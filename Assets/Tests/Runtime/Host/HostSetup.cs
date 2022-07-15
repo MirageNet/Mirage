@@ -111,7 +111,7 @@ namespace Mirage.Tests.Runtime.Host
 
         public void DoUpdate(int updateCount = 1)
         {
-            for (int i = 0; i < updateCount; i++)
+            for (var i = 0; i < updateCount; i++)
             {
                 server.Update();
                 client.Update();

@@ -21,14 +21,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             };
             instance.ackSystem = new AckSystem(instance.connection, config, MAX_PACKET_SIZE, time, bufferPool);
 
-            for (int i = 0; i < 50; i++)
+            for (var i = 0; i < 50; i++)
             {
                 instance.ackSystem.SendReliable(createRandomData(i));
                 // update to send batch
                 instance.ackSystem.Update();
             }
 
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+            var exception = Assert.Throws<InvalidOperationException>(() =>
             {
                 instance.ackSystem.SendReliable(createRandomData(51));
                 instance.ackSystem.Update();
@@ -52,14 +52,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             };
             instance.ackSystem = new AckSystem(instance.connection, config, MAX_PACKET_SIZE, time, bufferPool);
 
-            for (int i = 0; i < 255; i++)
+            for (var i = 0; i < 255; i++)
             {
                 instance.ackSystem.SendReliable(createRandomData(i));
                 // update to send batch
                 instance.ackSystem.Update();
             }
 
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+            var exception = Assert.Throws<InvalidOperationException>(() =>
             {
                 instance.ackSystem.SendReliable(createRandomData(0));
                 instance.ackSystem.Update();

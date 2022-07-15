@@ -66,8 +66,8 @@ namespace Mirage.Logging
                     return (fullname, null);
                 }
 
-                string[] parts = fullname.Split('.');
-                string name = parts.Last();
+                var parts = fullname.Split('.');
+                var name = parts.Last();
 
                 string @namespace;
                 if (parts.Length == 1)
@@ -89,7 +89,7 @@ namespace Mirage.Logging
     {
         public static void SaveFromLogFactory(this LogSettingsSO settings)
         {
-            Dictionary<string, ILogger> dictionary = LogFactory.loggers;
+            var dictionary = LogFactory.loggers;
             if (settings == null)
             {
                 Debug.LogWarning("Could not SaveFromDictionary because LogSettings were null");
@@ -98,7 +98,7 @@ namespace Mirage.Logging
 
             settings.LogLevels.Clear();
 
-            foreach (KeyValuePair<string, ILogger> kvp in dictionary)
+            foreach (var kvp in dictionary)
             {
                 settings.LogLevels.Add(new LogSettingsSO.LoggerSettings(kvp.Key, kvp.Value.filterLogType));
             }
@@ -116,10 +116,10 @@ namespace Mirage.Logging
                 return;
             }
 
-            for (int i = 0; i < settings.LogLevels.Count; i++)
+            for (var i = 0; i < settings.LogLevels.Count; i++)
             {
-                LogSettingsSO.LoggerSettings logLevel = settings.LogLevels[i];
-                string key = logLevel.FullName;
+                var logLevel = settings.LogLevels[i];
+                var key = logLevel.FullName;
                 if (key == null)
                 {
                     settings.LogLevels.RemoveAt(i);
@@ -128,7 +128,7 @@ namespace Mirage.Logging
                     continue;
                 }
 
-                ILogger logger = LogFactory.GetLogger(key);
+                var logger = LogFactory.GetLogger(key);
                 logger.filterLogType = logLevel.logLevel;
             }
         }

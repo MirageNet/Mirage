@@ -10,7 +10,7 @@ namespace Mirage.SocketLayer
 
         public static byte ReadByte(byte[] buffer, ref int offset)
         {
-            byte a = buffer[offset];
+            var a = buffer[offset];
             offset++;
 
             return a;

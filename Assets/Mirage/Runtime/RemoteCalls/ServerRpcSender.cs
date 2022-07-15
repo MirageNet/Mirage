@@ -35,7 +35,7 @@ namespace Mirage.RemoteCalls
                 payload = writer.ToArraySegment()
             };
 
-            (UniTask<T> task, int id) = behaviour.ClientObjectManager.CreateReplyTask<T>();
+            (var task, var id) = behaviour.ClientObjectManager.CreateReplyTask<T>();
 
             message.replyId = id;
 
@@ -46,8 +46,8 @@ namespace Mirage.RemoteCalls
 
         private static void Validate(NetworkBehaviour behaviour, int index, bool requireAuthority)
         {
-            RemoteCall rpc = behaviour.remoteCallCollection.Get(index);
-            INetworkClient client = behaviour.Client;
+            var rpc = behaviour.remoteCallCollection.Get(index);
+            var client = behaviour.Client;
 
             if (client == null || !client.Active)
             {

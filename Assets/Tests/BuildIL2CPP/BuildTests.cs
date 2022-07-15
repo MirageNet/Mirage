@@ -32,16 +32,16 @@ namespace Mirage.Tests.BuildIL2CPP
 
         public static void BuildWithIl2CPP(bool cleanup)
         {
-            bool hasErrors = false;
+            var hasErrors = false;
 
-            DateTime startTime = DateTime.Now;
+            var startTime = DateTime.Now;
             Debug.Log("Start BuildWithIl2CPP");
 
-            BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
-            string targetFolder = "./Temp/TestPlayerBuild";
-            string exePath = $"{targetFolder}/mirage.exe";
+            var target = EditorUserBuildSettings.activeBuildTarget;
+            var targetFolder = "./Temp/TestPlayerBuild";
+            var exePath = $"{targetFolder}/mirage.exe";
 
-            TestRunnerApi runner = UnityEngine.ScriptableObject.CreateInstance<TestRunnerApi>();
+            var runner = UnityEngine.ScriptableObject.CreateInstance<TestRunnerApi>();
             try
             {
                 using (new IL2CPPApplier(target, true))
@@ -73,7 +73,7 @@ namespace Mirage.Tests.BuildIL2CPP
                 if (cleanup)
                     CleanUpBuildFolder(targetFolder);
             }
-            TimeSpan duration = DateTime.Now - startTime;
+            var duration = DateTime.Now - startTime;
             Debug.Log($"End BuildWithIl2CPP duration:{duration.TotalSeconds:0.0}s");
 
             if (hasErrors)
@@ -104,8 +104,8 @@ namespace Mirage.Tests.BuildIL2CPP
         {
             // reflection because that is the only way to create buildOnly only with TestRunnerApi
             var assembly = Assembly.Load("UnityEditor.TestRunner");
-            string typeName = "UnityEditor.TestTools.TestRunner.PlayerLauncherTestRunSettings";
-            object runSettings = assembly.CreateInstance(typeName);
+            var typeName = "UnityEditor.TestTools.TestRunner.PlayerLauncherTestRunSettings";
+            var runSettings = assembly.CreateInstance(typeName);
             runSettings.GetType().GetProperty("buildOnly" +
                 "").SetValue(runSettings, true);
             runSettings.GetType().GetProperty("buildOnlyLocationPath").SetValue(runSettings, targetPath);
@@ -124,7 +124,7 @@ namespace Mirage.Tests.BuildIL2CPP
         {
             UnityEngine.Debug.Log("Apply IL2CPP");
             group = BuildPipeline.GetBuildTargetGroup(target);
-            ScriptingImplementation backend = PlayerSettings.GetScriptingBackend(group);
+            var backend = PlayerSettings.GetScriptingBackend(group);
             if (il2cpp && backend != ScriptingImplementation.IL2CPP)
             {
                 startingBackend = backend;

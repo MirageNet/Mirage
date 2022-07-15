@@ -89,8 +89,8 @@ namespace Mirage.Serialization
             this.allowResize = allowResize;
 
             // ensure capacity is multiple of 8
-            int ulongCapacity = Mathf.CeilToInt(minByteCapacity / (float)sizeof(ulong));
-            int byteCapacity = ulongCapacity * sizeof(ulong);
+            var ulongCapacity = Mathf.CeilToInt(minByteCapacity / (float)sizeof(ulong));
+            var byteCapacity = ulongCapacity * sizeof(ulong);
 
             bitCapacity = byteCapacity * 8;
             managedBuffer = new byte[byteCapacity];
@@ -107,8 +107,8 @@ namespace Mirage.Serialization
         private void ResizeBuffer(int minBitCapacity)
         {
             // +7 to round up to next byte
-            int minByteCapacity = (minBitCapacity + 7) / 8;
-            int size = managedBuffer.Length;
+            var minByteCapacity = (minBitCapacity + 7) / 8;
+            var size = managedBuffer.Length;
             while (size < minByteCapacity)
             {
                 size *= 2;
@@ -162,7 +162,7 @@ namespace Mirage.Serialization
         /// <returns></returns>
         public byte[] ToArray()
         {
-            byte[] data = new byte[ByteLength];
+            var data = new byte[ByteLength];
             Buffer.BlockCopy(managedBuffer, 0, data, 0, ByteLength);
             return data;
         }
@@ -209,12 +209,12 @@ namespace Mirage.Serialization
         /// <param name="value"></param>
         public void WriteBoolean(ulong value)
         {
-            int newPosition = bitPosition + 1;
+            var newPosition = bitPosition + 1;
             CheckCapacity(newPosition);
 
-            int bitsInLong = bitPosition & 0b11_1111;
+            var bitsInLong = bitPosition & 0b11_1111;
 
-            ulong* ptr = longPtr + (bitPosition >> 6);
+            var ptr = longPtr + (bitPosition >> 6);
             *ptr = (
                 *ptr & (
                     // start with 0000_0001
@@ -249,22 +249,22 @@ namespace Mirage.Serialization
         public void WriteInt64(long value) => WriteUInt64((ulong)value);
         public void WriteUInt64(ulong value)
         {
-            int newPosition = bitPosition + 64;
+            var newPosition = bitPosition + 64;
             CheckCapacity(newPosition);
 
-            int bitsInLong = bitPosition & 0b11_1111;
+            var bitsInLong = bitPosition & 0b11_1111;
 
             if (bitsInLong == 0)
             {
-                ulong* ptr1 = longPtr + (bitPosition >> 6);
+                var ptr1 = longPtr + (bitPosition >> 6);
                 *ptr1 = value;
             }
             else
             {
-                int bitsLeft = 64 - bitsInLong;
+                var bitsLeft = 64 - bitsInLong;
 
-                ulong* ptr1 = longPtr + (bitPosition >> 6);
-                ulong* ptr2 = ptr1 + 1;
+                var ptr1 = longPtr + (bitPosition >> 6);
+                var ptr2 = ptr1 + 1;
 
                 *ptr1 = (*ptr1 & (ulong.MaxValue >> bitsLeft)) | (value << bitsInLong);
                 *ptr2 = (*ptr2 & (ulong.MaxValue << newPosition)) | (value >> bitsLeft);
@@ -287,22 +287,22 @@ namespace Mirage.Serialization
 
         private void WriterUnmasked(ulong value, int bits)
         {
-            int newPosition = bitPosition + bits;
+            var newPosition = bitPosition + bits;
             CheckCapacity(newPosition);
 
-            int bitsInLong = bitPosition & 0b11_1111;
-            int bitsLeft = 64 - bitsInLong;
+            var bitsInLong = bitPosition & 0b11_1111;
+            var bitsLeft = 64 - bitsInLong;
 
             if (bitsLeft >= bits)
             {
-                ulong* ptr = longPtr + (bitPosition >> 6);
+                var ptr = longPtr + (bitPosition >> 6);
 
                 *ptr = (*ptr & BitMask.OuterMask(bitPosition, newPosition)) | (value << bitsInLong);
             }
             else
             {
-                ulong* ptr1 = longPtr + (bitPosition >> 6);
-                ulong* ptr2 = ptr1 + 1;
+                var ptr1 = longPtr + (bitPosition >> 6);
+                var ptr2 = ptr1 + 1;
 
                 *ptr1 = (*ptr1 & (ulong.MaxValue >> bitsLeft)) | (value << bitsInLong);
                 *ptr2 = (*ptr2 & (ulong.MaxValue << newPosition)) | (value >> bitsLeft);
@@ -337,7 +337,7 @@ namespace Mirage.Serialization
             CheckCapacity(bitPosition + bits);
 
             // moves position to arg, then write, then reset position
-            int currentPosition = this.bitPosition;
+            var currentPosition = this.bitPosition;
             this.bitPosition = bitPosition;
             Write(value, bits);
             this.bitPosition = currentPosition;
@@ -366,10 +366,10 @@ namespace Mirage.Serialization
         public void PadAndCopy<T>(in T value) where T : unmanaged
         {
             PadToByte();
-            int newPosition = bitPosition + (8 * sizeof(T));
+            var newPosition = bitPosition + (8 * sizeof(T));
             CheckCapacity(newPosition);
 
-            byte* startPtr = ((byte*)longPtr) + (bitPosition >> 3);
+            var startPtr = ((byte*)longPtr) + (bitPosition >> 3);
 
             var ptr = (T*)startPtr;
             *ptr = value;
@@ -387,7 +387,7 @@ namespace Mirage.Serialization
         public void WriteBytes(byte[] array, int offset, int length)
         {
             PadToByte();
-            int newPosition = bitPosition + (8 * length);
+            var newPosition = bitPosition + (8 * length);
             CheckCapacity(newPosition);
 
             // todo benchmark this vs Marshal.Copy or for loop
@@ -413,22 +413,22 @@ namespace Mirage.Serialization
         /// <param name="bitLength"></param>
         public void CopyFromWriter(NetworkWriter other, int otherBitPosition, int bitLength)
         {
-            int newBit = bitPosition + bitLength;
+            var newBit = bitPosition + bitLength;
             CheckCapacity(newBit);
 
-            int ulongPos = otherBitPosition >> 6;
-            ulong* otherPtr = other.longPtr + ulongPos;
+            var ulongPos = otherBitPosition >> 6;
+            var otherPtr = other.longPtr + ulongPos;
 
 
-            int firstBitOffset = otherBitPosition & 0b11_1111;
+            var firstBitOffset = otherBitPosition & 0b11_1111;
 
             // first align other
             if (firstBitOffset != 0)
             {
-                int bitsToCopyFromFirst = Math.Min(64 - firstBitOffset, bitLength);
+                var bitsToCopyFromFirst = Math.Min(64 - firstBitOffset, bitLength);
 
                 // if offset is 10, then we want to shift value by 10 to remove un-needed bits
-                ulong firstValue = *otherPtr >> firstBitOffset;
+                var firstValue = *otherPtr >> firstBitOffset;
 
                 Write(firstValue, bitsToCopyFromFirst);
 

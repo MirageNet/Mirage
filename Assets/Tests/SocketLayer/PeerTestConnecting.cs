@@ -19,7 +19,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             server = new PeerInstanceWithSocket(new Config { MaxConnections = ClientCount });
             clients = new PeerInstanceWithSocket[ClientCount];
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 clients[i] = new PeerInstanceWithSocket();
             }
@@ -30,14 +30,14 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             server.peer.Bind(TestEndPoint.CreateSubstitute());
 
-            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            var connectAction = Substitute.For<Action<IConnection>>();
             server.peer.OnConnected += connectAction;
 
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 // tell client i to connect
                 clients[i].peer.Connect(server.endPoint);
-                Action<IConnection> clientConnectAction = Substitute.For<Action<IConnection>>();
+                var clientConnectAction = Substitute.For<Action<IConnection>>();
                 clients[i].peer.OnConnected += clientConnectAction;
 
                 // no change untill update
@@ -52,7 +52,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
 
                 // sever send accept packet
                 Assert.That(server.socket.Sent.Count, Is.EqualTo(i + 1));
-                TestSocket.Packet lastSent = server.socket.Sent.Last();
+                var lastSent = server.socket.Sent.Last();
                 Assert.That(lastSent.endPoint, Is.EqualTo(clients[i].socket.endPoint));
                 // check first 2 bytes of message
                 Assert.That(ArgCollection.AreEquivalentIgnoringLength(lastSent.data, new byte[2] {
@@ -79,7 +79,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             };
             server.peer.OnConnected += connectAction;
 
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 // tell client i to connect
                 clients[i].peer.Connect(server.endPoint);

@@ -17,8 +17,8 @@ namespace Mirage.SocketLayer.Tests
         [Test]
         public void KeyIsSameEachCall()
         {
-            byte[] buffer1 = new byte[50];
-            byte[] buffer2 = new byte[50];
+            var buffer1 = new byte[50];
+            var buffer2 = new byte[50];
             validator.CopyTo(buffer1);
             validator.CopyTo(buffer2);
 
@@ -28,22 +28,22 @@ namespace Mirage.SocketLayer.Tests
         [Test]
         public void ValidateReturnsTrueIfKeyIsCorrect()
         {
-            byte[] buffer = new byte[50];
+            var buffer = new byte[50];
             validator.CopyTo(buffer);
 
-            bool valid = validator.Validate(buffer);
+            var valid = validator.Validate(buffer);
             Assert.IsTrue(valid);
         }
 
         [Test]
         public void ValidateReturnsFalseIfKeyIsCorrect()
         {
-            byte[] buffer = new byte[50];
+            var buffer = new byte[50];
             validator.CopyTo(buffer);
             // corrupt 1 byte
             buffer[4] = 0;
 
-            bool valid = validator.Validate(buffer);
+            var valid = validator.Validate(buffer);
             Assert.IsFalse(valid);
         }
 
@@ -53,7 +53,7 @@ namespace Mirage.SocketLayer.Tests
         public void DoesNotOverWriteFirst2Indexes(byte index1, byte index2)
         {
             // use tests cases so we check that it doesn't change atleast 2 sets of values
-            byte[] buffer = new byte[50];
+            var buffer = new byte[50];
             buffer[0] = index1;
             buffer[1] = index2;
             validator.CopyTo(buffer);

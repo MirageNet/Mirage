@@ -13,7 +13,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ThrowIfSocketIsNull()
         {
-            ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
+            var exception = Assert.Throws<ArgumentNullException>(() =>
             {
                 _ = new Peer(null, 1000, Substitute.For<IDataHandler>(), new Config(), Substitute.For<ILogger>());
             });
@@ -23,7 +23,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ThrowIfDataHandlerIsNull()
         {
-            ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
+            var exception = Assert.Throws<ArgumentNullException>(() =>
             {
                 _ = new Peer(Substitute.For<ISocket>(), 1000, null, new Config(), Substitute.For<ILogger>());
             });
@@ -50,7 +50,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ThrowIfPacketSizeIsTooSmall()
         {
-            ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            var exception = Assert.Throws<ArgumentException>(() =>
             {
                 _ = new Peer(Substitute.For<ISocket>(), 0, Substitute.For<IDataHandler>(), new Config(), Substitute.For<ILogger>());
             });
@@ -81,7 +81,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             peer.Bind(TestEndPoint.CreateSubstitute());
 
-            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            var connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
 
             socket.SetupReceiveCall(new byte[1] {
@@ -100,13 +100,13 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             peer.Bind(TestEndPoint.CreateSubstitute());
 
-            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            var connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
 
             const int aboveMTU = 5000;
             socket.SetupReceiveCall(new byte[1000], length: aboveMTU);
 
-            IndexOutOfRangeException exception = Assert.Throws<IndexOutOfRangeException>(() =>
+            var exception = Assert.Throws<IndexOutOfRangeException>(() =>
             {
                 peer.UpdateTest();
             });
@@ -120,14 +120,14 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             peer.Bind(TestEndPoint.CreateSubstitute());
 
-            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            var connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
 
-            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
+            var endPoint = TestEndPoint.CreateSubstitute();
 
             // 2 is min length of a message
-            byte[] randomData = new byte[UnityEngine.Random.Range(2, 20)];
-            for (int i = 0; i < randomData.Length; i++)
+            var randomData = new byte[UnityEngine.Random.Range(2, 20)];
+            for (var i = 0; i < randomData.Length; i++)
             {
                 randomData[i] = (byte)UnityEngine.Random.Range(0, 255);
             }
@@ -154,14 +154,14 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             peer.Bind(TestEndPoint.CreateSubstitute());
 
-            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            var connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
 
-            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
+            var endPoint = TestEndPoint.CreateSubstitute();
 
             // 2 is min length of a message
-            byte[] randomData = new byte[UnityEngine.Random.Range(2, 20)];
-            for (int i = 0; i < randomData.Length; i++)
+            var randomData = new byte[UnityEngine.Random.Range(2, 20)];
+            for (var i = 0; i < randomData.Length; i++)
             {
                 randomData[i] = (byte)UnityEngine.Random.Range(0, 255);
             }

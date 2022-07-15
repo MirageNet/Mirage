@@ -9,7 +9,7 @@ namespace Mirage.Examples.Basic
 
         public override void OnServerAddPlayer(INetworkPlayer player)
         {
-            NetworkIdentity character = Instantiate(PlayerPrefab);
+            var character = Instantiate(PlayerPrefab);
             // Make this a child of the layout panel in the Canvas
             character.transform.SetParent(Parent);
 

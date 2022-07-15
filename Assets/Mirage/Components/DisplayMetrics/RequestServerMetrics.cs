@@ -61,7 +61,7 @@ namespace Mirage.DisplayMetrics
         {
             for (uint i = 0; i < msg.newFrames.Length; i++)
             {
-                ulong seq = metrics.Sequencer.MoveInBounds(i + msg.start);
+                var seq = metrics.Sequencer.MoveInBounds(i + msg.start);
                 metrics.buffer[seq] = msg.newFrames[i];
             }
         }
@@ -104,7 +104,7 @@ namespace Mirage.DisplayMetrics
                 newFrames = getFrames(lastSendTick, metrics.tick)
             };
 
-            foreach (INetworkPlayer player in connections)
+            foreach (var player in connections)
             {
                 player.Send(msg);
             }
@@ -112,14 +112,14 @@ namespace Mirage.DisplayMetrics
 
         private Metrics.Frame[] getFrames(uint start, uint end)
         {
-            long count = metrics.Sequencer.Distance(end, start);
+            var count = metrics.Sequencer.Distance(end, start);
             // limit to 100 frames
             if (count > 100) count = 100;
 
             var frames = new Metrics.Frame[count];
             for (uint i = 0; i < count; i++)
             {
-                ulong seq = metrics.Sequencer.MoveInBounds(i + start);
+                var seq = metrics.Sequencer.MoveInBounds(i + start);
                 frames[i] = metrics.buffer[seq];
             }
 

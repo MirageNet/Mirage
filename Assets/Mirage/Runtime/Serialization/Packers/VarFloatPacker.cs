@@ -44,15 +44,15 @@ namespace Mirage.Serialization
 
         public void Pack(NetworkWriter writer, float value)
         {
-            int scaled = Mathf.RoundToInt(value * inversePrecision);
-            uint zig = ZigZag.Encode(scaled);
+            var scaled = Mathf.RoundToInt(value * inversePrecision);
+            var zig = ZigZag.Encode(scaled);
             VarIntBlocksPacker.Pack(writer, zig, blockSize);
         }
 
         public float Unpack(NetworkReader reader)
         {
-            uint zig = (uint)VarIntBlocksPacker.Unpack(reader, blockSize);
-            int scaled = ZigZag.Decode(zig);
+            var zig = (uint)VarIntBlocksPacker.Unpack(reader, blockSize);
+            var scaled = ZigZag.Decode(zig);
             return scaled * precision;
         }
     }

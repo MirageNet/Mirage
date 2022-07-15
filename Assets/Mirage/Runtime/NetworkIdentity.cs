@@ -241,7 +241,7 @@ namespace Mirage
             {
                 if (networkBehavioursCache is null)
                 {
-                    NetworkBehaviour[] components = FindBehaviourForThisIdentity();
+                    var components = FindBehaviourForThisIdentity();
 
                     if (components.Length > byte.MaxValue)
                         throw new InvalidOperationException("Only 255 NetworkBehaviours are allowed per GameObject.");
@@ -270,21 +270,21 @@ namespace Mirage
             GetComponentsInChildren<NetworkBehaviour>(true, childNetworkBehavioursCache);
 
             // start at last so we can remove from end of array instead of start
-            for (int i = childNetworkBehavioursCache.Count - 1; i >= 0; i--)
+            for (var i = childNetworkBehavioursCache.Count - 1; i >= 0; i--)
             {
-                NetworkBehaviour item = childNetworkBehavioursCache[i];
+                var item = childNetworkBehavioursCache[i];
                 if (item.Identity != this)
                 {
                     childNetworkBehavioursCache.RemoveAt(i);
                 }
             }
 
-            NetworkBehaviour[] components = childNetworkBehavioursCache.ToArray();
+            var components = childNetworkBehavioursCache.ToArray();
 
 #if DEBUG
             // validate the results here (just incase they are wrong)
             // we only need to do this in debug mode because results should be right
-            foreach (NetworkBehaviour item in components)
+            foreach (var item in components)
             {
                 logger.Assert(item.Identity == this, $"Child NetworkBehaviour had a different Identity, this:{name}, Child Identity:{item.Identity.name}");
             }
@@ -321,8 +321,8 @@ namespace Mirage
             }
             internal set
             {
-                int newID = value;
-                int oldId = _prefabHash;
+                var newID = value;
+                var oldId = _prefabHash;
 
                 // they are the same, do nothing
                 if (oldId == newID)
@@ -621,27 +621,27 @@ namespace Mirage
         /// <param name="observersWriter"></param>
         internal (int ownerWritten, int observersWritten) OnSerializeAll(bool initialState, NetworkWriter ownerWriter, NetworkWriter observersWriter)
         {
-            int ownerWritten = 0;
-            int observersWritten = 0;
+            var ownerWritten = 0;
+            var observersWritten = 0;
 
             // check if components are in byte.MaxRange just to be 100% sure
             // that we avoid overflows
-            NetworkBehaviour[] components = NetworkBehaviours;
+            var components = NetworkBehaviours;
 
             // serialize all components
-            for (int i = 0; i < components.Length; ++i)
+            for (var i = 0; i < components.Length; ++i)
             {
                 // is this component dirty?
                 // -> always serialize if initialState so all components are included in spawn packet
                 // -> note: IsDirty() is false if the component isn't dirty or sendInterval isn't elapsed yet
-                NetworkBehaviour comp = components[i];
+                var comp = components[i];
                 if (initialState || comp.IsDirty())
                 {
                     if (logger.LogEnabled()) logger.Log($"OnSerializeAllSafely: '{name}', component '{comp.GetType()}', initial state: '{initialState}'");
 
                     // remember start position in case we need to copy it into
                     // observers writer too
-                    int startBitPosition = ownerWriter.BitPosition;
+                    var startBitPosition = ownerWriter.BitPosition;
 
                     // write index as byte [0..255]
                     ownerWriter.WriteByte((byte)i);
@@ -662,7 +662,7 @@ namespace Mirage
                     //    OnSerialize again
                     if (comp.syncMode == SyncMode.Observers)
                     {
-                        int bitLength = ownerWriter.BitPosition - startBitPosition;
+                        var bitLength = ownerWriter.BitPosition - startBitPosition;
                         observersWriter.CopyFromWriter(ownerWriter, startBitPosition, bitLength);
                         observersWritten++;
                     }
@@ -676,7 +676,7 @@ namespace Mirage
         // been synchronized yet. Probably due to not meeting the syncInterval
         internal bool StillDirty()
         {
-            foreach (NetworkBehaviour behaviour in NetworkBehaviours)
+            foreach (var behaviour in NetworkBehaviours)
             {
                 if (behaviour.StillDirty())
                     return true;
@@ -689,7 +689,7 @@ namespace Mirage
             comp.OnDeserialize(reader, initialState);
 
             // check if Barrier is at end of Deserialize, if it is then the Deserialize was likely a success
-            byte barrierData = reader.ReadByte();
+            var barrierData = reader.ReadByte();
             if (barrierData != Barrier)
             {
                 throw new DeserializeFailedException($"Deserialization failure for component '{comp.GetType()}' on networked object '{name}' (NetId {NetId}, SceneId {SceneId:X})." +
@@ -705,14 +705,14 @@ namespace Mirage
         internal void OnDeserializeAll(NetworkReader reader, bool initialState)
         {
             // deserialize all components that were received
-            NetworkBehaviour[] components = NetworkBehaviours;
+            var components = NetworkBehaviours;
             // check if we can read at least 1 byte
             while (reader.CanReadBytes(1))
             {
                 // todo replace index with bool for if next component in order has changed or not
                 //      the index below was an alternative to a mask, but now we have bitpacking we can just use a bool for each NB index
                 // read & check index [0..255]
-                byte index = reader.ReadByte();
+                var index = reader.ReadByte();
                 if (index < components.Length)
                 {
                     // deserialize this component
@@ -748,7 +748,7 @@ namespace Mirage
         /// </summary>
         internal void ClearObservers()
         {
-            foreach (INetworkPlayer player in observers)
+            foreach (var player in observers)
             {
                 player.RemoveFromVisList(this);
             }
@@ -804,7 +804,7 @@ namespace Mirage
         internal void AddAllReadyServerConnectionsToObservers()
         {
             // add all server connections
-            foreach (INetworkPlayer player in Server.Players)
+            foreach (var player in Server.Players)
             {
                 if (player.SceneIsReady)
                     AddObserver(player);
@@ -826,10 +826,10 @@ namespace Mirage
         /// <param name="initialize">True if this is the first time.</param>
         public void RebuildObservers(bool initialize)
         {
-            bool changed = false;
+            var changed = false;
 
             // call OnRebuildObservers function
-            bool rebuildOverwritten = GetNewObservers(newObservers, initialize);
+            var rebuildOverwritten = GetNewObservers(newObservers, initialize);
 
             // if player connection: ensure player always see himself no matter what.
             // -> fixes https://github.com/vis2k/Mirror/issues/692 where a
@@ -859,7 +859,7 @@ namespace Mirage
             if (changed)
             {
                 observers.Clear();
-                foreach (INetworkPlayer player in newObservers)
+                foreach (var player in newObservers)
                 {
                     if (player != null && player.SceneIsReady)
                         observers.Add(player);
@@ -870,7 +870,7 @@ namespace Mirage
         // remove all old .observers that aren't in newObservers anymore
         private bool RemoveOldObservers(bool changed)
         {
-            foreach (INetworkPlayer player in observers)
+            foreach (var player in observers)
             {
                 if (!newObservers.Contains(player))
                 {
@@ -889,7 +889,7 @@ namespace Mirage
         // add all newObservers that aren't in .observers yet
         private bool AddNewObservers(bool initialize, bool changed)
         {
-            foreach (INetworkPlayer player in newObservers)
+            foreach (var player in newObservers)
             {
                 // only add ready connections.
                 // otherwise the player might not be in the world yet or anymore
@@ -964,7 +964,7 @@ namespace Mirage
 
             if (Owner != null)
             {
-                INetworkPlayer previousOwner = Owner;
+                var previousOwner = Owner;
 
                 Owner = null;
 
@@ -1031,7 +1031,7 @@ namespace Mirage
             using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
             {
                 // serialize all the dirty components and send
-                (int ownerWritten, int observersWritten) = OnSerializeAll(false, ownerWriter, observersWriter);
+                (var ownerWritten, var observersWritten) = OnSerializeAll(false, ownerWriter, observersWriter);
                 if (ownerWritten > 0 || observersWritten > 0)
                 {
                     var varsMessage = new UpdateVarsMessage
@@ -1088,7 +1088,7 @@ namespace Mirage
                 return;
 
             connectionsExcludeSelf.Clear();
-            foreach (INetworkPlayer player in observers)
+            foreach (var player in observers)
             {
                 if (player == Server.LocalPlayer)
                     continue;
@@ -1108,7 +1108,7 @@ namespace Mirage
         /// </summary>
         internal void ClearAllComponentsDirtyBits()
         {
-            foreach (NetworkBehaviour comp in NetworkBehaviours)
+            foreach (var comp in NetworkBehaviours)
             {
                 comp.ClearAllDirtyBits();
             }
@@ -1120,7 +1120,7 @@ namespace Mirage
         /// </summary>
         internal void ClearDirtyComponentsDirtyBits()
         {
-            foreach (NetworkBehaviour comp in NetworkBehaviours)
+            foreach (var comp in NetworkBehaviours)
             {
                 if (comp.IsDirty())
                 {
@@ -1131,7 +1131,7 @@ namespace Mirage
 
         private void ResetSyncObjects()
         {
-            foreach (NetworkBehaviour comp in NetworkBehaviours)
+            foreach (var comp in NetworkBehaviours)
             {
                 comp.ResetSyncObjects();
             }

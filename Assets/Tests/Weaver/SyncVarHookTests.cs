@@ -6,8 +6,8 @@ namespace Mirage.Tests.Weaver
     {
         private string TypeName()
         {
-            string name = TestContext.CurrentContext.Test.Name;
-            string ClassName = nameof(SyncVarHookTests);
+            var name = TestContext.CurrentContext.Test.Name;
+            var ClassName = nameof(SyncVarHookTests);
             // standard format for test name
             return $"{ClassName}.{name}.{name}";
         }

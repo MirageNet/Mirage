@@ -49,11 +49,11 @@ namespace Mirage.Weaver
         /// <returns></returns>
         public static MethodReference GetMethodInBaseType(this TypeReference typeReference, Predicate<MethodDefinition> match)
         {
-            TypeDefinition typedef = typeReference.Resolve();
-            TypeReference typeRef = typeReference;
+            var typedef = typeReference.Resolve();
+            var typeRef = typeReference;
             while (typedef != null)
             {
-                foreach (MethodDefinition md in typedef.Methods)
+                foreach (var md in typedef.Methods)
                 {
                     if (match.Invoke(md))
                     {
@@ -70,7 +70,7 @@ namespace Mirage.Weaver
 
                 try
                 {
-                    TypeReference parent = typedef.BaseType;
+                    var parent = typedef.BaseType;
                     if (parent.IsGenericInstance)
                     {
                         parent = MatchGenericParameters((GenericInstanceType)parent, typeRef);
@@ -105,10 +105,10 @@ namespace Mirage.Weaver
             // resolve it so we have non-generic instance (eg just instance with <T> instead of <int>)
             // if we dont cecil will make it double generic (eg INVALID IL)
             var generic = new GenericInstanceType(parentReference.Resolve());
-            foreach (TypeReference arg in parentReference.GenericArguments)
+            foreach (var arg in parentReference.GenericArguments)
                 generic.GenericArguments.Add(arg);
 
-            for (int i = 0; i < generic.GenericArguments.Count; i++)
+            for (var i = 0; i < generic.GenericArguments.Count; i++)
             {
                 // if arg is not generic
                 // eg List<int> would be int so not generic.
@@ -117,12 +117,12 @@ namespace Mirage.Weaver
                     continue;
 
                 // get the generic name, eg T
-                string name = generic.GenericArguments[i].Name;
+                var name = generic.GenericArguments[i].Name;
                 // find what type T is, eg turn it into `int` if `List<int>`
-                TypeReference arg = FindMatchingGenericArgument(childReference, name);
+                var arg = FindMatchingGenericArgument(childReference, name);
 
                 // import just to be safe
-                TypeReference imported = parentReference.Module.ImportReference(arg);
+                var imported = parentReference.Module.ImportReference(arg);
                 // set arg on generic, parent ref will be Base<int> instead of just Base<T>
                 generic.GenericArguments[i] = imported;
             }
@@ -133,7 +133,7 @@ namespace Mirage.Weaver
 
         private static TypeReference FindMatchingGenericArgument(TypeReference childReference, string paramName)
         {
-            TypeDefinition def = childReference.Resolve();
+            var def = childReference.Resolve();
             // child class must be generic if we are in this part of the code
             // eg Child<T> : Base<T>  <--- child must have generic if Base has T
             // vs Child : Base<int> <--- wont be here if Base has int (we check if T exists before calling this)
@@ -141,9 +141,9 @@ namespace Mirage.Weaver
                 throw new InvalidOperationException("Base class had generic parameters, but could not find them in child class");
 
             // go through parameters in child class, and find the generic that matches the name
-            for (int i = 0; i < def.GenericParameters.Count; i++)
+            for (var i = 0; i < def.GenericParameters.Count; i++)
             {
-                GenericParameter param = def.GenericParameters[i];
+                var param = def.GenericParameters[i];
                 if (param.Name == paramName)
                 {
                     var generic = (GenericInstanceType)childReference;
@@ -175,7 +175,7 @@ namespace Mirage.Weaver
         {
             while (typeDefinition != null)
             {
-                foreach (FieldDefinition field in typeDefinition.Fields.ToArray())
+                foreach (var field in typeDefinition.Fields.ToArray())
                 {
                     if (field.IsStatic || field.IsPrivate)
                         continue;
@@ -244,7 +244,7 @@ namespace Mirage.Weaver
             {
                 // get all the generic parameters and make a generic instance out of it
                 var genericTypes = new TypeReference[type.GenericParameters.Count];
-                for (int i = 0; i < type.GenericParameters.Count; i++)
+                for (var i = 0; i < type.GenericParameters.Count; i++)
                 {
                     genericTypes[i] = type.GenericParameters[i].GetElementType();
                 }
@@ -261,7 +261,7 @@ namespace Mirage.Weaver
         {
             if (type.HasFields)
             {
-                for (int i = 0; i < type.Fields.Count; i++)
+                for (var i = 0; i < type.Fields.Count; i++)
                 {
                     if (type.Fields[i].Name == fieldName)
                     {

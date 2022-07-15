@@ -114,7 +114,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 return false;
             }
 
-            for (int i = 0; i < expected.Length; i++)
+            for (var i = 0; i < expected.Length; i++)
             {
                 if (!actual[i].Equals(expected[i]))
                 {
@@ -137,8 +137,8 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                // return the data from endpoint
                .Do(x =>
                {
-                   byte[] dataArg = (byte[])x[0];
-                   for (int i = 0; i < data.Length; i++)
+                   var dataArg = (byte[])x[0];
+                   for (var i = 0; i < data.Length; i++)
                    {
                        dataArg[i] = data[i];
                    }

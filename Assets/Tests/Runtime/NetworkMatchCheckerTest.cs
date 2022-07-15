@@ -53,14 +53,14 @@ namespace Mirage.Tests.Runtime
             player1Connection = CreatePlayer(character1);
             player2Connection = CreatePlayer(character2);
             player3Connection = CreatePlayer(character3);
-            Dictionary<Guid, HashSet<NetworkIdentity>> g = GetMatchPlayersDictionary();
+            var g = GetMatchPlayersDictionary();
             matchPlayers = g;
         }
 
         private static Dictionary<Guid, HashSet<NetworkIdentity>> GetMatchPlayersDictionary()
         {
-            Type type = typeof(NetworkMatchChecker);
-            FieldInfo fieldInfo = type.GetField("matchPlayers", BindingFlags.Static | BindingFlags.NonPublic);
+            var type = typeof(NetworkMatchChecker);
+            var fieldInfo = type.GetField("matchPlayers", BindingFlags.Static | BindingFlags.NonPublic);
             return (Dictionary<Guid, HashSet<NetworkIdentity>>)fieldInfo.GetValue(null);
         }
 
@@ -90,78 +90,78 @@ namespace Mirage.Tests.Runtime
         private static void SetMatchId(NetworkMatchChecker target, Guid guid)
         {
             // set using reflection so bypass property
-            FieldInfo field = typeof(NetworkMatchChecker).GetField("currentMatch", BindingFlags.Instance | BindingFlags.NonPublic);
+            var field = typeof(NetworkMatchChecker).GetField("currentMatch", BindingFlags.Instance | BindingFlags.NonPublic);
             field.SetValue(target, guid);
         }
 
         [Test]
         public void OnCheckObserverShouldBeTrueForSameMatchId()
         {
-            string guid = Guid.NewGuid().ToString();
+            var guid = Guid.NewGuid().ToString();
 
             SetMatchId(player1MatchChecker, new Guid(guid));
             SetMatchId(player2MatchChecker, new Guid(guid));
 
-            bool player1Visable = player1MatchChecker.OnCheckObserver(player1Connection);
+            var player1Visable = player1MatchChecker.OnCheckObserver(player1Connection);
             Assert.IsTrue(player1Visable);
 
-            bool player2Visable = player1MatchChecker.OnCheckObserver(player2Connection);
+            var player2Visable = player1MatchChecker.OnCheckObserver(player2Connection);
             Assert.IsTrue(player2Visable);
         }
 
         [Test]
         public void OnCheckObserverShouldBeFalseForDifferentMatchId()
         {
-            string guid1 = Guid.NewGuid().ToString();
-            string guid2 = Guid.NewGuid().ToString();
+            var guid1 = Guid.NewGuid().ToString();
+            var guid2 = Guid.NewGuid().ToString();
 
             SetMatchId(player1MatchChecker, new Guid(guid1));
             SetMatchId(player2MatchChecker, new Guid(guid2));
 
-            bool player1VisableToPlayer1 = player1MatchChecker.OnCheckObserver(player1Connection);
+            var player1VisableToPlayer1 = player1MatchChecker.OnCheckObserver(player1Connection);
             Assert.IsTrue(player1VisableToPlayer1);
 
-            bool player2VisableToPlayer1 = player1MatchChecker.OnCheckObserver(player2Connection);
+            var player2VisableToPlayer1 = player1MatchChecker.OnCheckObserver(player2Connection);
             Assert.IsFalse(player2VisableToPlayer1);
 
 
-            bool player1VisableToPlayer2 = player2MatchChecker.OnCheckObserver(player1Connection);
+            var player1VisableToPlayer2 = player2MatchChecker.OnCheckObserver(player1Connection);
             Assert.IsFalse(player1VisableToPlayer2);
 
-            bool player2VisableToPlayer2 = player2MatchChecker.OnCheckObserver(player2Connection);
+            var player2VisableToPlayer2 = player2MatchChecker.OnCheckObserver(player2Connection);
             Assert.IsTrue(player2VisableToPlayer2);
         }
 
         [Test]
         public void OnCheckObserverShouldBeFalseIfObjectDoesNotHaveNetworkMatchChecker()
         {
-            string guid = Guid.NewGuid().ToString();
+            var guid = Guid.NewGuid().ToString();
 
             SetMatchId(player1MatchChecker, new Guid(guid));
 
-            bool player3Visable = player1MatchChecker.OnCheckObserver(player3Connection);
+            var player3Visable = player1MatchChecker.OnCheckObserver(player3Connection);
             Assert.IsFalse(player3Visable);
         }
 
         [Test]
         public void OnCheckObserverShouldBeFalseForEmptyGuid()
         {
-            string guid = Guid.Empty.ToString();
+            var guid = Guid.Empty.ToString();
 
             SetMatchId(player1MatchChecker, new Guid(guid));
             SetMatchId(player2MatchChecker, new Guid(guid));
 
-            bool player1Visable = player1MatchChecker.OnCheckObserver(player1Connection);
+            var player1Visable = player1MatchChecker.OnCheckObserver(player1Connection);
             Assert.IsFalse(player1Visable);
 
-            bool player2Visable = player1MatchChecker.OnCheckObserver(player2Connection);
+            var player2Visable = player1MatchChecker.OnCheckObserver(player2Connection);
             Assert.IsFalse(player2Visable);
         }
 
         [Test]
         public void SettingMatchIdShouldRebuildObservers()
         {
-            string guidMatch1 = Guid.NewGuid().ToString();
+            var guidMatch1 = Guid.NewGuid().ToString();
 
             // make players join same match
             player1MatchChecker.MatchId = new Guid(guidMatch1);
@@ -176,8 +176,8 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void ChangingMatchIdShouldRebuildObservers()
         {
-            string guidMatch1 = Guid.NewGuid().ToString();
-            string guidMatch2 = Guid.NewGuid().ToString();
+            var guidMatch1 = Guid.NewGuid().ToString();
+            var guidMatch2 = Guid.NewGuid().ToString();
 
             // make players join same match
             player1MatchChecker.MatchId = new Guid(guidMatch1);
@@ -195,7 +195,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void ClearingMatchIdShouldRebuildObservers()
         {
-            string guidMatch1 = Guid.NewGuid().ToString();
+            var guidMatch1 = Guid.NewGuid().ToString();
 
             // make players join same match
             player1MatchChecker.MatchId = new Guid(guidMatch1);

@@ -31,7 +31,7 @@ namespace Mirage
         {
             void AdapterFunction(INetworkPlayer player, NetworkReader reader)
             {
-                T message = NetworkDiagnostics.ReadWithDiagnostics<T>(reader);
+                var message = NetworkDiagnostics.ReadWithDiagnostics<T>(reader);
 
                 handler.Invoke(player, message);
             }
@@ -46,7 +46,7 @@ namespace Mirage
         /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
         public void RegisterHandler<T>(MessageDelegateWithPlayer<T> handler)
         {
-            int msgType = MessagePacker.GetId<T>();
+            var msgType = MessagePacker.GetId<T>();
             if (logger.filterLogType == LogType.Log && messageHandlers.ContainsKey(msgType))
             {
                 logger.Log($"RegisterHandler replacing {msgType}");
@@ -72,7 +72,7 @@ namespace Mirage
         /// <typeparam name="T">Message type</typeparam>
         public void UnregisterHandler<T>()
         {
-            int msgType = MessagePacker.GetId<T>();
+            var msgType = MessagePacker.GetId<T>();
             messageHandlers.Remove(msgType);
         }
 
@@ -87,13 +87,13 @@ namespace Mirage
 
         internal void InvokeHandler(INetworkPlayer player, int msgType, NetworkReader reader)
         {
-            if (messageHandlers.TryGetValue(msgType, out NetworkMessageDelegate msgDelegate))
+            if (messageHandlers.TryGetValue(msgType, out var msgDelegate))
             {
                 msgDelegate.Invoke(player, reader);
             }
             else
             {
-                if (MessagePacker.MessageTypes.TryGetValue(msgType, out Type type))
+                if (MessagePacker.MessageTypes.TryGetValue(msgType, out var type))
                 {
                     // this means we received a Message that has a struct, but no handler, It is likely that the developer forgot to register a handler or sent it by mistake
                     // we want this to be warning level
@@ -109,7 +109,7 @@ namespace Mirage
 
         public void HandleMessage(INetworkPlayer player, ArraySegment<byte> packet)
         {
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(packet, objectLocator))
+            using (var networkReader = NetworkReaderPool.GetReader(packet, objectLocator))
             {
 
                 // protect against attackers trying to send invalid data packets
@@ -125,12 +125,12 @@ namespace Mirage
 
                 try
                 {
-                    int msgType = MessagePacker.UnpackId(networkReader);
+                    var msgType = MessagePacker.UnpackId(networkReader);
                     InvokeHandler(player, msgType, networkReader);
                 }
                 catch (Exception e)
                 {
-                    string disconnectMessage = disconnectOnException ? $", Closed connection: {player}" : "";
+                    var disconnectMessage = disconnectOnException ? $", Closed connection: {player}" : "";
                     logger.LogError($"{e.GetType()} in Message handler (see stack below){disconnectMessage}\n{e}");
                     if (disconnectOnException)
                     {

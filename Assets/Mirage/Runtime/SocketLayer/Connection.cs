@@ -295,8 +295,8 @@ namespace Mirage.SocketLayer
 
         internal void ReceiveUnreliablePacket(Packet packet)
         {
-            int offset = 1;
-            int count = packet.length - offset;
+            var offset = 1;
+            var count = packet.length - offset;
             var segment = new ArraySegment<byte>(packet.buffer.array, offset, count);
             metrics?.OnReceiveMessageUnreliable(count);
             dataHandler.ReceiveMessage(this, segment);
@@ -325,7 +325,7 @@ namespace Mirage.SocketLayer
         private void HandleQueuedMessages()
         {
             // gets messages in order
-            while (ackSystem.NextReliablePacket(out AckSystem.ReliableReceived received))
+            while (ackSystem.NextReliablePacket(out var received))
             {
                 if (received.isFragment)
                 {
@@ -341,25 +341,25 @@ namespace Mirage.SocketLayer
         private void HandleFragmentedMessage(AckSystem.ReliableReceived received)
         {
             // get index from first
-            byte[] firstArray = received.buffer.array;
+            var firstArray = received.buffer.array;
             // length +1 because zero indexed 
-            int fragmentLength = firstArray[0] + 1;
+            var fragmentLength = firstArray[0] + 1;
 
             // todo find way to remove allocation? (can't use buffers because they will be too small for this bigger message)
-            byte[] message = new byte[fragmentLength * ackSystem.SizePerFragment];
+            var message = new byte[fragmentLength * ackSystem.SizePerFragment];
 
             // copy first
-            int copyLength = received.length - 1;
+            var copyLength = received.length - 1;
             logger?.Assert(copyLength == ackSystem.SizePerFragment, "First should be max size");
             Buffer.BlockCopy(firstArray, 1, message, 0, copyLength);
             received.buffer.Release();
 
-            int messageLength = copyLength;
+            var messageLength = copyLength;
             // start at 1 because first copied above
-            for (int i = 1; i < fragmentLength; i++)
+            for (var i = 1; i < fragmentLength; i++)
             {
-                AckSystem.ReliableReceived next = ackSystem.GetNextFragment();
-                byte[] nextArray = next.buffer.array;
+                var next = ackSystem.GetNextFragment();
+                var nextArray = next.buffer.array;
 
                 logger?.Assert(i == (fragmentLength - 1 - nextArray[0]), "fragment index should decrement each time");
 
@@ -376,12 +376,12 @@ namespace Mirage.SocketLayer
 
         private void HandleBatchedMessageInPacket(AckSystem.ReliableReceived received)
         {
-            byte[] array = received.buffer.array;
-            int packetLength = received.length;
-            int offset = 0;
+            var array = received.buffer.array;
+            var packetLength = received.length;
+            var offset = 0;
             while (offset < packetLength)
             {
-                ushort length = ByteUtils.ReadUShort(array, ref offset);
+                var length = ByteUtils.ReadUShort(array, ref offset);
                 var message = new ArraySegment<byte>(array, offset, length);
                 offset += length;
 
@@ -395,7 +395,7 @@ namespace Mirage.SocketLayer
 
         internal void ReceiveNotifyPacket(Packet packet)
         {
-            ArraySegment<byte> segment = ackSystem.ReceiveNotify(packet.buffer.array, packet.length);
+            var segment = ackSystem.ReceiveNotify(packet.buffer.array, packet.length);
             if (segment != default)
             {
                 metrics?.OnReceiveMessageNotify(packet.length);

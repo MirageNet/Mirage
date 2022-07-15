@@ -38,7 +38,7 @@ namespace Mirage.Weaver
 
             // find syncvars
             // use ToArray to create copy, ProcessSyncVar might add new fields
-            foreach (FieldDefinition fd in td.Fields.ToArray())
+            foreach (var fd in td.Fields.ToArray())
             {
                 // try/catch for each field, and log once
                 // we dont want to spam multiple logs for a single field
@@ -46,7 +46,7 @@ namespace Mirage.Weaver
                 {
                     if (IsValidSyncVar(fd))
                     {
-                        FoundSyncVar syncVar = behaviour.AddSyncVar(fd);
+                        var syncVar = behaviour.AddSyncVar(fd);
                         ProcessSyncVar(syncVar);
                         syncVar.HasProcessed = true;
                     }
@@ -104,13 +104,13 @@ namespace Mirage.Weaver
             syncVar.SetWrapType();
             syncVar.ProcessAttributes(writers, readers);
 
-            FieldDefinition fd = syncVar.FieldDefinition;
+            var fd = syncVar.FieldDefinition;
 
-            string originalName = fd.Name;
+            var originalName = fd.Name;
             Weaver.DebugLog(fd.DeclaringType, $"Sync Var {fd.Name} {fd.FieldType}");
 
-            MethodDefinition get = GenerateSyncVarGetter(syncVar);
-            MethodDefinition set = syncVar.InitialOnly
+            var get = GenerateSyncVarGetter(syncVar);
+            var set = syncVar.InitialOnly
                 ? GenerateSyncVarSetterInitialOnly(syncVar)
                 : GenerateSyncVarSetter(syncVar);
 
@@ -135,18 +135,18 @@ namespace Mirage.Weaver
 
         private MethodDefinition GenerateSyncVarGetter(FoundSyncVar syncVar)
         {
-            FieldDefinition fd = syncVar.FieldDefinition;
-            TypeReference originalType = syncVar.OriginalType;
-            string originalName = syncVar.OriginalName;
+            var fd = syncVar.FieldDefinition;
+            var originalType = syncVar.OriginalType;
+            var originalName = syncVar.OriginalName;
 
             //Create the get method
-            MethodDefinition get = fd.DeclaringType.AddMethod(
+            var get = fd.DeclaringType.AddMethod(
                     "get_Network" + originalName, MethodAttributes.Public |
                     MethodAttributes.SpecialName |
                     MethodAttributes.HideBySig,
                     originalType);
 
-            ILProcessor worker = get.Body.GetILProcessor();
+            var worker = get.Body.GetILProcessor();
             WriteLoadField(worker, syncVar);
 
             worker.Append(worker.Create(OpCodes.Ret));
@@ -159,18 +159,18 @@ namespace Mirage.Weaver
         private MethodDefinition GenerateSyncVarSetterInitialOnly(FoundSyncVar syncVar)
         {
             // todo reduce duplicate code with this and GenerateSyncVarSetter
-            FieldDefinition fd = syncVar.FieldDefinition;
-            TypeReference originalType = syncVar.OriginalType;
-            string originalName = syncVar.OriginalName;
+            var fd = syncVar.FieldDefinition;
+            var originalType = syncVar.OriginalType;
+            var originalName = syncVar.OriginalName;
 
             //Create the set method
-            MethodDefinition set = fd.DeclaringType.AddMethod("set_Network" + originalName, MethodAttributes.Public |
+            var set = fd.DeclaringType.AddMethod("set_Network" + originalName, MethodAttributes.Public |
                     MethodAttributes.SpecialName |
                     MethodAttributes.HideBySig);
-            ParameterDefinition valueParam = set.AddParam(originalType, "value");
+            var valueParam = set.AddParam(originalType, "value");
             set.SemanticsAttributes = MethodSemanticsAttributes.Setter;
 
-            ILProcessor worker = set.Body.GetILProcessor();
+            var worker = set.Body.GetILProcessor();
             WriteStoreField(worker, valueParam, syncVar);
             worker.Append(worker.Create(OpCodes.Ret));
 
@@ -179,21 +179,21 @@ namespace Mirage.Weaver
 
         private MethodDefinition GenerateSyncVarSetter(FoundSyncVar syncVar)
         {
-            FieldDefinition fd = syncVar.FieldDefinition;
-            TypeReference originalType = syncVar.OriginalType;
-            string originalName = syncVar.OriginalName;
+            var fd = syncVar.FieldDefinition;
+            var originalType = syncVar.OriginalType;
+            var originalName = syncVar.OriginalName;
 
             //Create the set method
-            MethodDefinition set = fd.DeclaringType.AddMethod("set_Network" + originalName, MethodAttributes.Public |
+            var set = fd.DeclaringType.AddMethod("set_Network" + originalName, MethodAttributes.Public |
                     MethodAttributes.SpecialName |
                     MethodAttributes.HideBySig);
-            ParameterDefinition valueParam = set.AddParam(originalType, "value");
+            var valueParam = set.AddParam(originalType, "value");
             set.SemanticsAttributes = MethodSemanticsAttributes.Setter;
 
-            ILProcessor worker = set.Body.GetILProcessor();
+            var worker = set.Body.GetILProcessor();
 
             // if (!SyncVarEqual(value, ref playerData))
-            Instruction endOfMethod = worker.Create(OpCodes.Nop);
+            var endOfMethod = worker.Create(OpCodes.Nop);
 
             // this
             worker.Append(worker.Create(OpCodes.Ldarg_0));
@@ -203,7 +203,7 @@ namespace Mirage.Weaver
             // make generic version of SetSyncVar with field type
             WriteLoadField(worker, syncVar);
 
-            MethodReference syncVarEqual = module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
+            var syncVarEqual = module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
             var syncVarEqualGm = new GenericInstanceMethod(syncVarEqual.GetElementMethod());
             syncVarEqualGm.GenericArguments.Add(originalType);
             worker.Append(worker.Create(OpCodes.Call, syncVarEqualGm));
@@ -211,7 +211,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Brtrue, endOfMethod));
 
             // T oldValue = value
-            VariableDefinition oldValue = set.AddLocal(originalType);
+            var oldValue = set.AddLocal(originalType);
             WriteLoadField(worker, syncVar);
             worker.Append(worker.Create(OpCodes.Stloc, oldValue));
 
@@ -226,7 +226,7 @@ namespace Mirage.Weaver
             if (syncVar.HasHook)
             {
                 //if (base.isLocalClient && !getSyncVarHookGuard(dirtyBit))
-                Instruction label = worker.Create(OpCodes.Nop);
+                var label = worker.Create(OpCodes.Nop);
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 // if invokeOnServer, then `IsServer` will also cover the Host case too so we dont need to use an OR here
                 if (syncVar.InvokeHookOnServer)
@@ -275,15 +275,15 @@ namespace Mirage.Weaver
         /// <param name="syncVar"></param>
         private void WriteLoadField(ILProcessor worker, FoundSyncVar syncVar)
         {
-            FieldDefinition fd = syncVar.FieldDefinition;
-            TypeReference originalType = syncVar.OriginalType;
+            var fd = syncVar.FieldDefinition;
+            var originalType = syncVar.OriginalType;
 
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
             if (syncVar.IsWrapped)
             {
                 worker.Append(worker.Create(OpCodes.Ldflda, fd.MakeHostGenericIfNeeded()));
-                MethodReference getter = module.ImportReference(fd.FieldType.Resolve().GetMethod("get_Value"));
+                var getter = module.ImportReference(fd.FieldType.Resolve().GetMethod("get_Value"));
                 worker.Append(worker.Create(OpCodes.Call, getter));
 
                 // When we use NetworkBehaviors, we normally use a derived class,
@@ -310,12 +310,12 @@ namespace Mirage.Weaver
         /// <param name="syncVar"></param>
         private void WriteStoreField(ILProcessor worker, ParameterDefinition valueParam, FoundSyncVar syncVar)
         {
-            FieldDefinition fd = syncVar.FieldDefinition;
+            var fd = syncVar.FieldDefinition;
 
             if (syncVar.IsWrapped)
             {
                 // there is a wrapper struct, call the setter
-                MethodReference setter = module.ImportReference(fd.FieldType.Resolve().GetMethod("set_Value"));
+                var setter = module.ImportReference(fd.FieldType.Resolve().GetMethod("set_Value"));
 
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldflda, fd.MakeHostGenericIfNeeded()));
@@ -405,7 +405,7 @@ namespace Mirage.Weaver
             void WriteEndFunctionCall()
             {
                 // only use Callvirt when not static
-                OpCode OpCall = hookMethod.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
+                var OpCall = hookMethod.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
                 MethodReference hookMethodReference = hookMethod;
 
                 if (hookMethodReference.DeclaringType.HasGenericParameters)
@@ -425,19 +425,19 @@ namespace Mirage.Weaver
                 throw new ArgumentException($"hook type should be event, but was {hookType}", nameof(hookType));
 
             // get backing field for event, and sure it is generic instance (eg MyType<T>.myEvent
-            FieldReference eventField = @event.DeclaringType.GetField(@event.Name).MakeHostGenericIfNeeded();
+            var eventField = @event.DeclaringType.GetField(@event.Name).MakeHostGenericIfNeeded();
 
             // get action type with number of args
-            Type actionType = hookType == SyncHookType.EventWith1Arg
+            var actionType = hookType == SyncHookType.EventWith1Arg
                 ? typeof(Action<>)
                 : typeof(Action<,>);
 
             // get Invoke method and make it correct type
-            MethodReference invokeNonGeneric = module.ImportReference(actionType.GetMethod("Invoke"));
-            MethodReference invoke = invokeNonGeneric.MakeHostInstanceGeneric((GenericInstanceType)@event.EventType);
+            var invokeNonGeneric = module.ImportReference(actionType.GetMethod("Invoke"));
+            var invoke = invokeNonGeneric.MakeHostInstanceGeneric((GenericInstanceType)@event.EventType);
 
-            Instruction nopEvent = worker.Create(OpCodes.Nop);
-            Instruction nopEnd = worker.Create(OpCodes.Nop);
+            var nopEvent = worker.Create(OpCodes.Nop);
+            var nopEnd = worker.Create(OpCodes.Nop);
 
             // **null check**
             worker.Append(worker.Create(OpCodes.Ldarg_0));
@@ -499,14 +499,14 @@ namespace Mirage.Weaver
                 return;
 
             var helper = new SerializeHelper(module, behaviour);
-            ILProcessor worker = helper.AddMethod();
+            var worker = helper.AddMethod();
 
             helper.AddLocals();
             helper.WriteBaseCall();
 
             helper.WriteIfInitial(() =>
             {
-                foreach (FoundSyncVar syncVar in behaviour.SyncVars)
+                foreach (var syncVar in behaviour.SyncVars)
                 {
                     WriteFromField(worker, helper.WriterParameter, syncVar);
                 }
@@ -518,7 +518,7 @@ namespace Mirage.Weaver
             // generate a writer call for any dirty variable in this class
 
             // start at number of syncvars in parent
-            foreach (FoundSyncVar syncVar in behaviour.SyncVars)
+            foreach (var syncVar in behaviour.SyncVars)
             {
                 // dont need to write field here if syncvar is InitialOnly
                 if (syncVar.InitialOnly) { continue; }
@@ -538,7 +538,7 @@ namespace Mirage.Weaver
         {
             if (!syncVar.HasProcessed) return;
 
-            FieldReference fieldRef = syncVar.FieldDefinition.MakeHostGenericIfNeeded();
+            var fieldRef = syncVar.FieldDefinition.MakeHostGenericIfNeeded();
             syncVar.ValueSerializer.AppendWriteField(module, worker, writerParameter, null, fieldRef);
         }
 
@@ -556,7 +556,7 @@ namespace Mirage.Weaver
 
 
             var helper = new DeserializeHelper(module, behaviour);
-            ILProcessor worker = helper.AddMethod();
+            var worker = helper.AddMethod();
 
             helper.AddLocals();
             helper.WriteBaseCall();
@@ -565,16 +565,16 @@ namespace Mirage.Weaver
             {
                 // For ititial spawn READ all values first, then invoke any hooks
                 var oldValues = new VariableDefinition[behaviour.SyncVars.Count];
-                for (int i = 0; i < behaviour.SyncVars.Count; i++)
+                for (var i = 0; i < behaviour.SyncVars.Count; i++)
                 {
-                    FoundSyncVar syncVar = behaviour.SyncVars[i];
+                    var syncVar = behaviour.SyncVars[i];
                     // StartHook create old value local variable,
                     oldValues[i] = StartHook(worker, helper.Method, syncVar, syncVar.OriginalType);
                     ReadToField(worker, helper.ReaderParameter, syncVar);
                 }
-                for (int i = 0; i < behaviour.SyncVars.Count; i++)
+                for (var i = 0; i < behaviour.SyncVars.Count; i++)
                 {
-                    FoundSyncVar syncVar = behaviour.SyncVars[i];
+                    var syncVar = behaviour.SyncVars[i];
                     EndHook(worker, syncVar, syncVar.OriginalType, oldValues[i]);
                 }
             });
@@ -582,14 +582,14 @@ namespace Mirage.Weaver
             helper.ReadDirtyBitMask();
 
             // conditionally read each syncvar
-            foreach (FoundSyncVar syncVar in behaviour.SyncVars)
+            foreach (var syncVar in behaviour.SyncVars)
             {
                 // dont need to write field here if syncvar is InitialOnly
                 if (syncVar.InitialOnly) { continue; }
 
                 helper.WriteIfSyncVarDirty(syncVar, () =>
                 {
-                    VariableDefinition oldValue = StartHook(worker, helper.Method, syncVar, syncVar.OriginalType);
+                    var oldValue = StartHook(worker, helper.Method, syncVar, syncVar.OriginalType);
                     // read value and store in syncvar BEFORE calling the hook
                     ReadToField(worker, helper.ReaderParameter, syncVar);
                     EndHook(worker, syncVar, syncVar.OriginalType, oldValue);
@@ -650,7 +650,7 @@ namespace Mirage.Weaver
                 // didn't change from the default values on the client.
 
                 // Generates: if (!SyncVarEqual)
-                Instruction syncVarEqualLabel = worker.Create(OpCodes.Nop);
+                var syncVarEqualLabel = worker.Create(OpCodes.Nop);
 
                 // 'this.' for 'this.SyncVarEqual'
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
@@ -659,7 +659,7 @@ namespace Mirage.Weaver
                 // 'newValue'
                 WriteLoadField(worker, syncVar);
                 // call the function
-                MethodReference syncVarEqual = module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
+                var syncVarEqual = module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
                 var syncVarEqualGm = new GenericInstanceMethod(syncVarEqual.GetElementMethod());
                 syncVarEqualGm.GenericArguments.Add(originalType);
                 worker.Append(worker.Create(OpCodes.Call, syncVarEqualGm));

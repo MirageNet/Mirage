@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -38,7 +37,7 @@ namespace Mirage.Examples.SceneChange
 
         public void AdditiveButtonHandler()
         {
-            IReadOnlyCollection<INetworkPlayer> players = sceneManager.Server.Players;
+            var players = sceneManager.Server.Players;
 
             if (additiveLoaded)
             {

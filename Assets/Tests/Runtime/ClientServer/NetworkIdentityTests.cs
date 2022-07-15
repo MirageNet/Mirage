@@ -70,7 +70,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void IsSceneObject()
         {
-            NetworkIdentity clone = CreateNetworkIdentity();
+            var clone = CreateNetworkIdentity();
 
             clone.SetSceneId(40);
             Assert.That(clone.IsSceneObject, Is.True);
@@ -78,7 +78,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void IsNotSceneObject()
         {
-            NetworkIdentity clone = CreateNetworkIdentity();
+            var clone = CreateNetworkIdentity();
 
             clone.SetSceneId(0);
             Assert.That(clone.IsSceneObject, Is.False);
@@ -86,7 +86,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void IsPrefab()
         {
-            NetworkIdentity clone = CreateNetworkIdentity();
+            var clone = CreateNetworkIdentity();
 
             clone.PrefabHash = 23232;
             Assert.That(clone.IsPrefab, Is.True);
@@ -94,7 +94,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void IsNotPrefab()
         {
-            NetworkIdentity clone = CreateNetworkIdentity();
+            var clone = CreateNetworkIdentity();
 
             clone.PrefabHash = 0;
             Assert.That(clone.IsPrefab, Is.False);
@@ -102,7 +102,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void IsNotPrefabIfScenObject()
         {
-            NetworkIdentity clone = CreateNetworkIdentity();
+            var clone = CreateNetworkIdentity();
 
             clone.PrefabHash = 23232;
             clone.SetSceneId(422);
@@ -111,7 +111,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void IsSpawned()
         {
-            NetworkIdentity clone = CreateNetworkIdentity();
+            var clone = CreateNetworkIdentity();
             clone.NetId = 20;
 
             Assert.That(clone.IsSpawned, Is.True);
@@ -119,7 +119,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void IsNotSpawned()
         {
-            NetworkIdentity clone = CreateNetworkIdentity();
+            var clone = CreateNetworkIdentity();
             clone.NetId = 0;
 
             Assert.That(clone.IsSpawned, Is.False);

@@ -9,15 +9,15 @@ namespace Mirage.Weaver.Serialization
     {
         public ValueSerializer GetSerializer(ModuleDefinition module, TypeDefinition holder, ICustomAttributeProvider attributeProvider, TypeReference fieldType, string fieldName)
         {
-            CustomAttribute attribute = attributeProvider.GetCustomAttribute<TAttribute>();
+            var attribute = attributeProvider.GetCustomAttribute<TAttribute>();
             if (attribute == null)
                 return default;
 
-            TSettings settings = GetSettings(fieldType, attribute);
-            LambdaExpression packMethod = GetPackMethod(fieldType);
-            LambdaExpression unpackMethod = GetUnpackMethod(fieldType);
+            var settings = GetSettings(fieldType, attribute);
+            var packMethod = GetPackMethod(fieldType);
+            var unpackMethod = GetUnpackMethod(fieldType);
             // field might be created by another finder, so we can re-use it
-            if (!TryGetPackerField(holder, fieldName, out FieldDefinition packerField))
+            if (!TryGetPackerField(holder, fieldName, out var packerField))
             {
                 packerField = CreatePackerField(module, fieldName, holder, settings);
             }
@@ -49,7 +49,7 @@ namespace Mirage.Weaver.Serialization
                 throw CreateException.Invoke($"Precsion must be positive, precision:{precision}");
             }
 
-            double expectedBitCount = Math.Floor(Math.Log(2 * max / (double)precision, 2)) + 1;
+            var expectedBitCount = Math.Floor(Math.Log(2 * max / (double)precision, 2)) + 1;
             // 30 should be large enough, if someone is trying to use more they might as well just send the whole float
             if (expectedBitCount > 30)
             {

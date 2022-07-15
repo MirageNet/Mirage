@@ -43,9 +43,9 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Repeat(1000)]
         public void UnpackedValueIsWithinPrecision()
         {
-            float start = GetRandomFloat();
-            uint packed = packer.Pack(start);
-            float unpacked = packer.Unpack(packed);
+            var start = GetRandomFloat();
+            var packed = packer.Pack(start);
+            var unpacked = packer.Unpack(packed);
 
             Assert.That(unpacked, Is.EqualTo(start).Within(precsion));
         }
@@ -53,9 +53,9 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Test]
         public void ValueOverMaxWillBeUnpackedAsMax()
         {
-            float start = max * 1.2f;
-            uint packed = packer.Pack(start);
-            float unpacked = packer.Unpack(packed);
+            var start = max * 1.2f;
+            var packed = packer.Pack(start);
+            var unpacked = packer.Unpack(packed);
 
             Assert.That(unpacked, Is.EqualTo(max).Within(precsion));
         }
@@ -63,9 +63,9 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Test]
         public void ValueUnderNegativeMaxWillBeUnpackedAsNegativeMax()
         {
-            float start = max * -1.2f;
-            uint packed = packer.Pack(start);
-            float unpacked = packer.Unpack(packed);
+            var start = max * -1.2f;
+            var packed = packer.Pack(start);
+            var unpacked = packer.Unpack(packed);
 
             Assert.That(unpacked, Is.EqualTo(min).Within(precsion));
         }
@@ -74,8 +74,8 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         public void ZeroUnpackToExactlyZero()
         {
             const float zero = 0;
-            uint packed = packer.Pack(zero);
-            float unpacked = packer.Unpack(packed);
+            var packed = packer.Pack(zero);
+            var unpacked = packer.Unpack(packed);
 
             Assert.That(unpacked, Is.EqualTo(zero));
         }
@@ -85,9 +85,9 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Repeat(100)]
         public void UnpackedValueIsWithinPrecisionUsingWriter()
         {
-            float start = GetRandomFloat();
+            var start = GetRandomFloat();
             packer.Pack(writer, start);
-            float unpacked = packer.Unpack(GetReader());
+            var unpacked = packer.Unpack(GetReader());
 
             Assert.That(unpacked, Is.EqualTo(start).Within(precsion));
         }
@@ -95,9 +95,9 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Test]
         public void ValueOverMaxWillBeUnpackedUsingWriterAsMax()
         {
-            float start = max * 1.2f;
+            var start = max * 1.2f;
             packer.Pack(writer, start);
-            float unpacked = packer.Unpack(GetReader());
+            var unpacked = packer.Unpack(GetReader());
 
             Assert.That(unpacked, Is.EqualTo(max).Within(precsion));
         }
@@ -105,9 +105,9 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Test]
         public void ValueUnderNegativeMaxWillBeUnpackedUsingWriterAsNegativeMax()
         {
-            float start = max * -1.2f;
+            var start = max * -1.2f;
             packer.Pack(writer, start);
-            float unpacked = packer.Unpack(GetReader());
+            var unpacked = packer.Unpack(GetReader());
 
             Assert.That(unpacked, Is.EqualTo(min).Within(precsion));
         }
@@ -117,9 +117,9 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Repeat(100)]
         public void UnpackedValueIsWithinPrecisionNoClamp()
         {
-            float start = GetRandomFloat();
-            uint packed = packer.PackNoClamp(start);
-            float unpacked = packer.Unpack(packed);
+            var start = GetRandomFloat();
+            var packed = packer.PackNoClamp(start);
+            var unpacked = packer.Unpack(packed);
 
             Assert.That(unpacked, Is.EqualTo(start).Within(precsion));
         }
@@ -128,9 +128,9 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Repeat(100)]
         public void UnpackedValueIsWithinPrecisionNoClampUsingWriter()
         {
-            float start = GetRandomFloat();
+            var start = GetRandomFloat();
             packer.PackNoClamp(writer, start);
-            float unpacked = packer.Unpack(GetReader());
+            var unpacked = packer.Unpack(GetReader());
 
             Assert.That(unpacked, Is.EqualTo(start).Within(precsion));
         }

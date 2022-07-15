@@ -41,8 +41,8 @@ namespace Mirage.Weaver
             LoadBuiltinExtensions();
             LoadBuiltinMessages();
 
-            int writeCount = writers.Count;
-            int readCount = readers.Count;
+            var writeCount = writers.Count;
+            var readCount = readers.Count;
 
             ProcessAssemblyClasses();
 
@@ -55,7 +55,7 @@ namespace Mirage.Weaver
             // find all extension methods
             IEnumerable<Type> types = MirageModule.GetTypes();
 
-            foreach (Type type in types)
+            foreach (var type in types)
             {
                 extensionHelper.RegisterExtensionMethodsInType(type);
             }
@@ -63,10 +63,10 @@ namespace Mirage.Weaver
 
         private void LoadBuiltinMessages()
         {
-            IEnumerable<Type> types = MirageModule.GetTypes().Where(t => t.GetCustomAttribute<NetworkMessageAttribute>() != null);
-            foreach (Type type in types)
+            var types = MirageModule.GetTypes().Where(t => t.GetCustomAttribute<NetworkMessageAttribute>() != null);
+            foreach (var type in types)
             {
-                TypeReference typeReference = module.ImportReference(type);
+                var typeReference = module.ImportReference(type);
                 writers.TryGetFunction(typeReference, null);
                 readers.TryGetFunction(typeReference, null);
                 messages.Add(typeReference);
@@ -92,7 +92,7 @@ namespace Mirage.Weaver
 
         private void LoadModuleMessages(List<TypeDefinition> types)
         {
-            foreach (TypeDefinition klass in types)
+            foreach (var klass in types)
             {
                 ProcessClass(klass);
             }
@@ -100,7 +100,7 @@ namespace Mirage.Weaver
 
         private void LoadModuleExtensions(List<TypeDefinition> types)
         {
-            foreach (TypeDefinition klass in types)
+            foreach (var klass in types)
             {
                 // extension methods only live in static classes
                 // static classes are represented as sealed and abstract
@@ -117,7 +117,7 @@ namespace Mirage.Weaver
                 messages.Add(klass);
             }
 
-            foreach (TypeDefinition nestedClass in klass.NestedTypes)
+            foreach (var nestedClass in klass.NestedTypes)
             {
                 ProcessClass(nestedClass);
             }
@@ -141,13 +141,13 @@ namespace Mirage.Weaver
 
         private void GenerateReadersWriters(FieldReference field, SequencePoint sequencePoint)
         {
-            TypeReference type = field.DeclaringType;
+            var type = field.DeclaringType;
 
             if (type.Is(typeof(Writer<>)) || type.Is(typeof(Reader<>)) && type.IsGenericInstance)
             {
                 var typeGenericInstance = (GenericInstanceType)type;
 
-                TypeReference parameterType = typeGenericInstance.GenericArguments[0];
+                var parameterType = typeGenericInstance.GenericArguments[0];
 
                 GenerateReadersWriters(parameterType, sequencePoint);
             }
@@ -159,15 +159,15 @@ namespace Mirage.Weaver
                 return;
 
             // generate methods for message or types used by generic read/write
-            bool isMessage = IsMessageMethod(method);
+            var isMessage = IsMessageMethod(method);
 
-            bool generate = isMessage ||
+            var generate = isMessage ||
                 IsReadWriteMethod(method);
 
             if (generate)
             {
                 var instanceMethod = (GenericInstanceMethod)method;
-                TypeReference parameterType = instanceMethod.GenericArguments[0];
+                var parameterType = instanceMethod.GenericArguments[0];
 
                 if (parameterType.IsGenericParameter)
                     return;
@@ -182,13 +182,13 @@ namespace Mirage.Weaver
         {
             if (!parameterType.IsGenericParameter && parameterType.CanBeResolved())
             {
-                TypeDefinition typeDefinition = parameterType.Resolve();
+                var typeDefinition = parameterType.Resolve();
 
                 if (typeDefinition.IsClass && !typeDefinition.IsValueType)
                 {
-                    MethodDefinition constructor = typeDefinition.GetMethod(".ctor");
+                    var constructor = typeDefinition.GetMethod(".ctor");
 
-                    bool hasAccess = constructor.IsPublic
+                    var hasAccess = constructor.IsPublic
                         || constructor.IsAssembly && typeDefinition.Module == module;
 
                     if (!hasAccess)
@@ -249,11 +249,11 @@ namespace Mirage.Weaver
         /// <param name="currentAssembly"></param>
         public void InitializeReaderAndWriters()
         {
-            MethodDefinition rwInitializer = module.GeneratedClass().AddMethod(
+            var rwInitializer = module.GeneratedClass().AddMethod(
                 "InitReadWriters",
                 Mono.Cecil.MethodAttributes.Public | Mono.Cecil.MethodAttributes.Static);
 
-            ConstructorInfo attributeconstructor = typeof(RuntimeInitializeOnLoadMethodAttribute).GetConstructor(new[] { typeof(RuntimeInitializeLoadType) });
+            var attributeconstructor = typeof(RuntimeInitializeOnLoadMethodAttribute).GetConstructor(new[] { typeof(RuntimeInitializeLoadType) });
 
             var customAttributeRef = new CustomAttribute(module.ImportReference(attributeconstructor));
             customAttributeRef.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportReference<RuntimeInitializeLoadType>(), RuntimeInitializeLoadType.BeforeSceneLoad));
@@ -262,12 +262,12 @@ namespace Mirage.Weaver
             if (IsEditorAssembly(module))
             {
                 // editor assembly,  add InitializeOnLoadMethod too.  Useful for the editor tests
-                ConstructorInfo initializeOnLoadConstructor = typeof(InitializeOnLoadMethodAttribute).GetConstructor(new Type[0]);
+                var initializeOnLoadConstructor = typeof(InitializeOnLoadMethodAttribute).GetConstructor(new Type[0]);
                 var initializeCustomConstructorRef = new CustomAttribute(module.ImportReference(initializeOnLoadConstructor));
                 rwInitializer.CustomAttributes.Add(initializeCustomConstructorRef);
             }
 
-            ILProcessor worker = rwInitializer.Body.GetILProcessor();
+            var worker = rwInitializer.Body.GetILProcessor();
 
             writers.InitializeWriters(worker);
             readers.InitializeReaders(worker);
@@ -279,10 +279,10 @@ namespace Mirage.Weaver
 
         private void RegisterMessages(ILProcessor worker)
         {
-            MethodInfo method = typeof(MessagePacker).GetMethod(nameof(MessagePacker.RegisterMessage));
-            MethodReference registerMethod = module.ImportReference(method);
+            var method = typeof(MessagePacker).GetMethod(nameof(MessagePacker.RegisterMessage));
+            var registerMethod = module.ImportReference(method);
 
-            foreach (TypeReference message in messages)
+            foreach (var message in messages)
             {
                 var genericMethodCall = new GenericInstanceMethod(registerMethod);
                 genericMethodCall.GenericArguments.Add(module.ImportReference(message));
@@ -316,12 +316,12 @@ namespace Mirage.Weaver
             if (!IsStatic(type))
                 return;
 
-            IEnumerable<MethodInfo> methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public)
+            var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public)
                    .Where(IsExtension)
                    .Where(NotGeneric)
                    .Where(NotIgnored);
 
-            foreach (MethodInfo method in methods)
+            foreach (var method in methods)
             {
                 if (IsWriterMethod(method))
                 {
@@ -340,12 +340,12 @@ namespace Mirage.Weaver
             if (!IsStatic(type))
                 return;
 
-            IEnumerable<MethodDefinition> methods = type.Methods
+            var methods = type.Methods
                    .Where(IsExtension)
                    .Where(NotGeneric)
                    .Where(NotIgnored);
 
-            foreach (MethodDefinition method in methods)
+            foreach (var method in methods)
             {
                 if (IsWriterMethod(method))
                 {
@@ -433,12 +433,12 @@ namespace Mirage.Weaver
 
         private void RegisterWriter(MethodInfo method)
         {
-            Type dataType = method.GetParameters()[1].ParameterType;
+            var dataType = method.GetParameters()[1].ParameterType;
             writers.Register(module.ImportReference(dataType), module.ImportReference(method));
         }
         private void RegisterWriter(MethodDefinition method)
         {
-            TypeReference dataType = method.Parameters[1].ParameterType;
+            var dataType = method.Parameters[1].ParameterType;
             writers.Register(module.ImportReference(dataType), module.ImportReference(method));
         }
 

@@ -62,9 +62,9 @@ namespace Mirage.DisplayMetrics
             double receiveCount = 0;
             double receiveBytes = 0;
 
-            Metrics.Frame[] array = Metrics.buffer;
-            int count = 0;
-            for (int i = 0; i < array.Length; i++)
+            var array = Metrics.buffer;
+            var count = 0;
+            for (var i = 0; i < array.Length; i++)
             {
                 if (!array[i].init)
                 {

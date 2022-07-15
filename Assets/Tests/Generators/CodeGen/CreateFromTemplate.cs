@@ -27,7 +27,7 @@ namespace JamesFrowen.SimpleCodeGen
 
         public void WriteToFile(string path)
         {
-            string directory = Path.GetDirectoryName(path);
+            var directory = Path.GetDirectoryName(path);
             if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);

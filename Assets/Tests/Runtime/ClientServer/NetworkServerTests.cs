@@ -35,7 +35,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void ThrowsIfListenIsCalledWhileAlreadyActive()
         {
-            InvalidOperationException expection = Assert.Throws<InvalidOperationException>(() =>
+            var expection = Assert.Throws<InvalidOperationException>(() =>
             {
                 server.StartServer();
             });
@@ -56,7 +56,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendToAll() => UniTask.ToCoroutine(async () =>
         {
-            bool invoked = false;
+            var invoked = false;
 
             ClientMessageHandler.RegisterHandler<WovenTestMessage>(msg => invoked = true);
 
@@ -71,7 +71,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendToClientOfPlayer() => UniTask.ToCoroutine(async () =>
         {
-            bool invoked = false;
+            var invoked = false;
 
             ClientMessageHandler.RegisterHandler<WovenTestMessage>(msg => invoked = true);
 
@@ -86,7 +86,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator RegisterMessage1() => UniTask.ToCoroutine(async () =>
         {
-            bool invoked = false;
+            var invoked = false;
 
             ServerMessageHandler.RegisterHandler<WovenTestMessage>(msg => invoked = true);
             clientPlayer.Send(message);
@@ -98,7 +98,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator RegisterMessage2() => UniTask.ToCoroutine(async () =>
         {
-            bool invoked = false;
+            var invoked = false;
 
             ServerMessageHandler.RegisterHandler<WovenTestMessage>((conn, msg) => invoked = true);
 
@@ -110,7 +110,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator UnRegisterMessage1() => UniTask.ToCoroutine(async () =>
         {
-            MessageDelegate<WovenTestMessage> func = Substitute.For<MessageDelegate<WovenTestMessage>>();
+            var func = Substitute.For<MessageDelegate<WovenTestMessage>>();
 
             ServerMessageHandler.RegisterHandler(func);
             ServerMessageHandler.UnregisterHandler<WovenTestMessage>();
@@ -147,7 +147,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         public IEnumerator StoppedInvokeTest() => UniTask.ToCoroutine(async () =>
 
         {
-            UnityAction func1 = Substitute.For<UnityAction>();
+            var func1 = Substitute.For<UnityAction>();
             server.Stopped.AddListener(func1);
 
             server.Stop();
@@ -159,7 +159,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
         public IEnumerator ApplicationQuitTest() => UniTask.ToCoroutine(async () =>
         {
-            UnityAction func1 = Substitute.For<UnityAction>();
+            var func1 = Substitute.For<UnityAction>();
             server.Stopped.AddListener(func1);
 
             await UniTask.Delay(1);
@@ -174,8 +174,8 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator DisconnectCalledBeforePlayerIsDestroyed()
         {
-            INetworkPlayer serverPlayer = base.serverPlayer;
-            int disconnectCalled = 0;
+            var serverPlayer = base.serverPlayer;
+            var disconnectCalled = 0;
             server.Disconnected.AddListener(player =>
             {
                 disconnectCalled++;

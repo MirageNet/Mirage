@@ -37,7 +37,7 @@ namespace Mirage
             var wrapper = new IdentityWrapper(identity);
 
             // get deterministic scene hash
-            int pathHash = GetSceneHash(identity);
+            var pathHash = GetSceneHash(identity);
 
             wrapper.SceneHash = pathHash;
 
@@ -74,7 +74,7 @@ namespace Mirage
                     AssignAssetID(identity, GetStagePath(stage));
                 }
             }
-            else if (SceneObjectWithPrefabParent(identity, out GameObject parent))
+            else if (SceneObjectWithPrefabParent(identity, out var parent))
             {
                 AssignSceneID(identity);
                 AssignAssetID(identity, parent);
@@ -117,13 +117,13 @@ namespace Mirage
 
         private static void AssignAssetID(NetworkIdentity identity, GameObject parent)
         {
-            string path = AssetDatabase.GetAssetPath(parent);
+            var path = AssetDatabase.GetAssetPath(parent);
             AssignAssetID(identity, path);
         }
 
         private static void AssignAssetID(NetworkIdentity identity)
         {
-            string path = AssetDatabase.GetAssetPath(identity.gameObject);
+            var path = AssetDatabase.GetAssetPath(identity.gameObject);
             AssignAssetID(identity, path);
         }
 
@@ -168,7 +168,7 @@ namespace Mirage
                 if (BuildPipeline.isBuildingPlayer)
                     throw new InvalidOperationException($"Scene {identity.gameObject.scene.path} needs to be opened and resaved before building, because the scene object {identity.name} has no valid sceneId yet.");
 
-                int randomId = GetRandomUInt();
+                var randomId = GetRandomUInt();
 
                 // only assign if not a duplicate of an existing scene id (small chance, but possible)
                 if (!IsDuplicate(identity, randomId))
@@ -183,7 +183,7 @@ namespace Mirage
 
         private static bool IsDuplicate(NetworkIdentity identity, int sceneId)
         {
-            if (sceneIds.TryGetValue(sceneId, out NetworkIdentity existing))
+            if (sceneIds.TryGetValue(sceneId, out var existing))
             {
                 // if existing is null we can use this id
                 if (existing == null)
@@ -208,7 +208,7 @@ namespace Mirage
             // use Crypto RNG to avoid having time based duplicates
             using (var rng = new RNGCryptoServiceProvider())
             {
-                byte[] bytes = new byte[4];
+                var bytes = new byte[4];
                 rng.GetBytes(bytes);
                 return BitConverter.ToInt32(bytes, 0);
             }

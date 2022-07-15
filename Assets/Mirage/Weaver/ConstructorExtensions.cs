@@ -16,7 +16,7 @@ namespace Mirage.Weaver
         public static void AddToConstructor(this TypeDefinition typeDefinition, IWeaverLogger logger, Action<ILProcessor> body)
         {
             // find instance constructor
-            MethodDefinition ctor = typeDefinition.GetMethod(".ctor");
+            var ctor = typeDefinition.GetMethod(".ctor");
 
             if (ctor == null)
             {
@@ -24,7 +24,7 @@ namespace Mirage.Weaver
                 return;
             }
 
-            Instruction ret = ctor.Body.Instructions[ctor.Body.Instructions.Count - 1];
+            var ret = ctor.Body.Instructions[ctor.Body.Instructions.Count - 1];
             if (ret.OpCode == OpCodes.Ret)
             {
                 // remove Ret so we can emit body
@@ -36,7 +36,7 @@ namespace Mirage.Weaver
                 return;
             }
 
-            ILProcessor worker = ctor.Body.GetILProcessor();
+            var worker = ctor.Body.GetILProcessor();
             body.Invoke(worker);
 
             // re-add Ret after body
@@ -52,13 +52,13 @@ namespace Mirage.Weaver
         /// <param name="body">code to write</param>
         public static void AddToStaticConstructor(this TypeDefinition typeDefinition, Action<ILProcessor> body)
         {
-            MethodDefinition cctor = typeDefinition.GetMethod(".cctor");
+            var cctor = typeDefinition.GetMethod(".cctor");
             if (cctor != null)
             {
                 // remove the return opcode from end of function. will add our own later.
                 if (cctor.Body.Instructions.Count != 0)
                 {
-                    Instruction retInstr = cctor.Body.Instructions[cctor.Body.Instructions.Count - 1];
+                    var retInstr = cctor.Body.Instructions[cctor.Body.Instructions.Count - 1];
                     if (retInstr.OpCode == OpCodes.Ret)
                     {
                         cctor.Body.Instructions.RemoveAt(cctor.Body.Instructions.Count - 1);
@@ -79,7 +79,7 @@ namespace Mirage.Weaver
                         MethodAttributes.Static);
             }
 
-            ILProcessor worker = cctor.Body.GetILProcessor();
+            var worker = cctor.Body.GetILProcessor();
 
             // add new code to bottom of constructor
             // todo should we be adding new code to top of function instead? incase user has early return in custom constructor?

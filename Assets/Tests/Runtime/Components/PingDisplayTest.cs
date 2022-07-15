@@ -13,7 +13,7 @@ namespace Mirage.Tests.Runtime.Components
         {
             var gameObject = new GameObject("pingDisplay", typeof(NetworkPingDisplay));
 
-            NetworkPingDisplay pingDisplay = gameObject.GetComponent<NetworkPingDisplay>();
+            var pingDisplay = gameObject.GetComponent<NetworkPingDisplay>();
             pingDisplay.Client = client;
 
             Assert.Throws<NullReferenceException>(() =>
@@ -28,11 +28,11 @@ namespace Mirage.Tests.Runtime.Components
         {
             var gameObject = new GameObject("pingDisplay", typeof(NetworkPingDisplay), typeof(Text));
 
-            NetworkPingDisplay pingDisplay = gameObject.GetComponent<NetworkPingDisplay>();
+            var pingDisplay = gameObject.GetComponent<NetworkPingDisplay>();
             pingDisplay.Client = client;
             pingDisplay.NetworkPingLabelText = gameObject.GetComponent<Text>();
 
-            Text oldValue = pingDisplay.NetworkPingLabelText;
+            var oldValue = pingDisplay.NetworkPingLabelText;
 
             pingDisplay.Update();
 

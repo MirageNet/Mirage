@@ -43,9 +43,9 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.WriteBytes(data, 0, data.Length);
 
             reader.Reset(writer.ToArraySegment());
-            ArraySegment<byte> deserialized = reader.ReadBytesSegment(data.Length);
+            var deserialized = reader.ReadBytesSegment(data.Length);
             Assert.That(deserialized.Count, Is.EqualTo(data.Length));
-            for (int i = 0; i < data.Length; ++i)
+            for (var i = 0; i < data.Length; ++i)
                 Assert.That(deserialized.Array[deserialized.Offset + i], Is.EqualTo(data[i]));
         }
 
@@ -57,9 +57,9 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.WriteBytesAndSize(data);
 
             reader.Reset(writer.ToArraySegment());
-            ArraySegment<byte> deserialized = reader.ReadBytesAndSizeSegment();
+            var deserialized = reader.ReadBytesAndSizeSegment();
             Assert.That(deserialized.Count, Is.EqualTo(data.Length));
-            for (int i = 0; i < data.Length; ++i)
+            for (var i = 0; i < data.Length; ++i)
                 Assert.That(deserialized.Array[deserialized.Offset + i], Is.EqualTo(data[i]));
         }
 
@@ -73,9 +73,9 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.WriteBytesAndSizeSegment(segment);
 
             reader.Reset(writer.ToArraySegment());
-            ArraySegment<byte> deserialized = reader.ReadBytesAndSizeSegment();
+            var deserialized = reader.ReadBytesAndSizeSegment();
             Assert.That(deserialized.Count, Is.EqualTo(segment.Count));
-            for (int i = 0; i < segment.Count; ++i)
+            for (var i = 0; i < segment.Count; ++i)
                 Assert.That(deserialized.Array[deserialized.Offset + i], Is.EqualTo(segment.Array[segment.Offset + i]));
         }
 
@@ -99,7 +99,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(writer.BitPosition, Is.EqualTo(0));
             Assert.That(writer.ByteLength, Is.EqualTo(0));
 
-            byte[] data = writer.ToArray();
+            var data = writer.ToArray();
             Assert.That(data, Is.Empty);
         }
 
@@ -209,7 +209,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.WriteVector2(vector);
             reader.Reset(writer.ToArraySegment());
-            Vector2 output = reader.ReadVector2();
+            var output = reader.ReadVector2();
             Assert.That(output, Is.EqualTo(vector));
         }
 
@@ -228,7 +228,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.WriteVector3(input);
             reader.Reset(writer.ToArraySegment());
-            Vector3 output = reader.ReadVector3();
+            var output = reader.ReadVector3();
             Assert.That(output, Is.EqualTo(input));
         }
 
@@ -246,7 +246,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.WriteVector4(input);
             reader.Reset(writer.ToArraySegment());
-            Vector4 output = reader.ReadVector4();
+            var output = reader.ReadVector4();
             Assert.That(output, Is.EqualTo(input));
         }
 
@@ -265,7 +265,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.WriteVector2Int(input);
             reader.Reset(writer.ToArraySegment());
-            Vector2Int output = reader.ReadVector2Int();
+            var output = reader.ReadVector2Int();
             Assert.That(output, Is.EqualTo(input));
         }
 
@@ -285,7 +285,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.WriteVector3Int(input);
             reader.Reset(writer.ToArraySegment());
-            Vector3Int output = reader.ReadVector3Int();
+            var output = reader.ReadVector3Int();
             Assert.That(output, Is.EqualTo(input));
         }
 
@@ -304,7 +304,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.WriteColor(input);
             reader.Reset(writer.ToArraySegment());
-            Color output = reader.ReadColor();
+            var output = reader.ReadColor();
             Assert.That(output, Is.EqualTo(input));
         }
 
@@ -324,7 +324,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.WriteColor32(input);
             reader.Reset(writer.ToArraySegment());
-            Color32 output = reader.ReadColor32();
+            var output = reader.ReadColor32();
             Assert.That(output, Is.EqualTo(input));
         }
 
@@ -341,7 +341,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.WriteRect(input);
             reader.Reset(writer.ToArraySegment());
-            Rect output = reader.ReadRect();
+            var output = reader.ReadRect();
             Assert.That(output, Is.EqualTo(input));
         }
 
@@ -357,7 +357,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.WritePlane(input);
             reader.Reset(writer.ToArraySegment());
-            Plane output = reader.ReadPlane();
+            var output = reader.ReadPlane();
             // note: Plane constructor does math internally, resulting in
             // floating point precision loss that causes exact comparison
             // to fail the test. So we test that the difference is small.
@@ -376,7 +376,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.WriteRay(input);
             reader.Reset(writer.ToArraySegment());
-            Ray output = reader.ReadRay();
+            var output = reader.ReadRay();
             Assert.That((output.direction - input.direction).magnitude, Is.LessThan(1e-6f));
             Assert.That(output.origin, Is.EqualTo(input.origin));
         }
@@ -394,7 +394,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.WriteMatrix4X4(input);
             reader.Reset(writer.ToArraySegment());
-            Matrix4x4 output = reader.ReadMatrix4x4();
+            var output = reader.ReadMatrix4x4();
             Assert.That(output, Is.EqualTo(input));
         }
 
@@ -411,7 +411,7 @@ namespace Mirage.Tests.Runtime.Serialization
         public void TestReadingInvalidString(byte invalid)
         {
             writer.WriteString("an uncorrupted string");
-            byte[] data = writer.ToArray();
+            var data = writer.ToArray();
             data[10] = invalid;
             reader.Reset(data);
             Assert.Throws<System.Text.DecoderFallbackException>(() => reader.ReadString());
@@ -478,15 +478,15 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void TestChar()
         {
-            char a = 'a';
-            char u = 'ⓤ';
+            var a = 'a';
+            var u = 'ⓤ';
 
             writer.WriteChar(a);
             writer.WriteChar(u);
             reader.Reset(writer.ToArraySegment());
-            char a2 = reader.ReadChar();
+            var a2 = reader.ReadChar();
             Assert.That(a2, Is.EqualTo(a));
-            char u2 = reader.ReadChar();
+            var u2 = reader.ReadChar();
             Assert.That(u2, Is.EqualTo(u));
         }
 
@@ -533,7 +533,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.WriteString(weird);
             reader.Reset(writer.ToArraySegment());
-            string str = reader.ReadString();
+            var str = reader.ReadString();
             Assert.That(str, Is.EqualTo(weird));
         }
 
@@ -707,7 +707,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.WriteGuid(originalGuid);
 
             reader.Reset(writer.ToArraySegment());
-            Guid readGuid = reader.ReadGuid();
+            var readGuid = reader.ReadGuid();
             Assert.That(readGuid, Is.EqualTo(originalGuid));
         }
 
@@ -736,7 +736,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.WriteSingle(weird);
             reader.Reset(writer.ToArraySegment());
-            float readFloat = reader.ReadSingle();
+            var readFloat = reader.ReadSingle();
             Assert.That(readFloat, Is.EqualTo(weird));
         }
 
@@ -765,7 +765,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.WriteDouble(weird);
             reader.Reset(writer.ToArraySegment());
-            double readDouble = reader.ReadDouble();
+            var readDouble = reader.ReadDouble();
             Assert.That(readDouble, Is.EqualTo(weird));
         }
 
@@ -784,7 +784,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.WriteDecimalConverter(weird);
             reader.Reset(writer.ToArraySegment());
-            decimal readDecimal = reader.ReadDecimalConverter();
+            var readDecimal = reader.ReadDecimalConverter();
             Assert.That(readDecimal, Is.EqualTo(weird));
         }
 
@@ -799,7 +799,7 @@ namespace Mirage.Tests.Runtime.Serialization
                 146, 10,134, 63,
                 197,245,103, 63
             };
-            foreach (float weird in inputFloats)
+            foreach (var weird in inputFloats)
             {
                 writer.WriteSingle(weird);
             }
@@ -817,7 +817,7 @@ namespace Mirage.Tests.Runtime.Serialization
                 101,115, 45, 56, 82,193,240, 63,
                 140,116,112,185,184,254,236, 63
             };
-            foreach (double weird in inputDoubles)
+            foreach (var weird in inputDoubles)
             {
                 writer.WriteDouble(weird);
             }
@@ -837,7 +837,7 @@ namespace Mirage.Tests.Runtime.Serialization
                 0x00, 0x00, 0x00, 0x00, 0xF0, 0x6D, 0xC2, 0xA4, 0x68, 0x52,
                 0x00, 0x00
             };
-            foreach (decimal weird in inputDecimals)
+            foreach (var weird in inputDecimals)
             {
                 writer.WriteDecimalConverter(weird);
             }
@@ -878,7 +878,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             byte[] values = { 0x12, 0x43, 0x00, 0xff, 0xab, 0x02, 0x20 };
             byte[] expected = { 0x12, 0x43, 0x00, 0xff, 0xab, 0x02, 0x20 };
-            foreach (byte value in values)
+            foreach (var value in values)
             {
                 writer.WriteSByte((sbyte)value);
             }
@@ -976,7 +976,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.Write(original);
 
             reader.Reset(writer.ToArraySegment());
-            List<int> readList = reader.Read<List<int>>();
+            var readList = reader.Read<List<int>>();
             Assert.That(readList, Is.EqualTo(original));
         }
 
@@ -986,7 +986,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.Write<List<int>>(null);
 
             reader.Reset(writer.ToArraySegment());
-            List<int> readList = reader.Read<List<int>>();
+            var readList = reader.Read<List<int>>();
             Assert.That(readList, Is.Null);
         }
 
@@ -996,7 +996,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.WriteNetworkBehaviour(null);
 
             reader.Reset(writer.ToArraySegment());
-            NetworkBehaviour behaviour = reader.ReadNetworkBehaviour();
+            var behaviour = reader.ReadNetworkBehaviour();
 
             Assert.That(behaviour, Is.Null);
 
@@ -1007,12 +1007,12 @@ namespace Mirage.Tests.Runtime.Serialization
         public void WriteNetworkBehaviorNotNull()
         {
             var go = new GameObject("TestWriteNetworkBehaviorNotNull", typeof(NetworkIdentity), typeof(MockComponent));
-            MockComponent mock = go.GetComponent<MockComponent>();
+            var mock = go.GetComponent<MockComponent>();
             // init lazy props
             _ = mock.Identity.NetworkBehaviours;
             mock.Identity.NetId = 1;
             // returns found id
-            reader.ObjectLocator.TryGetIdentity(1, out NetworkIdentity _).Returns(x => { x[1] = mock.Identity; return true; });
+            reader.ObjectLocator.TryGetIdentity(1, out var _).Returns(x => { x[1] = mock.Identity; return true; });
 
             // try/fianlly so go is always destroyed
             try
@@ -1020,7 +1020,7 @@ namespace Mirage.Tests.Runtime.Serialization
                 writer.WriteNetworkBehaviour(mock);
 
                 reader.Reset(writer.ToArraySegment());
-                MockComponent behaviour = reader.ReadNetworkBehaviour<MockComponent>();
+                var behaviour = reader.ReadNetworkBehaviour<MockComponent>();
 
                 Assert.That(behaviour == mock);
                 Assert.That(writer.ByteLength, Is.EqualTo(reader.BytePosition));
@@ -1041,12 +1041,12 @@ namespace Mirage.Tests.Runtime.Serialization
         public void WriteNetworkBehaviorArray()
         {
             var go = new GameObject("TestWriteNetworkBehaviorNotNull", typeof(NetworkIdentity), typeof(MockComponent));
-            MockComponent mock = go.GetComponent<MockComponent>();
+            var mock = go.GetComponent<MockComponent>();
             // init lazy props
             _ = mock.Identity.NetworkBehaviours;
             mock.Identity.NetId = 1;
             // returns found id
-            reader.ObjectLocator.TryGetIdentity(1, out NetworkIdentity _).Returns(x => { x[1] = mock.Identity; return true; });
+            reader.ObjectLocator.TryGetIdentity(1, out var _).Returns(x => { x[1] = mock.Identity; return true; });
 
             // try/fianlly so go is always destroyed
             try
@@ -1055,7 +1055,7 @@ namespace Mirage.Tests.Runtime.Serialization
                 writer.Write(mockArray);
 
                 reader.Reset(writer.ToArraySegment());
-                MockComponent[] readArray = reader.Read<MockComponent[]>();
+                var readArray = reader.Read<MockComponent[]>();
 
                 Assert.That(mockArray.Length == mockArray.Length);
                 Assert.That(mockArray[0] == mockArray[0]);
@@ -1072,12 +1072,12 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             // setup
             var go = new GameObject("TestWriteNetworkBehaviorNotNull", typeof(NetworkIdentity), typeof(MockComponent));
-            MockComponent mock = go.GetComponent<MockComponent>();
+            var mock = go.GetComponent<MockComponent>();
             // init lazy props
             _ = mock.Identity.NetworkBehaviours;
             mock.Identity.NetId = 1;
             // return not found
-            reader.ObjectLocator.TryGetIdentity(1, out NetworkIdentity _).Returns(x => { x[1] = null; return false; });
+            reader.ObjectLocator.TryGetIdentity(1, out var _).Returns(x => { x[1] = null; return false; });
 
             // try/fianlly so go is always destroyed
             try
@@ -1085,7 +1085,7 @@ namespace Mirage.Tests.Runtime.Serialization
                 writer.WriteNetworkBehaviour(mock);
 
                 reader.Reset(writer.ToArraySegment());
-                MockComponent behaviour = reader.ReadNetworkBehaviour<MockComponent>();
+                var behaviour = reader.ReadNetworkBehaviour<MockComponent>();
 
                 Assert.That(behaviour, Is.Null);
                 // make sure read same as written (including compIndex for non-0 netid
@@ -1103,7 +1103,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.WriteGameObject(null);
 
             reader.Reset(writer.ToArraySegment());
-            GameObject obj = reader.ReadGameObject();
+            var obj = reader.ReadGameObject();
 
             Assert.That(obj, Is.Null);
 
@@ -1128,7 +1128,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.Write(value);
             reader.Reset(writer.ToArraySegment());
-            int? unpacked = reader.Read<int?>();
+            var unpacked = reader.Read<int?>();
 
             Assert.That(unpacked, Is.EqualTo(value));
         }
@@ -1141,7 +1141,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.Write(value);
             reader.Reset(writer.ToArraySegment());
-            bool? unpacked = reader.Read<bool?>();
+            var unpacked = reader.Read<bool?>();
 
             Assert.That(unpacked, Is.EqualTo(value));
         }
@@ -1154,7 +1154,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             writer.Write(value);
             reader.Reset(writer.ToArraySegment());
-            ulong? unpacked = reader.Read<ulong?>();
+            var unpacked = reader.Read<ulong?>();
 
             Assert.That(unpacked, Is.EqualTo(value));
         }
@@ -1228,7 +1228,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(writer.BitPosition, Is.EqualTo(MessageWithCustomWriterExtesions.WriteSize));
             reader.Reset(writer.ToArraySegment());
 
-            MessageWithCustomWriter outValue = reader.Read<MessageWithCustomWriter>();
+            var outValue = reader.Read<MessageWithCustomWriter>();
             Assert.That(reader.BitPosition, Is.EqualTo(MessageWithCustomWriterExtesions.WriteSize));
             Assert.That(outValue.type, Is.EqualTo(inValue.type));
             Assert.That(outValue.value, Is.EqualTo(inValue.value).Within(0.01f));
@@ -1247,7 +1247,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             CollectionExtensions.WriteCountPlusOne(writer, inCount);
             reader.Reset(writer.ToArraySegment());
-            bool hasValue = CollectionExtensions.ReadCountPlusOne(reader, out int outCount);
+            var hasValue = CollectionExtensions.ReadCountPlusOne(reader, out var outCount);
 
             Assert.That(hasValue, Is.EqualTo(inCount.HasValue));
             if (hasValue)
@@ -1283,7 +1283,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             // 10 bytes = 80 bits
             reader.Reset(new byte[10]);
-            EndOfStreamException e = Assert.Throws<EndOfStreamException>(() =>
+            var e = Assert.Throws<EndOfStreamException>(() =>
             {
                 CollectionExtensions.ValidateSize(reader, count);
             });

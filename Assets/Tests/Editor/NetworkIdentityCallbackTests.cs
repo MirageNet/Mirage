@@ -163,8 +163,8 @@ namespace Mirage.Tests
         public void OnStartServerTest()
         {
             // lets add a component to check OnStartserver
-            UnityAction func1 = Substitute.For<UnityAction>();
-            UnityAction func2 = Substitute.For<UnityAction>();
+            var func1 = Substitute.For<UnityAction>();
+            var func2 = Substitute.For<UnityAction>();
 
             identity.OnStartServer.AddListener(func1);
             identity.OnStartServer.AddListener(func2);
@@ -179,7 +179,7 @@ namespace Mirage.Tests
         public void GetSetPrefabHash()
         {
             // assign a guid
-            int hash = 123456789;
+            var hash = 123456789;
             identity.PrefabHash = hash;
 
             // did it work?
@@ -189,12 +189,12 @@ namespace Mirage.Tests
         [Test]
         public void SetPrefabHash_GivesErrorIfOneExists()
         {
-            int hash1 = "Assets/Prefab/myPrefab.asset".GetStableHashCode();
+            var hash1 = "Assets/Prefab/myPrefab.asset".GetStableHashCode();
             identity.PrefabHash = hash1;
 
             // assign a guid
-            int hash2 = "Assets/Prefab/myPrefab2.asset".GetStableHashCode();
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+            var hash2 = "Assets/Prefab/myPrefab2.asset".GetStableHashCode();
+            var exception = Assert.Throws<InvalidOperationException>(() =>
             {
                 identity.PrefabHash = hash2;
             });
@@ -207,12 +207,12 @@ namespace Mirage.Tests
         [Test]
         public void SetPrefabHash_GivesErrorForEmptyGuid()
         {
-            int hash1 = "Assets/Prefab/myPrefab.asset".GetStableHashCode();
+            var hash1 = "Assets/Prefab/myPrefab.asset".GetStableHashCode();
             identity.PrefabHash = hash1;
 
             // assign a guid
-            int hash2 = 0;
-            ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            var hash2 = 0;
+            var exception = Assert.Throws<ArgumentException>(() =>
             {
                 identity.PrefabHash = hash2;
             });
@@ -226,7 +226,7 @@ namespace Mirage.Tests
         {
             Debug.Assert(identity.PrefabHash == 0, "PrefabHash needs to be empty at the start of this test");
             // assign a guid
-            int hash2 = 0;
+            var hash2 = 0;
             // expect no errors
             identity.PrefabHash = hash2;
 
@@ -238,7 +238,7 @@ namespace Mirage.Tests
         public void SetClientOwner()
         {
             // SetClientOwner
-            (_, NetworkPlayer original) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
+            (_, var original) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
             identity.SetClientOwner(original);
             Assert.That(identity.Owner, Is.EqualTo(original));
         }
@@ -247,11 +247,11 @@ namespace Mirage.Tests
         public void SetOverrideClientOwner()
         {
             // SetClientOwner
-            (_, NetworkPlayer original) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
+            (_, var original) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
             identity.SetClientOwner(original);
 
             // setting it when it's already set shouldn't overwrite the original
-            (_, NetworkPlayer overwrite) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
+            (_, var overwrite) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
             // will log a warning
             Assert.Throws<InvalidOperationException>(() =>
             {
@@ -268,10 +268,10 @@ namespace Mirage.Tests
             identity.StartServer();
 
             // add an observer connection
-            INetworkPlayer player = Substitute.For<INetworkPlayer>();
+            var player = Substitute.For<INetworkPlayer>();
             identity.observers.Add(player);
 
-            INetworkPlayer player2 = Substitute.For<INetworkPlayer>();
+            var player2 = Substitute.For<INetworkPlayer>();
             // RemoveObserverInternal with invalid connection should do nothing
             identity.RemoveObserverInternal(player2);
             Assert.That(identity.observers, Is.EquivalentTo(new[] { player }));
@@ -302,14 +302,14 @@ namespace Mirage.Tests
             //    left empty for scene hash
             Assert.That(identity.SceneId, Is.Not.Zero);
             Assert.That(identity.SceneId & 0xFFFF_FFFF_0000_0000ul, Is.Zero, "scene hash should start empty");
-            ulong originalId = identity.SceneId;
+            var originalId = identity.SceneId;
 
             // set scene hash
             NetworkIdentityIdGenerator.SetSceneHash(identity);
 
-            ulong newSceneId = identity.SceneId;
-            ulong newID = newSceneId & 0x0000_0000_FFFF_FFFFul;
-            ulong newHash = newSceneId & 0xFFFF_FFFF_0000_0000ul;
+            var newSceneId = identity.SceneId;
+            var newID = newSceneId & 0x0000_0000_FFFF_FFFFul;
+            var newHash = newSceneId & 0xFFFF_FFFF_0000_0000ul;
 
             // make sure that the right part is still the random sceneid
             Assert.That(newID, Is.EqualTo(originalId));
@@ -334,7 +334,7 @@ namespace Mirage.Tests
         public void OnStartServerCallsComponentsAndCatchesExceptions()
         {
             // make a mock delegate
-            UnityAction func = Substitute.For<UnityAction>();
+            var func = Substitute.For<UnityAction>();
 
             // add it to the listener
             identity.OnStartServer.AddListener(func);
@@ -361,7 +361,7 @@ namespace Mirage.Tests
         public void OnStartClientCallsComponentsAndCatchesExceptions()
         {
             // add component
-            UnityAction func = Substitute.For<UnityAction>();
+            var func = Substitute.For<UnityAction>();
             identity.OnStartClient.AddListener(func);
 
             func
@@ -387,7 +387,7 @@ namespace Mirage.Tests
         public void OnAuthorityChangedCallsComponentsAndCatchesExceptions()
         {
             // add component
-            UnityAction<bool> func = Substitute.For<UnityAction<bool>>();
+            var func = Substitute.For<UnityAction<bool>>();
             identity.OnAuthorityChanged.AddListener(func);
 
             func
@@ -405,8 +405,8 @@ namespace Mirage.Tests
         [Test]
         public void NotifyAuthorityCallsOnStartStopAuthority()
         {
-            int startAuth = 0;
-            int stopAuth = 0;
+            var startAuth = 0;
+            var stopAuth = 0;
             identity.OnAuthorityChanged.AddListener(auth =>
             {
                 if (auth) startAuth++;
@@ -469,8 +469,8 @@ namespace Mirage.Tests
             // create a networkidentity with a component that returns true
             // result should still be true.
             var gameObjectTrue = new GameObject();
-            NetworkIdentity identityTrue = gameObjectTrue.AddComponent<NetworkIdentity>();
-            CheckObserverTrueNetworkBehaviour compTrue = gameObjectTrue.AddComponent<CheckObserverTrueNetworkBehaviour>();
+            var identityTrue = gameObjectTrue.AddComponent<NetworkIdentity>();
+            var compTrue = gameObjectTrue.AddComponent<CheckObserverTrueNetworkBehaviour>();
             Assert.That(identityTrue.OnCheckObserver(player1), Is.True);
             Assert.That(compTrue.called, Is.EqualTo(1));
         }
@@ -482,8 +482,8 @@ namespace Mirage.Tests
             // one component that returns false.
             // result should still be false if any one returns false.
             var gameObjectFalse = new GameObject();
-            NetworkIdentity identityFalse = gameObjectFalse.AddComponent<NetworkIdentity>();
-            CheckObserverFalseNetworkBehaviour compFalse = gameObjectFalse.AddComponent<CheckObserverFalseNetworkBehaviour>();
+            var identityFalse = gameObjectFalse.AddComponent<NetworkIdentity>();
+            var compFalse = gameObjectFalse.AddComponent<CheckObserverFalseNetworkBehaviour>();
             Assert.That(identityFalse.OnCheckObserver(player1), Is.False);
             Assert.That(compFalse.called, Is.EqualTo(1));
         }
@@ -492,9 +492,9 @@ namespace Mirage.Tests
         public void OnSerializeAllSafely()
         {
             // create a networkidentity with our test components
-            SerializeTest1NetworkBehaviour comp1 = gameObject.AddComponent<SerializeTest1NetworkBehaviour>();
-            SerializeExceptionNetworkBehaviour compExc = gameObject.AddComponent<SerializeExceptionNetworkBehaviour>();
-            SerializeTest2NetworkBehaviour comp2 = gameObject.AddComponent<SerializeTest2NetworkBehaviour>();
+            var comp1 = gameObject.AddComponent<SerializeTest1NetworkBehaviour>();
+            var compExc = gameObject.AddComponent<SerializeExceptionNetworkBehaviour>();
+            var comp2 = gameObject.AddComponent<SerializeTest2NetworkBehaviour>();
 
             // set some unique values to serialize
             comp1.value = 12345;
@@ -520,7 +520,7 @@ namespace Mirage.Tests
         public void NoMoreThan64Components()
         {
             // add byte.MaxValue+1 components
-            for (int i = 0; i < byte.MaxValue + 1; ++i)
+            for (var i = 0; i < byte.MaxValue + 1; ++i)
             {
                 gameObject.AddComponent<SerializeTest1NetworkBehaviour>();
             }
@@ -540,9 +540,9 @@ namespace Mirage.Tests
         public void OnDeserializeSafelyShouldDetectAndHandleDeSerializationMismatch()
         {
             // add components
-            SerializeTest1NetworkBehaviour comp1 = gameObject.AddComponent<SerializeTest1NetworkBehaviour>();
+            var comp1 = gameObject.AddComponent<SerializeTest1NetworkBehaviour>();
             gameObject.AddComponent<SerializeMismatchNetworkBehaviour>();
-            SerializeTest2NetworkBehaviour comp2 = gameObject.AddComponent<SerializeTest2NetworkBehaviour>();
+            var comp2 = gameObject.AddComponent<SerializeTest2NetworkBehaviour>();
 
             // set some unique values to serialize
             comp1.value = 12345;
@@ -571,8 +571,8 @@ namespace Mirage.Tests
         public void OnStartLocalPlayer()
         {
             // add components
-            UnityAction funcEx = Substitute.For<UnityAction>();
-            UnityAction func = Substitute.For<UnityAction>();
+            var funcEx = Substitute.For<UnityAction>();
+            var func = Substitute.For<UnityAction>();
 
             identity.OnStartLocalPlayer.AddListener(funcEx);
             identity.OnStartLocalPlayer.AddListener(func);
@@ -608,7 +608,7 @@ namespace Mirage.Tests
         [Test]
         public void OnStopClient()
         {
-            UnityAction mockCallback = Substitute.For<UnityAction>();
+            var mockCallback = Substitute.For<UnityAction>();
             identity.OnStopClient.AddListener(mockCallback);
 
             identity.StopClient();
@@ -619,7 +619,7 @@ namespace Mirage.Tests
         [Test]
         public void OnStopServer()
         {
-            UnityAction mockCallback = Substitute.For<UnityAction>();
+            var mockCallback = Substitute.For<UnityAction>();
             identity.OnStopServer.AddListener(mockCallback);
 
             identity.StopServer();
@@ -630,7 +630,7 @@ namespace Mirage.Tests
         [Test]
         public void OnStopServerEx()
         {
-            UnityAction mockCallback = Substitute.For<UnityAction>();
+            var mockCallback = Substitute.For<UnityAction>();
             mockCallback
                 .When(f => f.Invoke())
                 .Do(f => { throw new Exception("Some exception"); });
@@ -695,12 +695,12 @@ namespace Mirage.Tests
         public void GetNewObservers()
         {
             // add components
-            RebuildObserversNetworkBehaviour comp = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
+            var comp = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
             comp.observer = player1;
 
             // get new observers
             var observers = new HashSet<INetworkPlayer>();
-            bool result = identity.GetNewObservers(observers, true);
+            var result = identity.GetNewObservers(observers, true);
             Assert.That(result, Is.True);
             Assert.That(observers.Count, Is.EqualTo(1));
             Assert.That(observers.Contains(comp.observer), Is.True);
@@ -724,7 +724,7 @@ namespace Mirage.Tests
         {
             // get new observers. no observer components so it should be false
             var observers = new HashSet<INetworkPlayer>();
-            bool result = identity.GetNewObservers(observers, true);
+            var result = identity.GetNewObservers(observers, true);
             Assert.That(result, Is.False);
         }
 
@@ -738,7 +738,7 @@ namespace Mirage.Tests
             gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
 
             // add own player connection that isn't ready
-            (_, NetworkPlayer connection) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
+            (_, var connection) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
             // set not ready (ready is default true now)
             connection.SceneIsReady = false;
 
@@ -758,7 +758,7 @@ namespace Mirage.Tests
 
             // add a proximity checker
             // one with a ready connection, one with no ready connection, one with null connection
-            RebuildObserversNetworkBehaviour comp = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
+            var comp = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
             comp.observer = Substitute.For<INetworkPlayer>();
             comp.observer.SceneIsReady.Returns(true);
 
@@ -773,7 +773,7 @@ namespace Mirage.Tests
         {
             // add a proximity checker
             // one with a ready connection, one with no ready connection, one with null connection
-            RebuildObserversNetworkBehaviour comp = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
+            var comp = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
             comp.observer = Substitute.For<INetworkPlayer>();
             comp.observer.SceneIsReady.Returns(false);
 
@@ -785,9 +785,9 @@ namespace Mirage.Tests
         [Test]
         public void RebuildObserversAddsReadyServerConnectionsIfNotImplemented()
         {
-            INetworkPlayer readyConnection = Substitute.For<INetworkPlayer>();
+            var readyConnection = Substitute.For<INetworkPlayer>();
             readyConnection.SceneIsReady.Returns(true);
-            INetworkPlayer notReadyConnection = Substitute.For<INetworkPlayer>();
+            var notReadyConnection = Substitute.For<INetworkPlayer>();
             notReadyConnection.SceneIsReady.Returns(false);
 
             // add some server connections

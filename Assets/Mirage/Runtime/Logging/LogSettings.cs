@@ -20,7 +20,7 @@ namespace Mirage.Logging
         {
             if (settings != null) { return; }
 
-            LogSettingsSO existingSettings = EditorLogSettingsLoader.FindLogSettings();
+            var existingSettings = EditorLogSettingsLoader.FindLogSettings();
             if (existingSettings != null)
             {
                 Undo.RecordObject(this, "adding existing settings");

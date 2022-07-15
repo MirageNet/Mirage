@@ -90,7 +90,7 @@ namespace Mirage
             if (targetGameObject == null)
                 return;
 
-            NetworkIdentity identity = targetGameObject.GetComponent<NetworkIdentity>();
+            var identity = targetGameObject.GetComponent<NetworkIdentity>();
 
             if (identity == null)
                 return;
@@ -100,11 +100,11 @@ namespace Mirage
 
             // padding
             var previewPadding = new RectOffset(-5, -5, -5, -5);
-            Rect paddedRect = previewPadding.Add(r);
+            var paddedRect = previewPadding.Add(r);
 
             //Centering
-            float initialX = paddedRect.x + 10;
-            float Y = paddedRect.y + 10;
+            var initialX = paddedRect.x + 10;
+            var Y = paddedRect.y + 10;
 
             Y = DrawNetworkIdentityInfo(identity, initialX, Y);
 
@@ -118,16 +118,16 @@ namespace Mirage
 
         private float DrawNetworkIdentityInfo(NetworkIdentity identity, float initialX, float Y)
         {
-            IEnumerable<NetworkIdentityInfo> infos = GetNetworkIdentityInfo(identity);
+            var infos = GetNetworkIdentityInfo(identity);
             // Get required label size for the names of the information values we're going to show
             // There are two columns, one with label for the name of the info and the next for the value
             var maxNameLabelSize = new Vector2(140, 16);
-            Vector2 maxValueLabelSize = GetMaxNameLabelSize(infos);
+            var maxValueLabelSize = GetMaxNameLabelSize(infos);
 
             var labelRect = new Rect(initialX, Y, maxNameLabelSize.x, maxNameLabelSize.y);
             var idLabelRect = new Rect(maxNameLabelSize.x, Y, maxValueLabelSize.x, maxValueLabelSize.y);
 
-            foreach (NetworkIdentityInfo info in infos)
+            foreach (var info in infos)
             {
                 GUI.Label(labelRect, info.Name, styles.LabelStyle);
                 GUI.Label(idLabelRect, info.Value, styles.ComponentName);
@@ -141,11 +141,11 @@ namespace Mirage
 
         private float DrawNetworkBehaviors(NetworkIdentity identity, float initialX, float Y)
         {
-            IEnumerable<NetworkBehaviourInfo> behavioursInfo = GetNetworkBehaviorInfo(identity);
+            var behavioursInfo = GetNetworkBehaviorInfo(identity);
 
             // Show behaviours list in a different way than the name/value pairs above
 
-            Vector2 maxBehaviourLabelSize = GetMaxBehaviourLabelSize(behavioursInfo);
+            var maxBehaviourLabelSize = GetMaxBehaviourLabelSize(behavioursInfo);
             var behaviourRect = new Rect(initialX, Y + 10, maxBehaviourLabelSize.x, maxBehaviourLabelSize.y);
 
             GUI.Label(behaviourRect, new GUIContent("Network Behaviours"), styles.LabelStyle);
@@ -153,7 +153,7 @@ namespace Mirage
             behaviourRect.x += 20;
             behaviourRect.y += behaviourRect.height;
 
-            foreach (NetworkBehaviourInfo info in behavioursInfo)
+            foreach (var info in behavioursInfo)
             {
                 if (info.Behaviour == null)
                 {
@@ -181,7 +181,7 @@ namespace Mirage
                 observerRect.x += 20;
                 observerRect.y += observerRect.height;
 
-                foreach (INetworkPlayer player in identity.observers)
+                foreach (var player in identity.observers)
                 {
                     GUI.Label(observerRect, player.Connection.EndPoint + ":" + player, styles.ComponentName);
                     observerRect.y += observerRect.height;
@@ -206,10 +206,10 @@ namespace Mirage
         // Get the maximum size used by the value of information items
         private Vector2 GetMaxNameLabelSize(IEnumerable<NetworkIdentityInfo> infos)
         {
-            Vector2 maxLabelSize = Vector2.zero;
-            foreach (NetworkIdentityInfo info in infos)
+            var maxLabelSize = Vector2.zero;
+            foreach (var info in infos)
             {
-                Vector2 labelSize = styles.LabelStyle.CalcSize(info.Value);
+                var labelSize = styles.LabelStyle.CalcSize(info.Value);
                 if (maxLabelSize.x < labelSize.x)
                 {
                     maxLabelSize.x = labelSize.x;
@@ -224,10 +224,10 @@ namespace Mirage
 
         private Vector2 GetMaxBehaviourLabelSize(IEnumerable<NetworkBehaviourInfo> behavioursInfo)
         {
-            Vector2 maxLabelSize = Vector2.zero;
-            foreach (NetworkBehaviourInfo behaviour in behavioursInfo)
+            var maxLabelSize = Vector2.zero;
+            foreach (var behaviour in behavioursInfo)
             {
-                Vector2 labelSize = styles.LabelStyle.CalcSize(behaviour.Name);
+                var labelSize = styles.LabelStyle.CalcSize(behaviour.Name);
                 if (maxLabelSize.x < labelSize.x)
                 {
                     maxLabelSize.x = labelSize.x;
@@ -270,8 +270,8 @@ namespace Mirage
         {
             var behaviourInfos = new List<NetworkBehaviourInfo>();
 
-            NetworkBehaviour[] behaviours = identity.GetComponents<NetworkBehaviour>();
-            foreach (NetworkBehaviour behaviour in behaviours)
+            var behaviours = identity.GetComponents<NetworkBehaviour>();
+            foreach (var behaviour in behaviours)
             {
                 behaviourInfos.Add(new NetworkBehaviourInfo
                 {
@@ -284,9 +284,9 @@ namespace Mirage
 
         private NetworkIdentityInfo GetAssetId(NetworkIdentity identity)
         {
-            int prefabHash = identity.PrefabHash;
+            var prefabHash = identity.PrefabHash;
 
-            string value = prefabHash != 0
+            var value = prefabHash != 0
                 ? prefabHash.ToString("X")
                 : "<object has no prefab>";
 

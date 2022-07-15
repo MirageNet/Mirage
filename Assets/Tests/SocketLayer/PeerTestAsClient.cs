@@ -14,10 +14,10 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ConnectShouldSendMessageToSocket()
         {
-            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
+            var endPoint = TestEndPoint.CreateSubstitute();
             peer.Connect(endPoint);
 
-            byte[] expected = connectRequest;
+            var expected = connectRequest;
 
             socket.Received(1).Send(
                 Arg.Is(endPoint),
@@ -29,8 +29,8 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ConnectShouldReturnANewConnection()
         {
-            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
-            IConnection conn = peer.Connect(endPoint);
+            var endPoint = TestEndPoint.CreateSubstitute();
+            var conn = peer.Connect(endPoint);
             Assert.That(conn, Is.TypeOf<Connection>(), "returned type should be connection");
             Assert.That(conn.State, Is.EqualTo(ConnectionState.Connecting), "new connection should be connecting");
         }
@@ -45,17 +45,17 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [UnityTest]
         public IEnumerator ShouldResendConnectMessageIfNoReply()
         {
-            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
+            var endPoint = TestEndPoint.CreateSubstitute();
             _ = peer.Connect(endPoint);
 
-            byte[] expected = connectRequest;
+            var expected = connectRequest;
 
             // wait enough time so that  would have been called
             // make sure to call update so events are invoked
             // 0.5 little extra to be sure
-            float end = time.Now + config.MaxConnectAttempts * config.ConnectAttemptInterval + 0.5f;
+            var end = time.Now + config.MaxConnectAttempts * config.ConnectAttemptInterval + 0.5f;
             float nextSendCheck = 0;
-            int sendCount = 0;
+            var sendCount = 0;
             while (end > time.Now)
             {
                 peer.UpdateTest();
@@ -65,7 +65,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                     sendCount++;
 
                     // check send
-                    int expectedCount = Mathf.Min(sendCount, config.MaxConnectAttempts);
+                    var expectedCount = Mathf.Min(sendCount, config.MaxConnectAttempts);
                     socket.Received(expectedCount).Send(
                         Arg.Is(endPoint),
                         Arg.Is<byte[]>(actual => actual.AreEquivalentIgnoringLength(expected)),
@@ -86,13 +86,13 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [UnityTest]
         public IEnumerator ShouldInvokeConnectionFailedIfNoReplyAfterMax()
         {
-            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
-            IConnection conn = peer.Connect(endPoint);
+            var endPoint = TestEndPoint.CreateSubstitute();
+            var conn = peer.Connect(endPoint);
 
             // wait enough time so that  would have been called
             // make sure to call update so events are invoked
             // 0.5 little extra to be sure
-            float end = time.Now + config.MaxConnectAttempts * config.ConnectAttemptInterval + 0.5f;
+            var end = time.Now + config.MaxConnectAttempts * config.ConnectAttemptInterval + 0.5f;
             while (end > time.Now)
             {
                 peer.UpdateTest();
@@ -106,8 +106,8 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ShouldInvokeConnectionFailedIfServerRejects()
         {
-            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
-            IConnection conn = peer.Connect(endPoint);
+            var endPoint = TestEndPoint.CreateSubstitute();
+            var conn = peer.Connect(endPoint);
 
             socket.SetupReceiveCall(new byte[3] {
                 (byte) PacketType.Command,
@@ -125,16 +125,16 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [UnityTest]
         public IEnumerator InvokesConnectFailedIfClosedBeforeConnect()
         {
-            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
-            IConnection conn = peer.Connect(endPoint);
+            var endPoint = TestEndPoint.CreateSubstitute();
+            var conn = peer.Connect(endPoint);
 
             peer.Close();
 
             // wait enough time so that OnDisconnected would have been called
             // make sure to call update so events are invoked
-            float start = UnityEngine.Time.time;
+            var start = UnityEngine.Time.time;
             // 0.5 little extra to be sure
-            float maxTime = config.MaxConnectAttempts * config.ConnectAttemptInterval + 0.5f;
+            var maxTime = config.MaxConnectAttempts * config.ConnectAttemptInterval + 0.5f;
             while (start + maxTime < UnityEngine.Time.time)
             {
                 peer.UpdateTest();
@@ -154,12 +154,12 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             // todo test as client with 1 connection
             Assert.Ignore("new NotImplementedException(What should happen if close / disconnect is called while still connecting)");
 
-            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
-            IConnection conn = peer.Connect(endPoint);
+            var endPoint = TestEndPoint.CreateSubstitute();
+            var conn = peer.Connect(endPoint);
 
             peer.Close();
 
-            byte[] expected = new byte[3]
+            var expected = new byte[3]
             {
                 (byte)PacketType.Command,
                 (byte)Commands.Disconnect,
@@ -178,11 +178,11 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             Assert.Ignore("not implemented");
             peer.Connect(TestEndPoint.CreateSubstitute());
 
-            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            var connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
 
-            byte[] expected = connectRequest;
-            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
+            var expected = connectRequest;
+            var endPoint = TestEndPoint.CreateSubstitute();
             socket.SetupReceiveCall(expected, endPoint);
             peer.UpdateTest();
 

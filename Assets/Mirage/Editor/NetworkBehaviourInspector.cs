@@ -26,7 +26,7 @@ namespace Mirage
         private bool SyncsAnything(Type scriptClass)
         {
             // check for all SyncVar fields, they don't have to be visible
-            foreach (FieldInfo field in InspectorHelper.GetAllFields(scriptClass, typeof(NetworkBehaviour)))
+            foreach (var field in InspectorHelper.GetAllFields(scriptClass, typeof(NetworkBehaviour)))
             {
                 if (field.IsSyncVar())
                 {
@@ -37,7 +37,7 @@ namespace Mirage
             // has OnSerialize that is not in NetworkBehaviour?
             // then it either has a syncvar or custom OnSerialize. either way
             // this means we have something to sync.
-            MethodInfo method = scriptClass.GetMethod("OnSerialize");
+            var method = scriptClass.GetMethod("OnSerialize");
             if (method != null && method.DeclaringType != typeof(NetworkBehaviour))
             {
                 return true;
@@ -48,7 +48,7 @@ namespace Mirage
             // search for SyncObjects manually.
             // Any SyncObject should be added to syncObjects when unity creates an
             // object so we can cheeck length of list so see if sync objects exists
-            FieldInfo syncObjectsField = scriptClass.GetField("syncObjects", BindingFlags.NonPublic | BindingFlags.Instance);
+            var syncObjectsField = scriptClass.GetField("syncObjects", BindingFlags.NonPublic | BindingFlags.Instance);
             var syncObjects = (List<ISyncObject>)syncObjectsField.GetValue(serializedObject.targetObject);
 
             return syncObjects.Count > 0;
@@ -62,10 +62,10 @@ namespace Mirage
             // then Unity temporarily keep using this Inspector causing things to break
             if (!(target is NetworkBehaviour)) { return; }
 
-            Type scriptClass = target.GetType();
+            var scriptClass = target.GetType();
 
             syncVarNames = new List<string>();
-            foreach (FieldInfo field in InspectorHelper.GetAllFields(scriptClass, typeof(NetworkBehaviour)))
+            foreach (var field in InspectorHelper.GetAllFields(scriptClass, typeof(NetworkBehaviour)))
             {
                 if (field.IsSyncVar() && field.IsVisibleField())
                 {
@@ -127,7 +127,7 @@ namespace Mirage
         {
             this.targetObject = targetObject;
             syncListFields = new List<SyncListField>();
-            foreach (FieldInfo field in InspectorHelper.GetAllFields(targetObject.GetType(), typeof(NetworkBehaviour)))
+            foreach (var field in InspectorHelper.GetAllFields(targetObject.GetType(), typeof(NetworkBehaviour)))
             {
                 if (field.IsSyncObject() && field.IsVisibleSyncObject())
                 {
@@ -143,7 +143,7 @@ namespace Mirage
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Sync Lists", EditorStyles.boldLabel);
 
-            for (int i = 0; i < syncListFields.Count; i++)
+            for (var i = 0; i < syncListFields.Count; i++)
             {
                 DrawSyncList(syncListFields[i]);
             }
@@ -156,14 +156,14 @@ namespace Mirage
             {
                 using (new EditorGUI.IndentLevelScope())
                 {
-                    object fieldValue = syncListField.field.GetValue(targetObject);
+                    var fieldValue = syncListField.field.GetValue(targetObject);
                     if (fieldValue is IEnumerable synclist)
                     {
-                        int index = 0;
-                        foreach (object item in synclist)
+                        var index = 0;
+                        foreach (var item in synclist)
                         {
-                            string itemValue = item != null ? item.ToString() : "NULL";
-                            string itemLabel = "Element " + index;
+                            var itemValue = item != null ? item.ToString() : "NULL";
+                            var itemLabel = "Element " + index;
                             EditorGUILayout.LabelField(itemLabel, itemValue);
 
                             index++;

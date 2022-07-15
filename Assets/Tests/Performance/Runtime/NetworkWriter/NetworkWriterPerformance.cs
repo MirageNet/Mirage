@@ -21,9 +21,9 @@ namespace Mirage.Tests.Performance
 
         private static void WPackedInt32()
         {
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            using (var writer = NetworkWriterPool.GetWriter())
             {
-                for (int i = 0; i < 37; i++)
+                for (var i = 0; i < 37; i++)
                 {
                     writer.WritePackedInt32(i * 1000);
                 }
@@ -43,9 +43,9 @@ namespace Mirage.Tests.Performance
 
         private static void WInt32()
         {
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            using (var writer = NetworkWriterPool.GetWriter())
             {
-                for (int i = 0; i < 37; i++)
+                for (var i = 0; i < 37; i++)
                 {
                     writer.WriteInt32(i * 1000);
                 }
@@ -66,9 +66,9 @@ namespace Mirage.Tests.Performance
 
         private static void WGenericInt32()
         {
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            using (var writer = NetworkWriterPool.GetWriter())
             {
-                for (int i = 0; i < 37; i++)
+                for (var i = 0; i < 37; i++)
                 {
                     writer.Write(i * 1000);
                 }

@@ -14,10 +14,10 @@ namespace Mirage.EditorScripts.Logging
 
             if (target.settings == null)
             {
-                LogSettingsSO newSettings = LogLevelsGUI.DrawCreateNewButton();
+                var newSettings = LogLevelsGUI.DrawCreateNewButton();
                 if (newSettings != null)
                 {
-                    SerializedProperty settingsProp = serializedObject.FindProperty("settings");
+                    var settingsProp = serializedObject.FindProperty("settings");
                     settingsProp.objectReferenceValue = newSettings;
                     serializedObject.ApplyModifiedProperties();
                 }

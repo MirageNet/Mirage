@@ -17,7 +17,7 @@ namespace Mirage
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            float labelHeight = GetLabelHeight(label);
+            var labelHeight = GetLabelHeight(label);
             if (property.isExpanded)
             {
                 return labelHeight + Margin + UnityEventDrawer.GetPropertyHeight(property, label);
@@ -35,7 +35,7 @@ namespace Mirage
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            float labelHeight = GetLabelHeight(label) + Margin;
+            var labelHeight = GetLabelHeight(label) + Margin;
             var labelRec = new Rect(position)
             {
                 height = labelHeight

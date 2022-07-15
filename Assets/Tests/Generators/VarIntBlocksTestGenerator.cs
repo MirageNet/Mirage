@@ -60,14 +60,14 @@ namespace Mirage.Tests.CodeGenerators
             fromTemplate.Replace("%%EXTRA_TYPE%%", extraType);
 
             var testCase = new StringBuilder();
-            for (int i = 0; i < values.Length; i++)
+            for (var i = 0; i < values.Length; i++)
             {
                 if (i > 0) { testCase.Append($",{Environment.NewLine}            "); }
                 testCase.Append($"new TestCase {{ value = {values[i]}, expectedBits = {expectedBitCount[i]} }}");
             }
             fromTemplate.Replace($"%%TEST_CASES%%", testCase.ToString());
 
-            string name = $"{type}_{bitCount}";
+            var name = $"{type}_{bitCount}";
             fromTemplate.Replace("%%NAME%%", name);
 
             fromTemplate.WriteToFile($"./Assets/Tests/Generated/VarIntBlocksTests/VarIntBlocksBehaviour_{name}.cs");

@@ -97,14 +97,14 @@ namespace Mirage
 
             CheckSendRate();
 
-            for (int i = 0; i < Animator.layerCount; i++)
+            for (var i = 0; i < Animator.layerCount; i++)
             {
-                if (!CheckAnimStateChanged(out int stateHash, out float normalizedTime, i))
+                if (!CheckAnimStateChanged(out var stateHash, out var normalizedTime, i))
                 {
                     continue;
                 }
 
-                using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+                using (var writer = NetworkWriterPool.GetWriter())
                 {
                     WriteParameters(writer);
                     SendAnimationMessage(stateHash, normalizedTime, i, layerWeight[i], writer.ToArraySegment());
@@ -114,11 +114,11 @@ namespace Mirage
 
         private bool CheckAnimStateChanged(out int stateHash, out float normalizedTime, int layerId)
         {
-            bool change = false;
+            var change = false;
             stateHash = 0;
             normalizedTime = 0;
 
-            float lw = Animator.GetLayerWeight(layerId);
+            var lw = Animator.GetLayerWeight(layerId);
             if (Mathf.Abs(lw - layerWeight[layerId]) > 0.001f)
             {
                 layerWeight[layerId] = lw;
@@ -127,7 +127,7 @@ namespace Mirage
 
             if (Animator.IsInTransition(layerId))
             {
-                AnimatorTransitionInfo tt = Animator.GetAnimatorTransitionInfo(layerId);
+                var tt = Animator.GetAnimatorTransitionInfo(layerId);
                 if (tt.fullPathHash != transitionHash[layerId])
                 {
                     // first time in this transition
@@ -138,7 +138,7 @@ namespace Mirage
                 return change;
             }
 
-            AnimatorStateInfo st = Animator.GetCurrentAnimatorStateInfo(layerId);
+            var st = Animator.GetCurrentAnimatorStateInfo(layerId);
             if (st.fullPathHash != animationHash[layerId])
             {
                 // first time in this animation state
@@ -157,12 +157,12 @@ namespace Mirage
 
         private void CheckSendRate()
         {
-            float now = Time.time;
+            var now = Time.time;
             if (SendMessagesAllowed && syncInterval >= 0 && now > nextSendTime)
             {
                 nextSendTime = now + syncInterval;
 
-                using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+                using (var writer = NetworkWriterPool.GetWriter())
                 {
                     if (WriteParameters(writer))
                         SendAnimationParametersMessage(writer.ToArraySegment());
@@ -235,15 +235,15 @@ namespace Mirage
         private ulong NextDirtyBits()
         {
             ulong dirtyBits = 0;
-            for (int i = 0; i < parameters.Length; i++)
+            for (var i = 0; i < parameters.Length; i++)
             {
-                AnimatorControllerParameter par = parameters[i];
-                bool changed = false;
+                var par = parameters[i];
+                var changed = false;
                 switch (par.type)
                 {
                     case AnimatorControllerParameterType.Int:
                         {
-                            int newIntValue = Animator.GetInteger(par.nameHash);
+                            var newIntValue = Animator.GetInteger(par.nameHash);
                             changed = newIntValue != lastIntParameters[i];
                             lastIntParameters[i] = newIntValue;
                             break;
@@ -251,7 +251,7 @@ namespace Mirage
 
                     case AnimatorControllerParameterType.Float:
                         {
-                            float newFloatValue = Animator.GetFloat(par.nameHash);
+                            var newFloatValue = Animator.GetFloat(par.nameHash);
                             changed = Mathf.Abs(newFloatValue - lastFloatParameters[i]) > 0.001f;
                             // only set lastValue if it was changed, otherwise value could slowly drift within the 0.001f limit each frame
                             if (changed)
@@ -261,7 +261,7 @@ namespace Mirage
 
                     case AnimatorControllerParameterType.Bool:
                         {
-                            bool newBoolValue = Animator.GetBool(par.nameHash);
+                            var newBoolValue = Animator.GetBool(par.nameHash);
                             changed = newBoolValue != lastBoolParameters[i];
                             lastBoolParameters[i] = newBoolValue;
                             break;
@@ -277,27 +277,27 @@ namespace Mirage
 
         private bool WriteParameters(NetworkWriter writer, bool forceAll = false)
         {
-            ulong dirtyBits = forceAll ? (~0ul) : NextDirtyBits();
+            var dirtyBits = forceAll ? (~0ul) : NextDirtyBits();
             writer.WritePackedUInt64(dirtyBits);
-            for (int i = 0; i < parameters.Length; i++)
+            for (var i = 0; i < parameters.Length; i++)
             {
                 if ((dirtyBits & (1ul << i)) == 0)
                     continue;
 
-                AnimatorControllerParameter par = parameters[i];
+                var par = parameters[i];
                 if (par.type == AnimatorControllerParameterType.Int)
                 {
-                    int newIntValue = Animator.GetInteger(par.nameHash);
+                    var newIntValue = Animator.GetInteger(par.nameHash);
                     writer.WritePackedInt32(newIntValue);
                 }
                 else if (par.type == AnimatorControllerParameterType.Float)
                 {
-                    float newFloatValue = Animator.GetFloat(par.nameHash);
+                    var newFloatValue = Animator.GetFloat(par.nameHash);
                     writer.WriteSingle(newFloatValue);
                 }
                 else if (par.type == AnimatorControllerParameterType.Bool)
                 {
-                    bool newBoolValue = Animator.GetBool(par.nameHash);
+                    var newBoolValue = Animator.GetBool(par.nameHash);
                     writer.WriteBoolean(newBoolValue);
                 }
             }
@@ -308,32 +308,32 @@ namespace Mirage
         {
             // need to read values from NetworkReader even if animator is disabled
 
-            ulong dirtyBits = reader.ReadPackedUInt64();
-            for (int i = 0; i < parameters.Length; i++)
+            var dirtyBits = reader.ReadPackedUInt64();
+            for (var i = 0; i < parameters.Length; i++)
             {
                 if ((dirtyBits & (1ul << i)) == 0)
                     continue;
 
-                AnimatorControllerParameter par = parameters[i];
+                var par = parameters[i];
                 switch (par.type)
                 {
                     case AnimatorControllerParameterType.Int:
                         {
-                            int newIntValue = reader.ReadPackedInt32();
+                            var newIntValue = reader.ReadPackedInt32();
                             SetInteger(par, newIntValue);
                             break;
                         }
 
                     case AnimatorControllerParameterType.Float:
                         {
-                            float newFloatValue = reader.ReadSingle();
+                            var newFloatValue = reader.ReadSingle();
                             SetFloat(par, newFloatValue);
                             break;
                         }
 
                     case AnimatorControllerParameterType.Bool:
                         {
-                            bool newBoolValue = reader.ReadBoolean();
+                            var newBoolValue = reader.ReadBoolean();
                             SetBool(par, newBoolValue);
                             break;
                         }
@@ -369,17 +369,17 @@ namespace Mirage
         {
             if (initialState)
             {
-                for (int i = 0; i < Animator.layerCount; i++)
+                for (var i = 0; i < Animator.layerCount; i++)
                 {
                     if (Animator.IsInTransition(i))
                     {
-                        AnimatorStateInfo st = Animator.GetNextAnimatorStateInfo(i);
+                        var st = Animator.GetNextAnimatorStateInfo(i);
                         writer.WriteInt32(st.fullPathHash);
                         writer.WriteSingle(st.normalizedTime);
                     }
                     else
                     {
-                        AnimatorStateInfo st = Animator.GetCurrentAnimatorStateInfo(i);
+                        var st = Animator.GetCurrentAnimatorStateInfo(i);
                         writer.WriteInt32(st.fullPathHash);
                         writer.WriteSingle(st.normalizedTime);
                     }
@@ -400,10 +400,10 @@ namespace Mirage
         {
             if (initialState)
             {
-                for (int i = 0; i < Animator.layerCount; i++)
+                for (var i = 0; i < Animator.layerCount; i++)
                 {
-                    int stateHash = reader.ReadInt32();
-                    float normalizedTime = reader.ReadSingle();
+                    var stateHash = reader.ReadInt32();
+                    var normalizedTime = reader.ReadSingle();
                     Animator.SetLayerWeight(i, reader.ReadSingle());
                     Animator.Play(stateHash, i, normalizedTime);
                 }
@@ -522,7 +522,7 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log("OnAnimationMessage for netId=" + NetId);
 
             // handle and broadcast
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters, null))
+            using (var networkReader = NetworkReaderPool.GetReader(parameters, null))
             {
                 HandleAnimMsg(stateHash, normalizedTime, layerId, weight, networkReader);
                 RpcOnAnimationClientMessage(stateHash, normalizedTime, layerId, weight, parameters);
@@ -537,7 +537,7 @@ namespace Mirage
                 return;
 
             // handle and broadcast
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters, null))
+            using (var networkReader = NetworkReaderPool.GetReader(parameters, null))
             {
                 HandleAnimParamsMsg(networkReader);
                 RpcOnAnimationParametersClientMessage(parameters);
@@ -553,7 +553,7 @@ namespace Mirage
 
             // handle and broadcast
             // host should have already the trigger
-            bool isHostOwner = IsClient && HasAuthority;
+            var isHostOwner = IsClient && HasAuthority;
             if (!isHostOwner)
             {
                 HandleAnimTriggerMsg(hash);
@@ -571,7 +571,7 @@ namespace Mirage
 
             // handle and broadcast
             // host should have already the trigger
-            bool isHostOwner = IsClient && HasAuthority;
+            var isHostOwner = IsClient && HasAuthority;
             if (!isHostOwner)
             {
                 HandleAnimResetTriggerMsg(hash);
@@ -587,14 +587,14 @@ namespace Mirage
         [ClientRpc]
         private void RpcOnAnimationClientMessage(int stateHash, float normalizedTime, int layerId, float weight, ArraySegment<byte> parameters)
         {
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters, null))
+            using (var networkReader = NetworkReaderPool.GetReader(parameters, null))
                 HandleAnimMsg(stateHash, normalizedTime, layerId, weight, networkReader);
         }
 
         [ClientRpc]
         private void RpcOnAnimationParametersClientMessage(ArraySegment<byte> parameters)
         {
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters, null))
+            using (var networkReader = NetworkReaderPool.GetReader(parameters, null))
                 HandleAnimParamsMsg(networkReader);
         }
 

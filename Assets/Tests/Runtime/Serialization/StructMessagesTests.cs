@@ -33,12 +33,12 @@ namespace Mirage.Tests.Runtime.Serialization.StructMessages
             });
 
             reader.Reset(writer.ToArraySegment());
-            SomeStructMessage received = reader.Read<SomeStructMessage>();
+            var received = reader.Read<SomeStructMessage>();
 
             Assert.AreEqual(someValue, received.someValue);
 
-            int writeLength = writer.ByteLength;
-            int readLength = reader.BytePosition;
+            var writeLength = writer.ByteLength;
+            var readLength = reader.BytePosition;
             Assert.That(writeLength == readLength, $"OnSerializeAll and OnDeserializeAll calls write the same amount of data\n    writeLength={writeLength}\n    readLength={readLength}");
         }
     }

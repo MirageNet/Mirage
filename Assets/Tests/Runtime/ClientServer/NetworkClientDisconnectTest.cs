@@ -24,7 +24,7 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
         [UnityTest]
         public IEnumerator DisconnectEventWhenClientDisconnects()
         {
-            int called = 0;
+            var called = 0;
             client.Disconnected.AddListener((reason) =>
             {
                 called++;
@@ -43,7 +43,7 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
         [UnityTest]
         public IEnumerator DisconnectEventWhenServerDisconnects()
         {
-            int called = 0;
+            var called = 0;
             client.Disconnected.AddListener((reason) =>
             {
                 called++;
@@ -63,7 +63,7 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
         [UnityTest]
         public IEnumerator DisconnectEventWhenTimeout()
         {
-            int called = 0;
+            var called = 0;
             client.Disconnected.AddListener((reason) =>
             {
                 called++;
@@ -80,12 +80,12 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
         [UnityTest]
         public IEnumerator DisconnectEventWhenSentInvalidPacket()
         {
-            (ISocket clientSocket, IEndPoint serverEndPoint) = GetSocketAndEndPoint();
-            byte[] badMessage = CreateInvalidPacket();
+            (var clientSocket, var serverEndPoint) = GetSocketAndEndPoint();
+            var badMessage = CreateInvalidPacket();
 
             clientSocket.Send(serverEndPoint, badMessage, 20);
 
-            int called = 0;
+            var called = 0;
             client.Disconnected.AddListener((reason) =>
             {
                 called++;
@@ -101,18 +101,18 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
 
         private (ISocket clientSocket, IEndPoint serverEndPoint) GetSocketAndEndPoint()
         {
-            IEndPoint clientEndPoint = server.Players.First().Connection.EndPoint;
-            TestSocket clientSocket = TestSocket.allSockets[clientEndPoint];
+            var clientEndPoint = server.Players.First().Connection.EndPoint;
+            var clientSocket = TestSocket.allSockets[clientEndPoint];
 
-            IEndPoint serverEndPoint = ((TestSocketFactory)server.SocketFactory).serverEndpoint;
+            var serverEndPoint = ((TestSocketFactory)server.SocketFactory).serverEndpoint;
 
             return (clientSocket, serverEndPoint);
         }
 
         private static byte[] CreateInvalidPacket()
         {
-            byte[] packet = new byte[20];
-            int offset = 0;
+            var packet = new byte[20];
+            var offset = 0;
             ByteUtils.WriteByte(packet, ref offset, (byte)PacketType.ReliableFragment);
             // reliable order header
             offset += 2;
@@ -137,7 +137,7 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
         {
             client.Connect("localhost");
 
-            int called = 0;
+            var called = 0;
             client.Disconnected.AddListener((reason) =>
             {
                 called++;
@@ -167,7 +167,7 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
             TestSocket.StopAllMessages = true;
             client.Connect("localhost");
 
-            int called = 0;
+            var called = 0;
             client.Disconnected.AddListener((reason) =>
             {
                 called++;
@@ -176,7 +176,7 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
 
             // wait longer than timeout
             var config = new Config();
-            float endTime = Time.time + (config.ConnectAttemptInterval * config.MaxConnectAttempts * 1.5f);
+            var endTime = Time.time + (config.ConnectAttemptInterval * config.MaxConnectAttempts * 1.5f);
             while (Time.time < endTime)
             {
                 if (client.IsConnected)
@@ -195,7 +195,7 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
         {
             client.Connect("localhost");
 
-            int called = 0;
+            var called = 0;
             client.Disconnected.AddListener((reason) =>
             {
                 called++;
@@ -224,7 +224,7 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
         {
             client.Connect("localhost");
 
-            int called = 0;
+            var called = 0;
             client.Disconnected.AddListener((reason) =>
             {
                 called++;

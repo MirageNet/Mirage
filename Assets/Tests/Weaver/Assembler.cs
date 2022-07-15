@@ -28,11 +28,11 @@ namespace Mirage.Tests.Weaver
 
                 if (inMemoryAssembly == null)
                 {
-                    byte[] peData = File.ReadAllBytes(assemblyPath);
+                    var peData = File.ReadAllBytes(assemblyPath);
 
-                    string pdbFileName = Path.GetFileNameWithoutExtension(assemblyPath) + ".pdb";
+                    var pdbFileName = Path.GetFileNameWithoutExtension(assemblyPath) + ".pdb";
 
-                    byte[] pdbData = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(assemblyPath), pdbFileName));
+                    var pdbData = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(assemblyPath), pdbFileName));
 
                     inMemoryAssembly = new InMemoryAssembly(peData, pdbData);
                 }
@@ -64,7 +64,7 @@ namespace Mirage.Tests.Weaver
         // Add a range of source files to compile
         public void AddSourceFiles(string[] sourceFiles)
         {
-            foreach (string src in sourceFiles)
+            foreach (var src in sourceFiles)
             {
                 this.sourceFiles.Add(Path.Combine(WeaverTestLocator.OutputDirectory, src));
             }
@@ -158,8 +158,8 @@ namespace Mirage.Tests.Weaver
 
         private static void WriteAssembly(AssemblyDefinition assembly)
         {
-            string file = $"./temp/WeaverTests/{assembly.Name}.dll";
-            string dir = Path.GetDirectoryName(file);
+            var file = $"./temp/WeaverTests/{assembly.Name}.dll";
+            var dir = Path.GetDirectoryName(file);
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
 

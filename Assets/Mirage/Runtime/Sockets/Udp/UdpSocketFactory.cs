@@ -142,10 +142,10 @@ namespace Mirage.Sockets.Udp
 
         public override IEndPoint GetConnectEndPoint(string address = null, ushort? port = null)
         {
-            string addressString = address ?? Address;
-            IPAddress ipAddress = getAddress(addressString);
+            var addressString = address ?? Address;
+            var ipAddress = getAddress(addressString);
 
-            ushort portIn = port ?? Port;
+            var portIn = port ?? Port;
 
 #if NANO_SOCKET_ALLOWED
             if (useNanoSocket) return new NanoEndPoint(addressString, portIn);
@@ -156,10 +156,10 @@ namespace Mirage.Sockets.Udp
 
         private IPAddress getAddress(string addressString)
         {
-            if (IPAddress.TryParse(addressString, out IPAddress address))
+            if (IPAddress.TryParse(addressString, out var address))
                 return address;
 
-            IPAddress[] results = Dns.GetHostAddresses(addressString);
+            var results = Dns.GetHostAddresses(addressString);
             if (results.Length == 0)
             {
                 throw new SocketException((int)SocketError.HostNotFound);
@@ -217,7 +217,7 @@ namespace Mirage.Sockets.Udp
         IEndPoint IEndPoint.CreateCopy()
         {
             // copy the inner endpoint
-            EndPoint copy = inner.Create(inner.Serialize());
+            var copy = inner.Create(inner.Serialize());
             return new EndPointWrapper(copy);
         }
     }

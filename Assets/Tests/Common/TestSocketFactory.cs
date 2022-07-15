@@ -28,7 +28,7 @@ namespace Mirage.Tests
         /// </summary>
         private void AddThisSocket()
         {
-            if (allSockets.TryGetValue(endPoint, out TestSocket value))
+            if (allSockets.TryGetValue(endPoint, out var value))
             {
                 if (value != this)
                 {
@@ -77,9 +77,9 @@ namespace Mirage.Tests
 
         int ISocket.Receive(byte[] buffer, out IEndPoint endPoint)
         {
-            Packet next = received.Dequeue();
+            var next = received.Dequeue();
             endPoint = next.endPoint;
-            int length = next.length;
+            var length = next.length;
 
             Buffer.BlockCopy(next.data, 0, buffer, 0, length);
             return length;
@@ -89,14 +89,14 @@ namespace Mirage.Tests
         {
             AddThisSocket();
 
-            if (!allSockets.TryGetValue(remoteEndPoint, out TestSocket other))
+            if (!allSockets.TryGetValue(remoteEndPoint, out var other))
             {
                 // other socket might have been closed
                 return;
             }
 
             // create copy because data is from buffer
-            byte[] clone = packet.Take(length).ToArray();
+            var clone = packet.Take(length).ToArray();
             Sent.Add(new Packet
             {
                 endPoint = remoteEndPoint,
@@ -128,7 +128,7 @@ namespace Mirage.Tests
     {
         public static IEndPoint CreateSubstitute()
         {
-            IEndPoint endpoint = Substitute.For<IEndPoint>();
+            var endpoint = Substitute.For<IEndPoint>();
             endpoint.CreateCopy().Returns(endpoint);
             return endpoint;
         }

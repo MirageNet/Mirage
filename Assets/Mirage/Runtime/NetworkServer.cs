@@ -203,7 +203,7 @@ namespace Mirage
             var dataHandler = new DataHandler(MessageHandler, connections);
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
 
-            Config config = PeerConfig;
+            var config = PeerConfig;
             if (config == null)
             {
                 config = new Config
@@ -213,7 +213,7 @@ namespace Mirage
                 };
             }
 
-            int maxPacketSize = SocketFactory.MaxPacketSize;
+            var maxPacketSize = SocketFactory.MaxPacketSize;
             NetworkWriterPool.Configure(maxPacketSize);
 
             // Are we listening for incoming connections?
@@ -222,7 +222,7 @@ namespace Mirage
             if (Listening)
             {
                 // Create a server specific socket.
-                ISocket socket = SocketFactory.CreateServerSocket();
+                var socket = SocketFactory.CreateServerSocket();
 
                 // Tell the peer to use that newly created socket.
                 peer = new Peer(socket, maxPacketSize, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
@@ -315,7 +315,7 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log($"Client {conn} disconnected with reason: {reason}");
 
-            if (connections.TryGetValue(conn, out INetworkPlayer player))
+            if (connections.TryGetValue(conn, out var player))
             {
                 OnDisconnected(player);
             }
@@ -431,19 +431,19 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("Server.SendToAll id:" + typeof(T));
 
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            using (var writer = NetworkWriterPool.GetWriter())
             {
                 // pack message into byte[] once
                 MessagePacker.Pack(msg, writer);
                 var segment = writer.ToArraySegment();
-                int count = 0;
+                var count = 0;
 
                 // using SendToMany (with IEnumerable) will cause Enumerator to be boxed and create GC/alloc
                 // instead we can use while loop and MoveNext to avoid boxing
-                Dictionary<IConnection, INetworkPlayer>.ValueCollection.Enumerator enumerator = connections.Values.GetEnumerator();
+                var enumerator = connections.Values.GetEnumerator();
                 while (enumerator.MoveNext())
                 {
-                    INetworkPlayer player = enumerator.Current;
+                    var player = enumerator.Current;
                     player.Send(segment, channelId);
                     count++;
                 }
@@ -463,14 +463,14 @@ namespace Mirage
         /// <param name="channelId"></param>
         public static void SendToMany<T>(IEnumerable<INetworkPlayer> players, T msg, int channelId = Channel.Reliable)
         {
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            using (var writer = NetworkWriterPool.GetWriter())
             {
                 // pack message into byte[] once
                 MessagePacker.Pack(msg, writer);
                 var segment = writer.ToArraySegment();
-                int count = 0;
+                var count = 0;
 
-                foreach (INetworkPlayer player in players)
+                foreach (var player in players)
                 {
                     player.Send(segment, channelId);
                     count++;
@@ -491,14 +491,14 @@ namespace Mirage
         /// </remarks>
         public static void SendToMany<T>(IReadOnlyList<INetworkPlayer> players, T msg, int channelId = Channel.Reliable)
         {
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            using (var writer = NetworkWriterPool.GetWriter())
             {
                 // pack message into byte[] once
                 MessagePacker.Pack(msg, writer);
                 var segment = writer.ToArraySegment();
-                int count = players.Count;
+                var count = players.Count;
 
-                for (int i = 0; i < count; i++)
+                for (var i = 0; i < count; i++)
                 {
                     players[i].Send(segment, channelId);
                 }
@@ -550,7 +550,7 @@ namespace Mirage
 
             public void ReceiveMessage(IConnection connection, ArraySegment<byte> message)
             {
-                if (players.TryGetValue(connection, out INetworkPlayer player))
+                if (players.TryGetValue(connection, out var player))
                 {
                     messageHandler.HandleMessage(player, message);
                 }

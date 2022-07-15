@@ -58,21 +58,21 @@ namespace Mirage.Tests.CodeGenerators
             fromTemplate.Replace("%%TYPE%%", type);
 
 
-            string args = largeMax.HasValue
+            var args = largeMax.HasValue
                 ? $"{smallMax}, {mediumMax}, {largeMax.Value}"
                 : $"{smallMax}, {mediumMax}";
             fromTemplate.Replace("%%ARGS%%", args);
             fromTemplate.Replace("%%EXTRA_TYPE%%", extraType);
 
             var testCase = new StringBuilder();
-            for (int i = 0; i < values.Length; i++)
+            for (var i = 0; i < values.Length; i++)
             {
                 if (i > 0) { testCase.Append($",{Environment.NewLine}            "); }
                 testCase.Append($"new TestCase {{ value = {values[i]}, expectedBits = {expectedBitCount[i]} }}");
             }
             fromTemplate.Replace($"%%TEST_CASES%%", testCase.ToString());
 
-            string name = $"{type}_{smallMax}_{mediumMax}";
+            var name = $"{type}_{smallMax}_{mediumMax}";
             fromTemplate.Replace("%%NAME%%", name);
 
             fromTemplate.WriteToFile($"./Assets/Tests/Generated/VarIntTests/VarIntBehaviour_{name}.cs");

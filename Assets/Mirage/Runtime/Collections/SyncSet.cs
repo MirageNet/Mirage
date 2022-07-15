@@ -102,7 +102,7 @@ namespace Mirage.Collections
             // if init,  write the full list content
             writer.WritePackedUInt32((uint)objects.Count);
 
-            foreach (T obj in objects)
+            foreach (var obj in objects)
             {
                 writer.Write(obj);
             }
@@ -119,9 +119,9 @@ namespace Mirage.Collections
             // write all the queued up changes
             writer.WritePackedUInt32((uint)changes.Count);
 
-            for (int i = 0; i < changes.Count; i++)
+            for (var i = 0; i < changes.Count; i++)
             {
-                Change change = changes[i];
+                var change = changes[i];
                 writer.WriteByte((byte)change.operation);
 
                 switch (change.operation)
@@ -146,15 +146,15 @@ namespace Mirage.Collections
             IsReadOnly = true;
 
             // if init,  write the full list content
-            int count = (int)reader.ReadPackedUInt32();
+            var count = (int)reader.ReadPackedUInt32();
 
             objects.Clear();
             changes.Clear();
             OnClear?.Invoke();
 
-            for (int i = 0; i < count; i++)
+            for (var i = 0; i < count; i++)
             {
-                T obj = reader.Read<T>();
+                var obj = reader.Read<T>();
                 objects.Add(obj);
                 OnAdd?.Invoke(obj);
             }
@@ -170,17 +170,17 @@ namespace Mirage.Collections
         {
             // This list can now only be modified by synchronization
             IsReadOnly = true;
-            bool raiseOnChange = false;
+            var raiseOnChange = false;
 
-            int changesCount = (int)reader.ReadPackedUInt32();
+            var changesCount = (int)reader.ReadPackedUInt32();
 
-            for (int i = 0; i < changesCount; i++)
+            for (var i = 0; i < changesCount; i++)
             {
                 var operation = (Operation)reader.ReadByte();
 
                 // apply the operation only if it is a new change
                 // that we have not applied yet
-                bool apply = changesAhead == 0;
+                var apply = changesAhead == 0;
 
                 switch (operation)
                 {
@@ -216,7 +216,7 @@ namespace Mirage.Collections
 
         private void DeserializeAdd(NetworkReader reader, bool apply)
         {
-            T item = reader.Read<T>();
+            var item = reader.Read<T>();
             if (apply)
             {
                 objects.Add(item);
@@ -235,7 +235,7 @@ namespace Mirage.Collections
 
         private void DeserializeRemove(NetworkReader reader, bool apply)
         {
-            T item = reader.Read<T>();
+            var item = reader.Read<T>();
             if (apply)
             {
                 objects.Remove(item);
@@ -291,7 +291,7 @@ namespace Mirage.Collections
             }
 
             // remove every element in other from this
-            foreach (T element in other)
+            foreach (var element in other)
             {
                 Remove(element);
             }
@@ -314,7 +314,7 @@ namespace Mirage.Collections
         {
             var elements = new List<T>(objects);
 
-            foreach (T element in elements)
+            foreach (var element in elements)
             {
                 if (!otherSet.Contains(element))
                 {
@@ -343,7 +343,7 @@ namespace Mirage.Collections
             }
             else
             {
-                foreach (T element in other)
+                foreach (var element in other)
                 {
                     if (!Remove(element))
                     {
@@ -357,7 +357,7 @@ namespace Mirage.Collections
         {
             if (other != this)
             {
-                foreach (T element in other)
+                foreach (var element in other)
                 {
                     Add(element);
                 }

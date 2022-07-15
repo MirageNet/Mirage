@@ -66,11 +66,11 @@ namespace Mirage.SocketLayer
         /// <returns>sequance of written item</returns>
         public uint Enqueue(T item)
         {
-            long dist = Sequencer.Distance(write, read);
+            var dist = Sequencer.Distance(write, read);
             if (dist == -1) { throw new InvalidOperationException($"Buffer is full, write:{write} read:{read}"); }
 
             buffer[write] = item;
-            uint sequence = write;
+            var sequence = write;
             write = (uint)Sequencer.NextAfter(write);
             count++;
             return sequence;
@@ -96,7 +96,7 @@ namespace Mirage.SocketLayer
         /// <returns>true if item exists, or false if it is missing</returns>
         public bool Exists(uint index)
         {
-            uint inBounds = (uint)Sequencer.MoveInBounds(index);
+            var inBounds = (uint)Sequencer.MoveInBounds(index);
             return !IsDefault(buffer[inBounds]);
         }
 
@@ -118,7 +118,7 @@ namespace Mirage.SocketLayer
         /// </summary>
         public T Dequeue()
         {
-            T item = buffer[read];
+            var item = buffer[read];
             RemoveNext();
             return item;
         }

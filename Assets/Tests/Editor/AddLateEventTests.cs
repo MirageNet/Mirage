@@ -217,7 +217,7 @@ namespace Mirage.Events.Tests
         {
             const int arg0 = 10;
 
-            int callCount = 0;
+            var callCount = 0;
 
             allLate.AddListener((a0) =>
             {
@@ -235,7 +235,7 @@ namespace Mirage.Events.Tests
         {
             const int arg0 = 10;
 
-            int callCount = 0;
+            var callCount = 0;
 
             // invoke before adding handler
             allLate.Invoke(arg0);
@@ -298,7 +298,7 @@ namespace Mirage.Events.Tests
             const int arg0 = 10;
             const string arg1 = "hell world";
 
-            int callCount = 0;
+            var callCount = 0;
 
             allLate.AddListener((a0, a1) =>
             {
@@ -318,7 +318,7 @@ namespace Mirage.Events.Tests
             const int arg0 = 10;
             const string arg1 = "hell world";
 
-            int callCount = 0;
+            var callCount = 0;
 
             // invoke before adding handler
             allLate.Invoke(arg0, arg1);

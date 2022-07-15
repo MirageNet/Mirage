@@ -86,10 +86,10 @@ namespace Mirage.Examples.Tanks
 
         private void CheckPlayersNotInList()
         {
-            NetworkWorld world = NetworkManager.Server.Active ? NetworkManager.Server.World : NetworkManager.Client.World;
-            foreach (NetworkIdentity identity in world.SpawnedIdentities)
+            var world = NetworkManager.Server.Active ? NetworkManager.Server.World : NetworkManager.Client.World;
+            foreach (var identity in world.SpawnedIdentities)
             {
-                Tank comp = identity.GetComponent<Tank>();
+                var comp = identity.GetComponent<Tank>();
                 if (comp != null && !players.Contains(comp))
                 {
                     //Add if new
@@ -102,8 +102,8 @@ namespace Mirage.Examples.Tanks
         {
             if (!LocalPlayer || !LocalPlayer.isReady) return false;
 
-            bool AllReady = true;
-            foreach (Tank tank in players)
+            var AllReady = true;
+            foreach (var tank in players)
             {
                 if (!tank.isReady)
                 {
@@ -132,8 +132,8 @@ namespace Mirage.Examples.Tanks
 
         private int GetAlivePlayerCount()
         {
-            int alivePlayerCount = 0;
-            foreach (Tank tank in players)
+            var alivePlayerCount = 0;
+            foreach (var tank in players)
             {
                 if (!tank.IsDead)
                 {
@@ -148,7 +148,7 @@ namespace Mirage.Examples.Tanks
 
         private void FindLocalTank()
         {
-            INetworkPlayer player = NetworkManager.Client.Player;
+            var player = NetworkManager.Client.Player;
 
             // Check to see if the player object is loaded in yet
             if (!player.HasCharacter)
@@ -171,7 +171,7 @@ namespace Mirage.Examples.Tanks
         //All players are ready and game has started. Allow players to move.
         private void AllowTankMovement()
         {
-            foreach (Tank tank in players)
+            foreach (var tank in players)
             {
                 tank.allowMovement = true;
             }
@@ -180,7 +180,7 @@ namespace Mirage.Examples.Tanks
         //Game is over. Prevent movement
         private void DisallowTankMovement()
         {
-            foreach (Tank tank in players)
+            foreach (var tank in players)
             {
                 tank.allowMovement = false;
             }

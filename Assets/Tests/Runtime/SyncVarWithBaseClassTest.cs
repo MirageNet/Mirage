@@ -29,10 +29,10 @@ namespace Mirage.Tests.Runtime.SyncVarWithBaseClass
         public void SetsCorrectDirtyBit()
         {
             var go = new GameObject("SetsCorrectDirtyBit", typeof(NetworkIdentity), typeof(C));
-            C behaviour = go.GetComponent<C>();
+            var behaviour = go.GetComponent<C>();
             Assert.That(behaviour.SyncVarDirtyBits, Is.Zero, "Should start at zero");
 
-            ulong expected = 0ul;
+            var expected = 0ul;
 
             behaviour.i0 = 1;
             SetDirtyBit(ref expected, 0);

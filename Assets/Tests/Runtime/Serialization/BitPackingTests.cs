@@ -34,7 +34,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.Write(value, 64);
             reader.Reset(writer.ToArray());
 
-            ulong result = reader.Read(64);
+            var result = reader.Read(64);
             Assert.That(result, Is.EqualTo(value));
         }
 
@@ -47,7 +47,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.Write(value, 32);
             reader.Reset(writer.ToArray());
 
-            ulong result = reader.Read(32);
+            var result = reader.Read(32);
             Assert.That(result, Is.EqualTo(value));
         }
 
@@ -61,8 +61,8 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.Write(value2, bits2);
             reader.Reset(writer.ToArray());
 
-            ulong result1 = reader.Read(bits1);
-            ulong result2 = reader.Read(bits2);
+            var result1 = reader.Read(bits1);
+            var result2 = reader.Read(bits2);
             Assert.That(result1, Is.EqualTo(value1));
             Assert.That(result2, Is.EqualTo(value2));
         }
@@ -71,15 +71,15 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void CanWriteToBufferLimit()
         {
-            for (int i = 0; i < 208; i++)
+            for (var i = 0; i < 208; i++)
             {
                 writer.Write((ulong)i, 50);
             }
 
-            byte[] result = writer.ToArray();
+            var result = writer.ToArray();
 
             // written bits/8
-            int expectedLength = (208 * 50) / 8;
+            var expectedLength = (208 * 50) / 8;
             Assert.That(result, Has.Length.EqualTo(expectedLength));
         }
 
@@ -87,7 +87,7 @@ namespace Mirage.Tests.Runtime.Serialization
         public void WriterThrowIfWritesTooMuch()
         {
             // write 1296 up to last word
-            for (int i = 0; i < 162; i++)
+            for (var i = 0; i < 162; i++)
             {
                 writer.Write((ulong)i, 64);
             }
@@ -99,7 +99,7 @@ namespace Mirage.Tests.Runtime.Serialization
                 writer.Write(0, 1);
             });
 
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+            var exception = Assert.Throws<InvalidOperationException>(() =>
             {
                 writer.Write(0, 1);
             });
@@ -111,16 +111,16 @@ namespace Mirage.Tests.Runtime.Serialization
         [Repeat(10)]
         public void WritesAllValueSizesCorrectly([Range(0, 63)] int startPosition, [Range(0, 64)] int valueBits)
         {
-            ulong randomValue = ULongRandom.Next();
+            var randomValue = ULongRandom.Next();
             writer.Write(0, startPosition);
 
-            ulong maskedValue = randomValue & BitMask.Mask(valueBits);
+            var maskedValue = randomValue & BitMask.Mask(valueBits);
 
             writer.Write(randomValue, valueBits);
             reader.Reset(writer.ToArray());
 
             _ = reader.Read(startPosition);
-            ulong result = reader.Read(valueBits);
+            var result = reader.Read(valueBits);
             Assert.That(result, Is.EqualTo(maskedValue));
         }
 
@@ -128,19 +128,19 @@ namespace Mirage.Tests.Runtime.Serialization
         public void WritesAllMasksCorrectly()
         {
             // we can't use [range] args because we have to skip cases where end is over 64
-            int count = 0;
-            for (int start = 0; start < 64; start++)
+            var count = 0;
+            for (var start = 0; start < 64; start++)
             {
-                for (int bits = 0; bits < 64; bits++)
+                for (var bits = 0; bits < 64; bits++)
                 {
-                    int end = start + bits;
+                    var end = start + bits;
                     if (end > 64)
                     {
                         continue;
                     }
 
-                    ulong expected = SlowMask(start, end);
-                    ulong actual = BitMask.OuterMask(start, end);
+                    var expected = SlowMask(start, end);
+                    var actual = BitMask.OuterMask(start, end);
                     count++;
                     if (expected != actual)
                     {
@@ -162,11 +162,11 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             // old mask, doesn't work when bitposition before/after is multiple of 64
             //           so we need to check if values == 0 before shifting masks
-            ulong mask1 = start == 0 ? 0ul : (ulong.MaxValue >> (64 - start));
+            var mask1 = start == 0 ? 0ul : (ulong.MaxValue >> (64 - start));
             // note: new position can not be 0, so no need to worry about 
-            ulong mask2 = (end & 0b11_1111) == 0 ? 0ul : (ulong.MaxValue << end /*we can use full position here as c# will mask it to just 6 bits*/);
+            var mask2 = (end & 0b11_1111) == 0 ? 0ul : (ulong.MaxValue << end /*we can use full position here as c# will mask it to just 6 bits*/);
             // mask either side of value, eg writing 4 bits at position 3: 111...111_1000_0111
-            ulong mask = mask1 | mask2;
+            var mask = mask1 | mask2;
             return mask;
         }
     }

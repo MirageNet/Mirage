@@ -32,9 +32,9 @@ namespace Mirage.Tests.Runtime.Serialization
                 SceneOperation = SceneOperation.LoadAdditive
             };
 
-            byte[] data = MessagePacker.Pack(message);
+            var data = MessagePacker.Pack(message);
 
-            SceneMessage unpacked = MessagePacker.Unpack<SceneMessage>(data);
+            var unpacked = MessagePacker.Unpack<SceneMessage>(data);
 
             Assert.That(unpacked.MainActivateScene, Is.EqualTo("Hello world"));
             Assert.That(unpacked.SceneOperation, Is.EqualTo(SceneOperation.LoadAdditive));
@@ -45,7 +45,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             var message = new SceneReadyMessage();
 
-            byte[] data = MessagePacker.Pack(message);
+            var data = MessagePacker.Pack(message);
 
             Assert.Throws<FormatException>(() =>
             {
@@ -65,7 +65,7 @@ namespace Mirage.Tests.Runtime.Serialization
                 SceneOperation = SceneOperation.LoadAdditive
             };
 
-            byte[] data = MessagePacker.Pack(message);
+            var data = MessagePacker.Pack(message);
 
             // overwrite the id
             data[0] = 0x01;
@@ -88,10 +88,10 @@ namespace Mirage.Tests.Runtime.Serialization
                 SceneOperation = SceneOperation.LoadAdditive
             };
 
-            byte[] data = MessagePacker.Pack(message);
+            var data = MessagePacker.Pack(message);
             reader.Reset(data);
 
-            int msgType = MessagePacker.UnpackId(reader);
+            var msgType = MessagePacker.UnpackId(reader);
             Assert.That(msgType, Is.EqualTo(BitConverter.ToUInt16(data, 0)));
         }
 
@@ -113,9 +113,9 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             MessagePacker.RegisterMessage<SomeRandomMessage>();
 
-            int id = MessagePacker.GetId<SomeRandomMessage>();
+            var id = MessagePacker.GetId<SomeRandomMessage>();
 
-            Type type = MessagePacker.MessageTypes[id];
+            var type = MessagePacker.MessageTypes[id];
 
             Assert.That(type, Is.EqualTo(typeof(SomeRandomMessage)));
         }
@@ -138,8 +138,8 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void FindSystemMessage()
         {
-            int id = MessagePacker.GetId<SceneMessage>();
-            Type type = MessagePacker.MessageTypes[id];
+            var id = MessagePacker.GetId<SceneMessage>();
+            var type = MessagePacker.MessageTypes[id];
             Assert.That(type, Is.EqualTo(typeof(SceneMessage)));
         }
 
@@ -149,7 +149,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             // note that GetId<> will cause the weaver to register it
             // but GetId() will not
-            int id = MessagePacker.GetId(typeof(SomeRandomMessageNotRegistered));
+            var id = MessagePacker.GetId(typeof(SomeRandomMessageNotRegistered));
             Assert.Throws<KeyNotFoundException>(() =>
             {
                 _ = MessagePacker.MessageTypes[id];

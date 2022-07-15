@@ -53,9 +53,9 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator ServerRpcReturn() => UniTask.ToCoroutine(async () =>
         {
-            int random = Random.Range(1, 100);
+            var random = Random.Range(1, 100);
             serverComponent.rpcResult = random;
-            int result = await clientComponent.GetResult();
+            var result = await clientComponent.GetResult();
             Assert.That(result, Is.EqualTo(random));
         });
     }
@@ -64,9 +64,9 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator ServerRpcReturn() => UniTask.ToCoroutine(async () =>
         {
-            float random = (Random.value - .5f) * 200;
+            var random = (Random.value - .5f) * 200;
             serverComponent.rpcResult = random;
-            float result = await clientComponent.GetResult();
+            var result = await clientComponent.GetResult();
             Assert.That(result, Is.EqualTo(random));
         });
     }
@@ -75,9 +75,9 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator ServerRpcReturn() => UniTask.ToCoroutine(async () =>
         {
-            Vector3 random = Random.insideUnitSphere;
+            var random = Random.insideUnitSphere;
             serverComponent.rpcResult = random;
-            Vector3 result = await clientComponent.GetResult();
+            var result = await clientComponent.GetResult();
             Assert.That(result, Is.EqualTo(random));
         });
     }
@@ -87,7 +87,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         public IEnumerator ServerRpcReturn() => UniTask.ToCoroutine(async () =>
         {
             serverComponent.rpcResult = serverIdentity;
-            NetworkIdentity result = await clientComponent.GetResult();
+            var result = await clientComponent.GetResult();
             // server returning its version of Identity should cause client to get reference to clients version
             Assert.That(result, Is.EqualTo(clientIdentity));
         });

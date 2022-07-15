@@ -91,7 +91,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNetworkIdentity() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
+            var callback = Substitute.For<Action<NetworkIdentity>>();
             clientComponent.onSendNetworkIdentityCalled += callback;
 
             serverComponent.SendNetworkIdentity(serverIdentity);
@@ -102,7 +102,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNetworkBehavior() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
+            var callback = Substitute.For<Action<NetworkBehaviour>>();
             clientComponent.onSendNetworkBehaviourCalled += callback;
 
             serverComponent.SendNetworkBehaviour(serverComponent);
@@ -113,7 +113,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNetworkBehaviorChild() => UniTask.ToCoroutine(async () =>
         {
-            Action<SampleBehaviorWithRpc> callback = Substitute.For<Action<SampleBehaviorWithRpc>>();
+            var callback = Substitute.For<Action<SampleBehaviorWithRpc>>();
             clientComponent.onSendNetworkBehaviourDerivedCalled += callback;
 
             serverComponent.SendNetworkBehaviourDerived(serverComponent);
@@ -124,7 +124,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendGameObject() => UniTask.ToCoroutine(async () =>
         {
-            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            var callback = Substitute.For<Action<GameObject>>();
             clientComponent.onSendGameObjectCalled += callback;
 
             serverComponent.SendGameObject(serverPlayerGO);
@@ -135,7 +135,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void SendInvalidGO()
         {
-            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            var callback = Substitute.For<Action<GameObject>>();
             clientComponent.onSendGameObjectCalled += callback;
 
             // this object does not have a NI, so this should error out
@@ -148,7 +148,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNullNetworkIdentity() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
+            var callback = Substitute.For<Action<NetworkIdentity>>();
             clientComponent.onSendNetworkIdentityCalled += callback;
 
             serverComponent.SendNetworkIdentity(null);
@@ -159,7 +159,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNullNetworkBehavior() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
+            var callback = Substitute.For<Action<NetworkBehaviour>>();
             clientComponent.onSendNetworkBehaviourCalled += callback;
 
             serverComponent.SendNetworkBehaviour(null);
@@ -170,7 +170,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNullNetworkBehaviorChild() => UniTask.ToCoroutine(async () =>
         {
-            Action<SampleBehaviorWithRpc> callback = Substitute.For<Action<SampleBehaviorWithRpc>>();
+            var callback = Substitute.For<Action<SampleBehaviorWithRpc>>();
             clientComponent.onSendNetworkBehaviourDerivedCalled += callback;
 
             serverComponent.SendNetworkBehaviourDerived(null);
@@ -181,7 +181,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNullGameObject() => UniTask.ToCoroutine(async () =>
         {
-            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            var callback = Substitute.For<Action<GameObject>>();
             clientComponent.onSendGameObjectCalled += callback;
 
             serverComponent.SendGameObject(null);
@@ -193,7 +193,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNetworkIdentityToServer() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
+            var callback = Substitute.For<Action<NetworkIdentity>>();
             serverComponent.onSendNetworkIdentityCalled += callback;
 
             clientComponent.SendNetworkIdentityToServer(clientIdentity);
@@ -204,7 +204,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNetworkBehaviorToServer() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
+            var callback = Substitute.For<Action<NetworkBehaviour>>();
             serverComponent.onSendNetworkBehaviourCalled += callback;
 
             clientComponent.SendNetworkBehaviourToServer(clientComponent);
@@ -215,7 +215,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNetworkBehaviorChildToServer() => UniTask.ToCoroutine(async () =>
         {
-            Action<SampleBehaviorWithRpc> callback = Substitute.For<Action<SampleBehaviorWithRpc>>();
+            var callback = Substitute.For<Action<SampleBehaviorWithRpc>>();
             serverComponent.onSendNetworkBehaviourDerivedCalled += callback;
 
             clientComponent.SendNetworkBehaviourDerivedToServer(clientComponent);
@@ -226,7 +226,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendTypeFromAnotherAssembly() => UniTask.ToCoroutine(async () =>
         {
-            Action<Weaver.Extra.SomeData> callback = Substitute.For<Action<Weaver.Extra.SomeData>>();
+            var callback = Substitute.For<Action<Weaver.Extra.SomeData>>();
             clientComponent.onSendTypeFromAnotherAssemblyCalled += callback;
 
             var someData = new Weaver.Extra.SomeData { usefulNumber = 13 };
@@ -238,7 +238,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendGameObjectToServer() => UniTask.ToCoroutine(async () =>
         {
-            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            var callback = Substitute.For<Action<GameObject>>();
             serverComponent.onSendGameObjectCalled += callback;
 
             clientComponent.SendGameObjectToServer(clientPlayerGO);
@@ -249,7 +249,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator WithSender() => UniTask.ToCoroutine(async () =>
         {
-            Action<int, INetworkPlayer> callback = Substitute.For<Action<int, INetworkPlayer>>();
+            var callback = Substitute.For<Action<int, INetworkPlayer>>();
             serverComponent.onWithSenderCalled += callback;
 
             const int value = 10;
@@ -261,7 +261,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator WithSenderInDifferentOrder() => UniTask.ToCoroutine(async () =>
       {
-          Action<INetworkPlayer, int> callback = Substitute.For<Action<INetworkPlayer, int>>();
+          var callback = Substitute.For<Action<INetworkPlayer, int>>();
           serverComponent.onWithSenderInDifferentOrderCalled += callback;
 
           const int value = 10;
@@ -275,7 +275,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void SendInvalidGOToServer()
         {
-            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            var callback = Substitute.For<Action<GameObject>>();
             serverComponent.onSendGameObjectCalled += callback;
 
             // this object does not have a NI, so this should error out

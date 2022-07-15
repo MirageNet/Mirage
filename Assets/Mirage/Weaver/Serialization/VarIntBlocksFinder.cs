@@ -7,13 +7,13 @@ namespace Mirage.Weaver.Serialization
     {
         public static ValueSerializer GetSerializer(ICustomAttributeProvider attributeProvider, TypeReference fieldType)
         {
-            CustomAttribute attribute = attributeProvider.GetCustomAttribute<VarIntBlocksAttribute>();
+            var attribute = attributeProvider.GetCustomAttribute<VarIntBlocksAttribute>();
             if (attribute == null)
                 return default;
 
             ThrowIfNotIntType(fieldType);
 
-            int blockSize = (int)attribute.ConstructorArguments[0].Value;
+            var blockSize = (int)attribute.ConstructorArguments[0].Value;
 
             if (blockSize <= 0)
                 throw new VarIntBlocksException("Blocksize should be above 0");
@@ -45,7 +45,7 @@ namespace Mirage.Weaver.Serialization
             if (type.Resolve().IsEnum)
             {
                 // check underlying field is signed
-                TypeReference enumType = type.Resolve().GetEnumUnderlyingType();
+                var enumType = type.Resolve().GetEnumUnderlyingType();
                 ThrowIfNotIntType(enumType);
                 return;
             }

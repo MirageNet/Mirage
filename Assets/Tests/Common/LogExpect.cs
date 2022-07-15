@@ -9,7 +9,7 @@ namespace Mirage.Tests
     {
         public static void ExpectWarn(string warn, Action action)
         {
-            ILogHandler defaultHandler = Debug.unityLogger.logHandler;
+            var defaultHandler = Debug.unityLogger.logHandler;
             Debug.unityLogger.logHandler = Substitute.For<ILogHandler>();
 
             try

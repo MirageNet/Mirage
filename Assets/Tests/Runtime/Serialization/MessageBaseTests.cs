@@ -45,13 +45,13 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void StructWithMethods()
         {
-            byte[] arr = MessagePacker.Pack(new TestMessage
+            var arr = MessagePacker.Pack(new TestMessage
             {
                 IntValue = 1,
                 DoubleValue = 3.3,
                 StringValue = "2"
             });
-            TestMessage t = MessagePacker.Unpack<TestMessage>(arr);
+            var t = MessagePacker.Unpack<TestMessage>(arr);
 
             Assert.AreEqual(1, t.IntValue);
         }
@@ -64,9 +64,9 @@ namespace Mirage.Tests.Runtime.Serialization
                 array = new[] { 3, 4, 5 }
             };
 
-            byte[] data = MessagePacker.Pack(intMessage);
+            var data = MessagePacker.Pack(intMessage);
 
-            ClassWithoutBaseMessage unpacked = MessagePacker.Unpack<ClassWithoutBaseMessage>(data);
+            var unpacked = MessagePacker.Unpack<ClassWithoutBaseMessage>(data);
 
             Assert.That(unpacked.array, Is.EquivalentTo(new[] { 3, 4, 5 }));
         }
@@ -80,9 +80,9 @@ namespace Mirage.Tests.Runtime.Serialization
                 someValue = value
             };
 
-            byte[] data = MessagePacker.Pack(intMessage);
+            var data = MessagePacker.Pack(intMessage);
 
-            OverrideMessage unpacked = MessagePacker.Unpack<OverrideMessage>(data);
+            var unpacked = MessagePacker.Unpack<OverrideMessage>(data);
 
             Assert.That(unpacked.someValue, Is.EqualTo(value));
         }
@@ -100,9 +100,9 @@ namespace Mirage.Tests.Runtime.Serialization
                 value3 = value3
             };
 
-            byte[] data = MessagePacker.Pack(intMessage);
+            var data = MessagePacker.Pack(intMessage);
 
-            Layer3Message unpacked = MessagePacker.Unpack<Layer3Message>(data);
+            var unpacked = MessagePacker.Unpack<Layer3Message>(data);
 
             Assert.That(unpacked.value1, Is.EqualTo(value1));
             Assert.That(unpacked.value2, Is.EqualTo(value2));

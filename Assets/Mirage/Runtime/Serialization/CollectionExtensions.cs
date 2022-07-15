@@ -48,8 +48,8 @@ namespace Mirage.Serialization
             if (list is null)
                 return;
 
-            int length = list.Count;
-            for (int i = 0; i < length; i++)
+            var length = list.Count;
+            for (var i = 0; i < length; i++)
                 writer.Write(list[i]);
         }
 
@@ -60,14 +60,14 @@ namespace Mirage.Serialization
             if (array is null)
                 return;
 
-            int length = array.Length;
-            for (int i = 0; i < length; i++)
+            var length = array.Length;
+            for (var i = 0; i < length; i++)
                 writer.Write(array[i]);
         }
 
         public static void WriteArraySegment<T>(this NetworkWriter writer, ArraySegment<T> segment)
         {
-            T[] array = segment.Array;
+            var array = segment.Array;
 
             if (array == null)
             {
@@ -76,11 +76,11 @@ namespace Mirage.Serialization
             else
             {
                 // cache these properties in local variable because they wont change and calling properties has performance cost
-                int offset = segment.Offset;
-                int length = segment.Count;
+                var offset = segment.Offset;
+                var length = segment.Count;
 
                 WriteCountPlusOne(writer, length);
-                for (int i = 0; i < length; i++)
+                for (var i = 0; i < length; i++)
                 {
                     writer.Write(array[offset + i]);
                 }
@@ -93,7 +93,7 @@ namespace Mirage.Serialization
         {
             // dont need to ValidateSize here because ReadBytes does it
 
-            return ReadCountPlusOne(reader, out int count)
+            return ReadCountPlusOne(reader, out var count)
                 ? reader.ReadBytes(count)
                 : null;
         }
@@ -102,7 +102,7 @@ namespace Mirage.Serialization
         {
             // dont need to ValidateSize here because we dont allocate for segment
 
-            return ReadCountPlusOne(reader, out int count)
+            return ReadCountPlusOne(reader, out var count)
                 ? reader.ReadBytesSegment(count)
                 : default;
         }
@@ -112,21 +112,21 @@ namespace Mirage.Serialization
             // we know each element is 8 bits, so count*8 for max size
             ValidateSize(reader, count * 8);
 
-            byte[] bytes = new byte[count];
+            var bytes = new byte[count];
             reader.ReadBytes(bytes, 0, count);
             return bytes;
         }
 
         public static List<T> ReadList<T>(this NetworkReader reader)
         {
-            bool hasValue = ReadCountPlusOne(reader, out int length);
+            var hasValue = ReadCountPlusOne(reader, out var length);
             if (!hasValue)
                 return null;
 
             ValidateSize(reader, length);
 
             var result = new List<T>(length);
-            for (int i = 0; i < length; i++)
+            for (var i = 0; i < length; i++)
             {
                 result.Add(reader.Read<T>());
             }
@@ -135,14 +135,14 @@ namespace Mirage.Serialization
 
         public static T[] ReadArray<T>(this NetworkReader reader)
         {
-            bool hasValue = ReadCountPlusOne(reader, out int length);
+            var hasValue = ReadCountPlusOne(reader, out var length);
             if (!hasValue)
                 return null;
 
             ValidateSize(reader, length);
 
             var result = new T[length];
-            for (int i = 0; i < length; i++)
+            for (var i = 0; i < length; i++)
             {
                 result[i] = reader.Read<T>();
             }
@@ -151,7 +151,7 @@ namespace Mirage.Serialization
 
         public static ArraySegment<T> ReadArraySegment<T>(this NetworkReader reader)
         {
-            T[] array = reader.ReadArray<T>();
+            var array = reader.ReadArray<T>();
             return array != null ? new ArraySegment<T>(array) : default;
         }
 
@@ -180,7 +180,7 @@ namespace Mirage.Serialization
         {
             // count = 0 means the array was null
             // otherwise count -1 is the length of the array
-            uint value = reader.ReadPackedUInt32();
+            var value = reader.ReadPackedUInt32();
             // Use checked() to force it to throw OverflowException if data is invalid/
             // do -1 after checked, incase value is 0 (count will be -1, but ok because we will return false in that case)
             count = checked((int)value) - 1;

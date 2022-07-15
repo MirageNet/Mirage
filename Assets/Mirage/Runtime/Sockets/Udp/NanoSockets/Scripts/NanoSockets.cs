@@ -77,7 +77,7 @@ namespace NanoSockets
 
         public override int GetHashCode()
         {
-            int hash = 17;
+            var hash = 17;
 
             hash = hash * 31 + address0.GetHashCode();
             hash = hash * 31 + address1.GetHashCode();
@@ -88,7 +88,7 @@ namespace NanoSockets
 
         public override string ToString()
         {
-            StringBuilder ip = new StringBuilder(64);
+            var ip = new StringBuilder(64);
 
             NanoSockets.UDP.GetIP(ref this, ip, 64);
 
@@ -97,7 +97,7 @@ namespace NanoSockets
 
         public static Address CreateFromIpPort(string ip, ushort port)
         {
-            Address address = default(Address);
+            var address = default(Address);
 
             NanoSockets.UDP.SetIP(ref address, ip);
             address.port = port;

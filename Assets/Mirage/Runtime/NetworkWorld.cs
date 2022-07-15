@@ -46,7 +46,7 @@ namespace Mirage
             if (netId == 0) throw new ArgumentException("id can not be zero", nameof(netId));
             if (identity == null) throw new ArgumentNullException(nameof(identity));
             if (netId != identity.NetId) throw new ArgumentException("NetworkIdentity did not have matching netId", nameof(identity));
-            if (SpawnedObjects.TryGetValue(netId, out NetworkIdentity existing) && existing != null) throw new ArgumentException("An Identity with same id already exists in network world", nameof(netId));
+            if (SpawnedObjects.TryGetValue(netId, out var existing) && existing != null) throw new ArgumentException("An Identity with same id already exists in network world", nameof(netId));
 
             // dont use add, netId might already exist but have been destroyed
             // this can happen client side. we check for this case in TryGetValue above
@@ -56,8 +56,8 @@ namespace Mirage
 
         internal void RemoveIdentity(NetworkIdentity identity)
         {
-            uint netId = identity.NetId;
-            bool removed = SpawnedObjects.Remove(netId);
+            var netId = identity.NetId;
+            var removed = SpawnedObjects.Remove(netId);
             // only invoke event if values was successfully removed
             if (removed)
                 onUnspawn?.Invoke(identity);
@@ -67,7 +67,7 @@ namespace Mirage
         {
             var removalCollection = new List<NetworkIdentity>(SpawnedIdentities);
 
-            foreach (NetworkIdentity identity in removalCollection)
+            foreach (var identity in removalCollection)
             {
                 if (identity == null)
                     SpawnedObjects.Remove(identity.NetId);
@@ -78,8 +78,8 @@ namespace Mirage
         {
             if (netId == 0) throw new ArgumentException("id can not be zero", nameof(netId));
 
-            SpawnedObjects.TryGetValue(netId, out NetworkIdentity identity);
-            bool removed = SpawnedObjects.Remove(netId);
+            SpawnedObjects.TryGetValue(netId, out var identity);
+            var removed = SpawnedObjects.Remove(netId);
             // only invoke event if values was successfully removed
             if (removed)
                 onUnspawn?.Invoke(identity);

@@ -160,7 +160,7 @@ namespace Mirage.Experimental
             // Save last for next frame to compare only if change was detected, otherwise
             // slow moving objects might never sync because of C#'s float comparison tolerance.
             // See also: https://github.com/vis2k/Mirror/pull/428)
-            bool changed = HasMoved || HasRotated || HasScaled;
+            var changed = HasMoved || HasRotated || HasScaled;
             if (changed)
             {
                 // local position/rotation for VR support
@@ -187,10 +187,10 @@ namespace Mirage.Experimental
         private bool NeedsTeleport()
         {
             // calculate time between the two data points
-            float startTime = start.IsValid ? start.timeStamp : Time.time - Time.fixedDeltaTime;
-            float goalTime = goal.IsValid ? goal.timeStamp : Time.time;
-            float difference = goalTime - startTime;
-            float timeSinceGoalReceived = Time.time - goalTime;
+            var startTime = start.IsValid ? start.timeStamp : Time.time - Time.fixedDeltaTime;
+            var goalTime = goal.IsValid ? goal.timeStamp : Time.time;
+            var difference = goalTime - startTime;
+            var timeSinceGoalReceived = Time.time - goalTime;
             return timeSinceGoalReceived > difference * 5;
         }
 
@@ -281,8 +281,8 @@ namespace Mirage.Experimental
             //
             else
             {
-                float oldDistance = Vector3.Distance(start.localPosition, goal.localPosition);
-                float newDistance = Vector3.Distance(goal.localPosition, temp.localPosition);
+                var oldDistance = Vector3.Distance(start.localPosition, goal.localPosition);
+                var newDistance = Vector3.Distance(goal.localPosition, temp.localPosition);
 
                 start = goal;
 
@@ -307,8 +307,8 @@ namespace Mirage.Experimental
         //     - elapsed based on send interval hoping that it roughly matches
         private static float EstimateMovementSpeed(DataPoint from, DataPoint to, Transform transform, float sendInterval)
         {
-            Vector3 delta = to.localPosition - (from.localPosition != transform.localPosition ? from.localPosition : transform.localPosition);
-            float elapsed = from.IsValid ? to.timeStamp - from.timeStamp : sendInterval;
+            var delta = to.localPosition - (from.localPosition != transform.localPosition ? from.localPosition : transform.localPosition);
+            var elapsed = from.IsValid ? to.timeStamp - from.timeStamp : sendInterval;
 
             // avoid NaN
             return elapsed > 0 ? delta.magnitude / elapsed : 0;
@@ -339,7 +339,7 @@ namespace Mirage.Experimental
 
                 // Option 2: always += speed
                 // speed is 0 if we just started after idle, so always use max for best results
-                float speed = Mathf.Max(start.movementSpeed, goal.movementSpeed);
+                var speed = Mathf.Max(start.movementSpeed, goal.movementSpeed);
                 return Vector3.MoveTowards(currentPosition, goal.localPosition, speed * Time.deltaTime);
             }
 
@@ -353,7 +353,7 @@ namespace Mirage.Experimental
 
             if (start.localRotation != goal.localRotation)
             {
-                float t = CurrentInterpolationFactor(start, goal);
+                var t = CurrentInterpolationFactor(start, goal);
                 return Quaternion.Slerp(start.localRotation, goal.localRotation, t);
             }
 
@@ -367,7 +367,7 @@ namespace Mirage.Experimental
 
             if (start.localScale != goal.localScale)
             {
-                float t = CurrentInterpolationFactor(start, goal);
+                var t = CurrentInterpolationFactor(start, goal);
                 return Vector3.Lerp(start.localScale, goal.localScale, t);
             }
 
@@ -378,10 +378,10 @@ namespace Mirage.Experimental
         {
             if (start.IsValid)
             {
-                float difference = goal.timeStamp - start.timeStamp;
+                var difference = goal.timeStamp - start.timeStamp;
 
                 // the moment we get 'goal', 'start' is supposed to start, so elapsed time is based on:
-                float elapsed = Time.time - goal.timeStamp;
+                var elapsed = Time.time - goal.timeStamp;
 
                 // avoid NaN
                 return difference > 0 ? elapsed / difference : 1;
@@ -406,7 +406,7 @@ namespace Mirage.Experimental
         private static void DrawDataPointGizmo(DataPoint data, Color color)
         {
             // use a little offset because transform.localPosition might be in the ground in many cases
-            Vector3 offset = Vector3.up * 0.01f;
+            var offset = Vector3.up * 0.01f;
 
             // draw position
             Gizmos.color = color;

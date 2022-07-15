@@ -31,16 +31,16 @@ namespace Mirage.Weaver.Serialization
                 throw new FloatPackException($"Max must be above 0, max:{settings.max}");
             }
 
-            CustomAttributeArgument arg1 = attribute.ConstructorArguments[1];
+            var arg1 = attribute.ConstructorArguments[1];
             if (arg1.Type.Is<float>())
             {
-                float precision = (float)arg1.Value;
+                var precision = (float)arg1.Value;
                 ValidatePrecision(settings.max, precision, (s) => new FloatPackException(s));
                 settings.precision = precision;
             }
             else
             {
-                int bitCount = (int)arg1.Value;
+                var bitCount = (int)arg1.Value;
                 ValidateBitCount(bitCount, (s) => new FloatPackException(s));
                 settings.bitCount = bitCount;
             }
@@ -62,7 +62,7 @@ namespace Mirage.Weaver.Serialization
 
         protected override FieldDefinition CreatePackerField(ModuleDefinition module, string fieldName, TypeDefinition holder, FloatPackSettings settings)
         {
-            FieldDefinition packerField = AddPackerField<FloatPacker>(holder, fieldName);
+            var packerField = AddPackerField<FloatPacker>(holder, fieldName);
 
             holder.AddToStaticConstructor((worker) =>
             {

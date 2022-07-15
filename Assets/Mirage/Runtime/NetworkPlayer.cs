@@ -149,7 +149,7 @@ namespace Mirage
         {
             if (isDisconnected) { return; }
 
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            using (var writer = NetworkWriterPool.GetWriter())
             {
                 MessagePacker.Pack(message, writer);
 
@@ -190,7 +190,7 @@ namespace Mirage
         {
             if (isDisconnected) { return; }
 
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            using (var writer = NetworkWriterPool.GetWriter())
             {
                 MessagePacker.Pack(message, writer);
 
@@ -221,7 +221,7 @@ namespace Mirage
         /// </summary>
         public void RemoveAllVisibleObjects()
         {
-            foreach (NetworkIdentity identity in visList)
+            foreach (var identity in visList)
             {
                 identity.RemoveObserverInternal(this);
             }
@@ -247,7 +247,7 @@ namespace Mirage
             // create a copy because the list might be modified when destroying
             var ownedObjects = new HashSet<NetworkIdentity>(clientOwnedObjects);
 
-            foreach (NetworkIdentity netIdentity in ownedObjects)
+            foreach (var netIdentity in ownedObjects)
             {
                 //dont destroy self yet.
                 if (netIdentity == Identity)

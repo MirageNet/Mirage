@@ -19,7 +19,7 @@ namespace Mirage.Tests.Weaver
                     ScriptableObject assemblerObj = CreateInstance<WeaverTestLocator>();
 
                     var monoScript = MonoScript.FromScriptableObject(assemblerObj);
-                    string myPath = AssetDatabase.GetAssetPath(monoScript);
+                    var myPath = AssetDatabase.GetAssetPath(monoScript);
                     _outputDirectory = Path.GetDirectoryName(myPath);
                 }
                 return _outputDirectory;

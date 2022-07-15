@@ -32,7 +32,7 @@ namespace Mirage
         /// <param name="initialize">True if the set of observers is being built for the first time.</param>
         public virtual void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
         {
-            foreach (INetworkPlayer player in Server.Players)
+            foreach (var player in Server.Players)
             {
                 if (OnCheckObserver(player))
                 {

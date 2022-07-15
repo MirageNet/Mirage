@@ -27,7 +27,7 @@ namespace Mirage.Weaver
 
             if (writeToFile)
             {
-                string path = $"./Build/WeaverLogs/Timer_{name}.log";
+                var path = $"./Build/WeaverLogs/Timer_{name}.log";
                 try
                 {
                     writer = new StreamWriter(path)
@@ -56,7 +56,7 @@ namespace Mirage.Weaver
         [Conditional("WEAVER_DEBUG_TIMER")]
         private void WriteLine(string msg)
         {
-            string fullMsg = $"[WeaverDiagnostics] {msg}";
+            var fullMsg = $"[WeaverDiagnostics] {msg}";
             Console.WriteLine(fullMsg);
             if (writeToFile)
             {

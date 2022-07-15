@@ -23,7 +23,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
 
             var reader = new NetworkReader();
             reader.Reset(writer.ToArraySegment());
-            MyMessage<int> result = reader.Read<MyMessage<int>>();
+            var result = reader.Read<MyMessage<int>>();
 
             Assert.That(result, Is.EqualTo(msg));
         }
@@ -32,7 +32,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         public IEnumerator CanSendMessage()
         {
             const int num = 32;
-            int called = 0;
+            var called = 0;
 
             var msg = new MyMessage<int> { Value = num };
             server.MessageHandler.RegisterHandler<MyMessage<int>>((result) =>

@@ -12,9 +12,9 @@ namespace Mirage.Tests
         {
             var gameObject = new GameObject("NetworkObjectManager", typeof(ClientObjectManager));
 
-            ClientObjectManager client = gameObject.GetComponent<ClientObjectManager>();
+            var client = gameObject.GetComponent<ClientObjectManager>();
 
-            ClientObjectManagerInspector inspector = ScriptableObject.CreateInstance<ClientObjectManagerInspector>();
+            var inspector = ScriptableObject.CreateInstance<ClientObjectManagerInspector>();
             inspector.RegisterPrefabs(client);
 
             Assert.That(client.spawnPrefabs, Has.Count.GreaterThan(2));
@@ -28,10 +28,10 @@ namespace Mirage.Tests
             var preexisting = new GameObject("object", typeof(NetworkIdentity));
 
             var gameObject = new GameObject("NetworkObjectManager", typeof(ClientObjectManager));
-            ClientObjectManager client = gameObject.GetComponent<ClientObjectManager>();
+            var client = gameObject.GetComponent<ClientObjectManager>();
             client.spawnPrefabs.Add(preexisting.GetComponent<NetworkIdentity>());
 
-            ClientObjectManagerInspector inspector = ScriptableObject.CreateInstance<ClientObjectManagerInspector>();
+            var inspector = ScriptableObject.CreateInstance<ClientObjectManagerInspector>();
 
             inspector.RegisterPrefabs(client);
 

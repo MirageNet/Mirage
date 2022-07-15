@@ -54,7 +54,7 @@ namespace Mirage.Sockets.Udp
                 const uint IOC_IN = 0x80000000;
                 const uint IOC_VENDOR = 0x18000000;
                 const uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
-                byte[] _false = new byte[] { 0, 0, 0, 0 };
+                var _false = new byte[] { 0, 0, 0, 0 };
 
                 socket.IOControl(unchecked((int)SIO_UDP_CONNRESET), _false, null);
             }
@@ -89,14 +89,14 @@ namespace Mirage.Sockets.Udp
 
         public int Receive(byte[] buffer, out IEndPoint endPoint)
         {
-            int c = socket.ReceiveFrom(buffer, ref Endpoint.inner);
+            var c = socket.ReceiveFrom(buffer, ref Endpoint.inner);
             endPoint = Endpoint;
             return c;
         }
 
         public void Send(IEndPoint endPoint, byte[] packet, int length)
         {
-            EndPoint netEndPoint = ((EndPointWrapper)endPoint).inner;
+            var netEndPoint = ((EndPointWrapper)endPoint).inner;
             socket.SendTo(packet, length, SocketFlags.None, netEndPoint);
         }
     }

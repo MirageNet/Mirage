@@ -24,7 +24,7 @@ namespace Mirage.Tests.Runtime
             SerializeHelper.SerializeDeltaTo(serverList, clientList);
             Assert.That(serverList.IsDirty, Is.False);
 
-            TestPlayer player = serverList[0];
+            var player = serverList[0];
             player.item.price = 15;
             serverList[0] = player;
 

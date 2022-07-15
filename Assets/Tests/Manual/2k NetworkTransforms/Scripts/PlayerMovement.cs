@@ -10,8 +10,8 @@ namespace Mirage.Examples.OneK
         {
             if (!IsLocalPlayer) return;
 
-            float h = Input.GetAxis("Horizontal");
-            float v = Input.GetAxis("Vertical");
+            var h = Input.GetAxis("Horizontal");
+            var v = Input.GetAxis("Vertical");
 
             var dir = new Vector3(h, 0, v);
             transform.position += dir.normalized * (Time.deltaTime * speed);

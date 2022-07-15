@@ -54,8 +54,8 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
             const int num2 = 132;
             const int num3 = 232;
             const int num4 = 332;
-            Action<int, int> hook1 = Substitute.For<Action<int, int>>();
-            Action<int, int> hook2 = Substitute.For<Action<int, int>>();
+            var hook1 = Substitute.For<Action<int, int>>();
+            var hook2 = Substitute.For<Action<int, int>>();
             clientComponent.hookMethod += hook1;
             clientComponent.hookEvent += hook2;
 
@@ -99,8 +99,8 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
             const int num2 = 132;
             const int num3 = 232;
             const int num4 = 332;
-            Action<MyClass, MyClass> hook1 = Substitute.For<Action<MyClass, MyClass>>();
-            Action<MyClass, MyClass> hook2 = Substitute.For<Action<MyClass, MyClass>>();
+            var hook1 = Substitute.For<Action<MyClass, MyClass>>();
+            var hook2 = Substitute.For<Action<MyClass, MyClass>>();
             clientComponent.hookMethod += hook1;
             clientComponent.hookEvent += hook2;
 

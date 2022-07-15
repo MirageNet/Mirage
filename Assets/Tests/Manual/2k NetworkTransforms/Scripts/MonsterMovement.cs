@@ -32,12 +32,12 @@ namespace Mirage.Examples.OneK
             }
             else
             {
-                float r = Random.value;
+                var r = Random.value;
                 if (r < movementProbability * Time.deltaTime)
                 {
-                    Vector2 circlePos = Random.insideUnitCircle;
+                    var circlePos = Random.insideUnitCircle;
                     var dir = new Vector3(circlePos.x, 0, circlePos.y);
-                    Vector3 dest = transform.position + dir * movementDistance;
+                    var dest = transform.position + dir * movementDistance;
 
                     // within move dist around start?
                     // (don't want to wander off)

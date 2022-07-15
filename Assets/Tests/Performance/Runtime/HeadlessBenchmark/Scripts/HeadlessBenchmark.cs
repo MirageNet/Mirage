@@ -31,14 +31,14 @@ namespace Mirage.HeadlessBenchmark
         }
         private IEnumerator DisplayFramesPerSecons()
         {
-            int previousFrameCount = Time.frameCount;
+            var previousFrameCount = Time.frameCount;
             long previousMessageCount = 0;
 
             while (true)
             {
                 yield return new WaitForSeconds(1);
-                int frameCount = Time.frameCount;
-                int frames = frameCount - previousFrameCount;
+                var frameCount = Time.frameCount;
+                var frames = frameCount - previousFrameCount;
 
                 long messageCount = 0;
                 // todo use debug metrics from peer when they are added
@@ -47,7 +47,7 @@ namespace Mirage.HeadlessBenchmark
                 //    messageCount = kcpTransport.ReceivedMessageCount;
                 //}
 
-                long messages = messageCount - previousMessageCount;
+                var messages = messageCount - previousMessageCount;
 
                 if (Application.isEditor)
                     Debug.LogFormat("{0} FPS {1} messages {2} clients", frames, messages, server.NumberOfPlayers);
@@ -79,17 +79,17 @@ namespace Mirage.HeadlessBenchmark
         {
             StartCoroutine(DisplayFramesPerSecons());
 
-            string monster = GetArgValue("-monster");
+            var monster = GetArgValue("-monster");
             if (!string.IsNullOrEmpty(monster))
             {
-                for (int i = 0; i < int.Parse(monster); i++)
+                for (var i = 0; i < int.Parse(monster); i++)
                     SpawnMonsters(i);
             }
         }
 
         private void SpawnMonsters(int i)
         {
-            GameObject monster = Instantiate(MonsterPrefab);
+            var monster = Instantiate(MonsterPrefab);
             monster.gameObject.name = $"Monster {i}";
             serverObjectManager.Spawn(monster.gameObject);
         }
@@ -98,21 +98,21 @@ namespace Mirage.HeadlessBenchmark
         {
             if (string.IsNullOrEmpty(GetArg("-server"))) return;
 
-            GameObject serverGo = Instantiate(ServerPrefab);
+            var serverGo = Instantiate(ServerPrefab);
             serverGo.name = "Server";
             server = serverGo.GetComponent<NetworkServer>();
             server.MaxConnections = 9999;
             server.SocketFactory = socketFactory;
             serverObjectManager = serverGo.GetComponent<ServerObjectManager>();
 
-            NetworkSceneManager networkSceneManager = serverGo.GetComponent<NetworkSceneManager>();
+            var networkSceneManager = serverGo.GetComponent<NetworkSceneManager>();
             networkSceneManager.Server = server;
 
             serverObjectManager.Server = server;
             serverObjectManager.NetworkSceneManager = networkSceneManager;
             serverObjectManager.Start();
 
-            CharacterSpawner spawner = serverGo.GetComponent<CharacterSpawner>();
+            var spawner = serverGo.GetComponent<CharacterSpawner>();
             spawner.ServerObjectManager = serverObjectManager;
             spawner.Server = server;
 
@@ -124,19 +124,19 @@ namespace Mirage.HeadlessBenchmark
 
         private async UniTaskVoid StartClients()
         {
-            string clientArg = GetArg("-client");
+            var clientArg = GetArg("-client");
             if (!string.IsNullOrEmpty(clientArg))
             {
                 //network address provided?
-                string address = GetArgValue("-address");
+                var address = GetArgValue("-address");
                 if (string.IsNullOrEmpty(address))
                 {
                     address = "localhost";
                 }
 
                 //nested clients
-                int clonesCount = 1;
-                string clonesString = GetArgValue("-client");
+                var clonesCount = 1;
+                var clonesString = GetArgValue("-client");
                 if (!string.IsNullOrEmpty(clonesString))
                 {
                     clonesCount = int.Parse(clonesString);
@@ -145,7 +145,7 @@ namespace Mirage.HeadlessBenchmark
                 Console.WriteLine("Starting {0} clients", clonesCount);
 
                 // connect from a bunch of clients
-                for (int i = 0; i < clonesCount; i++)
+                for (var i = 0; i < clonesCount; i++)
                 {
                     StartClient(i, address);
                     await UniTask.Delay(500);
@@ -157,12 +157,12 @@ namespace Mirage.HeadlessBenchmark
 
         private void StartClient(int i, string networkAddress)
         {
-            GameObject clientGo = Instantiate(ClientPrefab);
+            var clientGo = Instantiate(ClientPrefab);
             clientGo.name = $"Client {i}";
-            NetworkClient client = clientGo.GetComponent<NetworkClient>();
-            ClientObjectManager objectManager = clientGo.GetComponent<ClientObjectManager>();
-            CharacterSpawner spawner = clientGo.GetComponent<CharacterSpawner>();
-            NetworkSceneManager networkSceneManager = clientGo.GetComponent<NetworkSceneManager>();
+            var client = clientGo.GetComponent<NetworkClient>();
+            var objectManager = clientGo.GetComponent<ClientObjectManager>();
+            var spawner = clientGo.GetComponent<CharacterSpawner>();
+            var networkSceneManager = clientGo.GetComponent<NetworkSceneManager>();
             networkSceneManager.Client = client;
 
             objectManager.Client = client;
@@ -208,10 +208,10 @@ namespace Mirage.HeadlessBenchmark
 
         private void ParseForSocket()
         {
-            string socket = GetArgValue("-socket");
+            var socket = GetArgValue("-socket");
             if (string.IsNullOrEmpty(socket) || socket.Equals("udp"))
             {
-                UdpSocketFactory newSocket = gameObject.AddComponent<UdpSocketFactory>();
+                var newSocket = gameObject.AddComponent<UdpSocketFactory>();
                 socketFactory = newSocket;
 
                 //Try to apply port if exists and needed by transport.
@@ -227,7 +227,7 @@ namespace Mirage.HeadlessBenchmark
 
         private string GetArgValue(string name)
         {
-            for (int i = 0; i < cachedArgs.Length; i++)
+            for (var i = 0; i < cachedArgs.Length; i++)
             {
                 if (cachedArgs[i] == name && cachedArgs.Length > i + 1)
                 {
@@ -239,7 +239,7 @@ namespace Mirage.HeadlessBenchmark
 
         private string GetArg(string name)
         {
-            for (int i = 0; i < cachedArgs.Length; i++)
+            for (var i = 0; i < cachedArgs.Length; i++)
             {
                 if (cachedArgs[i] == name)
                 {

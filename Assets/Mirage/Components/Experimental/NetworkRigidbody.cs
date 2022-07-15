@@ -160,11 +160,11 @@ namespace Mirage.Experimental
         {
             // only update if they have changed more than Sensitivity
 
-            Vector3 currentVelocity = syncVelocity ? target.velocity : default;
-            Vector3 currentAngularVelocity = syncAngularVelocity ? target.angularVelocity : default;
+            var currentVelocity = syncVelocity ? target.velocity : default;
+            var currentAngularVelocity = syncAngularVelocity ? target.angularVelocity : default;
 
-            bool velocityChanged = syncVelocity && ((previousValue.velocity - currentVelocity).sqrMagnitude > velocitySensitivity * velocitySensitivity);
-            bool angularVelocityChanged = syncAngularVelocity && ((previousValue.angularVelocity - currentAngularVelocity).sqrMagnitude > angularVelocitySensitivity * angularVelocitySensitivity);
+            var velocityChanged = syncVelocity && ((previousValue.velocity - currentVelocity).sqrMagnitude > velocitySensitivity * velocitySensitivity);
+            var angularVelocityChanged = syncAngularVelocity && ((previousValue.angularVelocity - currentAngularVelocity).sqrMagnitude > angularVelocitySensitivity * angularVelocitySensitivity);
 
             if (velocityChanged)
             {
@@ -204,15 +204,15 @@ namespace Mirage.Experimental
         [Client]
         private void SendVelocity()
         {
-            float now = Time.time;
+            var now = Time.time;
             if (now < previousValue.nextSyncTime)
                 return;
 
-            Vector3 currentVelocity = syncVelocity ? target.velocity : default;
-            Vector3 currentAngularVelocity = syncAngularVelocity ? target.angularVelocity : default;
+            var currentVelocity = syncVelocity ? target.velocity : default;
+            var currentAngularVelocity = syncAngularVelocity ? target.angularVelocity : default;
 
-            bool velocityChanged = syncVelocity && ((previousValue.velocity - currentVelocity).sqrMagnitude > velocitySensitivity * velocitySensitivity);
-            bool angularVelocityChanged = syncAngularVelocity && ((previousValue.angularVelocity - currentAngularVelocity).sqrMagnitude > angularVelocitySensitivity * angularVelocitySensitivity);
+            var velocityChanged = syncVelocity && ((previousValue.velocity - currentVelocity).sqrMagnitude > velocitySensitivity * velocitySensitivity);
+            var angularVelocityChanged = syncAngularVelocity && ((previousValue.angularVelocity - currentAngularVelocity).sqrMagnitude > angularVelocitySensitivity * angularVelocitySensitivity);
 
             // if angularVelocity has changed it is likely that velocity has also changed so just sync both values
             // however if only velocity has changed just send velocity

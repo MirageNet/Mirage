@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using Mono.Cecil;
-using ConstructorInfo = System.Reflection.ConstructorInfo;
 
 namespace Mirage.Weaver
 {
@@ -35,7 +34,7 @@ namespace Mirage.Weaver
                 return false;
 
             // are ANY parent classes of baseClass?
-            TypeReference parent = td.BaseType;
+            var parent = td.BaseType;
 
             if (parent == null)
                 return false;
@@ -85,7 +84,7 @@ namespace Mirage.Weaver
         // set the value of a constant in a class
         public static void SetConst<T>(this TypeDefinition td, string fieldName, T value) where T : struct
         {
-            FieldDefinition field = td.Fields.FirstOrDefault(f => f.Name == fieldName);
+            var field = td.Fields.FirstOrDefault(f => f.Name == fieldName);
 
             if (field == null)
             {
@@ -101,7 +100,7 @@ namespace Mirage.Weaver
 
         public static T GetConst<T>(this TypeDefinition td, string fieldName) where T : struct
         {
-            FieldDefinition field = td.Fields.FirstOrDefault(f => f.Name == fieldName);
+            var field = td.Fields.FirstOrDefault(f => f.Name == fieldName);
 
             if (field == null)
             {
@@ -115,7 +114,7 @@ namespace Mirage.Weaver
 
         public static TypeReference GetEnumUnderlyingType(this TypeDefinition td)
         {
-            foreach (FieldDefinition field in td.Fields)
+            foreach (var field in td.Fields)
             {
                 if (!field.IsStatic)
                     return field.FieldType;
@@ -131,11 +130,11 @@ namespace Mirage.Weaver
             if (td.Is<TInterface>())
                 return true;
 
-            TypeDefinition typedef = td;
+            var typedef = td;
 
             while (typedef != null)
             {
-                foreach (InterfaceImplementation iface in typedef.Interfaces)
+                foreach (var iface in typedef.Interfaces)
                 {
                     if (iface.InterfaceType.Is<TInterface>())
                         return true;
@@ -143,7 +142,7 @@ namespace Mirage.Weaver
 
                 try
                 {
-                    TypeReference parent = typedef.BaseType;
+                    var parent = typedef.BaseType;
                     typedef = parent?.Resolve();
                 }
                 catch (AssemblyResolutionException)
@@ -172,7 +171,7 @@ namespace Mirage.Weaver
 
                 if (parent.Scope.Name == "mscorlib")
                 {
-                    TypeDefinition resolved = parent.Resolve();
+                    var resolved = parent.Resolve();
                     return resolved != null;
                 }
 
@@ -206,10 +205,10 @@ namespace Mirage.Weaver
                 ExplicitThis = self.ExplicitThis
             };
 
-            foreach (ParameterDefinition parameter in self.Parameters)
+            foreach (var parameter in self.Parameters)
                 reference.Parameters.Add(new ParameterDefinition(parameter.ParameterType));
 
-            foreach (GenericParameter generic_parameter in self.GenericParameters)
+            foreach (var generic_parameter in self.GenericParameters)
                 reference.GenericParameters.Add(new GenericParameter(generic_parameter.Name, reference));
 
             return self.Module.ImportReference(reference);
@@ -217,7 +216,7 @@ namespace Mirage.Weaver
 
         public static MethodReference MakeHostInstanceSelfGeneric(this MethodReference self)
         {
-            TypeReference type = self.DeclaringType;
+            var type = self.DeclaringType;
             if (!type.HasGenericParameters)
             {
                 // if type isn't generic we dont need to do anything
@@ -241,7 +240,7 @@ namespace Mirage.Weaver
             {
                 // make generic instance of type, and give it the generic params as args
                 var genericType = new GenericInstanceType(self);
-                foreach (GenericParameter param in self.GenericParameters)
+                foreach (var param in self.GenericParameters)
                     genericType.GenericArguments.Add(param);
 
                 return genericType;
@@ -250,7 +249,7 @@ namespace Mirage.Weaver
 
         public static bool TryGetCustomAttribute<TAttribute>(this ICustomAttributeProvider method, out CustomAttribute customAttribute)
         {
-            foreach (CustomAttribute ca in method.CustomAttributes)
+            foreach (var ca in method.CustomAttributes)
             {
                 if (ca.AttributeType.Is<TAttribute>())
                 {
@@ -265,7 +264,7 @@ namespace Mirage.Weaver
 
         public static CustomAttribute GetCustomAttribute<TAttribute>(this ICustomAttributeProvider method)
         {
-            _ = method.TryGetCustomAttribute<TAttribute>(out CustomAttribute customAttribute);
+            _ = method.TryGetCustomAttribute<TAttribute>(out var customAttribute);
             return customAttribute;
         }
 
@@ -281,14 +280,14 @@ namespace Mirage.Weaver
 
         public static void AddCustomAttribute(this ICustomAttributeProvider attributeProvider, ModuleDefinition module, Type t)
         {
-            ConstructorInfo constructor = t.GetConstructor(new Type[0]);
+            var constructor = t.GetConstructor(new Type[0]);
             var customAttribute = new CustomAttribute(module.ImportReference(constructor));
             attributeProvider.CustomAttributes.Add(customAttribute);
         }
 
         public static T GetField<T>(this CustomAttribute ca, string field, T defaultValue)
         {
-            foreach (CustomAttributeNamedArgument customField in ca.Fields)
+            foreach (var customField in ca.Fields)
             {
                 if (customField.Name == field)
                 {
@@ -312,7 +311,7 @@ namespace Mirage.Weaver
             if (orignalType.Module != module)
                 orignalType = module.ImportReference(orignalType);
 
-            TypeReference fieldType = module.ImportReference(field.FieldType);
+            var fieldType = module.ImportReference(field.FieldType);
             return new FieldReference(field.Name, fieldType, orignalType);
         }
 
@@ -327,7 +326,7 @@ namespace Mirage.Weaver
             // if generic, then check if it has a type from orignalType 
             if (field.FieldType.IsGenericParameter && orignalType.IsGenericInstance)
             {
-                if (FindGenericArgmentWithMatchingName(field.FieldType, orignalType, out TypeReference found))
+                if (FindGenericArgmentWithMatchingName(field.FieldType, orignalType, out var found))
                     return found;
             }
 
@@ -338,12 +337,12 @@ namespace Mirage.Weaver
         private static bool FindGenericArgmentWithMatchingName(TypeReference genericParameter, TypeReference orignalType, out TypeReference found)
         {
             // resolve to get GenericParameters
-            TypeDefinition resolved = orignalType.Resolve();
+            var resolved = orignalType.Resolve();
 
-            string typeName = genericParameter.Name;
-            for (int i = 0; i < resolved.GenericParameters.Count; i++)
+            var typeName = genericParameter.Name;
+            for (var i = 0; i < resolved.GenericParameters.Count; i++)
             {
-                GenericParameter param = resolved.GenericParameters[i];
+                var param = resolved.GenericParameters[i];
                 if (param.Name == typeName)
                 {
                     var generic = (GenericInstanceType)orignalType;

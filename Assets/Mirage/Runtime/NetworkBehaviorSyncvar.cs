@@ -29,7 +29,7 @@ namespace Mirage
                 if (component != null)
                     return component;
 
-                if (objectLocator != null && objectLocator.TryGetIdentity(NetId, out NetworkIdentity result))
+                if (objectLocator != null && objectLocator.TryGetIdentity(NetId, out var result))
                 {
                     return result.NetworkBehaviours[componentId];
                 }
@@ -61,13 +61,13 @@ namespace Mirage
 
         public static NetworkBehaviorSyncvar ReadNetworkBehaviourSyncVar(this NetworkReader reader)
         {
-            MirageNetworkReader mirageReader = reader.ToMirageReader();
+            var mirageReader = reader.ToMirageReader();
 
-            uint netId = reader.ReadPackedUInt32();
-            int componentId = reader.ReadPackedInt32();
+            var netId = reader.ReadPackedUInt32();
+            var componentId = reader.ReadPackedInt32();
 
             NetworkIdentity identity = null;
-            bool hasValue = mirageReader.ObjectLocator?.TryGetIdentity(netId, out identity) ?? false;
+            var hasValue = mirageReader.ObjectLocator?.TryGetIdentity(netId, out identity) ?? false;
 
             return new NetworkBehaviorSyncvar
             {

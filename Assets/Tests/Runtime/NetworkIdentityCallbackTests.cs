@@ -82,7 +82,7 @@ namespace Mirage.Tests.Runtime
             gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
 
             // add own player connection
-            (NetworkPlayer serverPlayer, NetworkPlayer _) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
+            (var serverPlayer, var _) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
             serverPlayer.SceneIsReady = true;
             identity.Owner = serverPlayer;
 

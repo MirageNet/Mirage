@@ -122,9 +122,9 @@ namespace Mirage.Collections
             // if init,  write the full list content
             writer.WritePackedUInt32((uint)objects.Count);
 
-            for (int i = 0; i < objects.Count; i++)
+            for (var i = 0; i < objects.Count; i++)
             {
-                T obj = objects[i];
+                var obj = objects[i];
                 writer.Write(obj);
             }
 
@@ -140,9 +140,9 @@ namespace Mirage.Collections
             // write all the queued up changes
             writer.WritePackedUInt32((uint)changes.Count);
 
-            for (int i = 0; i < changes.Count; i++)
+            for (var i = 0; i < changes.Count; i++)
             {
-                Change change = changes[i];
+                var change = changes[i];
                 writer.WriteByte((byte)change.operation);
 
                 switch (change.operation)
@@ -173,15 +173,15 @@ namespace Mirage.Collections
             IsReadOnly = true;
 
             // if init,  write the full list content
-            int count = (int)reader.ReadPackedUInt32();
+            var count = (int)reader.ReadPackedUInt32();
 
             objects.Clear();
             OnClear?.Invoke();
             changes.Clear();
 
-            for (int i = 0; i < count; i++)
+            for (var i = 0; i < count; i++)
             {
-                T obj = reader.Read<T>();
+                var obj = reader.Read<T>();
                 objects.Add(obj);
                 OnInsert?.Invoke(i, obj);
             }
@@ -198,17 +198,17 @@ namespace Mirage.Collections
         {
             // This list can now only be modified by synchronization
             IsReadOnly = true;
-            bool raiseOnChange = false;
+            var raiseOnChange = false;
 
-            int changesCount = (int)reader.ReadPackedUInt32();
+            var changesCount = (int)reader.ReadPackedUInt32();
 
-            for (int i = 0; i < changesCount; i++)
+            for (var i = 0; i < changesCount; i++)
             {
                 var operation = (Operation)reader.ReadByte();
 
                 // apply the operation only if it is a new change
                 // that we have not applied yet
-                bool apply = changesAhead == 0;
+                var apply = changesAhead == 0;
 
                 switch (operation)
                 {
@@ -250,7 +250,7 @@ namespace Mirage.Collections
 
         private void DeserializeAdd(NetworkReader reader, bool apply)
         {
-            T newItem = reader.Read<T>();
+            var newItem = reader.Read<T>();
             if (apply)
             {
                 objects.Add(newItem);
@@ -270,8 +270,8 @@ namespace Mirage.Collections
 
         private void DeserializeInsert(NetworkReader reader, bool apply)
         {
-            int index = (int)reader.ReadPackedUInt32();
-            T newItem = reader.Read<T>();
+            var index = (int)reader.ReadPackedUInt32();
+            var newItem = reader.Read<T>();
             if (apply)
             {
                 objects.Insert(index, newItem);
@@ -281,10 +281,10 @@ namespace Mirage.Collections
 
         private void DeserializeRemoveAt(NetworkReader reader, bool apply)
         {
-            int index = (int)reader.ReadPackedUInt32();
+            var index = (int)reader.ReadPackedUInt32();
             if (apply)
             {
-                T oldItem = objects[index];
+                var oldItem = objects[index];
                 objects.RemoveAt(index);
                 OnRemove?.Invoke(index, oldItem);
             }
@@ -292,11 +292,11 @@ namespace Mirage.Collections
 
         private void DeserializeSet(NetworkReader reader, bool apply)
         {
-            int index = (int)reader.ReadPackedUInt32();
-            T newItem = reader.Read<T>();
+            var index = (int)reader.ReadPackedUInt32();
+            var newItem = reader.Read<T>();
             if (apply)
             {
-                T oldItem = objects[index];
+                var oldItem = objects[index];
                 objects[index] = newItem;
                 OnSet?.Invoke(index, oldItem, newItem);
             }
@@ -311,7 +311,7 @@ namespace Mirage.Collections
 
         public void AddRange(IEnumerable<T> range)
         {
-            foreach (T entry in range)
+            foreach (var entry in range)
             {
                 Add(entry);
             }
@@ -330,7 +330,7 @@ namespace Mirage.Collections
 
         public int IndexOf(T item)
         {
-            for (int i = 0; i < objects.Count; ++i)
+            for (var i = 0; i < objects.Count; ++i)
                 if (comparer.Equals(item, objects[i]))
                     return i;
             return -1;
@@ -338,7 +338,7 @@ namespace Mirage.Collections
 
         public int FindIndex(Predicate<T> match)
         {
-            for (int i = 0; i < objects.Count; ++i)
+            for (var i = 0; i < objects.Count; ++i)
                 if (match(objects[i]))
                     return i;
             return -1;
@@ -346,14 +346,14 @@ namespace Mirage.Collections
 
         public T Find(Predicate<T> match)
         {
-            int i = FindIndex(match);
+            var i = FindIndex(match);
             return (i != -1) ? objects[i] : default;
         }
 
         public List<T> FindAll(Predicate<T> match)
         {
             var results = new List<T>();
-            for (int i = 0; i < objects.Count; ++i)
+            for (var i = 0; i < objects.Count; ++i)
                 if (match(objects[i]))
                     results.Add(objects[i]);
             return results;
@@ -368,7 +368,7 @@ namespace Mirage.Collections
 
         public void InsertRange(int index, IEnumerable<T> range)
         {
-            foreach (T entry in range)
+            foreach (var entry in range)
             {
                 Insert(index, entry);
                 index++;
@@ -377,8 +377,8 @@ namespace Mirage.Collections
 
         public bool Remove(T item)
         {
-            int index = IndexOf(item);
-            bool result = index >= 0;
+            var index = IndexOf(item);
+            var result = index >= 0;
             if (result)
             {
                 RemoveAt(index);
@@ -388,7 +388,7 @@ namespace Mirage.Collections
 
         public void RemoveAt(int index)
         {
-            T oldItem = objects[index];
+            var oldItem = objects[index];
             objects.RemoveAt(index);
             OnRemove?.Invoke(index, oldItem);
             AddOperation(Operation.OP_REMOVEAT, index, default);
@@ -397,11 +397,11 @@ namespace Mirage.Collections
         public int RemoveAll(Predicate<T> match)
         {
             var toRemove = new List<T>();
-            for (int i = 0; i < objects.Count; ++i)
+            for (var i = 0; i < objects.Count; ++i)
                 if (match(objects[i]))
                     toRemove.Add(objects[i]);
 
-            foreach (T entry in toRemove)
+            foreach (var entry in toRemove)
             {
                 Remove(entry);
             }
@@ -416,7 +416,7 @@ namespace Mirage.Collections
             {
                 if (!comparer.Equals(objects[i], value))
                 {
-                    T oldItem = objects[i];
+                    var oldItem = objects[i];
                     objects[i] = value;
                     OnSet?.Invoke(i, oldItem, value);
                     AddOperation(Operation.OP_SET, i, value);

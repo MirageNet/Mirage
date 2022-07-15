@@ -35,9 +35,9 @@ namespace Mirage.Serialization
         /// <typeparam name="T"></typeparam>
         public static void RegisterMessage<T>()
         {
-            int id = GetId<T>();
+            var id = GetId<T>();
 
-            if (messageTypes.TryGetValue(id, out Type type) && type != typeof(T))
+            if (messageTypes.TryGetValue(id, out var type) && type != typeof(T))
             {
                 throw new ArgumentException($"Message {typeof(T)} and {messageTypes[id]} have the same ID. Change the name of one of those messages");
             }
@@ -66,9 +66,9 @@ namespace Mirage.Serialization
             // this works because value types cannot be derived
             // if it is a reference type (for example IMessageBase),
             // ask the message for the real type
-            Type type = default(T) == null && message != null ? message.GetType() : typeof(T);
+            var type = default(T) == null && message != null ? message.GetType() : typeof(T);
 
-            int id = GetId(type);
+            var id = GetId(type);
             writer.WriteUInt16((ushort)id);
 
             writer.Write(message);
@@ -79,10 +79,10 @@ namespace Mirage.Serialization
         // => useful for local client message enqueue
         public static byte[] Pack<T>(T message)
         {
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            using (var writer = NetworkWriterPool.GetWriter())
             {
                 Pack(message, writer);
-                byte[] data = writer.ToArray();
+                var data = writer.ToArray();
 
                 return data;
             }
@@ -105,7 +105,7 @@ namespace Mirage.Serialization
         /// <exception cref="FormatException"></exception>
         public static T Unpack<T>(byte[] data, IObjectLocator objectLocator)
         {
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(data, objectLocator))
+            using (var networkReader = NetworkReaderPool.GetReader(data, objectLocator))
             {
                 ValidateId<T>(networkReader);
 
@@ -121,7 +121,7 @@ namespace Mirage.Serialization
         /// <exception cref="FormatException"></exception>
         private static void ValidateId<T>(PooledNetworkReader networkReader)
         {
-            int typeId = GetId<T>();
+            var typeId = GetId<T>();
 
             int id = networkReader.ReadUInt16();
             if (id != typeId)

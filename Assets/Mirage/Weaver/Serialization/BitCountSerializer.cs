@@ -40,7 +40,7 @@ namespace Mirage.Weaver.Serialization
 
         public override void AppendWriteField(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldReference fieldReference)
         {
-            MethodReference writeWithBitCount = module.ImportReference(typeof(NetworkWriter).GetMethod(nameof(NetworkWriter.Write)));
+            var writeWithBitCount = module.ImportReference(typeof(NetworkWriter).GetMethod(nameof(NetworkWriter.Write)));
 
             worker.Append(LoadParamOrArg0(worker, writerParameter));
             worker.Append(LoadParamOrArg0(worker, typeParameter));
@@ -63,7 +63,7 @@ namespace Mirage.Weaver.Serialization
 
         public override void AppendWriteParameter(ModuleDefinition module, ILProcessor worker, VariableDefinition writer, ParameterDefinition valueParameter)
         {
-            MethodReference writeWithBitCount = module.ImportReference(typeof(NetworkWriter).GetMethod(nameof(NetworkWriter.Write)));
+            var writeWithBitCount = module.ImportReference(typeof(NetworkWriter).GetMethod(nameof(NetworkWriter.Write)));
 
             worker.Append(worker.Create(OpCodes.Ldloc, writer));
             worker.Append(worker.Create(OpCodes.Ldarg, valueParameter));
@@ -84,8 +84,8 @@ namespace Mirage.Weaver.Serialization
 
         private void WriteZigZag(ModuleDefinition module, ILProcessor worker, TypeReference fieldType)
         {
-            bool useLong = fieldType.Is<long>();
-            MethodReference encode = useLong
+            var useLong = fieldType.Is<long>();
+            var encode = useLong
                 ? module.ImportReference((long v) => ZigZag.Encode(v))
                 : module.ImportReference((int v) => ZigZag.Encode(v));
 
@@ -100,7 +100,7 @@ namespace Mirage.Weaver.Serialization
 
         public override void AppendRead(ModuleDefinition module, ILProcessor worker, ParameterDefinition readerParameter, TypeReference fieldType)
         {
-            MethodReference readWithBitCount = module.ImportReference(readerParameter.ParameterType.Resolve().GetMethod(nameof(NetworkReader.Read)));
+            var readWithBitCount = module.ImportReference(readerParameter.ParameterType.Resolve().GetMethod(nameof(NetworkReader.Read)));
 
             // add `reader` to stack
             worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
@@ -127,8 +127,8 @@ namespace Mirage.Weaver.Serialization
 
         private void ReadZigZag(ModuleDefinition module, ILProcessor worker, TypeReference fieldType)
         {
-            bool useLong = fieldType.Is<long>();
-            MethodReference encode = useLong
+            var useLong = fieldType.Is<long>();
+            var encode = useLong
                 ? module.ImportReference((ulong v) => ZigZag.Decode(v))
                 : module.ImportReference((uint v) => ZigZag.Decode(v));
 

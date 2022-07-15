@@ -37,7 +37,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void ClearEventOnSyncAll()
         {
-            Action callback = Substitute.For<Action>();
+            var callback = Substitute.For<Action>();
             clientSyncSet.OnClear += callback;
             SerializeHelper.SerializeAllTo(serverSyncSet, clientSyncSet);
             callback.Received().Invoke();
@@ -46,7 +46,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void InsertEventOnSyncAll()
         {
-            Action<string> callback = Substitute.For<Action<string>>();
+            var callback = Substitute.For<Action<string>>();
             clientSyncSet.OnAdd += callback;
             SerializeHelper.SerializeAllTo(serverSyncSet, clientSyncSet);
 
@@ -58,7 +58,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void ChangeEventOnSyncAll()
         {
-            Action callback = Substitute.For<Action>();
+            var callback = Substitute.For<Action>();
             clientSyncSet.OnChange += callback;
             SerializeHelper.SerializeAllTo(serverSyncSet, clientSyncSet);
             callback.Received().Invoke();
@@ -109,7 +109,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void AddClientCallbackTest()
         {
-            Action<string> callback = Substitute.For<Action<string>>();
+            var callback = Substitute.For<Action<string>>();
             clientSyncSet.OnAdd += callback;
             serverSyncSet.Add("yay");
             SerializeHelper.SerializeDeltaTo(serverSyncSet, clientSyncSet);
@@ -119,7 +119,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void RemoveClientCallbackTest()
         {
-            Action<string> callback = Substitute.For<Action<string>>();
+            var callback = Substitute.For<Action<string>>();
             clientSyncSet.OnRemove += callback;
             serverSyncSet.Remove("World");
             SerializeHelper.SerializeDeltaTo(serverSyncSet, clientSyncSet);
@@ -129,7 +129,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void ClearClientCallbackTest()
         {
-            Action callback = Substitute.For<Action>();
+            var callback = Substitute.For<Action>();
             clientSyncSet.OnClear += callback;
             serverSyncSet.Clear();
             SerializeHelper.SerializeDeltaTo(serverSyncSet, clientSyncSet);
@@ -139,7 +139,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void ChangeClientCallbackTest()
         {
-            Action callback = Substitute.For<Action>();
+            var callback = Substitute.For<Action>();
             clientSyncSet.OnChange += callback;
             serverSyncSet.Add("1");
             serverSyncSet.Add("2");
@@ -284,7 +284,7 @@ namespace Mirage.Tests.Runtime
             clientSyncSet.Reset();
 
             // make old client the host
-            SyncSetString hostList = clientSyncSet;
+            var hostList = clientSyncSet;
             var clientList2 = new SyncSetString();
 
             Assert.That(hostList.IsReadOnly, Is.False);

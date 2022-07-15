@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Mirage.Weaver;
-using Mono.Cecil;
 using Mono.Cecil.Cil;
 using NUnit.Framework;
 
@@ -119,16 +118,16 @@ namespace Mirage.Tests.Weaver
         /// <param name="methodName"></param>
         private void CheckAddedCode(Expression<Func<NetworkBehaviour, bool>> pred, string className, string methodName)
         {
-            TypeDefinition type = assembly.MainModule.GetType(className);
-            MethodDefinition method = type.Methods.First(m => m.Name == methodName);
-            MethodBody body = method.Body;
+            var type = assembly.MainModule.GetType(className);
+            var method = type.Methods.First(m => m.Name == methodName);
+            var body = method.Body;
 
-            Instruction top = body.Instructions[0];
+            var top = body.Instructions[0];
             Assert.That(top.OpCode, Is.EqualTo(OpCodes.Ldarg_0));
 
-            MethodReference methodRef = assembly.MainModule.ImportReference(pred);
+            var methodRef = assembly.MainModule.ImportReference(pred);
 
-            Instruction call = body.Instructions[1];
+            var call = body.Instructions[1];
 
             Assert.That(call.OpCode, Is.EqualTo(OpCodes.Call));
             Assert.That(call.Operand.ToString(), Is.EqualTo(methodRef.ToString()));

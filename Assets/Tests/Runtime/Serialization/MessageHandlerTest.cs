@@ -31,10 +31,10 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void InvokesMessageHandler()
         {
-            int invoked = 0;
+            var invoked = 0;
             messageHandler.RegisterHandler<SceneReadyMessage>(_ => { invoked++; });
 
-            int messageId = MessagePacker.GetId<SceneReadyMessage>();
+            var messageId = MessagePacker.GetId<SceneReadyMessage>();
             messageHandler.InvokeHandler(player, messageId, reader);
 
             Assert.That(invoked, Is.EqualTo(1), "Should have been invoked");
@@ -47,7 +47,7 @@ namespace Mirage.Tests.Runtime
         {
             messageHandler = new MessageHandler(null, disconnectOnThrow);
 
-            int invoked = 0;
+            var invoked = 0;
             messageHandler.RegisterHandler<SceneReadyMessage>(_ => { invoked++; throw new InvalidOperationException("Fun Exception"); });
 
             var packet = new ArraySegment<byte>(MessagePacker.Pack(new SceneReadyMessage()));
@@ -75,7 +75,7 @@ namespace Mirage.Tests.Runtime
         {
             ExpectLog(() =>
             {
-                int messageId = MessagePacker.GetId<SceneMessage>();
+                var messageId = MessagePacker.GetId<SceneMessage>();
                 messageHandler.InvokeHandler(player, messageId, reader);
             }
             , LogType.Warning, $"Unexpected message {typeof(SceneMessage)} received from {player}. Did you register a handler for it?");
@@ -94,12 +94,12 @@ namespace Mirage.Tests.Runtime
 
         private void ExpectLog(Action action, LogType type, string log)
         {
-            ILogger logger = LogFactory.GetLogger(typeof(MessageHandler));
-            ILogHandler existing = logger.logHandler;
-            LogType existingLevel = logger.filterLogType;
+            var logger = LogFactory.GetLogger(typeof(MessageHandler));
+            var existing = logger.logHandler;
+            var existingLevel = logger.filterLogType;
             try
             {
-                ILogHandler handler = Substitute.For<ILogHandler>();
+                var handler = Substitute.For<ILogHandler>();
                 logger.logHandler = handler;
                 logger.filterLogType = LogType.Log;
 

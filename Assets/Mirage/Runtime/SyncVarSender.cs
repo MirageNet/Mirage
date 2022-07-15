@@ -20,7 +20,7 @@ namespace Mirage
         {
             DirtyObjectsTmp.Clear();
 
-            foreach (NetworkIdentity identity in DirtyObjects)
+            foreach (var identity in DirtyObjects)
             {
                 if (identity != null)
                 {
@@ -33,7 +33,7 @@ namespace Mirage
 
             DirtyObjects.Clear();
 
-            foreach (NetworkIdentity obj in DirtyObjectsTmp)
+            foreach (var obj in DirtyObjectsTmp)
                 DirtyObjects.Add(obj);
         }
     }

@@ -28,9 +28,9 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void ResizesIfWritingOverCapacity()
         {
-            int overCapacity = (1300 / 8) + 10;
+            var overCapacity = (1300 / 8) + 10;
             Assert.That(writer.ByteCapacity, Is.EqualTo(1304), "is first multiple of 8 over 1300");
-            for (int i = 0; i < overCapacity; i++)
+            for (var i = 0; i < overCapacity; i++)
             {
                 writer.WriteUInt64((ulong)i);
             }
@@ -42,10 +42,10 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void WillResizeMultipleTimes()
         {
-            int overCapacity = ((1300 / 8) + 10) * 10; // 1720 * 8 = 13760 bytes
+            var overCapacity = ((1300 / 8) + 10) * 10; // 1720 * 8 = 13760 bytes
 
             Assert.That(writer.ByteCapacity, Is.EqualTo(1304), "is first multiple of 8 over 1300");
-            for (int i = 0; i < overCapacity; i++)
+            for (var i = 0; i < overCapacity; i++)
             {
                 writer.WriteUInt64((ulong)i);
             }
@@ -57,8 +57,8 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void ResizedArrayContainsAllData()
         {
-            int overCapacity = (1300 / 8) + 10;
-            for (int i = 0; i < overCapacity; i++)
+            var overCapacity = (1300 / 8) + 10;
+            for (var i = 0; i < overCapacity; i++)
             {
                 writer.WriteUInt64((ulong)i);
             }
@@ -66,7 +66,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
             var segment = writer.ToArraySegment();
             reader.Reset(segment);
-            for (int i = 0; i < overCapacity; i++)
+            for (var i = 0; i < overCapacity; i++)
             {
                 Assert.That(reader.ReadUInt64(), Is.EqualTo((ulong)i));
             }
@@ -102,7 +102,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.WriteUInt16(value1);
 
             reader.Reset(writer.ToArray());
-            ushort out1 = reader.ReadUInt16();
+            var out1 = reader.ReadUInt16();
             Assert.That(out1, Is.EqualTo(value1));
 
             // reset and write 2nd value
@@ -111,7 +111,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.WriteUInt16(value2);
 
             reader.Reset(writer.ToArray());
-            ushort out2 = reader.ReadUInt16();
+            var out2 = reader.ReadUInt16();
             Assert.That(out2, Is.EqualTo(value2), "Value 2 was incorrect");
         }
 
@@ -124,7 +124,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.WriteUInt64(value1);
 
             reader.Reset(writer.ToArray());
-            ulong out1 = reader.ReadUInt64();
+            var out1 = reader.ReadUInt64();
             Assert.That(out1, Is.EqualTo(value1));
 
             // reset and write 2nd value
@@ -133,7 +133,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.WriteUInt64(value2);
 
             reader.Reset(writer.ToArray());
-            ulong out2 = reader.ReadUInt64();
+            var out2 = reader.ReadUInt64();
             Assert.That(out2, Is.EqualTo(value2), "Value 2 was incorrect");
         }
 
@@ -146,7 +146,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.Write(value1, 64);
 
             reader.Reset(writer.ToArray());
-            ulong out1 = reader.Read(64);
+            var out1 = reader.Read(64);
             Assert.That(out1, Is.EqualTo(value1));
 
             // reset and write 2nd value
@@ -155,7 +155,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.Write(value2, 64);
 
             reader.Reset(writer.ToArray());
-            ulong out2 = reader.Read(64);
+            var out2 = reader.Read(64);
             Assert.That(out2, Is.EqualTo(value2), "Value 2 was incorrect");
         }
     }

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Mirage.Logging;
-using UnityEngine;
 
 namespace Mirage.EditorScripts.Logging
 {
@@ -26,9 +25,9 @@ namespace Mirage.EditorScripts.Logging
 
         private void RemoveDuplicates()
         {
-            for (int i = 0; i < settings.LogLevels.Count; i++)
+            for (var i = 0; i < settings.LogLevels.Count; i++)
             {
-                bool added = duplicateChecker.Add(settings.LogLevels[i].FullName);
+                var added = duplicateChecker.Add(settings.LogLevels[i].FullName);
                 // is duplicate, remove it
                 if (!added)
                 {
@@ -41,9 +40,9 @@ namespace Mirage.EditorScripts.Logging
         private void AddNewFromFactory()
         {
             // try add new types
-            foreach (KeyValuePair<string, ILogger> logger in LogFactory.Loggers)
+            foreach (var logger in LogFactory.Loggers)
             {
-                bool added = duplicateChecker.Add(logger.Key);
+                var added = duplicateChecker.Add(logger.Key);
                 // is new, add it
                 if (added)
                 {

@@ -21,7 +21,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         public void ClampsToZero()
         {
             packer.Pack(writer, -4.5f);
-            float outValue = packer.Unpack(GetReader());
+            var outValue = packer.Unpack(GetReader());
 
             Assert.That(outValue, Is.Zero);
         }
@@ -31,7 +31,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         {
             const float value = 99.5f;
             packer.Pack(writer, value);
-            float outValue = packer.Unpack(GetReader());
+            var outValue = packer.Unpack(GetReader());
 
             Assert.That(outValue, Is.EqualTo(value).Within(precsion));
         }

@@ -135,7 +135,7 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         public void TearDown()
         {
             // Clean up all created objects
-            foreach (GameObject item in createdObjects)
+            foreach (var item in createdObjects)
             {
                 Object.DestroyImmediate(item);
             }
@@ -152,11 +152,11 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
 
         private static void SyncNetworkBehaviour(NetworkBehaviour source, NetworkBehaviour target, bool initialState)
         {
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            using (var writer = NetworkWriterPool.GetWriter())
             {
                 source.OnSerialize(writer, initialState);
 
-                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment(), target.World))
+                using (var reader = NetworkReaderPool.GetReader(writer.ToArraySegment(), target.World))
                 {
                     target.OnDeserialize(reader, initialState);
                 }
@@ -168,8 +168,8 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         [TestCase(false)]
         public void BehaviourWithSyncVarTest(bool initialState)
         {
-            BehaviourWithSyncVar source = CreateBehaviour<BehaviourWithSyncVar>();
-            BehaviourWithSyncVar target = CreateBehaviour<BehaviourWithSyncVar>();
+            var source = CreateBehaviour<BehaviourWithSyncVar>();
+            var target = CreateBehaviour<BehaviourWithSyncVar>();
 
             source.SyncField = 10;
             source.syncList.Add(true);
@@ -186,8 +186,8 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         [TestCase(false)]
         public void OverrideBehaviourFromSyncVarTest(bool initialState)
         {
-            OverrideBehaviourFromSyncVar source = CreateBehaviour<OverrideBehaviourFromSyncVar>();
-            OverrideBehaviourFromSyncVar target = CreateBehaviour<OverrideBehaviourFromSyncVar>();
+            var source = CreateBehaviour<OverrideBehaviourFromSyncVar>();
+            var target = CreateBehaviour<OverrideBehaviourFromSyncVar>();
 
             source.SyncFieldInAbstract = 12;
             source.syncListInAbstract.Add(true);
@@ -206,8 +206,8 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         [TestCase(false)]
         public void OverrideBehaviourWithSyncVarFromSyncVarTest(bool initialState)
         {
-            OverrideBehaviourWithSyncVarFromSyncVar source = CreateBehaviour<OverrideBehaviourWithSyncVarFromSyncVar>();
-            OverrideBehaviourWithSyncVarFromSyncVar target = CreateBehaviour<OverrideBehaviourWithSyncVarFromSyncVar>();
+            var source = CreateBehaviour<OverrideBehaviourWithSyncVarFromSyncVar>();
+            var target = CreateBehaviour<OverrideBehaviourWithSyncVarFromSyncVar>();
 
             source.SyncFieldInAbstract = 10;
             source.syncListInAbstract.Add(true);
@@ -235,8 +235,8 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         [TestCase(false)]
         public void SubClassTest(bool initialState)
         {
-            SubClass source = CreateBehaviour<SubClass>();
-            SubClass target = CreateBehaviour<SubClass>();
+            var source = CreateBehaviour<SubClass>();
+            var target = CreateBehaviour<SubClass>();
 
             source.SyncFieldInAbstract = 10;
             source.syncListInAbstract.Add(true);
@@ -257,8 +257,8 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         [TestCase(false)]
         public void SubClassFromSyncVarTest(bool initialState)
         {
-            SubClassFromSyncVar source = CreateBehaviour<SubClassFromSyncVar>();
-            SubClassFromSyncVar target = CreateBehaviour<SubClassFromSyncVar>();
+            var source = CreateBehaviour<SubClassFromSyncVar>();
+            var target = CreateBehaviour<SubClassFromSyncVar>();
 
             source.SyncFieldInAbstract = 10;
             source.syncListInAbstract.Add(true);
@@ -283,8 +283,8 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         [TestCase(false)]
         public void BehaviourWithSyncVarWithOnSerializeTest(bool initialState)
         {
-            BehaviourWithSyncVarWithOnSerialize source = CreateBehaviour<BehaviourWithSyncVarWithOnSerialize>();
-            BehaviourWithSyncVarWithOnSerialize target = CreateBehaviour<BehaviourWithSyncVarWithOnSerialize>();
+            var source = CreateBehaviour<BehaviourWithSyncVarWithOnSerialize>();
+            var target = CreateBehaviour<BehaviourWithSyncVarWithOnSerialize>();
 
             source.SyncField = 10;
             source.syncList.Add(true);
@@ -306,8 +306,8 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         [TestCase(false)]
         public void OverrideBehaviourFromSyncVarWithOnSerializeTest(bool initialState)
         {
-            OverrideBehaviourFromSyncVarWithOnSerialize source = CreateBehaviour<OverrideBehaviourFromSyncVarWithOnSerialize>();
-            OverrideBehaviourFromSyncVarWithOnSerialize target = CreateBehaviour<OverrideBehaviourFromSyncVarWithOnSerialize>();
+            var source = CreateBehaviour<OverrideBehaviourFromSyncVarWithOnSerialize>();
+            var target = CreateBehaviour<OverrideBehaviourFromSyncVarWithOnSerialize>();
 
             source.SyncFieldInAbstract = 12;
             source.syncListInAbstract.Add(true);
@@ -331,8 +331,8 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         [TestCase(false)]
         public void OverrideBehaviourWithSyncVarFromSyncVarWithOnSerializeTest(bool initialState)
         {
-            OverrideBehaviourWithSyncVarFromSyncVarWithOnSerialize source = CreateBehaviour<OverrideBehaviourWithSyncVarFromSyncVarWithOnSerialize>();
-            OverrideBehaviourWithSyncVarFromSyncVarWithOnSerialize target = CreateBehaviour<OverrideBehaviourWithSyncVarFromSyncVarWithOnSerialize>();
+            var source = CreateBehaviour<OverrideBehaviourWithSyncVarFromSyncVarWithOnSerialize>();
+            var target = CreateBehaviour<OverrideBehaviourWithSyncVarFromSyncVarWithOnSerialize>();
 
             source.SyncFieldInAbstract = 10;
             source.syncListInAbstract.Add(true);

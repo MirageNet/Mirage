@@ -22,7 +22,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             const int CValue = 2;
             int clientA = default;
             int clientB = default;
-            int called = 0;
+            var called = 0;
             clientComponent.health = CValue;
             clientComponent.OnHealthChanged += (a, b) =>
             {

@@ -9,7 +9,7 @@ namespace Mirage.Tests
         [Test]
         public void SenderUsesDefaultChannelForMessage()
         {
-            IMessageSender sender = Substitute.For<IMessageSender>();
+            var sender = Substitute.For<IMessageSender>();
             var msg = new NetworkPingMessage();
             sender.Send(msg);
             sender.Received(1).Send(msg, Channel.Reliable);
@@ -18,7 +18,7 @@ namespace Mirage.Tests
         [Test]
         public void SenderUsesDefaultChannelForSegement()
         {
-            IMessageSender sender = Substitute.For<IMessageSender>();
+            var sender = Substitute.For<IMessageSender>();
             var segment = new ArraySegment<byte>();
             sender.Send(segment);
             sender.Received(1).Send(segment, Channel.Reliable);

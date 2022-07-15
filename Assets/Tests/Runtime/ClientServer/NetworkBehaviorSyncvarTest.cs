@@ -55,17 +55,17 @@ namespace Mirage.Tests.Runtime.ClientServer
         public IEnumerator SpawnWithTarget() => UniTask.ToCoroutine(async () =>
         {
             // create an object, set the target and spawn it
-            UnityEngine.GameObject newObject = UnityEngine.Object.Instantiate(playerPrefab);
-            SampleBehaviorWithNB newBehavior = newObject.GetComponent<SampleBehaviorWithNB>();
+            var newObject = UnityEngine.Object.Instantiate(playerPrefab);
+            var newBehavior = newObject.GetComponent<SampleBehaviorWithNB>();
             newBehavior.target = serverComponent;
             serverObjectManager.Spawn(newObject);
 
             // wait until the client spawns it
-            uint newObjectId = newBehavior.NetId;
-            NetworkIdentity newClientObject = await AsyncUtil.WaitUntilSpawn(client.World, newObjectId);
+            var newObjectId = newBehavior.NetId;
+            var newClientObject = await AsyncUtil.WaitUntilSpawn(client.World, newObjectId);
 
             // check if the target was set correctly in the client
-            SampleBehaviorWithNB newClientBehavior = newClientObject.GetComponent<SampleBehaviorWithNB>();
+            var newClientBehavior = newClientObject.GetComponent<SampleBehaviorWithNB>();
             Assert.That(newClientBehavior.target, Is.SameAs(clientComponent));
 
             // cleanup

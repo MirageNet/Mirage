@@ -70,9 +70,9 @@ namespace Mirage.Serialization
         {
             QuickNormalize(ref _value);
 
-            FindLargestIndex(ref _value, out uint index);
+            FindLargestIndex(ref _value, out var index);
 
-            GetSmallerDimensions(index, ref _value, out float a, out float b, out float c);
+            GetSmallerDimensions(index, ref _value, out var a, out var b, out var c);
 
             // largest needs to be positive to be calculated by reader 
             // if largest is negative flip sign of others because Q = -Q
@@ -96,7 +96,7 @@ namespace Mirage.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void QuickNormalize(ref Quaternion quaternion)
         {
-            float dot =
+            var dot =
                 (quaternion.x * quaternion.x) +
                 (quaternion.y * quaternion.y) +
                 (quaternion.z * quaternion.z) +
@@ -108,7 +108,7 @@ namespace Mirage.Serialization
             // only normalize if dot product is outside allowed range
             if (minAllowed > dot || maxAllowed < dot)
             {
-                float dotSqrt = (float)Math.Sqrt(dot);
+                var dotSqrt = (float)Math.Sqrt(dot);
                 // rotation is 0
                 if (dotSqrt < allowedEpsilon)
                 {
@@ -120,7 +120,7 @@ namespace Mirage.Serialization
                 }
                 else
                 {
-                    float iDotSqrt = 1 / dotSqrt;
+                    var iDotSqrt = 1 / dotSqrt;
                     quaternion.x *= iDotSqrt;
                     quaternion.y *= iDotSqrt;
                     quaternion.z *= iDotSqrt;
@@ -132,13 +132,13 @@ namespace Mirage.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void FindLargestIndex(ref Quaternion quaternion, out uint index)
         {
-            float x2 = quaternion.x * quaternion.x;
-            float y2 = quaternion.y * quaternion.y;
-            float z2 = quaternion.z * quaternion.z;
-            float w2 = quaternion.w * quaternion.w;
+            var x2 = quaternion.x * quaternion.x;
+            var y2 = quaternion.y * quaternion.y;
+            var z2 = quaternion.z * quaternion.z;
+            var w2 = quaternion.w * quaternion.w;
 
             index = 0;
-            float current = x2;
+            var current = x2;
             // check vs sq to avoid doing mathf.abs
             if (y2 > current)
             {
@@ -194,16 +194,16 @@ namespace Mirage.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Quaternion Unpack(NetworkReader reader)
         {
-            ulong combine = reader.Read(totalBitCount);
+            var combine = reader.Read(totalBitCount);
 
-            uint index = (uint)(combine >> bitCountPerElement * 3);
+            var index = (uint)(combine >> bitCountPerElement * 3);
 
-            float a = floatPacker.Unpack((uint)(combine >> bitCountPerElement * 2) & readMask);
-            float b = floatPacker.Unpack((uint)(combine >> bitCountPerElement * 1) & readMask);
-            float c = floatPacker.Unpack((uint)combine & readMask);
+            var a = floatPacker.Unpack((uint)(combine >> bitCountPerElement * 2) & readMask);
+            var b = floatPacker.Unpack((uint)(combine >> bitCountPerElement * 1) & readMask);
+            var c = floatPacker.Unpack((uint)combine & readMask);
 
-            float l2 = 1 - ((a * a) + (b * b) + (c * c));
-            float largest = (float)Math.Sqrt(l2);
+            var l2 = 1 - ((a * a) + (b * b) + (c * c));
+            var largest = (float)Math.Sqrt(l2);
             // this Quaternion should already be normallized because of the way that largest is calculated
             switch (index)
             {

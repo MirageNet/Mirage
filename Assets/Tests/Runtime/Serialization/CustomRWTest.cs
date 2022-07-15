@@ -38,9 +38,9 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             var quest = new MockQuest(100);
 
-            byte[] data = MessagePacker.Pack(quest);
+            var data = MessagePacker.Pack(quest);
 
-            MockQuest unpacked = MessagePacker.Unpack<MockQuest>(data);
+            var unpacked = MessagePacker.Unpack<MockQuest>(data);
             Assert.That(unpacked.Id, Is.EqualTo(100));
         }
     }

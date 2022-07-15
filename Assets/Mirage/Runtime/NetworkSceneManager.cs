@@ -159,7 +159,7 @@ namespace Mirage
             if (!scene.IsValid())
                 throw new ArgumentException("Scene is not valid", nameof(scene));
 
-            if (!ServerSceneData.TryGetValue(scene, out HashSet<INetworkPlayer> players))
+            if (!ServerSceneData.TryGetValue(scene, out var players))
             {
                 throw new KeyNotFoundException($"Could not find player list for scene:{scene}");
             }
@@ -180,7 +180,7 @@ namespace Mirage
         }
         public void ScenesPlayerIsInNonAlloc(INetworkPlayer player, List<Scene> scenes)
         {
-            foreach (KeyValuePair<Scene, HashSet<INetworkPlayer>> scene in _serverSceneData)
+            foreach (var scene in _serverSceneData)
             {
                 if (scene.Value.Contains(player))
                     scenes.Add(scene.Key);
@@ -222,7 +222,7 @@ namespace Mirage
             //Additive are scenes loaded on server and this client is not a host client
             if (message.AdditiveScenes != null && message.AdditiveScenes.Count > 0 && Client && !Client.IsLocalClient)
             {
-                for (int sceneIndex = 0; sceneIndex < message.AdditiveScenes.Count; sceneIndex++)
+                for (var sceneIndex = 0; sceneIndex < message.AdditiveScenes.Count; sceneIndex++)
                 {
                     if (string.IsNullOrEmpty(message.AdditiveScenes[sceneIndex])) continue;
 
@@ -455,7 +455,7 @@ namespace Mirage
         {
             logger.Log("[NetworkSceneManager] - OnServerAuthenticated");
 
-            List<string> additiveScenes = GetAdditiveScenes();
+            var additiveScenes = GetAdditiveScenes();
 
             player.Send(new SceneMessage { MainActivateScene = ActiveScenePath, AdditiveScenes = additiveScenes });
             player.Send(new SceneReadyMessage());
@@ -467,10 +467,10 @@ namespace Mirage
             var additiveScenes = new List<string>(SceneManager.sceneCount - 1);
 
             // add all scenes except active to additive list
-            Scene activeScene = SceneManager.GetActiveScene();
-            for (int sceneIndex = 0; sceneIndex < SceneManager.sceneCount; sceneIndex++)
+            var activeScene = SceneManager.GetActiveScene();
+            for (var sceneIndex = 0; sceneIndex < SceneManager.sceneCount; sceneIndex++)
             {
-                Scene scene = SceneManager.GetSceneAt(sceneIndex);
+                var scene = SceneManager.GetSceneAt(sceneIndex);
                 if (scene != activeScene)
                 {
                     additiveScenes.Add(scene.path);
@@ -501,7 +501,7 @@ namespace Mirage
         /// <param name="disconnectedPlayer"></param>
         protected internal virtual void OnServerPlayerDisconnected(INetworkPlayer disconnectedPlayer)
         {
-            foreach (HashSet<INetworkPlayer> playersInScene in _serverSceneData.Values)
+            foreach (var playersInScene in _serverSceneData.Values)
             {
                 playersInScene.Remove(disconnectedPlayer);
             }
@@ -533,7 +533,7 @@ namespace Mirage
         {
             ThrowIfNotServer();
 
-            foreach (INetworkPlayer player in players ?? Server.Players)
+            foreach (var player in players ?? Server.Players)
             {
                 SetClientNotReady(player);
             }
@@ -704,7 +704,7 @@ namespace Mirage
 
             await SceneLoadingAsyncOperationInfo;
 
-            Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+            var scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
 
             if (Server && Server.Active)
             {
@@ -722,7 +722,7 @@ namespace Mirage
         private async UniTask UnLoadSceneAdditiveAsync(string scenePath)
         {
             // Ensure additive scene is actually loaded
-            Scene scene = SceneManager.GetSceneByPath(scenePath);
+            var scene = SceneManager.GetSceneByPath(scenePath);
             if (scene.IsValid())
             {
                 await SceneManager.UnloadSceneAsync(scenePath, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
@@ -766,7 +766,7 @@ namespace Mirage
         /// <returns>Returns back correct scene data.</returns>
         public Scene GetSceneByPathOrName(string scenePath)
         {
-            Scene scene = SceneManager.GetSceneByPath(scenePath);
+            var scene = SceneManager.GetSceneByPath(scenePath);
 
             return !string.IsNullOrEmpty(scene.name) ? scene : SceneManager.GetSceneByName(scenePath);
         }

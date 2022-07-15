@@ -9,7 +9,6 @@ using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.UIElements;
-using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 /**
  * Docs used:
@@ -148,9 +147,9 @@ namespace Mirage
 
             //Load the UI
             //Each editor window contains a root VisualElement object
-            VisualElement root = rootVisualElement;
-            VisualTreeAsset uxml = Resources.Load<VisualTreeAsset>("WelcomeWindow");
-            StyleSheet uss = Resources.Load<StyleSheet>("WelcomeWindow");
+            var root = rootVisualElement;
+            var uxml = Resources.Load<VisualTreeAsset>("WelcomeWindow");
+            var uss = Resources.Load<StyleSheet>("WelcomeWindow");
 
             _changeLogTemplate = Resources.Load<VisualTreeAsset>("Changelog");
 
@@ -158,7 +157,7 @@ namespace Mirage
             uxml.CloneTree(root);
 
             //set the version text
-            Label versionText = root.Q<Label>("VersionText");
+            var versionText = root.Q<Label>("VersionText");
             versionText.text = "v" + GetVersion();
 
             DrawChangeLog(ParseChangeLog());
@@ -176,7 +175,7 @@ namespace Mirage
             ShowTab(EditorPrefs.GetString(screenToOpenKey, "Welcome"));
 
             //set the screen's button to be tinted when welcome window is opened
-            Button openedButton = rootVisualElement.Q<Button>(EditorPrefs.GetString(screenToOpenKey, "Welcome") + "Button");
+            var openedButton = rootVisualElement.Q<Button>(EditorPrefs.GetString(screenToOpenKey, "Welcome") + "Button");
             ToggleMenuButtonColor(openedButton, true);
             lastClickedTab = openedButton;
 
@@ -194,7 +193,7 @@ namespace Mirage
         //menu button setup
         private void ConfigureTab(string tabButtonName, string tab, string url)
         {
-            Button tabButton = rootVisualElement.Q<Button>(tabButtonName);
+            var tabButton = rootVisualElement.Q<Button>(tabButtonName);
 
             tabButton.EnableInClassList("dark-selected-tab", false);
             tabButton.EnableInClassList("light-selected-tab", false);
@@ -209,7 +208,7 @@ namespace Mirage
                 EditorPrefs.SetString(screenToOpenKey, tab);
             };
 
-            Button redirectButton = rootVisualElement.Q<VisualElement>(tab).Q<Button>("Redirect");
+            var redirectButton = rootVisualElement.Q<VisualElement>(tab).Q<Button>("Redirect");
             if (redirectButton != null)
             {
                 redirectButton.clicked += () => Application.OpenURL(url);
@@ -219,9 +218,9 @@ namespace Mirage
         //switch between content
         private void ShowTab(string screen)
         {
-            VisualElement rightColumn = rootVisualElement.Q<VisualElement>("RightColumnBox");
+            var rightColumn = rootVisualElement.Q<VisualElement>("RightColumnBox");
 
-            foreach (VisualElement tab in rightColumn.Children())
+            foreach (var tab in rightColumn.Children())
             {
                 if (tab.name == screen)
                 {
@@ -263,7 +262,7 @@ namespace Mirage
         {
             var content = new List<string>();
 
-            int currentChangeLogs = 0;
+            var currentChangeLogs = 0;
 
             using (var reader = new StreamReader(changeLogPath))
             {
@@ -301,23 +300,23 @@ namespace Mirage
         //draw the parsed information
         private void DrawChangeLog(List<string> content)
         {
-            int currentVersionCount = -1;
+            var currentVersionCount = -1;
 
             var builder = new StringBuilder();
             var firstTitle = true;
             var regexLine = new Regex("^\\* (.*)$");
             var regexBold = new Regex("\\*\\*(.*)\\*\\*");
 
-            for (int i = 0; i < content.Count; i++)
+            for (var i = 0; i < content.Count; i++)
             {
-                string item = content[i];
+                var item = content[i];
 
                 //if the item is a version
                 if (item.Contains("# [") || item.Contains("## ["))
                 {
                     currentVersionCount++;
 
-                    TemplateContainer newLog = _changeLogTemplate.CloneTree();
+                    var newLog = _changeLogTemplate.CloneTree();
 
                     newLog.Q<Label>("ChangeLogVersion").text =
                         $"Version {item.Split(new[] { "[" }, StringSplitOptions.RemoveEmptyEntries)[1].Split(new[] { "]" }, StringSplitOptions.RemoveEmptyEntries)[0]}";
@@ -336,7 +335,7 @@ namespace Mirage
 #if UNITY_2021_2_OR_NEWER
                     string subTitle = $"<b>{item.Substring(4)}</b>";
 #else
-                    string subTitle = item.Substring(4);
+                    var subTitle = item.Substring(4);
 #endif
                     builder.Append(subTitle);
                     builder.Append("\n");
@@ -345,7 +344,7 @@ namespace Mirage
                 //if the item is a change
                 else
                 {
-                    string change = item.Split(new string[] { "([" }, StringSplitOptions.None)[0];
+                    var change = item.Split(new string[] { "([" }, StringSplitOptions.None)[0];
                     change = regexLine.Replace(change, "- $1\n");
                     change = regexBold.Replace(change, BoldReplace);
 
@@ -361,7 +360,7 @@ namespace Mirage
         //configure the package tab when the tab button is pressed
         private void ConfigurePackagesTab()
         {
-            Button tabButton = rootVisualElement.Q<Button>("PackagesButton");
+            var tabButton = rootVisualElement.Q<Button>("PackagesButton");
 
             tabButton.EnableInClassList("dark-selected-tab", false);
             tabButton.EnableInClassList("light-selected-tab", false);
@@ -389,9 +388,9 @@ namespace Mirage
         /// <param name="packageName">The package to install or uninstall.</param>
         private void ModuleButtonClicked(string packageName)
         {
-            VisualElement packageElement = rootVisualElement.Q<VisualElement>("ModulesList").Q<VisualElement>(packageName);
+            var packageElement = rootVisualElement.Q<VisualElement>("ModulesList").Q<VisualElement>(packageName);
 
-            Button packageButton = packageElement.Q<Button>();
+            var packageButton = packageElement.Q<Button>();
 
             switch (packageButton.text)
             {
@@ -483,13 +482,13 @@ namespace Mirage
 
                     packages.Clear();
 
-                    foreach (PackageInfo package in searchRequest.Result)
+                    foreach (var package in searchRequest.Result)
                     {
                         if (!package.name.Contains("com.miragenet") || package.name.Equals(miragePackageName)) continue;
 
-                        bool packageInstalled = false;
+                        var packageInstalled = false;
 
-                        foreach (PackageInfo installedPackages in listRequest.Result)
+                        foreach (var installedPackages in listRequest.Result)
                         {
                             if (!package.name.Equals(installedPackages.name)) continue;
 
@@ -519,10 +518,10 @@ namespace Mirage
         //changes text and functionality after button press
         private void ConfigureInstallButtons()
         {
-            VisualElement moduleVisualElement = rootVisualElement.Q<VisualElement>("ModulesList");
+            var moduleVisualElement = rootVisualElement.Q<VisualElement>("ModulesList");
             moduleVisualElement.Clear();
 
-            foreach (Package module in packages)
+            foreach (var module in packages)
             {
                 //set the button and name of the package
                 var moduleButton = new Button(() => ModuleButtonClicked(module.displayName))

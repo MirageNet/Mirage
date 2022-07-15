@@ -54,9 +54,9 @@ namespace Mirage.Tests.CodeGenerators
             fromTemplate.Replace("%%EXTRA_TYPE%%", extraType);
             fromTemplate.Replace("%%EXTRA_VALUE%%", extraValue);
 
-            string minString = min.ToString().Replace('-', 'N');
-            string maxString = max.ToString().Replace('-', 'N');
-            string name = $"{type}_{minString}_{maxString}{extraName}";
+            var minString = min.ToString().Replace('-', 'N');
+            var maxString = max.ToString().Replace('-', 'N');
+            var name = $"{type}_{minString}_{maxString}{extraName}";
             fromTemplate.Replace("%%NAME%%", name);
 
             fromTemplate.WriteToFile($"./Assets/Tests/Generated/BitCountFromRangeTests/BitCountFromRange_{name}.cs");

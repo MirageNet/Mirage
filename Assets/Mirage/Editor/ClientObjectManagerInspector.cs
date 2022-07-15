@@ -22,9 +22,9 @@ namespace Mirage
 
         public void RegisterPrefabs(ClientObjectManager gameObject)
         {
-            ISet<NetworkIdentity> prefabs = LoadPrefabsContaining<NetworkIdentity>("Assets");
+            var prefabs = LoadPrefabsContaining<NetworkIdentity>("Assets");
 
-            foreach (NetworkIdentity existing in gameObject.spawnPrefabs)
+            foreach (var existing in gameObject.spawnPrefabs)
             {
                 prefabs.Add(existing);
             }
@@ -36,13 +36,13 @@ namespace Mirage
         {
             var result = new HashSet<T>();
 
-            string[] guids = AssetDatabase.FindAssets("t:GameObject", new[] { path });
+            var guids = AssetDatabase.FindAssets("t:GameObject", new[] { path });
 
-            for (int i = 0; i < guids.Length; i++)
+            for (var i = 0; i < guids.Length; i++)
             {
-                string assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
+                var assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
 
-                T obj = AssetDatabase.LoadAssetAtPath<T>(assetPath);
+                var obj = AssetDatabase.LoadAssetAtPath<T>(assetPath);
 
                 if (obj != null)
                 {

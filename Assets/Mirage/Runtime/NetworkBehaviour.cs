@@ -200,9 +200,9 @@ namespace Mirage
                     return componentIndex.Value;
 
                 // note: FindIndex causes allocations, we search manually instead
-                for (int i = 0; i < Identity.NetworkBehaviours.Length; i++)
+                for (var i = 0; i < Identity.NetworkBehaviours.Length; i++)
                 {
-                    NetworkBehaviour component = Identity.NetworkBehaviours[i];
+                    var component = Identity.NetworkBehaviours[i];
                     if (component == this)
                     {
                         componentIndex = i;
@@ -291,7 +291,7 @@ namespace Mirage
             // note: don't use List.ForEach here, this is a hot path
             //   List.ForEach: 432b/frame
             //   for: 231b/frame
-            for (int i = 0; i < syncObjects.Count; ++i)
+            for (var i = 0; i < syncObjects.Count; ++i)
             {
                 syncObjects[i].Flush();
             }
@@ -302,7 +302,7 @@ namespace Mirage
             // note: don't use Linq here. 1200 networked objects:
             //   Linq: 187KB GC/frame;, 2.66ms time
             //   for: 8KB GC/frame; 1.28ms time
-            for (int i = 0; i < syncObjects.Count; ++i)
+            for (var i = 0; i < syncObjects.Count; ++i)
             {
                 if (syncObjects[i].IsDirty)
                 {
@@ -354,7 +354,7 @@ namespace Mirage
                 objectWritten = SerializeObjectsDelta(writer);
             }
 
-            bool syncVarWritten = SerializeSyncVars(writer, initialState);
+            var syncVarWritten = SerializeSyncVars(writer, initialState);
 
             return objectWritten || syncVarWritten;
         }
@@ -408,9 +408,9 @@ namespace Mirage
         internal ulong DirtyObjectBits()
         {
             ulong dirtyObjects = 0;
-            for (int i = 0; i < syncObjects.Count; i++)
+            for (var i = 0; i < syncObjects.Count; i++)
             {
-                ISyncObject syncObject = syncObjects[i];
+                var syncObject = syncObjects[i];
                 if (syncObject.IsDirty)
                 {
                     dirtyObjects |= 1UL << i;
@@ -421,10 +421,10 @@ namespace Mirage
 
         public bool SerializeObjectsAll(NetworkWriter writer)
         {
-            bool dirty = false;
-            for (int i = 0; i < syncObjects.Count; i++)
+            var dirty = false;
+            for (var i = 0; i < syncObjects.Count; i++)
             {
-                ISyncObject syncObject = syncObjects[i];
+                var syncObject = syncObjects[i];
                 syncObject.OnSerializeAll(writer);
                 dirty = true;
             }
@@ -433,13 +433,13 @@ namespace Mirage
 
         public bool SerializeObjectsDelta(NetworkWriter writer)
         {
-            bool dirty = false;
+            var dirty = false;
             // write the mask
             writer.WritePackedUInt64(DirtyObjectBits());
             // serializable objects, such as synclists
-            for (int i = 0; i < syncObjects.Count; i++)
+            for (var i = 0; i < syncObjects.Count; i++)
             {
-                ISyncObject syncObject = syncObjects[i];
+                var syncObject = syncObjects[i];
                 if (syncObject.IsDirty)
                 {
                     syncObject.OnSerializeDelta(writer);
@@ -451,19 +451,19 @@ namespace Mirage
 
         internal void DeSerializeObjectsAll(NetworkReader reader)
         {
-            for (int i = 0; i < syncObjects.Count; i++)
+            for (var i = 0; i < syncObjects.Count; i++)
             {
-                ISyncObject syncObject = syncObjects[i];
+                var syncObject = syncObjects[i];
                 syncObject.OnDeserializeAll(reader);
             }
         }
 
         internal void DeSerializeObjectsDelta(NetworkReader reader)
         {
-            ulong dirty = reader.ReadPackedUInt64();
-            for (int i = 0; i < syncObjects.Count; i++)
+            var dirty = reader.ReadPackedUInt64();
+            for (var i = 0; i < syncObjects.Count; i++)
             {
-                ISyncObject syncObject = syncObjects[i];
+                var syncObject = syncObjects[i];
                 if ((dirty & (1UL << i)) != 0)
                 {
                     syncObject.OnDeserializeDelta(reader);
@@ -473,7 +473,7 @@ namespace Mirage
 
         internal void ResetSyncObjects()
         {
-            foreach (ISyncObject syncObject in syncObjects)
+            foreach (var syncObject in syncObjects)
             {
                 syncObject.Reset();
             }

@@ -38,7 +38,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [TestCaseSource(nameof(ThrowsIfAnyMaxIsZeroCases))]
         public void ThrowsIfAnyMaxIsZero(Vector2 max, Vector2 precision)
         {
-            ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            var exception = Assert.Throws<ArgumentException>(() =>
             {
                 _ = new Vector2Packer(max, precision);
             });
@@ -68,7 +68,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
                 );
 
             packer.Pack(writer, expected);
-            Vector2 unpacked = packer.Unpack(GetReader());
+            var unpacked = packer.Unpack(GetReader());
 
             Assert.That(unpacked.x, Is.EqualTo(expected.x).Within(precision.x));
             Assert.That(unpacked.y, Is.EqualTo(expected.y).Within(precision.y));
@@ -79,10 +79,10 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         public void ZeroUnpacksAsZero(Vector2 max, Vector2 precision)
         {
             var packer = new Vector2Packer(max, precision);
-            Vector2 zero = Vector2.zero;
+            var zero = Vector2.zero;
 
             packer.Pack(writer, zero);
-            Vector2 unpacked = packer.Unpack(GetReader());
+            var unpacked = packer.Unpack(GetReader());
 
             Assert.That(unpacked, Is.EqualTo(zero));
         }

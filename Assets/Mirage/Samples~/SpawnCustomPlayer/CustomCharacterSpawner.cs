@@ -57,11 +57,11 @@ namespace Example.CustomCharacter
 
         private void OnCreateCharacter(INetworkPlayer player, CreateMMOCharacterMessage msg)
         {
-            CustomCharacter prefab = GetPrefab(msg);
+            var prefab = GetPrefab(msg);
 
             // create your character object
             // use the data in msg to configure it
-            CustomCharacter character = Instantiate(prefab);
+            var character = Instantiate(prefab);
 
             // set syncVars before telling mirage to spawn character
             // this will cause them to be sent to client in the spawn message

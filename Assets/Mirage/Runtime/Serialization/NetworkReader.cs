@@ -197,11 +197,11 @@ namespace Mirage.Serialization
         /// <param name="value"></param>
         public ulong ReadBooleanAsUlong()
         {
-            int newPosition = bitPosition + 1;
+            var newPosition = bitPosition + 1;
             CheckNewLength(newPosition);
 
-            ulong* ptr = (longPtr + (bitPosition >> 6));
-            ulong result = ((*ptr) >> bitPosition) & 0b1;
+            var ptr = (longPtr + (bitPosition >> 6));
+            var result = ((*ptr) >> bitPosition) & 0b1;
 
             bitPosition = newPosition;
             return result;
@@ -230,22 +230,22 @@ namespace Mirage.Serialization
         public long ReadInt64() => (long)ReadUInt64();
         public ulong ReadUInt64()
         {
-            int newPosition = bitPosition + 64;
+            var newPosition = bitPosition + 64;
             CheckNewLength(newPosition);
 
-            int bitsInLong = bitPosition & 0b11_1111;
+            var bitsInLong = bitPosition & 0b11_1111;
             ulong result;
             if (bitsInLong == 0)
             {
-                ulong* ptr1 = (longPtr + (bitPosition >> 6));
+                var ptr1 = (longPtr + (bitPosition >> 6));
                 result = *ptr1;
             }
             else
             {
-                int bitsLeft = 64 - bitsInLong;
+                var bitsLeft = 64 - bitsInLong;
 
-                ulong* ptr1 = (longPtr + (bitPosition >> 6));
-                ulong* ptr2 = (ptr1 + 1);
+                var ptr1 = (longPtr + (bitPosition >> 6));
+                var ptr2 = (ptr1 + 1);
 
                 // eg use byte, read 6  =>bitPosition=5, bitsLeft=3, newPos=1
                 // r1 = aaab_bbbb => 0000_0aaa
@@ -253,8 +253,8 @@ namespace Mirage.Serialization
                 // r = r1|r2 => ccaa_aaaa
                 // we mask this result later
 
-                ulong r1 = (*ptr1) >> bitPosition;
-                ulong r2 = (*ptr2) << bitsLeft;
+                var r1 = (*ptr1) >> bitPosition;
+                var r2 = (*ptr2) << bitsLeft;
                 result = r1 | r2;
             }
 
@@ -268,13 +268,13 @@ namespace Mirage.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float ReadSingle()
         {
-            uint uValue = ReadUInt32();
+            var uValue = ReadUInt32();
             return *(float*)&uValue;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double ReadDouble()
         {
-            ulong uValue = ReadUInt64();
+            var uValue = ReadUInt64();
             return *(double*)&uValue;
         }
 
@@ -289,22 +289,22 @@ namespace Mirage.Serialization
 
         private ulong ReadUnmasked(int bits)
         {
-            int newPosition = bitPosition + bits;
+            var newPosition = bitPosition + bits;
             CheckNewLength(newPosition);
 
-            int bitsInLong = bitPosition & 0b11_1111;
-            int bitsLeft = 64 - bitsInLong;
+            var bitsInLong = bitPosition & 0b11_1111;
+            var bitsLeft = 64 - bitsInLong;
 
             ulong result;
             if (bitsLeft >= bits)
             {
-                ulong* ptr = longPtr + (bitPosition >> 6);
+                var ptr = longPtr + (bitPosition >> 6);
                 result = (*ptr) >> bitsInLong;
             }
             else
             {
-                ulong* ptr1 = longPtr + (bitPosition >> 6);
-                ulong* ptr2 = ptr1 + 1;
+                var ptr1 = longPtr + (bitPosition >> 6);
+                var ptr2 = ptr1 + 1;
 
                 // eg use byte, read 6  =>bitPosition=5, bitsLeft=3, newPos=1
                 // r1 = aaab_bbbb => 0000_0aaa
@@ -312,8 +312,8 @@ namespace Mirage.Serialization
                 // r = r1|r2 => ccaa_aaaa
                 // we mask this result later
 
-                ulong r1 = (*ptr1) >> bitsInLong;
-                ulong r2 = (*ptr2) << bitsLeft;
+                var r1 = (*ptr1) >> bitsInLong;
+                var r2 = (*ptr2) << bitsLeft;
                 result = r1 | r2;
             }
             bitPosition = newPosition;
@@ -331,9 +331,9 @@ namespace Mirage.Serialization
             // check length here so this methods throws instead of the read below
             CheckNewLength(bitPosition + bits);
 
-            int currentPosition = this.bitPosition;
+            var currentPosition = this.bitPosition;
             this.bitPosition = bitPosition;
-            ulong result = Read(bits);
+            var result = Read(bits);
             this.bitPosition = currentPosition;
 
             return result;
@@ -368,10 +368,10 @@ namespace Mirage.Serialization
         public void PadAndCopy<T>(out T value) where T : unmanaged
         {
             PadToByte();
-            int newPosition = bitPosition + (8 * sizeof(T));
+            var newPosition = bitPosition + (8 * sizeof(T));
             CheckNewLength(newPosition);
 
-            byte* startPtr = ((byte*)longPtr) + (bitPosition >> 3);
+            var startPtr = ((byte*)longPtr) + (bitPosition >> 3);
 
             value = *(T*)startPtr;
             bitPosition = newPosition;
@@ -388,7 +388,7 @@ namespace Mirage.Serialization
         public void ReadBytes(byte[] array, int offset, int length)
         {
             PadToByte();
-            int newPosition = bitPosition + (8 * length);
+            var newPosition = bitPosition + (8 * length);
             CheckNewLength(newPosition);
 
             // todo benchmark this vs Marshal.Copy or for loop
@@ -399,7 +399,7 @@ namespace Mirage.Serialization
         public ArraySegment<byte> ReadBytesSegment(int count)
         {
             PadToByte();
-            int newPosition = bitPosition + (8 * count);
+            var newPosition = bitPosition + (8 * count);
             CheckNewLength(newPosition);
 
             var result = new ArraySegment<byte>(managedBuffer, BytePosition, count);

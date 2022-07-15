@@ -28,7 +28,7 @@ namespace Mirage.Weaver.NetworkBehaviours
 
         public void Set(int countInCurrent)
         {
-            int totalSyncVars = GetInBase() + countInCurrent;
+            var totalSyncVars = GetInBase() + countInCurrent;
 
             if (totalSyncVars >= max)
             {

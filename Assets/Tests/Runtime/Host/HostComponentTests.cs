@@ -90,7 +90,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void StoppingHostShouldCallDisconnectedOnLocalClient()
         {
-            int invoked = 0;
+            var invoked = 0;
             client.Disconnected.AddListener((reason) =>
             {
                 Assert.That(reason, Is.EqualTo(ClientStoppedReason.HostModeStopped));
@@ -111,7 +111,7 @@ namespace Mirage.Tests.Runtime.Host
             // wait for server to disconnect
             await UniTask.WaitUntil(() => !server.Active);
 
-            UnityAction<string, SceneOperation> mockListener = Substitute.For<UnityAction<string, SceneOperation>>();
+            var mockListener = Substitute.For<UnityAction<string, SceneOperation>>();
             sceneManager.OnClientStartedSceneChange.AddListener(mockListener);
             await StartHost();
 
