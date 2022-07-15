@@ -25,7 +25,7 @@ namespace Example.CustomCharacter
             Server.Started.AddListener(OnServerStarted);
         }
 
-        void OnClientStarted()
+        private void OnClientStarted()
         {
             // make sure all prefabs are Register so mirage can spawn the character for this client and for other players
             ClientObjectManager.RegisterPrefab(HumanPrefab.Identity);
@@ -36,7 +36,7 @@ namespace Example.CustomCharacter
         // you can send the message here if you already know
         // everything about the character at the time of player
         // or at a later time when the user submits his preferences
-        void OnClientAuthenticated(INetworkPlayer player)
+        private void OnClientAuthenticated(INetworkPlayer player)
         {
             var mmoCharacter = new CreateMMOCharacterMessage
             {
@@ -49,13 +49,13 @@ namespace Example.CustomCharacter
             player.Send(mmoCharacter);
         }
 
-        void OnServerStarted()
+        private void OnServerStarted()
         {
             // wait for client to send us an AddPlayerMessage
             Server.MessageHandler.RegisterHandler<CreateMMOCharacterMessage>(OnCreateCharacter);
         }
 
-        void OnCreateCharacter(INetworkPlayer player, CreateMMOCharacterMessage msg)
+        private void OnCreateCharacter(INetworkPlayer player, CreateMMOCharacterMessage msg)
         {
             CustomCharacter prefab = GetPrefab(msg);
 
@@ -73,7 +73,7 @@ namespace Example.CustomCharacter
             ServerObjectManager.AddCharacter(player, character.Identity);
         }
 
-        CustomCharacter GetPrefab(CreateMMOCharacterMessage msg)
+        private CustomCharacter GetPrefab(CreateMMOCharacterMessage msg)
         {
             // get prefab based on race
             CustomCharacter prefab;

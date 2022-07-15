@@ -7,7 +7,7 @@ namespace Mirage
 {
     public class SceneVisibilityChecker : NetworkVisibility
     {
-        static readonly ILogger logger = LogFactory.GetLogger<SceneVisibilityChecker>();
+        private static readonly ILogger logger = LogFactory.GetLogger<SceneVisibilityChecker>();
 
         public override bool OnCheckObserver(INetworkPlayer player)
         {

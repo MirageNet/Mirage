@@ -38,7 +38,7 @@ namespace Mirage.Weaver
         /// }
         /// </code>
         /// </remarks>
-        MethodDefinition GenerateSkeleton(MethodDefinition md, MethodDefinition userCodeFunc, CustomAttribute clientRpcAttr, ValueSerializer[] paramSerializers)
+        private MethodDefinition GenerateSkeleton(MethodDefinition md, MethodDefinition userCodeFunc, CustomAttribute clientRpcAttr, ValueSerializer[] paramSerializers)
         {
             string newName = SkeletonMethodName(md);
             MethodDefinition rpc = md.DeclaringType.AddMethod(
@@ -130,7 +130,7 @@ namespace Mirage.Weaver
         /// }
         /// </code>
         /// </remarks>
-        MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute clientRpcAttr, int rpcIndex, ValueSerializer[] paramSerializers)
+        private MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute clientRpcAttr, int rpcIndex, ValueSerializer[] paramSerializers)
         {
             MethodDefinition rpc = SubstituteMethod(md);
 
@@ -189,7 +189,7 @@ namespace Mirage.Weaver
                           : md.Module.ImportReference(() => ClientRpcSender.SendTarget(default, default, default, default, default));
         }
 
-        void IsClient(ILProcessor worker, Action body)
+        private void IsClient(ILProcessor worker, Action body)
         {
             // if (IsLocalClient) {
             Instruction endif = worker.Create(OpCodes.Nop);
@@ -204,7 +204,7 @@ namespace Mirage.Weaver
 
         }
 
-        void CallBody(ILProcessor worker, MethodDefinition rpc)
+        private void CallBody(ILProcessor worker, MethodDefinition rpc)
         {
             IsClient(worker, () =>
             {
@@ -212,7 +212,7 @@ namespace Mirage.Weaver
             });
         }
 
-        void InvokeBody(ILProcessor worker, MethodDefinition rpc)
+        private void InvokeBody(ILProcessor worker, MethodDefinition rpc)
         {
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
@@ -267,7 +267,7 @@ namespace Mirage.Weaver
         /// checks ClientRpc Attribute values are valid
         /// </summary>
         /// <exception cref="RpcException">Throws when parameter are invalid</exception>
-        void ValidateAttribute(MethodDefinition md, CustomAttribute clientRpcAttr)
+        private void ValidateAttribute(MethodDefinition md, CustomAttribute clientRpcAttr)
         {
             RpcTarget target = clientRpcAttr.GetField(nameof(ClientRpcAttribute.target), RpcTarget.Observers);
             if (target == RpcTarget.Player && !HasNetworkPlayerParameter(md))

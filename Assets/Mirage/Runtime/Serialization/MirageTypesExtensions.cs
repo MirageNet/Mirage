@@ -6,7 +6,7 @@ namespace Mirage.Serialization
 {
     public static class MirageTypesExtensions
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(MirageTypesExtensions));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(MirageTypesExtensions));
 
         public static void WriteNetworkIdentity(this NetworkWriter writer, NetworkIdentity value)
         {

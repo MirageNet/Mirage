@@ -32,15 +32,13 @@ namespace Mirage.Serialization
         // todo needs doc comments
         // todo need attribute to validate large bits based on pack type (eg if packing ushort, make sure largebits is 16 or less)
 
-        readonly int smallBitCount;
-        readonly int mediumBitsCount;
-        readonly int largeBitsCount;
-
-        readonly ulong smallValue;
-        readonly ulong mediumValue;
-        readonly ulong largeValue;
-
-        readonly bool throwIfOverLarge;
+        private readonly int smallBitCount;
+        private readonly int mediumBitsCount;
+        private readonly int largeBitsCount;
+        private readonly ulong smallValue;
+        private readonly ulong mediumValue;
+        private readonly ulong largeValue;
+        private readonly bool throwIfOverLarge;
 
         public VarIntPacker(ulong smallValue, ulong mediumValue)
             : this(BitHelper.BitCount(smallValue), BitHelper.BitCount(mediumValue), 64, false) { }
@@ -87,7 +85,8 @@ namespace Mirage.Serialization
         {
             pack(writer, value, 16);
         }
-        void pack(NetworkWriter writer, ulong value, int maxBits)
+
+        private void pack(NetworkWriter writer, ulong value, int maxBits)
         {
             if (value <= smallValue)
             {
@@ -138,7 +137,8 @@ namespace Mirage.Serialization
         {
             return (ushort)unpack(reader, 16);
         }
-        ulong unpack(NetworkReader reader, int maxBits)
+
+        private ulong unpack(NetworkReader reader, int maxBits)
         {
             if (!reader.ReadBoolean())
             {

@@ -22,7 +22,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
         }
 
         [Server(error = false)]
-        void OnCollisionStay(Collision other)
+        private void OnCollisionStay(Collision other)
         {
             if (other.gameObject.CompareTag("Player"))
             {

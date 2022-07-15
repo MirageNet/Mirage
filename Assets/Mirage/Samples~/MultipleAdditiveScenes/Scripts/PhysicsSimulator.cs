@@ -4,13 +4,12 @@ namespace Mirage.Examples.MultipleAdditiveScenes
 {
     public class PhysicsSimulator : NetworkBehaviour
     {
-        PhysicsScene physicsScene;
-        PhysicsScene2D physicsScene2D;
+        private PhysicsScene physicsScene;
+        private PhysicsScene2D physicsScene2D;
+        private bool simulatePhysicsScene;
+        private bool simulatePhysicsScene2D;
 
-        bool simulatePhysicsScene;
-        bool simulatePhysicsScene2D;
-
-        void Start()
+        private void Start()
         {
             if (IsServer)
             {
@@ -26,7 +25,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
             }
         }
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
             if (!IsServer) return;
 

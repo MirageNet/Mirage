@@ -19,7 +19,7 @@ namespace Mirage
     /// </remarks>
     public sealed class NetworkPlayer : INetworkPlayer, IMessageSender
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
 
         private readonly HashSet<NetworkIdentity> visList = new HashSet<NetworkIdentity>();
 
@@ -37,7 +37,7 @@ namespace Mirage
         /// Has this player been marked as disconnected
         /// <para>Messages sent to disconnected players will be ignored</para>
         /// </summary>
-        bool isDisconnected = false;
+        private bool isDisconnected = false;
 
         /// <summary>
         /// Backing field for <see cref="Identity"/>

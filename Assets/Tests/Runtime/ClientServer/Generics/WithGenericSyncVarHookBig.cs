@@ -14,7 +14,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         [SyncVar(hook = nameof(onValueChanged))]
         public T value1;
 
-        void onValueChanged(T oldValue, T newValue)
+        private void onValueChanged(T oldValue, T newValue)
         {
             hookMethod?.Invoke(oldValue, newValue);
         }

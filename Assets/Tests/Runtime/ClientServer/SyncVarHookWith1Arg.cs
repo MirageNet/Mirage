@@ -12,7 +12,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
         [SyncVar(hook = nameof(OnChange))] public int var;
 
-        void OnChange(int newValue)
+        private void OnChange(int newValue)
         {
             onChangedCalled?.Invoke(newValue);
         }
@@ -32,12 +32,12 @@ namespace Mirage.Tests.Runtime.ClientServer
         [SyncVar(hook = nameof(OnChange), hookType = SyncHookType.MethodWith1Arg)]
         public int var;
 
-        void OnChange(int newValue)
+        private void OnChange(int newValue)
         {
             onChangedCalled?.Invoke(newValue);
         }
 
-        void OnChange(int oldValue, int newValue)
+        private void OnChange(int oldValue, int newValue)
         {
             // use log error here not assert, mirage will catch the assert execption and possible hide it.
             Debug.LogError("Should not be called");
@@ -50,13 +50,13 @@ namespace Mirage.Tests.Runtime.ClientServer
         [SyncVar(hook = nameof(OnChange), hookType = SyncHookType.MethodWith2Arg)]
         public int var;
 
-        void OnChange(int newValue)
+        private void OnChange(int newValue)
         {
             // use log error here not assert, mirage will catch the assert execption and possible hide it.
             Debug.LogError("Should not be called");
         }
 
-        void OnChange(int oldValue, int newValue)
+        private void OnChange(int oldValue, int newValue)
         {
             onChangedCalled?.Invoke(newValue);
         }

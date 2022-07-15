@@ -11,12 +11,12 @@ namespace Mirage.Examples.Additive
         public CharacterController characterController;
         public CapsuleCollider capsuleCollider;
 
-        void Awake()
+        private void Awake()
         {
             Identity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
         }
 
-        void OnValidate()
+        private void OnValidate()
         {
             if (characterController == null)
                 characterController = GetComponent<CharacterController>();
@@ -24,7 +24,7 @@ namespace Mirage.Examples.Additive
                 capsuleCollider = GetComponent<CapsuleCollider>();
         }
 
-        void Start()
+        private void Start()
         {
             capsuleCollider.enabled = IsServer;
         }
@@ -39,7 +39,7 @@ namespace Mirage.Examples.Additive
             Camera.main.transform.localEulerAngles = new Vector3(10f, 0f, 0f);
         }
 
-        void OnDisable()
+        private void OnDisable()
         {
             if (IsLocalPlayer && Camera.main != null)
             {
@@ -64,7 +64,7 @@ namespace Mirage.Examples.Additive
         public bool isFalling;
         public Vector3 velocity;
 
-        void Update()
+        private void Update()
         {
             if (!IsLocalPlayer || !characterController.enabled)
                 return;
@@ -96,7 +96,7 @@ namespace Mirage.Examples.Additive
             }
         }
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
             if (!IsLocalPlayer || characterController == null)
                 return;

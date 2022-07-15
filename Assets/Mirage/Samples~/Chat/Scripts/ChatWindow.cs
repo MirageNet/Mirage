@@ -8,7 +8,7 @@ namespace Mirage.Examples.Chat
 {
     public class ChatWindow : MonoBehaviour
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(ChatWindow));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(ChatWindow));
 
         [FormerlySerializedAs("client")]
         public NetworkClient Client;
@@ -29,7 +29,7 @@ namespace Mirage.Examples.Chat
             Player.OnMessage -= OnPlayerMessage;
         }
 
-        void OnPlayerMessage(Player player, string message)
+        private void OnPlayerMessage(Player player, string message)
         {
             string prettyMessage = player.IsLocalPlayer ?
                 $"<color=red>{player.playerName}: </color> {message}" :
@@ -58,7 +58,7 @@ namespace Mirage.Examples.Chat
             StartCoroutine(AppendAndScroll(message));
         }
 
-        IEnumerator AppendAndScroll(string message)
+        private IEnumerator AppendAndScroll(string message)
         {
             ChatHistory.text += message + "\n";
 

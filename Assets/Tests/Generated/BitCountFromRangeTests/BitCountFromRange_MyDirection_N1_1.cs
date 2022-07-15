@@ -54,7 +54,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.MyDirec
     
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
-        const MyDirection value = (MyDirection)1;
+        private const MyDirection value = (MyDirection)1;
 
         [Test]
         public void SyncVarIsBitPacked()

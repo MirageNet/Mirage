@@ -89,7 +89,7 @@ namespace Mirage
         #endregion
 
 #if UNITY_EDITOR
-        void OnValidate()
+        private void OnValidate()
         {
             UnityEditor.Undo.RecordObject(this, "Assigned NetworkClient authenticator");
             // automatically assign NetworkClient field if we add this to NetworkClient

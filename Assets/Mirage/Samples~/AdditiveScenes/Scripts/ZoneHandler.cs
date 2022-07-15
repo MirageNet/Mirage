@@ -10,14 +10,14 @@ namespace Mirage.Examples.Additive
     // that entered the Zone to load the subscene assigned to the subscene property.
     public class ZoneHandler : NetworkBehaviour
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(ZoneHandler));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(ZoneHandler));
 
         [Scene]
         [Tooltip("Assign the sub-scene to load for this zone")]
         public string subScene;
 
         [Server]
-        void OnTriggerEnter(Collider other)
+        private void OnTriggerEnter(Collider other)
         {
             if (logger.LogEnabled()) logger.LogFormat(LogType.Log, "Loading {0}", subScene);
 
@@ -26,7 +26,7 @@ namespace Mirage.Examples.Additive
         }
 
         [Server]
-        void OnTriggerExit(Collider other)
+        private void OnTriggerExit(Collider other)
         {
             if (logger.LogEnabled()) logger.LogFormat(LogType.Log, "Unloading {0}", subScene);
 

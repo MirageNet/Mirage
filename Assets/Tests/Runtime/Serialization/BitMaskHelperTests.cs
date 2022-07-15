@@ -8,7 +8,7 @@ namespace Mirage.Tests.Runtime.Serialization
         /// <summary>
         /// slow way of creating correct mask
         /// </summary>
-        static ulong slowMask(int bits)
+        private static ulong slowMask(int bits)
         {
             ulong mask = 0;
             for (int i = 0; i < bits; i++)

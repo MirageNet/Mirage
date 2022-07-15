@@ -16,9 +16,9 @@ namespace Mirage.Tests.Performance.Runtime
     [Category("Benchmark")]
     public class BenchmarkPerformance
     {
-        const string ScenePath = "Assets/Tests/Performance/Runtime/10K/Scenes/Scene.unity";
-        const int Warmup = 50;
-        const int MeasureCount = 120;
+        private const string ScenePath = "Assets/Tests/Performance/Runtime/10K/Scenes/Scene.unity";
+        private const int Warmup = 50;
+        private const int MeasureCount = 120;
 
         private NetworkManager benchmarker;
 
@@ -54,7 +54,7 @@ namespace Mirage.Tests.Performance.Runtime
             Object.Destroy(benchmarker.gameObject);
         }
 
-        static void EnableHealth(bool value)
+        private static void EnableHealth(bool value)
         {
             Health[] all = Object.FindObjectsOfType<Health>();
             foreach (Health health in all)

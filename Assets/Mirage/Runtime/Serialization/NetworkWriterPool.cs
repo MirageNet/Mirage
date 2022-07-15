@@ -7,8 +7,8 @@ namespace Mirage.Serialization
 {
     public static class NetworkWriterPool
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkWriterPool));
-        static Pool<PooledNetworkWriter> pool;
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkWriterPool));
+        private static Pool<PooledNetworkWriter> pool;
 
         /// <summary>
         /// Current Size of buffers, or null before Configure has been called

@@ -30,7 +30,7 @@ namespace Mirage.Weaver.Serialization
         /// </summary>
         /// <param name="type"></param>
         /// <param name="syncVar"></param>
-        static void ThrowIfNotIntType(TypeReference type)
+        private static void ThrowIfNotIntType(TypeReference type)
         {
             // throw if unsigned
             if (type.Is<byte>()

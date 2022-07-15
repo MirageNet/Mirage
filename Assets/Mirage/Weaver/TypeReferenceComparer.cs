@@ -4,7 +4,7 @@ using Mono.Cecil;
 
 namespace Mirage.Weaver
 {
-    class TypeReferenceComparer : IEqualityComparer<TypeReference>
+    internal class TypeReferenceComparer : IEqualityComparer<TypeReference>
     {
         public bool Equals(TypeReference x, TypeReference y)
         {

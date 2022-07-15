@@ -18,9 +18,8 @@ namespace Mirage.Tests.Runtime.Host
 {
     public class NetworkSceneManagerTests : HostSetup<MockComponent>
     {
-        AssetBundle bundle;
-
-        UnityAction<Scene, SceneOperation> sceneEventFunction;
+        private AssetBundle bundle;
+        private UnityAction<Scene, SceneOperation> sceneEventFunction;
 
         public override void ExtraSetup()
         {

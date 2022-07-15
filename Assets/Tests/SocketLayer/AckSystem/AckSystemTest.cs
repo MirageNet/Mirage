@@ -68,7 +68,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
     }
 
     // NSubstitute doesn't work for this type because interface is internal
-    class SubIRawConnection : IRawConnection
+    internal class SubIRawConnection : IRawConnection
     {
         public List<byte[]> packets = new List<byte[]>();
 

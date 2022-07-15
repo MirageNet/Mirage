@@ -8,7 +8,7 @@ namespace Mirage.Tests.PlayerTests
     /// </summary>
     public class LogErrorChecker : ILogHandler, IDisposable
     {
-        ILogHandler inner;
+        private ILogHandler inner;
         public bool HasErrors;
 
         public LogErrorChecker()

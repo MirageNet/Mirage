@@ -31,9 +31,9 @@ namespace Mirage.Serialization
     /// </summary>
     public sealed class VarVector3Packer
     {
-        readonly VarFloatPacker x;
-        readonly VarFloatPacker y;
-        readonly VarFloatPacker z;
+        private readonly VarFloatPacker x;
+        private readonly VarFloatPacker y;
+        private readonly VarFloatPacker z;
 
         public VarVector3Packer(Vector3 precision, int blocksize)
         {

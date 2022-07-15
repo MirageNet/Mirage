@@ -28,7 +28,7 @@ namespace Mirage.Logging
                 }
             }
 
-            static string CreateFullName(string name, string space)
+            private static string CreateFullName(string name, string space)
             {
                 // special case when namespace is null we just return null
                 // see GetNameAndNameSpaceFromFullname

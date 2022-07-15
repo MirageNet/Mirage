@@ -10,7 +10,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
 {
     public class Vector2PackerTests : PackerTestBase
     {
-        static IEnumerable WriteCorrectNumberOfBitsCases()
+        private static IEnumerable WriteCorrectNumberOfBitsCases()
         {
             yield return new TestCaseData(Vector2.one * 100, Vector2.one * 0.1f).Returns(11 * 2);
             yield return new TestCaseData(Vector2.one * 200, Vector2.one * 0.1f).Returns(12 * 2);
@@ -28,7 +28,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             return writer.BitPosition;
         }
 
-        static IEnumerable ThrowsIfAnyMaxIsZeroCases()
+        private static IEnumerable ThrowsIfAnyMaxIsZeroCases()
         {
             yield return new TestCaseData(new Vector2(100, 0), Vector2.one * 0.1f);
             yield return new TestCaseData(new Vector2(0, 100), Vector2.one * 0.1f);
@@ -47,8 +47,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
         }
 
-
-        static IEnumerable<TestCaseData> UnpacksToSaveValueCases()
+        private static IEnumerable<TestCaseData> UnpacksToSaveValueCases()
         {
             yield return new TestCaseData(Vector2.one * 100, Vector2.one * 0.1f);
             yield return new TestCaseData(Vector2.one * 200, Vector2.one * 0.1f);

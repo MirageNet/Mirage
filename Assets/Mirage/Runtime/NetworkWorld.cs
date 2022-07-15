@@ -11,7 +11,7 @@ namespace Mirage
     /// </summary>
     public class NetworkWorld : IObjectLocator
     {
-        static readonly ILogger logger = LogFactory.GetLogger<NetworkWorld>();
+        private static readonly ILogger logger = LogFactory.GetLogger<NetworkWorld>();
 
         /// <summary>
         /// Raised when object is spawned

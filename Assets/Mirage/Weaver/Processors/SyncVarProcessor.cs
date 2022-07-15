@@ -72,7 +72,7 @@ namespace Mirage.Weaver
             GenerateDeserialization();
         }
 
-        bool IsValidSyncVar(FieldDefinition field)
+        private bool IsValidSyncVar(FieldDefinition field)
         {
             if (!field.HasCustomAttribute<SyncVarAttribute>())
             {
@@ -98,7 +98,7 @@ namespace Mirage.Weaver
             return true;
         }
 
-        void ProcessSyncVar(FoundSyncVar syncVar)
+        private void ProcessSyncVar(FoundSyncVar syncVar)
         {
             // process attributes first before creating setting, otherwise it wont know about hook
             syncVar.SetWrapType();
@@ -133,7 +133,7 @@ namespace Mirage.Weaver
             }
         }
 
-        MethodDefinition GenerateSyncVarGetter(FoundSyncVar syncVar)
+        private MethodDefinition GenerateSyncVarGetter(FoundSyncVar syncVar)
         {
             FieldDefinition fd = syncVar.FieldDefinition;
             TypeReference originalType = syncVar.OriginalType;
@@ -156,7 +156,7 @@ namespace Mirage.Weaver
             return get;
         }
 
-        MethodDefinition GenerateSyncVarSetterInitialOnly(FoundSyncVar syncVar)
+        private MethodDefinition GenerateSyncVarSetterInitialOnly(FoundSyncVar syncVar)
         {
             // todo reduce duplicate code with this and GenerateSyncVarSetter
             FieldDefinition fd = syncVar.FieldDefinition;
@@ -176,7 +176,8 @@ namespace Mirage.Weaver
 
             return set;
         }
-        MethodDefinition GenerateSyncVarSetter(FoundSyncVar syncVar)
+
+        private MethodDefinition GenerateSyncVarSetter(FoundSyncVar syncVar)
         {
             FieldDefinition fd = syncVar.FieldDefinition;
             TypeReference originalType = syncVar.OriginalType;
@@ -272,7 +273,7 @@ namespace Mirage.Weaver
         /// </summary>
         /// <param name="worker"></param>
         /// <param name="syncVar"></param>
-        void WriteLoadField(ILProcessor worker, FoundSyncVar syncVar)
+        private void WriteLoadField(ILProcessor worker, FoundSyncVar syncVar)
         {
             FieldDefinition fd = syncVar.FieldDefinition;
             TypeReference originalType = syncVar.OriginalType;
@@ -307,7 +308,7 @@ namespace Mirage.Weaver
         /// <param name="worker"></param>
         /// <param name="valueParam"></param>
         /// <param name="syncVar"></param>
-        void WriteStoreField(ILProcessor worker, ParameterDefinition valueParam, FoundSyncVar syncVar)
+        private void WriteStoreField(ILProcessor worker, ParameterDefinition valueParam, FoundSyncVar syncVar)
         {
             FieldDefinition fd = syncVar.FieldDefinition;
 
@@ -329,13 +330,12 @@ namespace Mirage.Weaver
             }
         }
 
-
-        void WriteCallHookMethodUsingArgument(ILProcessor worker, SyncVarHook hook, VariableDefinition oldValue)
+        private void WriteCallHookMethodUsingArgument(ILProcessor worker, SyncVarHook hook, VariableDefinition oldValue)
         {
             WriteCallHook(worker, hook, oldValue, null);
         }
 
-        void WriteCallHookMethodUsingField(ILProcessor worker, SyncVarHook hook, VariableDefinition oldValue, FoundSyncVar syncVarField)
+        private void WriteCallHookMethodUsingField(ILProcessor worker, SyncVarHook hook, VariableDefinition oldValue, FoundSyncVar syncVarField)
         {
             if (syncVarField == null)
             {
@@ -345,7 +345,7 @@ namespace Mirage.Weaver
             WriteCallHook(worker, hook, oldValue, syncVarField);
         }
 
-        void WriteCallHook(ILProcessor worker, SyncVarHook hook, VariableDefinition oldValue, FoundSyncVar syncVarField)
+        private void WriteCallHook(ILProcessor worker, SyncVarHook hook, VariableDefinition oldValue, FoundSyncVar syncVarField)
         {
             if (hook.Method != null)
                 WriteCallHookMethod(worker, hook.Method, hook.hookType, oldValue, syncVarField);
@@ -353,7 +353,7 @@ namespace Mirage.Weaver
                 WriteCallHookEvent(worker, hook.Event, hook.hookType, oldValue, syncVarField);
         }
 
-        void WriteCallHookMethod(ILProcessor worker, MethodDefinition hookMethod, SyncHookType hookType, VariableDefinition oldValue, FoundSyncVar syncVarField)
+        private void WriteCallHookMethod(ILProcessor worker, MethodDefinition hookMethod, SyncHookType hookType, VariableDefinition oldValue, FoundSyncVar syncVarField)
         {
             if (hookType != SyncHookType.MethodWith1Arg && hookType != SyncHookType.MethodWith2Arg)
                 throw new ArgumentException($"hook type should be method, but was {hookType}", nameof(hookType));
@@ -419,7 +419,7 @@ namespace Mirage.Weaver
             }
         }
 
-        void WriteCallHookEvent(ILProcessor worker, EventDefinition @event, SyncHookType hookType, VariableDefinition oldValue, FoundSyncVar syncVarField)
+        private void WriteCallHookEvent(ILProcessor worker, EventDefinition @event, SyncHookType hookType, VariableDefinition oldValue, FoundSyncVar syncVarField)
         {
             if (hookType != SyncHookType.EventWith1Arg && hookType != SyncHookType.EventWith2Arg)
                 throw new ArgumentException($"hook type should be event, but was {hookType}", nameof(hookType));
@@ -486,9 +486,7 @@ namespace Mirage.Weaver
             }
         }
 
-
-
-        void GenerateSerialization()
+        private void GenerateSerialization()
         {
             Weaver.DebugLog(behaviour.TypeDefinition, "  GenerateSerialization");
 
@@ -536,7 +534,7 @@ namespace Mirage.Weaver
             helper.WriteReturnDirty();
         }
 
-        void WriteFromField(ILProcessor worker, ParameterDefinition writerParameter, FoundSyncVar syncVar)
+        private void WriteFromField(ILProcessor worker, ParameterDefinition writerParameter, FoundSyncVar syncVar)
         {
             if (!syncVar.HasProcessed) return;
 
@@ -544,8 +542,7 @@ namespace Mirage.Weaver
             syncVar.ValueSerializer.AppendWriteField(module, worker, writerParameter, null, fieldRef);
         }
 
-
-        void GenerateDeserialization()
+        private void GenerateDeserialization()
         {
             Weaver.DebugLog(behaviour.TypeDefinition, "  GenerateDeSerialization");
 
@@ -678,7 +675,7 @@ namespace Mirage.Weaver
 
         }
 
-        void ReadToField(ILProcessor worker, ParameterDefinition readerParameter, FoundSyncVar syncVar)
+        private void ReadToField(ILProcessor worker, ParameterDefinition readerParameter, FoundSyncVar syncVar)
         {
             if (!syncVar.HasProcessed) return;
 

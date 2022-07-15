@@ -54,19 +54,20 @@ namespace Mirage.Collections
             OP_SET
         }
 
-        struct Change
+        private struct Change
         {
             internal Operation operation;
             internal TKey key;
             internal TValue item;
         }
 
-        readonly List<Change> changes = new List<Change>();
+        private readonly List<Change> changes = new List<Change>();
+
         // how many changes we need to ignore
         // this is needed because when we initialize the list,
         // we might later receive changes that have already been applied
         // so we need to skip them
-        int changesAhead;
+        private int changesAhead;
 
         public void Reset()
         {
@@ -95,7 +96,7 @@ namespace Mirage.Collections
             this.objects = objects;
         }
 
-        void AddOperation(Operation op, TKey key, TValue item)
+        private void AddOperation(Operation op, TKey key, TValue item)
         {
             if (IsReadOnly)
             {

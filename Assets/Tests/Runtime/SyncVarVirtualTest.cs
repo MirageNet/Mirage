@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Mirage.Tests.Runtime
 {
-    abstract class SyncVarHookTesterBase : NetworkBehaviour
+    internal abstract class SyncVarHookTesterBase : NetworkBehaviour
     {
         [SyncVar(hook = nameof(OnValue1Changed))]
         public float value1;
@@ -32,7 +32,7 @@ namespace Mirage.Tests.Runtime
         }
     }
 
-    class SyncVarHookTester : SyncVarHookTesterBase
+    internal class SyncVarHookTester : SyncVarHookTesterBase
     {
         public event Action OnValue1ChangedOverrideCalled;
         public event Action OnValue2ChangedOverrideCalled;
@@ -52,10 +52,9 @@ namespace Mirage.Tests.Runtime
         private NetworkIdentity netIdServer;
         private SyncVarHookTester clientTester;
         private NetworkIdentity netIdClient;
-
-        readonly NetworkWriter ownerWriter = new NetworkWriter(1300);
-        readonly NetworkWriter observersWriter = new NetworkWriter(1300);
-        readonly NetworkReader reader = new NetworkReader();
+        private readonly NetworkWriter ownerWriter = new NetworkWriter(1300);
+        private readonly NetworkWriter observersWriter = new NetworkWriter(1300);
+        private readonly NetworkReader reader = new NetworkReader();
 
         [SetUp]
         public void Setup()

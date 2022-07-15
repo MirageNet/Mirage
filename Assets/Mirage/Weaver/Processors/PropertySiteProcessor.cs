@@ -24,7 +24,7 @@ namespace Mirage.Weaver
                         !md.IsConstructor;
 
         // replaces syncvar write access with the NetworkXYZ.get property calls
-        void ProcessInstructionSetterField(Instruction i, FieldReference opField)
+        private void ProcessInstructionSetterField(Instruction i, FieldReference opField)
         {
             // does it set a field that we replaced?
             if (Setters.TryGetValue(opField, out MethodDefinition replacement))
@@ -46,7 +46,7 @@ namespace Mirage.Weaver
         }
 
         // replaces syncvar read access with the NetworkXYZ.get property calls
-        void ProcessInstructionGetterField(Instruction i, FieldReference opField)
+        private void ProcessInstructionGetterField(Instruction i, FieldReference opField)
         {
             // does it set a field that we replaced?
             if (Getters.TryGetValue(opField, out MethodDefinition replacement))
@@ -67,7 +67,7 @@ namespace Mirage.Weaver
             }
         }
 
-        Instruction ProcessInstruction(MethodDefinition md, Instruction instr, SequencePoint sequencePoint)
+        private Instruction ProcessInstruction(MethodDefinition md, Instruction instr, SequencePoint sequencePoint)
         {
             if (instr.OpCode == OpCodes.Stfld && instr.Operand is FieldReference opFieldst)
             {
@@ -109,7 +109,7 @@ namespace Mirage.Weaver
             return instr;
         }
 
-        Instruction ProcessInstructionLoadAddress(MethodDefinition md, Instruction instr, FieldReference opField)
+        private Instruction ProcessInstructionLoadAddress(MethodDefinition md, Instruction instr, FieldReference opField)
         {
             // does it set a field that we replaced?
             if (Setters.TryGetValue(opField, out MethodDefinition replacement))

@@ -43,8 +43,7 @@ namespace Mirage.Tests
 
 
         public readonly IEndPoint endPoint;
-
-        readonly Queue<Packet> received = new Queue<Packet>();
+        private readonly Queue<Packet> received = new Queue<Packet>();
         public List<Packet> Sent = new List<Packet>();
 
         public readonly string name;
@@ -138,9 +137,8 @@ namespace Mirage.Tests
     public class TestSocketFactory : SocketFactory
     {
         public IEndPoint serverEndpoint = TestEndPoint.CreateSubstitute();
-
-        int clientNameIndex;
-        int serverNameIndex;
+        private int clientNameIndex;
+        private int serverNameIndex;
         public override int MaxPacketSize => 1300;
         public override ISocket CreateClientSocket()
         {

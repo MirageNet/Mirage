@@ -9,10 +9,9 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
     [Category("SocketLayer")]
     public class AckSystemTest_Notify_ManySends : AckSystemTestBase
     {
-        const int messageCount = 5;
-
-        AckTestInstance instance;
-        ushort maxSequence;
+        private const int messageCount = 5;
+        private AckTestInstance instance;
+        private ushort maxSequence;
 
         [SetUp]
         public void SetUp()

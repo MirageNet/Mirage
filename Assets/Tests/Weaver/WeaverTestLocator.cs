@@ -9,7 +9,7 @@ namespace Mirage.Tests.Weaver
     /// </summary>
     public class WeaverTestLocator : ScriptableObject
     {
-        static string _outputDirectory;
+        private static string _outputDirectory;
         public static string OutputDirectory
         {
             get

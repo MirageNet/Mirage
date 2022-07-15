@@ -8,10 +8,9 @@ namespace Mirage
 {
     public class MessageHandler : IMessageReceiver
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(MessageHandler));
-
-        readonly bool disconnectOnException;
-        readonly IObjectLocator objectLocator;
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(MessageHandler));
+        private readonly bool disconnectOnException;
+        private readonly IObjectLocator objectLocator;
 
         /// <summary>
         /// Handles network messages on client and server

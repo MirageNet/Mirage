@@ -44,7 +44,7 @@ namespace Mirage.RemoteCalls
             return task;
         }
 
-        static void Validate(NetworkBehaviour behaviour, int index, bool requireAuthority)
+        private static void Validate(NetworkBehaviour behaviour, int index, bool requireAuthority)
         {
             RemoteCall rpc = behaviour.remoteCallCollection.Get(index);
             INetworkClient client = behaviour.Client;

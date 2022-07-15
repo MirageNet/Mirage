@@ -10,7 +10,7 @@ namespace Mirage
     /// </summary>
     public class NetworkTime
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkTime));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkTime));
 
         /// <summary>
         /// how often are we sending ping messages
@@ -22,8 +22,7 @@ namespace Mirage
         /// average out the last few results from Ping
         /// </summary>
         public int PingWindowSize = 10;
-
-        double lastPingTime;
+        private double lastPingTime;
 
         // Date and time when the application started
         private readonly Stopwatch stopwatch = new Stopwatch();
@@ -33,17 +32,17 @@ namespace Mirage
             stopwatch.Start();
         }
 
-        ExponentialMovingAverage _rtt = new ExponentialMovingAverage(10);
-        ExponentialMovingAverage _offset = new ExponentialMovingAverage(10);
+        private ExponentialMovingAverage _rtt = new ExponentialMovingAverage(10);
+        private ExponentialMovingAverage _offset = new ExponentialMovingAverage(10);
         private double _time;
         private int lastFrame;
 
         // the true offset guaranteed to be in this range
-        double offsetMin = double.MinValue;
-        double offsetMax = double.MaxValue;
+        private double offsetMin = double.MinValue;
+        private double offsetMax = double.MaxValue;
 
         // returns the clock time _in this system_
-        double LocalTime() => stopwatch.Elapsed.TotalSeconds;
+        private double LocalTime() => stopwatch.Elapsed.TotalSeconds;
 
         public void Reset()
         {

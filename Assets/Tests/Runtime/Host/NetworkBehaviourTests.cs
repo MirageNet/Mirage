@@ -46,7 +46,7 @@ namespace Mirage.Tests.Runtime.Host
 
         #endregion
 
-        class OnStartServerTestComponent : NetworkBehaviour
+        private class OnStartServerTestComponent : NetworkBehaviour
         {
             public bool called;
 

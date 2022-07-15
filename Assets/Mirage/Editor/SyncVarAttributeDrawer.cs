@@ -6,7 +6,7 @@ namespace Mirage
     [CustomPropertyDrawer(typeof(SyncVarAttribute))]
     public class SyncVarAttributeDrawer : PropertyDrawer
     {
-        static readonly GUIContent syncVarIndicatorContent = new GUIContent("SyncVar", "This variable has been marked with the [SyncVar] attribute.");
+        private static readonly GUIContent syncVarIndicatorContent = new GUIContent("SyncVar", "This variable has been marked with the [SyncVar] attribute.");
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {

@@ -9,7 +9,7 @@ namespace Mirage.Tests.Runtime.Serialization
     [TestFixture]
     public class MessagePackerTest
     {
-        NetworkReader reader;
+        private NetworkReader reader;
         [SetUp]
         public void Setup()
         {
@@ -106,7 +106,7 @@ namespace Mirage.Tests.Runtime.Serialization
             });
         }
 
-        struct SomeRandomMessage { };
+        private struct SomeRandomMessage { };
 
         [Test]
         public void RegisterMessage()
@@ -121,8 +121,9 @@ namespace Mirage.Tests.Runtime.Serialization
         }
 
         // these 2 messages have a colliding message id
-        struct SomeRandomMessage2121143 { };
-        struct SomeRandomMessage2133122 { };
+        private struct SomeRandomMessage2121143 { };
+
+        private struct SomeRandomMessage2133122 { };
 
         [Test]
         public void RegisterMessage2()
@@ -142,7 +143,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(type, Is.EqualTo(typeof(SceneMessage)));
         }
 
-        struct SomeRandomMessageNotRegistered { };
+        private struct SomeRandomMessageNotRegistered { };
         [Test]
         public void FindUnknownMessage()
         {

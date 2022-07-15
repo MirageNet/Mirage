@@ -29,7 +29,8 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
 
         [SyncVar(hook = nameof(syncHook))]
         public MyStruct<int> varWithHook;
-        void syncHook(MyStruct<int> _old, MyStruct<int> _new) => onSyncHook?.Invoke(_old.value, _new.value);
+
+        private void syncHook(MyStruct<int> _old, MyStruct<int> _new) => onSyncHook?.Invoke(_old.value, _new.value);
 
         [SyncVar(hook = nameof(syncEvent))]
         public MyStruct<int> varWithEvent;

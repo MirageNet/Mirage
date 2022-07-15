@@ -11,7 +11,7 @@ namespace Mirage.Tests.Runtime
     public class NetworkIdentityCallbackTests : ClientServerSetup<MockComponent>
     {
         #region test components
-        class RebuildEmptyObserversNetworkBehaviour : NetworkVisibility
+        private class RebuildEmptyObserversNetworkBehaviour : NetworkVisibility
         {
             public override bool OnCheckObserver(INetworkPlayer player) { return true; }
             public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
@@ -20,11 +20,10 @@ namespace Mirage.Tests.Runtime
 
         #endregion
 
-        GameObject gameObject;
-        NetworkIdentity identity;
-
-        INetworkPlayer player1;
-        INetworkPlayer player2;
+        private GameObject gameObject;
+        private NetworkIdentity identity;
+        private INetworkPlayer player1;
+        private INetworkPlayer player2;
 
         [SetUp]
         public override void ExtraSetup()

@@ -9,9 +9,9 @@ namespace Mirage.Tests.Runtime.Host
     [TestFixture]
     public class LobbyReadyTest : HostSetup<MockComponent>
     {
-        GameObject readyPlayer;
-        LobbyReady lobby;
-        ObjectReady readyComp;
+        private GameObject readyPlayer;
+        private LobbyReady lobby;
+        private ObjectReady readyComp;
 
         public override void ExtraSetup()
         {

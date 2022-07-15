@@ -9,7 +9,7 @@ namespace Mirage.Examples.SceneChange
     {
         public NetworkSceneManager sceneManager;
         public Text AdditiveButtonText;
-        bool additiveLoaded;
+        private bool additiveLoaded;
         private Scene _additiveLoadedScene;
 
         public void Update()

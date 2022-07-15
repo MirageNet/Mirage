@@ -7,22 +7,23 @@ namespace Mirage.SocketLayer
     public class RingBuffer<T>
     {
         public readonly Sequencer Sequencer;
-
-        readonly IEqualityComparer<T> comparer;
+        private readonly IEqualityComparer<T> comparer;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        bool IsDefault(T value)
+        private bool IsDefault(T value)
         {
             return comparer.Equals(value, default(T));
         }
 
-        readonly T[] buffer;
+        private readonly T[] buffer;
+
         /// <summary>oldtest item</summary>
-        uint read;
+        private uint read;
+
         /// <summary>newest item</summary>
-        uint write;
+        private uint write;
 
         /// <summary>manually keep track of number of items queued/inserted, this will be different from read to write range if removing/inserting not in order</summary>
-        int count;
+        private int count;
 
         public uint Read => read;
         public uint Write => write;

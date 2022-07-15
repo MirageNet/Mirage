@@ -7,8 +7,7 @@ namespace Mirage.Examples.Pong
         public Transform leftRacketSpawn;
         public Transform rightRacketSpawn;
         public GameObject ballPrefab;
-
-        GameObject ball;
+        private GameObject ball;
 
         public override void Awake()
         {

@@ -10,23 +10,23 @@ namespace Mirage
     /// </summary>
     public class PipePeerConnection : IConnection
     {
-        static readonly ILogger logger = LogFactory.GetLogger<PipePeerConnection>();
+        private static readonly ILogger logger = LogFactory.GetLogger<PipePeerConnection>();
 
         /// <summary>
         /// handler of other connection
         /// </summary>
-        IDataHandler otherHandler;
+        private IDataHandler otherHandler;
+
         /// <summary>
         /// other connection that is passed to handler
         /// </summary>
-        IConnection otherConnection;
+        private IConnection otherConnection;
 
         /// <summary>
         /// Name used for debugging
         /// </summary>
-        string name;
-
-        Action OnDisconnect;
+        private string name;
+        private Action OnDisconnect;
 
         private PipePeerConnection() { }
 

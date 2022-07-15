@@ -43,7 +43,7 @@ namespace Mirage.Weaver
         /// <param name="name"></param>
         /// <param name="assembly_reference"></param>
         /// <returns>false if referene failed to be found</returns>
-        bool TryImportFast(AssemblyName name, out AssemblyNameReference assembly_reference)
+        private bool TryImportFast(AssemblyName name, out AssemblyNameReference assembly_reference)
         {
             // getting full name is expensive
             // we cant cache it because the AssemblyName object might be different each time (different hashcode)

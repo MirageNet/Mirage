@@ -17,7 +17,7 @@ namespace Mirage
 {
     internal static class NetworkIdentityIdGenerator
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkIdentityIdGenerator));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkIdentityIdGenerator));
 
         /// <summary>
         /// Keep track of all sceneIds to detect scene duplicates
@@ -86,7 +86,7 @@ namespace Mirage
             }
         }
 
-        static string GetStagePath(PrefabStage stage)
+        private static string GetStagePath(PrefabStage stage)
         {
             // NOTE: might make sense to use GetPrefabStage for asset
             //       path, but let's not touch it while it works.
@@ -97,7 +97,7 @@ namespace Mirage
 #endif
         }
 
-        static bool SceneObjectWithPrefabParent(NetworkIdentity identity, out GameObject parent)
+        private static bool SceneObjectWithPrefabParent(NetworkIdentity identity, out GameObject parent)
         {
             parent = null;
 
@@ -115,19 +115,19 @@ namespace Mirage
             return true;
         }
 
-        static void AssignAssetID(NetworkIdentity identity, GameObject parent)
+        private static void AssignAssetID(NetworkIdentity identity, GameObject parent)
         {
             string path = AssetDatabase.GetAssetPath(parent);
             AssignAssetID(identity, path);
         }
 
-        static void AssignAssetID(NetworkIdentity identity)
+        private static void AssignAssetID(NetworkIdentity identity)
         {
             string path = AssetDatabase.GetAssetPath(identity.gameObject);
             AssignAssetID(identity, path);
         }
 
-        static void AssignAssetID(NetworkIdentity identity, string path)
+        private static void AssignAssetID(NetworkIdentity identity, string path)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -149,7 +149,7 @@ namespace Mirage
         /// Id must be assigned at edit time. This is to make sure they are the the same between builds
         /// </para>
         /// </remarks>
-        static void AssignSceneID(NetworkIdentity identity)
+        private static void AssignSceneID(NetworkIdentity identity)
         {
             // Only generate at editor time
             if (Application.isPlaying)
@@ -181,7 +181,7 @@ namespace Mirage
             sceneIds[wrapper.SceneId] = identity;
         }
 
-        static bool IsDuplicate(NetworkIdentity identity, int sceneId)
+        private static bool IsDuplicate(NetworkIdentity identity, int sceneId)
         {
             if (sceneIds.TryGetValue(sceneId, out NetworkIdentity existing))
             {
@@ -203,7 +203,7 @@ namespace Mirage
         /// Gets random int using secure randon
         /// </summary>
         /// <returns></returns>
-        static int GetRandomUInt()
+        private static int GetRandomUInt()
         {
             // use Crypto RNG to avoid having time based duplicates
             using (var rng = new RNGCryptoServiceProvider())
@@ -217,14 +217,14 @@ namespace Mirage
         /// <summary>
         /// Wrapper for NetworkIdentity that will set and save fields
         /// </summary>
-        class IdentityWrapper
+        private class IdentityWrapper
         {
-            const long ID_MASK = (long)0x0000_0000_FFFF_FFFFul;
-            const long HASH_MASK = unchecked((long)0xFFFF_FFFF_0000_0000ul);
-            readonly NetworkIdentity identity;
-            readonly SerializedObject _serializedObject;
-            readonly SerializedProperty _prefabHashProp;
-            readonly SerializedProperty _sceneIdProp;
+            private const long ID_MASK = (long)0x0000_0000_FFFF_FFFFul;
+            private const long HASH_MASK = unchecked((long)0xFFFF_FFFF_0000_0000ul);
+            private readonly NetworkIdentity identity;
+            private readonly SerializedObject _serializedObject;
+            private readonly SerializedProperty _prefabHashProp;
+            private readonly SerializedProperty _sceneIdProp;
 
             public IdentityWrapper(NetworkIdentity identity)
             {

@@ -13,9 +13,9 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
     [TestFixture(500ul, 100_000ul, 10_000_000ul)]
     public class UintPackerTests : PackerTestBase
     {
-        readonly Random random = new Random();
-        readonly VarIntPacker packer;
-        readonly ulong max;
+        private readonly Random random = new Random();
+        private readonly VarIntPacker packer;
+        private readonly ulong max;
 
         public UintPackerTests(ulong smallValue, ulong mediumValue, ulong? largeValue)
         {
@@ -31,18 +31,17 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             }
         }
 
-
-        ulong GetRandonUlongBias()
+        private ulong GetRandonUlongBias()
         {
             return (ulong)(Math.Abs(random.NextDouble() - random.NextDouble()) * max);
         }
 
-        uint GetRandonUintBias()
+        private uint GetRandonUintBias()
         {
             return (uint)(Math.Abs(random.NextDouble() - random.NextDouble()) * Math.Min(max, uint.MaxValue));
         }
 
-        ushort GetRandonUshortBias()
+        private ushort GetRandonUshortBias()
         {
             return (ushort)(Math.Abs(random.NextDouble() - random.NextDouble()) * Math.Min(max, ushort.MaxValue));
         }

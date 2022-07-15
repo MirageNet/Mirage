@@ -130,7 +130,7 @@ namespace Mirage.Weaver
             return assemblyDefinition;
         }
 
-        IReadOnlyList<FoundType> FindAllClasses(ModuleDefinition module)
+        private IReadOnlyList<FoundType> FindAllClasses(ModuleDefinition module)
         {
             using (timer.Sample("FindAllClasses"))
             {
@@ -176,7 +176,7 @@ namespace Mirage.Weaver
             foundTypes.Add(new FoundType(type, isNetworkBehaviour, isMonoBehaviour));
         }
 
-        bool WeaveNetworkBehavior(FoundType foundType)
+        private bool WeaveNetworkBehavior(FoundType foundType)
         {
             List<TypeDefinition> behaviourClasses = FindAllBaseTypes(foundType);
 
@@ -197,7 +197,7 @@ namespace Mirage.Weaver
         /// </summary>
         /// <param name="foundType"></param>
         /// <returns></returns>
-        static List<TypeDefinition> FindAllBaseTypes(FoundType foundType)
+        private static List<TypeDefinition> FindAllBaseTypes(FoundType foundType)
         {
             var behaviourClasses = new List<TypeDefinition>();
 

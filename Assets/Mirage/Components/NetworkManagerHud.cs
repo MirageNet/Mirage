@@ -27,7 +27,7 @@ namespace Mirage
             NetworkManager.Client?.Disconnected.AddListener(_ => OfflineSetActive());
         }
 
-        void SetLabel(string value)
+        private void SetLabel(string value)
         {
             if (StatusLabel) StatusLabel.text = value;
         }

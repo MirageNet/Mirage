@@ -51,7 +51,8 @@ namespace Mirage.Tests.Runtime.SyncVarWithBaseClass
             SetDirtyBit(ref expected, 8);
             Assert.That(behaviour.SyncVarDirtyBits, Is.EqualTo(expected));
         }
-        void SetDirtyBit(ref ulong bits, int index)
+
+        private void SetDirtyBit(ref ulong bits, int index)
         {
             bits |= 1ul << index;
         }

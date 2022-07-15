@@ -38,12 +38,12 @@ namespace Mirage.Serialization
         /// <summary>
         /// 1 / sqrt(2)
         /// </summary>
-        const float MaxValue = 1f / 1.414214f;
+        private const float MaxValue = 1f / 1.414214f;
 
         /// <summary>
         /// bit count per element writen
         /// </summary>
-        readonly int bitCountPerElement;
+        private readonly int bitCountPerElement;
 
         /// <summary>
         /// total bit count for Quaternion
@@ -51,10 +51,9 @@ namespace Mirage.Serialization
         /// count = 3 * perElement + 2;
         /// </para>
         /// </summary>
-        readonly int totalBitCount;
-        readonly uint readMask;
-
-        readonly FloatPacker floatPacker;
+        private readonly int totalBitCount;
+        private readonly uint readMask;
+        private readonly FloatPacker floatPacker;
 
         /// <param name="quaternionBitLength">10 per "smallest 3" is good enough for most people</param>
         public QuaternionPacker(int quaternionBitLength = 10)
@@ -158,7 +157,7 @@ namespace Mirage.Serialization
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void GetSmallerDimensions(uint largestIndex, ref Quaternion quaternion, out float a, out float b, out float c)
+        private static void GetSmallerDimensions(uint largestIndex, ref Quaternion quaternion, out float a, out float b, out float c)
         {
             switch (largestIndex)
             {
@@ -188,7 +187,8 @@ namespace Mirage.Serialization
                     return;
             }
         }
-        static void ThrowIfOutOfRange() => throw new IndexOutOfRangeException("Invalid Quaternion index!");
+
+        private static void ThrowIfOutOfRange() => throw new IndexOutOfRangeException("Invalid Quaternion index!");
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

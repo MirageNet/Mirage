@@ -39,8 +39,8 @@ namespace Mirage.Tests.Runtime.Serialization
             M, N, O, P
         }
 
-        readonly NetworkWriter writer = new NetworkWriter(1300);
-        readonly NetworkReader reader = new NetworkReader();
+        private readonly NetworkWriter writer = new NetworkWriter(1300);
+        private readonly NetworkReader reader = new NetworkReader();
 
         [TearDown]
         public void TearDown()
@@ -81,7 +81,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(clientMsg, Is.EqualTo(MyCustom.N));
         }
 
-        T SerializeAndDeserializeMessage<T>(T msg)
+        private T SerializeAndDeserializeMessage<T>(T msg)
         {
             writer.Write(msg);
 

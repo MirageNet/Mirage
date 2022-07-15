@@ -8,7 +8,7 @@ namespace Mirage.Tests
 {
     public class PipePeerConnectionTest
     {
-        class ConnectionHandler
+        private class ConnectionHandler
         {
             public IDataHandler handler;
             public IConnection connection;
@@ -45,11 +45,10 @@ namespace Mirage.Tests
             }
         }
 
-        ConnectionHandler conn1;
-        ConnectionHandler conn2;
-
-        Action disconnect1;
-        Action disconnect2;
+        private ConnectionHandler conn1;
+        private ConnectionHandler conn2;
+        private Action disconnect1;
+        private Action disconnect2;
 
         [SetUp]
         public void Setup()

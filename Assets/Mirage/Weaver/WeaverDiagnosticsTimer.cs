@@ -8,8 +8,8 @@ namespace Mirage.Weaver
     internal class WeaverDiagnosticsTimer
     {
         public bool writeToFile;
-        StreamWriter writer;
-        Stopwatch stopwatch;
+        private StreamWriter writer;
+        private Stopwatch stopwatch;
         private string name;
 
         public long ElapsedMilliseconds => stopwatch?.ElapsedMilliseconds ?? 0;
@@ -54,7 +54,7 @@ namespace Mirage.Weaver
         }
 
         [Conditional("WEAVER_DEBUG_TIMER")]
-        void WriteLine(string msg)
+        private void WriteLine(string msg)
         {
             string fullMsg = $"[WeaverDiagnostics] {msg}";
             Console.WriteLine(fullMsg);
@@ -79,9 +79,9 @@ namespace Mirage.Weaver
 
         public struct SampleScope : IDisposable
         {
-            readonly WeaverDiagnosticsTimer timer;
-            readonly long start;
-            readonly string label;
+            private readonly WeaverDiagnosticsTimer timer;
+            private readonly long start;
+            private readonly string label;
 
             public SampleScope(WeaverDiagnosticsTimer timer, string label)
             {

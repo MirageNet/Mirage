@@ -102,13 +102,13 @@ namespace Mirage.Experimental
 
         // Is this a client with authority over this transform?
         // This component could be on the player object or any object that has been assigned authority to this client.
-        bool IsOwnerWithClientAuthority => HasAuthority && clientAuthority;
+        private bool IsOwnerWithClientAuthority => HasAuthority && clientAuthority;
 
         // interpolation start and goal
         public DataPoint start = new DataPoint();
         public DataPoint goal = new DataPoint();
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
             // if server then always sync to others.
             // let the clients know that this has moved
@@ -155,7 +155,7 @@ namespace Mirage.Experimental
         }
 
         // moved or rotated or scaled since last time we checked it?
-        bool HasEitherMovedRotatedScaled()
+        private bool HasEitherMovedRotatedScaled()
         {
             // Save last for next frame to compare only if change was detected, otherwise
             // slow moving objects might never sync because of C#'s float comparison tolerance.
@@ -175,14 +175,16 @@ namespace Mirage.Experimental
         // SqrMagnitude is faster than Distance per Unity docs
         // https://docs.unity3d.com/ScriptReference/Vector3-sqrMagnitude.html
 
-        bool HasMoved => syncPosition && Vector3.SqrMagnitude(lastPosition - TargetTransform.localPosition) > localPositionSensitivity * localPositionSensitivity;
-        bool HasRotated => syncRotation && Quaternion.Angle(lastRotation, TargetTransform.localRotation) > localRotationSensitivity;
-        bool HasScaled => syncScale && Vector3.SqrMagnitude(lastScale - TargetTransform.localScale) > localScaleSensitivity * localScaleSensitivity;
+        private bool HasMoved => syncPosition && Vector3.SqrMagnitude(lastPosition - TargetTransform.localPosition) > localPositionSensitivity * localPositionSensitivity;
+
+        private bool HasRotated => syncRotation && Quaternion.Angle(lastRotation, TargetTransform.localRotation) > localRotationSensitivity;
+
+        private bool HasScaled => syncScale && Vector3.SqrMagnitude(lastScale - TargetTransform.localScale) > localScaleSensitivity * localScaleSensitivity;
 
         // teleport / lag / stuck detection
         // - checking distance is not enough since there could be just a tiny fence between us and the goal
         // - checking time always works, this way we just teleport if we still didn't reach the goal after too much time has elapsed
-        bool NeedsTeleport()
+        private bool NeedsTeleport()
         {
             // calculate time between the two data points
             float startTime = start.IsValid ? start.timeStamp : Time.time - Time.fixedDeltaTime;
@@ -194,7 +196,7 @@ namespace Mirage.Experimental
 
         // local authority client sends sync message to server for broadcasting
         [ServerRpc]
-        void CmdClientToServerSync(Vector3 position, Quaternion rotation, Vector3 scale)
+        private void CmdClientToServerSync(Vector3 position, Quaternion rotation, Vector3 scale)
         {
             // Ignore messages from client if not in client authority mode
             if (!clientAuthority)
@@ -211,7 +213,7 @@ namespace Mirage.Experimental
         }
 
         [ClientRpc]
-        void RpcMove(Vector3 position, Quaternion rotation, Vector3 scale)
+        private void RpcMove(Vector3 position, Quaternion rotation, Vector3 scale)
         {
             if (HasAuthority && excludeOwnerUpdate) return;
 
@@ -220,7 +222,7 @@ namespace Mirage.Experimental
         }
 
         // serialization is needed by OnSerialize and by manual sending from authority
-        void SetGoal(Vector3 position, Quaternion rotation, Vector3 scale)
+        private void SetGoal(Vector3 position, Quaternion rotation, Vector3 scale)
         {
             // put it into a data point immediately
             var temp = new DataPoint
@@ -303,7 +305,7 @@ namespace Mirage.Experimental
         // - if this is the first time ever then we use our best guess:
         //     - delta based on transform.localPosition
         //     - elapsed based on send interval hoping that it roughly matches
-        static float EstimateMovementSpeed(DataPoint from, DataPoint to, Transform transform, float sendInterval)
+        private static float EstimateMovementSpeed(DataPoint from, DataPoint to, Transform transform, float sendInterval)
         {
             Vector3 delta = to.localPosition - (from.localPosition != transform.localPosition ? from.localPosition : transform.localPosition);
             float elapsed = from.IsValid ? to.timeStamp - from.timeStamp : sendInterval;
@@ -313,7 +315,7 @@ namespace Mirage.Experimental
         }
 
         // set position carefully depending on the target component
-        void ApplyPositionRotationScale(Vector3 position, Quaternion rotation, Vector3 scale)
+        private void ApplyPositionRotationScale(Vector3 position, Quaternion rotation, Vector3 scale)
         {
             // local position/rotation for VR support
             if (syncPosition) TargetTransform.localPosition = position;
@@ -322,7 +324,7 @@ namespace Mirage.Experimental
         }
 
         // where are we in the timeline between start and goal? [0,1]
-        Vector3 InterpolatePosition(DataPoint start, DataPoint goal, Vector3 currentPosition)
+        private Vector3 InterpolatePosition(DataPoint start, DataPoint goal, Vector3 currentPosition)
         {
             if (!interpolatePosition)
                 return currentPosition;
@@ -344,7 +346,7 @@ namespace Mirage.Experimental
             return currentPosition;
         }
 
-        Quaternion InterpolateRotation(DataPoint start, DataPoint goal, Quaternion defaultRotation)
+        private Quaternion InterpolateRotation(DataPoint start, DataPoint goal, Quaternion defaultRotation)
         {
             if (!interpolateRotation)
                 return defaultRotation;
@@ -358,7 +360,7 @@ namespace Mirage.Experimental
             return defaultRotation;
         }
 
-        Vector3 InterpolateScale(DataPoint start, DataPoint goal, Vector3 currentScale)
+        private Vector3 InterpolateScale(DataPoint start, DataPoint goal, Vector3 currentScale)
         {
             if (!interpolateScale)
                 return currentScale;
@@ -372,7 +374,7 @@ namespace Mirage.Experimental
             return currentScale;
         }
 
-        static float CurrentInterpolationFactor(DataPoint start, DataPoint goal)
+        private static float CurrentInterpolationFactor(DataPoint start, DataPoint goal)
         {
             if (start.IsValid)
             {
@@ -390,7 +392,7 @@ namespace Mirage.Experimental
         #region Debug Gizmos
 
         // draw the data points for easier debugging
-        void OnDrawGizmos()
+        private void OnDrawGizmos()
         {
             // draw start and goal points and a line between them
             if (start.localPosition != goal.localPosition)
@@ -401,7 +403,7 @@ namespace Mirage.Experimental
             }
         }
 
-        static void DrawDataPointGizmo(DataPoint data, Color color)
+        private static void DrawDataPointGizmo(DataPoint data, Color color)
         {
             // use a little offset because transform.localPosition might be in the ground in many cases
             Vector3 offset = Vector3.up * 0.01f;
@@ -417,7 +419,7 @@ namespace Mirage.Experimental
             Gizmos.DrawRay(data.localPosition + offset, data.localRotation * Vector3.up);
         }
 
-        static void DrawLineBetweenDataPoints(DataPoint data1, DataPoint data2, Color color)
+        private static void DrawLineBetweenDataPoints(DataPoint data1, DataPoint data2, Color color)
         {
             Gizmos.color = color;
             Gizmos.DrawLine(data1.localPosition, data2.localPosition);

@@ -47,10 +47,10 @@ namespace Mirage.Tests.Runtime.Generated.QuaternionPackAttributeTests._8_0
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
-        static readonly Quaternion value = new Quaternion(0f, 0.7071068f, 0f, 0.7071068f);
-        const float within = 0.0054f;
+        private static readonly Quaternion value = new Quaternion(0f, 0.7071068f, 0f, 0.7071068f);
+        private const float within = 0.0054f;
 
-        static void AssertValue(Quaternion actual)
+        private static void AssertValue(Quaternion actual)
         {
             Vector3 inVec = value * Vector3.forward;
             Vector3 outVec = actual * Vector3.forward;

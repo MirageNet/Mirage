@@ -248,7 +248,7 @@ namespace Mirage.Weaver
             return generated;
         }
 
-        SerializeFunctionException ThrowCantGenerate(TypeReference typeReference, string typeDescription = null)
+        private SerializeFunctionException ThrowCantGenerate(TypeReference typeReference, string typeDescription = null)
         {
             string reasonStr = string.IsNullOrEmpty(typeDescription) ? string.Empty : $"{typeDescription} ";
             return new SerializeFunctionException($"Cannot generate {FunctionTypeLog} for {reasonStr}{typeReference.Name}. Use a supported type or provide a custom {FunctionTypeLog}", typeReference);

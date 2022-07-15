@@ -16,8 +16,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         public const int MAX_PACKET_SIZE = 1300;
 
         protected byte[] connectRequest;
-
-        PeerInstance instance;
+        private PeerInstance instance;
         protected Action<IConnection> connectAction;
         protected Action<IConnection, RejectReason> connectFailedAction;
         protected Action<IConnection, DisconnectReason> disconnectAction;

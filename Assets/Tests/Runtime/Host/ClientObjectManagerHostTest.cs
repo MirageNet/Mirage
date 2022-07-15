@@ -11,7 +11,7 @@ namespace Mirage.Tests.Runtime.Host
     [TestFixture]
     public class ClientObjectManagerHostTest : HostSetup<MockComponent>
     {
-        GameObject playerReplacement;
+        private GameObject playerReplacement;
 
         [Test]
         public void OnSpawnAssetSceneIDFailureExceptionTest()
@@ -113,12 +113,12 @@ namespace Mirage.Tests.Runtime.Host
             Object.Destroy(prefabObject);
         }
 
-        NetworkIdentity TestSpawnDelegate(SpawnMessage msg)
+        private NetworkIdentity TestSpawnDelegate(SpawnMessage msg)
         {
             return new GameObject("spawned", typeof(NetworkIdentity)).GetComponent<NetworkIdentity>();
         }
 
-        void TestUnspawnDelegate(NetworkIdentity identity)
+        private void TestUnspawnDelegate(NetworkIdentity identity)
         {
             Object.Destroy(identity.gameObject);
         }
@@ -140,7 +140,7 @@ namespace Mirage.Tests.Runtime.Host
         }
 
         //Used to ensure the test has a unique non empty guid
-        int NewUniqueHash()
+        private int NewUniqueHash()
         {
             int testGuid = Guid.NewGuid().GetHashCode();
 

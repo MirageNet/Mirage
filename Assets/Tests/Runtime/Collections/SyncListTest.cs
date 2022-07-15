@@ -9,8 +9,8 @@ namespace Mirage.Tests.Runtime
 {
     public static class SerializeHelper
     {
-        static readonly NetworkWriter writer = new NetworkWriter(1300);
-        static readonly NetworkReader reader = new NetworkReader();
+        private static readonly NetworkWriter writer = new NetworkWriter(1300);
+        private static readonly NetworkReader reader = new NetworkReader();
 
         public static void SerializeAllTo<T>(T fromList, T toList) where T : ISyncObject
         {
@@ -44,8 +44,8 @@ namespace Mirage.Tests.Runtime
     [TestFixture]
     public class SyncListTest
     {
-        SyncList<string> serverSyncList;
-        SyncList<string> clientSyncList;
+        private SyncList<string> serverSyncList;
+        private SyncList<string> clientSyncList;
 
 
 

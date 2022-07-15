@@ -54,7 +54,7 @@ namespace Mirage.Tests.Runtime.Generated.ZigZagAttributeTests.MyEnum_4
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
-        const MyEnum value = (MyEnum)1;
+        private const MyEnum value = (MyEnum)1;
 
         [Test]
         public void SyncVarIsBitPacked()

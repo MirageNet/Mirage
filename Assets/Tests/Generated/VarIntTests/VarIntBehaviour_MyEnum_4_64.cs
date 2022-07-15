@@ -65,7 +65,8 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.MyEnum_4_64
             public int expectedBits;
             public override string ToString() => value.ToString();
         }
-        static TestCase[] cases = new TestCase[] 
+
+        private static TestCase[] cases = new TestCase[] 
         {
             new TestCase { value = (MyEnum)0, expectedBits = 4 },
             new TestCase { value = (MyEnum)4, expectedBits = 4 },

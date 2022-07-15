@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Mirage.Tests.Runtime.Serialization
 {
-    class MockPlayer : NetworkBehaviour
+    internal class MockPlayer : NetworkBehaviour
     {
         public struct Guild
         {
@@ -20,9 +20,9 @@ namespace Mirage.Tests.Runtime.Serialization
 
     public class SyncVarTest
     {
-        readonly NetworkWriter ownerWriter = new NetworkWriter(1300);
-        readonly NetworkWriter observersWriter = new NetworkWriter(1300);
-        readonly MirageNetworkReader reader = new MirageNetworkReader();
+        private readonly NetworkWriter ownerWriter = new NetworkWriter(1300);
+        private readonly NetworkWriter observersWriter = new NetworkWriter(1300);
+        private readonly MirageNetworkReader reader = new MirageNetworkReader();
 
         [TearDown]
         public void TearDown()

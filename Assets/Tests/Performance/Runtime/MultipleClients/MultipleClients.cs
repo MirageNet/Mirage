@@ -19,13 +19,12 @@ namespace Mirage.Tests.Performance.Runtime
     [Category("Benchmark")]
     public class MultipleClients
     {
-        const string ScenePath = "Assets/Tests/Performance/Runtime/MultipleClients/Scenes/Scene.unity";
-        const string MonsterPath = "Assets/Tests/Performance/Runtime/MultipleClients/Prefabs/Monster.prefab";
-        const int Warmup = 50;
-        const int MeasureCount = 256;
-
-        const int ClientCount = 10;
-        const int MonsterCount = 10;
+        private const string ScenePath = "Assets/Tests/Performance/Runtime/MultipleClients/Scenes/Scene.unity";
+        private const string MonsterPath = "Assets/Tests/Performance/Runtime/MultipleClients/Prefabs/Monster.prefab";
+        private const int Warmup = 50;
+        private const int MeasureCount = 256;
+        private const int ClientCount = 10;
+        private const int MonsterCount = 10;
 
         public NetworkServer Server;
         public ServerObjectManager ServerObjectManager;

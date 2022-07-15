@@ -8,10 +8,10 @@ namespace Mirage.Weaver.Serialization
     {
         public override bool IsIntType => true;
 
-        readonly int bitCount;
-        readonly OpCode? typeConverter;
-        readonly bool useZigZag;
-        readonly int? minValue;
+        private readonly int bitCount;
+        private readonly OpCode? typeConverter;
+        private readonly bool useZigZag;
+        private readonly int? minValue;
 
         public BitCountSerializer(int bitCount, OpCode? typeConverter, bool useZigZag = false)
         {
@@ -81,7 +81,8 @@ namespace Mirage.Weaver.Serialization
             worker.Append(worker.Create(OpCodes.Ldc_I4, bitCount));
             worker.Append(worker.Create(OpCodes.Call, writeWithBitCount));
         }
-        void WriteZigZag(ModuleDefinition module, ILProcessor worker, TypeReference fieldType)
+
+        private void WriteZigZag(ModuleDefinition module, ILProcessor worker, TypeReference fieldType)
         {
             bool useLong = fieldType.Is<long>();
             MethodReference encode = useLong
@@ -90,7 +91,8 @@ namespace Mirage.Weaver.Serialization
 
             worker.Append(worker.Create(OpCodes.Call, encode));
         }
-        void WriteSubtractMinValue(ILProcessor worker)
+
+        private void WriteSubtractMinValue(ILProcessor worker)
         {
             worker.Append(worker.Create(OpCodes.Ldc_I4, minValue.Value));
             worker.Append(worker.Create(OpCodes.Sub));
@@ -123,7 +125,7 @@ namespace Mirage.Weaver.Serialization
             }
         }
 
-        void ReadZigZag(ModuleDefinition module, ILProcessor worker, TypeReference fieldType)
+        private void ReadZigZag(ModuleDefinition module, ILProcessor worker, TypeReference fieldType)
         {
             bool useLong = fieldType.Is<long>();
             MethodReference encode = useLong
@@ -132,7 +134,8 @@ namespace Mirage.Weaver.Serialization
 
             worker.Append(worker.Create(OpCodes.Call, encode));
         }
-        void ReadAddMinValue(ILProcessor worker)
+
+        private void ReadAddMinValue(ILProcessor worker)
         {
             worker.Append(worker.Create(OpCodes.Ldc_I4, minValue.Value));
             worker.Append(worker.Create(OpCodes.Add));

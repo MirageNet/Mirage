@@ -5,7 +5,7 @@ namespace Mirage.Events.Tests
 {
     public abstract class AddLateEventTestsBase
     {
-        int listenerCallCount;
+        private int listenerCallCount;
         protected void TestListener() => listenerCallCount++;
 
         protected abstract void Init();
@@ -138,7 +138,7 @@ namespace Mirage.Events.Tests
 
     public class AddLateEvent0ArgTest : AddLateEventTestsBase
     {
-        AddLateEvent allLate;
+        private AddLateEvent allLate;
         protected override void Init()
         {
             allLate = new AddLateEvent();
@@ -175,9 +175,9 @@ namespace Mirage.Events.Tests
     public class IntAddLateEvent : AddLateEvent<int, IntUnityEvent> { }
     public class AddLateEvent1ArgTest : AddLateEventTestsBase
     {
-        IntAddLateEvent allLate;
+        private IntAddLateEvent allLate;
 
-        void TestListener1Arg(int a)
+        private void TestListener1Arg(int a)
         {
             TestListener();
         }
@@ -255,8 +255,9 @@ namespace Mirage.Events.Tests
     public class IntStringAddLateEvent : AddLateEvent<int, string, IntStringUnityEvent> { }
     public class AddLateEvent2ArgTest : AddLateEventTestsBase
     {
-        IntStringAddLateEvent allLate;
-        void TestListener2Arg(int a, string b)
+        private IntStringAddLateEvent allLate;
+
+        private void TestListener2Arg(int a, string b)
         {
             TestListener();
         }

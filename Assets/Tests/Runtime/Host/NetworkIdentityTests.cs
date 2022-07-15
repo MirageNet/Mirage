@@ -15,8 +15,8 @@ namespace Mirage.Tests.Runtime.Host
     {
         #region SetUp
 
-        GameObject gameObject;
-        NetworkIdentity testIdentity;
+        private GameObject gameObject;
+        private NetworkIdentity testIdentity;
 
         public override void ExtraSetup()
         {
@@ -218,8 +218,8 @@ namespace Mirage.Tests.Runtime.Host
     {
         #region SetUp
 
-        GameObject gameObject;
-        NetworkIdentity testIdentity;
+        private GameObject gameObject;
+        private NetworkIdentity testIdentity;
 
         public override void ExtraSetup()
         {

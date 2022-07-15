@@ -130,7 +130,8 @@ namespace Mirage.Weaver
             return generic;
 
         }
-        static TypeReference FindMatchingGenericArgument(TypeReference childReference, string paramName)
+
+        private static TypeReference FindMatchingGenericArgument(TypeReference childReference, string paramName)
         {
             TypeDefinition def = childReference.Resolve();
             // child class must be generic if we are in this part of the code

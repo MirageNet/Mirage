@@ -8,7 +8,7 @@ namespace Mirage.SocketLayer
     public sealed class ByteBuffer : IDisposable
     {
         public readonly byte[] array;
-        readonly Pool<ByteBuffer> pool;
+        private readonly Pool<ByteBuffer> pool;
 
         private ByteBuffer(int bufferSize, Pool<ByteBuffer> pool)
         {

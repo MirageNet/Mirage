@@ -13,7 +13,7 @@ namespace Mirage.Logging
         /// <summary>
         /// logHandler used for new loggers
         /// </summary>
-        static ILogHandler defaultLogHandler = Debug.unityLogger;
+        private static ILogHandler defaultLogHandler = Debug.unityLogger;
 
         public static ILogger GetLogger<T>(LogType defaultLogLevel = LogType.Warning)
         {

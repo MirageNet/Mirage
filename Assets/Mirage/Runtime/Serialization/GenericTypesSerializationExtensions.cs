@@ -45,7 +45,8 @@ namespace Mirage.Serialization
 
             Writer<T>.Write(writer, value);
         }
-        static void ThrowIfWriterNotFound<T>()
+
+        private static void ThrowIfWriterNotFound<T>()
         {
             throw new KeyNotFoundException($"No writer found for {typeof(T)}. See https://miragenet.github.io/Mirage/Articles/General/Troubleshooting.html for details");
         }
@@ -65,7 +66,8 @@ namespace Mirage.Serialization
 
             return Reader<T>.Read(reader);
         }
-        static void ThrowIfReaderNotFound<T>()
+
+        private static void ThrowIfReaderNotFound<T>()
         {
             throw new KeyNotFoundException($"No reader found for {typeof(T)}. See https://miragenet.github.io/Mirage/Articles/General/Troubleshooting.html for details");
         }

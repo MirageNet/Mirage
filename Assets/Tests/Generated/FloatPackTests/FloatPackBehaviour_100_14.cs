@@ -47,8 +47,8 @@ namespace Mirage.Tests.Runtime.Generated.FloatPackAttributeTests._100_14
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
-        const float value = 5.2f;
-        const float within = 0.0123f;
+        private const float value = 5.2f;
+        private const float within = 0.0123f;
 
         [Test]
         public void SyncVarIsBitPacked()

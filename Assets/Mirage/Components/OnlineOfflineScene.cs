@@ -7,7 +7,7 @@ namespace Mirage
 {
     public class OnlineOfflineScene : MonoBehaviour
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(OnlineOfflineScene));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(OnlineOfflineScene));
 
         [FormerlySerializedAs("server")]
         public NetworkServer Server;
@@ -23,7 +23,7 @@ namespace Mirage
         public string OfflineScene;
 
         // Start is called before the first frame update
-        void Start()
+        private void Start()
         {
             if (string.IsNullOrEmpty(OnlineScene))
                 throw new MissingReferenceException("OnlineScene missing. Please assign to OnlineOfflineScene component.");
@@ -38,12 +38,12 @@ namespace Mirage
             }
         }
 
-        void OnServerStarted()
+        private void OnServerStarted()
         {
             NetworkSceneManager.ServerLoadSceneNormal(OnlineScene);
         }
 
-        void OnServerStopped()
+        private void OnServerStopped()
         {
             Debug.Log("OnlineOfflineScene.OnServerStopped");
             NetworkSceneManager.ServerLoadSceneNormal(OfflineScene);

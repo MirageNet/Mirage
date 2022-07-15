@@ -13,17 +13,17 @@ namespace Mirage
     [CanEditMultipleObjects]
     public class NetworkBehaviourInspector : Editor
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkBehaviourInspector));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkBehaviourInspector));
 
         /// <summary>
         /// List of all visible syncVars in target class
         /// </summary>
         protected List<string> syncVarNames = new List<string>();
-        bool syncsAnything;
-        SyncListDrawer syncListDrawer;
+        private bool syncsAnything;
+        private SyncListDrawer syncListDrawer;
 
         // does this type sync anything? otherwise we don't need to show syncInterval
-        bool SyncsAnything(Type scriptClass)
+        private bool SyncsAnything(Type scriptClass)
         {
             // check for all SyncVar fields, they don't have to be visible
             foreach (FieldInfo field in InspectorHelper.GetAllFields(scriptClass, typeof(NetworkBehaviour)))
@@ -54,7 +54,7 @@ namespace Mirage
             return syncObjects.Count > 0;
         }
 
-        void OnEnable()
+        private void OnEnable()
         {
             if (target == null) { logger.LogWarning("NetworkBehaviourInspector had no target object"); return; }
 
@@ -120,8 +120,8 @@ namespace Mirage
     }
     public class SyncListDrawer
     {
-        readonly UnityEngine.Object targetObject;
-        readonly List<SyncListField> syncListFields;
+        private readonly UnityEngine.Object targetObject;
+        private readonly List<SyncListField> syncListFields;
 
         public SyncListDrawer(UnityEngine.Object targetObject)
         {
@@ -149,7 +149,7 @@ namespace Mirage
             }
         }
 
-        void DrawSyncList(SyncListField syncListField)
+        private void DrawSyncList(SyncListField syncListField)
         {
             syncListField.visible = EditorGUILayout.Foldout(syncListField.visible, syncListField.label);
             if (syncListField.visible)
@@ -173,7 +173,7 @@ namespace Mirage
             }
         }
 
-        class SyncListField
+        private class SyncListField
         {
             public bool visible;
             public readonly FieldInfo field;

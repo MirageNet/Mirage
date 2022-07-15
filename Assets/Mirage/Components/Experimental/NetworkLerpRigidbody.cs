@@ -17,25 +17,24 @@ namespace Mirage.Experimental
 
         [Tooltip("Set to true if moves come from owner client, set to false if moves always come from server")]
         public bool clientAuthority;
+        private float nextSyncTime;
 
-        float nextSyncTime;
-
-
-        [SyncVar]
-        Vector3 targetVelocity;
 
         [SyncVar]
-        Vector3 targetPosition;
+        private Vector3 targetVelocity;
+
+        [SyncVar]
+        private Vector3 targetPosition;
 
         /// <summary>
         /// Ignore value if is host or client with Authority
         /// </summary>
         /// <returns></returns>
-        bool IgnoreSync => IsServer || ClientWithAuthority;
+        private bool IgnoreSync => IsServer || ClientWithAuthority;
 
-        bool ClientWithAuthority => clientAuthority && HasAuthority;
+        private bool ClientWithAuthority => clientAuthority && HasAuthority;
 
-        void OnValidate()
+        private void OnValidate()
         {
             if (target == null)
             {
@@ -43,7 +42,7 @@ namespace Mirage.Experimental
             }
         }
 
-        void Update()
+        private void Update()
         {
             if (IsServer)
             {
@@ -80,7 +79,7 @@ namespace Mirage.Experimental
             targetPosition = position;
         }
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
             if (IgnoreSync) { return; }
 

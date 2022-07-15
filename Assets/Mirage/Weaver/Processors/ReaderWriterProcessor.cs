@@ -24,7 +24,7 @@ namespace Mirage.Weaver
         /// <summary>
         /// Mirage's main module used to find built in extension methods and messages
         /// </summary>
-        static Module MirageModule => typeof(NetworkWriter).Module;
+        private static Module MirageModule => typeof(NetworkWriter).Module;
 
         public ReaderWriterProcessor(ModuleDefinition module, Readers readers, Writers writers)
         {
@@ -75,7 +75,7 @@ namespace Mirage.Weaver
         #endregion
 
         #region Assembly defined reader/writer
-        void ProcessAssemblyClasses()
+        private void ProcessAssemblyClasses()
         {
             var types = new List<TypeDefinition>(module.Types);
 

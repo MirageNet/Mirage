@@ -24,7 +24,7 @@ namespace Mirage
         }
 
         [ServerRpc]
-        void ReadyRpc()
+        private void ReadyRpc()
         {
             IsReady = true;
         }

@@ -8,8 +8,9 @@ namespace Mirage.Tests.Runtime.ClientServer
     public class NetworkManagerHudClientServerTest : ClientServerSetup<MockComponent>
     {
         protected override bool AutoConnectClient => false;
-        GameObject gameObject;
-        NetworkManagerHud networkManagerHud;
+
+        private GameObject gameObject;
+        private NetworkManagerHud networkManagerHud;
         public override void ExtraSetup()
         {
             gameObject = new GameObject("NetworkManagerHud", typeof(NetworkManagerHud));

@@ -8,9 +8,9 @@ namespace Mirage.SocketLayer
     /// </summary>
     internal class ConnectKeyValidator
     {
-        readonly byte[] key;
+        private readonly byte[] key;
         public readonly int KeyLength;
-        const int OFFSET = 2;
+        private const int OFFSET = 2;
 
         public ConnectKeyValidator(byte[] key)
         {
@@ -18,7 +18,7 @@ namespace Mirage.SocketLayer
             KeyLength = key.Length;
         }
 
-        static byte[] GetKeyBytes(string key)
+        private static byte[] GetKeyBytes(string key)
         {
             // default to mirage version
             if (string.IsNullOrEmpty(key))

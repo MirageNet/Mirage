@@ -23,7 +23,7 @@ namespace Mirage
     [DisallowMultipleComponent]
     public class NetworkClient : MonoBehaviour, INetworkClient
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkClient));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkClient));
 
         public bool EnablePeerMetrics;
         [Tooltip("Sequence size of buffer in bits.\n10 => array size 1024 => ~17 seconds at 60hz")]
@@ -42,17 +42,16 @@ namespace Mirage
 
         [Tooltip("If true will set Application.runInBackground")]
         public bool RunInBackground = true;
-
-        Peer peer;
+        private Peer peer;
 
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
 
         [Header("Events")]
-        [SerializeField] AddLateEvent _started = new AddLateEvent();
-        [SerializeField] NetworkPlayerAddLateEvent _connected = new NetworkPlayerAddLateEvent();
-        [SerializeField] NetworkPlayerAddLateEvent _authenticated = new NetworkPlayerAddLateEvent();
-        [SerializeField] DisconnectAddLateEvent _disconnected = new DisconnectAddLateEvent();
+        [SerializeField] private AddLateEvent _started = new AddLateEvent();
+        [SerializeField] private NetworkPlayerAddLateEvent _connected = new NetworkPlayerAddLateEvent();
+        [SerializeField] private NetworkPlayerAddLateEvent _authenticated = new NetworkPlayerAddLateEvent();
+        [SerializeField] private DisconnectAddLateEvent _disconnected = new DisconnectAddLateEvent();
 
         /// <summary>
         /// Event fires when the client starts, before it has connected to the Server.
@@ -148,12 +147,12 @@ namespace Mirage
             _started.Invoke();
         }
 
-        void ThrowIfActive()
+        private void ThrowIfActive()
         {
             if (Active) throw new InvalidOperationException("Client is already active");
         }
 
-        void ThrowIfSocketIsMissing()
+        private void ThrowIfSocketIsMissing()
         {
             if (SocketFactory is null)
                 SocketFactory = GetComponent<SocketFactory>();
@@ -184,7 +183,7 @@ namespace Mirage
             Cleanup();
         }
 
-        void OnHostDisconnected()
+        private void OnHostDisconnected()
         {
             Player?.MarkAsDisconnected();
             _disconnected?.Invoke(ClientStoppedReason.HostModeStopped);
@@ -223,7 +222,7 @@ namespace Mirage
             server.InvokeLocalConnected();
         }
 
-        void InitializeAuthEvents()
+        private void InitializeAuthEvents()
         {
             if (authenticator != null)
             {
@@ -316,7 +315,7 @@ namespace Mirage
         /// Shut down a client.
         /// <para>This should be done when a client is no longer going to be used.</para>
         /// </summary>
-        void Cleanup()
+        private void Cleanup()
         {
             logger.Log("Shutting down client.");
 
@@ -353,9 +352,9 @@ namespace Mirage
 
         internal class DataHandler : IDataHandler
         {
-            IConnection connection;
-            INetworkPlayer player;
-            readonly IMessageReceiver messageHandler;
+            private IConnection connection;
+            private INetworkPlayer player;
+            private readonly IMessageReceiver messageHandler;
 
             public DataHandler(IMessageReceiver messageHandler)
             {

@@ -5,8 +5,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 {
     public class BasicAuthenticatorTest : ClientServerSetup<MockComponent>
     {
-
-        BasicAuthenticator authenticator;
+        private BasicAuthenticator authenticator;
 
         [Test]
         public void CheckConnected()

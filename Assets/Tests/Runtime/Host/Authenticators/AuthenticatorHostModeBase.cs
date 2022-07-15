@@ -6,9 +6,8 @@ namespace Mirage.Tests.Runtime.Host.Authenticators
     {
         protected abstract void AddAuthenticator();
 
-
-        int serverAuthCalled;
-        int clientAuthCalled;
+        private int serverAuthCalled;
+        private int clientAuthCalled;
 
         public sealed override void ExtraSetup()
         {

@@ -22,7 +22,7 @@ namespace Mirage
     {
         #region Fields
 
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkSceneManager));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkSceneManager));
 
         [Header("Setup Settings")]
 
@@ -73,18 +73,18 @@ namespace Mirage
         [Header("Events")]
 
         [FormerlySerializedAs("ClientChangeScene")]
-        [SerializeField] SceneChangeStartedEvent _onClientStartedSceneChange = new SceneChangeStartedEvent();
+        [SerializeField] private SceneChangeStartedEvent _onClientStartedSceneChange = new SceneChangeStartedEvent();
 
         [FormerlySerializedAs("ClientSceneChanged")]
-        [SerializeField] SceneChangeFinishedEvent _onClientFinishedSceneChange = new SceneChangeFinishedEvent();
+        [SerializeField] private SceneChangeFinishedEvent _onClientFinishedSceneChange = new SceneChangeFinishedEvent();
 
         [FormerlySerializedAs("ServerChangeScene")]
-        [SerializeField] SceneChangeStartedEvent _onServerStartedSceneChange = new SceneChangeStartedEvent();
+        [SerializeField] private SceneChangeStartedEvent _onServerStartedSceneChange = new SceneChangeStartedEvent();
 
         [FormerlySerializedAs("ServerSceneChanged")]
-        [SerializeField] SceneChangeFinishedEvent _onServerFinishedSceneChange = new SceneChangeFinishedEvent();
+        [SerializeField] private SceneChangeFinishedEvent _onServerFinishedSceneChange = new SceneChangeFinishedEvent();
 
-        [SerializeField] PlayerSceneChangeEvent _onPlayerSceneReady = new PlayerSceneChangeEvent();
+        [SerializeField] private PlayerSceneChangeEvent _onPlayerSceneReady = new PlayerSceneChangeEvent();
 
         /// <summary>
         /// Event fires when the Client starts changing scene.
@@ -315,7 +315,7 @@ namespace Mirage
             Client.Player.Send(new SceneReadyMessage());
         }
 
-        void ThrowIfNotClient()
+        private void ThrowIfNotClient()
         {
             if (Client == null || !Client.IsConnected) { throw new InvalidOperationException("Method can only be called if client is active"); }
         }
@@ -461,7 +461,8 @@ namespace Mirage
             player.Send(new SceneReadyMessage());
 
         }
-        static List<string> GetAdditiveScenes()
+
+        private static List<string> GetAdditiveScenes()
         {
             var additiveScenes = new List<string>(SceneManager.sceneCount - 1);
 
@@ -511,7 +512,7 @@ namespace Mirage
         /// </summary>
         /// <param name="player"></param>
         /// <param name="msg"></param>
-        void HandlePlayerSceneReady(INetworkPlayer player, SceneReadyMessage msg)
+        private void HandlePlayerSceneReady(INetworkPlayer player, SceneReadyMessage msg)
         {
             if (logger.LogEnabled()) logger.Log("Default handler for ready message from " + player);
 
@@ -558,7 +559,7 @@ namespace Mirage
             }
         }
 
-        void ThrowIfNotServer()
+        private void ThrowIfNotServer()
         {
             if (Server == null || !Server.Active) { throw new InvalidOperationException("Method can only be called if server is active"); }
         }

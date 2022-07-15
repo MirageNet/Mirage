@@ -7,8 +7,8 @@ namespace Mirage.Collections
 {
     public class SyncList<T> : IList<T>, IReadOnlyList<T>, ISyncObject
     {
-        readonly IList<T> objects;
-        readonly IEqualityComparer<T> comparer;
+        private readonly IList<T> objects;
+        private readonly IEqualityComparer<T> comparer;
 
         public int Count => objects.Count;
         public bool IsReadOnly { get; private set; }
@@ -52,19 +52,20 @@ namespace Mirage.Collections
             OP_SET
         }
 
-        struct Change
+        private struct Change
         {
             internal Operation operation;
             internal int index;
             internal T item;
         }
 
-        readonly List<Change> changes = new List<Change>();
+        private readonly List<Change> changes = new List<Change>();
+
         // how many changes we need to ignore
         // this is needed because when we initialize the list,
         // we might later receive changes that have already been applied
         // so we need to skip them
-        int changesAhead;
+        private int changesAhead;
 
         internal int ChangeCount => changes.Count;
 
@@ -98,7 +99,7 @@ namespace Mirage.Collections
             objects.Clear();
         }
 
-        void AddOperation(Operation op, int itemIndex, T newItem)
+        private void AddOperation(Operation op, int itemIndex, T newItem)
         {
             if (IsReadOnly)
             {
@@ -441,8 +442,8 @@ namespace Mirage.Collections
         // => this is extremely important for MMO scale networking
         public struct Enumerator : IEnumerator<T>
         {
-            readonly SyncList<T> list;
-            int index;
+            private readonly SyncList<T> list;
+            private int index;
             public T Current { get; private set; }
 
             public Enumerator(SyncList<T> list)

@@ -9,7 +9,7 @@ using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver
 {
-    static class RegisterRpc
+    internal static class RegisterRpc
     {
         public static void RegisterAll(ILProcessor worker, List<RpcMethod> rpcs)
         {
@@ -26,7 +26,7 @@ namespace Mirage.Weaver
             }
         }
 
-        static string HumanReadableName(MethodReference method)
+        private static string HumanReadableName(MethodReference method)
         {
             string typeName = method.DeclaringType.FullName;
             string methodName = method.Name;
@@ -34,7 +34,7 @@ namespace Mirage.Weaver
             return $"{typeName}.{methodName}";
         }
 
-        static void RegisterServerRpc(ILProcessor worker, ServerRpcMethod rpc)
+        private static void RegisterServerRpc(ILProcessor worker, ServerRpcMethod rpc)
         {
             MethodDefinition skeleton = rpc.skeleton;
             bool requireAuthority = rpc.requireAuthority;
@@ -44,7 +44,7 @@ namespace Mirage.Weaver
             CallRegister(worker, rpc, invokeType, registerMethod, requireAuthority);
         }
 
-        static RpcInvokeType? GetServerInvokeType(ServerRpcMethod rpcMethod)
+        private static RpcInvokeType? GetServerInvokeType(ServerRpcMethod rpcMethod)
         {
             MethodDefinition func = rpcMethod.skeleton;
             if (func.ReturnType.Is(typeof(void)))
@@ -57,7 +57,7 @@ namespace Mirage.Weaver
         /// <summary>
         /// Gets normal or Unitask register method
         /// </summary>
-        static MethodReference GetRegisterMethod(MethodDefinition func)
+        private static MethodReference GetRegisterMethod(MethodDefinition func)
         {
             if (func.ReturnType.Is(typeof(void)))
                 return func.Module.ImportReference((RemoteCallCollection c) => c.Register(default, default, default, default, default, default));
@@ -65,7 +65,7 @@ namespace Mirage.Weaver
                 return CreateGenericRequestDelegate(func);
         }
 
-        static MethodReference CreateGenericRequestDelegate(MethodDefinition func)
+        private static MethodReference CreateGenericRequestDelegate(MethodDefinition func)
         {
             var taskReturnType = func.ReturnType as GenericInstanceType;
 
@@ -84,13 +84,13 @@ namespace Mirage.Weaver
         /// </summary>
         /// <param name="worker"></param>
         /// <param name="rpc"></param>
-        static void RegisterClientRpc(ILProcessor worker, ClientRpcMethod rpc)
+        private static void RegisterClientRpc(ILProcessor worker, ClientRpcMethod rpc)
         {
             MethodReference registerMethod = GetRegisterMethod(rpc.skeleton);
             CallRegister(worker, rpc, RpcInvokeType.ClientRpc, registerMethod, false);
         }
 
-        static void CallRegister(ILProcessor worker, RpcMethod rpcMethod, RpcInvokeType? invokeType, MethodReference registerMethod, bool requireAuthority)
+        private static void CallRegister(ILProcessor worker, RpcMethod rpcMethod, RpcInvokeType? invokeType, MethodReference registerMethod, bool requireAuthority)
         {
             MethodDefinition skeleton = rpcMethod.skeleton;
             string name = HumanReadableName(rpcMethod.stub);
@@ -131,7 +131,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Call, registerMethod));
         }
 
-        static MethodReference CreateRpcDelegate(MethodDefinition func)
+        private static MethodReference CreateRpcDelegate(MethodDefinition func)
         {
             if (func.ReturnType.Is(typeof(void)))
             {

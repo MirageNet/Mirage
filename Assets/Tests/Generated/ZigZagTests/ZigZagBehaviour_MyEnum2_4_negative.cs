@@ -54,7 +54,7 @@ namespace Mirage.Tests.Runtime.Generated.ZigZagAttributeTests.MyEnum2_4_negative
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
-        const MyEnum2 value = (MyEnum2)(-1);
+        private const MyEnum2 value = (MyEnum2)(-1);
 
         [Test]
         public void SyncVarIsBitPacked()

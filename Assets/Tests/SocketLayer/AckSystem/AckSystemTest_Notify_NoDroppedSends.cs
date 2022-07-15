@@ -11,14 +11,12 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
     [Category("SocketLayer")]
     public class AckSystemTest_Notify_NoDroppedSends : AckSystemTestBase
     {
-        const int messageCount = 5;
+        private const int messageCount = 5;
         private ushort maxSequence;
-
-        AckTestInstance instance1;
-        AckTestInstance instance2;
-
-        List<ArraySegment<byte>> received1;
-        List<ArraySegment<byte>> received2;
+        private AckTestInstance instance1;
+        private AckTestInstance instance2;
+        private List<ArraySegment<byte>> received1;
+        private List<ArraySegment<byte>> received2;
 
         [SetUp]
         public void SetUp()

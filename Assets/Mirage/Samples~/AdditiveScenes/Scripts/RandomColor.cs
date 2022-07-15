@@ -4,7 +4,7 @@ namespace Mirage.Examples.Additive
 {
     public class RandomColor : NetworkBehaviour
     {
-        void Awake()
+        private void Awake()
         {
             Identity.OnStartServer.AddListener(OnStartServer);
         }
@@ -20,15 +20,15 @@ namespace Mirage.Examples.Additive
 
         // Unity clones the material when GetComponent<Renderer>().material is called
         // Cache it here and destroy it in OnDestroy to prevent a memory leak
-        Material cachedMaterial;
+        private Material cachedMaterial;
 
-        void SetColor(Color32 oldColor, Color32 newColor)
+        private void SetColor(Color32 oldColor, Color32 newColor)
         {
             if (cachedMaterial == null) cachedMaterial = GetComponentInChildren<Renderer>().material;
             cachedMaterial.color = newColor;
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             Destroy(cachedMaterial);
         }

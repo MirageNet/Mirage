@@ -13,7 +13,7 @@ namespace Mirage
     /// </summary>
     public class CharacterSpawner : MonoBehaviour
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(CharacterSpawner));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(CharacterSpawner));
 
         [FormerlySerializedAs("client")]
         public NetworkClient Client;
@@ -62,7 +62,7 @@ namespace Mirage
             }
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             if (Client != null && SceneManager != null)
             {
@@ -114,7 +114,7 @@ namespace Mirage
             Client.Send(new AddCharacterMessage());
         }
 
-        void OnServerAddPlayerInternal(INetworkPlayer player, AddCharacterMessage msg)
+        private void OnServerAddPlayerInternal(INetworkPlayer player, AddCharacterMessage msg)
         {
             logger.Log("CharacterSpawner.OnServerAddPlayer");
 

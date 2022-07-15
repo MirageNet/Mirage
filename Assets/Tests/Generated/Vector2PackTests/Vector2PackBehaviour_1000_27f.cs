@@ -47,10 +47,10 @@ namespace Mirage.Tests.Runtime.Generated.Vector2PackAttributeTests._1000_27f
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
-        static readonly Vector2 value = new Vector2(-10.3f, 0.2f);
-        const float within = 0.1f;
+        private static readonly Vector2 value = new Vector2(-10.3f, 0.2f);
+        private const float within = 0.1f;
 
-        static void AssertValue(Vector2 actual)
+        private static void AssertValue(Vector2 actual)
         {
             Assert.That(actual.x, Is.EqualTo(value.x).Within(within));
             Assert.That(actual.y, Is.EqualTo(value.y).Within(within));

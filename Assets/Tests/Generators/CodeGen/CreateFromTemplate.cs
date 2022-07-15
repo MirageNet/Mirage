@@ -6,10 +6,9 @@ namespace JamesFrowen.SimpleCodeGen
 {
     public sealed class CreateFromTemplate
     {
-        readonly string template;
-        string output;
-
-        HashSet<string> createdFiles = new HashSet<string>();
+        private readonly string template;
+        private string output;
+        private HashSet<string> createdFiles = new HashSet<string>();
 
         public CreateFromTemplate(string templatePath)
         {

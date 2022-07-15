@@ -16,13 +16,14 @@ namespace Mirage.Examples.Notify
     /// </summary>
     public class SendChangesNotify
     {
-        readonly INetworkPlayer player;
+        private readonly INetworkPlayer player;
         public List<float> someValues = new List<float>();
         public int lastReceivedCount;
 
         // pool for MyNotifyCallbacks so they can be re-used and not allocate
-        Stack<MyNotifyCallbacks> callbackPool = new Stack<MyNotifyCallbacks>();
-        MyNotifyCallbacks GetCallbacks()
+        private Stack<MyNotifyCallbacks> callbackPool = new Stack<MyNotifyCallbacks>();
+
+        private MyNotifyCallbacks GetCallbacks()
         {
             if (callbackPool.Count > 0)
             {
@@ -100,7 +101,7 @@ namespace Mirage.Examples.Notify
         // A pool can be used to hold these so they can be re-used multiple times and avoid allocations
         public class MyNotifyCallbacks : INotifyCallBack
         {
-            readonly SendChangesNotify owner;
+            private readonly SendChangesNotify owner;
             public int valueCount;
 
             public MyNotifyCallbacks(SendChangesNotify owner)

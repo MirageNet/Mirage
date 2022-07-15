@@ -48,7 +48,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.ushort_
     
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
-        const ushort value = 20;
+        private const ushort value = 20;
 
         [Test]
         public void SyncVarIsBitPacked()

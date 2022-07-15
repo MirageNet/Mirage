@@ -11,7 +11,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 {
     public class NetworkServerTests : ClientServerSetup<MockComponent>
     {
-        WovenTestMessage message;
+        private WovenTestMessage message;
 
         public override void ExtraSetup()
         {

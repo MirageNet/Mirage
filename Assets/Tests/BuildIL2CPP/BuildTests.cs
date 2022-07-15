@@ -100,7 +100,7 @@ namespace Mirage.Tests.BuildIL2CPP
             }
         }
 
-        static ITestRunSettings GetRunSettings(string targetPath)
+        private static ITestRunSettings GetRunSettings(string targetPath)
         {
             // reflection because that is the only way to create buildOnly only with TestRunnerApi
             var assembly = Assembly.Load("UnityEditor.TestRunner");
@@ -115,10 +115,10 @@ namespace Mirage.Tests.BuildIL2CPP
     }
 
     // code from: https://github.com/James-Frowen/NetworkingBuildWindow
-    class IL2CPPApplier : IDisposable
+    internal class IL2CPPApplier : IDisposable
     {
-        BuildTargetGroup group;
-        ScriptingImplementation? startingBackend;
+        private BuildTargetGroup group;
+        private ScriptingImplementation? startingBackend;
 
         public IL2CPPApplier(BuildTarget target, bool il2cpp)
         {

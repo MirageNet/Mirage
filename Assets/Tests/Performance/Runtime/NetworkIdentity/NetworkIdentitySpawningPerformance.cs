@@ -9,10 +9,10 @@ namespace Mirage.Tests.Performance
     [Category("Benchmark")]
     public class NetworkIdentitySpawningPerformance
     {
-        List<GameObject> spawned = new List<GameObject>();
-        GameObject prefab;
+        private List<GameObject> spawned = new List<GameObject>();
+        private GameObject prefab;
 
-        GameObject Spawn()
+        private GameObject Spawn()
         {
             var clone = GameObject.Instantiate(prefab);
             spawned.Add(clone);

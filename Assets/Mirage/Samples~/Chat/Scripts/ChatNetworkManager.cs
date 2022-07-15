@@ -11,7 +11,7 @@ namespace Mirage.Examples.Chat
 
         public Player playerPrefab;
 
-        void Awake()
+        private void Awake()
         {
             Server.Started.AddListener(OnServerStarted);
             Client.Connected.AddListener(OnClientAuthenticated);

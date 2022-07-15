@@ -6,7 +6,7 @@ namespace Mirage
 {
     public class HeadlessFrameLimiter : MonoBehaviour
     {
-        static readonly ILogger logger = LogFactory.GetLogger<HeadlessFrameLimiter>();
+        private static readonly ILogger logger = LogFactory.GetLogger<HeadlessFrameLimiter>();
 
         /// <summary>
         /// Server Update frequency, per second. Use around 60Hz for fast paced games like Counter-Strike to minimize latency. Use around 30Hz for games like WoW to minimize computations. Use around 1-10Hz for slow paced games like EVE.

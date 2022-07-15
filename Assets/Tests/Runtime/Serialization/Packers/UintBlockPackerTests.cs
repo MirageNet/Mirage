@@ -12,26 +12,25 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
     [TestFixture(16)]
     public class UintBlockPackerTests : PackerTestBase
     {
-        readonly Random random = new Random();
-        readonly int blockSize;
+        private readonly Random random = new Random();
+        private readonly int blockSize;
 
         public UintBlockPackerTests(int blockSize)
         {
             this.blockSize = blockSize;
         }
 
-
-        ulong GetRandonUlongBias()
+        private ulong GetRandonUlongBias()
         {
             return (ulong)(Math.Abs(random.NextDouble() - random.NextDouble()) * ulong.MaxValue);
         }
 
-        uint GetRandonUintBias()
+        private uint GetRandonUintBias()
         {
             return (uint)(Math.Abs(random.NextDouble() - random.NextDouble()) * uint.MaxValue);
         }
 
-        ushort GetRandonUshortBias()
+        private ushort GetRandonUshortBias()
         {
             return (ushort)(Math.Abs(random.NextDouble() - random.NextDouble()) * ushort.MaxValue);
         }

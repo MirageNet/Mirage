@@ -141,8 +141,9 @@ namespace Mirage.Tests.Runtime.ClientServer
             unspawnDelegate.Received().Invoke(Arg.Any<NetworkIdentity>());
         });
 
-        int spawnDelegateTestCalled;
-        NetworkIdentity SpawnDelegateTest(SpawnMessage msg)
+        private int spawnDelegateTestCalled;
+
+        private NetworkIdentity SpawnDelegateTest(SpawnMessage msg)
         {
             spawnDelegateTestCalled++;
 

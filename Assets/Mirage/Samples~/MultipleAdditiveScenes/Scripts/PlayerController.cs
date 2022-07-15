@@ -12,7 +12,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
         public CharacterController characterController;
         public CapsuleCollider capsuleCollider;
 
-        void OnValidate()
+        private void OnValidate()
         {
             if (characterController == null)
                 characterController = GetComponent<CharacterController>();
@@ -20,7 +20,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
                 capsuleCollider = GetComponent<CapsuleCollider>();
         }
 
-        void Start()
+        private void Start()
         {
             capsuleCollider.enabled = IsServer;
         }
@@ -35,7 +35,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
             Camera.main.transform.localEulerAngles = new Vector3(10f, 0f, 0f);
         }
 
-        void OnDisable()
+        private void OnDisable()
         {
             if (IsLocalPlayer && Camera.main != null)
             {
@@ -61,7 +61,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
         public bool isFalling;
         public Vector3 velocity;
 
-        void Update()
+        private void Update()
         {
             if (!IsLocalPlayer || !characterController.enabled)
                 return;
@@ -93,7 +93,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
             }
         }
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
             if (!IsLocalPlayer || characterController == null)
                 return;

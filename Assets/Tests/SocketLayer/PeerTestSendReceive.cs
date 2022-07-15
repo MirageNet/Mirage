@@ -20,15 +20,13 @@ namespace Mirage.SocketLayer.Tests.PeerTests
     [Category("SocketLayer"), Description("integration test to make sure that send and receiving works as a whole")]
     public class PeerTestSendReceive
     {
-        const int ClientCount = 4;
-        PeerInstanceWithSocket server;
-        PeerInstanceWithSocket[] clients;
-
-        List<IConnection> clientConnections;
-        List<IConnection> serverConnections;
-
-        int maxFragmentMessageSize;
-        float NotifyWaitTime;
+        private const int ClientCount = 4;
+        private PeerInstanceWithSocket server;
+        private PeerInstanceWithSocket[] clients;
+        private List<IConnection> clientConnections;
+        private List<IConnection> serverConnections;
+        private int maxFragmentMessageSize;
+        private float NotifyWaitTime;
 
         [SetUp]
         public void SetUp()
@@ -56,7 +54,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             UpdateAll();
         }
 
-        void UpdateAll()
+        private void UpdateAll()
         {
             server.peer.UpdateTest();
             for (int i = 0; i < ClientCount; i++)

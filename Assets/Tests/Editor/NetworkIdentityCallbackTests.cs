@@ -14,7 +14,7 @@ namespace Mirage.Tests
     {
         #region test components
 
-        class CheckObserverExceptionNetworkBehaviour : NetworkVisibility
+        private class CheckObserverExceptionNetworkBehaviour : NetworkVisibility
         {
             public int called;
             public INetworkPlayer valuePassed;
@@ -27,7 +27,7 @@ namespace Mirage.Tests
             }
         }
 
-        class CheckObserverTrueNetworkBehaviour : NetworkVisibility
+        private class CheckObserverTrueNetworkBehaviour : NetworkVisibility
         {
             public int called;
             public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
@@ -38,7 +38,7 @@ namespace Mirage.Tests
             }
         }
 
-        class CheckObserverFalseNetworkBehaviour : NetworkVisibility
+        private class CheckObserverFalseNetworkBehaviour : NetworkVisibility
         {
             public int called;
             public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
@@ -49,7 +49,7 @@ namespace Mirage.Tests
             }
         }
 
-        class SerializeTest1NetworkBehaviour : NetworkBehaviour
+        private class SerializeTest1NetworkBehaviour : NetworkBehaviour
         {
             public int value;
             public override bool OnSerialize(NetworkWriter writer, bool initialState)
@@ -63,7 +63,7 @@ namespace Mirage.Tests
             }
         }
 
-        class SerializeTest2NetworkBehaviour : NetworkBehaviour
+        private class SerializeTest2NetworkBehaviour : NetworkBehaviour
         {
             public string value;
             public override bool OnSerialize(NetworkWriter writer, bool initialState)
@@ -77,7 +77,7 @@ namespace Mirage.Tests
             }
         }
 
-        class SerializeExceptionNetworkBehaviour : NetworkBehaviour
+        private class SerializeExceptionNetworkBehaviour : NetworkBehaviour
         {
             public override bool OnSerialize(NetworkWriter writer, bool initialState)
             {
@@ -89,7 +89,7 @@ namespace Mirage.Tests
             }
         }
 
-        class SerializeMismatchNetworkBehaviour : NetworkBehaviour
+        private class SerializeMismatchNetworkBehaviour : NetworkBehaviour
         {
             public int value;
             public override bool OnSerialize(NetworkWriter writer, bool initialState)
@@ -105,7 +105,7 @@ namespace Mirage.Tests
             }
         }
 
-        class RebuildObserversNetworkBehaviour : NetworkVisibility
+        private class RebuildObserversNetworkBehaviour : NetworkVisibility
         {
             public INetworkPlayer observer;
             public override bool OnCheckObserver(INetworkPlayer player) { return true; }
@@ -115,7 +115,7 @@ namespace Mirage.Tests
             }
         }
 
-        class RebuildEmptyObserversNetworkBehaviour : NetworkVisibility
+        private class RebuildEmptyObserversNetworkBehaviour : NetworkVisibility
         {
             public override bool OnCheckObserver(INetworkPlayer player) { return true; }
             public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
@@ -123,14 +123,13 @@ namespace Mirage.Tests
 
         #endregion
 
-        GameObject gameObject;
-        NetworkIdentity identity;
+        private GameObject gameObject;
+        private NetworkIdentity identity;
         private NetworkServer server;
         private ServerObjectManager serverObjectManager;
         private GameObject networkServerGameObject;
-
-        INetworkPlayer player1;
-        INetworkPlayer player2;
+        private INetworkPlayer player1;
+        private INetworkPlayer player2;
 
         [SetUp]
         public void SetUp()

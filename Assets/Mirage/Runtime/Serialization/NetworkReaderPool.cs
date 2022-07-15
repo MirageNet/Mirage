@@ -10,8 +10,8 @@ namespace Mirage.Serialization
     /// </summary>
     public static class NetworkReaderPool
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkReaderPool));
-        static Pool<PooledNetworkReader> pool = new Pool<PooledNetworkReader>(PooledNetworkReader.CreateNew, 0, 5, 100, logger);
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkReaderPool));
+        private static Pool<PooledNetworkReader> pool = new Pool<PooledNetworkReader>(PooledNetworkReader.CreateNew, 0, 5, 100, logger);
 
         public static void Configure(int startPoolSize = 5, int maxPoolSize = 100)
         {

@@ -53,10 +53,10 @@ namespace Mirage.SocketLayer
     /// </example>
     public class Sequencer
     {
-        readonly int shift;
-        readonly int bits;
-        readonly ulong mask;
-        ulong sequence;
+        private readonly int shift;
+        private readonly int bits;
+        private readonly ulong mask;
+        private ulong sequence;
 
         /// <summary>
         /// Number of bits used for the sequence generator up to 64

@@ -35,14 +35,14 @@ namespace Mirage.EditorScripts.Logging
             return null;
         }
 
-        readonly LogSettingsSO settings;
-        readonly LogSettingChecker checker;
-        readonly Dictionary<string, bool> folderOutState = new Dictionary<string, bool>();
+        private readonly LogSettingsSO settings;
+        private readonly LogSettingChecker checker;
+        private readonly Dictionary<string, bool> folderOutState = new Dictionary<string, bool>();
 
         /// <summary>
         /// Keep track of gui changed. If it has changed then we need to update <see cref="LogFactory"/> and save the new levels to file
         /// </summary>
-        bool guiChanged;
+        private bool guiChanged;
 
         public LogLevelsGUI(LogSettingsSO settings)
         {
@@ -276,7 +276,7 @@ namespace Mirage.EditorScripts.Logging
             return asset;
         }
 
-        static string SavePanel(string name, string defaultPath)
+        private static string SavePanel(string name, string defaultPath)
         {
             string path = EditorUtility.SaveFilePanel(
                            "Save ScriptableObject",
@@ -296,7 +296,7 @@ namespace Mirage.EditorScripts.Logging
             return path;
         }
 
-        static void SaveAsset(string path, ScriptableObject asset)
+        private static void SaveAsset(string path, ScriptableObject asset)
         {
             string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path);
 

@@ -7,9 +7,8 @@ namespace Mirage.Tests.Runtime.Serialization
     {
         private readonly NetworkWriter writer = new NetworkWriter(1300);
         private readonly NetworkReader reader = new NetworkReader();
-
-        readonly byte[] sampleData = new byte[10] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        const int BITS_PER_BYTE = 8;
+        private readonly byte[] sampleData = new byte[10] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        private const int BITS_PER_BYTE = 8;
 
         [TearDown]
         public void TearDown()

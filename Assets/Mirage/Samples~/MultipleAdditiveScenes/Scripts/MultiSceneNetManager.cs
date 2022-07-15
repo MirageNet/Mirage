@@ -13,8 +13,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
 
         [Scene]
         public string gameScene;
-
-        readonly List<Scene> subScenes = new List<Scene>();
+        private readonly List<Scene> subScenes = new List<Scene>();
 
         /// <summary>
         /// This is invoked when a server is started - including when a host is started.
@@ -41,9 +40,9 @@ namespace Mirage.Examples.MultipleAdditiveScenes
             StartCoroutine(AddPlayerDelayed(player));
         }
 
-        int playerId = 1;
+        private int playerId = 1;
 
-        IEnumerator AddPlayerDelayed(INetworkPlayer player)
+        private IEnumerator AddPlayerDelayed(INetworkPlayer player)
         {
             yield return new WaitForSeconds(.5f);
 
@@ -66,7 +65,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
 
 
 
-        IEnumerator LoadSubScenes()
+        private IEnumerator LoadSubScenes()
         {
             for (int index = 0; index < instances; index++)
             {
@@ -90,7 +89,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
                 StartCoroutine(UnloadClientSubScenes());
         }
 
-        IEnumerator UnloadClientSubScenes()
+        private IEnumerator UnloadClientSubScenes()
         {
             for (int index = 0; index < UnityEngine.SceneManagement.SceneManager.sceneCount; index++)
             {
@@ -99,7 +98,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
             }
         }
 
-        IEnumerator UnloadSubScenes()
+        private IEnumerator UnloadSubScenes()
         {
             for (int index = 0; index < subScenes.Count; index++)
                 yield return UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(subScenes[index]);

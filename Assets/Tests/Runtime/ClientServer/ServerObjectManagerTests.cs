@@ -12,10 +12,10 @@ namespace Mirage.Tests.Runtime.ClientServer
     [TestFixture]
     public class ServerObjectManagerTests : ClientServerSetup<MockComponent>
     {
-        void AssertNoIdentityMessage(InvalidOperationException ex, string name) => Assert.That(ex.Message, Is.EqualTo($"Gameobject {name} doesn't have NetworkIdentity."));
-        void AssertNoIdentityMessage(InvalidOperationException ex) => AssertNoIdentityMessage(ex, new GameObject().name);
+        private void AssertNoIdentityMessage(InvalidOperationException ex, string name) => Assert.That(ex.Message, Is.EqualTo($"Gameobject {name} doesn't have NetworkIdentity."));
+        private void AssertNoIdentityMessage(InvalidOperationException ex) => AssertNoIdentityMessage(ex, new GameObject().name);
 
-        NetworkIdentity CreatePlayerReplacement()
+        private NetworkIdentity CreatePlayerReplacement()
         {
             var playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
             toDestroy.Add(playerReplacement);

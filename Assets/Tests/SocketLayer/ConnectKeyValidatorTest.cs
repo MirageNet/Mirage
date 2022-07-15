@@ -7,7 +7,7 @@ namespace Mirage.SocketLayer.Tests
     [TestFixture("Mirage V123")]
     public class ConnectKeyValidatorTest
     {
-        ConnectKeyValidator validator;
+        private ConnectKeyValidator validator;
 
         public ConnectKeyValidatorTest(string key)
         {

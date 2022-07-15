@@ -16,7 +16,7 @@ namespace Mirage.Tests.Runtime.ClientServer
     [TestFixture]
     public class NetworkSceneManagerNonHostTests : ClientServerSetup<MockComponent>
     {
-        AssetBundle bundle;
+        private AssetBundle bundle;
 
         public override void ExtraSetup()
         {
@@ -172,8 +172,9 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.That(noAdditiveScenesFound);
         });
 
-        bool noAdditiveScenesFound;
-        void CheckForPendingAdditiveSceneList(Scene scene, SceneOperation sceneOperation)
+        private bool noAdditiveScenesFound;
+
+        private void CheckForPendingAdditiveSceneList(Scene scene, SceneOperation sceneOperation)
         {
             if (clientSceneManager.ClientPendingAdditiveSceneLoadingList.Count == 0)
             {
@@ -191,8 +192,9 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.That(additiveSceneWasFound);
         }
 
-        bool additiveSceneWasFound;
-        void CheckForAdditiveScene(string scenePath, SceneOperation sceneOperation)
+        private bool additiveSceneWasFound;
+
+        private void CheckForAdditiveScene(string scenePath, SceneOperation sceneOperation)
         {
             if (clientSceneManager.ClientPendingAdditiveSceneLoadingList.Contains("Assets/Mirror/Tests/Runtime/testScene.unity"))
             {

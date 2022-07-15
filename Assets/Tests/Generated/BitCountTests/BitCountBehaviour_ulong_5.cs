@@ -48,7 +48,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests.ulong_5
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
-        const ulong value = 20;
+        private const ulong value = 20;
 
         [Test]
         public void SyncVarIsBitPacked()

@@ -54,7 +54,8 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ret));
             return writerMethod.definition;
         }
-        struct WriteMethod
+
+        private struct WriteMethod
         {
             public readonly MethodDefinition definition;
             public readonly ParameterDefinition writerParameter;
@@ -134,7 +135,7 @@ namespace Mirage.Weaver
         /// <param name="type"></param>
         /// <par
         /// <returns>false if fail</returns>
-        void WriteAllFields(TypeReference type, WriteMethod writerFunc)
+        private void WriteAllFields(TypeReference type, WriteMethod writerFunc)
         {
             // create copy here because we might add static packer field
             System.Collections.Generic.IEnumerable<FieldDefinition> fields = type.FindAllPublicFields();
