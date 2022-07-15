@@ -82,11 +82,11 @@ namespace Mirage.Serialization
     /// </summary>
     public sealed class PooledNetworkReader : MirageNetworkReader, IDisposable
     {
-        private readonly Pool<PooledNetworkReader> pool;
+        private readonly Pool<PooledNetworkReader> _pool;
 
         private PooledNetworkReader(Pool<PooledNetworkReader> pool) : base()
         {
-            this.pool = pool ?? throw new ArgumentNullException(nameof(pool));
+            _pool = pool ?? throw new ArgumentNullException(nameof(pool));
         }
 
         public static PooledNetworkReader CreateNew(int _, Pool<PooledNetworkReader> pool)
@@ -111,7 +111,7 @@ namespace Mirage.Serialization
             // => dont put it back for finalize
             if (disposing)
             {
-                pool.Put(this);
+                _pool.Put(this);
             }
         }
     }

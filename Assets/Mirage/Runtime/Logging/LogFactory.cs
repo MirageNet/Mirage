@@ -6,9 +6,9 @@ namespace Mirage.Logging
 {
     public static class LogFactory
     {
-        internal static readonly Dictionary<string, ILogger> loggers = new Dictionary<string, ILogger>();
+        internal static readonly Dictionary<string, ILogger> _loggers = new Dictionary<string, ILogger>();
 
-        public static IReadOnlyDictionary<string, ILogger> Loggers => loggers;
+        public static IReadOnlyDictionary<string, ILogger> Loggers => _loggers;
 
         /// <summary>
         /// logHandler used for new loggers
@@ -27,7 +27,7 @@ namespace Mirage.Logging
 
         public static ILogger GetLogger(string loggerName, LogType defaultLogLevel = LogType.Warning)
         {
-            if (loggers.TryGetValue(loggerName, out var logger))
+            if (_loggers.TryGetValue(loggerName, out var logger))
             {
                 return logger;
             }
@@ -43,7 +43,7 @@ namespace Mirage.Logging
                 filterLogType = defaultLogLevel
             };
 
-            loggers[loggerName] = logger;
+            _loggers[loggerName] = logger;
             return logger;
         }
 
@@ -55,7 +55,7 @@ namespace Mirage.Logging
         {
             defaultLogHandler = logHandler;
 
-            foreach (var logger in loggers.Values)
+            foreach (var logger in _loggers.Values)
             {
                 logger.logHandler = logHandler;
             }

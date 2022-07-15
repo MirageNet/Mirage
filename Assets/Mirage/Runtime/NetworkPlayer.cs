@@ -21,7 +21,7 @@ namespace Mirage
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
 
-        private readonly HashSet<NetworkIdentity> visList = new HashSet<NetworkIdentity>();
+        private readonly HashSet<NetworkIdentity> _visList = new HashSet<NetworkIdentity>();
 
         /// <summary>
         /// Transport level connection
@@ -31,13 +31,13 @@ namespace Mirage
         /// <para>Transport layers connections begin at one. So on a client with a single connection to a server, the connectionId of that connection will be one. In NetworkServer, the connectionId of the local connection is zero.</para>
         /// <para>Clients do not know their connectionId on the server, and do not know the connectionId of other clients on the server.</para>
         /// </remarks>
-        private readonly IConnection connection;
+        private readonly IConnection _connection;
 
         /// <summary>
         /// Has this player been marked as disconnected
         /// <para>Messages sent to disconnected players will be ignored</para>
         /// </summary>
-        private bool isDisconnected = false;
+        private bool _isDisconnected = false;
 
         /// <summary>
         /// Backing field for <see cref="Identity"/>
@@ -72,9 +72,9 @@ namespace Mirage
         /// The IP address / URL / FQDN associated with the connection.
         /// Can be useful for a game master to do IP Bans etc.
         /// </summary>
-        public IEndPoint Address => connection.EndPoint;
+        public IEndPoint Address => _connection.EndPoint;
 
-        public IConnection Connection => connection;
+        public IConnection Connection => _connection;
 
         /// <summary>
         /// Disconnects the player.
@@ -85,8 +85,8 @@ namespace Mirage
         /// </remarks>
         public void Disconnect()
         {
-            connection.Disconnect();
-            isDisconnected = true;
+            _connection.Disconnect();
+            _isDisconnected = true;
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace Mirage
         /// </summary>
         public void MarkAsDisconnected()
         {
-            isDisconnected = true;
+            _isDisconnected = true;
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace Mirage
         /// </summary>
         // IMPORTANT: this needs to be <NetworkIdentity>, not <uint netId>. fixes a bug where DestroyOwnedObjects wouldn't find
         //            the netId anymore: https://github.com/vis2k/Mirror/issues/1380 . Works fine with NetworkIdentity pointers though.
-        private readonly HashSet<NetworkIdentity> clientOwnedObjects = new HashSet<NetworkIdentity>();
+        private readonly HashSet<NetworkIdentity> _clientOwnedObjects = new HashSet<NetworkIdentity>();
 
         /// <summary>
         /// Creates a new NetworkConnection with the specified address and connectionId
@@ -134,7 +134,7 @@ namespace Mirage
         /// <param name="networkConnectionId"></param>
         public NetworkPlayer(IConnection connection)
         {
-            this.connection = connection ?? throw new ArgumentNullException(nameof(connection));
+            _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         }
 
 
@@ -147,7 +147,7 @@ namespace Mirage
         /// <returns></returns>
         public void Send<T>(T message, int channelId = Channel.Reliable)
         {
-            if (isDisconnected) { return; }
+            if (_isDisconnected) { return; }
 
             using (var writer = NetworkWriterPool.GetWriter())
             {
@@ -167,15 +167,15 @@ namespace Mirage
         /// <param name="channelId"></param>
         public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
-            if (isDisconnected) { return; }
+            if (_isDisconnected) { return; }
 
             if (channelId == Channel.Reliable)
             {
-                connection.SendReliable(segment);
+                _connection.SendReliable(segment);
             }
             else
             {
-                connection.SendUnreliable(segment);
+                _connection.SendUnreliable(segment);
             }
         }
 
@@ -188,7 +188,7 @@ namespace Mirage
         /// <returns></returns>
         public void Send<T>(T message, INotifyCallBack token)
         {
-            if (isDisconnected) { return; }
+            if (_isDisconnected) { return; }
 
             using (var writer = NetworkWriterPool.GetWriter())
             {
@@ -196,7 +196,7 @@ namespace Mirage
 
                 var segment = writer.ToArraySegment();
                 NetworkDiagnostics.OnSend(message, segment.Count, 1);
-                connection.SendNotify(segment, token);
+                _connection.SendNotify(segment, token);
             }
         }
 
@@ -207,12 +207,12 @@ namespace Mirage
 
         public void AddToVisList(NetworkIdentity identity)
         {
-            visList.Add(identity);
+            _visList.Add(identity);
         }
 
         public void RemoveFromVisList(NetworkIdentity identity)
         {
-            visList.Remove(identity);
+            _visList.Remove(identity);
         }
 
         /// <summary>
@@ -221,21 +221,21 @@ namespace Mirage
         /// </summary>
         public void RemoveAllVisibleObjects()
         {
-            foreach (var identity in visList)
+            foreach (var identity in _visList)
             {
                 identity.RemoveObserverInternal(this);
             }
-            visList.Clear();
+            _visList.Clear();
         }
 
         public void AddOwnedObject(NetworkIdentity networkIdentity)
         {
-            clientOwnedObjects.Add(networkIdentity);
+            _clientOwnedObjects.Add(networkIdentity);
         }
 
         public void RemoveOwnedObject(NetworkIdentity networkIdentity)
         {
-            clientOwnedObjects.Remove(networkIdentity);
+            _clientOwnedObjects.Remove(networkIdentity);
         }
 
         /// <summary>
@@ -245,7 +245,7 @@ namespace Mirage
         public void DestroyOwnedObjects()
         {
             // create a copy because the list might be modified when destroying
-            var ownedObjects = new HashSet<NetworkIdentity>(clientOwnedObjects);
+            var ownedObjects = new HashSet<NetworkIdentity>(_clientOwnedObjects);
 
             foreach (var netIdentity in ownedObjects)
             {
@@ -266,7 +266,7 @@ namespace Mirage
                 Identity.ServerObjectManager.Destroy(Identity.gameObject);
 
             // clear the hashset because we destroyed them all
-            clientOwnedObjects.Clear();
+            _clientOwnedObjects.Clear();
         }
     }
 }

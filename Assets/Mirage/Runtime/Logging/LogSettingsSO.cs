@@ -15,16 +15,16 @@ namespace Mirage.Logging
             public string Name;
             public string Namespace;
 
-            private string fullNameCache;
+            private string _fullNameCache;
             public string FullName
             {
                 get
                 {
                     // need lazy property here because unity deserializes without using constructor
-                    if (string.IsNullOrEmpty(fullNameCache))
-                        fullNameCache = CreateFullName(Name, Namespace);
+                    if (string.IsNullOrEmpty(_fullNameCache))
+                        _fullNameCache = CreateFullName(Name, Namespace);
 
-                    return fullNameCache;
+                    return _fullNameCache;
                 }
             }
 
@@ -46,13 +46,13 @@ namespace Mirage.Logging
                 Name = name ?? string.Empty;
                 Namespace = @namespace ?? string.Empty;
                 logLevel = level;
-                fullNameCache = CreateFullName(Name, Namespace);
+                _fullNameCache = CreateFullName(Name, Namespace);
             }
             public LoggerSettings(string fullname, LogType level)
             {
                 (Name, Namespace) = GetNameAndNameSpaceFromFullname(fullname);
                 logLevel = level;
-                fullNameCache = CreateFullName(Name, Namespace);
+                _fullNameCache = CreateFullName(Name, Namespace);
             }
 
             private static (string name, string @namespace) GetNameAndNameSpaceFromFullname(string fullname)
@@ -89,7 +89,7 @@ namespace Mirage.Logging
     {
         public static void SaveFromLogFactory(this LogSettingsSO settings)
         {
-            var dictionary = LogFactory.loggers;
+            var dictionary = LogFactory._loggers;
             if (settings == null)
             {
                 Debug.LogWarning("Could not SaveFromDictionary because LogSettings were null");

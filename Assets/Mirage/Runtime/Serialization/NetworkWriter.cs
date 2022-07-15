@@ -38,16 +38,16 @@ namespace Mirage.Serialization
         /// <summary>
         /// Max buffer size = 0.5MB
         /// </summary>
-        private const int MaxBufferSize = 524_288;
-        private byte[] managedBuffer;
-        private int bitCapacity;
+        private const int MAX_BUFFER_SIZE = 524_288;
+        private byte[] _managedBuffer;
+        private int _bitCapacity;
 
         /// <summary>Allow internal buffer to resize if capcity is reached</summary>
-        private readonly bool allowResize;
-        private GCHandle handle;
-        private ulong* longPtr;
-        private bool needsDisposing;
-        private int bitPosition;
+        private readonly bool _allowResize;
+        private GCHandle _handle;
+        private ulong* _longPtr;
+        private bool _needsDisposing;
+        private int _bitPosition;
 
         /// <summary>
         /// Size limit of buffer
@@ -56,7 +56,7 @@ namespace Mirage.Serialization
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             // see ByteLength for comment on math
-            get => (bitCapacity + 0b111) >> 3;
+            get => (_bitCapacity + 0b111) >> 3;
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Mirage.Serialization
             // add to 3 last bits,
             //   if any are 1 then it will roll over 4th bit.
             //   if all are 0, then nothing happens 
-            get => (bitPosition + 0b111) >> 3;
+            get => (_bitPosition + 0b111) >> 3;
         }
 
         /// <summary>
@@ -80,20 +80,20 @@ namespace Mirage.Serialization
         public int BitPosition
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => bitPosition;
+            get => _bitPosition;
         }
 
         public NetworkWriter(int minByteCapacity) : this(minByteCapacity, true) { }
         public NetworkWriter(int minByteCapacity, bool allowResize)
         {
-            this.allowResize = allowResize;
+            _allowResize = allowResize;
 
             // ensure capacity is multiple of 8
             var ulongCapacity = Mathf.CeilToInt(minByteCapacity / (float)sizeof(ulong));
             var byteCapacity = ulongCapacity * sizeof(ulong);
 
-            bitCapacity = byteCapacity * 8;
-            managedBuffer = new byte[byteCapacity];
+            _bitCapacity = byteCapacity * 8;
+            _managedBuffer = new byte[byteCapacity];
 
             CreateHandle();
         }
@@ -108,13 +108,13 @@ namespace Mirage.Serialization
         {
             // +7 to round up to next byte
             var minByteCapacity = (minBitCapacity + 7) / 8;
-            var size = managedBuffer.Length;
+            var size = _managedBuffer.Length;
             while (size < minByteCapacity)
             {
                 size *= 2;
-                if (size > MaxBufferSize)
+                if (size > MAX_BUFFER_SIZE)
                 {
-                    throw new InvalidOperationException($"Can not resize buffer to {size} bytes because it is above max value of {MaxBufferSize}");
+                    throw new InvalidOperationException($"Can not resize buffer to {size} bytes because it is above max value of {MAX_BUFFER_SIZE}");
                 }
             }
 
@@ -122,19 +122,19 @@ namespace Mirage.Serialization
 
             FreeHandle();
 
-            Array.Resize(ref managedBuffer, size);
-            bitCapacity = size * 8;
+            Array.Resize(ref _managedBuffer, size);
+            _bitCapacity = size * 8;
 
             CreateHandle();
         }
 
         private void CreateHandle()
         {
-            if (needsDisposing) FreeHandle();
+            if (_needsDisposing) FreeHandle();
 
-            handle = GCHandle.Alloc(managedBuffer, GCHandleType.Pinned);
-            longPtr = (ulong*)handle.AddrOfPinnedObject();
-            needsDisposing = true;
+            _handle = GCHandle.Alloc(_managedBuffer, GCHandleType.Pinned);
+            _longPtr = (ulong*)_handle.AddrOfPinnedObject();
+            _needsDisposing = true;
         }
 
         /// <summary>
@@ -143,16 +143,16 @@ namespace Mirage.Serialization
         /// </summary>
         private void FreeHandle()
         {
-            if (!needsDisposing) return;
+            if (!_needsDisposing) return;
 
-            handle.Free();
-            longPtr = null;
-            needsDisposing = false;
+            _handle.Free();
+            _longPtr = null;
+            _needsDisposing = false;
         }
 
         public void Reset()
         {
-            bitPosition = 0;
+            _bitPosition = 0;
         }
 
         /// <summary>
@@ -163,21 +163,21 @@ namespace Mirage.Serialization
         public byte[] ToArray()
         {
             var data = new byte[ByteLength];
-            Buffer.BlockCopy(managedBuffer, 0, data, 0, ByteLength);
+            Buffer.BlockCopy(_managedBuffer, 0, data, 0, ByteLength);
             return data;
         }
         public ArraySegment<byte> ToArraySegment()
         {
-            return new ArraySegment<byte>(managedBuffer, 0, ByteLength);
+            return new ArraySegment<byte>(_managedBuffer, 0, ByteLength);
         }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CheckCapacity(int newLength)
         {
-            if (newLength > bitCapacity)
+            if (newLength > _bitCapacity)
             {
-                if (allowResize)
+                if (_allowResize)
                 {
                     ResizeBuffer(newLength);
                 }
@@ -190,12 +190,12 @@ namespace Mirage.Serialization
 
         private void ThrowLengthOverCapacity(int newLength)
         {
-            throw new InvalidOperationException($"Can not write over end of buffer, new length {newLength}, capacity {bitCapacity}");
+            throw new InvalidOperationException($"Can not write over end of buffer, new length {newLength}, capacity {_bitCapacity}");
         }
 
         private void PadToByte()
         {
-            bitPosition = ByteLength << 3;
+            _bitPosition = ByteLength << 3;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -209,12 +209,12 @@ namespace Mirage.Serialization
         /// <param name="value"></param>
         public void WriteBoolean(ulong value)
         {
-            var newPosition = bitPosition + 1;
+            var newPosition = _bitPosition + 1;
             CheckCapacity(newPosition);
 
-            var bitsInLong = bitPosition & 0b11_1111;
+            var bitsInLong = _bitPosition & 0b11_1111;
 
-            var ptr = longPtr + (bitPosition >> 6);
+            var ptr = _longPtr + (_bitPosition >> 6);
             *ptr = (
                 *ptr & (
                     // start with 0000_0001
@@ -224,7 +224,7 @@ namespace Mirage.Serialization
                 )
             ) | ((value & 0b1) << bitsInLong);
 
-            bitPosition = newPosition;
+            _bitPosition = newPosition;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -249,27 +249,27 @@ namespace Mirage.Serialization
         public void WriteInt64(long value) => WriteUInt64((ulong)value);
         public void WriteUInt64(ulong value)
         {
-            var newPosition = bitPosition + 64;
+            var newPosition = _bitPosition + 64;
             CheckCapacity(newPosition);
 
-            var bitsInLong = bitPosition & 0b11_1111;
+            var bitsInLong = _bitPosition & 0b11_1111;
 
             if (bitsInLong == 0)
             {
-                var ptr1 = longPtr + (bitPosition >> 6);
+                var ptr1 = _longPtr + (_bitPosition >> 6);
                 *ptr1 = value;
             }
             else
             {
                 var bitsLeft = 64 - bitsInLong;
 
-                var ptr1 = longPtr + (bitPosition >> 6);
+                var ptr1 = _longPtr + (_bitPosition >> 6);
                 var ptr2 = ptr1 + 1;
 
                 *ptr1 = (*ptr1 & (ulong.MaxValue >> bitsLeft)) | (value << bitsInLong);
                 *ptr2 = (*ptr2 & (ulong.MaxValue << newPosition)) | (value >> bitsLeft);
             }
-            bitPosition = newPosition;
+            _bitPosition = newPosition;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -287,27 +287,27 @@ namespace Mirage.Serialization
 
         private void WriterUnmasked(ulong value, int bits)
         {
-            var newPosition = bitPosition + bits;
+            var newPosition = _bitPosition + bits;
             CheckCapacity(newPosition);
 
-            var bitsInLong = bitPosition & 0b11_1111;
+            var bitsInLong = _bitPosition & 0b11_1111;
             var bitsLeft = 64 - bitsInLong;
 
             if (bitsLeft >= bits)
             {
-                var ptr = longPtr + (bitPosition >> 6);
+                var ptr = _longPtr + (_bitPosition >> 6);
 
-                *ptr = (*ptr & BitMask.OuterMask(bitPosition, newPosition)) | (value << bitsInLong);
+                *ptr = (*ptr & BitMask.OuterMask(_bitPosition, newPosition)) | (value << bitsInLong);
             }
             else
             {
-                var ptr1 = longPtr + (bitPosition >> 6);
+                var ptr1 = _longPtr + (_bitPosition >> 6);
                 var ptr2 = ptr1 + 1;
 
                 *ptr1 = (*ptr1 & (ulong.MaxValue >> bitsLeft)) | (value << bitsInLong);
                 *ptr2 = (*ptr2 & (ulong.MaxValue << newPosition)) | (value >> bitsLeft);
             }
-            bitPosition = newPosition;
+            _bitPosition = newPosition;
         }
 
         /// <summary>
@@ -337,10 +337,10 @@ namespace Mirage.Serialization
             CheckCapacity(bitPosition + bits);
 
             // moves position to arg, then write, then reset position
-            var currentPosition = this.bitPosition;
-            this.bitPosition = bitPosition;
+            var currentPosition = _bitPosition;
+            _bitPosition = bitPosition;
             Write(value, bits);
-            this.bitPosition = currentPosition;
+            _bitPosition = currentPosition;
         }
 
 
@@ -353,7 +353,7 @@ namespace Mirage.Serialization
         public void MoveBitPosition(int newPosition)
         {
             CheckCapacity(newPosition);
-            bitPosition = newPosition;
+            _bitPosition = newPosition;
         }
 
         /// <summary>
@@ -366,14 +366,14 @@ namespace Mirage.Serialization
         public void PadAndCopy<T>(in T value) where T : unmanaged
         {
             PadToByte();
-            var newPosition = bitPosition + (8 * sizeof(T));
+            var newPosition = _bitPosition + (8 * sizeof(T));
             CheckCapacity(newPosition);
 
-            var startPtr = ((byte*)longPtr) + (bitPosition >> 3);
+            var startPtr = ((byte*)_longPtr) + (_bitPosition >> 3);
 
             var ptr = (T*)startPtr;
             *ptr = value;
-            bitPosition = newPosition;
+            _bitPosition = newPosition;
         }
 
         /// <summary>
@@ -387,12 +387,12 @@ namespace Mirage.Serialization
         public void WriteBytes(byte[] array, int offset, int length)
         {
             PadToByte();
-            var newPosition = bitPosition + (8 * length);
+            var newPosition = _bitPosition + (8 * length);
             CheckCapacity(newPosition);
 
             // todo benchmark this vs Marshal.Copy or for loop
-            Buffer.BlockCopy(array, offset, managedBuffer, ByteLength, length);
-            bitPosition = newPosition;
+            Buffer.BlockCopy(array, offset, _managedBuffer, ByteLength, length);
+            _bitPosition = newPosition;
         }
 
         /// <summary>
@@ -413,11 +413,11 @@ namespace Mirage.Serialization
         /// <param name="bitLength"></param>
         public void CopyFromWriter(NetworkWriter other, int otherBitPosition, int bitLength)
         {
-            var newBit = bitPosition + bitLength;
+            var newBit = _bitPosition + bitLength;
             CheckCapacity(newBit);
 
             var ulongPos = otherBitPosition >> 6;
-            var otherPtr = other.longPtr + ulongPos;
+            var otherPtr = other._longPtr + ulongPos;
 
 
             var firstBitOffset = otherBitPosition & 0b11_1111;
@@ -449,8 +449,8 @@ namespace Mirage.Serialization
             //      if bitlength == 0 then write will return
             Write(*otherPtr, bitLength);
 
-            Debug.Assert(bitPosition == newBit, "bitPosition should already be equal to newBit because it would have incremented each WriteUInt64");
-            bitPosition = newBit;
+            Debug.Assert(_bitPosition == newBit, "bitPosition should already be equal to newBit because it would have incremented each WriteUInt64");
+            _bitPosition = newBit;
         }
     }
 }

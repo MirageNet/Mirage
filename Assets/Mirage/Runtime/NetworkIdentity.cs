@@ -107,7 +107,7 @@ namespace Mirage
         public TransformSpawnSettings SpawnSettings = new TransformSpawnSettings(true, true, true);
 
         [NonSerialized]
-        private NetworkBehaviour[] networkBehavioursCache;
+        private NetworkBehaviour[] _networkBehavioursCache;
 
         /// <summary>
         /// Returns true if running as a client and this object was spawned by a server.
@@ -239,22 +239,22 @@ namespace Mirage
         {
             get
             {
-                if (networkBehavioursCache is null)
+                if (_networkBehavioursCache is null)
                 {
                     var components = FindBehaviourForThisIdentity();
 
                     if (components.Length > byte.MaxValue)
                         throw new InvalidOperationException("Only 255 NetworkBehaviours are allowed per GameObject.");
 
-                    networkBehavioursCache = components;
+                    _networkBehavioursCache = components;
                 }
 
-                return networkBehavioursCache;
+                return _networkBehavioursCache;
             }
         }
 
         // cache list to call GetComponentsInChildren() with no allocations
-        private static List<NetworkBehaviour> childNetworkBehavioursCache = new List<NetworkBehaviour>();
+        private static readonly List<NetworkBehaviour> childNetworkBehavioursCache = new List<NetworkBehaviour>();
 
         /// <summary>
         /// Removes NetworkBehaviour that belong to another NetworkIdentity from the components array
@@ -358,9 +358,9 @@ namespace Mirage
         [SerializeField] private NetworkPlayerAddLateEvent _onOwnerChanged = new NetworkPlayerAddLateEvent();
         [SerializeField] private AddLateEvent _onStopClient = new AddLateEvent();
         [SerializeField] private AddLateEvent _onStopServer = new AddLateEvent();
-        private bool clientStarted;
-        private bool localPlayerStarted;
-        private bool hadAuthority;
+        private bool _clientStarted;
+        private bool _localPlayerStarted;
+        private bool _hadAuthority;
 
         /// <summary>
         /// This is invoked for NetworkBehaviour objects when they become active on the server.
@@ -446,12 +446,12 @@ namespace Mirage
         /// <summary>
         /// hasSpawned should always be false before runtime
         /// </summary>
-        [SerializeField, HideInInspector] private bool hasSpawned;
+        [SerializeField, HideInInspector] private bool _hasSpawned;
         public bool SpawnedFromInstantiate { get; private set; }
 
         private void Awake()
         {
-            if (hasSpawned)
+            if (_hasSpawned)
             {
                 logger.LogError($"Object '{name}' (NetID {NetId}) has already been spawned. Don't call Instantiate for NetworkIdentities that were in the scene " +
                     $"since the beginning (aka scene objects). Otherwise the client won't know which object to use for a SpawnSceneObject message.");
@@ -460,14 +460,14 @@ namespace Mirage
                 Destroy(gameObject);
             }
 
-            hasSpawned = true;
+            _hasSpawned = true;
         }
 
         private void OnValidate()
         {
             // OnValidate is not called when using Instantiate, so we can use
             // it to make sure that hasSpawned is false
-            hasSpawned = false;
+            _hasSpawned = false;
 
 #if UNITY_EDITOR
             NetworkIdentityIdGenerator.SetupIDs(this);
@@ -507,29 +507,29 @@ namespace Mirage
 
         internal void StartClient()
         {
-            if (clientStarted)
+            if (_clientStarted)
                 return;
-            clientStarted = true;
+            _clientStarted = true;
 
             _onStartClient.Invoke();
         }
 
         internal void StartLocalPlayer()
         {
-            if (localPlayerStarted)
+            if (_localPlayerStarted)
                 return;
-            localPlayerStarted = true;
+            _localPlayerStarted = true;
 
             _onStartLocalPlayer.Invoke();
         }
 
         internal void NotifyAuthority()
         {
-            if (!hadAuthority && HasAuthority)
+            if (!_hadAuthority && HasAuthority)
                 CallStartAuthority();
-            if (hadAuthority && !HasAuthority)
+            if (_hadAuthority && !HasAuthority)
                 CallStopAuthority();
-            hadAuthority = HasAuthority;
+            _hadAuthority = HasAuthority;
         }
 
         internal void CallStartAuthority()
@@ -570,7 +570,7 @@ namespace Mirage
         }
 
         // random number that is unlikely to appear in a regular data stream
-        private const byte Barrier = 171;
+        private const byte BARRIER = 171;
 
         // paul: readstring bug prevention: https://issuetracker.unity3d.com/issues/unet-networkwriter-dot-write-causing-readstring-slash-readbytes-out-of-range-errors-in-clients
         // -> OnSerialize writes componentData, barrier, componentData, barrier,componentData,...
@@ -608,7 +608,7 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log($"OnSerializeSafely written for '{comp.name}', Component '{comp.GetType()}', SceneId {SceneId:X}");
 
             // serialize a barrier to be checked by the deserializer
-            writer.WriteByte(Barrier);
+            writer.WriteByte(BARRIER);
         }
 
         /// <summary>
@@ -690,7 +690,7 @@ namespace Mirage
 
             // check if Barrier is at end of Deserialize, if it is then the Deserialize was likely a success
             var barrierData = reader.ReadByte();
-            if (barrierData != Barrier)
+            if (barrierData != BARRIER)
             {
                 throw new DeserializeFailedException($"Deserialization failure for component '{comp.GetType()}' on networked object '{name}' (NetId {NetId}, SceneId {SceneId:X})." +
                     $" Possible Reasons:\n" +
@@ -984,16 +984,16 @@ namespace Mirage
         {
             ResetSyncObjects();
 
-            hasSpawned = false;
-            clientStarted = false;
-            localPlayerStarted = false;
+            _hasSpawned = false;
+            _clientStarted = false;
+            _localPlayerStarted = false;
             NetId = 0;
             Server = null;
             Client = null;
             ServerObjectManager = null;
             ClientObjectManager = null;
             Owner = null;
-            networkBehavioursCache = null;
+            _networkBehavioursCache = null;
 
             ClearObservers();
             ResetEvents();

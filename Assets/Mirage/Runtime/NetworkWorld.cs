@@ -28,12 +28,12 @@ namespace Mirage
         /// </summary>
         public NetworkTime Time { get; } = new NetworkTime();
 
-        private readonly Dictionary<uint, NetworkIdentity> SpawnedObjects = new Dictionary<uint, NetworkIdentity>();
-        public IReadOnlyCollection<NetworkIdentity> SpawnedIdentities => SpawnedObjects.Values;
+        private readonly Dictionary<uint, NetworkIdentity> _spawnedObjects = new Dictionary<uint, NetworkIdentity>();
+        public IReadOnlyCollection<NetworkIdentity> SpawnedIdentities => _spawnedObjects.Values;
 
         public bool TryGetIdentity(uint netId, out NetworkIdentity identity)
         {
-            return SpawnedObjects.TryGetValue(netId, out identity) && identity != null;
+            return _spawnedObjects.TryGetValue(netId, out identity) && identity != null;
         }
 
         /// <summary>
@@ -46,18 +46,18 @@ namespace Mirage
             if (netId == 0) throw new ArgumentException("id can not be zero", nameof(netId));
             if (identity == null) throw new ArgumentNullException(nameof(identity));
             if (netId != identity.NetId) throw new ArgumentException("NetworkIdentity did not have matching netId", nameof(identity));
-            if (SpawnedObjects.TryGetValue(netId, out var existing) && existing != null) throw new ArgumentException("An Identity with same id already exists in network world", nameof(netId));
+            if (_spawnedObjects.TryGetValue(netId, out var existing) && existing != null) throw new ArgumentException("An Identity with same id already exists in network world", nameof(netId));
 
             // dont use add, netId might already exist but have been destroyed
             // this can happen client side. we check for this case in TryGetValue above
-            SpawnedObjects[netId] = identity;
+            _spawnedObjects[netId] = identity;
             onSpawn?.Invoke(identity);
         }
 
         internal void RemoveIdentity(NetworkIdentity identity)
         {
             var netId = identity.NetId;
-            var removed = SpawnedObjects.Remove(netId);
+            var removed = _spawnedObjects.Remove(netId);
             // only invoke event if values was successfully removed
             if (removed)
                 onUnspawn?.Invoke(identity);
@@ -70,7 +70,7 @@ namespace Mirage
             foreach (var identity in removalCollection)
             {
                 if (identity == null)
-                    SpawnedObjects.Remove(identity.NetId);
+                    _spawnedObjects.Remove(identity.NetId);
             }
         }
 
@@ -78,8 +78,8 @@ namespace Mirage
         {
             if (netId == 0) throw new ArgumentException("id can not be zero", nameof(netId));
 
-            SpawnedObjects.TryGetValue(netId, out var identity);
-            var removed = SpawnedObjects.Remove(netId);
+            _spawnedObjects.TryGetValue(netId, out var identity);
+            var removed = _spawnedObjects.Remove(netId);
             // only invoke event if values was successfully removed
             if (removed)
                 onUnspawn?.Invoke(identity);
@@ -87,7 +87,7 @@ namespace Mirage
 
         internal void ClearSpawnedObjects()
         {
-            SpawnedObjects.Clear();
+            _spawnedObjects.Clear();
         }
 
         public NetworkWorld()

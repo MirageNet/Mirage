@@ -7,34 +7,33 @@ namespace Mirage
     /// </summary>
     public class SyncVarSender
     {
-        private readonly HashSet<NetworkIdentity> DirtyObjects = new HashSet<NetworkIdentity>();
-        private readonly List<NetworkIdentity> DirtyObjectsTmp = new List<NetworkIdentity>();
+        private readonly HashSet<NetworkIdentity> _dirtyObjects = new HashSet<NetworkIdentity>();
+        private readonly List<NetworkIdentity> _dirtyObjectsTmp = new List<NetworkIdentity>();
 
         public void AddDirtyObject(NetworkIdentity dirty)
         {
-            DirtyObjects.Add(dirty);
+            _dirtyObjects.Add(dirty);
         }
-
 
         internal void Update()
         {
-            DirtyObjectsTmp.Clear();
+            _dirtyObjectsTmp.Clear();
 
-            foreach (var identity in DirtyObjects)
+            foreach (var identity in _dirtyObjects)
             {
                 if (identity != null)
                 {
                     identity.UpdateVars();
 
                     if (identity.StillDirty())
-                        DirtyObjectsTmp.Add(identity);
+                        _dirtyObjectsTmp.Add(identity);
                 }
             }
 
-            DirtyObjects.Clear();
+            _dirtyObjects.Clear();
 
-            foreach (var obj in DirtyObjectsTmp)
-                DirtyObjects.Add(obj);
+            foreach (var obj in _dirtyObjectsTmp)
+                _dirtyObjects.Add(obj);
         }
     }
 }

@@ -50,7 +50,8 @@ namespace Mirage
 
         [Tooltip("Creates Socket for Peer to use")]
         public SocketFactory SocketFactory;
-        private Peer peer;
+
+        private Peer _peer;
 
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
@@ -126,9 +127,9 @@ namespace Mirage
         /// <summary>
         /// A list of local connections on the server.
         /// </summary>
-        public IReadOnlyCollection<INetworkPlayer> Players => connections.Values;
+        public IReadOnlyCollection<INetworkPlayer> Players => _connections.Values;
 
-        private readonly Dictionary<IConnection, INetworkPlayer> connections = new Dictionary<IConnection, INetworkPlayer>();
+        private readonly Dictionary<IConnection, INetworkPlayer> _connections = new Dictionary<IConnection, INetworkPlayer>();
 
         /// <summary>
         /// <para>Checks if the server has been started.</para>
@@ -166,7 +167,7 @@ namespace Mirage
             }
 
             // just clear list, connections will be disconnected when peer is closed
-            connections.Clear();
+            _connections.Clear();
             LocalPlayer = null;
 
             Cleanup();
@@ -191,7 +192,7 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log($"NetworkServer created, Mirage version: {Version.Current}");
 
             logger.Assert(Players.Count == 0, "Player should have been reset since previous session");
-            logger.Assert(connections.Count == 0, "Connections should have been reset since previous session");
+            logger.Assert(_connections.Count == 0, "Connections should have been reset since previous session");
 
             World = new NetworkWorld();
             SyncVarSender = new SyncVarSender();
@@ -200,7 +201,7 @@ namespace Mirage
             MessageHandler = new MessageHandler(World, DisconnectOnException);
             MessageHandler.RegisterHandler<NetworkPingMessage>(World.Time.OnServerPing);
 
-            var dataHandler = new DataHandler(MessageHandler, connections);
+            var dataHandler = new DataHandler(MessageHandler, _connections);
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
 
             var config = PeerConfig;
@@ -225,11 +226,11 @@ namespace Mirage
                 var socket = SocketFactory.CreateServerSocket();
 
                 // Tell the peer to use that newly created socket.
-                peer = new Peer(socket, maxPacketSize, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
-                peer.OnConnected += Peer_OnConnected;
-                peer.OnDisconnected += Peer_OnDisconnected;
+                _peer = new Peer(socket, maxPacketSize, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
+                _peer.OnConnected += Peer_OnConnected;
+                _peer.OnDisconnected += Peer_OnDisconnected;
                 // Bind it to the endpoint.
-                peer.Bind(SocketFactory.GetBindEndPoint());
+                _peer.Bind(SocketFactory.GetBindEndPoint());
 
                 if (logger.LogEnabled()) logger.Log($"Server started, listening for connections. Using socket {socket.GetType()}");
 
@@ -293,9 +294,9 @@ namespace Mirage
 
         internal void Update()
         {
-            peer?.UpdateReceive();
+            _peer?.UpdateReceive();
             SyncVarSender?.Update();
-            peer?.UpdateSent();
+            _peer?.UpdateSent();
         }
 
         private void Peer_OnConnected(IConnection conn)
@@ -315,7 +316,7 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log($"Client {conn} disconnected with reason: {reason}");
 
-            if (connections.TryGetValue(conn, out var player))
+            if (_connections.TryGetValue(conn, out var player))
             {
                 OnDisconnected(player);
             }
@@ -355,13 +356,13 @@ namespace Mirage
 
             Application.quitting -= Stop;
 
-            if (peer != null)
+            if (_peer != null)
             {
                 //remove handlers first to stop loop
-                peer.OnConnected -= Peer_OnConnected;
-                peer.OnDisconnected -= Peer_OnDisconnected;
-                peer.Close();
-                peer = null;
+                _peer.OnConnected -= Peer_OnConnected;
+                _peer.OnDisconnected -= Peer_OnDisconnected;
+                _peer.Close();
+                _peer = null;
             }
         }
 
@@ -374,7 +375,7 @@ namespace Mirage
         {
             if (!Players.Contains(player))
             {
-                connections.Add(player.Connection, player);
+                _connections.Add(player.Connection, player);
             }
         }
 
@@ -384,7 +385,7 @@ namespace Mirage
         /// <param name="connectionId">The id of the connection to remove.</param>
         public void RemoveConnection(INetworkPlayer player)
         {
-            connections.Remove(player.Connection);
+            _connections.Remove(player.Connection);
         }
 
         /// <summary>
@@ -440,7 +441,7 @@ namespace Mirage
 
                 // using SendToMany (with IEnumerable) will cause Enumerator to be boxed and create GC/alloc
                 // instead we can use while loop and MoveNext to avoid boxing
-                var enumerator = connections.Values.GetEnumerator();
+                var enumerator = _connections.Values.GetEnumerator();
                 while (enumerator.MoveNext())
                 {
                     var player = enumerator.Current;
@@ -539,20 +540,20 @@ namespace Mirage
         /// </summary>
         private class DataHandler : IDataHandler
         {
-            private readonly IMessageReceiver messageHandler;
-            private readonly Dictionary<IConnection, INetworkPlayer> players;
+            private readonly IMessageReceiver _messageHandler;
+            private readonly Dictionary<IConnection, INetworkPlayer> _players;
 
             public DataHandler(IMessageReceiver messageHandler, Dictionary<IConnection, INetworkPlayer> connections)
             {
-                this.messageHandler = messageHandler;
-                players = connections;
+                _messageHandler = messageHandler;
+                _players = connections;
             }
 
             public void ReceiveMessage(IConnection connection, ArraySegment<byte> message)
             {
-                if (players.TryGetValue(connection, out var player))
+                if (_players.TryGetValue(connection, out var player))
                 {
-                    messageHandler.HandleMessage(player, message);
+                    _messageHandler.HandleMessage(player, message);
                 }
                 else
                 {

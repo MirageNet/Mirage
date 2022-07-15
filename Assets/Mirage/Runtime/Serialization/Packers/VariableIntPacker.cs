@@ -32,13 +32,13 @@ namespace Mirage.Serialization
         // todo needs doc comments
         // todo need attribute to validate large bits based on pack type (eg if packing ushort, make sure largebits is 16 or less)
 
-        private readonly int smallBitCount;
-        private readonly int mediumBitsCount;
-        private readonly int largeBitsCount;
-        private readonly ulong smallValue;
-        private readonly ulong mediumValue;
-        private readonly ulong largeValue;
-        private readonly bool throwIfOverLarge;
+        private readonly int _smallBitCount;
+        private readonly int _mediumBitsCount;
+        private readonly int _largeBitsCount;
+        private readonly ulong _smallValue;
+        private readonly ulong _mediumValue;
+        private readonly ulong _largeValue;
+        private readonly bool _throwIfOverLarge;
 
         public VarIntPacker(ulong smallValue, ulong mediumValue)
             : this(BitHelper.BitCount(smallValue), BitHelper.BitCount(mediumValue), 64, false) { }
@@ -52,7 +52,7 @@ namespace Mirage.Serialization
 
         private VarIntPacker(int smallBits, int mediumBits, int largeBits, bool throwIfOverLarge)
         {
-            this.throwIfOverLarge = throwIfOverLarge;
+            _throwIfOverLarge = throwIfOverLarge;
             if (smallBits == 0) throw new ArgumentException("Small value can not be zero", nameof(smallBits));
             if (smallBits >= mediumBits) throw new ArgumentException("Medium value must be greater than small value", nameof(mediumBits));
             if (mediumBits >= largeBits) throw new ArgumentException("Large value must be greater than medium value", nameof(largeBits));
@@ -60,14 +60,14 @@ namespace Mirage.Serialization
             // force medium to also be 62 or less so we can use 1 write call (2 bits to say its medium + 62 value bits
             if (mediumBits > 62) throw new ArgumentException("Medium bits must be 62 or less", nameof(mediumBits));
 
-            smallBitCount = smallBits;
-            mediumBitsCount = mediumBits;
-            largeBitsCount = largeBits;
+            _smallBitCount = smallBits;
+            _mediumBitsCount = mediumBits;
+            _largeBitsCount = largeBits;
 
             // mask is also max value for n bits
-            smallValue = BitMask.Mask(smallBits);
-            mediumValue = BitMask.Mask(mediumBits);
-            largeValue = BitMask.Mask(largeBits);
+            _smallValue = BitMask.Mask(smallBits);
+            _mediumValue = BitMask.Mask(mediumBits);
+            _largeValue = BitMask.Mask(largeBits);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -88,28 +88,28 @@ namespace Mirage.Serialization
 
         private void pack(NetworkWriter writer, ulong value, int maxBits)
         {
-            if (value <= smallValue)
+            if (value <= _smallValue)
             {
                 // start with b0 to say small, then value
-                writer.Write(value << 1, smallBitCount + 1);
+                writer.Write(value << 1, _smallBitCount + 1);
             }
-            else if (value <= mediumValue)
+            else if (value <= _mediumValue)
             {
                 // start with b01 to say medium, then value
-                writer.Write(value << 2 | 0b01, mediumBitsCount + 2);
+                writer.Write((value << 2) | 0b01, _mediumBitsCount + 2);
             }
-            else if (value <= largeValue)
+            else if (value <= _largeValue)
             {
                 // start with b11 to say large, then value
                 // use 2 write calls here because bitCount could be 64
                 writer.Write(0b11, 2);
-                writer.Write(value, Math.Min(maxBits, largeBitsCount));
+                writer.Write(value, Math.Min(maxBits, _largeBitsCount));
             }
             else
             {
-                if (throwIfOverLarge)
+                if (_throwIfOverLarge)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), value, $"Value is over max of {largeValue}");
+                    throw new ArgumentOutOfRangeException(nameof(value), value, $"Value is over max of {_largeValue}");
                 }
                 else
                 {
@@ -117,7 +117,7 @@ namespace Mirage.Serialization
                     // we dont want to write value here because it will be masked and lose some high bits
                     // need 2 write calls here because max is 64+2 bits
                     writer.Write(0b11, 2);
-                    writer.Write(ulong.MaxValue, Math.Min(maxBits, largeBitsCount));
+                    writer.Write(ulong.MaxValue, Math.Min(maxBits, _largeBitsCount));
                 }
             }
         }
@@ -142,17 +142,17 @@ namespace Mirage.Serialization
         {
             if (!reader.ReadBoolean())
             {
-                return reader.Read(smallBitCount);
+                return reader.Read(_smallBitCount);
             }
             else
             {
                 if (!reader.ReadBoolean())
                 {
-                    return reader.Read(mediumBitsCount);
+                    return reader.Read(_mediumBitsCount);
                 }
                 else
                 {
-                    return reader.Read(Math.Min(largeBitsCount, maxBits));
+                    return reader.Read(Math.Min(_largeBitsCount, maxBits));
                 }
             }
         }

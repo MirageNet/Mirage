@@ -5,18 +5,18 @@ namespace Mirage
     // https://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average
     public class ExponentialMovingAverage
     {
-        private readonly float alpha;
-        private bool initialized;
+        private readonly float _alpha;
+        private bool _initialized;
 
         public ExponentialMovingAverage(int n)
         {
             // standard N-day EMA alpha calculation
-            alpha = 2.0f / (n + 1);
+            _alpha = 2.0f / (n + 1);
         }
 
         public void Reset()
         {
-            initialized = false;
+            _initialized = false;
             Value = 0;
             Var = 0;
         }
@@ -25,16 +25,16 @@ namespace Mirage
         {
             // simple algorithm for EMA described here:
             // https://en.wikipedia.org/wiki/Moving_average#Exponentially_weighted_moving_variance_and_standard_deviation
-            if (initialized)
+            if (_initialized)
             {
                 var delta = newValue - Value;
-                Value += alpha * delta;
-                Var = (1 - alpha) * (Var + alpha * delta * delta);
+                Value += _alpha * delta;
+                Var = (1 - _alpha) * (Var + (_alpha * delta * delta));
             }
             else
             {
                 Value = newValue;
-                initialized = true;
+                _initialized = true;
             }
         }
 

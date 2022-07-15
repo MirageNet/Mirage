@@ -28,7 +28,7 @@ namespace Mirage
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkBehaviour));
 
-        internal float lastSyncTime;
+        internal float _lastSyncTime;
 
         // hidden because NetworkBehaviourInspector shows it only if has OnSerialize.
         /// <summary>
@@ -123,19 +123,19 @@ namespace Mirage
 
         protected internal ulong SyncVarDirtyBits { get; private set; }
 
-        private ulong syncVarHookGuard;
+        private ulong _syncVarHookGuard;
 
         protected internal bool GetSyncVarHookGuard(ulong dirtyBit)
         {
-            return (syncVarHookGuard & dirtyBit) != 0UL;
+            return (_syncVarHookGuard & dirtyBit) != 0UL;
         }
 
         protected internal void SetSyncVarHookGuard(ulong dirtyBit, bool value)
         {
             if (value)
-                syncVarHookGuard |= dirtyBit;
+                _syncVarHookGuard |= dirtyBit;
             else
-                syncVarHookGuard &= ~dirtyBit;
+                _syncVarHookGuard &= ~dirtyBit;
         }
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace Mirage
             }
         }
 
-        private int? componentIndex;
+        private int? _componentIndex;
         public const int COMPONENT_INDEX_NOT_FOUND = -1;
         /// <summary>
         /// Returns the index of the component on this object
@@ -196,8 +196,8 @@ namespace Mirage
         {
             get
             {
-                if (componentIndex.HasValue)
-                    return componentIndex.Value;
+                if (_componentIndex.HasValue)
+                    return _componentIndex.Value;
 
                 // note: FindIndex causes allocations, we search manually instead
                 for (var i = 0; i < Identity.NetworkBehaviours.Length; i++)
@@ -205,7 +205,7 @@ namespace Mirage
                     var component = Identity.NetworkBehaviours[i];
                     if (component == this)
                     {
-                        componentIndex = i;
+                        _componentIndex = i;
                         return i;
                     }
                 }
@@ -284,7 +284,7 @@ namespace Mirage
         /// </summary>
         public void ClearAllDirtyBits()
         {
-            lastSyncTime = Time.time;
+            _lastSyncTime = Time.time;
             SyncVarDirtyBits = 0L;
 
             // flush all unsynchronized changes in syncobjects
@@ -314,7 +314,7 @@ namespace Mirage
 
         public bool IsDirty()
         {
-            if (Time.time - lastSyncTime >= syncInterval)
+            if (Time.time - _lastSyncTime >= syncInterval)
             {
                 return SyncVarDirtyBits != 0L || AnySyncObjectDirty();
             }

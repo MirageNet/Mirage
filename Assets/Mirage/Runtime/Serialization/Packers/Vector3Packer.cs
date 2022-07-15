@@ -28,42 +28,42 @@ namespace Mirage.Serialization
 {
     public sealed class Vector3Packer
     {
-        private readonly FloatPacker xPacker;
-        private readonly FloatPacker yPacker;
-        private readonly FloatPacker zPacker;
+        private readonly FloatPacker _xPacker;
+        private readonly FloatPacker _yPacker;
+        private readonly FloatPacker _zPacker;
 
         public Vector3Packer(float xMax, float yMax, float zMax, int xBitCount, int yBitCount, int zBitCount)
         {
-            xPacker = new FloatPacker(xMax, xBitCount);
-            yPacker = new FloatPacker(yMax, yBitCount);
-            zPacker = new FloatPacker(zMax, zBitCount);
+            _xPacker = new FloatPacker(xMax, xBitCount);
+            _yPacker = new FloatPacker(yMax, yBitCount);
+            _zPacker = new FloatPacker(zMax, zBitCount);
         }
         public Vector3Packer(float xMax, float yMax, float zMax, float xPrecision, float yPrecision, float zPrecision)
         {
-            xPacker = new FloatPacker(xMax, xPrecision);
-            yPacker = new FloatPacker(yMax, yPrecision);
-            zPacker = new FloatPacker(zMax, zPrecision);
+            _xPacker = new FloatPacker(xMax, xPrecision);
+            _yPacker = new FloatPacker(yMax, yPrecision);
+            _zPacker = new FloatPacker(zMax, zPrecision);
         }
         public Vector3Packer(Vector3 max, Vector3 precision)
         {
-            xPacker = new FloatPacker(max.x, precision.x);
-            yPacker = new FloatPacker(max.y, precision.y);
-            zPacker = new FloatPacker(max.z, precision.z);
+            _xPacker = new FloatPacker(max.x, precision.x);
+            _yPacker = new FloatPacker(max.y, precision.y);
+            _zPacker = new FloatPacker(max.z, precision.z);
         }
 
         public void Pack(NetworkWriter writer, Vector3 value)
         {
-            xPacker.Pack(writer, value.x);
-            yPacker.Pack(writer, value.y);
-            zPacker.Pack(writer, value.z);
+            _xPacker.Pack(writer, value.x);
+            _yPacker.Pack(writer, value.y);
+            _zPacker.Pack(writer, value.z);
         }
 
         public Vector3 Unpack(NetworkReader reader)
         {
             Vector3 value = default;
-            value.x = xPacker.Unpack(reader);
-            value.y = yPacker.Unpack(reader);
-            value.z = zPacker.Unpack(reader);
+            value.x = _xPacker.Unpack(reader);
+            value.y = _yPacker.Unpack(reader);
+            value.z = _zPacker.Unpack(reader);
             return value;
         }
     }

@@ -23,7 +23,7 @@ namespace Mirage
         /// Keep track of all sceneIds to detect scene duplicates
         /// <para>we only need to check the id part here. The Scene Hash part is only needed when a scene is duplciated</para>
         /// </summary>
-        internal static readonly Dictionary<int, NetworkIdentity> sceneIds = new Dictionary<int, NetworkIdentity>();
+        internal static readonly Dictionary<int, NetworkIdentity> _sceneIds = new Dictionary<int, NetworkIdentity>();
 
         /// <summary>
         /// Sets the scene hash on the NetworkIdentity
@@ -178,12 +178,12 @@ namespace Mirage
             }
 
             // Add to dictionary so we can keep track of ID for duplicates
-            sceneIds[wrapper.SceneId] = identity;
+            _sceneIds[wrapper.SceneId] = identity;
         }
 
         private static bool IsDuplicate(NetworkIdentity identity, int sceneId)
         {
-            if (sceneIds.TryGetValue(sceneId, out var existing))
+            if (_sceneIds.TryGetValue(sceneId, out var existing))
             {
                 // if existing is null we can use this id
                 if (existing == null)
@@ -221,7 +221,7 @@ namespace Mirage
         {
             private const long ID_MASK = (long)0x0000_0000_FFFF_FFFFul;
             private const long HASH_MASK = unchecked((long)0xFFFF_FFFF_0000_0000ul);
-            private readonly NetworkIdentity identity;
+            private readonly NetworkIdentity _identity;
             private readonly SerializedObject _serializedObject;
             private readonly SerializedProperty _prefabHashProp;
             private readonly SerializedProperty _sceneIdProp;
@@ -230,7 +230,7 @@ namespace Mirage
             {
                 if (identity == null) throw new ArgumentNullException(nameof(identity));
 
-                this.identity = identity;
+                _identity = identity;
 
                 _serializedObject = new SerializedObject(identity);
                 _prefabHashProp = _serializedObject.FindProperty("_prefabHash");

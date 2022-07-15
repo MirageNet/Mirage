@@ -44,9 +44,9 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             var goSyncvar = new GameObjectSyncvar
             {
-                objectLocator = client.World,
-                netId = serverIdentity.NetId,
-                gameObject = null,
+                _objectLocator = client.World,
+                _netId = serverIdentity.NetId,
+                _gameObject = null,
             };
 
             Assert.That(goSyncvar.Value, Is.SameAs(clientPlayerGO));

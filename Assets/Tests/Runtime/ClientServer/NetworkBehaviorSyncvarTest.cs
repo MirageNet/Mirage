@@ -43,9 +43,9 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             var goSyncvar = new NetworkBehaviorSyncvar
             {
-                objectLocator = client.World,
-                netId = serverIdentity.NetId,
-                component = null,
+                _objectLocator = client.World,
+                _netId = serverIdentity.NetId,
+                _component = null,
             };
 
             Assert.That(goSyncvar.Value, Is.SameAs(clientComponent));

@@ -9,8 +9,9 @@ namespace Mirage
     public class MessageHandler : IMessageReceiver
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(MessageHandler));
-        private readonly bool disconnectOnException;
-        private readonly IObjectLocator objectLocator;
+
+        private readonly bool _disconnectOnException;
+        private readonly IObjectLocator _objectLocator;
 
         /// <summary>
         /// Handles network messages on client and server
@@ -19,12 +20,12 @@ namespace Mirage
         /// <param name="reader"></param>
         internal delegate void NetworkMessageDelegate(INetworkPlayer player, NetworkReader reader);
 
-        internal readonly Dictionary<int, NetworkMessageDelegate> messageHandlers = new Dictionary<int, NetworkMessageDelegate>();
+        internal readonly Dictionary<int, NetworkMessageDelegate> _messageHandlers = new Dictionary<int, NetworkMessageDelegate>();
 
         public MessageHandler(IObjectLocator objectLocator, bool disconnectOnException)
         {
-            this.disconnectOnException = disconnectOnException;
-            this.objectLocator = objectLocator;
+            _disconnectOnException = disconnectOnException;
+            _objectLocator = objectLocator;
         }
 
         private static NetworkMessageDelegate MessageWrapper<T>(MessageDelegateWithPlayer<T> handler)
@@ -47,11 +48,11 @@ namespace Mirage
         public void RegisterHandler<T>(MessageDelegateWithPlayer<T> handler)
         {
             var msgType = MessagePacker.GetId<T>();
-            if (logger.filterLogType == LogType.Log && messageHandlers.ContainsKey(msgType))
+            if (logger.filterLogType == LogType.Log && _messageHandlers.ContainsKey(msgType))
             {
                 logger.Log($"RegisterHandler replacing {msgType}");
             }
-            messageHandlers[msgType] = MessageWrapper(handler);
+            _messageHandlers[msgType] = MessageWrapper(handler);
         }
 
         /// <summary>
@@ -62,7 +63,7 @@ namespace Mirage
         /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
         public void RegisterHandler<T>(MessageDelegate<T> handler)
         {
-            RegisterHandler<T>((_, value) => { handler(value); });
+            RegisterHandler<T>((_, value) => handler.Invoke(value));
         }
 
         /// <summary>
@@ -73,7 +74,7 @@ namespace Mirage
         public void UnregisterHandler<T>()
         {
             var msgType = MessagePacker.GetId<T>();
-            messageHandlers.Remove(msgType);
+            _messageHandlers.Remove(msgType);
         }
 
         /// <summary>
@@ -81,13 +82,13 @@ namespace Mirage
         /// </summary>
         public void ClearHandlers()
         {
-            messageHandlers.Clear();
+            _messageHandlers.Clear();
         }
 
 
         internal void InvokeHandler(INetworkPlayer player, int msgType, NetworkReader reader)
         {
-            if (messageHandlers.TryGetValue(msgType, out var msgDelegate))
+            if (_messageHandlers.TryGetValue(msgType, out var msgDelegate))
             {
                 msgDelegate.Invoke(player, reader);
             }
@@ -109,7 +110,7 @@ namespace Mirage
 
         public void HandleMessage(INetworkPlayer player, ArraySegment<byte> packet)
         {
-            using (var networkReader = NetworkReaderPool.GetReader(packet, objectLocator))
+            using (var networkReader = NetworkReaderPool.GetReader(packet, _objectLocator))
             {
 
                 // protect against attackers trying to send invalid data packets
@@ -130,9 +131,9 @@ namespace Mirage
                 }
                 catch (Exception e)
                 {
-                    var disconnectMessage = disconnectOnException ? $", Closed connection: {player}" : "";
+                    var disconnectMessage = _disconnectOnException ? $", Closed connection: {player}" : "";
                     logger.LogError($"{e.GetType()} in Message handler (see stack below){disconnectMessage}\n{e}");
-                    if (disconnectOnException)
+                    if (_disconnectOnException)
                     {
                         player.Disconnect();
                     }

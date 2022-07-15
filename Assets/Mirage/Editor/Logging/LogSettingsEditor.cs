@@ -12,7 +12,7 @@ namespace Mirage.EditorScripts.Logging
 
             var target = this.target as LogSettings;
 
-            if (target.settings == null)
+            if (target._settings == null)
             {
                 var newSettings = LogLevelsGUI.DrawCreateNewButton();
                 if (newSettings != null)
@@ -24,7 +24,7 @@ namespace Mirage.EditorScripts.Logging
             }
             else
             {
-                LogLevelsGUI.DrawSettings(target.settings);
+                LogLevelsGUI.DrawSettings(target._settings);
             }
         }
     }

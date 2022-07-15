@@ -55,7 +55,7 @@ namespace Mirage.RemoteCalls
             }
 
             // if authority is required, then client must have authority to send
-            if (requireAuthority && !(behaviour.HasAuthority))
+            if (requireAuthority && !behaviour.HasAuthority)
             {
                 throw new UnauthorizedAccessException($"Trying to send ServerRpc for object without authority. {rpc}");
             }
