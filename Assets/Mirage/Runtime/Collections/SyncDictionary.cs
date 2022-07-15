@@ -13,7 +13,7 @@ namespace Mirage.Collections
         public int Count => objects.Count;
         public bool IsReadOnly { get; private set; }
 
-        internal int ChangeCount => changes.Count;
+        internal int ChangeCount => _changes.Count;
 
 
         /// <summary>
@@ -56,28 +56,28 @@ namespace Mirage.Collections
 
         private struct Change
         {
-            internal Operation operation;
-            internal TKey key;
-            internal TValue item;
+            public Operation Operation;
+            public TKey Key;
+            public TValue Item;
         }
 
-        private readonly List<Change> changes = new List<Change>();
+        private readonly List<Change> _changes = new List<Change>();
 
         // how many changes we need to ignore
         // this is needed because when we initialize the list,
         // we might later receive changes that have already been applied
         // so we need to skip them
-        private int changesAhead;
+        private int _changesAhead;
 
         public void Reset()
         {
             IsReadOnly = false;
-            changes.Clear();
-            changesAhead = 0;
+            _changes.Clear();
+            _changesAhead = 0;
             objects.Clear();
         }
 
-        public bool IsDirty => changes.Count > 0;
+        public bool IsDirty => _changes.Count > 0;
 
         public ICollection<TKey> Keys => objects.Keys;
 
@@ -89,7 +89,7 @@ namespace Mirage.Collections
 
         // throw away all the changes
         // this should be called after a successfull sync
-        public void Flush() => changes.Clear();
+        public void Flush() => _changes.Clear();
 
         public SyncIDictionary(IDictionary<TKey, TValue> objects)
         {
@@ -105,12 +105,12 @@ namespace Mirage.Collections
 
             var change = new Change
             {
-                operation = op,
-                key = key,
-                item = item
+                Operation = op,
+                Key = key,
+                Item = item
             };
 
-            changes.Add(change);
+            _changes.Add(change);
 
             OnChange?.Invoke();
         }
@@ -130,26 +130,26 @@ namespace Mirage.Collections
             // thus the client will need to skip all the pending changes
             // or they would be applied again.
             // So we write how many changes are pending
-            writer.WritePackedUInt32((uint)changes.Count);
+            writer.WritePackedUInt32((uint)_changes.Count);
         }
 
         public void OnSerializeDelta(NetworkWriter writer)
         {
             // write all the queued up changes
-            writer.WritePackedUInt32((uint)changes.Count);
+            writer.WritePackedUInt32((uint)_changes.Count);
 
-            for (var i = 0; i < changes.Count; i++)
+            for (var i = 0; i < _changes.Count; i++)
             {
-                var change = changes[i];
-                writer.WriteByte((byte)change.operation);
+                var change = _changes[i];
+                writer.WriteByte((byte)change.Operation);
 
-                switch (change.operation)
+                switch (change.Operation)
                 {
                     case Operation.OP_ADD:
                     case Operation.OP_REMOVE:
                     case Operation.OP_SET:
-                        writer.Write(change.key);
-                        writer.Write(change.item);
+                        writer.Write(change.Key);
+                        writer.Write(change.Item);
                         break;
                     case Operation.OP_CLEAR:
                         break;
@@ -166,7 +166,7 @@ namespace Mirage.Collections
             var count = (int)reader.ReadPackedUInt32();
 
             objects.Clear();
-            changes.Clear();
+            _changes.Clear();
             OnClear?.Invoke();
 
             for (var i = 0; i < count; i++)
@@ -180,7 +180,7 @@ namespace Mirage.Collections
             // We will need to skip all these changes
             // the next time the list is synchronized
             // because they have already been applied
-            changesAhead = (int)reader.ReadPackedUInt32();
+            _changesAhead = (int)reader.ReadPackedUInt32();
             OnChange?.Invoke();
         }
 
@@ -198,7 +198,7 @@ namespace Mirage.Collections
 
                 // apply the operation only if it is a new change
                 // that we have not applied yet
-                var apply = changesAhead == 0;
+                var apply = _changesAhead == 0;
 
                 switch (operation)
                 {
@@ -226,7 +226,7 @@ namespace Mirage.Collections
                 // we just skipped this change
                 else
                 {
-                    changesAhead--;
+                    _changesAhead--;
                 }
             }
 
