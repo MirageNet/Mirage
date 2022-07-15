@@ -56,5 +56,4 @@ namespace Mirage.Serialization
             return scaled * precision;
         }
     }
-
 }

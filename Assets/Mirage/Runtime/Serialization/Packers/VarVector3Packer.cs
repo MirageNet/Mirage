@@ -58,5 +58,4 @@ namespace Mirage.Serialization
             return value;
         }
     }
-
 }
