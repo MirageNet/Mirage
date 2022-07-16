@@ -37,9 +37,6 @@ jobs:
           path: Library
           key: Library-2020.3.30
 
-      - name: Run editor Tests
-        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
-        timeout-minutes: 20
         
       - name: Run play Tests
         run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
@@ -87,10 +84,6 @@ jobs:
           path: Library
           key: Library-2021.3.5-2
 
-      - name: Run editor Tests
-        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
-        timeout-minutes: 20
-        
       - name: Run play Tests
         run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
         timeout-minutes: 20
@@ -110,130 +103,3 @@ jobs:
           path: "Tests/*.xml"
           access-token: ${{ secrets.GITHUB_TOKEN }}
   
-  BuildIL2CPP:
-    name: BuildIL2CPP
-    runs-on: ubuntu-latest
-    # available list of containers here:
-    # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
-    container: unityci/editor:ubuntu-2020.3.30f1-linux-il2cpp-1.0.1
-    
-    steps:
-      - name: Activate unity
-        # exit code is 1 for manual activation
-        continue-on-error: true
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE2 }}
-        run: |          
-          echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
-          unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
-      
-      - name: Checkout repository
-        uses: actions/checkout@v1
-
-      - name: Cache Library
-        id: cache-library
-        uses: actions/cache@v3
-        with:
-          path: Library
-          key: Library-2020.3.30
-
-      - name: Run by Build with il2cpp
-      # checks that all weaver generate code in the test dlls also compiles for IL2CPP
-        run: unity-editor -nographics -logFile /dev/stdout -executeMethod Mirage.Tests.BuildIL2CPP.BuildTests.BuildWithIl2CPP -quit
-        timeout-minutes: 20
-
-  Publish:
-    # only run once both tests and il2cpp have passed
-    needs: [Tests2020, Tests2021, BuildIL2CPP]
-    # only run on master
-    if: github.ref == 'refs/heads/master'
-    name: Publish
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v1
-
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '14'
-
-      - name: Release
-        uses: cycjimmy/semantic-release-action@v2
-        id: semantic
-        with:
-          extra_plugins: |
-            @semantic-release/exec
-            @semantic-release/changelog
-            @semantic-release/git
-          branch: master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  SonarScan:
-    # needs coverage from test CI
-    # only need 2020 test because that is the container that this action uses 
-    needs: [Tests2020] 
-    name: SonarScan
-    runs-on: ubuntu-latest
-    # available list of containers here:
-    # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
-    container: unityci/editor:ubuntu-2020.3.30f1-base-1.0.1
-    env:
-      DOTNET_ROOT: '/opt/unity/Editor/Data/NetCore/Sdk-2.2.107'
-    steps:
-      - name: Activate unity
-        # exit code is 1 for manual activation
-        continue-on-error: true
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE2 }}
-        run: |          
-          echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
-          unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
-      
-      - name: Checkout repository
-        uses: actions/checkout@v1
-
-      - name: Cache Library
-        id: cache-library
-        uses: actions/cache@v3
-        with:
-          path: Library
-          key: Library-2020.3.30
-
-      - name: Install sonar scanner
-        run: |
-          $DOTNET_ROOT/dotnet tool install dotnet-sonarscanner --tool-path . --version 5.4.0
-          apt update
-          apt install -y openjdk-11-jre-headless
-      - name: Generate Solution
-        run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
-
-      - name: get test coverages
-        uses: actions/download-artifact@v3
-        with:
-          name: Test results
-          path: Tests
-    
-      - name: SonarQube analysis
-        env:
-          FrameworkPathOverride: /opt/unity/Editor/Data/MonoBleedingEdge/
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ls -l
-          ./dotnet-sonarscanner begin \
-            /o:miragenet \
-            /k:MirageNet_Mirage \
-            /n:Mirage \
-            /d:sonar.verbose=false \
-            /d:sonar.login=$SONAR_TOKEN \
-            /d:sonar.host.url=https://sonarcloud.io \
-            /d:sonar.exclusions=Assets/Mirage/Runtime/Sockets/Udp/NanoSockets/** \
-            /d:sonar.cpd.exclusions=Assets/Tests/** \
-            /d:sonar.coverage.exclusions=Assets/Tests/**,Assets/Mirage/Editor/** \
-            ${{ steps.semantic.outputs.new_release_published == 'true' && format('/v:{0}',steps.semantic.outputs.new_release_version) || '' }} \
-            /d:sonar.cs.nunit.reportsPaths=Tests/editmode-results.xml,Tests/playmode-results.xml \
-            /d:sonar.cs.opencover.reportsPaths=Tests/Mirage-opencov/EditMode/TestCoverageResults_0000.xml,Tests/Mirage-opencov/PlayMode/TestCoverageResults_0000.xml
-          $DOTNET_ROOT/dotnet build Mirage.sln
-          ./dotnet-sonarscanner end /d:sonar.login=$SONAR_TOKEN
- 
