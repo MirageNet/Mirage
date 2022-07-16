@@ -59,6 +59,10 @@ namespace Mirage
                 if (NetworkSceneManager != null)
                     NetworkSceneManager.OnClientFinishedSceneChange.AddListener(OnFinishedSceneChange);
             }
+            else
+            {
+                Debug.LogWarning($"Client is null for ClientObjectManager on {this.gameObject.name}");
+            }
         }
 
 #if UNITY_EDITOR
