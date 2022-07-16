@@ -261,8 +261,12 @@ namespace Mirage
         /// <param name="sceneOperation">Scene operation that was just  happen</param>
         internal void OnClientSceneLoadFinished(Scene scene, SceneOperation sceneOperation)
         {
+            Console.WriteLine($"[Trace:FinishLoadSceneTest] OnClientSceneLoadFinished");
+
             if (_clientPendingAdditiveSceneLoadingList.Count > 0 && Client && !Client.IsLocalClient)
             {
+                Console.WriteLine($"[Trace:FinishLoadSceneTest] ERROR: more scenes {_clientPendingAdditiveSceneLoadingList.Count}");
+
                 if (string.IsNullOrEmpty(_clientPendingAdditiveSceneLoadingList[0]))
                     throw new ArgumentNullException("ClientPendingAdditiveSceneLoadingList[0]", "Some how a null scene path has been entered.");
 
@@ -273,9 +277,16 @@ namespace Mirage
                 return;
             }
 
+            Console.WriteLine($"[Trace:FinishLoadSceneTest] ERROR: more scenes {_clientPendingAdditiveSceneLoadingList.Count}");
+
             //set ready after scene change has completed
             if (!Client.Player.SceneIsReady)
+            {
+                Console.WriteLine($"[Trace:FinishLoadSceneTest] player not ready, setting ready");
                 SetSceneIsReady();
+            }
+
+            Console.WriteLine($"[Trace:FinishLoadSceneTest] Invoking event");
 
             //Call event once all scene related actions (sub-scenes and ready) are done.
             OnClientFinishedSceneChange?.Invoke(scene, sceneOperation);
@@ -580,9 +591,13 @@ namespace Mirage
         /// <param name="players">List of players we are adding to this scene.</param>
         internal void CompleteLoadingScene(Scene scene, SceneOperation sceneOperation, IEnumerable<INetworkPlayer> players = null)
         {
+            Console.WriteLine($"[Trace:FinishLoadSceneTest] CompleteLoadingScene called");
+
             // If server mode call this to make sure scene finishes loading
             if (Server && Server.Active)
             {
+                Console.WriteLine($"[Trace:FinishLoadSceneTest] Server Active");
+
                 if (logger.LogEnabled())
                 {
                     logger.Log("[NetworkSceneManager] - Host: " + sceneOperation + " operation for scene: " +
@@ -607,6 +622,8 @@ namespace Mirage
             // If client let's call this to finish client scene loading too
             if (Client && Client.Active)
             {
+                Console.WriteLine($"[Trace:FinishLoadSceneTest] Client Active");
+
                 if (logger.LogEnabled())
                 {
                     logger.Log("[NetworkSceneManager] - Client: " + sceneOperation + " operation for scene: " +
