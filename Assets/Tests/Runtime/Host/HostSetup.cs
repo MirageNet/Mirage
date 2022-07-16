@@ -9,13 +9,13 @@ using Object = UnityEngine.Object;
 
 namespace Mirage.Tests.Runtime.Host
 {
+
     public class HostSetup<T> : TestBase where T : NetworkBehaviour
     {
         protected GameObject networkManagerGo;
         protected NetworkManager manager;
         protected NetworkServer server;
         protected NetworkClient client;
-        protected NetworkSceneManager sceneManager;
         protected ServerObjectManager serverObjectManager;
         protected ClientObjectManager clientObjectManager;
 
@@ -38,11 +38,8 @@ namespace Mirage.Tests.Runtime.Host
             Console.WriteLine($"[MirageTest] UnitySetUp class:{TestContext.CurrentContext.Test.ClassName} method:{TestContext.CurrentContext.Test.MethodName}");
 
             networkManagerGo = new GameObject();
-            // set gameobject name to test name (helps with debugging)
-            networkManagerGo.name = TestContext.CurrentContext.Test.MethodName;
 
             networkManagerGo.AddComponent<TestSocketFactory>();
-            sceneManager = networkManagerGo.AddComponent<NetworkSceneManager>();
             serverObjectManager = networkManagerGo.AddComponent<ServerObjectManager>();
             clientObjectManager = networkManagerGo.AddComponent<ClientObjectManager>();
             manager = networkManagerGo.AddComponent<NetworkManager>();
@@ -54,17 +51,13 @@ namespace Mirage.Tests.Runtime.Host
             if (ServerConfig != null) server.PeerConfig = ServerConfig;
             if (ClientConfig != null) client.PeerConfig = ClientConfig;
 
-            sceneManager.Client = client;
-            sceneManager.Server = server;
             serverObjectManager.Server = server;
-            serverObjectManager.NetworkSceneManager = sceneManager;
             clientObjectManager.Client = client;
-            clientObjectManager.NetworkSceneManager = sceneManager;
 
             ExtraSetup();
 
             // wait for all Start() methods to get invoked
-            await UniTask.DelayFrame(1);
+            await UniTask.DelayFrame(2);
 
             if (AutoStartServer)
             {
@@ -98,6 +91,7 @@ namespace Mirage.Tests.Runtime.Host
         }
 
         public virtual void ExtraTearDown() { }
+        public virtual UniTask ExtraTearDownAsync() => UniTask.CompletedTask;
 
         [UnityTearDown]
         public IEnumerator UnityTearDown() => UniTask.ToCoroutine(async () =>
@@ -113,6 +107,7 @@ namespace Mirage.Tests.Runtime.Host
             TearDownTestObjects();
 
             ExtraTearDown();
+            await ExtraTearDownAsync();
 
             Console.WriteLine($"[MirageTest] UnityTearDown class:{TestContext.CurrentContext.Test.ClassName} method:{TestContext.CurrentContext.Test.MethodName}");
         });

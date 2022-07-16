@@ -15,20 +15,24 @@ namespace Mirage.Tests.Runtime.ClientServer
     [Category("LoadsScene")]
     public class NetworkSceneManagerNonHostTests : ClientServerSetup<MockComponent>
     {
-        public override void ExtraTearDown()
+        protected NetworkSceneManager serverSceneManager;
+        protected NetworkSceneManager clientSceneManager;
+
+        public override void ExtraSetup()
         {
-            UnloadAdditiveScenes();
+            serverSceneManager = serverGo.AddComponent<NetworkSceneManager>();
+            clientSceneManager = clientGo.AddComponent<NetworkSceneManager>();
+
+            serverSceneManager.Server = server;
+            clientSceneManager.Client = client;
+
+            serverObjectManager.NetworkSceneManager = serverSceneManager;
+            clientObjectManager.NetworkSceneManager = clientSceneManager;
         }
 
-        private static void UnloadAdditiveScenes()
+        public override UniTask ExtraTearDownAsync()
         {
-            var active = SceneManager.GetActiveScene();
-            for (var i = 0; i < SceneManager.sceneCount; i++)
-            {
-                var scene = SceneManager.GetSceneAt(i);
-                if (active == scene) { continue; }
-                SceneManager.UnloadSceneAsync(scene);
-            }
+            return TestScene.UnloadAdditiveScenes();
         }
 
         [Test]

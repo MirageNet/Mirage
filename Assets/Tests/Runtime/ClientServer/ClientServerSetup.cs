@@ -15,7 +15,6 @@ namespace Mirage.Tests.Runtime.ClientServer
     {
         protected GameObject serverGo;
         protected NetworkServer server;
-        protected NetworkSceneManager serverSceneManager;
         protected ServerObjectManager serverObjectManager;
         protected GameObject serverPlayerGO;
         protected NetworkIdentity serverIdentity;
@@ -23,7 +22,6 @@ namespace Mirage.Tests.Runtime.ClientServer
 
         protected GameObject clientGo;
         protected NetworkClient client;
-        protected NetworkSceneManager clientSceneManager;
         protected ClientObjectManager clientObjectManager;
         protected GameObject clientPlayerGO;
         protected NetworkIdentity clientIdentity;
@@ -41,7 +39,14 @@ namespace Mirage.Tests.Runtime.ClientServer
         protected MessageHandler ClientMessageHandler => client.MessageHandler;
         protected MessageHandler ServerMessageHandler => server.MessageHandler;
 
+        /// <summary>
+        /// called before Start() after Server/Client GameObject have been setup
+        /// </summary>
         public virtual void ExtraSetup() { }
+        /// <summary>
+        /// Called after test of setup
+        /// </summary>
+        /// <returns></returns>
         public virtual UniTask LateSetup() => UniTask.CompletedTask;
 
         protected virtual bool AutoConnectClient => true;
@@ -51,13 +56,11 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnitySetUp]
         public IEnumerator UnitySetUp() => UniTask.ToCoroutine(async () =>
         {
-            Console.WriteLine($"[MirageTest] UnitySetUp class:{TestContext.CurrentContext.Test.ClassName} method:{TestContext.CurrentContext.Test.MethodName}");
+            Console.WriteLine($"[MirageTest] UnitySetUp class:{TestContext.CurrentContext.Test.ClassName} method:{TestContext.CurrentContext.Test.MethodName} ");
 
-            serverGo = new GameObject("server", typeof(NetworkSceneManager), typeof(ServerObjectManager), typeof(NetworkServer));
-            clientGo = new GameObject("client", typeof(NetworkSceneManager), typeof(ClientObjectManager), typeof(NetworkClient));
+            serverGo = new GameObject("server", typeof(ServerObjectManager), typeof(NetworkServer));
+            clientGo = new GameObject("client", typeof(ClientObjectManager), typeof(NetworkClient));
             socketFactory = serverGo.AddComponent<TestSocketFactory>();
-
-            await UniTask.Delay(1);
 
             server = serverGo.GetComponent<NetworkServer>();
             client = clientGo.GetComponent<NetworkClient>();
@@ -68,24 +71,16 @@ namespace Mirage.Tests.Runtime.ClientServer
             server.SocketFactory = socketFactory;
             client.SocketFactory = socketFactory;
 
-            serverSceneManager = serverGo.GetComponent<NetworkSceneManager>();
-            clientSceneManager = clientGo.GetComponent<NetworkSceneManager>();
-            serverSceneManager.Server = server;
-            clientSceneManager.Client = client;
-            serverSceneManager.Start();
-            clientSceneManager.Start();
-
             serverObjectManager = serverGo.GetComponent<ServerObjectManager>();
             serverObjectManager.Server = server;
-            serverObjectManager.NetworkSceneManager = serverSceneManager;
-            serverObjectManager.Start();
 
             clientObjectManager = clientGo.GetComponent<ClientObjectManager>();
             clientObjectManager.Client = client;
-            clientObjectManager.NetworkSceneManager = clientSceneManager;
-            clientObjectManager.Start();
 
             ExtraSetup();
+
+            // wait 2 frames for start to be called
+            await UniTask.DelayFrame(2);
 
             // create and register a prefab
             playerPrefab = new GameObject("player (unspawned)", typeof(NetworkIdentity), typeof(T));
@@ -138,6 +133,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         });
 
         public virtual void ExtraTearDown() { }
+        public virtual UniTask ExtraTearDownAsync() => UniTask.CompletedTask;
 
         [UnityTearDown]
         public IEnumerator UnityTearDown() => UniTask.ToCoroutine(async () =>
@@ -158,6 +154,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             TearDownTestObjects();
 
             ExtraTearDown();
+            await ExtraTearDownAsync();
 
             Console.WriteLine($"[MirageTest] UnityTearDown class:{TestContext.CurrentContext.Test.ClassName} method:{TestContext.CurrentContext.Test.MethodName}");
         });
