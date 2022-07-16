@@ -1,3 +1,18 @@
+## [123.3.2](https://github.com/MirageNet/Mirage/compare/v123.3.1...v123.3.2) (2022-07-16)
+
+
+### Bug Fixes
+
+* fixing warning created from id generator ([eaee748](https://github.com/MirageNet/Mirage/commit/eaee7486e1d180f38273379f5f656c1d11d0d8f6))
+* **Weaver:** fixing extension methods for unity2021 ([7f35778](https://github.com/MirageNet/Mirage/commit/7f3577815bf289c152a8521270be9c348b028a25))
+* **Weaver:** fixing generic check on extension methods ([fddf9ea](https://github.com/MirageNet/Mirage/commit/fddf9eaa15f68ab2489a7bb640ce81e935cde284)), closes [#1066](https://github.com/MirageNet/Mirage/issues/1066)
+* **Weaver:** fixing WeaverDiagnosticsTimer for when directory is not found ([eb880d5](https://github.com/MirageNet/Mirage/commit/eb880d5ceb0eca1f833c213da7434df833e5b126))
+
+
+### Performance Improvements
+
+* avoiding call to find NetworkIdentity ([7947e9e](https://github.com/MirageNet/Mirage/commit/7947e9ec8a88bc7942606be79096b18aabaf0606))
+
 ## [123.3.1](https://github.com/MirageNet/Mirage/compare/v123.3.0...v123.3.1) (2022-06-29)
 
 
