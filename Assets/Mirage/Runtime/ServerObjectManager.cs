@@ -350,7 +350,7 @@ namespace Mirage
             if (!identity.IsSpawned)
             {
                 // If the object has not been spawned, then do a full spawn and update observers
-                Spawn(identity.gameObject, identity.Owner);
+                Spawn(identity, identity.Owner);
             }
             else
             {
