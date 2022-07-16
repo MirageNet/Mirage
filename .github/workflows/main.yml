@@ -211,7 +211,7 @@ jobs:
       - name: get test coverages
         uses: actions/download-artifact@v3
         with:
-          name: Test results
+          name: Test results 2020
           path: Tests
     
       - name: SonarQube analysis
