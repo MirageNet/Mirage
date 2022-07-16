@@ -8,45 +8,44 @@ namespace Mirage.SocketLayer
     /// </summary>
     internal struct Packet
     {
-        public readonly ByteBuffer buffer;
-        public readonly int length;
+        public readonly ByteBuffer Buffer;
+        public readonly int Length;
 
         public Packet(ByteBuffer data, int length)
         {
-            buffer = data ?? throw new ArgumentNullException(nameof(data));
-            this.length = length;
+            Buffer = data ?? throw new ArgumentNullException(nameof(data));
+            Length = length;
         }
 
         public bool IsValidSize()
         {
-            const int MinPacketSize = 1;
+            const int minPacketSize = 1;
 
-            if (length < MinPacketSize)
+            if (Length < minPacketSize)
                 return false;
 
             // Min size of message given to Mirage
-            const int MIN_MESSAGE_SIZE = 2;
+            const int minMessageSize = 2;
 
+            const int minCommandSize = 2;
+            const int minUnreliableSize = 1 + minMessageSize;
 
-            const int MIN_COMMAND_SIZE = 2;
-            const int MIN_UNRELIABLE_SIZE = 1 + MIN_MESSAGE_SIZE;
-
-            switch (type)
+            switch (Type)
             {
                 case PacketType.Command:
-                    return length >= MIN_COMMAND_SIZE;
+                    return Length >= minCommandSize;
 
                 case PacketType.Unreliable:
-                    return length >= MIN_UNRELIABLE_SIZE;
+                    return Length >= minUnreliableSize;
 
                 case PacketType.Notify:
-                    return length >= AckSystem.NOTIFY_HEADER_SIZE + MIN_MESSAGE_SIZE;
+                    return Length >= AckSystem.NOTIFY_HEADER_SIZE + minMessageSize;
                 case PacketType.Reliable:
-                    return length >= AckSystem.MIN_RELIABLE_HEADER_SIZE + MIN_MESSAGE_SIZE;
+                    return Length >= AckSystem.MIN_RELIABLE_HEADER_SIZE + minMessageSize;
                 case PacketType.ReliableFragment:
-                    return length >= AckSystem.MIN_RELIABLE_FRAGMENT_HEADER_SIZE + 1;
+                    return Length >= AckSystem.MIN_RELIABLE_FRAGMENT_HEADER_SIZE + 1;
                 case PacketType.Ack:
-                    return length >= AckSystem.ACK_HEADER_SIZE;
+                    return Length >= AckSystem.ACK_HEADER_SIZE;
 
                 default:
                 case PacketType.KeepAlive:
@@ -54,7 +53,7 @@ namespace Mirage.SocketLayer
             }
         }
 
-        public PacketType type => (PacketType)buffer.array[0];
-        public Commands command => (Commands)buffer.array[1];
+        public PacketType Type => (PacketType)Buffer.array[0];
+        public Commands Command => (Commands)Buffer.array[1];
     }
 }

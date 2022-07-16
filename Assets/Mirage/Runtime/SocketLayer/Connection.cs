@@ -69,7 +69,20 @@ namespace Mirage.SocketLayer
     /// </summary>
     internal sealed class Connection : IConnection, IRawConnection
     {
-        private readonly ILogger logger;
+        private readonly ILogger _logger;
+
+        private readonly Peer _peer;
+        public readonly IEndPoint EndPoint;
+        private readonly IDataHandler _dataHandler;
+
+        private readonly ConnectingTracker _connectingTracker;
+        private readonly TimeoutTracker _timeoutTracker;
+        private readonly KeepAliveTracker _keepAliveTracker;
+        private readonly DisconnectedTracker _disconnectedTracker;
+
+        private readonly Metrics _metrics;
+        private readonly AckSystem _ackSystem;
+
         private ConnectionState _state;
         public ConnectionState State
         {
@@ -80,58 +93,47 @@ namespace Mirage.SocketLayer
                 switch (value)
                 {
                     case ConnectionState.Connected:
-                        logger?.Assert(_state == ConnectionState.Created || _state == ConnectionState.Connecting);
+                        _logger?.Assert(_state == ConnectionState.Created || _state == ConnectionState.Connecting);
                         break;
 
                     case ConnectionState.Connecting:
-                        logger?.Assert(_state == ConnectionState.Created);
+                        _logger?.Assert(_state == ConnectionState.Created);
                         break;
 
                     case ConnectionState.Disconnected:
-                        logger?.Assert(_state == ConnectionState.Connected);
+                        _logger?.Assert(_state == ConnectionState.Connected);
                         break;
 
                     case ConnectionState.Destroyed:
-                        logger?.Assert(_state == ConnectionState.Removing);
+                        _logger?.Assert(_state == ConnectionState.Removing);
                         break;
                 }
 
-                if (logger.Enabled(LogType.Log)) logger.Log($"{EndPoint} changed state from {_state} to {value}");
+                if (_logger.Enabled(LogType.Log)) _logger.Log($"{EndPoint} changed state from {_state} to {value}");
                 _state = value;
             }
         }
-        public bool Connected => State == ConnectionState.Connected;
-
-        private readonly Peer peer;
-        public readonly IEndPoint EndPoint;
-        private readonly IDataHandler dataHandler;
-
-        private readonly ConnectingTracker connectingTracker;
-        private readonly TimeoutTracker timeoutTracker;
-        private readonly KeepAliveTracker keepAliveTracker;
-        private readonly DisconnectedTracker disconnectedTracker;
-
-        private readonly Metrics metrics;
-        private readonly AckSystem ackSystem;
 
         IEndPoint IConnection.EndPoint => EndPoint;
 
+        public bool Connected => State == ConnectionState.Connected;
+
         internal Connection(Peer peer, IEndPoint endPoint, IDataHandler dataHandler, Config config, int maxPacketSize, Time time, Pool<ByteBuffer> bufferPool, ILogger logger, Metrics metrics)
         {
-            this.peer = peer;
-            this.logger = logger;
+            _peer = peer;
+            _logger = logger;
 
             EndPoint = endPoint ?? throw new ArgumentNullException(nameof(endPoint));
-            this.dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
+            _dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
             State = ConnectionState.Created;
 
-            connectingTracker = new ConnectingTracker(config, time);
-            timeoutTracker = new TimeoutTracker(config, time);
-            keepAliveTracker = new KeepAliveTracker(config, time);
-            disconnectedTracker = new DisconnectedTracker(config, time);
+            _connectingTracker = new ConnectingTracker(config, time);
+            _timeoutTracker = new TimeoutTracker(config, time);
+            _keepAliveTracker = new KeepAliveTracker(config, time);
+            _disconnectedTracker = new DisconnectedTracker(config, time);
 
-            this.metrics = metrics;
-            ackSystem = new AckSystem(this, config, maxPacketSize, time, bufferPool, metrics);
+            _metrics = metrics;
+            _ackSystem = new AckSystem(this, config, maxPacketSize, time, bufferPool, metrics);
         }
 
         public override string ToString()
@@ -163,11 +165,11 @@ namespace Mirage.SocketLayer
 
         public void SetReceiveTime()
         {
-            timeoutTracker.SetReceiveTime();
+            _timeoutTracker.SetReceiveTime();
         }
         public void SetSendTime()
         {
-            keepAliveTracker.SetSendTime();
+            _keepAliveTracker.SetSendTime();
         }
 
         private void ThrowIfNotConnected()
@@ -180,8 +182,8 @@ namespace Mirage.SocketLayer
         public void SendUnreliable(byte[] packet, int offset, int length)
         {
             ThrowIfNotConnected();
-            metrics?.OnSendMessageUnreliable(length);
-            peer.SendUnreliable(this, packet, offset, length);
+            _metrics?.OnSendMessageUnreliable(length);
+            _peer.SendUnreliable(this, packet, offset, length);
         }
         public void SendUnreliable(byte[] packet)
         {
@@ -198,8 +200,8 @@ namespace Mirage.SocketLayer
         public INotifyToken SendNotify(byte[] packet, int offset, int length)
         {
             ThrowIfNotConnected();
-            metrics?.OnSendMessageNotify(length);
-            return ackSystem.SendNotify(packet, offset, length);
+            _metrics?.OnSendMessageNotify(length);
+            return _ackSystem.SendNotify(packet, offset, length);
         }
         /// <summary>
         /// Use <see cref="INotifyCallBack"/> version for non-alloc
@@ -222,8 +224,8 @@ namespace Mirage.SocketLayer
         public void SendNotify(byte[] packet, int offset, int length, INotifyCallBack callBacks)
         {
             ThrowIfNotConnected();
-            metrics?.OnSendMessageNotify(length);
-            ackSystem.SendNotify(packet, offset, length, callBacks);
+            _metrics?.OnSendMessageNotify(length);
+            _ackSystem.SendNotify(packet, offset, length, callBacks);
         }
         /// <summary>
         /// Use <see cref="INotifyCallBack"/> version for non-alloc
@@ -248,8 +250,8 @@ namespace Mirage.SocketLayer
         public void SendReliable(byte[] message, int offset, int length)
         {
             ThrowIfNotConnected();
-            metrics?.OnSendMessageReliable(length);
-            ackSystem.SendReliable(message, offset, length);
+            _metrics?.OnSendMessageReliable(length);
+            _ackSystem.SendReliable(message, offset, length);
         }
         public void SendReliable(byte[] packet)
         {
@@ -263,7 +265,7 @@ namespace Mirage.SocketLayer
 
         void IRawConnection.SendRaw(byte[] packet, int length)
         {
-            peer.Send(this, packet, length);
+            _peer.Send(this, packet, length);
         }
 
         /// <summary>
@@ -275,17 +277,17 @@ namespace Mirage.SocketLayer
         }
         internal void Disconnect(DisconnectReason reason, bool sendToOther = true)
         {
-            if (logger.Enabled(LogType.Log)) logger.Log($"Disconnect with reason: {reason}");
+            if (_logger.Enabled(LogType.Log)) _logger.Log($"Disconnect with reason: {reason}");
             switch (State)
             {
                 case ConnectionState.Connecting:
-                    peer.FailedToConnect(this, RejectReason.ClosedByPeer);
+                    _peer.FailedToConnect(this, RejectReason.ClosedByPeer);
                     break;
 
                 case ConnectionState.Connected:
                     State = ConnectionState.Disconnected;
-                    disconnectedTracker.OnDisconnect();
-                    peer.OnConnectionDisconnected(this, reason, sendToOther);
+                    _disconnectedTracker.OnDisconnect();
+                    _peer.OnConnectionDisconnected(this, reason, sendToOther);
                     break;
 
                 default:
@@ -296,28 +298,28 @@ namespace Mirage.SocketLayer
         internal void ReceiveUnreliablePacket(Packet packet)
         {
             var offset = 1;
-            var count = packet.length - offset;
-            var segment = new ArraySegment<byte>(packet.buffer.array, offset, count);
-            metrics?.OnReceiveMessageUnreliable(count);
-            dataHandler.ReceiveMessage(this, segment);
+            var count = packet.Length - offset;
+            var segment = new ArraySegment<byte>(packet.Buffer.array, offset, count);
+            _metrics?.OnReceiveMessageUnreliable(count);
+            _dataHandler.ReceiveMessage(this, segment);
         }
 
         internal void ReceiveReliablePacket(Packet packet)
         {
-            ackSystem.ReceiveReliable(packet.buffer.array, packet.length, false);
+            _ackSystem.ReceiveReliable(packet.Buffer.array, packet.Length, false);
 
             HandleQueuedMessages();
         }
 
         internal void ReceiveReliableFragment(Packet packet)
         {
-            if (ackSystem.InvalidFragment(packet.buffer.array))
+            if (_ackSystem.InvalidFragment(packet.Buffer.array))
             {
                 Disconnect(DisconnectReason.InvalidPacket);
                 return;
             }
 
-            ackSystem.ReceiveReliable(packet.buffer.array, packet.length, true);
+            _ackSystem.ReceiveReliable(packet.Buffer.array, packet.Length, true);
 
             HandleQueuedMessages();
         }
@@ -325,9 +327,9 @@ namespace Mirage.SocketLayer
         private void HandleQueuedMessages()
         {
             // gets messages in order
-            while (ackSystem.NextReliablePacket(out var received))
+            while (_ackSystem.NextReliablePacket(out var received))
             {
-                if (received.isFragment)
+                if (received.IsFragment)
                 {
                     HandleFragmentedMessage(received);
                 }
@@ -341,43 +343,43 @@ namespace Mirage.SocketLayer
         private void HandleFragmentedMessage(AckSystem.ReliableReceived received)
         {
             // get index from first
-            var firstArray = received.buffer.array;
+            var firstArray = received.Buffer.array;
             // length +1 because zero indexed 
             var fragmentLength = firstArray[0] + 1;
 
             // todo find way to remove allocation? (can't use buffers because they will be too small for this bigger message)
-            var message = new byte[fragmentLength * ackSystem.SizePerFragment];
+            var message = new byte[fragmentLength * _ackSystem.SizePerFragment];
 
             // copy first
-            var copyLength = received.length - 1;
-            logger?.Assert(copyLength == ackSystem.SizePerFragment, "First should be max size");
+            var copyLength = received.Length - 1;
+            _logger?.Assert(copyLength == _ackSystem.SizePerFragment, "First should be max size");
             Buffer.BlockCopy(firstArray, 1, message, 0, copyLength);
-            received.buffer.Release();
+            received.Buffer.Release();
 
             var messageLength = copyLength;
             // start at 1 because first copied above
             for (var i = 1; i < fragmentLength; i++)
             {
-                var next = ackSystem.GetNextFragment();
-                var nextArray = next.buffer.array;
+                var next = _ackSystem.GetNextFragment();
+                var nextArray = next.Buffer.array;
 
-                logger?.Assert(i == (fragmentLength - 1 - nextArray[0]), "fragment index should decrement each time");
+                _logger?.Assert(i == (fragmentLength - 1 - nextArray[0]), "fragment index should decrement each time");
 
                 // +1 because first is copied above
-                copyLength = next.length - 1;
-                Buffer.BlockCopy(nextArray, 1, message, ackSystem.SizePerFragment * i, copyLength);
+                copyLength = next.Length - 1;
+                Buffer.BlockCopy(nextArray, 1, message, _ackSystem.SizePerFragment * i, copyLength);
                 messageLength += copyLength;
-                next.buffer.Release();
+                next.Buffer.Release();
             }
 
-            metrics?.OnReceiveMessageReliable(messageLength);
-            dataHandler.ReceiveMessage(this, new ArraySegment<byte>(message, 0, messageLength));
+            _metrics?.OnReceiveMessageReliable(messageLength);
+            _dataHandler.ReceiveMessage(this, new ArraySegment<byte>(message, 0, messageLength));
         }
 
         private void HandleBatchedMessageInPacket(AckSystem.ReliableReceived received)
         {
-            var array = received.buffer.array;
-            var packetLength = received.length;
+            var array = received.Buffer.array;
+            var packetLength = received.Length;
             var offset = 0;
             while (offset < packetLength)
             {
@@ -385,27 +387,27 @@ namespace Mirage.SocketLayer
                 var message = new ArraySegment<byte>(array, offset, length);
                 offset += length;
 
-                metrics?.OnReceiveMessageReliable(length);
-                dataHandler.ReceiveMessage(this, message);
+                _metrics?.OnReceiveMessageReliable(length);
+                _dataHandler.ReceiveMessage(this, message);
             }
 
             // release buffer after all its message have been handled
-            received.buffer.Release();
+            received.Buffer.Release();
         }
 
         internal void ReceiveNotifyPacket(Packet packet)
         {
-            var segment = ackSystem.ReceiveNotify(packet.buffer.array, packet.length);
+            var segment = _ackSystem.ReceiveNotify(packet.Buffer.array, packet.Length);
             if (segment != default)
             {
-                metrics?.OnReceiveMessageNotify(packet.length);
-                dataHandler.ReceiveMessage(this, segment);
+                _metrics?.OnReceiveMessageNotify(packet.Length);
+                _dataHandler.ReceiveMessage(this, segment);
             }
         }
 
         internal void ReceiveNotifyAck(Packet packet)
         {
-            ackSystem.ReceiveAck(packet.buffer.array);
+            _ackSystem.ReceiveAck(packet.Buffer.array);
         }
 
 
@@ -414,16 +416,16 @@ namespace Mirage.SocketLayer
         /// </summary>
         private void UpdateConnecting()
         {
-            if (connectingTracker.TimeAttempt())
+            if (_connectingTracker.TimeAttempt())
             {
-                if (connectingTracker.MaxAttempts())
+                if (_connectingTracker.MaxAttempts())
                 {
-                    peer.FailedToConnect(this, RejectReason.Timeout);
+                    _peer.FailedToConnect(this, RejectReason.Timeout);
                 }
                 else
                 {
-                    connectingTracker.OnAttempt();
-                    peer.SendConnectRequest(this);
+                    _connectingTracker.OnAttempt();
+                    _peer.SendConnectRequest(this);
                 }
             }
         }
@@ -433,15 +435,15 @@ namespace Mirage.SocketLayer
         /// </summary>
         private void UpdateDisconnected()
         {
-            if (disconnectedTracker.TimeToRemove())
+            if (_disconnectedTracker.TimeToRemove())
             {
-                peer.RemoveConnection(this);
+                _peer.RemoveConnection(this);
             }
         }
 
         void IConnection.FlushBatch()
         {
-            this.ackSystem.Update();
+            _ackSystem.Update();
         }
 
         /// <summary>
@@ -449,118 +451,118 @@ namespace Mirage.SocketLayer
         /// </summary>
         private void UpdateConnected()
         {
-            if (timeoutTracker.TimeToDisconnect())
+            if (_timeoutTracker.TimeToDisconnect())
             {
                 Disconnect(DisconnectReason.Timeout);
             }
 
-            ackSystem.Update();
+            _ackSystem.Update();
 
-            if (keepAliveTracker.TimeToSend())
+            if (_keepAliveTracker.TimeToSend())
             {
-                peer.SendKeepAlive(this);
+                _peer.SendKeepAlive(this);
             }
         }
 
         private class ConnectingTracker
         {
-            private readonly Config config;
-            private readonly Time time;
-            private float lastAttempt = float.MinValue;
-            private int AttemptCount = 0;
+            private readonly Config _config;
+            private readonly Time _time;
+            private float _lastAttempt = float.MinValue;
+            private int _attemptCount = 0;
 
             public ConnectingTracker(Config config, Time time)
             {
-                this.config = config;
-                this.time = time;
+                _config = config;
+                _time = time;
             }
 
             public bool TimeAttempt()
             {
-                return lastAttempt + config.ConnectAttemptInterval < time.Now;
+                return _lastAttempt + _config.ConnectAttemptInterval < _time.Now;
             }
 
             public bool MaxAttempts()
             {
-                return AttemptCount >= config.MaxConnectAttempts;
+                return _attemptCount >= _config.MaxConnectAttempts;
             }
 
             public void OnAttempt()
             {
-                AttemptCount++;
-                lastAttempt = time.Now;
+                _attemptCount++;
+                _lastAttempt = _time.Now;
             }
         }
 
         private class TimeoutTracker
         {
-            private float lastRecvTime = float.MinValue;
-            private readonly Config config;
-            private readonly Time time;
+            private float _lastRecvTime = float.MinValue;
+            private readonly Config _config;
+            private readonly Time _time;
 
             public TimeoutTracker(Config config, Time time)
             {
-                this.config = config;
-                this.time = time ?? throw new ArgumentNullException(nameof(time));
+                _config = config;
+                _time = time ?? throw new ArgumentNullException(nameof(time));
             }
 
             public bool TimeToDisconnect()
             {
-                return lastRecvTime + config.TimeoutDuration < time.Now;
+                return _lastRecvTime + _config.TimeoutDuration < _time.Now;
             }
 
             public void SetReceiveTime()
             {
-                lastRecvTime = time.Now;
+                _lastRecvTime = _time.Now;
             }
         }
 
         private class KeepAliveTracker
         {
-            private float lastSendTime = float.MinValue;
-            private readonly Config config;
-            private readonly Time time;
+            private float _lastSendTime = float.MinValue;
+            private readonly Config _config;
+            private readonly Time _time;
 
             public KeepAliveTracker(Config config, Time time)
             {
-                this.config = config;
-                this.time = time ?? throw new ArgumentNullException(nameof(time));
+                _config = config;
+                _time = time ?? throw new ArgumentNullException(nameof(time));
             }
 
 
             public bool TimeToSend()
             {
-                return lastSendTime + config.KeepAliveInterval < time.Now;
+                return _lastSendTime + _config.KeepAliveInterval < _time.Now;
             }
 
             public void SetSendTime()
             {
-                lastSendTime = time.Now;
+                _lastSendTime = _time.Now;
             }
         }
 
         private class DisconnectedTracker
         {
-            private bool isDisonnected;
-            private float disconnectTime;
-            private readonly Config config;
-            private readonly Time time;
+            private bool _isDisonnected;
+            private float _disconnectTime;
+            private readonly Config _config;
+            private readonly Time _time;
 
             public DisconnectedTracker(Config config, Time time)
             {
-                this.config = config;
-                this.time = time ?? throw new ArgumentNullException(nameof(time));
+                _config = config;
+                _time = time ?? throw new ArgumentNullException(nameof(time));
             }
 
             public void OnDisconnect()
             {
-                disconnectTime = time.Now + config.DisconnectDuration;
-                isDisonnected = true;
+                _disconnectTime = _time.Now + _config.DisconnectDuration;
+                _isDisonnected = true;
             }
 
             public bool TimeToRemove()
             {
-                return isDisonnected && disconnectTime < time.Now;
+                return _isDisonnected && _disconnectTime < _time.Now;
             }
         }
     }

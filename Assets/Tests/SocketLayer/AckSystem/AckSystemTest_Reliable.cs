@@ -98,8 +98,8 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
             private static void HandleAllMessageInPacket(List<byte[]> messages, AckSystem.ReliableReceived received)
             {
-                var array = received.buffer.array;
-                var packetLength = received.length;
+                var array = received.Buffer.array;
+                var packetLength = received.Length;
                 var offset = 0;
                 while (offset < packetLength)
                 {
@@ -113,7 +113,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 }
 
                 // release buffer after all its message have been handled
-                received.buffer.Release();
+                received.Buffer.Release();
             }
         }
 

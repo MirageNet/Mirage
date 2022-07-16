@@ -8,13 +8,13 @@ namespace Mirage.SocketLayer
     /// </summary>
     internal class ConnectKeyValidator
     {
-        private readonly byte[] key;
+        private readonly byte[] _key;
         public readonly int KeyLength;
         private const int OFFSET = 2;
 
         public ConnectKeyValidator(byte[] key)
         {
-            this.key = key;
+            _key = key;
             KeyLength = key.Length;
         }
 
@@ -38,7 +38,7 @@ namespace Mirage.SocketLayer
             for (var i = 0; i < KeyLength; i++)
             {
                 var keyByte = buffer[i + OFFSET];
-                if (keyByte != key[i])
+                if (keyByte != _key[i])
                     return false;
             }
 
@@ -49,7 +49,7 @@ namespace Mirage.SocketLayer
         {
             for (var i = 0; i < KeyLength; i++)
             {
-                buffer[i + OFFSET] = key[i];
+                buffer[i + OFFSET] = _key[i];
             }
         }
     }

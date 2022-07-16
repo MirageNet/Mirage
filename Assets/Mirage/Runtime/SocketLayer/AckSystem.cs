@@ -28,27 +28,27 @@ namespace Mirage.SocketLayer
 
         /// <summary>Smallest size a header for reliable packet, <see cref="RELIABLE_HEADER_SIZE"/> + 1 byte for fragment index</summary>
         public const int MIN_RELIABLE_FRAGMENT_HEADER_SIZE = RELIABLE_HEADER_SIZE + FRAGMENT_INDEX_SIZE;
-        private readonly RingBuffer<AckablePacket> sentAckablePackets;
-        private readonly Sequencer reliableOrder;
-        private readonly RingBuffer<ReliableReceived> reliableReceive;
+        private readonly RingBuffer<AckablePacket> _sentAckablePackets;
+        private readonly Sequencer _reliableOrder;
+        private readonly RingBuffer<ReliableReceived> _reliableReceive;
 
         // temp list for resending when processing sentqueue
-        private readonly HashSet<ReliablePacket> toResend = new HashSet<ReliablePacket>();
-        private readonly IRawConnection connection;
-        private readonly ITime time;
-        private readonly Pool<ByteBuffer> bufferPool;
-        private readonly Pool<ReliablePacket> reliablePool;
-        private readonly Metrics metrics;
-        private readonly int maxPacketsInSendBufferPerConnection;
-        private readonly int maxPacketSize;
-        private readonly float ackTimeout;
+        private readonly HashSet<ReliablePacket> _toResend = new HashSet<ReliablePacket>();
+        private readonly IRawConnection _connection;
+        private readonly ITime _time;
+        private readonly Pool<ByteBuffer> _bufferPool;
+        private readonly Pool<ReliablePacket> _reliablePool;
+        private readonly Metrics _metrics;
+        private readonly int _maxPacketsInSendBufferPerConnection;
+        private readonly int _maxPacketSize;
+        private readonly float _ackTimeout;
 
         /// <summary>how many empty acks to send</summary>
-        private readonly int emptyAckLimit;
-        private readonly int receivesBeforeEmpty;
-        private readonly bool allowFragmented;
-        private readonly int maxFragments;
-        private readonly int maxFragmentsMessageSize;
+        private readonly int _emptyAckLimit;
+        private readonly int _receivesBeforeEmpty;
+        private readonly bool _allowFragmented;
+        private readonly int _maxFragments;
+        private readonly int _maxFragmentsMessageSize;
 
         public readonly int SizePerFragment;
 
@@ -56,17 +56,17 @@ namespace Mirage.SocketLayer
         /// most recent sequence received
         /// <para>will be sent with next message</para>
         /// </summary>
-        private ushort LatestAckSequence;
+        private ushort _latestAckSequence;
 
         /// <summary>
         /// mask of recent sequences received
         /// <para>will be sent with next message</para>
         /// </summary>
-        private ulong AckMask;
-        private float lastSentTime;
-        private ushort lastSentAck;
-        private int emptyAckCount = 0;
-        private ReliablePacket nextBatch;
+        private ulong _ackMask;
+        private float _lastSentTime;
+        private ushort _lastSentAck;
+        private int _emptyAckCount = 0;
+        private ReliablePacket _nextBatch;
 
         /// <summary>
         /// 
@@ -78,32 +78,32 @@ namespace Mirage.SocketLayer
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
 
-            this.connection = connection;
-            this.time = time;
-            this.bufferPool = bufferPool;
-            reliablePool = new Pool<ReliablePacket>(ReliablePacket.CreateNew, default, 0, config.MaxReliablePacketsInSendBufferPerConnection);
-            this.metrics = metrics;
+            _connection = connection;
+            _time = time;
+            _bufferPool = bufferPool;
+            _reliablePool = new Pool<ReliablePacket>(ReliablePacket.CreateNew, default, 0, config.MaxReliablePacketsInSendBufferPerConnection);
+            _metrics = metrics;
 
-            ackTimeout = config.TimeBeforeEmptyAck;
-            emptyAckLimit = config.EmptyAckLimit;
-            receivesBeforeEmpty = config.ReceivesBeforeEmptyAck;
-            this.maxPacketSize = maxPacketSize;
-            maxPacketsInSendBufferPerConnection = config.MaxReliablePacketsInSendBufferPerConnection;
+            _ackTimeout = config.TimeBeforeEmptyAck;
+            _emptyAckLimit = config.EmptyAckLimit;
+            _receivesBeforeEmpty = config.ReceivesBeforeEmptyAck;
+            _maxPacketSize = maxPacketSize;
+            _maxPacketsInSendBufferPerConnection = config.MaxReliablePacketsInSendBufferPerConnection;
 
-            maxFragments = config.MaxReliableFragments;
-            allowFragmented = maxFragments >= 0;
+            _maxFragments = config.MaxReliableFragments;
+            _allowFragmented = _maxFragments >= 0;
             SizePerFragment = maxPacketSize - MIN_RELIABLE_FRAGMENT_HEADER_SIZE;
-            maxFragmentsMessageSize = maxFragments * SizePerFragment;
+            _maxFragmentsMessageSize = _maxFragments * SizePerFragment;
 
             var size = config.SequenceSize;
             if (size > 16) throw new ArgumentOutOfRangeException("SequenceSize", size, "SequenceSize has a max value of 16");
-            sentAckablePackets = new RingBuffer<AckablePacket>(size);
-            reliableOrder = new Sequencer(size);
-            reliableReceive = new RingBuffer<ReliableReceived>(size);
+            _sentAckablePackets = new RingBuffer<AckablePacket>(size);
+            _reliableOrder = new Sequencer(size);
+            _reliableReceive = new RingBuffer<ReliableReceived>(size);
 
             // set lastest to value before 0 so that first packet will be received
             // max will be 1 less than 0
-            LatestAckSequence = (ushort)sentAckablePackets.Sequencer.MoveInBounds(ulong.MaxValue);
+            _latestAckSequence = (ushort)_sentAckablePackets.Sequencer.MoveInBounds(ulong.MaxValue);
 
             OnSend();
         }
@@ -116,14 +116,14 @@ namespace Mirage.SocketLayer
         /// <returns>true if next packet is available</returns>
         public bool NextReliablePacket(out ReliableReceived packet)
         {
-            if (!reliableReceive.TryPeak(out packet))
+            if (!_reliableReceive.TryPeak(out packet))
                 return false;
 
 
             // normal packet (with batched messages) OR full fragmented message
-            if (!packet.isFragment || CheckFullFragmentedMessage(packet, reliableReceive.Read))
+            if (!packet.IsFragment || CheckFullFragmentedMessage(packet, _reliableReceive.Read))
             {
-                reliableReceive.RemoveNext();
+                _reliableReceive.RemoveNext();
                 return true;
             }
 
@@ -133,7 +133,7 @@ namespace Mirage.SocketLayer
         private bool CheckFullFragmentedMessage(ReliableReceived packet, uint readIndex)
         {
             // fragment will always be first byte of message
-            uint fragmentIndex = packet.buffer.array[0];
+            uint fragmentIndex = packet.Buffer.array[0];
 
             // if fragment Index is 3 we expect 4 packets total (3 more)
             // so we check 0,1,2 packets in
@@ -141,7 +141,7 @@ namespace Mirage.SocketLayer
             for (uint i = 0; i < fragmentIndex; i++)
             {
                 // check if other packets after current exist
-                if (!reliableReceive.Exists(readIndex + i + 1))
+                if (!_reliableReceive.Exists(readIndex + i + 1))
                 {
                     fullMessage = false;
                     break;
@@ -153,15 +153,15 @@ namespace Mirage.SocketLayer
 
         public ReliableReceived GetNextFragment()
         {
-            return reliableReceive.Dequeue();
+            return _reliableReceive.Dequeue();
         }
 
         public void Update()
         {
-            if (nextBatch != null)
+            if (_nextBatch != null)
             {
-                SendReliablePacket(nextBatch);
-                nextBatch = null;
+                SendReliablePacket(_nextBatch);
+                _nextBatch = null;
             }
 
 
@@ -179,13 +179,13 @@ namespace Mirage.SocketLayer
         /// </summary>
         private void ResetEmptyAckCount()
         {
-            emptyAckCount = 0;
+            _emptyAckCount = 0;
         }
 
         private void CheckSendEmptyAck()
         {
-            var distance = sentAckablePackets.Sequencer.Distance(LatestAckSequence, lastSentAck);
-            if (distance > receivesBeforeEmpty)
+            var distance = _sentAckablePackets.Sequencer.Distance(_latestAckSequence, _lastSentAck);
+            if (distance > _receivesBeforeEmpty)
             {
                 SendAck();
             }
@@ -194,19 +194,19 @@ namespace Mirage.SocketLayer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool TimeToSendAck()
         {
-            var shouldSend = lastSentTime + ackTimeout < time.Now;
+            var shouldSend = _lastSentTime + _ackTimeout < _time.Now;
             return shouldSend;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool ShouldSendEmptyAck()
         {
-            return emptyAckCount < emptyAckLimit;
+            return _emptyAckCount < _emptyAckLimit;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Send(byte[] final, int length)
         {
-            connection.SendRaw(final, length);
+            _connection.SendRaw(final, length);
             OnSend();
         }
 
@@ -214,23 +214,23 @@ namespace Mirage.SocketLayer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void OnSend()
         {
-            emptyAckCount++;
-            lastSentAck = LatestAckSequence;
-            lastSentTime = time.Now;
+            _emptyAckCount++;
+            _lastSentAck = _latestAckSequence;
+            _lastSentTime = _time.Now;
         }
 
         private void SendAck()
         {
-            using (var final = bufferPool.Take())
+            using (var final = _bufferPool.Take())
             {
                 var offset = 0;
 
                 ByteUtils.WriteByte(final.array, ref offset, (byte)PacketType.Ack);
 
-                ByteUtils.WriteUShort(final.array, ref offset, LatestAckSequence);
-                ByteUtils.WriteULong(final.array, ref offset, AckMask);
+                ByteUtils.WriteUShort(final.array, ref offset, _latestAckSequence);
+                ByteUtils.WriteULong(final.array, ref offset, _ackMask);
 
-                connection.SendRaw(final.array, offset);
+                _connection.SendRaw(final.array, offset);
                 Send(final.array, offset);
             }
         }
@@ -247,18 +247,18 @@ namespace Mirage.SocketLayer
 
         public void SendNotify(byte[] inPacket, int inOffset, int inLength, INotifyCallBack callBacks)
         {
-            if (inLength + NOTIFY_HEADER_SIZE > maxPacketSize)
+            if (inLength + NOTIFY_HEADER_SIZE > _maxPacketSize)
             {
-                throw new ArgumentException($"Message is bigger than MTU, size:{inLength} but max Notify message size is {maxPacketSize - NOTIFY_HEADER_SIZE}");
+                throw new ArgumentException($"Message is bigger than MTU, size:{inLength} but max Notify message size is {_maxPacketSize - NOTIFY_HEADER_SIZE}");
             }
-            if (sentAckablePackets.IsFull)
+            if (_sentAckablePackets.IsFull)
             {
                 throw new InvalidOperationException("Sent queue is full");
             }
 
-            var sequence = (ushort)sentAckablePackets.Enqueue(new AckablePacket(callBacks));
+            var sequence = (ushort)_sentAckablePackets.Enqueue(new AckablePacket(callBacks));
 
-            using (var buffer = bufferPool.Take())
+            using (var buffer = _bufferPool.Take())
             {
                 var outPacket = buffer.array;
                 Buffer.BlockCopy(inPacket, inOffset, outPacket, NOTIFY_HEADER_SIZE, inLength);
@@ -268,8 +268,8 @@ namespace Mirage.SocketLayer
                 ByteUtils.WriteByte(outPacket, ref outOffset, (byte)PacketType.Notify);
 
                 ByteUtils.WriteUShort(outPacket, ref outOffset, sequence);
-                ByteUtils.WriteUShort(outPacket, ref outOffset, LatestAckSequence);
-                ByteUtils.WriteULong(outPacket, ref outOffset, AckMask);
+                ByteUtils.WriteUShort(outPacket, ref outOffset, _latestAckSequence);
+                ByteUtils.WriteULong(outPacket, ref outOffset, _ackMask);
 
                 Send(outPacket, outOffset + inLength);
             }
@@ -279,41 +279,41 @@ namespace Mirage.SocketLayer
 
         public void SendReliable(byte[] message, int offset, int length)
         {
-            if (sentAckablePackets.IsFull)
+            if (_sentAckablePackets.IsFull)
             {
-                throw new InvalidOperationException($"Sent queue is full for {connection}");
+                throw new InvalidOperationException($"Sent queue is full for {_connection}");
             }
 
-            if (length + MIN_RELIABLE_HEADER_SIZE > maxPacketSize)
+            if (length + MIN_RELIABLE_HEADER_SIZE > _maxPacketSize)
             {
-                if (allowFragmented)
+                if (_allowFragmented)
                 {
                     SendFragmented(message, offset, length);
                     return;
                 }
                 else
                 {
-                    throw new ArgumentException($"Message is bigger than MTU and fragmentation is disabled, max Reliable message size is {maxPacketSize - MIN_RELIABLE_HEADER_SIZE}", nameof(length));
+                    throw new ArgumentException($"Message is bigger than MTU and fragmentation is disabled, max Reliable message size is {_maxPacketSize - MIN_RELIABLE_HEADER_SIZE}", nameof(length));
                 }
             }
 
 
-            if (nextBatch == null)
+            if (_nextBatch == null)
             {
-                nextBatch = CreateReliableBuffer(PacketType.Reliable);
+                _nextBatch = CreateReliableBuffer(PacketType.Reliable);
             }
 
             var msgLength = length + RELIABLE_MESSAGE_LENGTH_SIZE;
-            var batchLength = nextBatch.length;
-            if (batchLength + msgLength > maxPacketSize)
+            var batchLength = _nextBatch.Length;
+            if (batchLength + msgLength > _maxPacketSize)
             {
                 // if full, send and create new
-                SendReliablePacket(nextBatch);
+                SendReliablePacket(_nextBatch);
 
-                nextBatch = CreateReliableBuffer(PacketType.Reliable);
+                _nextBatch = CreateReliableBuffer(PacketType.Reliable);
             }
 
-            AddToBatch(nextBatch, message, offset, length);
+            AddToBatch(_nextBatch, message, offset, length);
         }
 
         /// <summary>
@@ -326,9 +326,9 @@ namespace Mirage.SocketLayer
         /// <param name="length"></param>
         private void SendFragmented(byte[] message, int offset, int length)
         {
-            if (length > maxFragmentsMessageSize)
+            if (length > _maxFragmentsMessageSize)
             {
-                throw new ArgumentException($"Message is bigger than MTU for fragmentation, max Reliable fragmented size is {maxFragmentsMessageSize}", nameof(length));
+                throw new ArgumentException($"Message is bigger than MTU for fragmentation, max Reliable fragmented size is {_maxFragmentsMessageSize}", nameof(length));
             }
 
             var fragments = Mathf.CeilToInt(length / (float)SizePerFragment);
@@ -339,26 +339,26 @@ namespace Mirage.SocketLayer
                 var fragmentIndex = fragments - i - 1;
 
                 var packet = CreateReliableBuffer(PacketType.ReliableFragment);
-                var array = packet.buffer.array;
-                var packetOffset = packet.length;
+                var array = packet.Buffer.array;
+                var packetOffset = packet.Length;
 
                 ByteUtils.WriteByte(array, ref packetOffset, (byte)fragmentIndex);
                 var nextLength = Math.Min(remaining, SizePerFragment);
-                Buffer.BlockCopy(message, offset + SizePerFragment * i, array, packetOffset, nextLength);
+                Buffer.BlockCopy(message, offset + (SizePerFragment * i), array, packetOffset, nextLength);
                 packetOffset += nextLength;
                 remaining -= nextLength;
 
-                packet.length = packetOffset;
+                packet.Length = packetOffset;
                 SendReliablePacket(packet);
             }
         }
 
         private ReliablePacket CreateReliableBuffer(PacketType packetType)
         {
-            var order = (ushort)reliableOrder.Next();
+            var order = (ushort)_reliableOrder.Next();
 
-            var packet = reliablePool.Take();
-            var buffer = bufferPool.Take();
+            var packet = _reliablePool.Take();
+            var buffer = _bufferPool.Take();
 
             var offset = 0;
             ByteUtils.WriteByte(buffer.array, ref offset, (byte)packetType);
@@ -372,40 +372,40 @@ namespace Mirage.SocketLayer
 
         private static void AddToBatch(ReliablePacket packet, byte[] message, int offset, int length)
         {
-            var array = packet.buffer.array;
-            var packetOffset = packet.length;
+            var array = packet.Buffer.array;
+            var packetOffset = packet.Length;
 
             ByteUtils.WriteUShort(array, ref packetOffset, (ushort)length);
             Buffer.BlockCopy(message, offset, array, packetOffset, length);
             packetOffset += length;
 
-            packet.length = packetOffset;
+            packet.Length = packetOffset;
         }
 
         private void SendReliablePacket(ReliablePacket reliable)
         {
             ThrowIfBufferLimitReached();
 
-            var sequence = (ushort)sentAckablePackets.Enqueue(new AckablePacket(reliable));
+            var sequence = (ushort)_sentAckablePackets.Enqueue(new AckablePacket(reliable));
 
-            var final = reliable.buffer.array;
+            var final = reliable.Buffer.array;
 
             var offset = 1;
 
             reliable.OnSend(sequence);
             ByteUtils.WriteUShort(final, ref offset, sequence);
-            ByteUtils.WriteUShort(final, ref offset, LatestAckSequence);
-            ByteUtils.WriteULong(final, ref offset, AckMask);
+            ByteUtils.WriteUShort(final, ref offset, _latestAckSequence);
+            ByteUtils.WriteULong(final, ref offset, _ackMask);
 
-            Send(final, reliable.length);
+            Send(final, reliable.Length);
         }
 
         private void ThrowIfBufferLimitReached()
         {
             // greater or equal, because we are adding 1 adder this check
-            if (sentAckablePackets.Count >= maxPacketsInSendBufferPerConnection)
+            if (_sentAckablePackets.Count >= _maxPacketsInSendBufferPerConnection)
             {
-                throw new InvalidOperationException($"Max packets in send buffer reached for {connection}");
+                throw new InvalidOperationException($"Max packets in send buffer reached for {_connection}");
             }
         }
 
@@ -446,7 +446,7 @@ namespace Mirage.SocketLayer
             var fragmentIndex = ByteUtils.ReadByte(array, ref offset);
 
             // invalid if equal to (because it should be 0 indexed)
-            return fragmentIndex >= maxFragments;
+            return fragmentIndex >= _maxFragments;
         }
 
         /// <summary>
@@ -468,7 +468,7 @@ namespace Mirage.SocketLayer
             // checks acks, late message are allowed for reliable
             // but only insert lastest if later than read Index
 
-            var reliableDistance = reliableReceive.DistanceToRead(reliableSequence);
+            var reliableDistance = _reliableReceive.DistanceToRead(reliableSequence);
 
             if (reliableDistance < 0)
             {
@@ -484,16 +484,16 @@ namespace Mirage.SocketLayer
             }
 
             // new packet
-            var savedPacket = bufferPool.Take();
+            var savedPacket = _bufferPool.Take();
             var bufferLength = length - RELIABLE_HEADER_SIZE;
             Buffer.BlockCopy(packet, RELIABLE_HEADER_SIZE, savedPacket.array, 0, bufferLength);
-            reliableReceive.InsertAt(reliableSequence, new ReliableReceived(savedPacket, bufferLength, isFragment));
+            _reliableReceive.InsertAt(reliableSequence, new ReliableReceived(savedPacket, bufferLength, isFragment));
         }
 
         private bool PacketExists(ushort reliableSequence)
         {
-            var existing = reliableReceive[reliableSequence];
-            return existing.buffer != null;
+            var existing = _reliableReceive[reliableSequence];
+            return existing.Buffer != null;
         }
 
         public void ReceiveAck(byte[] packet)
@@ -510,7 +510,7 @@ namespace Mirage.SocketLayer
         /// <returns>distance</returns>
         private int ProcessIncomingHeader(ushort sequence, ushort ackSequence, ulong ackMask)
         {
-            var distance = (int)sentAckablePackets.Sequencer.Distance(sequence, LatestAckSequence);
+            var distance = (int)_sentAckablePackets.Sequencer.Distance(sequence, _latestAckSequence);
             SetAckValues(sequence, distance);
             CheckSentQueue(ackSequence, ackMask);
             return distance;
@@ -525,7 +525,7 @@ namespace Mirage.SocketLayer
                 {
                     // this means 63 packets have gone missingg
                     // this should never happen, but if it does then just set mask to 1
-                    AckMask = 1;
+                    _ackMask = 1;
                 }
                 else
                 {
@@ -533,9 +533,9 @@ namespace Mirage.SocketLayer
                     // eg distance = 2
                     // this will mean mask will be ..01
                     // which means that 1 packet was missed
-                    AckMask = (AckMask << (int)distance) | 1;
+                    _ackMask = (_ackMask << (int)distance) | 1;
                 }
-                LatestAckSequence = sequence;
+                _latestAckSequence = sequence;
             }
             else
             {
@@ -546,7 +546,7 @@ namespace Mirage.SocketLayer
                     return;
 
                 var newAck = 1ul << negativeDistance;
-                AckMask |= newAck;
+                _ackMask |= newAck;
             }
 
             // after receiving reset empty count and check if we should send ack right away
@@ -557,24 +557,24 @@ namespace Mirage.SocketLayer
         private void CheckSentQueue(ushort sequence, ulong mask)
         {
             // old sequence, nothing in buffer to ack/lost
-            if (sentAckablePackets.DistanceToRead(sequence) < 0) { return; }
+            if (_sentAckablePackets.DistanceToRead(sequence) < 0) { return; }
 
-            ackMessagesInSentQueue(sequence, mask);
-            sentAckablePackets.MoveReadToNextNonEmpty();
-            resendMessages();
+            AckMessagesInSentQueue(sequence, mask);
+            _sentAckablePackets.MoveReadToNextNonEmpty();
+            ResendMessages();
         }
-        private void ackMessagesInSentQueue(ushort sequence, ulong mask)
+        private void AckMessagesInSentQueue(ushort sequence, ulong mask)
         {
-            var start = sentAckablePackets.Read;
-            var end = sentAckablePackets.Write;
-            var sequencer = sentAckablePackets.Sequencer;
+            var start = _sentAckablePackets.Read;
+            var end = _sentAckablePackets.Write;
+            var sequencer = _sentAckablePackets.Sequencer;
 
             var count = sequencer.Distance(end, start);
 
             for (uint i = 0; i < count; i++)
             {
                 var ackableSequence = (uint)sequencer.MoveInBounds(start + i);
-                var ackable = sentAckablePackets[ackableSequence];
+                var ackable = _sentAckablePackets[ackableSequence];
 
                 if (ackable.IsNotValid())
                     continue;
@@ -585,7 +585,7 @@ namespace Mirage.SocketLayer
 
         private void CheckAckablePacket(ushort sequence, ulong mask, AckablePacket ackable, uint ackableSequence)
         {
-            var distance = (int)sentAckablePackets.Sequencer.Distance(sequence, ackableSequence);
+            var distance = (int)_sentAckablePackets.Sequencer.Distance(sequence, ackableSequence);
 
             // negative distance means next is sent after last ack, so nothing to ack yet
             // no chance for it to be acked yet, so do nothing
@@ -597,56 +597,56 @@ namespace Mirage.SocketLayer
 
             if (ackable.IsNotify)
             {
-                ackable.token.Notify(!lost);
-                sentAckablePackets.RemoveAt(ackableSequence);
+                ackable.Token.Notify(!lost);
+                _sentAckablePackets.RemoveAt(ackableSequence);
             }
             else
             {
-                var reliablePacket = ackable.reliablePacket;
+                var reliablePacket = ackable.ReliablePacket;
                 if (lost)
                 {
-                    reliableLost(sequence, reliablePacket);
+                    ReliableLost(sequence, reliablePacket);
                 }
                 else
                 {
-                    reliableAcked(reliablePacket);
+                    ReliableAcked(reliablePacket);
                 }
             }
         }
 
-        private void reliableAcked(ReliablePacket reliablePacket)
+        private void ReliableAcked(ReliablePacket reliablePacket)
         {
-            foreach (var seq in reliablePacket.sequences)
+            foreach (var seq in reliablePacket.Sequences)
             {
-                sentAckablePackets.RemoveAt(seq);
+                _sentAckablePackets.RemoveAt(seq);
             }
 
             // remove from toResend incase it was added in previous loop
-            toResend.Remove(reliablePacket);
+            _toResend.Remove(reliablePacket);
 
             reliablePacket.OnAck();
         }
 
-        private void reliableLost(ushort sequence, ReliablePacket reliablePacket)
+        private void ReliableLost(ushort sequence, ReliablePacket reliablePacket)
         {
             // we dont need to resend if it has not been possible to have been acked yet
 
             // eg seq=99, last = 101 => dist = 99-101=-2 => sent after seq => dont resend
             // => if positive, then resend
-            if (sentAckablePackets.Sequencer.Distance(sequence, reliablePacket.lastSequence) > 0)
+            if (_sentAckablePackets.Sequencer.Distance(sequence, reliablePacket.LastSequence) > 0)
             {
-                toResend.Add(reliablePacket);
+                _toResend.Add(reliablePacket);
             }
         }
 
-        private void resendMessages()
+        private void ResendMessages()
         {
-            foreach (var reliable in toResend)
+            foreach (var reliable in _toResend)
             {
-                metrics?.OnResend(reliable.length);
+                _metrics?.OnResend(reliable.Length);
                 SendReliablePacket(reliable);
             }
-            toResend.Clear();
+            _toResend.Clear();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -666,28 +666,28 @@ namespace Mirage.SocketLayer
 
         private struct AckablePacket : IEquatable<AckablePacket>
         {
-            public INotifyCallBack token;
-            public ReliablePacket reliablePacket;
+            public INotifyCallBack Token;
+            public ReliablePacket ReliablePacket;
 
-            public bool IsNotify => token != null;
-            public bool IsReliable => reliablePacket != null;
+            public bool IsNotify => Token != null;
+            public bool IsReliable => ReliablePacket != null;
 
             public AckablePacket(INotifyCallBack token)
             {
-                this.token = token;
-                reliablePacket = null;
+                Token = token;
+                ReliablePacket = null;
             }
 
             public AckablePacket(ReliablePacket reliablePacket)
             {
-                this.reliablePacket = reliablePacket;
-                token = null;
+                ReliablePacket = reliablePacket;
+                Token = null;
             }
 
             public bool Equals(AckablePacket other)
             {
-                return token == other.token &&
-                    reliablePacket == other.reliablePacket;
+                return Token == other.Token &&
+                    ReliablePacket == other.ReliablePacket;
             }
 
             /// <summary>
@@ -696,52 +696,52 @@ namespace Mirage.SocketLayer
             /// <returns></returns>
             public bool IsNotValid()
             {
-                return token == null && reliablePacket == null;
+                return Token == null && ReliablePacket == null;
             }
         }
 
         private class ReliablePacket
         {
-            public ushort lastSequence;
-            public int length;
+            public ushort LastSequence;
+            public int Length;
 
-            public ByteBuffer buffer;
-            public ushort order;
+            public ByteBuffer Buffer;
+            public ushort Order;
 
-            public readonly List<ushort> sequences = new List<ushort>(4);
-            private readonly Pool<ReliablePacket> pool;
+            public readonly List<ushort> Sequences = new List<ushort>(4);
+            private readonly Pool<ReliablePacket> _pool;
 
             public void OnSend(ushort sequence)
             {
-                sequences.Add(sequence);
-                lastSequence = sequence;
+                Sequences.Add(sequence);
+                LastSequence = sequence;
             }
 
             public void OnAck()
             {
-                buffer.Release();
-                pool.Put(this);
+                Buffer.Release();
+                _pool.Put(this);
             }
 
             public void Setup(ushort order, ByteBuffer buffer, int length)
             {
                 // reset old data
-                lastSequence = 0;
-                sequences.Clear();
+                LastSequence = 0;
+                Sequences.Clear();
 
-                this.order = order;
-                this.buffer = buffer;
-                this.length = length;
+                Order = order;
+                Buffer = buffer;
+                Length = length;
             }
 
             private ReliablePacket(Pool<ReliablePacket> pool)
             {
-                this.pool = pool;
+                _pool = pool;
             }
 
             public override int GetHashCode()
             {
-                return order;
+                return Order;
             }
 
             public override bool Equals(object obj)
@@ -749,37 +749,38 @@ namespace Mirage.SocketLayer
                 if (obj is ReliablePacket other)
                 {
                     // use order as quick check, but use list to check if they are actually equal
-                    return order == other.order && sequences == other.sequences;
+                    return Order == other.Order && Sequences == other.Sequences;
                 }
                 return false;
             }
 
-            public static ReliablePacket CreateNew(int _size, Pool<ReliablePacket> pool)
+            public static ReliablePacket CreateNew(int size, Pool<ReliablePacket> pool)
             {
                 return new ReliablePacket(pool);
             }
         }
-        public struct ReliableReceived : IEquatable<ReliableReceived>
+        internal struct ReliableReceived : IEquatable<ReliableReceived>
         {
-            public readonly ByteBuffer buffer;
-            public readonly int length;
-            public readonly bool isFragment;
+            public readonly ByteBuffer Buffer;
+            public readonly int Length;
+            public readonly bool IsFragment;
+
             public int FragmentIndex
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => buffer.array[0];
+                get => Buffer.array[0];
             }
 
             public ReliableReceived(ByteBuffer buffer, int length, bool isFragment)
             {
-                this.buffer = buffer;
-                this.length = length;
-                this.isFragment = isFragment;
+                Buffer = buffer;
+                Length = length;
+                IsFragment = isFragment;
             }
 
             public bool Equals(ReliableReceived other)
             {
-                return buffer == other.buffer;
+                return Buffer == other.Buffer;
             }
         }
     }

@@ -53,15 +53,15 @@ namespace Mirage.SocketLayer
     /// </example>
     public class Sequencer
     {
-        private readonly int shift;
-        private readonly int bits;
-        private readonly ulong mask;
-        private ulong sequence;
+        private readonly int _shift;
+        private readonly int _bits;
+        private readonly ulong _mask;
+        private ulong _sequence;
 
         /// <summary>
         /// Number of bits used for the sequence generator up to 64
         /// </summary>
-        public int Bits => bits;
+        public int Bits => _bits;
 
         /// <param name="bits">amount of bits for the sequence</param>
         public Sequencer(int bits)
@@ -75,10 +75,10 @@ namespace Mirage.SocketLayer
             // - 1      = 255
             //          = 1111 1111
 
-            this.bits = bits;
-            sequence = 0;
-            mask = (1UL << bits) - 1UL;
-            shift = sizeof(ulong) * 8 - bits;
+            _bits = bits;
+            _sequence = 0;
+            _mask = (1UL << bits) - 1UL;
+            _shift = (sizeof(ulong) * 8) - bits;
         }
 
         /// <summary>
@@ -88,8 +88,8 @@ namespace Mirage.SocketLayer
         /// <returns>0, 1, 2, ..., (2^n)-1, 0, 1, 2, ...</returns>
         public ulong Next()
         {
-            var current = sequence;
-            sequence = NextAfter(sequence);
+            var current = _sequence;
+            _sequence = NextAfter(_sequence);
             return current;
         }
 
@@ -101,7 +101,7 @@ namespace Mirage.SocketLayer
         /// <returns>the next sequence value</returns>
         public ulong NextAfter(ulong sequence)
         {
-            return (sequence + 1UL) & mask;
+            return (sequence + 1UL) & _mask;
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace Mirage.SocketLayer
         /// <returns>the next sequence value</returns>
         public ulong MoveInBounds(ulong sequence)
         {
-            return (sequence) & mask;
+            return (sequence) & _mask;
         }
 
         /// <summary>
@@ -124,9 +124,9 @@ namespace Mirage.SocketLayer
         /// <returns>from - to, adjusted for wrapping</returns>
         public long Distance(ulong from, ulong to)
         {
-            to <<= shift;
-            from <<= shift;
-            return ((long)(from - to)) >> shift;
+            to <<= _shift;
+            from <<= _shift;
+            return ((long)(from - to)) >> _shift;
         }
     }
 }

@@ -85,16 +85,16 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
             Assert.IsTrue(ackSystem.NextReliablePacket(out var first));
 
-            Assert.IsTrue(first.isFragment);
-            Assert.That(first.buffer.array[0], Is.EqualTo(1), "First fragment should have index 1");
-            Assert.That(first.length, Is.EqualTo(bytesIn1 + 1));
-            AssertAreSameFromOffsets(message, 0, first.buffer.array, 1, bytesIn1);
+            Assert.IsTrue(first.IsFragment);
+            Assert.That(first.Buffer.array[0], Is.EqualTo(1), "First fragment should have index 1");
+            Assert.That(first.Length, Is.EqualTo(bytesIn1 + 1));
+            AssertAreSameFromOffsets(message, 0, first.Buffer.array, 1, bytesIn1);
 
             var second = ackSystem.GetNextFragment();
-            Assert.IsTrue(second.isFragment);
-            Assert.That(second.buffer.array[0], Is.EqualTo(0), "Second fragment should have index 0");
-            Assert.That(second.length, Is.EqualTo(bytesIn2 + 1));
-            AssertAreSameFromOffsets(message, bytesIn1, second.buffer.array, 1, bytesIn2);
+            Assert.IsTrue(second.IsFragment);
+            Assert.That(second.Buffer.array[0], Is.EqualTo(0), "Second fragment should have index 0");
+            Assert.That(second.Length, Is.EqualTo(bytesIn2 + 1));
+            AssertAreSameFromOffsets(message, bytesIn1, second.Buffer.array, 1, bytesIn2);
         }
     }
 }
