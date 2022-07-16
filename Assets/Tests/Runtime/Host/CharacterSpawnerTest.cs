@@ -6,12 +6,15 @@ using UnityEngine.TestTools;
 namespace Mirage.Tests.Runtime.Host
 {
     [Category("LoadsScene")]
-    public class CharacterSpawnerTest : HostSetup<MockComponent>
+    public class CharacterSpawnerTest : HostSetupWithSceneManager<MockComponent>
     {
         private CharacterSpawner spawner;
 
         public override void ExtraSetup()
         {
+            // call base for SceneManager Setup
+            base.ExtraSetup();
+
             // disable so awake isn't called till setup finished
             networkManagerGo.SetActive(false);
             spawner = networkManagerGo.AddComponent<CharacterSpawner>();

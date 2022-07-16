@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Host
 {
-    public class HostComponentTests : HostSetup<MockComponent>
+    public class HostComponentTests : HostSetupWithSceneManager<MockComponent>
     {
         [UnityTest]
         public IEnumerator ServerRpc() => UniTask.ToCoroutine(async () =>
