@@ -8,11 +8,11 @@ namespace Mirage.SocketLayer
     public sealed class ByteBuffer : IDisposable
     {
         public readonly byte[] array;
-        private readonly Pool<ByteBuffer> pool;
+        private readonly Pool<ByteBuffer> _pool;
 
         private ByteBuffer(int bufferSize, Pool<ByteBuffer> pool)
         {
-            this.pool = pool ?? throw new ArgumentNullException(nameof(pool));
+            _pool = pool ?? throw new ArgumentNullException(nameof(pool));
 
             array = new byte[bufferSize];
         }
@@ -24,7 +24,7 @@ namespace Mirage.SocketLayer
 
         public void Release()
         {
-            pool.Put(this);
+            _pool.Put(this);
         }
 
         void IDisposable.Dispose() => Release();
