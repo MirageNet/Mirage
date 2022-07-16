@@ -18,7 +18,7 @@ namespace Mirage.Tests
     {
         public static void AddTestPlayer(this NetworkServer server, INetworkPlayer player)
         {
-            var info = typeof(NetworkServer).GetField("connections", BindingFlags.Instance | BindingFlags.NonPublic);
+            var info = typeof(NetworkServer).GetField("_connections", BindingFlags.Instance | BindingFlags.NonPublic);
             var connections = (Dictionary<IConnection, INetworkPlayer>)info.GetValue(server);
 
             var connectiion = Substitute.For<IConnection>();
