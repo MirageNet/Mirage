@@ -219,53 +219,57 @@ namespace Mirage
         /// </summary>
         private class IdentityWrapper
         {
-            private const long ID_MASK = (long)0x0000_0000_FFFF_FFFFul;
-            private const long HASH_MASK = unchecked((long)0xFFFF_FFFF_0000_0000ul);
+            private const ulong ID_MASK = 0x0000_0000_FFFF_FFFFul;
+            private const ulong HASH_MASK = 0xFFFF_FFFF_0000_0000ul;
             private readonly NetworkIdentity _identity;
-            private readonly SerializedObject _serializedObject;
-            private readonly SerializedProperty _prefabHashProp;
-            private readonly SerializedProperty _sceneIdProp;
 
             public IdentityWrapper(NetworkIdentity identity)
             {
                 if (identity == null) throw new ArgumentNullException(nameof(identity));
 
                 _identity = identity;
-
-                _serializedObject = new SerializedObject(identity);
-                _prefabHashProp = _serializedObject.FindProperty("_prefabHash");
-                _sceneIdProp = _serializedObject.FindProperty("_sceneId");
             }
 
             public int PrefabHash
             {
-                get => _prefabHashProp.intValue;
+                get => _identity.Editor_PrefabHash;
                 set
                 {
-                    _prefabHashProp.intValue = value;
-                    _serializedObject.ApplyModifiedProperties();
+                    if (PrefabHash == value)
+                        return;
+
+                    Undo.RecordObject(_identity, "Set PrefabHash");
+                    _identity.Editor_PrefabHash = value;
                 }
             }
 
 
             public int SceneId
             {
-                get => (int)(_sceneIdProp.intValue & ID_MASK);
+                get => (int)(_identity.Editor_SceneId & ID_MASK);
                 set
                 {
+                    // just use get here so we get the correct part of id
+                    if (SceneId == value)
+                        return;
+
+                    Undo.RecordObject(_identity, "Set SceneId");
                     // have to mask incoming number incase it is negative
-                    _sceneIdProp.longValue = (_sceneIdProp.longValue & HASH_MASK) | (value & ID_MASK);
-                    _serializedObject.ApplyModifiedProperties();
+                    _identity.Editor_SceneId = (_identity.SceneId & HASH_MASK) | ((ulong)value & ID_MASK);
                 }
             }
 
             public int SceneHash
             {
-                get => (int)((_sceneIdProp.intValue & HASH_MASK) >> 32);
+                get => (int)((_identity.Editor_SceneId & HASH_MASK) >> 32);
                 set
                 {
-                    _sceneIdProp.longValue = (((long)value) << 32) | (_sceneIdProp.longValue & ID_MASK);
-                    _serializedObject.ApplyModifiedProperties();
+                    // just use get here so we get the correct part of id
+                    if (SceneHash == value)
+                        return;
+
+                    Undo.RecordObject(_identity, "Set SceneHash");
+                    _identity.Editor_SceneId = (((ulong)value) << 32) | (_identity.SceneId & ID_MASK);
                 }
             }
 

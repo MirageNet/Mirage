@@ -348,6 +348,27 @@ namespace Mirage
             }
         }
 
+#if UNITY_EDITOR
+        /// <summary>
+        /// Gets PrefabHash avoiding runtime checks
+        /// <para>used by NetworkIdentityIdGenerator</para>
+        /// </summary>
+        internal int Editor_PrefabHash
+        {
+            get => _prefabHash;
+            set => _prefabHash = value;
+        }
+
+        /// <summary>
+        /// Gets SceneId avoiding runtime checks
+        /// <para>used by NetworkIdentityIdGenerator</para>
+        /// </summary>
+        internal ulong Editor_SceneId
+        {
+            get => _sceneId;
+            set => _sceneId = value;
+        }
+#endif
 
 
         [Header("Events")]
