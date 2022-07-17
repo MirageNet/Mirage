@@ -32,7 +32,7 @@ jobs:
           key: Library-Library-2021.3.4
 
       - name: Generate Solution
-        run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod UnityEditor.SyncVS.SyncSolution -quit
+        run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod GitTools.Solution.Sync -quit
 
       # unity 2020.3 outputs <ReferenceOutputAssembly>false</ReferenceOutputAssembly> on linux
       # this breaks references to other csproj for docfx and sonar.
