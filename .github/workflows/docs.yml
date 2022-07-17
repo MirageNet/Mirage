@@ -58,6 +58,7 @@ jobs:
           path: doc/docs/reference
 
   publish_docs:
+    needs: [build_doc]
     runs-on: ubuntu-latest
     container: node:18
     steps:
