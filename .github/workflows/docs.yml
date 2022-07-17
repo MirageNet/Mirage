@@ -51,10 +51,23 @@ jobs:
           input-folder: doc/api
           output-folder: doc/docs/reference
 
-      - uses: actions/setup-node@v3
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
         with:
-          node-version: 18
-          cache: npm
+          name: metadata
+          path: doc/docs/reference
+
+  publish_docs:
+    runs-on: ubuntu-latest
+    container: node:18
+    steps:
+      - uses: actions/checkout@v1
+        
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: metadata
+          path: doc/docs/reference
 
       - name: Install dependencies
         working-directory: doc
@@ -77,6 +90,6 @@ jobs:
           allow_empty_commit: true
           jekyll: false
           # Build directory to deploy
-          build_dir: doc/_site
+          build_dir: doc/build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
