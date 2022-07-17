@@ -76,7 +76,7 @@ jobs:
 
       - name: Build docusaurus
         working-directory: doc
-        run: npm build
+        run: npm run build
         env:
           ORG_NAME: ${{ github.repository_owner }}
           REPO_NAME: ${{ github.repository }}
