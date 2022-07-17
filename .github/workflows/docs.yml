@@ -1,8 +1,8 @@
 name: Docs
 
 # this is disabled till it is can be fixed
-# on: [push]
-on: [workflow_dispatch]
+on: [push]
+#on: [workflow_dispatch]
 
 jobs:
   build_doc:
@@ -54,14 +54,15 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: yarn
+          cache: npm
 
       - name: Install dependencies
         working-directory: doc
-        run: yarn install --frozen-lockfile
-      - name: Build website
+        run: npm ci
+
+      - name: Build docusaurus
         working-directory: doc
-        run: yarn build
+        run: npm build
         env:
           ORG_NAME: ${{ github.repository_owner }}
           REPO_NAME: ${{ github.repository }}
