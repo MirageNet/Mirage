@@ -6,7 +6,6 @@ on: [workflow_dispatch]
 
 jobs:
   build_doc:
-
     runs-on: ubuntu-latest
     # available list of containers here:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
@@ -52,8 +51,25 @@ jobs:
       - name: Generate API 
         run: docfx metadata --logLevel Warning --warningsAsErrors doc/docfx.json
 
-      - name: Build Docs
-        run: docfx build --logLevel Warning --warningsAsErrors doc/docfx.json
+      - name: Convert metadata to markdown
+        uses: fillefilip8/DocFxToMarkdown@v1.0.0
+        with:
+          input-folder: doc/api
+          output-folder: doc/docs/reference
+
+      - name: Set up Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+          
+      - name: Build Docusaurus
+        env:
+          ORG_NAME: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          cd doc
+          npm install 
+          npm run build
 
       - name: Publish docs
         uses: crazy-max/ghaction-github-pages@v2.6.0
@@ -65,6 +81,6 @@ jobs:
           allow_empty_commit: true
           jekyll: false
           # Build directory to deploy
-          build_dir: doc/_site
+          build_dir: doc/build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
