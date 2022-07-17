@@ -1,9 +1,7 @@
-###############
-#    folder   #
-###############
-/**/DROP/
-/**/TEMP/
-/**/packages/
-/**/bin/
-/**/obj/
-_site
+node_modules
+build
+.vscode
+.docusaurus
+.env
+.idea/*
+docs/reference
