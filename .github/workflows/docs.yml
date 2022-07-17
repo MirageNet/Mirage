@@ -51,7 +51,7 @@ jobs:
           input-folder: doc/api
           output-folder: doc/docs/reference
 
-      - uses: redkubes/docusaurus-deploy-action@v1
+      - uses: redkubes/docusaurus-deploy-action@v1.2
         with:
           source-folder: doc
           git-user: github-bot
