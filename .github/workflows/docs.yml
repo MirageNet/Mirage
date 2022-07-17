@@ -41,15 +41,9 @@ jobs:
       - name: Fix Csproj
         run: sed -i 's/<ReferenceOutputAssembly>false<\/ReferenceOutputAssembly>/<ReferenceOutputAssembly>true<\/ReferenceOutputAssembly>/g' *.csproj
 
-      # need to update so that docfx setup finds files correctly
-      - name: apt update
-        run: apt update
-        
-      - name: Install docfx
-        uses: MirageNet/setup-docfx@v1
-
-      - name: Generate API 
-        run: docfx metadata --logLevel Warning --warningsAsErrors doc/docfx.json
+      - uses: nikeee/docfx-action@v1.0.0
+        with:
+          args: metadata --logLevel Warning --warningsAsErrors doc/docfx.json
 
       - name: Convert metadata to markdown
         uses: fillefilip8/DocFxToMarkdown@v1.0.0
