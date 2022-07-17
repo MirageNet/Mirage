@@ -43,7 +43,7 @@ jobs:
 
       - uses: nikeee/docfx-action@v1.0.0
         with:
-          args: metadata --logLevel Warning --warningsAsErrors doc/docfx.json
+          args: metadata --logLevel Warning doc/docfx.json
 
       - name: Convert metadata to markdown
         uses: fillefilip8/DocFxToMarkdown@v1.0.0
