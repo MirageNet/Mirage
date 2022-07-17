@@ -51,30 +51,9 @@ jobs:
           input-folder: doc/api
           output-folder: doc/docs/reference
 
-      - name: Set up Node
-        uses: actions/setup-node@v2
+      - uses: redkubes/docusaurus-deploy-action@v1
         with:
-          node-version: "16"
-          
-      - name: Build Docusaurus
-        env:
-          ORG_NAME: ${{ github.repository_owner }}
-          REPO_NAME: ${{ github.repository }}
-        run: |
-          cd doc
-          npm install 
-          npm run build
-
-      - name: Publish docs
-        uses: crazy-max/ghaction-github-pages@v2.6.0
-        #if: github.ref == 'refs/heads/master'
-        with:
-          # Create incremental commit instead of doing push force
-          keep_history: true
-          # Allow an empty commit to be created
-          allow_empty_commit: true
-          jekyll: false
-          # Build directory to deploy
-          build_dir: doc/build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          source-folder: doc
+          git-user: github-bot
+          git-password: ${{ secrets.GITHUB_TOKEN }}
+          deployment-branch: gh-pages
