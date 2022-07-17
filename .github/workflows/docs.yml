@@ -51,9 +51,31 @@ jobs:
           input-folder: doc/api
           output-folder: doc/docs/reference
 
-      - uses: redkubes/docusaurus-deploy-action@v1.2
+      - uses: actions/setup-node@v3
         with:
-          source-folder: doc
-          git-user: github-bot
-          git-password: ${{ secrets.GITHUB_TOKEN }}
-          deployment-branch: gh-pages
+          node-version: 18
+          cache: yarn
+
+      - name: Install dependencies
+        working-directory: doc
+        run: yarn install --frozen-lockfile
+      - name: Build website
+        working-directory: doc
+        run: yarn build
+        env:
+          ORG_NAME: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.repository }}
+
+      - name: Publish docs
+        uses: crazy-max/ghaction-github-pages@v2.6.0
+        #if: github.ref == 'refs/heads/master'
+        with:
+          # Create incremental commit instead of doing push force
+          keep_history: true
+          # Allow an empty commit to be created
+          allow_empty_commit: true
+          jekyll: false
+          # Build directory to deploy
+          build_dir: doc/_site
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
