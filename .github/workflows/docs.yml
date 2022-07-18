@@ -79,7 +79,7 @@ jobs:
         run: npm run build
         env:
           ORG_NAME: ${{ github.repository_owner }}
-          REPO_NAME: ${{ github.repository }}
+          REPO_NAME: ${{ github.event.repository.name }}
 
       - name: Publish docs
         uses: crazy-max/ghaction-github-pages@v2.6.0
