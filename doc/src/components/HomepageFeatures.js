@@ -31,7 +31,7 @@ const FeatureList = [
     title: 'Low bandwidth usage',
     description: (
       <>
-        Use our <a href="docs/guides/bit-packing/overview">BitPacking</a> features to greatly reduce bandwidth.
+        Use our <a href="docs/guides/bit-packing/">Bit Packing</a> features to greatly reduce bandwidth.
       </>
     ),
   },
@@ -39,7 +39,7 @@ const FeatureList = [
     title: 'State synchronization',
     description: (
       <>
-        Use <a href="docs/guides/sync/overview">SyncVars</a> to easily synchronize your game state over the network.
+        Use <a href="docs/guides/sync/">SyncVars</a> to easily synchronize your game state over the network.
       </>
     ),
   },
@@ -47,7 +47,7 @@ const FeatureList = [
     title: 'Server authoritative',
     description: (
       <>
-        Utilize the <a href="docs/guides/remote-calls/server-rpc">Server RPCs</a> to do server-authoritative tasks.
+        Utilize the <a href="docs/guides/remote-actions/server-rpc">Server RPCs</a> to do server-authoritative tasks.
       </>
     ),
   }

@@ -6,7 +6,7 @@ In Build Settings, remove all scenes and add all of the scenes from the Scenes f
 - MainScene
 - SubScene
 
-Open the MainScene in the Editor and make sure the Sub Scenes list in the Network Manager component on the Network scene object contains the SubScene scene.  This is already setup by default, but if the MainScene was opened and saved before putting the scenes in the Build Settings list, the Sub Scenes list may be cleared accidentally.
+Open the MainScene in the Editor and make sure the Sub Scenes list in the Network Manager component on the Network scene object contains the SubScene scene.  This is already set-up by default, but if the MainScene was opened and saved before putting the scenes in the Build Settings list, the Sub Scenes list may be cleared accidentally.
 
 File -> Build and Run
 
@@ -18,7 +18,7 @@ Press Play in the Editor and click Host (Server + Client) in the HUD
 Click Client in the built instances.
 - WASDQE keys to move & turn your player capsule.
 - There are objects in the corners of the scene hidden by Proximity Checkers.
-- The big area in the middle is where the subscene will be loaded when you get near the shelter.
-- There are also networked objects inside the subscene, also with Proximity Checkers.
-- Since subscenes are only loaded for individual clients, other clients that are outside the middle Zone won't see what those in the subscene can see.
-- If you play a built instance as Host or Server and play as client in the editor, you'll see the subscene content load and unload in the hierarchy as you move in and out of the middle Zone.
+- The big area in the middle is where the sub-scene will be loaded when you get near the shelter.
+- There are also networked objects inside the sub-scene, also with Proximity Checkers.
+- Since sub-scenes are only loaded for individual clients, other clients that are outside the middle Zone won't see what those in the sub-scene can see.
+- If you play a built instance as Host or Server and play as a client in the editor, you'll see the sub-scene content load and unload in the hierarchy as you move in and out of the middle Zone.

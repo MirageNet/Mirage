@@ -2,9 +2,9 @@
 
 The bit count of Integer based fields can be set using [BitCountFromRangeAttribute](/docs/reference/Mirage.Serialization/BitCountFromRangeAttribute) It will use the given range to calculate the required bit count. This works in a similar way to [BitCount](/docs/guides/bit-packing/bit-count)
 
-The min value is subtracted from the value before it is written and added back on after it is read. This will shift all written values into the positive range for writing so that the sign bit is not lost.
+The min value is subtracted from the value before it is written and added back after it is read. This will shift all written values into the positive range for writing so that the sign bit is not lost.
 
-This will truncate the bits so that only the small bits are sent. There is no range checking for values using BitCount, so value that are too big or too small will not be unpacked correctly.
+This will truncate the bits so that only the small bits are sent. There is no range checking for values using BitCount, so the value that is too big or too small will not be unpacked correctly.
 
 Bit Count is calculated using `bitCount = 1 + Floor(Log2(max - min))`, so `min = -100`, `max = 100` results in `bit count = 8`
 
@@ -27,7 +27,7 @@ Values are written using `Write(value - min, bitCount)` and read using `value = 
 
 ### Example 1
 
-A modifier which can add to a character value to increase or decrease it
+A modifier that can add to a character value to increase or decrease it
 
 ```cs
 public class MyNetworkBehaviour : NetworkBehaviour 
@@ -37,7 +37,7 @@ public class MyNetworkBehaviour : NetworkBehaviour
 }
 ```
 
-`Range = 200` so bit count is 8, causing real range to be -100 to 155
+`Range = 200` so bit count is 8, causing the real range to be -100 to 155
 
 `modifier = 57` will serialize to `1001_1101`
 
@@ -68,7 +68,7 @@ public class MyNetworkBehaviour : NetworkBehaviour
 }
 ```
 
-`Range = 3` so bit count is `2`, causing real range to be -1 to 2
+`Range = 3` so bit count is `2`, causing the real range to be -1 to 2
 
 `direction = -1` will serialize to `00`
 

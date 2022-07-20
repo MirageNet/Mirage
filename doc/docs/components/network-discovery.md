@@ -1,6 +1,6 @@
 # Network Discovery
 
-Suppose your are next to a friend. He starts a game in host mode and you want to join him. How will your phone locate his? Finding out his IP address is not exactly intuitive or something kids can do.
+Suppose you are next to a friend. He starts a game in host mode and you want to join him. How will your phone locate his? Finding out his IP address is not exactly intuitive or something kids can do.
 
 To solve this problem you can use Network Discovery. When your game starts, it sends a message in your current network asking "Is there any server available?". Any server within the same network will reply and provide information about how to connect to it.
 
@@ -24,9 +24,9 @@ In the NetworkDiscoveryHUD, the NetworkDiscovery component should be assigned au
 
 To use Network Discovery follow these steps:
 
-1.  Create a gameobject with a NetworkManager if you have not done so already
+1.  Create a game object with a NetworkManager if you have not done so already
 2.  Do not add a NetworkManagerHUD. Discovery has a different UI component.
-3.  Add a NetworkDiscoveryHUD component to the NetworkManager gameobject.  
+3.  Add a NetworkDiscoveryHUD component to the NetworkManager game object.  
     A NetworkDiscovery component will be automatically added and wired up to your HUD.
 4.  Add a player to the NetworkManager if you have not done so.
 5.  Build and run a standalone version
@@ -45,7 +45,7 @@ Sometimes you want to provide more information in the discovery messages. Some u
 
 -   The client can show if the server is in PvP or PvE mode
 -   The client can show how full the servers are.
--   The client can show the ping to each server so the player can chose the fastest server
+-   The client can show the ping to each server so the player can choose the fastest server
 -   The client can show the language
 -   The client can show if the server is password protected
 

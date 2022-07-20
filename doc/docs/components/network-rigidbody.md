@@ -1,7 +1,7 @@
 # Network Rigidbody
 
 :::caution
-The Network Rigidbody class as "Experimental" for now so please share any problems or bugs you find with it and use at your own risk if production builds. 
+The Network Lerp Rigidbody is marked as "Experimental" for now so please share any problems or bugs you find with it and use it at your own risk if production builds. 
 :::
 
 The Network Rigidbody component synchronizes velocity and other properties of a rigidbody across the network. This component is useful when you have a non-kinematic rigidbody that have constant forces applied to them, like gravity, but also want to apply forces or change velocity to that rigidbody or server or client with authority. For example, objects that move and jump using rigidbody using gravity.

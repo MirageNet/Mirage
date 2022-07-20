@@ -39,16 +39,16 @@ This is a full list of virtual methods (callbacks) that you can implement on `Ne
 ## Server Only
 
 - OnStartServer
-    - called when behaviour is spawned on server
+    - called when behaviour is spawned on the server
 - OnStopServer
-    - called when behaviour is destroyed or unspawned on server
+    - called when behaviour is destroyed or unspawned on the server
 - OnSerialize
-    - called when behaviour is serialize before it is sent to client, when overriding make sure to call `base.OnSerialize`
+    - called when behaviour is serializing before it is sent to a client, when overriding make sure to call `base.OnSerialize`
 
 ## Client only
 
 - OnStartClient
-    - called when behaviour is spawned on client 
+    - called when behaviour is spawned on a client 
 - OnStartAuthority
     - called when behaviour has authority when it is spawned (eg local player)
     - called when behaviour is given authority by the sever
@@ -58,7 +58,7 @@ This is a full list of virtual methods (callbacks) that you can implement on `Ne
 - OnStopAuthority
     - called when authority is taken from the object (eg local player is replaced but not destroyed)
 - OnStopClient
-    - called when object is destroyed on client by the `ObjectDestroyMessage` or `ObjectHideMessage` messages
+    - called when an object is destroyed on a client by the `ObjectDestroyMessage` or `ObjectHideMessage` messages
 
 
 # Example flows 
@@ -78,7 +78,7 @@ When `NetworkServer.Spawn` is called (eg when new client connections and a playe
 
 ### Client mode
 
-When local player is spawned for client
+When the local player is spawned for the client
 -   `OnStartAuthority`
 -   `OnStartClient`
 -   `OnStartLocalPlayer`

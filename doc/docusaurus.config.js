@@ -11,12 +11,6 @@ const repoName = process.env.REPO_NAME ?? "Mirage";
 
 const githubUrl = `https://github.com/${orgName}/${repoName}`;
 
-const fs = require('fs');
-
-if(!fs.existsSync("docs/reference/overview.md")) {
-  fs.writeFileSync("docs/reference/overview.md", "# Overview")
-}
-
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "Mirage Networking",
@@ -75,7 +69,7 @@ const config = {
           },
           {
             type: "doc",
-            docId: "reference/overview",
+            docId: "reference/Mirage/Mirage",
             position: "left",
             label: "API Reference",
           },

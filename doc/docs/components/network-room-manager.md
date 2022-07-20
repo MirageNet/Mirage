@@ -1,12 +1,14 @@
 # Network Room Manager
 
-\*\*Please see the Room example in the Examples folder in your Mirage folder
+:::tip
+Please see the Room example in the Examples folder in your Mirage folder
+:::
 
 The Network Room Manager is a specialized type of [Network Manager](/docs/components/network-manager) that provides a multiplayer room before entering the main play scene of the game. It allows you to set up a network with:
 -   A maximum player limit
 -   Automatic start when all players are ready
 -   Option to prevent players from joining a game in progress
--   Customizable ways for players to choose options while in room  
+-   Customizable ways for players to choose options while in the room  
 
 There are two types of character objects with the Network Room Manager:
 

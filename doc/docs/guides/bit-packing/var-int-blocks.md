@@ -4,7 +4,7 @@
 This page is a work in progress
 :::
 
-Packs and integer value based on its size
+Packs an integer value based on its size
 
 ### Supported Types
 
@@ -19,7 +19,7 @@ Packs and integer value based on its size
 
 ### Example 1
 
-A modifier which can be added to a character value to increase or decrease it
+A modifier that can be added to a character value to increase or decrease it
 
 ```cs
 public class MyNetworkBehaviour : NetworkBehaviour 
@@ -29,7 +29,7 @@ public class MyNetworkBehaviour : NetworkBehaviour
 }
 ```
 
-`Range = 200` so bit count is 8, causing real range to be -100 to 155
+`Range = 200` so bit count is 8, causing the real range to be -100 to 155
 
 `modifier = 57` will serialize to `1001_1101`
 
@@ -60,7 +60,7 @@ public class MyNetworkBehaviour : NetworkBehaviour
 }
 ```
 
-`Range = 3` so bit count is `2`, causing real range to be -1 to 2
+`Range = 3` so bit count is `2`, causing the real range to be -1 to 2
 
 `direction = -1` will serialize to `00`
 

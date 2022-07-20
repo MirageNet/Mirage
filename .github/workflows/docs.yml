@@ -46,7 +46,7 @@ jobs:
           args: metadata --logLevel Warning doc/docfx.json
 
       - name: Convert metadata to markdown
-        uses: fillefilip8/DocFxToMarkdown@v1.0.2
+        uses: fillefilip8/DocFxToMarkdown@1.3.0
         with:
           input-folder: doc/api
           output-folder: doc/docs/reference

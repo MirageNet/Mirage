@@ -14,7 +14,7 @@ The Network Proximity Checker component controls the visibility of game objects 
 
 With the Network Proximity Checker, a game running on a client doesn’t have information about game objects that are not visible. This has two main benefits: it reduces the amount of data sent across the network, and it makes your game more secure against hacking.
 
-This component relies on physics to calculate visibility, so observer game objects must also have a collider component on it.
+This component relies on physics to calculate visibility, so observer game objects must also have a collider component on them.
 
 A game object with a Network Proximity Checker component must also have a Network Identity component. When you create a Network Proximity Checker component on a game object, Mirage also creates a Network Identity component on that game object if it does not already have one.
 

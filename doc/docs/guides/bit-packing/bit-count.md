@@ -2,7 +2,7 @@
 
 The bit count of Integer based fields can be set using the [BitCountAttribute](/docs/reference/Mirage.Serialization/BitCountAttribute).
 
-This will truncate the bits so that only the small bits are sent. There is no range checking for values using BitCount, so value that are too big or negative will not be unpacked correctly
+This will truncate the bits so that only the small bits are sent. There is no range checking for values using BitCount, so the value that is too big or negative will not be unpacked correctly
 
 This means that `BitCount` should not be used with values that can be negative because this data will be lost. If you do need to send negative values then use [ZigZagEncode](/docs/guides/bit-packing/zig-zag-encode) or [BitCountFromRange](/docs/guides/bit-packing/bit-count-from-range)
 
@@ -10,7 +10,7 @@ This means that `BitCount` should not be used with values that can be negative b
 
 - A Value with a maximum value
 - An index in an array of known size
-    - eg array with 10 elements, index can be sent as 4 bits
+    - eg array with 10 elements, the index can be sent as 4 bits
 - A Random int hash where you only need to send 16 bits
 
 ### Supported Types

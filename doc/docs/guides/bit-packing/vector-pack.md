@@ -15,7 +15,7 @@ These attributes work in the same way as [FloatPack](/docs/guides/bit-packing/fl
 
 ### Example 1
 
-A Position in bounds +-100 in all xyz with 0.05 precision for all axis 
+A Position in bounds +-100 in all XYZ with 0.05 precision for all axis 
 
 ```cs
 public class MyNetworkBehaviour : NetworkBehaviour 
@@ -27,7 +27,7 @@ public class MyNetworkBehaviour : NetworkBehaviour
 
 ### Example 2
 
-A Position in bounds +-100 in all xz with 0.05 precision, but with +-20 and precision 0.1 in y axis
+A Position in bounds +-100 in all XZ with 0.05 precision, but with +-20 and precision 0.1 in y-axis
 
 ```cs
 public class MyNetworkBehaviour : NetworkBehaviour 

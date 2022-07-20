@@ -4,4 +4,4 @@ build
 .docusaurus
 .env
 .idea/*
-docs/reference/*.md
+/docs/reference/

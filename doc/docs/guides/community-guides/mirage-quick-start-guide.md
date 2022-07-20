@@ -9,14 +9,14 @@ This guide covers the following topics:
 - [Names And Colours](#names-and-colours)
 - [Weapon Switching](#weapon-switching)
 
-It is best to first make a mini practice game before converting your single player game, or creating your ideal brand new multiplayer.
+It is best to first make a mini practice game before converting your single-player game or creating your ideal brand new multiplayer.
 
-The Pre-made Mirage examples are great for using as reference, it is recommend to use them regarding connection setup, with ports and firewalls. This can be a huge topic that changes from person to person, and is not covered in this guide, here we will use localHost (multiple games on same PC).
+The Pre-made Mirage examples are great for using as reference, it is recommended to use them regarding connection setup, with ports and firewalls. This can be a huge topic that changes from person to person and is not covered in this guide, here we will use localHost (multiple games on the same PC).
 To achieve this, let's first create a new blank project on Unity Hub, after the editor opened up, we can move forward.
 
 ## Installation
 
-Before everything, to install Mirage we need to add a new package manager into our project. To do this, we can go into `Edit menu` then `Project Settings`.
+Before everything, to install Mirage we need to add a new package manager repository to our project. To do this, we can go into `Edit menu` and then `Project Settings`.
 This will open a new Editor Window with multiple tabs. The one we are looking for is `Package Manager`, so click there.
 Once you click there, you should add a new Package Manager, so complete the fields as we show next and click apply
 
@@ -31,49 +31,50 @@ Scopes:
 
 ![Add scoped registry](/img/guides/community-guides/mirage-quick-start-guide/scoped-registry.png)
 
-Once everything is ready, the next step is to close the Project Settings window, and jump into the `Package Manager`. So for this we click on `Window menu` then `Package Manager`. 
+Once everything is ready, the next step is to close the Project Settings window, and jump into the `Package Manager`. So for this, we click on `Window menu` and then `Package Manager`. 
 At this window, we will click on a small button that says (probably, at today date on Unity Editor 2021.13f) `Packages: In Project`, here we have to select `My registries`.
 Once, you've done that, we should be able to see Mirage and a few transport and also plugins in that list.
-After select, you can choose the version on the list below the name, otherwise you can just click install on the bottom right part of the window and after a loading bar, that's it. You already have Mirage API on your code, congrats!
+After selecting, you can choose the version on the list below the name, otherwise, you can just click install on the bottom right part of the window and after a loading bar, that's it. You already have Mirage API on your code, congrats!
 
 ![Install Mirage](/img/guides/community-guides/mirage-quick-start-guide/install-mirage.png)
 
-NOTE: Mirage already includes a UDP transport, so for this guide is not necessary download anything else than Mirage.
+:::note
+Mirage already includes a UDP transport, so for this guide is not necessary to download anything else than Mirage.
+:::
 
 ## Creating A Network Manager
 
 Here we will be following a couple of steps, so it is easier to follow me.
 
-- Right click on your Scenes folder, then click on Create new scene, save it as `Main Scene`, and add it to build settings
-- Mirage already have a menu for creating a base network manager, so right click on your Scene hierarchy then go to `Create => Network => NetworkManager`
-- Now you will see a pre configured GameObject called `NetworkManager`
+- Right-click on your Scenes folder, then click on Create new scene, save it as `Main Scene`, and add it to build settings
+- Mirage already has a menu for creating a base network manager, so right-click on your Scene hierarchy then go to `Create => Network => NetworkManager`
+- Now you will see a pre-configured GameObject called `NetworkManager`
 
 ![Network Manager](/img/guides/community-guides/mirage-quick-start-guide/network-manager.jpg)
 
-Important stuff about this objects
-```
-    CharacterSpawner is the one will be in charge of spawning your player later, so this is very important object
-    Since we are not changing scenes between server open or close, we could disable the NetworkSceneManager, but we can leave it as it is.
-    UdpSocketFactory is the one that does the connection, so you can change the IP and port if necessary there.
-```
+Important stuff about these objects
 
-Now let's setup a few things on the scene, to make it look more like a game
+>CharacterSpawner is the one will be in charge of spawning your player later, so this is very important object.  
+>Since we are not changing scenes between server open or close, we could disable the NetworkSceneManager, but we can leave it as it is.  
+>UdpSocketFactory is the one that does the connection, so you can change the IP and port if necessary there.
+
+Now let's set up a few things on the scene, to make it look more like a game
 - Add a simple Plane floor with: 
     - positions (0, -1, 0)
     - scale (2, 2, 2)
-- Next we add a GameObject, name with name `StartPosition1` 
+- Next, we add a GameObject, name with the name `StartPosition1` 
     - set position (1, 1, 1)
 - We go back to our `NetworkManager GO`, over `Character Spawner` component we will change the `Player Spawn Method` from Random to Round Robin.
-    - As a second step, we will add into the `Start Positions` list the one we created on the previous step.
-- (Optional) you can create more positions if you want, and you can add them into the list, is not necessary but maybe looks nice.
+    - As a second step, we will add to the `Start Positions` list the one we created in the previous step.
+- (Optional) you can create more positions if you want, and you can add them to the list, is not necessary but maybe looks nice.
 
 ## Player Movement
 
-So after we configure the basics, we need to create our player prefab in order to be able to spawn ourself in the network.
+So after we configure the basics, we need to create our player prefab in order to be able to spawn ourselves in the network.
 As before, we will follow a couple of easy steps.
 
 - Create a capsule in the scene hierarchy and name it Player
-- Attached a `NetworkIdentity` and `NetworkTransform` component into the capsule.
+- Attach a `NetworkIdentity` and `NetworkTransform` component into the capsule.
 - Tick Client Authority on the NetworkTransform
 
 This is how our Player GO components should look right now
@@ -85,14 +86,14 @@ NOTE: Is not needed to set anything else here, `Server Object Manager` and `Clie
 Next steps:
 - Add a new Script, call it `PlayerScript`
 - Then drag this GO with the mouse into the assets folder (You should probably create a Prefabs folder later as a good practice) and release the mouse there. That will create a Prefab for us. (You can notice this was successful because your GO icon in the scene hierarchy will be blue now)
-- Then delete Player from scene
+- Then delete Player from the scene
 
 At this stage, our player is done, so right now we need to tell Mirage who is our player in order to spawn it.
 So this is very easy, just go to your `NetworkManager` GO and open (if it is not) Character Spawner, then drag the player prefab we created before in the `Player Prefab` field.
 
 ![](/img/guides/community-guides/mirage-quick-start-guide/spawn-player.jpg)
 
-The last step we will need to do, is simple go to our script we created before (you can go into the assets folder and it will be there) and double click it and it will open your IDE. So what we will need to do is simple tell how we are moving the user, and also to set the camera as child of the player.
+The last step we will need to do is simple: go to the script we created before (you can go into the assets folder and it will be there) and double click it and it will open your IDE. So what we will need to do is simple: tell how we are moving the user, and also to set the camera as a child of the player.
 
 We can do that simply like this:
 ```cs
@@ -127,24 +128,24 @@ namespace GettingStarted
 }
 ```
 
-Press play in Unity editor and... what happen? Why is our player don't spawning? 
-Well, the question is very simple. You need to start the server somehow, and that's what comming next, but before...
+Press play in Unity editor and... what happened? Why is our player don't spawning? 
+Well, the question is very simple. You need to start the server somehow, and that's what coming next, but before...
 
 ### Types of servers
 
-On Mirage has two types of server:
-- You can create a server only game, which runs as an Authoritative kind, and takes decision for every player and you must join always as a client ([For more info you can click here](https://www.gabrielgambetta.com/client-server-game-architecture.html)).
-- You can create a host server. Which will work as client + server and will take decisions for every other clients in the network
+On Mirage has two types of servers:
+- You can create a server-only game, which runs as an Authoritative kind, and takes decisions for every player and you must join always as a client ([For more info you can click here](https://www.gabrielgambetta.com/client-server-game-architecture.html)).
+- You can create a host server. Which will work as client + server and will take decisions for every other client in the network
 
 Which one is the best? That depends on your game, we can't know certainly in this guide.
 
 ### Why are you telling me this now?
 
-Because in this guide we will be working on Server + Client type, so we want you to know that there are other ways to connect into the Server besides this guide.
+Because in this guide we will be working on Server + Client type, so we want you to know that there are other ways to connect to the Server besides this guide.
 
 ### Continuing with the guide
 
-Now, we need to connect into our server, so for this we have two roads, write down a script and make the server start or just using the HUD
+Now, we need to connect to our server, so for this, we have two roads, write down a script and make the server start, or just use the HUD.
 
 ## Initiate Server By Scripting
 
@@ -173,16 +174,15 @@ namespace GettingStarted
 }
 ```
 
-After we save the file, we go back into our `NetworkManager` GO, and assign the NetworkManager field into the script.
+After we save the file, we go back into our `NetworkManager` GO, and assign the NetworkManager field to the script.
 
 ![](/img/guides/community-guides/mirage-quick-start-guide/start-server-script.jpg)
 
 ## Understanding Network Hud
 
-TODO
-
-> [!WARNING] 
-> From here: This guide was written for mirror so some information might be out-of-date for mirage
+:::danger TODO
+From here: This guide was written for Mirror so some information might be out-of-date for Mirage
+:::
 
 ## Names And Colours
 
@@ -277,7 +277,7 @@ Add the `PlayerNameText` and `FloatingInfo` objects into the script on the playe
 
 ![](/img/guides/community-guides/mirage-quick-start-guide/image--009.jpg)
 
-Now if you build and run, host on one, join on the other, you will see player names and colors synced across the network! 
+Now if you build and run, host on one, and join on the other, you will see player names and colors synced across the network! 
 
 Well done, 5 stars to you!
 
@@ -289,9 +289,9 @@ Well done, 5 stars to you!
 
 A scene networked object all can access and adjust.
 
-Create a SceneScript.cs, add it onto an empty GameObject in the scene called SceneScript.
+Create a SceneScript.cs, and add it onto an empty GameObject in the scene called SceneScript.
 
-Then create a Canvas with text and button, similar to below.
+Then create a Canvas with text and a button, similar to the image below.
 
 ![](/img/guides/community-guides/mirage-quick-start-guide/image--011.jpg)
 
@@ -365,12 +365,12 @@ namespace QuickStart
 
 - Attach the ButtonSendMessage function to your Canvas Button.
 - Attach Canvas Scene Text to SceneScript variable.
-    - ignore SceneScript’s, playerScript variable, it automatically sets this!
+    - ignore SceneScript’s, `playerScript` variable, it automatically sets this!
 
 ![](/img/guides/community-guides/mirage-quick-start-guide/image--012.jpg) 
 ![](/img/guides/community-guides/mirage-quick-start-guide/image--013.jpg)
 
-Now if you build and run, host and join, you can send messages, and have a text log for actions!
+Now if you build and run, host, and join, you can send messages, and have a text log for actions!
 
 Wahooo!
 
@@ -429,7 +429,7 @@ void Awake()
     }
 }
 ```
-Add the weapon switch button in update. Only local player switches its own weapon, so it goes below the `!isLocalPlayer` check.
+Add the weapon switch button in `Update`. Only the local player switches its own weapon, so it goes below the `!IsLocalPlayer` check.
 ```cs
 void Update()
 {
@@ -466,12 +466,12 @@ Add the basic cube weapons first, change these later.
 
 - Double click your player prefab to enter it
 - Add a "WeaponsHolder" empty GameObject, with position and rotation at 0,0,0.
-- Inside that GameObject, create a cube from unity menu, (GameObject, 3D object, cube)- Remove the box colliders.
+- Inside that GameObject, create a cube from the Unity menu, (GameObject, 3D object, cube)- Remove the box colliders.
 - Rename this `Weapon1`, change position and scale to match the below pictures.
 
 ![](/img/guides/community-guides/mirage-quick-start-guide/image--017.jpg)
 
-Duplicate weapon 1 for a Weapon 2, and change its scale and position, now you should have 2 different looking ‘weapons’!
+Duplicate weapon 1 for Weapon 2, and change its scale and position, now you should have 2 different looking ‘weapons’!
 
 ![](/img/guides/community-guides/mirage-quick-start-guide/image--018.jpg)
 

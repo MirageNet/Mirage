@@ -4,23 +4,22 @@ sidebar_position: 2
 
 # Getting Started
 
-This document describes the steps to creating a multiplayer game with Mirage. The process described here is a simplified, higher level version of the actual process for a real game; it doesn’t always work exactly like this, but it provides a basic recipe for the process.
+This document describes the steps to creating a multiplayer game with Mirage. The process described here is a simplified, higher-level version of the actual process for a real game; it doesn’t always work exactly like this, but it provides a basic recipe for the process.
 
-## Video tutorials
+## Video Tutorials
 
-Currently there are no mirage specific videos. You can use Mirror existing videos alongside our [Mirror to Mirage Conversion](/docs/guides/mirror-migration) guide.
+Currently, there are no Mirage-specific videos. You can use Mirror's existing videos alongside our [Mirror to Mirage Conversion](/docs/guides/mirror-migration) guide.
 
-## Networking set-up
+## Networking Set-Up
 -   Right click in the Scene, select *Network* → *NetworkManager*. This will create a new GameObject with all the necessary networking components set up for you.
--   Add the NetworkManagerHUD component to the game object. This provides an out of the box canvas ui system that you can use and create your own ui with. Assign the variables
-to properly setup the ui so everything will interact with network code. In future we will be providing out of the box ui that auto set's up.
+-   Add the NetworkManagerHUD component to the game object. This provides an out-of-the-box canvas UI system that you can use and create your own UI. Assign the variables to properly set up the UI so everything will interact with network code. In the future, we will be providing out-of-the-box UI that auto sets up.
 
 See [Using the NetworkManager](/docs/components/network-manager).
 
 ## Player Prefab
 - Create a new prefab in your project.
-- Add a NetworkIdentity component to the player Prefab
-- Set the `playerPrefab` field on the `CharacterSpawner` component to the player Prefab. You can find this component on the GameObject you created in the first setup.
+- Add a NetworkIdentity component to the player prefab
+- Set the `playerPrefab` field on the `CharacterSpawner` component to the player prefab. You can find this component on the GameObject you created in the first setup.
 
 See [character objects](/docs/guides/game-objects/spawn-player) for more information.
 
@@ -32,13 +31,13 @@ require physics to be also part of your normal movement calculations suggestion 
 
 :::caution
 Currently network transform and network rigid body components cannot handle various lag and drop of packets. Jitter or lag behind may occur. We are working
-to improve these components and have a better lag and jitter control in the future.
+to improve these components and have better lag and jitter control in the future.
 - Add the correct movement component you require.
-- Check box client authority under the component if you want the player to be able to fully control movement without server controlling it.
+- Check box client authority under the component if you want the player to be able to fully control movement without the server controlling it.
 :::
 
 :::caution
-If client authority is checked then hacking can occur due to trusting clients and accepting there movement. if you do not want this do not check client authority under the component and you will require to send commands to server to allow movement to occur.
+If client authority is checked then hacking can occur due to trusting clients and accepting their movement. if you do not want this do not check client authority under the component and you will require to send commands to the server to allow movement to occur.
 - Update input and control scripts to reflect what type of control you want. See below for different examples.
 :::
 
@@ -46,7 +45,7 @@ If client authority is checked then hacking can occur due to trusting clients an
 If you require a camera to run on player prefab subscribe to `Identity.OnStartLocalPlayer` event to take control of the Main Camera in the scene for the player. You do not need a camera on every player prefab.
 :::
 
-Example if client authority has been checked and you trust clients. Never trust clients tho.
+For example, if client authority has been checked and you trust clients. Never trust clients though.
 
 ```cs
 using UnityEngine;
@@ -67,7 +66,7 @@ public class Controls : NetworkBehaviour
 }
 ```
 
-Example if server authority is going to be used.
+For example, if server authority is going to be used.
 
 ```cs
 using UnityEngine;
@@ -114,8 +113,8 @@ See [Remote Actions](/docs/guides/remote-actions/).
 
 Fix non-player prefabs such as enemies:
 -   Add the `NetworkIdentify` component
--   Add the correct component needed to sync movement as state above with player movement.
--   Once all objects have a network identity. Find ClientObjectManager under the `NetworkManager` game object in scene and hit register prefabs.
+-   Add the correct component needed to sync movement as the state above with player movement.
+-   Once all objects have a network identity. Find ClientObjectManager under the `NetworkManager` game object in the scene and hit register prefabs.
 -   Update scripts with game state and actions
 
 ## Spawners
@@ -124,5 +123,5 @@ Fix non-player prefabs such as enemies:
 -   Call `ServerObjectManager.Spawn()` for created game objects
 
 ## Spawn positions for players
--   Add a new game object and place it at player’s start location
+-   Add a new game object and place it at the player's start location
 -   Add this GameObject to the `CharacterSpawner`'s `Positions` list.

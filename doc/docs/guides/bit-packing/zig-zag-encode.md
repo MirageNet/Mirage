@@ -1,6 +1,6 @@
 # ZigZag Encode
 
-To encode a value using [ZigZag Encoding](https://gist.github.com/mfuerstenau/ba870a29e16536fdbaba) you can use the <xref:Mirage.Serialization.ZigZagEncodeAttribute> 
+To encode a value using [ZigZag Encoding](https://gist.github.com/mfuerstenau/ba870a29e16536fdbaba) you can use the [ZigZagEncodeAttribute](/docs/reference/Mirage.Serialization/ZigZagEncodeAttribute)
 
 This will cause negative values to be encoded as positive so that the sign bit is not lost when packing.
 
@@ -26,7 +26,7 @@ The sign of a value will take up 1 bit, so if the value is in the range -+100 it
 
 ### Example 1
 
-A modifier which can be added to a character value to increase or decrease it
+A modifier that can be added to a character value to increase or decrease it
 
 ```cs
 public class MyNetworkBehaviour : NetworkBehaviour 
@@ -36,7 +36,7 @@ public class MyNetworkBehaviour : NetworkBehaviour
 }
 ```
 
-`Range = 200` so bit count is 8, causing real range to be -128 to 127
+`Range = 200` so bit count is 8, causing the real range to be -128 to 127
 
 `modifier = 57` will serialize to `0111_0010`
 

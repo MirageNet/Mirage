@@ -14,7 +14,7 @@ Mirage scans your code looking for calls to `Send`, `ReceiveHandler`, `Write` or
 It will also recognize [SyncVars](/docs/guides/sync/) and parameters of [Remote Calls](/docs/guides/remote-actions/). 
 If it does not find one, it assumes you are not trying to serialize the type so it does not generate the reader and writer.
 
-For example, you might get this error with this code when trying to sync the synclist.
+For example, you might get this error with this code when trying to sync the [SyncList](/docs/guides/sync/sync-list).
 
 ```cs
 public struct MyCustomType

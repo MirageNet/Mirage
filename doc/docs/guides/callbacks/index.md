@@ -1,8 +1,8 @@
 # Callbacks Overview
 
-When you are making a multiplayer game, In addition to synchronizing the properties of networked game objects, you are likely to need to send, receive, and react to other pieces of information - such as when the match starts, when a player joins or leaves the match, or other information specific to your type of game, for example a notification to all players that a flag has been captured in a “capture-the-flag” style game.
+When you are making a multiplayer game, In addition to synchronizing the properties of networked game objects, you are likely to need to send, receive, and react to other pieces of information - such as when the match starts, when a player joins, or leaves the match, or other information specific to your type of game, for example, a notification to all players that a flag has been captured in a “capture-the-flag” style game.
 
-Within the Mirage networking High-Level API there are three main ways to communicate this type of information.
+Within the Mirage networking High-Level API, there are three main ways to communicate this type of information.
 
 ## Remote Actions
 
@@ -16,4 +16,4 @@ Networking callbacks allow you to hook into built-in Mirage events which occur d
 
 ## Network Messages
 
-Network messages are a “lower level” approach to sending messages (although they are still classed as part of the networking “High level API”). They allow you to send data directly between clients and the server using scripting. You can send basic types of data (int, string, etc) as well as most common Unity types (such as Vector3). Since you implement this yourself, these messages are not associated directly with any particular game objects or Unity events - it is up to you do decide their purpose and implement them!
+Network messages are a “lower level” approach to sending messages (although they are still classed as part of the networking "High-level API"). They allow you to send data directly between clients and the server using scripting. You can send basic types of data (int, string, etc) as well as most common Unity types (such as Vector3). Since you implement this yourself, these messages are not associated directly with any particular game objects or Unity events - it is up to you to decide their purpose and implement them!

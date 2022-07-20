@@ -6,7 +6,7 @@ title: Google Cloud Services
 
 This guide will explain how to set up a Linux server running on [Google Cloud](https://cloud.google.com/).
 
-Google cloud offers $300 free credits to new users for a limited time, and it also have "Always free products". See [overview](https://cloud.google.com/free) and [docs](https://cloud.google.com/free/docs/gcp-free-tier) for more information.
+Google cloud offers $300 free credits to new users for a limited time, and it also has "Always free products". See [overview](https://cloud.google.com/free) and [docs](https://cloud.google.com/free/docs/gcp-free-tier) for more information.
 
 
 ## Before you begin
@@ -39,17 +39,17 @@ If this is your first instance you will see a dialog prompting you to create a n
 
     - Name your instance. This tutorial uses the instance name `mirror-instance-demo` throughout.
     - Select the region and zone in which you want your instance to be hosted. This tutorial uses the region `us-central1 (Iowa)` and the zone `us-central1-a` throughout.
-    - Machine configuration depends on the size of your game. For a simple example we can use a small server.
+    - Machine configuration depends on the size of your game. For a simple example, we can use a small server.
         - select `N1` for series
         - select `f1-micro` for machine type
     - In the Boot disk section, click Change. The Boot disk dialog will pop up.
     - Change the disk type to SSD Persistent Disk.
 
-![create instance with name and region](/img/guides/development-servers/google-cloud/02-create-instance-name-region.jpg)
+![create an instance with name and region](/img/guides/development-servers/google-cloud/02-create-instance-name-region.jpg)
 
 4) Boot disk can be left as default `10gb standard persistent disk` with `Debian GNU/Linux 9 (stretch)` for this tutorial.
 
-You may want to change it to best fit your needs. You can instead use an ssd or increase its size, however this will increase the monthly cost. 
+You may want to change it to best fit your needs. You can instead use an SSD or increase its size, however, this will increase the monthly cost. 
 
 ![Boot disk](/img/guides/development-servers/google-cloud/03-boot-disk.jpg)
 
@@ -73,13 +73,13 @@ This tutorial use `mirror-demo` as the tag
 
     b) Select the **External IP** dropdown and select `Create IP address`
 
-    c) Enter a name for this ip and press **Reserve**. For this tutorial we will use `mirror-demo-ip`
+    c) Enter a name for this IP and press **Reserve**. For this tutorial, we will use `mirror-demo-ip`
 
 ![reserve ip address](/img/guides/development-servers/google-cloud/06-ip-address.jpg)
 
 8) Create your instance. 
 
-Press the **Create** button at the bottom of the page to finish set up and create your instance
+Press the **Create** button at the bottom of the page to finish set-up and create your instance
 
 ## Configure Firewall
 
@@ -100,12 +100,12 @@ This will allow other people to connect to your server using its IP and port
     - Protocols or ports: Select UDP, and then enter port 7777 into the field provided.
 
 :::note
-UDP and port 7777 is default settings for socket, if you are using a different socket you will need to find out what settings that uses.
+UDP and port 7777 are the default settings for the socket, if you are using a different socket you will need to find out what settings that uses.
 :::
 
 ![Create network rule](/img/guides/development-servers/google-cloud/07-create-network-rule.jpg)
 
-4) Press **Create** to confirm setting and create the rule.
+4) Press **Create** to confirm the setting and create the rule.
 
 ## Connect to your new instance
 
@@ -113,11 +113,11 @@ Once your instance has finished being created you can press the **SSH** button t
 
 ![connect to instance](/img/guides/development-servers/google-cloud/08-connect-to-instance.jpg)
 
-## Setting up the linux instance
+## Setting up the Linux instance
 
 When you first connect you will need to set up a few things
 
-1) First update the list of packages
+1) First, update the list of packages
 ```sh
 sudo apt-get update
 ```
@@ -127,7 +127,7 @@ sudo apt-get update
 sudo apt-get install -y screen unzip
 ```
 
-`screen` allows you to have multiple terminals, allows you do do other stuff while your game is running
+`screen` allows you to have multiple terminals, allows you to do other stuff while your game is running
 
 `unzip` unzips can be used to extract files from a ZIP file after you upload it to the instance 
 
@@ -156,12 +156,12 @@ cd ~
 ```
 
 :::note
-The destination will be `/home/username` where username should be the cloud account you are logged into. 
+The destination will be `/home/username` where the username should be the cloud account you are logged into. 
 :::
 
 ![Uploading](/img/guides/development-servers/google-cloud/12-uploading.jpg)
 
-Once your file has finished upload you can extract the files
+Once your file has finished the upload you can extract the files
 
 ```sh
 unzip ./mirror-demo.zip 
@@ -169,7 +169,7 @@ unzip ./mirror-demo.zip
 
 ## Run server
 
-1) Move into game folder
+1) Move into the game folder
 ```sh
 cd mirror-demo
 ```
@@ -196,7 +196,7 @@ The parts of the command above:
 - `-logfile ~/server.log` unity argument for log file location, this will create a log file in the home directory
 
 
-4) Create start file so you can start your server the same way each time
+4) Create a start file so you can start your server the same way each time
 
     a) create `start.sh`
     ```
@@ -223,7 +223,7 @@ screen -ls
 ```
 
 - Attach to existing screen, 
-    - process-id is show when calling `screen -ls`
+    - process-id is shown when calling `screen -ls`
     - screen name is given by `-S` when creating the screen, for this tutorial it was `mirrorServer`
 ```sh
 screen -r <process-id | screen name>
@@ -238,16 +238,16 @@ Once attached to a screen you can press `CTRL + C` to stop the process, this wil
 
 ### View log files
 
-You can use the `-logfile ~/path/to/log.log` argument for Unity when starting your game server. This will cause the logs to be written to a file instead of to the terminal. This will means recent logs wont show up in `screen -r`.
+You can use the `-logfile ~/path/to/log.log` argument for Unity when starting your game server. This will cause the logs to be written to a file instead of to the terminal. This will means recent logs won't show up in `screen -r`.
 
-- you can use the `tail` command to view the the end of the log file
+- you can use the `tail` command to view the end of the log file
 
 ```sh
 tail -n 50 ./server.log 
 ```
 - you can use the `-n` argument to set how many lines to show
 
-- you can use the `-f` argument follow the end of the file stream showing you any new logs that are written to the file in real time. You will need to press `CTRL + C` to exit follow mode
+- you can use the `-f` argument to follow the end of the file stream showing you any new logs that are written to the file in real-time. You will need to press `CTRL + C` to exit follow mode
 
 
 
