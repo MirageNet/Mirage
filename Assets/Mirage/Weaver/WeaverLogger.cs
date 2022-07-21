@@ -12,6 +12,12 @@ namespace Mirage.Weaver
     {
         public List<DiagnosticMessage> Diagnostics = new List<DiagnosticMessage>();
 
+        public bool EnableTrace { get; }
+
+        public WeaverLogger(bool enableTrace)
+        {
+            EnableTrace = enableTrace;
+        }
 
         public void Error(string message)
         {

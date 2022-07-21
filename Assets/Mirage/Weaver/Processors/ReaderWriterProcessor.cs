@@ -62,12 +62,12 @@ namespace Mirage.Weaver
         /// </summary>
         private bool FindAllExtensionMethods()
         {
-            var assemblies = new List<AssemblyDefinition>();
+            var references = new List<AssemblyDefinition>();
             // load all references
             foreach (var reference in module.AssemblyReferences)
             {
                 var assembly = module.AssemblyResolver.Resolve(reference);
-                assemblies.Add(assembly);
+                references.Add(assembly);
             }
 
             // store how many writers are found, we need to check if currentModule adds any
@@ -78,7 +78,7 @@ namespace Mirage.Weaver
             var processed = writers.Count != writeCount || readers.Count != readCount;
 
             // process all references
-            foreach (var assembly in assemblies)
+            foreach (var assembly in references)
             {
                 FindExtensionMethodsInAssembly(assembly);
             }
