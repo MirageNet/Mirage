@@ -20,13 +20,14 @@ namespace Mirage.Weaver
 
         public override ILPostProcessResult Process(ICompiledAssembly compiledAssembly)
         {
-            bool willProcess = WillProcess(compiledAssembly);
-            string logText = willProcess ? "Processing" : "Skipping";
+            var willProcess = WillProcess(compiledAssembly);
+            var logText = willProcess ? "Processing" : "Skipping";
             Log($"{logText} {compiledAssembly.Name}");
             if (!willProcess)
                 return null;
 
-            var logger = new WeaverLogger();
+            var enableTrace = compiledAssembly.Defines.Contains("WEAVER_DEBUG_LOGS");
+            var logger = new WeaverLogger(enableTrace);
             var weaver = new Weaver(logger);
 
             var assemblyDefinition = weaver.Weave(compiledAssembly);

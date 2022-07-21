@@ -6,6 +6,11 @@ namespace Mirage.Weaver
     // todo rename this to IWeaverErrors because it isn't really a logger
     public interface IWeaverLogger
     {
+        /// <summary>
+        /// Should error message show stack trace of errror. Mostly used for debugging weaver
+        /// </summary>
+        bool EnableTrace { get; }
+
         void Error(string message);
         void Error(string message, MemberReference mr);
         void Error(string message, MemberReference mr, SequencePoint sequencePoint);
@@ -21,12 +26,20 @@ namespace Mirage.Weaver
     {
         public static void Error(this IWeaverLogger logger, WeaverException exception)
         {
-            logger.Error(exception.Message, exception.MemberReference, exception.SequencePoint);
+            var message = exception.Message;
+            if (logger.EnableTrace)
+                message += "\n" + exception.ToString();
+
+            logger.Error(message, exception.MemberReference, exception.SequencePoint);
         }
 
         public static void Error(this IWeaverLogger logger, WeaverException exception, SequencePoint sequencePoint)
         {
-            logger.Error(exception.Message, exception.MemberReference, sequencePoint);
+            var message = exception.Message;
+            if (logger.EnableTrace)
+                message += "\n" + exception.ToString();
+
+            logger.Error(message, exception.MemberReference, sequencePoint);
         }
     }
 }

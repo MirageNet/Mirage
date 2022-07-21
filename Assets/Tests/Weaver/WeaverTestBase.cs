@@ -84,7 +84,9 @@ namespace Mirage.Tests.Weaver
 
         private static async Task<Result> buildAndWeave(string outputFile, string[] sourceFiles)
         {
-            var weaverLog = new WeaverLogger();
+            // no trace logs, we mostly want to test what user will see
+            var weaverLog = new WeaverLogger(false);
+
             var assembler = new Assembler(outputFile, sourceFiles);
             var assembly = await assembler.BuildAsync(weaverLog);
             return new Result(weaverLog, assembly, assembler);
