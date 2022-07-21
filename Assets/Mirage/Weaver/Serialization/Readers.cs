@@ -91,7 +91,7 @@ namespace Mirage.Weaver
         protected override MethodReference GenerateCollectionFunction(TypeReference typeReference, TypeReference elementType, Expression<Action> genericExpression)
         {
             // generate readers for the element
-            _ = GetFunction_Thorws(elementType);
+            _ = GetFunction_Throws(elementType);
 
             var readMethod = GenerateReaderFunction(typeReference);
 
