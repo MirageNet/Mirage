@@ -210,5 +210,11 @@ namespace Mirage.Tests.Weaver
         {
             IsSuccess();
         }
+
+        [Test, BatchSafe(BatchType.Success)]
+        public void CanUseStringInMessage()
+        {
+            IsSuccess();
+        }
     }
 }
