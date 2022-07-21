@@ -7,7 +7,7 @@ This page goes into depth about Serialization, for the basics see [Data Types](/
 
 Mirage creates `Serialize` and `Deserialize` functions for types using Weaver. Weaver edits the dll after unity compiles 
 them using [Mono.Cecil](https://github.com/jbevain/cecil). This allows Mirage to have a lot of complex features like 
-SyncVar, ClientRpc and Message Serialization without the user needed to manually set everything up.
+SyncVar, ClientRpc, and Message Serialization without the user needing to manually set everything up.
 
 ## Rules And Tips
 
@@ -15,7 +15,7 @@ There are some rules and limits for what Weaver can do. Some features add comple
 not been implemented. These features are not impossible to implement and could be added if there is a high demand for them.
 
 - You should be able to write Custom Read/Write functions for any type, and Weaver will use them.
-    - This means if there is a unsupported type like `int[][]` creating a custom Read/Write function will allow you to 
+    - This means if there is an unsupported type like `int[][]` creating a custom Read/Write function will allow you to 
     sync `int[][]` in SyncVar/ClientRpc/etc
 - If you have a type that has a field that is not able to be serialized, you can mark that field with 
 `[System.NonSerialized]` and weaver will ignore it
@@ -36,7 +36,7 @@ Types in this list can have custom writers.
 - Generic Types, eg `MyData<T>`
     - Custom Read/Write must declare T, eg `MyData<int>`
 - Interfaces
-- Types that references themselves
+- Types that reference themselves
 
 ### Built-in Read Write Functions
 
@@ -44,13 +44,14 @@ Mirage provides some built-in Read/Write Functions. They can be found in `Networ
 
 This is a non-compete list of types that have built-in functions, check the classes above to see the full list.
 
-- Most [c# primitive types](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/built-in-types)
+- Most [C# primitive types](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/built-in-types)
 - Common Unity structs
     - Vector3
     - Quaternion
     - Rect
     - Ray
     - Guid
+
 - NetworkIdentity, GameObject, Transform
     
 #### NetworkIdentity, GameObject, Transform
@@ -74,18 +75,18 @@ Weaver will generate read/write functions for:
 
 #### Classes and Structs
 
-Weaver will read/write every public field in the type, unless the field is marked with `[System.NonSerialized]`. 
+Weaver will read/write every public field in the type unless the field is marked with `[System.NonSerialized]`. 
 If there is an unsupported type in the class or struct Weaver will fail to make read/write functions for it.
 
-:::note
-Weaver does not check properties
+:::caution
+The weaver does not check properties
 :::
 
 #### Enums
 
 Weaver will use the underlying type of an enum to read and write them. By default this is `int`.
 
-For example `Switch` will use the `byte` read/write functions to be serialized
+For example, `Switch` will use the `byte` read/write functions to be serialized
 ```cs
 public enum Switch : byte
 {
@@ -127,9 +128,7 @@ public static MyType ReadMyType(this NetworkReader reader)
 }
 ```
 
-It is best practice to make read/write functions 
-[extension methods](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/extension-methods) 
-so they can be called like `writer.WriteMyType(value)`.
+It is best practice to make read/write [extension methods](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/extension-methods) so they can be called like `writer.WriteMyType(value)`.
 
 It is a good idea to call them `ReadMyType` and `WriteMyType` so it is obvious what type they are for. However the name of the function doesn't matter, weaver should be able to find it no matter what it is called.
 
@@ -137,7 +136,7 @@ It is a good idea to call them `ReadMyType` and `WriteMyType` so it is obvious w
 
 Weaver won't write properties, but a custom writer can be used to send them over the network.
 
-This can be useful if you want to have private set for your properties
+This can be useful if you want to have `private set` for your properties
 
 ```cs
 public struct MyData
@@ -171,7 +170,6 @@ public static class CustomReadWriteFunctions
 
 Rigidbody is an unsupported type because it inherits from `Component`. But a custom writer can be added so that it is 
 synced using a NetworkIdentity if one is attached.
-
 
 ```cs
 public struct MyCollision
@@ -208,7 +206,7 @@ public static class CustomReadWriteFunctions
 }
 ```
 
-Above are functions for `MyCollision`, but instead you could add functions for `Rigidbody` and let weaver would generate a writer for `MyCollision`.
+Above are functions for `MyCollision`, but instead, you could add functions for `Rigidbody` and let weaver would generate a writer for `MyCollision`.
 ```cs 
 public static class CustomReadWriteFunctions
 {
@@ -232,5 +230,4 @@ public static class CustomReadWriteFunctions
 
 ## Debugging
 
-You can use tools like [dnSpy](https://github.com/0xd4d/dnSpy) or [ILSpy](https://github.com/icsharpcode/ILSpy)
- to view the complied code after Weaver has altered it. This can help with understanding and debug what Mirage and Weaver does.
+You can use tools like [dnSpy](https://github.com/0xd4d/dnSpy) or [ILSpy](https://github.com/icsharpcode/ILSpy) to view the complied code after Weaver has altered it. This can help with understanding and debug what Mirage and Weaver does.

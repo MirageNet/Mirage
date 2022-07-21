@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 # Sync Var
-SyncVars are properties of classes that inherit from [NetworkBehaviour](/docs/reference/Mirage/NetworkBehaviour), which are synchronized from the server to clients. When a game object is spawned, or a new player joins a game in progress, they are sent the latest state of all SyncVars on networked objects that are visible to them. Use the [[SyncVar]](/docs/reference/Mirage/SyncVarAttribute) custom attribute to specify which variables in your script you want to synchronize.
+[`SyncVars`](/docs/reference/Mirage/SyncVarAttribute) are properties of classes that inherit from [NetworkBehaviour](/docs/reference/Mirage/NetworkBehaviour), which are synchronized from the server to clients. When a game object is spawned, or a new player joins a game in progress, they are sent the latest state of all SyncVars on networked objects that are visible to them. Use the [[SyncVar]](/docs/reference/Mirage/SyncVarAttribute) custom attribute to specify which variables in your script you want to synchronize.
 
 :::note
 The state of SyncVars is applied to game objects on clients before [Identity.OnStartClient](/docs/reference/Mirage/NetworkIdentity#onstartclient) event is invoked, so the state of the object is always up-to-date in subscribed callbacks.
@@ -65,7 +65,7 @@ private class Cat : Pet
 }
 ```
 
-You can attach the Cat component to your cat prefab, and it will synchronize both it's `name` and `color`.
+You can attach the Cat component to your cat prefab, and it will synchronize both its `name` and `color`.
 
 :::caution
 Both `Cat` and `Pet` should be in the same assembly. If they are in separate assemblies, make sure not to change `name` from inside `Cat` directly, add a method to `Pet` instead. 
@@ -78,7 +78,7 @@ The `hook` property of SyncVar can be used to specify a function to be called wh
 - The hook callback must have two parameters of the same type as the SyncVar property. One for the old value, one for the new value.
 - The hook is always called after the SyncVar value is set. You don't need to set it yourself.
 - The hook only fires for changed values, and changing a value in the inspector will not trigger an update.
-- Hooks can be virtual methods and overriden in a derived class.
+- Hooks can be virtual methods and overridden in a derived class.
 
 ### Example Client Only
 Below is a simple example of assigning a random color to each player when they're spawned on the server.  All clients will see all players in the correct colors, even if they join later.
@@ -128,8 +128,7 @@ public class Player : NetworkBehaviour
 ```
 
 ### Example Client & Server
-Below is a simple example of assigning a random color to each player when they're spawned on the server. All clients will see all players in the correct colors, even if they join later.
-Server will also fire the event.
+Below is a simple example of assigning a random color to each player when they're spawned on the server. All clients will see all players in the correct colors, even if they join later, the server will also fire the event.
 
 ```cs
 using UnityEngine;
@@ -177,7 +176,7 @@ public class Player : NetworkBehaviour
 
 ## SyncVar Initialize Only
 
-Just like regular SyncVars, when an game object is spawned, or a new player joins a game in progress, they are sent the latest state of all SyncVars on networked objects that are visible to them. 
+Just like regular SyncVars, when a game object is spawned, or a new player joins a game in progress, they are sent the latest state of all SyncVars on networked objects that are visible to them. 
 With the `initialOnly` flag set to true you will now be able to control the state of the SyncVar manually rather than waiting for Mirage to update them. 
 
 :::note

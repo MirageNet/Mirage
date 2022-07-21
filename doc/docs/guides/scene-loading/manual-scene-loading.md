@@ -52,6 +52,6 @@ Make sure to call `ClientObjectManager.PrepareToSpawnSceneObjects` client side b
 
 ### Host mode
 
-If using this setup in Host mode make sure you only load the Scene once, this can be done by checking if the server is active before loading tje scene on the client.
+If using this setup in Host mode make sure you only load the Scene once, this can be done by checking if the server is active before loading the scene on the client.
 
-The rest of the setup should stay the same. In host mode there will be 2 copies of the `NetworkPlayer` one for client side and one for server side. When using `player.SceneIsReady` you will need to make sure you are setting it on both copies of the player. The easiest way to do this is just treat the host client as a normal client and send message, but be aware of any functions you dont want called twice.
+The rest of the setup should stay the same. In host mode, there will be 2 copies of the `NetworkPlayer` one for the client-side and one for the server-side. When using `player.SceneIsReady` you will need to make sure you are setting it on both copies of the player. The easiest way to do this is just to treat the host client as a normal client and send the message, but be aware of any functions you don't want to be called twice.

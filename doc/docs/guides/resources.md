@@ -3,8 +3,8 @@ sidebar_position: 12
 ---
 # Resources
 
-:::info
-Work in progress
+:::caution Work In Progress
+This page is a work in progress
 :::
 
 ## Video Tutorials Playlists

@@ -30,8 +30,8 @@ In Mirage you do it by subscribing to events in [NetworkIdentity](/docs/referenc
 
 ## Server Instantiate
 
-This is done usual by you using Unity's `GameObject.Instantiate` 
-This goes through the regular GameObject Lifecycle events such as Awake, Start, Enabled, etc..
+This is usually done by you using Unity's `GameObject.Instantiate` 
+This goes through the regular GameObject Lifecycle events such as Awake, Start, Enabled, etc...
 Basically this is outside Mirage's control.
 
 [Scene Objects](/docs/guides/game-objects/scene-objects) are normally instantiated as part of the scene.
@@ -59,7 +59,7 @@ public class MyComponent : MonoBehaviour {
 
 You can also simply drag your `OnStartServer` method in the [NetworkIdentity.OnStartServer](/docs/reference/Mirage/NetworkIdentity#onstartserver) event in the inspector.
 
-During the spawn a message will be sent to all the clients telling them to spawn the object. The message
+During the spawn, a message will be sent to all the clients telling them to spawn the object. The message
 will include all the data in [SyncVars](/docs/guides/sync/sync-var), [SyncLists](/docs/guides/sync/sync-list), [SyncHashSet](/docs/guides/sync/sync-hash-set), [SyncDictionary](/docs/guides/sync/sync-dictionary)
 
 ## Client Instantiate
@@ -68,13 +68,13 @@ When an object is spawned,  the server will send a message to the clients tellin
 an asset id.
 
 By default, Mirage will look up all the known prefabs looking for that asset id.  
-Make sure to add your prefabs in the NetworkClient list of prefabs.
+Make sure to add your prefabs to the NetworkClient list of prefabs.
 Then Mirage will instantiate the prefab,  and it will go through the regular Unity Lifecycle events.
 You can customize how objects are instantiated using Spawn Handlers.
 
 Do not add Network logic to these events.  Instead,  use these events to subscribe to network events in NetworkIdentity.
 
-Immediatelly after the object is instantiated, all the data is updated to match the data in the server.
+Immediately after the object is instantiated, all the data is updated to match the data in the server.
 
 ## Client Start Authority
 
@@ -106,7 +106,7 @@ you called [`ServerObjectManager.Destroy(GameObject, Boolean)`](/docs/reference/
 During this state, a message is sent to all the clients to unspawn the object.
 The event [NetworkIdentity.OnStopServer](/docs/reference/Mirage/NetworkIdentity#onstopserver) will be invoked. 
 
-Subscribe to this event either by using `AddListener`,  or adding your method to the event in the inspector.
+Subscribe to this event either by using `AddListener`, or by adding your method to the event in the inspector.
 
 ## Server Destroy
 
@@ -120,10 +120,10 @@ Note that the server will destroy the object, and will not wait for the clients 
 ## Stop Client
 
 This can be triggered either because the client received an Unspawn message or the client was disconnected
-The event [NetworkIdentity.OnStopClient](/docs/reference/Mirage/NetworkIdentity#onstopclient) will be invoke.  
-Subscribe to this event either by using `AddListener`,  or adding your method to the event in the inspector.
+The event [NetworkIdentity.OnStopClient](/docs/reference/Mirage/NetworkIdentity#onstopclient) will be invoked.  
+Subscribe to this event either by using `AddListener`, or by adding your method to the event in the inspector.
 
-Use it to cleanup any network related resource used by this object.
+Use it to clean up any network-related resource used by this object.
 
 ## Client Destroy
 
@@ -131,4 +131,4 @@ After an object is stopped on the client,  by default unity will call `GameObjec
 Or it will call `GameObject.SetActive(false)` if it is a [Scene Object](/docs/guides/game-objects/scene-objects)
 You can customize how objects are destroying using Spawn Handlers
 
-The normal Unity lifecycle events applies.
+The normal Unity lifecycle events still apply.

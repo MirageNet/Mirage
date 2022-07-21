@@ -18,14 +18,14 @@ using Mirage;
 ```
 
 ## Components
-Many roles that `NetworkManager` fulfilled in Mirror were split into multiple simpler components in Mirage, such as `NetworkClient`, `NetworkServer` and `NetworkSceneManager`. Those classes are no longer static singletons, they are MonoBehaviours instead, so you need to add them to your scene and reference them. `NetworkManager` in Mirage only serves as a reference holder for server and client.
+Many roles that `NetworkManager` fulfilled in Mirror were split into multiple simpler components in Mirage, such as `NetworkClient`, `NetworkServer`, and `NetworkSceneManager`. Those classes are no longer static singletons, they are MonoBehaviours instead, so you need to add them to your scene and reference them. `NetworkManager` in Mirage only serves as a reference holder for server and client.
 
 :::tip
-The easiest way to get started is to right click in the Hierarchy > Network > NetworkManager. This will create a GameObject with all the necessary components and references already set up.
+The easiest way to get started is to right-click in the Hierarchy > Network > NetworkManager. This will create a GameObject with all the necessary components and references already set up.
 :::
 
 ### Accessing Mirage components from NetworkBehaviour
-Despite Mirage removing all static state, you can still access the important networking components from within `NetworkBehaviour` easily. This table shows how to access different components in comparison to Mirror:
+Despite Mirage removing all static states, you can still access the important networking components from within `NetworkBehaviour` easily. This table shows how to access different components in comparison to Mirror:
 
 | Mirror (static) | Mirage (property of `NetworkBehaviour`) |
 |:---------------:|:---------------------------------------:|
@@ -144,7 +144,8 @@ public class MyNetworkManager : NetworkManager
 ```
 
 ### NetworkBehaviour events
-Table below shows the Mirror's `NetworkBehaviour` override method names on the left and the Mirage events on the right.
+
+The table below shows the Mirror's `NetworkBehaviour` override method names on the left and the Mirage events on the right.
 
 | Mirror (override)      | Mirage (event)                                                                |
 |:----------------------:|:-----------------------------------------------------------------------------:|
@@ -201,7 +202,7 @@ public class Player : NetworkBehaviour
 ```
 
 :::note
-Please note that due to timing all event callbacks should be registered in `Awake` method or via Unity inspector in order for them to be invoked consistently.
+Please note that due to timing all event callbacks should be registered in `Awake` method or via Unity inspector for them to be invoked consistently.
 :::
 
 ## Method Attributes
@@ -242,7 +243,7 @@ These fields/properties have been renamed:
 | `NetworkTime.time`                    | [NetworkTime.Time](/docs/reference/Mirage/NetworkTime#time)                            |
 
 ## Object Management
-Registered spawnable prefabs were moved from `NetworkManager` to [ClientObjectManager](/docs/reference/Mirage/ClientObjectManager) component. You can use the Inspector to register all NetworkIdentities via single click.
+Registered spawnable prefabs were moved from `NetworkManager` to the [ClientObjectManager](/docs/reference/Mirage/ClientObjectManager) component. You can use the Inspector to register all NetworkIdentities via a single click.
 
 ### Spawning and destroying
 Table below shows how to spawn objects in Mirage from `NetworkBehaviour`:

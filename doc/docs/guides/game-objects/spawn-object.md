@@ -12,17 +12,17 @@ var boxGo = Instantiate(boxPrefab);
 ServerObjectManager.Spawn(boxGo);
 ```
 
-Once the game object is spawned using this system, state updates are sent to clients whenever the game object changes on the server. When Mirage destroys the game object on the server, it also destroys it on the clients. The server manages spawned game objects alongside all other networked game objects, so that if another client joins the game later, the server can spawn the game objects on that client. These spawned game objects have a unique network instance ID called “netId” that is the same on the server and clients for each game object. The unique network instance ID is used to route messages set across the network to game objects, and to identify game objects.
+Once the game object is spawned using this system, state updates are sent to clients whenever the game object changes on the server. When Mirage destroys the game object on the server, it also destroys it on the clients. The server manages spawned game objects alongside all other networked game objects so that if another client joins the game later, the server can spawn the game objects on that client. These spawned game objects have a unique network instance ID called `NetId` that is the same on the server and clients for each game object. The unique network instance ID is used to route messages sent across the network to game objects and to identify game objects.
 
 When the server spawns a game object with a Network Identity component, the game object spawned on the client has the same “state”. This means it is identical to the game object on the server; it has the same Transform, movement state, and (if Network Transform and SyncVars are used) synchronized variables. Therefore, client game objects are always up-to-date when Mirage creates them. This avoids issues such as game objects spawning at the wrong initial location, then reappearing at their correct position when a state update arrives.
 
 A game object Prefab must have a Network Identity component before trying to register it with the Network Manager.
 
-To register a Prefab with the Client Object Manager in the Editor, select the Network Manager game object, and in the Inspector, navigate to the Client Object Manager component. Click the triangle next to Spawn Prefabs to open the settings, click the plus (+) button. Drag and drop Prefabs into the empty field to assign them to the list. 
-For automatic registering click the Register all prefabs button.
+To register a Prefab with the Client Object Manager in the Editor, select the Network Manager game object, and in the Inspector, navigate to the Client Object Manager component. Click the triangle next to Spawn Prefabs to open the settings, and click the plus (+) button. Drag and drop Prefabs into the empty field to assign them to the list. 
+For automatic registering click the 'Register All Prefabs' button.
 
 :::note
-This searches entire project for prefabs / objects that have a network identity component on it and register it for you.
+This searches the entire project for prefabs/objects that have a network identity component on them and register it for you.
 :::
 
 ![Registered Spawnable Prefabs](/img/guides/game-objects/spawn-objects.png)
@@ -109,9 +109,9 @@ void OnServerConnect(NetworkConnection conn, ConnectMessage msg)
 
 The server does not need to register anything, as it knows what game object is being spawned (and the asset ID is sent in the spawn message). The client needs to be able to look up the game object, so it must be registered on the client.
 
-When writing your own network manager, it’s important to make the client ready to receive state updates before calling the spawn command on the server, otherwise they won’t be sent. If you’re using Mirage’s built-in Network Manager component, this happens automatically.
+When writing your own network manager, it’s important to make the client ready to receive state updates before calling the spawn command on the server, otherwise, they won’t be sent. If you’re using Mirage’s built-in Network Manager component, this happens automatically.
 
-For more advanced uses, such as object pools or dynamically created Assets, you can use the `ClientObjectManager.RegisterSpawnHandler` method, which allows callback functions to be registered for client-side spawning. See documentation on Custom Spawn Functions for an example of this.
+For more advanced uses, such as object pools or dynamically created Assets, you can use the `ClientObjectManager.RegisterSpawnHandler` method, which allows callback functions to be registered for client-side spawning. See the documentation on [Custom Spawn Functions](/docs/guides/game-objects/spawn-object-custom) for an example of this.
 
 If the game object has a network state like synchronized variables, then that state is synchronized with the spawn message. In the following example, this script is attached to the tree Prefab:
 
@@ -162,28 +162,28 @@ Attach the `Tree` script to the `treePrefab` script created earlier to see this 
 
 The actual flow of internal operations that takes place for spawning game objects is:
 -   Prefab with Network Identity component is registered as spawnable.
--   game object is instantiated from the Prefab on the server.
--   Game code sets initial values on the instance (note that 3D physics forces applied here do not take effect immediately).
+-   A game object is instantiated from the Prefab on the server.
+-   The game code sets initial values on the instance (note that 3D physics forces applied here do not take effect immediately).
 -   `ServerObjectManager.Spawn` is called with the instance.
--   The state of the SyncVars on the instance on the server are collected by calling `OnSerialize` on [Network Behaviour] components.
--   A network message of type `ObjectSpawn` is sent to connected clients that includes the SyncVar data.
--   `OnStartServer` is called on the instance on the server, and `isServer` is set to `true`
+-   The state of the SyncVars on the instance on the server is collected by calling `OnSerialize` on [Network Behaviour] components.
+-   A network message of the type `ObjectSpawn` is sent to connected clients that include the SyncVar data.
+-   `OnStartServer` is called on the instance on the server, and `IsServer` is set to `true`
 -   Clients receive the `ObjectSpawn` message and create a new instance from the registered Prefab.
 -   The SyncVar data is applied to the new instance on the client by calling OnDeserialize on Network Behaviour components.
--   `OnStartClient` is called on the instance on each client, and `isClient` is set to `true`
--   As game play progresses, changes to SyncVar values are automatically synchronized to clients. This continues until game ends.
+-   `OnStartClient` is called on the instance on each client, and `IsClient` is set to `true`
+-   As game-play progresses, changes to SyncVar values are automatically synchronized to clients. This continues until the game ends.
 -   `ServerObjectManager.Destroy` is called on the instance on the server.
--   A network message of type `ObjectDestroy` is sent to clients.
+-   A network message of the type `ObjectDestroy` is sent to clients.
 -   `OnNetworkDestroy` is called on the instance on clients, then the instance is destroyed.
 
 ### Player Game Objects
 
-Player game objects in the HLAPI work slightly differently to non-player game objects. The flow for spawning player game objects with the Network Manager is:
+Player game objects in the HLAPI work slightly differently from non-player game objects. The flow for spawning player game objects with the Network Manager is:
 -   Prefab with `NetworkIdentity` is registered as the `PlayerPrefab`
--   Client connects to the server
+-   The client connects to the server
 -   Client calls `AddPlayer`, network message of type `MsgType.AddPlayer` is sent to the server
--   Server receives message and calls `CharacterSpawner.OnServerAddPlayer`
--   game object is instantiated from the Player Prefab on the server
+-   The server receives the message and calls `CharacterSpawner.OnServerAddPlayer`
+-   A game object is instantiated from the Player Prefab on the server
 -   `ServerObjectManager.AddCharacter` is called with the new player instance on the server
 -   The player instance is spawned - you do not have to call `ServerObjectManager.Spawn` for the player instance. The spawn message is sent to all clients like on a normal spawn.
 -   A network message of type `Owner` is sent to the client that added the player (only that client!)
@@ -192,7 +192,7 @@ Player game objects in the HLAPI work slightly differently to non-player game ob
 
 :::note
 `OnStartLocalPlayer` is called after `OnStartClient`, because it only happens when the ownership message arrives from the server after the player game object is spawned, so `IsLocalPlayer` is not set in `OnStartClient`.  
-Because `OnStartLocalPlayer` is only called for the client’s local player game object, it is a good place to perform initialization that should only be done for the local player. This could include enabling input processing, and enabling camera tracking for the player game object.
+Because `OnStartLocalPlayer` is only called for the client’s local player game object, it is a good place to perform initialization that should only be done for the local player. This could include enabling input processing and enabling camera tracking for the player game object.
 :::
 
 ## Spawning Game Objects with Client Authority

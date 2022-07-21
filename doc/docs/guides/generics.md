@@ -3,11 +3,11 @@ sidebar_position: 9
 ---
 # Generics
 
-Mirage supports generic types for [SyncVar](/docs/guides/sync/sync-var), [Rpcs](/docs/guides/remote-actions/), and for fields in [NetworkMessages](/docs/guides/remote-actions/network-messages).
+Mirage supports generic types for [SyncVar](/docs/guides/sync/sync-var), [Rpcs](/docs/guides/remote-actions/), and fields in [NetworkMessages](/docs/guides/remote-actions/network-messages).
 
 ## NetworkBehaviour
 
-By making a [NetworkBehaviour](/docs/guides/game-objects/network-behaviour) generic you can then use generic SyncVar fields or use the generic in an rpc
+By making a [NetworkBehaviour](/docs/guides/game-objects/network-behaviour) generic you can then use generic SyncVar fields or use the generic in an RPC.
 
 ```cs
 public class MyGenericBehaviour<T> : NetworkBehaviour
@@ -23,14 +23,14 @@ public class MyGenericBehaviour<T> : NetworkBehaviour
 ```
 
 :::warning
-Making the RPC itself generic does not work. for example `MyRpc<T>(T value)` will not work. This is because the receiver will have no idea what generic to invoke the type as.
+Making the RPC itself generic does not work. For example, `MyRpc<T>(T value)` will not work. This is because the receiver will have no idea what generic to invoke the type as.
 :::
 
 ## Ensure Type has Write and Read functions
 
-In order for a type to work as a generic, it must have write and read that Mirage can find. For built in types this is done automatically (see [Serialization](/docs/guides/serialization)).
+For a type to work as a generic, it must have a write and read that Mirage can find. For built-in types, this is done automatically (see [Serialization](/docs/guides/serialization)).
 
-For custom types Mirage will try to automatically find them and generate functions, however this does not always work. Adding `[NetworkMessage]` to the type will tell Mirage to generate functions for it.
+For custom types Mirage will try to automatically find them and generate functions, however, this does not always work. Adding `[NetworkMessage]` to the type will tell Mirage to generate functions for it.
 
 ```cs
 [NetworkMessage]
@@ -40,7 +40,7 @@ public struct MyCustomType
 }
 ```
 
-Alternatively you can manually create Write and Read functions for your type
+Alternatively, you can manually create Write and Read functions for your type
 
 ```cs
 public static class MyCustomTypeExtensions 
@@ -59,7 +59,7 @@ public static class MyCustomTypeExtensions
 
 ## Network Messages and other types
 
-Generic message are partly supported. Generic Instance can be used as messages, For example using `MyMessage<int>` in the example below.
+Generic messages are partly supported. Generic instances can be used as messages, For example, using `MyMessage<int>` in the example below.
 
 This also includes using generic types in RPC or inside other types as long they are generic instances.
 
@@ -84,12 +84,12 @@ class Manager
 ```
 
 :::note
-Generic message should not have `[NetworkMessage]` because this cause Mirage to try to make writer for the generic itself. Only generic instances (eg `MyMessage<int>`) can have serialize functions 
+Generic message should not have `[NetworkMessage]` because this cause Mirage to try to make a writer for the generic itself. Only generic instances (eg `MyMessage<int>`) can have serialize functions 
 :::
 
 ## SyncList, SyncDictionary, SyncSet
 
-SyncList, SyncDictionary and SyncSet can have generic types as their element type as long as it is a generic instance (eg `MyType<int>` not `MyType<T>`).
+SyncList, SyncDictionary, and SyncSet can have generic types as their element type as long as it is a generic instance (eg `MyType<int>` not `MyType<T>`).
 
 ```cs 
 public struct MyType<T>

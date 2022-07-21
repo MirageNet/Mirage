@@ -3,8 +3,8 @@ sidebar_position: 11
 ---
 # Best Practices
 
-:::info
-Work in progress
+:::caution Work In Progress
+This page is a work in progress
 :::
 
 ## Custom Messages

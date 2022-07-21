@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 # Sync List
-SyncLists are array based lists similar to C\# [List<T\>](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1?view=netstandard-2.0) that synchronize their contents from the server to the clients.
+[`SyncList`](/docs/reference/Mirage.Collections/SyncList-1) is an array-based list similar to C\# [List<T\>](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1?view=netstandard-2.0) that synchronizes its contents from the server to the clients.
 
 A [SyncList](/docs/reference/Mirage.Collections/SyncList-1) can contain any [supported Mirage type](/docs/guides/data-types).
 
@@ -10,7 +10,7 @@ A [SyncList](/docs/reference/Mirage.Collections/SyncList-1) can contain any [sup
 Add a field of type [SyncList](/docs/reference/Mirage.Collections/SyncList-1) on any [NetworkIdentity](/docs/reference/Mirage/NetworkIdentity) where `T` can be any supported Mirage type and initialize it.
 
 :::caution IMPORTANT
-You need to initialize the SyncList immediately after definition in order for them to work. You can mark them as `readonly` to enforce proper usage.
+You need to initialize the SyncList immediately after the definition for them to work. You can mark them as `readonly` to enforce proper usage.
 :::
 
 ### Basic example
@@ -53,14 +53,14 @@ public class Player : NetworkBehaviour
 ```
 
 ## Callbacks
-You can detect when a `SyncList` changes on the client and/or server. This is especially useful for refreshing your UI, character appearance etc.
+You can detect when a `SyncList` changes on the client and/or server. This is especially useful for refreshing your UI, character appearance, etc.
 
-There are different callbacks for different operations, such as `OnChange` (any change to the list), `OnInsert` (adding new element) etc. Please check the [SyncList API reference](/docs/reference/Mirage.Collections/SyncList-1) for the complete list of callbacks.
+There are different callbacks for different operations, such as `OnChange` (any change to the list), `OnInsert` (adding a new element), etc. Please check the [SyncList API reference](/docs/reference/Mirage.Collections/SyncList-1) for the complete list of callbacks.
 
 Depending on where you want to invoke the callbacks, you can use these methods to register them:
 - `Awake` for both client and server
 - `Identity.OnStartServer` event for server-only
-- `Identity.OnStartClient` event for cleint-only
+- `Identity.OnStartClient` event for client-only
 
 :::note
 By the time you subscribe, the list will already be initialized, so you will not get a call for the initial data, only updates.

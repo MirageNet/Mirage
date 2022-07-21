@@ -141,19 +141,21 @@ private CustomCharacter GetPrefab(CreateMMOCharacterMessage msg)
 
 ## Ready State
 
-*This out of date and needs updating*
+:::danger Out of date!
+This is out of date and needs to be updated!
+:::
 
-In addition to characters, player also have a “scene is ready” state. The server sends clients that are ready information about spawned game objects and state synchronization updates; clients which are not ready are not sent these updates. 
+In addition to characters, players also have a "scene is ready" state. The server sends clients that are ready information about spawned game objects and state synchronization updates; clients which are not ready are not sent these updates. 
 
 When a client initially connects to a server, their SceneIsReady property will be true. However initial spawning will not happen until a character has been added or you manually tell the server to send spawned objects.
 
-Once a client has completed all its pre-game setup, and all its Assets are loaded, it can send a character message. As seen in the example above this will tell the server to spawn the player's character using `ServerObjectManager.AddCharacter`. After the character is spawned mirage will automatically send spawn message for the other spawned object to the client.
+Once a client has completed all its pre-game setup, and all its Assets are loaded, it can send a character message. As seen in the example above this will tell the server to spawn the player's character using `ServerObjectManager.AddCharacter`. After the character is spawned mirage will automatically send a spawn message for the other spawned object to the client.
 
 ## Switching Characters
 
-To replace the character game object for a player, use `ServerObjectManager.ReplaceCharacter`. This is useful having different game object for the player at different times, such as in game and a pregame lobby. The function takes the same arguments as `AddCharacter`, but allows there to already be a character for that player. The old character game object is not destroyed when ReplaceCharacter is called. The `NetworkRoomManager` uses this technique to switch from the `NetworkRoomPlayer` game object to a game play player game object when all the players in the room are ready.
+To replace the character game object for a player, use `ServerObjectManager.ReplaceCharacter`. This is useful for having different game objects for the player at different times, such as in-game and a pregame lobby. The function takes the same arguments as `AddCharacter`, but allows there to already be a character for that player. The old character game object is not destroyed when ReplaceCharacter is called. The `NetworkRoomManager` uses this technique to switch from the `NetworkRoomPlayer` game object to a game-play player game object when all the players in the room are ready.
 
-You can also use `ReplaceCharacter` to respawn a player or change the object that represents the player. In some cases it is better to just disable a game object and reset its game attributes on respawn. The following code sample demonstrates how to actually replace the player game object with a new game object:
+You can also use `ReplaceCharacter` to respawn a player or change the object that represents the player. In some cases, it is better to just disable a game object and reset its game attributes on respawn. The following code sample demonstrates how to replace the player game object with a new game object:
 
 ``` cs
 public class CustomCharacterSpawner : MonoBehaviour
@@ -181,7 +183,7 @@ public class CustomCharacterSpawner : MonoBehaviour
 
 ## Destroying Characters
 
-Once the character is finished with (eg game over, or player died) you can remove the character using `ServerObjectManager.DestroyCharacter`
+Once the character is finished (eg game over, or player died) you can remove the character using `ServerObjectManager.DestroyCharacter`.
 
 ```cs
 public void OnPlayerDeath(INetworkPlayer player)
@@ -190,4 +192,4 @@ public void OnPlayerDeath(INetworkPlayer player)
 }
 ```
 
-Alternatively you can use `ServerObjectManager.RemoveCharacter` to remove it as the player's character without destroying it
+Alternatively, you can use `ServerObjectManager.RemoveCharacter` to remove it as the player's character without destroying it.

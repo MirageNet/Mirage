@@ -6,9 +6,9 @@ title: Spawn Object - Custom
 
 You can use spawn handler functions to customize the default behavior when creating spawned game objects on the client. Spawn handler functions ensure you have full control of how you spawn the game object, as well as how you destroy it.
 
-Use `ClientObjectManager.RegisterSpawnHandler` or `ClientObjectManager.RegisterPrefab` to register functions to spawn and destroy client game objects. The server creates game objects directly, and then spawns them on the clients through this functionality. This functions takes either the asset ID or a prefab and two function delegates: one to handle creating game objects on the client, and one to handle destroying game objects on the client. The asset ID can be a dynamic one, or just the asset ID found on the prefab game object you want to spawn.
+Use `ClientObjectManager.RegisterSpawnHandler` or `ClientObjectManager.RegisterPrefab` to register functions to spawn and destroy client game objects. The server creates game objects directly and then spawns them on the clients through this functionality. This function takes either the asset ID or a prefab and two function delegates: one to handle creating game objects on the client, and one to handle destroying game objects on the client. The asset ID can be a dynamic one, or just the asset ID found on the prefab game object you want to spawn.
 
-The spawn / unspawn delegates will look something like this:
+The spawn/unspawn delegates will look something like this:
 
 **Spawn Handler**
 ``` cs
@@ -26,7 +26,7 @@ void UnSpawnDelegate(NetworkIdentity spawned)
 }
 ```
 
-When a prefab is saved it's `PrefabHash` field will be automatically set. If you want to create prefabs at runtime you will have to generate a new Hash instead.
+When a prefab is saved its `PrefabHash` field will be automatically set. If you want to create prefabs at runtime you will have to generate a new Hash instead.
 
 **Generate prefab at runtime**
 ``` cs
@@ -224,7 +224,7 @@ void Update()
 }
 ```
 
-In the fire logic on the player, make it use the game object pool:
+In the firing logic on the player, make it use the game object pool:
 
 ``` cs
 [ServerRpc]

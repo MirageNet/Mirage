@@ -3,7 +3,7 @@ sidebar_position: 2
 ---
 # Client RPC
 
-ClientRpc are sent from [NetworkBehaviours](/docs/reference/Mirage/NetworkBehaviour) on the server to Behaviours on the client. They can be sent from any [NetworkBehaviours](/docs/reference/Mirage/NetworkBehaviour) that has been spawned.
+ClientRpcs are sent from [NetworkBehaviours](/docs/reference/Mirage/NetworkBehaviour) on the server to Behaviours on the client. They can be sent from any [NetworkBehaviour](/docs/reference/Mirage/NetworkBehaviour) that has been spawned.
 
 To make a function into a ClientRpc add [`[ClientRpc]`](/docs/reference/Mirage/ClientRpcAttribute) directly above the function.
 
@@ -36,7 +36,7 @@ This will send the RPC message to only the owner of the object.
 
 ### RpcTarget.Player
 
-This will send the RPC message to the NetworkPlayer that is passed into the call.
+This will send the RPC message to the [`NetworkPlayer`](/docs/reference/Mirage/NetworkPlayer) that is passed into the call.
 
 ```cs
 [ClientRpc(target = RpcTarget.Player)]
@@ -46,7 +46,7 @@ public void MyRpcFunction(NetworkPlayer target)
 }
 ```
 
-Mirage will use the `NetworkPlayer target` to know where to sent it, but it will not send the `target` value. Because of this its value will always be null on the client.
+Mirage will use the `NetworkPlayer target` to know where to send it, but it will not send the `target` value. Because of this, its value will always be null for the client.
 
 ## Exclude owner
 
@@ -83,7 +83,7 @@ public class Player : NetworkBehaviour
 }
 ```
 
-When running a game as a host with a local client, ClientRpc calls will be invoked on the local client even though it is in the same process as the server. So the behaviours of local and remote clients are the same for ClientRpc calls.
+When running a game as a host with a local client, ClientRpc calls will be invoked on the local client even though it is in the same process as the server. So the behaviors of local and remote clients are the same for ClientRpc calls.
 
 You can also specify which client gets the call with the `target` parameter. 
 

@@ -7,7 +7,7 @@ Examples of RPC and generated code.
 
 ## Example 1
 
-Set a player's name from client and have it synced to other players.
+Set a player's name from a client and have it synced to other players.
 
 ```cs
 public class Player : NetworkBehaviour
@@ -25,9 +25,9 @@ public class Player : NetworkBehaviour
 
 ### Generated code
 
-Weaver moves the user code into a new function and then replace the body of the RPC with an internal send call.
+Weaver moves the user code into a new function and then replaces the body of the RPC with an internal send call.
 
-RPCs are registered using the classes static constructor with methods that will read all the parameter and then invoke the user code method.
+RPCs are registered using the classes static constructor with methods that will read all the parameters and then invoke the user code method.
 
 ```cs
 public class Player : NetworkBehaviour
