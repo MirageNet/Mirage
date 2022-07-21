@@ -120,7 +120,7 @@ namespace Mirage.Weaver
         {
             try
             {
-                return GetFunction_Thorws(typeReference);
+                return GetFunction_Throws(typeReference);
             }
             catch (SerializeFunctionException e)
             {
@@ -137,7 +137,7 @@ namespace Mirage.Weaver
         /// <returns></returns>
         /// <exception cref="SerializeFunctionException">Throws if unable to find or create function</exception>
         // todo rename this to GetFunction once other classes are able to catch Exception
-        public MethodReference GetFunction_Thorws(TypeReference typeReference)
+        public MethodReference GetFunction_Throws(TypeReference typeReference)
         {
             // if is <T> then  just return generic write./read with T as the generic argument
             if (typeReference.IsGenericParameter)

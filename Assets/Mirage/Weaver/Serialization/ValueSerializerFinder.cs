@@ -130,8 +130,8 @@ namespace Mirage.Weaver.Serialization
         private static ValueSerializer FindSerializeFunctions(Writers writers, Readers readers, TypeReference fieldType)
         {
             // writers or readers might be null here, this is allowed because user of ValueSerializer might only be doing writing, or only doing reading
-            var writeFunction = writers?.GetFunction_Thorws(fieldType);
-            var readFunction = readers?.GetFunction_Thorws(fieldType);
+            var writeFunction = writers?.GetFunction_Throws(fieldType);
+            var readFunction = readers?.GetFunction_Throws(fieldType);
             return new FunctionSerializer(writeFunction, readFunction);
         }
     }

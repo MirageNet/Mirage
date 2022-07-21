@@ -159,7 +159,7 @@ namespace Mirage.Weaver
         {
             // make sure element has a writer
             // collection writers use the generic writer, so this will make sure one exists
-            _ = GetFunction_Thorws(elementType);
+            _ = GetFunction_Throws(elementType);
 
             var writerMethod = GenerateWriterFunc(typeReference);
 

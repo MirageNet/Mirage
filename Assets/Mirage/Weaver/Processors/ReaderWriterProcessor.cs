@@ -109,8 +109,8 @@ namespace Mirage.Weaver
             {
                 var typeReference = module.ImportReference(type);
                 // these can use the throw version, because if they break Mirage/weaver is broken
-                writers.GetFunction_Thorws(typeReference);
-                readers.GetFunction_Thorws(typeReference);
+                writers.GetFunction_Throws(typeReference);
+                readers.GetFunction_Throws(typeReference);
                 messages.Add(typeReference);
             }
         }
