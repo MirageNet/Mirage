@@ -108,8 +108,9 @@ namespace Mirage.Weaver
             foreach (var type in types)
             {
                 var typeReference = module.ImportReference(type);
-                writers.TryGetFunction(typeReference, null);
-                readers.TryGetFunction(typeReference, null);
+                // these can use the throw version, because if they break Mirage/weaver is broken
+                writers.GetFunction_Thorws(typeReference);
+                readers.GetFunction_Thorws(typeReference);
                 messages.Add(typeReference);
             }
         }
