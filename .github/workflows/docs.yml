@@ -1,8 +1,6 @@
 name: Docs
 
-# this is disabled till it is can be fixed
 on: [push]
-#on: [workflow_dispatch]
 
 jobs:
   build_doc:
@@ -46,7 +44,7 @@ jobs:
           args: metadata --logLevel Warning doc/docfx.json
 
       - name: Convert metadata to markdown
-        uses: fillefilip8/DocFxToMarkdown@1.3.0
+        uses: fillefilip8/DocFxToMarkdown@1.4.0
         with:
           input-folder: doc/api
           output-folder: doc/docs/reference
@@ -83,7 +81,7 @@ jobs:
 
       - name: Publish docs
         uses: crazy-max/ghaction-github-pages@v2.6.0
-        #if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master'
         with:
           # Create incremental commit instead of doing push force
           keep_history: true
