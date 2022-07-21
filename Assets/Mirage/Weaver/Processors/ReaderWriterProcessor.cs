@@ -46,6 +46,8 @@ namespace Mirage.Weaver
 
             var processed = FindAllExtensionMethods();
 
+            Log($"Found: {writers.Count} writers, {readers.Count} readers");
+
             LoadBuiltinMessages();
 
             // store how many writers are found, we need to check if currentModule adds any
@@ -69,6 +71,9 @@ namespace Mirage.Weaver
                 var assembly = module.AssemblyResolver.Resolve(reference);
                 references.Add(assembly);
             }
+
+            // check current module first, then check other modules
+            // the order shouldn't matter because we just register function here we do not generate anything new
 
             // store how many writers are found, we need to check if currentModule adds any
             var writeCount = writers.Count;
@@ -107,6 +112,8 @@ namespace Mirage.Weaver
             var types = MirageModule.GetTypes().Where(t => t.GetCustomAttribute<NetworkMessageAttribute>() != null);
             foreach (var type in types)
             {
+                Log($"Loading Build in message: {type.FullName}");
+
                 var typeReference = module.ImportReference(type);
                 // these can use the throw version, because if they break Mirage/weaver is broken
                 writers.GetFunction_Throws(typeReference);
@@ -134,6 +141,7 @@ namespace Mirage.Weaver
         {
             if (klass.HasCustomAttribute<NetworkMessageAttribute>())
             {
+                Log($"Loading message: {klass.FullName}");
                 readers.TryGetFunction(klass, null);
                 writers.TryGetFunction(klass, null);
                 messages.Add(klass);
@@ -217,6 +225,7 @@ namespace Mirage.Weaver
                         return;
                 }
 
+                Log($"Generating Serialize for type used in generic: {parameterType.FullName}");
                 writers.TryGetFunction(parameterType, sequencePoint);
                 readers.TryGetFunction(parameterType, sequencePoint);
             }
