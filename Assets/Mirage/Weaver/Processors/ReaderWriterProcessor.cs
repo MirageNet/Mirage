@@ -26,11 +26,11 @@ namespace Mirage.Weaver
         private readonly Readers readers;
         private readonly Writers writers;
         private readonly SerailizeExtensionHelper extensionHelper;
+        private readonly ModuleDefinition mirageModule;
 
         /// <summary>
         /// Mirage's main module used to find built in extension methods and messages
         /// </summary>
-        private static Module MirageModule => typeof(NetworkWriter).Module;
 
         public ReaderWriterProcessor(ModuleDefinition module, Readers readers, Writers writers)
         {
@@ -38,6 +38,10 @@ namespace Mirage.Weaver
             this.readers = readers;
             this.writers = writers;
             extensionHelper = new SerailizeExtensionHelper(module, readers, writers);
+
+            var typeInMirage = module.ImportReference(typeof(NetworkWriter));
+            // have to resolve to get typedef, then get the module
+            mirageModule = typeInMirage.Resolve().Module;
         }
 
         public bool Process()
@@ -45,8 +49,6 @@ namespace Mirage.Weaver
             messages.Clear();
 
             var processed = FindAllExtensionMethods();
-
-            Log($"Found: {writers.Count} writers, {readers.Count} readers");
 
             LoadBuiltinMessages();
 
@@ -75,32 +77,72 @@ namespace Mirage.Weaver
             // check current module first, then check other modules
             // the order shouldn't matter because we just register function here we do not generate anything new
 
-            // store how many writers are found, we need to check if currentModule adds any
-            var writeCount = writers.Count;
-            var readCount = readers.Count;
-            FindExtensionMethodsInAssembly(module.Assembly);
-            // have any been added?
-            var processed = writers.Count != writeCount || readers.Count != readCount;
+            var tracker = new CountTracker(this);
+
+            FindExtensionMethods(module.Assembly);
+            // have any been added in the dll we are weaving?
+            var processed = tracker.AnyNew();
+            tracker.LogCount("Main Module");
+
+            // we have to find extensions in mirage manually, it seems that for some versions of unity Mirage.dll isn't referenced by the
+            FindExtensionMethods(mirageModule);
+            tracker.LogCount("Mirage");
 
             // process all references
             foreach (var assembly in references)
             {
-                FindExtensionMethodsInAssembly(assembly);
+                tracker.LogCount(assembly.Name.Name);
+                FindExtensionMethods(assembly);
             }
 
             return processed;
         }
 
-        private void FindExtensionMethodsInAssembly(AssemblyDefinition assembly)
+        private struct CountTracker
+        {
+            public int WriteCount;
+            public int ReadCount;
+            private readonly ReaderWriterProcessor _processor;
+
+            public CountTracker(ReaderWriterProcessor processor) : this()
+            {
+                _processor = processor;
+                ReadCount = processor.readers.Count;
+                WriteCount = processor.writers.Count;
+            }
+
+            public bool AnyNew()
+            {
+                return _processor.writers.Count != WriteCount || _processor.readers.Count != ReadCount;
+            }
+            public void LogCount(string label)
+            {
+                Log($"Functions in {label}: {_processor.writers.Count - WriteCount} writers, {_processor.readers.Count - ReadCount} readers");
+                // store values again so we can log new count
+                WriteCount = _processor.writers.Count;
+                ReadCount = _processor.readers.Count;
+            }
+        }
+
+        private void FindExtensionMethods(AssemblyDefinition assembly)
         {
             Log($"Looking for extension methods in {assembly.FullName}");
             foreach (var module in assembly.Modules)
             {
-                foreach (var type in module.Types)
-                {
-                    var resolved = type.Resolve();
-                    extensionHelper.RegisterExtensionMethodsInType(resolved);
-                }
+                // skip mirage for here, we process it manually
+                if (module == mirageModule)
+                    continue;
+
+                FindExtensionMethods(module);
+            }
+        }
+
+        private void FindExtensionMethods(ModuleDefinition module)
+        {
+            foreach (var type in module.Types)
+            {
+                var resolved = type.Resolve();
+                extensionHelper.RegisterExtensionMethodsInType(resolved);
             }
         }
 
@@ -109,10 +151,10 @@ namespace Mirage.Weaver
         /// </summary>
         private void LoadBuiltinMessages()
         {
-            var types = MirageModule.GetTypes().Where(t => t.GetCustomAttribute<NetworkMessageAttribute>() != null);
+            var types = mirageModule.GetTypes().Where(t => t.GetCustomAttribute<NetworkMessageAttribute>() != null);
             foreach (var type in types)
             {
-                Log($"Loading Build in message: {type.FullName}");
+                Log($"Loading built-in message: {type.FullName}");
 
                 var typeReference = module.ImportReference(type);
                 // these can use the throw version, because if they break Mirage/weaver is broken
@@ -219,7 +261,7 @@ namespace Mirage.Weaver
                     var constructor = typeDefinition.GetMethod(".ctor");
 
                     var hasAccess = constructor.IsPublic
-                        || constructor.IsAssembly && typeDefinition.Module == module;
+                        || (constructor.IsAssembly && typeDefinition.Module == module);
 
                     if (!hasAccess)
                         return;
@@ -338,7 +380,7 @@ namespace Mirage.Weaver
             this.writers = writers;
         }
 
-
+        // todo can this be removed, doesn't seem to be used any more
         public void RegisterExtensionMethodsInType(Type type)
         {
             // only check static types
