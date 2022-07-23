@@ -1,3 +1,10 @@
+## [123.3.3](https://github.com/MirageNet/Mirage/compare/v123.3.2...v123.3.3) (2022-07-23)
+
+
+### Bug Fixes
+
+* **Weaver:** finding extension methods in mirage manully ([b3ada19](https://github.com/MirageNet/Mirage/commit/b3ada19b49b3940c66538e58450807e7dbee08dc))
+
 ## [123.3.2](https://github.com/MirageNet/Mirage/compare/v123.3.1...v123.3.2) (2022-07-16)
 
 
