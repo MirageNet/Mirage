@@ -1,4 +1,5 @@
 using System;
+using Mirage.Serialization;
 using Mirage.SocketLayer;
 
 namespace Mirage
@@ -9,7 +10,7 @@ namespace Mirage
     public interface IMessageSender
     {
         void Send<T>(T message, int channelId = Channel.Reliable);
-        void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable);
+        void Send(Segment segment, int channelId = Channel.Reliable);
         void Send<T>(T message, INotifyCallBack notifyCallBack);
     }
 

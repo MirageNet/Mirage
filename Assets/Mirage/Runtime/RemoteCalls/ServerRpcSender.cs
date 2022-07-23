@@ -18,7 +18,7 @@ namespace Mirage.RemoteCalls
                 netId = behaviour.NetId,
                 componentIndex = behaviour.ComponentIndex,
                 functionIndex = index,
-                payload = writer.ToArraySegment()
+                payload = writer.ToSegment()
             };
 
             behaviour.Client.Send(message, channelId);
@@ -32,7 +32,7 @@ namespace Mirage.RemoteCalls
                 netId = behaviour.NetId,
                 componentIndex = behaviour.ComponentIndex,
                 functionIndex = index,
-                payload = writer.ToArraySegment()
+                payload = writer.ToSegment()
             };
 
             (var task, var id) = behaviour.ClientObjectManager.CreateReplyTask<T>();

@@ -45,7 +45,7 @@ namespace Mirage.RemoteCalls
                 netId = behaviour.NetId,
                 componentIndex = behaviour.ComponentIndex,
                 functionIndex = index,
-                payload = writer.ToArraySegment()
+                payload = writer.ToSegment()
             };
             return message;
         }

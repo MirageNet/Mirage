@@ -87,6 +87,24 @@ namespace Mirage.Serialization
             }
         }
 
+        public static unsafe void WriteSegmentAndSize(this NetworkWriter writer, Segment segment)
+        {
+            if (segment.Ptr == null)
+            {
+                WriteCountPlusOne(writer, null);
+                return;
+            }
+
+            WriteCountPlusOne(writer, segment.Length);
+            writer.WriteSegment(segment);
+        }
+        public static Segment ReaderSegmentAndSize(this NetworkReader reader)
+        {
+            return ReadCountPlusOne(reader, out var count)
+                ? reader.ReadSegment(count)
+                : default;
+        }
+
 
         /// <returns>array or null</returns>
         public static byte[] ReadBytesAndSize(this NetworkReader reader)
@@ -98,6 +116,7 @@ namespace Mirage.Serialization
                 : null;
         }
 
+        [System.Obsolete("Use Segment instead", true)]
         public static ArraySegment<byte> ReadBytesAndSizeSegment(this NetworkReader reader)
         {
             // dont need to ValidateSize here because we dont allocate for segment

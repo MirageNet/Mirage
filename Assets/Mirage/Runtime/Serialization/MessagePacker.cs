@@ -77,6 +77,7 @@ namespace Mirage.Serialization
         // helper function to pack message into a simple byte[] (which allocates)
         // => useful for tests
         // => useful for local client message enqueue
+        [System.Obsolete("Use Segment instead", true)]
         public static byte[] Pack<T>(T message)
         {
             using (var writer = NetworkWriterPool.GetWriter())
@@ -103,6 +104,7 @@ namespace Mirage.Serialization
         /// <param name="objectLocator">Can be null, but must be set in order to read NetworkIdentity Values</param>
         /// <returns></returns>
         /// <exception cref="FormatException"></exception>
+        [System.Obsolete("Use Segment instead", true)]
         public static T Unpack<T>(byte[] data, IObjectLocator objectLocator)
         {
             using (var networkReader = NetworkReaderPool.GetReader(data, objectLocator))

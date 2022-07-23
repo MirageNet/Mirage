@@ -153,11 +153,12 @@ namespace Mirage
             {
                 MessagePacker.Pack(message, writer);
 
-                var segment = writer.ToArraySegment();
-                NetworkDiagnostics.OnSend(message, segment.Count, 1);
+                var segment = writer.ToSegment();
+                NetworkDiagnostics.OnSend(message, segment.Length, 1);
                 Send(segment, channelId);
             }
         }
+
 
         /// <summary>
         /// Sends a block of data
@@ -165,17 +166,19 @@ namespace Mirage
         /// </summary>
         /// <param name="segment"></param>
         /// <param name="channelId"></param>
-        public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
+        public void Send(Segment segment, int channelId = Channel.Reliable)
         {
             if (_isDisconnected) { return; }
 
+            var buffer = SegmentHelper.Convert(segment);
+
             if (channelId == Channel.Reliable)
             {
-                _connection.SendReliable(segment);
+                _connection.SendReliable(buffer);
             }
             else
             {
-                _connection.SendUnreliable(segment);
+                _connection.SendUnreliable(buffer);
             }
         }
 
@@ -194,9 +197,10 @@ namespace Mirage
             {
                 MessagePacker.Pack(message, writer);
 
-                var segment = writer.ToArraySegment();
-                NetworkDiagnostics.OnSend(message, segment.Count, 1);
-                _connection.SendNotify(segment, token);
+                var segment = writer.ToSegment();
+                NetworkDiagnostics.OnSend(message, segment.Length, 1);
+                var buffer = SegmentHelper.Convert(segment);
+                _connection.SendNotify(buffer, token);
             }
         }
 

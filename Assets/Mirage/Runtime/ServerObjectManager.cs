@@ -436,7 +436,7 @@ namespace Mirage
             OnServerRpc(player, msg.netId, msg.componentIndex, msg.functionIndex, msg.payload, default);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void OnServerRpc(INetworkPlayer player, uint netId, int componentIndex, int functionIndex, ArraySegment<byte> payload, int replyId)
+        private void OnServerRpc(INetworkPlayer player, uint netId, int componentIndex, int functionIndex, Segment payload, int replyId)
         {
             if (!Server.World.TryGetIdentity(netId, out var identity))
             {
@@ -602,7 +602,7 @@ namespace Mirage
             });
         }
 
-        private static ArraySegment<byte> CreateSpawnMessagePayload(bool isOwner, NetworkIdentity identity, PooledNetworkWriter ownerWriter, PooledNetworkWriter observersWriter)
+        private static Segment CreateSpawnMessagePayload(bool isOwner, NetworkIdentity identity, PooledNetworkWriter ownerWriter, PooledNetworkWriter observersWriter)
         {
             // Only call OnSerializeAllSafely if there are NetworkBehaviours
             if (identity.NetworkBehaviours.Length == 0)
@@ -616,9 +616,9 @@ namespace Mirage
 
             // use owner segment if 'conn' owns this identity, otherwise
             // use observers segment
-            var payload = isOwner ?
-                ownerWriter.ToArraySegment() :
-                observersWriter.ToArraySegment();
+            var payload = isOwner
+                ? ownerWriter.ToSegment()
+                : observersWriter.ToSegment();
 
             return payload;
         }

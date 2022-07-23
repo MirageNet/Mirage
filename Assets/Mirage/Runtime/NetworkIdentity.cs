@@ -1066,7 +1066,7 @@ namespace Mirage
                     //  below too)
                     if (ownerWritten > 0)
                     {
-                        varsMessage.payload = ownerWriter.ToArraySegment();
+                        varsMessage.payload = ownerWriter.ToSegment();
                         if (Owner != null && Owner.SceneIsReady)
                             Owner.Send(varsMessage);
                     }
@@ -1075,7 +1075,7 @@ namespace Mirage
                     // (only if we serialized anything for observers)
                     if (observersWritten > 0)
                     {
-                        varsMessage.payload = observersWriter.ToArraySegment();
+                        varsMessage.payload = observersWriter.ToSegment();
                         SendToRemoteObservers(varsMessage, false);
                     }
 

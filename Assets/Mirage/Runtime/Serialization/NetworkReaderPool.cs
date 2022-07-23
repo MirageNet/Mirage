@@ -31,6 +31,21 @@ namespace Mirage.Serialization
         /// <param name="packet"></param>
         /// <param name="objectLocator">Can be null, but must be set in order to read NetworkIdentity Values</param>
         /// <returns></returns>
+        public static PooledNetworkReader GetReader(Segment packet, IObjectLocator objectLocator)
+        {
+            var reader = pool.Take();
+            reader.ObjectLocator = objectLocator;
+            reader.Reset(packet);
+            return reader;
+        }
+
+        /// <summary>
+        /// Gets reader from pool. sets internal array and objectLocator values
+        /// </summary>
+        /// <param name="packet"></param>
+        /// <param name="objectLocator">Can be null, but must be set in order to read NetworkIdentity Values</param>
+        /// <returns></returns>
+        [System.Obsolete("Use Segment instead", true)]
         public static PooledNetworkReader GetReader(ArraySegment<byte> packet, IObjectLocator objectLocator)
         {
             var reader = pool.Take();
@@ -44,6 +59,7 @@ namespace Mirage.Serialization
         /// <param name="packet"></param>
         /// <param name="objectLocator">Can be null, but must be set in order to read NetworkIdentity Values</param>
         /// <returns></returns>
+        [System.Obsolete("Use Segment instead", true)]
         public static PooledNetworkReader GetReader(byte[] array, IObjectLocator objectLocator)
         {
             var reader = pool.Take();
@@ -57,6 +73,7 @@ namespace Mirage.Serialization
         /// <param name="packet"></param>
         /// <param name="objectLocator">Can be null, but must be set in order to read NetworkIdentity Values</param>
         /// <returns></returns>
+        [System.Obsolete("Use Segment instead", true)]
         public static PooledNetworkReader GetReader(byte[] array, int offset, int length, IObjectLocator objectLocator)
         {
             var reader = pool.Take();

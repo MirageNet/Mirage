@@ -436,7 +436,7 @@ namespace Mirage
             {
                 // pack message into byte[] once
                 MessagePacker.Pack(msg, writer);
-                var segment = writer.ToArraySegment();
+                var segment = writer.ToSegment();
                 var count = 0;
 
                 // using SendToMany (with IEnumerable) will cause Enumerator to be boxed and create GC/alloc
@@ -450,7 +450,7 @@ namespace Mirage
                 }
                 enumerator.Dispose();
 
-                NetworkDiagnostics.OnSend(msg, segment.Count, count);
+                NetworkDiagnostics.OnSend(msg, segment.Length, count);
             }
         }
 
@@ -468,7 +468,7 @@ namespace Mirage
             {
                 // pack message into byte[] once
                 MessagePacker.Pack(msg, writer);
-                var segment = writer.ToArraySegment();
+                var segment = writer.ToSegment();
                 var count = 0;
 
                 foreach (var player in players)
@@ -477,7 +477,7 @@ namespace Mirage
                     count++;
                 }
 
-                NetworkDiagnostics.OnSend(msg, segment.Count, count);
+                NetworkDiagnostics.OnSend(msg, segment.Length, count);
             }
         }
 
@@ -496,7 +496,7 @@ namespace Mirage
             {
                 // pack message into byte[] once
                 MessagePacker.Pack(msg, writer);
-                var segment = writer.ToArraySegment();
+                var segment = writer.ToSegment();
                 var count = players.Count;
 
                 for (var i = 0; i < count; i++)
@@ -504,7 +504,7 @@ namespace Mirage
                     players[i].Send(segment, channelId);
                 }
 
-                NetworkDiagnostics.OnSend(msg, segment.Count, count);
+                NetworkDiagnostics.OnSend(msg, segment.Length, count);
             }
         }
 

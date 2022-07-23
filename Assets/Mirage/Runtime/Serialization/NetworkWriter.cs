@@ -30,6 +30,75 @@ using UnityEngine;
 namespace Mirage.Serialization
 {
     /// <summary>
+    /// A segment of unmanged memory containing data
+    /// </summary>
+    public unsafe struct Segment
+    {
+        public readonly void* Ptr;
+        public readonly int Length;
+
+        public Segment(void* ptr, int length)
+        {
+            Ptr = ptr;
+            Length = length;
+        }
+    }
+
+    internal static class SegmentHelper
+    {
+        static Segment segment;
+        static byte[] array;
+
+        /// <summary>
+        /// Converts from  unsafe pointer to managed array
+        /// <para>
+        ///     IMPORTANT: There is only 1 copy of the cached array.
+        ///     Should only use this in parts of the stack where it wont be used twice
+        /// </para>
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <returns></returns>
+        public unsafe static ArraySegment<byte> Convert(Segment segment)
+        {
+            if (array == null || array.Length < segment.Length)
+            {
+                var size = Math.Max(segment.Length, 1300);
+                array = new byte[size];
+            }
+
+            Marshal.Copy((IntPtr)segment.Ptr, array, 0, segment.Length);
+            return new ArraySegment<byte>(array, 0, segment.Length);
+        }
+
+        /// <summary>
+        /// Converts from managed array to unsafe pointer
+        /// <para>
+        ///     IMPORTANT: There is only 1 copy of the cached pointer.
+        ///     Should only use this in parts of the stack where it wont be used twice
+        /// </para>
+        /// </summary>
+        /// <param name="arraySegment"></param>
+        /// <returns></returns>
+        public unsafe static Segment Convert(ArraySegment<byte> arraySegment)
+        {
+            if (segment.Length < arraySegment.Count)
+            {
+                if (segment.Ptr != null)
+                {
+                    Marshal.FreeHGlobal((IntPtr)segment.Ptr);
+                }
+
+                var size = Math.Max(arraySegment.Count, 1300);
+                var ptr = (void*)Marshal.AllocHGlobal(size);
+                segment = new Segment(ptr, size);
+            }
+
+            Marshal.Copy(arraySegment.Array, arraySegment.Offset, (IntPtr)segment.Ptr, arraySegment.Count);
+            return new Segment(segment.Ptr, arraySegment.Count);
+        }
+    }
+
+    /// <summary>
     /// Bit writer, writes values to a buffer on a bit level
     /// <para>Use <see cref="NetworkWriterPool.GetWriter"/> to reduce memory allocation</para>
     /// </summary>
@@ -39,12 +108,10 @@ namespace Mirage.Serialization
         /// Max buffer size = 0.5MB
         /// </summary>
         private const int MAX_BUFFER_SIZE = 524_288;
-        private byte[] _managedBuffer;
         private int _bitCapacity;
 
         /// <summary>Allow internal buffer to resize if capcity is reached</summary>
         private readonly bool _allowResize;
-        private GCHandle _handle;
         private ulong* _longPtr;
         private bool _needsDisposing;
         private int _bitPosition;
@@ -92,23 +159,20 @@ namespace Mirage.Serialization
             var ulongCapacity = Mathf.CeilToInt(minByteCapacity / (float)sizeof(ulong));
             var byteCapacity = ulongCapacity * sizeof(ulong);
 
-            _bitCapacity = byteCapacity * 8;
-            _managedBuffer = new byte[byteCapacity];
-
-            CreateHandle();
+            CreateMemory(byteCapacity);
         }
 
 
         ~NetworkWriter()
         {
-            FreeHandle();
+            FreeMemory();
         }
 
         private void ResizeBuffer(int minBitCapacity)
         {
             // +7 to round up to next byte
             var minByteCapacity = (minBitCapacity + 7) / 8;
-            var size = _managedBuffer.Length;
+            var size = ByteCapacity;
             while (size < minByteCapacity)
             {
                 size *= 2;
@@ -120,20 +184,16 @@ namespace Mirage.Serialization
 
             Debug.LogWarning($"Resizing buffer, new size:{size} bytes");
 
-            FreeHandle();
-
-            Array.Resize(ref _managedBuffer, size);
-            _bitCapacity = size * 8;
-
-            CreateHandle();
+            CreateMemory(size);
         }
 
-        private void CreateHandle()
+        private void CreateMemory(int byteCapacity)
         {
-            if (_needsDisposing) FreeHandle();
+            if (_needsDisposing)
+                FreeMemory();
 
-            _handle = GCHandle.Alloc(_managedBuffer, GCHandleType.Pinned);
-            _longPtr = (ulong*)_handle.AddrOfPinnedObject();
+            _longPtr = (ulong*)Marshal.AllocHGlobal(byteCapacity);
+            _bitCapacity = byteCapacity * 8;
             _needsDisposing = true;
         }
 
@@ -141,11 +201,11 @@ namespace Mirage.Serialization
         /// Frees the handle for the buffer
         /// <para>In order for <see cref="PooledNetworkWriter"/> to work This class can not have <see cref="IDisposable"/>. Instead we call this method from finalize</para>
         /// </summary>
-        private void FreeHandle()
+        private void FreeMemory()
         {
             if (!_needsDisposing) return;
 
-            _handle.Free();
+            Marshal.FreeHGlobal((IntPtr)_longPtr);
             _longPtr = null;
             _needsDisposing = false;
         }
@@ -160,17 +220,25 @@ namespace Mirage.Serialization
         /// <para>To reduce Allocations use <see cref="ToArraySegment"/> instead</para>
         /// </summary>
         /// <returns></returns>
+        [System.Obsolete("Use Segment instead", true)]
         public byte[] ToArray()
         {
             var data = new byte[ByteLength];
-            Buffer.BlockCopy(_managedBuffer, 0, data, 0, ByteLength);
+            var ptr = (byte*)_longPtr;
+            Marshal.Copy((IntPtr)ptr, data, 0, ByteLength);
             return data;
         }
+
+        [System.Obsolete("Use Segment instead", true)]
         public ArraySegment<byte> ToArraySegment()
         {
-            return new ArraySegment<byte>(_managedBuffer, 0, ByteLength);
+            return new ArraySegment<byte>(ToArray(), 0, ByteLength);
         }
 
+        public Segment ToSegment()
+        {
+            return new Segment(_longPtr, ByteLength);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CheckCapacity(int newLength)
@@ -390,8 +458,29 @@ namespace Mirage.Serialization
             var newPosition = _bitPosition + (8 * length);
             CheckCapacity(newPosition);
 
-            // todo benchmark this vs Marshal.Copy or for loop
-            Buffer.BlockCopy(array, offset, _managedBuffer, ByteLength, length);
+            var ptr = (byte*)_longPtr + ByteLength;
+            Marshal.Copy(array, offset, (IntPtr)ptr, length);
+            _bitPosition = newPosition;
+        }
+
+        /// <summary>
+        /// <para>
+        ///    Moves position to nearest byte then writes bytes to that position
+        /// </para>
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="offset"></param>
+        /// <param name="length"></param>
+        public void WriteSegment(Segment segment)
+        {
+            PadToByte();
+            var newPosition = _bitPosition + (8 * segment.Length);
+            CheckCapacity(newPosition);
+
+            var ptr = (byte*)_longPtr + ByteLength;
+            var destSize = ByteCapacity - ByteLength;
+
+            Buffer.MemoryCopy(segment.Ptr, ptr, destSize, segment.Length);
             _bitPosition = newPosition;
         }
 

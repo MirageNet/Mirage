@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using Mirage.Serialization;
 using UnityEngine;
 
 namespace Mirage
@@ -44,7 +44,7 @@ namespace Mirage
 
         // the parameters for the Cmd function
         // -> ArraySegment to avoid unnecessary allocations
-        public ArraySegment<byte> payload;
+        public Segment payload;
     }
 
     [NetworkMessage]
@@ -59,14 +59,14 @@ namespace Mirage
         public int replyId;
         // the parameters for the Cmd function
         // -> ArraySegment to avoid unnecessary allocations
-        public ArraySegment<byte> payload;
+        public Segment payload;
     }
 
     [NetworkMessage]
     public struct ServerRpcReply
     {
         public int replyId;
-        public ArraySegment<byte> payload;
+        public Segment payload;
     }
 
     [NetworkMessage]
@@ -77,7 +77,7 @@ namespace Mirage
         public int functionIndex;
         // the parameters for the Cmd function
         // -> ArraySegment to avoid unnecessary allocations
-        public ArraySegment<byte> payload;
+        public Segment payload;
     }
     #endregion
 
@@ -122,7 +122,7 @@ namespace Mirage
         /// The serialized component data
         /// <remark>ArraySegment to avoid unnecessary allocations</remark>
         /// </summary>
-        public ArraySegment<byte> payload;
+        public Segment payload;
     }
 
     [NetworkMessage]
@@ -155,7 +155,7 @@ namespace Mirage
         public uint netId;
         // the serialized component data
         // -> ArraySegment to avoid unnecessary allocations
-        public ArraySegment<byte> payload;
+        public Segment payload;
     }
 
     // A client sends this message to the server

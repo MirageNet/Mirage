@@ -35,16 +35,11 @@ namespace Mirage.Serialization
     /// </summary>
     public unsafe class NetworkReader : IDisposable
     {
-        private byte[] _managedBuffer;
-        private GCHandle _handle;
         private ulong* _longPtr;
         private bool _needsDisposing;
 
         /// <summary>Current read position</summary>
         private int _bitPosition;
-
-        /// <summary>Offset of given buffer</summary>
-        private int _bitOffset;
 
         /// <summary>Length of given buffer</summary>
         private int _bitLength;
@@ -90,7 +85,6 @@ namespace Mirage.Serialization
         {
             if (!_needsDisposing) return;
 
-            _handle.Free();
             _longPtr = null;
             _needsDisposing = false;
 
@@ -98,7 +92,6 @@ namespace Mirage.Serialization
             {
                 // clear manged stuff here because we no longer want reader to keep reference to buffer
                 _bitLength = 0;
-                _managedBuffer = null;
             }
         }
         public void Dispose()
@@ -106,18 +99,45 @@ namespace Mirage.Serialization
             Dispose(true);
         }
 
+        [System.Obsolete("Use Segment instead", true)]
         public void Reset(ArraySegment<byte> segment)
         {
             Reset(segment.Array, segment.Offset, segment.Count);
         }
+        [System.Obsolete("Use Segment instead", true)]
         public void Reset(byte[] array)
         {
             Reset(array, 0, array.Length);
         }
+        [System.Obsolete("Use Segment instead", true)]
         public void Reset(byte[] array, int position, int length)
         {
             if (array == null)
                 throw new ArgumentNullException(nameof(array), "Cant use null array in Reader");
+
+            //if (_needsDisposing)
+            //{
+            //    // dispose old handler first
+            //    // false here so we dont release reader back to pool
+            //    Dispose(false);
+            //}
+
+            //// reset disposed bool, as it can be disposed again after reset
+            //_needsDisposing = true;
+
+            //_bitPosition = position * 8;
+            //_bitOffset = position * 8;
+            //_bitLength = _bitPosition + (length * 8);
+            //_managedBuffer = array;
+            //_handle = GCHandle.Alloc(_managedBuffer, GCHandleType.Pinned);
+            //_longPtr = (ulong*)_handle.AddrOfPinnedObject();
+            throw new NotSupportedException("Use ToSegment instead to avoid allocations");
+        }
+
+        public void Reset(Segment segment)
+        {
+            if (segment.Ptr == null)
+                throw new ArgumentNullException(nameof(segment), "Cant use null pointer in Reader");
 
             if (_needsDisposing)
             {
@@ -129,13 +149,11 @@ namespace Mirage.Serialization
             // reset disposed bool, as it can be disposed again after reset
             _needsDisposing = true;
 
-            _bitPosition = position * 8;
-            _bitOffset = position * 8;
-            _bitLength = _bitPosition + (length * 8);
-            _managedBuffer = array;
-            _handle = GCHandle.Alloc(_managedBuffer, GCHandleType.Pinned);
-            _longPtr = (ulong*)_handle.AddrOfPinnedObject();
+            _bitPosition = 0;
+            _bitLength = segment.Length * 8;
+            _longPtr = (ulong*)segment.Ptr;
         }
+
 
         /// <summary>
         /// Can read atleast 1 bit
@@ -349,9 +367,9 @@ namespace Mirage.Serialization
         /// <exception cref="ArgumentOutOfRangeException">throws when <paramref name="newPosition"/> is less than <see cref="_bitOffset"/></exception>
         public void MoveBitPosition(int newPosition)
         {
-            if (newPosition < _bitOffset)
+            if (newPosition < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(newPosition), newPosition, $"New position can not be less than buffer offset, Buffer offset: {_bitOffset}");
+                throw new ArgumentOutOfRangeException(nameof(newPosition), newPosition, $"New position must be greater than zero");
             }
             CheckNewLength(newPosition);
             _bitPosition = newPosition;
@@ -382,29 +400,45 @@ namespace Mirage.Serialization
         ///    Moves position to nearest byte then copies bytes from that position
         /// </para>
         /// </summary>
-        /// <param name="array"></param>
+        /// <param name="destination"></param>
         /// <param name="offset"></param>
         /// <param name="length"></param>
-        public void ReadBytes(byte[] array, int offset, int length)
+        public void ReadBytes(byte[] destination, int offset, int length)
         {
             PadToByte();
             var newPosition = _bitPosition + (8 * length);
             CheckNewLength(newPosition);
 
-            // todo benchmark this vs Marshal.Copy or for loop
-            Buffer.BlockCopy(_managedBuffer, BytePosition, array, offset, length);
+            Marshal.Copy((IntPtr)_longPtr, destination, offset, length);
             _bitPosition = newPosition;
         }
 
+        [System.Obsolete("Use Segment instead", true)]
         public ArraySegment<byte> ReadBytesSegment(int count)
+        {
+            var dest = new byte[count];
+            ReadBytes(dest, 0, count);
+            return new ArraySegment<byte>(dest);
+        }
+
+        /// <summary>
+        /// <para>
+        ///    Moves position to nearest byte then returns segment
+        /// </para>
+        /// </summary>
+        /// <param name="destination"></param>
+        /// <param name="offset"></param>
+        /// <param name="length"></param>
+        public Segment ReadSegment(int count)
         {
             PadToByte();
             var newPosition = _bitPosition + (8 * count);
             CheckNewLength(newPosition);
 
-            var result = new ArraySegment<byte>(_managedBuffer, BytePosition, count);
+            var ptr = (byte*)_longPtr + BytePosition;
+            var segment = new Segment(ptr, count);
             _bitPosition = newPosition;
-            return result;
+            return segment;
         }
     }
 }

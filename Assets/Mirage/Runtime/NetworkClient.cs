@@ -280,7 +280,7 @@ namespace Mirage
             Player.Send(message, channelId);
         }
 
-        public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
+        public void Send(Segment segment, int channelId = Channel.Reliable)
         {
             Player.Send(segment, channelId);
         }

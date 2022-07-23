@@ -45,7 +45,7 @@ namespace Mirage.Serialization
 
         /// <returns>string or null</returns>
         /// <exception cref="ArgumentException">Throws if invalid utf8 string is received</exception>
-        public static string ReadString(this NetworkReader reader)
+        public unsafe static string ReadString(this NetworkReader reader)
         {
             // read number of bytes
             var size = reader.ReadUInt16();
@@ -61,10 +61,10 @@ namespace Mirage.Serialization
                 throw new EndOfStreamException($"ReadString too long: {realSize}. Limit is: {MaxStringLength}");
             }
 
-            var data = reader.ReadBytesSegment(realSize);
+            var data = reader.ReadSegment(realSize);
 
             // convert directly from buffer to string via encoding
-            return encoding.GetString(data.Array, data.Offset, data.Count);
+            return encoding.GetString((byte*)data.Ptr, data.Length);
         }
     }
 }

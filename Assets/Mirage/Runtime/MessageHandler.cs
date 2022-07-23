@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Mirage
 {
-    public class MessageHandler : IMessageReceiver
+    public unsafe class MessageHandler : IMessageReceiver
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(MessageHandler));
 
@@ -108,11 +108,13 @@ namespace Mirage
             }
         }
 
+
+        // todo make Peer use unmanged buffers too
         public void HandleMessage(INetworkPlayer player, ArraySegment<byte> packet)
         {
-            using (var networkReader = NetworkReaderPool.GetReader(packet, _objectLocator))
+            var buffer = SegmentHelper.Convert(packet);
+            using (var networkReader = NetworkReaderPool.GetReader(buffer, _objectLocator))
             {
-
                 // protect against attackers trying to send invalid data packets
                 // exception could be throw if:
                 // - invalid headers
