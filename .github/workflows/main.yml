@@ -169,6 +169,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # upload next version so that sonar job can use it
+      - run: echo ${{ steps.semantic.outputs.new_release_version }} > SemanticVersion.txt
+      - name: Archive Version
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: SemanticVersion
+          path: SemanticVersion.txt
+
   SonarScan:
     # needs coverage from test CI
     # only need 2020 test because that is the container that this action uses 
@@ -216,12 +225,30 @@ jobs:
       - name: Fix Csproj
         run: sed -i 's/<ReferenceOutputAssembly>false<\/ReferenceOutputAssembly>/<ReferenceOutputAssembly>true<\/ReferenceOutputAssembly>/g' *.csproj
 
-      - name: get test coverages
+      - name: Get test coverages
         uses: actions/download-artifact@v3
         with:
           name: Test results 2020
           path: Tests
     
+      # Get version from Release step
+      # Run this as late as possible, to give time for publish job to finish and upload
+      - name: Get version
+        continue-on-error: true
+        uses: actions/download-artifact@v3
+        with:
+          name: SemanticVersion
+          path: SemanticVersion
+      
+      - name: Set SEM_VERSION
+        # see https://stackoverflow.com/a/57969570/8479976
+        # note if SemanticVersion does not exist SEM_VERSION will just stay empty
+        run: echo "SEM_VERSION=$(cat SemanticVersion/SemanticVersion.txt)" >> $GITHUB_ENV
+
+      # echo the version for debugging
+      - name: Echo Version
+        run: echo ${{ env.SEM_VERSION }}
+  
       - name: SonarQube analysis
         env:
           FrameworkPathOverride: /opt/unity/Editor/Data/MonoBleedingEdge/
@@ -239,7 +266,7 @@ jobs:
             /d:sonar.exclusions=Assets/Mirage/Runtime/Sockets/Udp/NanoSockets/** \
             /d:sonar.cpd.exclusions=Assets/Tests/** \
             /d:sonar.coverage.exclusions=Assets/Tests/**,Assets/Mirage/Editor/** \
-            ${{ steps.semantic.outputs.new_release_published == 'true' && format('/v:{0}',steps.semantic.outputs.new_release_version) || '' }} \
+            ${{ env.SEM_VERSION != '' && format('/v:{0}',env.SEM_VERSION) || '' }} \
             /d:sonar.cs.nunit.reportsPaths=Tests/editmode-results.xml,Tests/playmode-results.xml \
             /d:sonar.cs.opencover.reportsPaths=Tests/Mirage-opencov/EditMode/TestCoverageResults_0000.xml,Tests/Mirage-opencov/PlayMode/TestCoverageResults_0000.xml
           $DOTNET_ROOT/dotnet build Mirage.sln
