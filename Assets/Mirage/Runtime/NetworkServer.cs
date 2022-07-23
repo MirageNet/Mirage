@@ -122,6 +122,7 @@ namespace Mirage
         /// Number of active player objects across all connections on the server.
         /// <para>This is only valid on the host / server.</para>
         /// </summary>
+        // todo rename this from players to characters. (or remove it? it seems like a confusing field)
         public int NumberOfPlayers => Players.Count(kv => kv.HasCharacter);
 
         /// <summary>
