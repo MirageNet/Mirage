@@ -22,7 +22,7 @@
     "docusaurus-plugin-sass": "^0.2.2",
     "dotenv": "^16.0.1",
     "mdx-mermaid": "^1.2.3",
-    "mermaid": "^9.1.2",
+    "mermaid": "^8.11.5",
     "prism-react-renderer": "^1.2.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
