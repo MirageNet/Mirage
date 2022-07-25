@@ -80,7 +80,7 @@ jobs:
           REPO_NAME: ${{ github.event.repository.name }}
 
       - name: Publish docs
-        uses: crazy-max/ghaction-github-pages@v2.6.0
+        uses: crazy-max/ghaction-github-pages@v3.0.0
         if: github.ref == 'refs/heads/master'
         with:
           # Create incremental commit instead of doing push force
