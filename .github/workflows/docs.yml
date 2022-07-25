@@ -83,8 +83,7 @@ jobs:
         uses: crazy-max/ghaction-github-pages@v2.6.0
         if: github.ref == 'refs/heads/master'
         with:
-          # Create incremental commit instead of doing push force
-          keep_history: true
+          keep_history: false
           # Allow an empty commit to be created
           allow_empty_commit: true
           jekyll: false
