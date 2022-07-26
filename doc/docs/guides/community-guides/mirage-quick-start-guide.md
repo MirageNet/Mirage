@@ -30,7 +30,6 @@ Scopes:
 ```
 
 ![Add scoped registry](/img/scoped-registry.png)
-![Add scoped registry](/img/scoped-registry.png)
 
 Once everything is ready, the next step is to close the Project Settings window, and jump into the `Package Manager`. So for this, we click on `Window menu` and then `Package Manager`. 
 At this window, we will click on a small button that says (probably, at today date on Unity Editor 2021.13f) `Packages: In Project`, here we have to select `My registries`.
