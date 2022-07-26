@@ -29,14 +29,15 @@ Scopes:
 - com.miragenet
 ```
 
-![Add scoped registry](/img/guides/community-guides/mirage-quick-start-guide/scoped-registry.png)
+![Add scoped registry](/img/scoped-registry.png)
+![Add scoped registry](/img/scoped-registry.png)
 
 Once everything is ready, the next step is to close the Project Settings window, and jump into the `Package Manager`. So for this, we click on `Window menu` and then `Package Manager`. 
 At this window, we will click on a small button that says (probably, at today date on Unity Editor 2021.13f) `Packages: In Project`, here we have to select `My registries`.
 Once, you've done that, we should be able to see Mirage and a few transport and also plugins in that list.
 After selecting, you can choose the version on the list below the name, otherwise, you can just click install on the bottom right part of the window and after a loading bar, that's it. You already have Mirage API on your code, congrats!
 
-![Install Mirage](/img/guides/community-guides/mirage-quick-start-guide/install-mirage.png)
+![Install Mirage](/img/install-mirage.png)
 
 :::note
 Mirage already includes a UDP transport, so for this guide is not necessary to download anything else than Mirage.
