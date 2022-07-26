@@ -12,11 +12,11 @@
 
 ## What is Mirage?
 
-Mirage is a rolling-release **high level** API for the Unity Game Engine that provides a **powerful, yet easy to use** networking API. Be it a online MMO, co-op adventure game or a first person shooter, Mirage improves your networked projects' **probability of success** significantly. With its modular structure and "use only what you need" approach, Mirage lets you unleash maximum performance out of your networking. 
+Mirage is a rolling-release **high-level** API for the Unity Game Engine that provides a **powerful, yet easy to use** networking API. Be it an online MMO, co-op adventure game or, a first-person shooter, Mirage improves your networked projects' **probability of success** significantly. With its modular structure and "use only what you need" approach, Mirage lets you unleash maximum performance out of your networking. 
 
 Networked objects in the client are mirror images of the objects in the server, and the API provides all the tools necessary to keep them in sync and pass messages between them.
 
-Mirage is a rolling-release network stack. With every update, you get the latest features and bug fixes. You are **encouraged** to diagnose, report and help fix bugs that you find: Issue tickets will be investigated, feature requests are considered and pull requests are regularly reviewed.
+Mirage is a rolling-release network stack. With every update, you get the latest features and bug fixes. You are **encouraged** to diagnose, report, and help fix bugs that you find: Issue tickets will be investigated, feature requests are considered, and pull requests are regularly reviewed.
 
 Mirage is built by passionate network engineers and is backed by a friendly community.
 
@@ -25,24 +25,24 @@ Mirage is built by passionate network engineers and is backed by a friendly comm
 To install Mirage, follow these steps:
 
 1) Mirage requires at least Unity 2020 LTS. You may install [Unity 2020 LTS](https://unity.com/) via the Unity website or via the Unity Hub. <br/>
-    You may use newer versions, however _LTS versions are strongly recommended_ as newer versions can contain bugs, glitches or just flat out break game projects.
-2) Start a new project or open your existing one. If opening an exsiting one, it is **strongly recommended** to back it up before installing Mirage.
-4) Add the OpenUPM registry.  Click on the `Edit` menu, then select `Project settings...`, select `Package Manager` and add a scoped registry like so: <br/>
+    You may use newer versions, however, _LTS versions are strongly recommended_ as newer versions can contain bugs, glitches, or just flat-out break game projects.
+2) Start a new project or open your existing one. If opening an existing one, it is **strongly recommended** to back it up before installing Mirage.
+4) Add the OpenUPM registry.  Click on the `Edit` menu, then select `Project settings...`, select `Package Manager`, and add a scoped registry like so: <br/>
     Name: `OpenUPM` <br/>
     Url: `https://package.openupm.com` <br/>
     Scopes:
     - `com.cysharp.unitask`
     - `com.openupm`
     - `com.miragenet`
-   ![Scoped Registry](doc/images/Scoped%20Registry.png)
+   ![Scoped Registry](/doc/static/img/scoped-registry.png)
 4) Close the project settings.
 5) Open the package manager by clicking on the `Window` menu and selecting `Package Manager`. Then select `Packages`, `My Registries`, select the latest version of Mirage and click install, like so:
-   ![Install Mirage](doc/images/Install%20Mirage.png)
+   ![Install Mirage](doc/static/img/install-mirage.png)
 6) You may come back to the package manager at any time to uninstall Mirage or upgrade it.
 
 ## Migrating from Mirror
 
-If you've got a project already using Mirror and you want to migrate it to Mirage, it's recommended to check out our [Migration Guide](https://miragenet.github.io/Mirage/Articles/Guides/MirrorMigration.html) for a smooth transition. Also check the heading below, as there are some major differences between Mirage and the other network library.
+If you've got a project already using Mirror and you want to migrate it to Mirage, it's recommended to check out our [Migration Guide](https://miragenet.github.io/Mirage/docs/guides/mirror-migration) for a smooth transition. Also check the heading below, as there are some major differences between Mirage and the other network library.
 
 ## Comparison with Mirror
 
@@ -66,17 +66,17 @@ Mirage has some notable differences from its distant sister, Mirror. The table b
 **Some notable features that Mirage has:**
 
 * Modular API: You only use the components you need
-* Network components can be added in child objects
+* Network components can be added to child objects
 * Clients can connect to multiple servers - for example, be connected to a chat server while connected to a game server
 * [Fast play mode support](https://blogs.unity3d.com/2019/11/05/enter-play-mode-faster-in-unity-2019-3/)
 * Error handling
 * [Version defines](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html#define-symbols)
-* Server Rpcs can [return values](https://miragenet.github.io/Mirage/Articles/Guides/RemoteCalls/ServerRpc.html)
+* Server Rpcs can [return values](https://miragenet.github.io/Mirage/docs/guides/remote-actions/server-rpc)
 * Bit packing to help compress values and reduce bandwidth
 
 Peeking under the hood, Mirage is built upon fundamental pillars: 
 
-* Mirage avoids singletons and static state in general
+* Mirage avoids singletons and static states in general
 * Mirage follows the [SOLID principles](https://en.wikipedia.org/wiki/SOLID)
 * Mirage has high [![Test Coverage](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=coverage)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage) and low [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=sqale_index)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
 
@@ -98,14 +98,14 @@ If you want to contribute to Mirage, follow these steps:
 ### Windows
 
 1) Install the [git Windows Client](https://git-scm.com/download/win) or use your favorite git client (Fork, SourceTree, etc). 
-    Note that cloning the repository using a GUI tool should be fairly straight forward, we'll omit this for a command line example.
-3) As administrator, clone this repo with symbolic links support using Git Bash:
+    Note that cloning the repository using a GUI tool should be fairly straightforward, we'll omit this for a command line example.
+3) As an administrator, clone this repo with symbolic links support using Git Bash:
     ```sh 
     cd C:\UnityProjects\DontReallyUseThisExamplePath
     mkdir MirageNetworking
     git clone -c core.symlinks=true https://github.com/MirageNet/Mirage.git
     ```
-    It you don't want to use administrator, [add symlink support](https://www.joshkel.com/2018/01/18/symlinks-in-windows/) to your account.
+    If you don't want to use administrator, [add symlink support](https://www.joshkel.com/2018/01/18/symlinks-in-windows/) to your account.
     If you don't enable symlinks, you will be able to work on Mirage but Unity will not see the examples.
 3) Open in Unity 2020.3 LTS or later and have fun!
 
@@ -125,6 +125,6 @@ Mirage supports multiple ways of transporting data:
 6. Push to the branch: `git push origin my-new-feature`
 7. Submit a pull request and let the team review your work. :smiley:
 
-The team will review it ASAP and give it the stamp of approval, ask for changes or decline it with a detailed explaination. 
+The team will review it ASAP and give it the stamp of approval, ask for changes or decline it with a detailed explanation. 
 
 Thank you for using Mirage and we hope to see your project be successful!
