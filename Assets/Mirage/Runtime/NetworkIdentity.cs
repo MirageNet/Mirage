@@ -30,12 +30,12 @@ namespace Mirage
     ///     The NetworkIdentity manages the dirty state of the NetworkBehaviours of the object.
     ///     When it discovers that NetworkBehaviours are dirty, it causes an update packet to be created and sent to clients.
     /// </para>
-    /// 
+    ///
     /// <list type="bullet">
     ///     <listheader><description>
     ///         The flow for serialization updates managed by the NetworkIdentity is:
     ///     </description></listheader>
-    ///     
+    ///
     ///     <item><description>
     ///         Each NetworkBehaviour has a dirty mask. This mask is available inside OnSerialize as syncVarDirtyBits
     ///     </description></item>
@@ -71,12 +71,12 @@ namespace Mirage
     ///         The UpdateVars packet is sent to ready clients that are observing the object
     ///     </description></item>
     /// </list>
-    /// 
+    ///
     /// <list type="bullet">
     ///     <listheader><description>
     ///         On the client:
     ///     </description></listheader>
-    /// 
+    ///
     ///     <item><description>
     ///         an UpdateVars packet is received for an object
     ///     </description></item>
@@ -99,7 +99,7 @@ namespace Mirage
     /// </remarks>
     [DisallowMultipleComponent]
     [AddComponentMenu("Network/NetworkIdentity")]
-    [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkIdentity.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/docs/components/network-identity")]
     public sealed class NetworkIdentity : MonoBehaviour
     {
         private static readonly ILogger logger = LogFactory.GetLogger<NetworkIdentity>();

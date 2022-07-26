@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Mirage.Experimental
 {
     [AddComponentMenu("Network/Experimental/NetworkRigidbody")]
-    [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkRigidbody.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/docs/components/network-rigidbody")]
     public class NetworkRigidbody : NetworkBehaviour
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkRigidbody));

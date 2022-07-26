@@ -13,7 +13,7 @@ namespace Mirage
     [DisallowMultipleComponent]
     [AddComponentMenu("Network/NetworkSceneChecker")]
     [RequireComponent(typeof(NetworkIdentity))]
-    [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkSceneChecker.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/docs/components/network-scene-checker")]
     [System.Obsolete("This checker is inefficient, use SimpleSceneChecker instead")]
     public class NetworkSceneChecker : NetworkVisibility
     {

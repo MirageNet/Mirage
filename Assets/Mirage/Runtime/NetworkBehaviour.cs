@@ -23,7 +23,7 @@ namespace Mirage
     /// <para>Some of the built-in components of the networking system are derived from NetworkBehaviour, including NetworkTransport, NetworkAnimator and NetworkProximityChecker.</para>
     /// </remarks>
     [AddComponentMenu("")]
-    [HelpURL("https://miragenet.github.io/Mirage/Articles/Guides/GameObjects/NetworkBehaviour.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/docs/guides/game-objects/network-behaviour")]
     public abstract class NetworkBehaviour : MonoBehaviour
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkBehaviour));
