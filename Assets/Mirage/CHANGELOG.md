@@ -1,3 +1,15 @@
+# [123.4.0](https://github.com/MirageNet/Mirage/compare/v123.3.3...v123.4.0) (2022-07-27)
+
+
+### Bug Fixes
+
+* updating HelpUrl for new docs ([#1094](https://github.com/MirageNet/Mirage/issues/1094)) ([e31a5db](https://github.com/MirageNet/Mirage/commit/e31a5dbccb9ec7d08943c9fb7c530a7dfd37f252))
+
+
+### Features
+
+* adding example script for sending prefab in rpc ([c0dc98e](https://github.com/MirageNet/Mirage/commit/c0dc98e018b0f8a5b22f4fe62f0951558cacdadd))
+
 ## [123.3.3](https://github.com/MirageNet/Mirage/compare/v123.3.2...v123.3.3) (2022-07-23)
 
 
