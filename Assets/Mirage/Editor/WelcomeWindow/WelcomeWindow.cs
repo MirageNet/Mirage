@@ -32,11 +32,11 @@ namespace Mirage
 
         #region Urls
 
-        private const string WelcomePageUrl = "https://miragenet.github.io/Mirage/index.html";
-        private const string QuickStartUrl = "https://miragenet.github.io/Mirage/Articles/Guides/CommunityGuides/MirageQuickStartGuide/index.html";
+        private const string WelcomePageUrl = "https://miragenet.github.io/Mirage/";
+        private const string QuickStartUrl = "https://miragenet.github.io/Mirage/docs/guides/community-guides/mirage-quick-start-guide";
         private const string ChangelogUrl = "https://github.com/MirageNet/Mirage/blob/master/Assets/Mirage/CHANGELOG.md";
-        private const string BestPracticesUrl = "https://miragenet.github.io/Mirage/Articles/Guides/BestPractices.html";
-        private const string FaqUrl = "https://miragenet.github.io/Mirage/Articles/Guides/FAQ.html";
+        private const string BestPracticesUrl = "https://miragenet.github.io/Mirage/docs/guides/best-practices";
+        private const string FaqUrl = "https://miragenet.github.io/Mirage/docs/guides/faq";
         private const string DiscordInviteUrl = "https://discord.gg/DTBPBYvexy";
 
 #if UNITY_2021_2_OR_NEWER

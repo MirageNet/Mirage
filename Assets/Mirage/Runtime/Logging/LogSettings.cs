@@ -9,7 +9,7 @@ namespace Mirage.Logging
     /// </summary>
     [DisallowMultipleComponent]
     [AddComponentMenu("Network/LogSettings")]
-    [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkLogSettings.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/docs/components/network-log-settings")]
     public class LogSettings : MonoBehaviour
     {
         [Header("Log Settings Asset")]

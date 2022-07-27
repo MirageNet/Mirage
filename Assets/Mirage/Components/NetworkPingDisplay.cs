@@ -8,7 +8,7 @@ namespace Mirage
     /// </summary>
     [DisallowMultipleComponent]
     [AddComponentMenu("Network/NetworkPingDisplay")]
-    [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkPingDisplay.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/docs/components/network-ping-display")]
     public class NetworkPingDisplay : MonoBehaviour
     {
         public NetworkClient Client;

@@ -48,7 +48,7 @@ namespace Mirage.Serialization
 
         private static void ThrowIfWriterNotFound<T>()
         {
-            throw new KeyNotFoundException($"No writer found for {typeof(T)}. See https://miragenet.github.io/Mirage/Articles/General/Troubleshooting.html for details");
+            throw new KeyNotFoundException($"No writer found for {typeof(T)}. See https://miragenet.github.io/Mirage/docs/general/troubleshooting for details");
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Mirage.Serialization
 
         private static void ThrowIfReaderNotFound<T>()
         {
-            throw new KeyNotFoundException($"No reader found for {typeof(T)}. See https://miragenet.github.io/Mirage/Articles/General/Troubleshooting.html for details");
+            throw new KeyNotFoundException($"No reader found for {typeof(T)}. See https://miragenet.github.io/Mirage/docs/general/troubleshooting for details");
         }
     }
 }

@@ -39,7 +39,7 @@ namespace Mirage.Serialization
     /// <para>
     /// NOTE: bits are truncated when using this, so signed values will lose their sign. Use <see cref="ZigZagEncodeAttribute"/> as well if value might be negative
     /// </para>
-    /// <para>Also See: <see href="https://miragenet.github.io/Mirage/Articles/Guides/BitPacking/BitCount.html">Bit Packing Documentation</see></para>
+    /// <para>Also See: <see href="https://miragenet.github.io/Mirage/docs/guides/bit-packing/bit-countl">Bit Packing Documentation</see></para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
     public class BitCountAttribute : Attribute
@@ -50,7 +50,7 @@ namespace Mirage.Serialization
 
     /// <summary>
     /// Calculates bitcount from then given min/max values and then packs using <see cref="BitCountAttribute"/>
-    /// <para>Also See: <see href="https://miragenet.github.io/Mirage/Articles/Guides/BitPacking/BitCountFromRange.html">Bit Packing Documentation</see></para>
+    /// <para>Also See: <see href="https://miragenet.github.io/Mirage/docs/guides/bit-packing/bit-count-from-range">Bit Packing Documentation</see></para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
     public class BitCountFromRangeAttribute : Attribute
@@ -62,7 +62,7 @@ namespace Mirage.Serialization
 
     /// <summary>
     /// Used along size <see cref="BitCountAttribute"/> to encodes a interager value using <see cref="ZigZag"/> so that both positive and negative values can be sent
-    /// <para>Also See: <see href="https://miragenet.github.io/Mirage/Articles/Guides/BitPacking/BitCountFromRange.html">Bit Packing Documentation</see></para>
+    /// <para>Also See: <see href="https://miragenet.github.io/Mirage/docs/guides/bit-packing/bit-count-from-rangel">Bit Packing Documentation</see></para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
     public class ZigZagEncodeAttribute : Attribute
@@ -71,8 +71,8 @@ namespace Mirage.Serialization
     }
 
     /// <summary>
-    /// Packs a float field, clamped from -max to +max, with 
-    /// <para>Also See: <see href="https://miragenet.github.io/Mirage/Articles/Guides/BitPacking/BitCountFromRange.html">Bit Packing Documentation</see></para>
+    /// Packs a float field, clamped from -max to +max, with
+    /// <para>Also See: <see href="https://miragenet.github.io/Mirage/docs/guides/bit-packing/bit-count-from-range">Bit Packing Documentation</see></para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
     public class FloatPackAttribute : Attribute
@@ -87,7 +87,7 @@ namespace Mirage.Serialization
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class Vector3PackAttribute : Attribute
     {
@@ -99,7 +99,7 @@ namespace Mirage.Serialization
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class Vector2PackAttribute : Attribute
     {
@@ -111,7 +111,7 @@ namespace Mirage.Serialization
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class QuaternionPackAttribute : Attribute
     {
@@ -147,7 +147,7 @@ namespace Mirage.Serialization
         /// </summary>
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="blockSize">Value should be between 1 and 64</param>
         public VarIntBlocksAttribute(int blockSize) { }

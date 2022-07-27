@@ -6,7 +6,7 @@ namespace Mirage
     /// <summary>
     /// Base class for implementing component-based authentication during the Connect phase
     /// </summary>
-    [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/Authenticators/index.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/docs/components/authenticators/")]
     public abstract class NetworkAuthenticator : MonoBehaviour
     {
         /// <summary>

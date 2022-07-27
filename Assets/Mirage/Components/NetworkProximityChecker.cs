@@ -10,7 +10,7 @@ namespace Mirage
     /// </summary>
     [AddComponentMenu("Network/NetworkProximityChecker")]
     [RequireComponent(typeof(NetworkIdentity))]
-    [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkProximityChecker.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/docs/components/network-proximity-checker")]
     public class NetworkProximityChecker : NetworkVisibility
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkProximityChecker));

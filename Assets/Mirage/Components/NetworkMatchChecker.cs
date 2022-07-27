@@ -12,7 +12,7 @@ namespace Mirage
     [DisallowMultipleComponent]
     [AddComponentMenu("Network/NetworkMatchChecker")]
     [RequireComponent(typeof(NetworkIdentity))]
-    [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkMatchChecker.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/docs/components/network-match-checker")]
     public class NetworkMatchChecker : NetworkVisibility
     {
         private static readonly Dictionary<Guid, HashSet<NetworkIdentity>> matchPlayers = new Dictionary<Guid, HashSet<NetworkIdentity>>();

@@ -14,7 +14,7 @@ namespace Mirage
     }
 
     [AddComponentMenu("Network/NetworkManager")]
-    [HelpURL("https://miragenet.github.io/Mirage/Articles/Guides/Callbacks/NetworkManager.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/docs/guides/callbacks/network-manager")]
     [DisallowMultipleComponent]
     public class NetworkManager : MonoBehaviour
     {
