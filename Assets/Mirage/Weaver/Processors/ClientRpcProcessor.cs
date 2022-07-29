@@ -194,7 +194,7 @@ namespace Mirage.Weaver
             // if (IsLocalClient) {
             Instruction endif = worker.Create(OpCodes.Nop);
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsClient));
+            worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.HasAuthority));
             worker.Append(worker.Create(OpCodes.Brfalse, endif));
 
             body();
