@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Mirage.Tests.Runtime.Host;
 using NSubstitute;
 using UnityEngine.TestTools;
 
@@ -30,7 +31,58 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         }
     }
 
-    public class RpcUsageTest : ClientServerSetup<RpcUsageBehaviours>
+    public class HostRpcUsageTest : HostSetup<RpcUsageBehaviours>
+    {
+        [UnityTest]
+        public IEnumerator CallPlayerOnlyClientRpc()
+        {
+            const short num = short.MaxValue;
+
+            Action<int> sub = Substitute.For<Action<int>>();
+            component.PlayerClientRpcCalled += sub;
+
+            component.PlayerTest(client.Player, num);
+
+            yield return null;
+            yield return null;
+
+            sub.Received(1).Invoke(num);
+        }
+
+        [UnityTest]
+        public IEnumerator CallOwnerOnlyClientRpc()
+        {
+            const short num = short.MaxValue;
+
+            Action<int> sub = Substitute.For<Action<int>>();
+            component.OwnerRpcCalled += sub;
+
+            component.OwnerTest(num, num);
+
+            yield return null;
+            yield return null;
+
+            sub.Received(1).Invoke(num);
+        }
+
+        [UnityTest]
+        public IEnumerator CallDefaultClientRpc()
+        {
+            const short num = short.MaxValue;
+
+            Action<int> sub = Substitute.For<Action<int>>();
+            component.DefaultRpcCalled += sub;
+
+            component.DefaultTest(num);
+
+            yield return null;
+            yield return null;
+
+            sub.Received(1).Invoke(num);
+        }
+    }
+
+    public class ClientServerRpcUsageTest : ClientServerSetup<RpcUsageBehaviours>
     {
         [UnityTest]
         public IEnumerator CallPlayerOnlyClientRpc()
@@ -40,10 +92,12 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             Action<int> sub = Substitute.For<Action<int>>();
             clientComponent.PlayerClientRpcCalled += sub;
 
-            serverComponent.PlayerTest(clientPlayer, num);
+            serverComponent.PlayerTest(clientComponent.Owner, num);
 
             yield return null;
+            yield return null;
 
+            sub.Received(1).Invoke(num);
         }
 
         [UnityTest]
@@ -56,6 +110,7 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
 
             serverComponent.OwnerTest(num, num);
 
+            yield return null;
             yield return null;
 
             sub.Received(1).Invoke(num);
@@ -72,9 +127,9 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             serverComponent.DefaultTest(num);
 
             yield return null;
+            yield return null;
 
             sub.Received(1).Invoke(num);
-
         }
     }
 }
