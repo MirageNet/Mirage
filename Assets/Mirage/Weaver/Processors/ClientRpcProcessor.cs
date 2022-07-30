@@ -132,6 +132,11 @@ namespace Mirage.Weaver
         /// </remarks>
         private MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute clientRpcAttr, int rpcIndex, ValueSerializer[] paramSerializers)
         {
+            // get values from attribute
+            var target = clientRpcAttr.GetField(nameof(ClientRpcAttribute.target), RpcTarget.Observers);
+            var channel = clientRpcAttr.GetField(nameof(ClientRpcAttribute.channel), 0);
+            var excludeOwner = clientRpcAttr.GetField(nameof(ClientRpcAttribute.excludeOwner), false);
+
             var rpc = SubstituteMethod(md);
 
             var worker = md.Body.GetILProcessor();
@@ -140,7 +145,7 @@ namespace Mirage.Weaver
             // {
             //    call the body
             // }
-            CallBody(worker, rpc);
+            CallBody(worker, rpc, target);
 
             // NetworkWriter writer = NetworkWriterPool.GetWriter()
             var writer = md.AddLocal<PooledNetworkWriter>();
@@ -152,9 +157,7 @@ namespace Mirage.Weaver
 
             var rpcName = md.FullName;
 
-            var target = clientRpcAttr.GetField(nameof(ClientRpcAttribute.target), RpcTarget.Observers);
-            var channel = clientRpcAttr.GetField(nameof(ClientRpcAttribute.channel), 0);
-            var excludeOwner = clientRpcAttr.GetField(nameof(ClientRpcAttribute.excludeOwner), false);
+
 
             var sendMethod = GetSendMethod(md, target);
 
@@ -189,13 +192,40 @@ namespace Mirage.Weaver
                           : md.Module.ImportReference(() => ClientRpcSender.SendTarget(default, default, default, default, default));
         }
 
-        private void IsClient(ILProcessor worker, Action body)
+        private void IsClient(ILProcessor worker, RpcTarget target, Action body)
         {
             // if (IsLocalClient) {
             var endif = worker.Create(OpCodes.Nop);
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsClient));
             worker.Append(worker.Create(OpCodes.Brfalse, endif));
+
+            switch (target)
+            {
+                case RpcTarget.Observers:
+                    // if (this.IsLocalPlayerObserver())
+                    worker.Append(worker.Create(OpCodes.Ldarg_0));
+                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsLocalPlayerObserver()));
+                    worker.Append(worker.Create(OpCodes.Brfalse, endif));
+                    break;
+
+                case RpcTarget.Owner:
+                    // if (this.IsLocalPlayerTarget(this.Owner))
+                    worker.Append(worker.Create(OpCodes.Ldarg_0));
+                    worker.Append(worker.Create(OpCodes.Ldarg_0));
+                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Owner));
+                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsLocalPlayerTarget(default)));
+                    worker.Append(worker.Create(OpCodes.Brfalse, endif));
+                    break;
+                case RpcTarget.Player:
+                    // target will be arg1
+                    // if (this.IsLocalPlayerTarget(target))
+                    worker.Append(worker.Create(OpCodes.Ldarg_0));
+                    worker.Append(worker.Create(OpCodes.Ldarg_1));
+                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsLocalPlayerTarget(default)));
+                    worker.Append(worker.Create(OpCodes.Brfalse, endif));
+                    break;
+            }
 
             body();
 
@@ -204,12 +234,12 @@ namespace Mirage.Weaver
 
         }
 
-        private void CallBody(ILProcessor worker, MethodDefinition rpc)
+        private void CallBody(ILProcessor worker, MethodDefinition rpc, RpcTarget target)
         {
-            IsClient(worker, () =>
-            {
-                InvokeBody(worker, rpc);
-            });
+            IsClient(worker, target, () =>
+             {
+                 InvokeBody(worker, rpc);
+             });
         }
 
         private void InvokeBody(ILProcessor worker, MethodDefinition rpc)
