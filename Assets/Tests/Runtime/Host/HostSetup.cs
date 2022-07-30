@@ -30,7 +30,15 @@ namespace Mirage.Tests.Runtime.Host
         protected virtual Config ServerConfig => null;
         protected virtual Config ClientConfig => null;
 
+        /// <summary>
+        /// called before Start() after Server/Client GameObject have been setup
+        /// </summary>
         public virtual void ExtraSetup() { }
+        /// <summary>
+        /// Called after test of setup
+        /// </summary>
+        /// <returns></returns>
+        public virtual UniTask LateSetup() => UniTask.CompletedTask;
 
         [UnitySetUp]
         public IEnumerator UnitySetUp() => UniTask.ToCoroutine(async () =>
@@ -72,6 +80,8 @@ namespace Mirage.Tests.Runtime.Host
                 // wait for client to spawn it
                 await AsyncUtil.WaitUntilWithTimeout(() => client.Player.HasCharacter);
             }
+
+            await LateSetup();
         });
 
         protected async UniTask StartHost()
