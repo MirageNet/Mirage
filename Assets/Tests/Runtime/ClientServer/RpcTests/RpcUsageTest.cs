@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Mirage.Tests.Runtime.Host;
 using NSubstitute;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.ClientServer.RpcTests
@@ -33,6 +34,28 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
 
     public class HostRpcUsageTest : HostSetup<RpcUsageBehaviours>
     {
+        [UnityTest]
+        public IEnumerator SceneObjectCallPlayerOnlyClientRpc()
+        {
+            var test = new GameObject("Scene Object", typeof(NetworkIdentity));
+
+            clientObjectManager.RegisterPrefab(test.GetNetworkIdentity());
+
+            test.AddComponent<RpcUsageBehaviours>();
+
+            const short num = short.MaxValue;
+
+            Action<int> sub = Substitute.For<Action<int>>();
+            test.PlayerClientRpcCalled += sub;
+
+            test.PlayerTest(client.Player, num);
+
+            yield return null;
+            yield return null;
+
+            sub.Received(1).Invoke(num);
+        }
+
         [UnityTest]
         public IEnumerator CallPlayerOnlyClientRpc()
         {
@@ -84,6 +107,22 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
 
     public class ClientServerRpcUsageTest : ClientServerSetup<RpcUsageBehaviours>
     {
+        [UnityTest]
+        public IEnumerator ServerCallPlayerOnlyClientRpc()
+        {
+            const short num = short.MaxValue;
+
+            Action<int> sub = Substitute.For<Action<int>>();
+            serverComponent.PlayerClientRpcCalled += sub;
+
+            serverComponent.PlayerTest(serverComponent.Owner, num);
+
+            yield return null;
+            yield return null;
+
+            sub.Received(0).Invoke(num);
+        }
+
         [UnityTest]
         public IEnumerator CallPlayerOnlyClientRpc()
         {
