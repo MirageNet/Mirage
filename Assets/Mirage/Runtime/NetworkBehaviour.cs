@@ -256,51 +256,11 @@ namespace Mirage
             }
         }
 
-
-
         protected internal bool SyncVarEqual<T>(T value, T fieldValue)
         {
             // newly initialized or changed value?
             return EqualityComparer<T>.Default.Equals(value, fieldValue);
         }
-
-
-        /// <summary>
-        /// Checks if host player can see the object
-        /// <para>Weaver uses this to check if RPC should be invoked locally</para>
-        /// </summary>
-        /// <param name="player"></param>
-        /// <returns></returns>
-        internal bool IsLocalPlayerObserver()
-        {
-            if (Server != null)
-            {
-                var local = Server.LocalPlayer;
-                return Identity.observers.Contains(local);
-            }
-
-            // todo should ClientRpc be called in client only mode
-            return true;
-        }
-
-        /// <summary>
-        /// Checks if host player is the target player
-        /// <para>Weaver uses this to check if RPC should be invoked locally</para>
-        /// </summary>
-        /// <param name="player"></param>
-        /// <returns></returns>
-        internal bool IsLocalPlayerTarget(INetworkPlayer target)
-        {
-            if (Server != null)
-            {
-                var local = Server.LocalPlayer;
-                return local == target;
-            }
-
-            // todo should ClientRpc be called in client only mode
-            return true;
-        }
-
 
         /// <summary>
         /// Used to set the behaviour as dirty, so that a network update will be sent for the object.

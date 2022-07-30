@@ -71,6 +71,42 @@ namespace Mirage.RemoteCalls
                 return;
             }
         }
+
+        /// <summary>
+        /// Checks if host player can see the object
+        /// <para>Weaver uses this to check if RPC should be invoked locally</para>
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
+        public static bool IsLocalPlayerObserver(NetworkBehaviour behaviour)
+        {
+            if (behaviour.Server != null)
+            {
+                var local = behaviour.Server.LocalPlayer;
+                return behaviour.Identity.observers.Contains(local);
+            }
+
+            // todo should ClientRpc be called in client only mode
+            return true;
+        }
+
+        /// <summary>
+        /// Checks if host player is the target player
+        /// <para>Weaver uses this to check if RPC should be invoked locally</para>
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
+        public static bool IsLocalPlayerTarget(NetworkBehaviour behaviour, INetworkPlayer target)
+        {
+            if (behaviour.Server != null)
+            {
+                var local = behaviour.Server.LocalPlayer;
+                return local == target;
+            }
+
+            // todo should ClientRpc be called in client only mode
+            return true;
+        }
     }
 }
 

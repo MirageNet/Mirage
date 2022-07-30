@@ -205,7 +205,7 @@ namespace Mirage.Weaver
                 case RpcTarget.Observers:
                     // if (this.IsLocalPlayerObserver())
                     worker.Append(worker.Create(OpCodes.Ldarg_0));
-                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsLocalPlayerObserver()));
+                    worker.Append(worker.Create(OpCodes.Call, () => ClientRpcSender.IsLocalPlayerObserver(default)));
                     worker.Append(worker.Create(OpCodes.Brfalse, endif));
                     break;
 
@@ -214,7 +214,7 @@ namespace Mirage.Weaver
                     worker.Append(worker.Create(OpCodes.Ldarg_0));
                     worker.Append(worker.Create(OpCodes.Ldarg_0));
                     worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Owner));
-                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsLocalPlayerTarget(default)));
+                    worker.Append(worker.Create(OpCodes.Call, () => ClientRpcSender.IsLocalPlayerTarget(default, default)));
                     worker.Append(worker.Create(OpCodes.Brfalse, endif));
                     break;
                 case RpcTarget.Player:
@@ -222,7 +222,7 @@ namespace Mirage.Weaver
                     // if (this.IsLocalPlayerTarget(target))
                     worker.Append(worker.Create(OpCodes.Ldarg_0));
                     worker.Append(worker.Create(OpCodes.Ldarg_1));
-                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsLocalPlayerTarget(default)));
+                    worker.Append(worker.Create(OpCodes.Call, () => ClientRpcSender.IsLocalPlayerTarget(default, default)));
                     worker.Append(worker.Create(OpCodes.Brfalse, endif));
                     break;
             }
