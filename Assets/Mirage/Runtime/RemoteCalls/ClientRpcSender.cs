@@ -24,10 +24,16 @@ namespace Mirage.RemoteCalls
         {
             var message = CreateMessage(behaviour, index, writer);
 
-            // connection parameter is optional. use owner if null
+            // player parameter is optional. use owner if null
             if (player == null)
             {
                 player = behaviour.Owner;
+            }
+
+            // if still null throw to give useful error
+            if (player == null)
+            {
+                throw new InvalidOperationException("Player target was null for Rpc");
             }
 
             player.Send(message, channelId);
