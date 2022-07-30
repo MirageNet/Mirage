@@ -194,7 +194,8 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
 
             serverComponent.RpcObservers(NUM);
 
-            yield return new WaitForSeconds(1);
+            yield return null;
+            yield return null;
 
             _client1Stub.Received(1).Invoke(NUM);
             _client2Stub.Received(1).Invoke(NUM);
@@ -219,7 +220,8 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
 
             serverComponent.RpcObservers(NUM);
 
-            yield return new WaitForSeconds(1);
+            yield return null;
+            yield return null;
 
             _client1Stub.Received(1).Invoke(NUM);
             _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
@@ -247,7 +249,8 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
 
             serverComponent.RpcObservers(NUM);
 
-            yield return new WaitForSeconds(1);
+            yield return null;
+            yield return null;
 
             _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
             _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
