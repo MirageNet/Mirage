@@ -73,6 +73,7 @@ namespace Mirage.Tests.Runtime.Host
 
                 playerGO = new GameObject("playerGO", typeof(Rigidbody));
                 playerIdentity = playerGO.AddComponent<NetworkIdentity>();
+                playerIdentity.PrefabHash = Guid.NewGuid().GetHashCode();
                 playerComponent = playerGO.AddComponent<T>();
 
                 serverObjectManager.AddCharacter(server.LocalPlayer, playerGO);
