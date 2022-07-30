@@ -9,24 +9,28 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.ClientServer.RpcTests
 {
-    public class RpcUsageBehaviour : NetworkBehaviour
+    public class RpcUsageBehaviour_Player : NetworkBehaviour
     {
         public event Action<int> PlayerCalled;
-        public event Action<int> OwnerCalled;
-        public event Action<int> ObserversCalled;
-
         [ClientRpc(target = RpcTarget.Player)]
         public void RpcPlayer(INetworkPlayer _player, short arg1)
         {
             PlayerCalled?.Invoke(arg1);
         }
+    }
+    public class RpcUsageBehaviour_Owner : NetworkBehaviour
+    {
 
+        public event Action<int> OwnerCalled;
         [ClientRpc(target = RpcTarget.Owner)]
         public void RpcOwner(short arg1)
         {
             OwnerCalled?.Invoke(arg1);
         }
-
+    }
+    public class RpcUsageBehaviour_Observers : NetworkBehaviour
+    {
+        public event Action<int> ObserversCalled;
         [ClientRpc(target = RpcTarget.Observers)]
         public void RpcObservers(short arg1)
         {
@@ -34,24 +38,24 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         }
     }
 
-    public class RpcUsageClientServerTest : ClientServerSetup<RpcUsageBehaviour>
+    public abstract class RpcUsageClientServerTestBase<T> : ClientServerSetup<T> where T : NetworkBehaviour
     {
-        private const short NUM = 52;
+        protected const short NUM = 52;
 
-        private Action<int> _client1Stub;
-        private Action<int> _client2Stub;
-        private Action<int> _serverStub;
+        protected Action<int> _client1Stub;
+        protected Action<int> _client2Stub;
+        protected Action<int> _serverStub;
 
-        private ClientInstance<RpcUsageBehaviour> _client2;
+        protected ClientInstance<T> _client2;
         /// <summary>
         /// Player for client 2 on server
         /// </summary>
-        private INetworkPlayer serverPlayer2;
+        protected INetworkPlayer serverPlayer2;
 
         /// <summary>
         /// Component of player 1 character on client 2
         /// </summary>
-        private RpcUsageBehaviour clientComponent_on2;
+        protected T clientComponent_on2;
 
         public override void ExtraSetup()
         {
@@ -63,7 +67,7 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
 
         public override async UniTask LateSetup()
         {
-            _client2 = new ClientInstance<RpcUsageBehaviour>(ClientConfig, _server.socketFactory);
+            _client2 = new ClientInstance<T>(ClientConfig, _server.socketFactory);
             _client2.clientObjectManager.RegisterPrefab(playerPrefab.GetNetworkIdentity());
             _client2.client.Connect("localhost");
 
@@ -76,7 +80,7 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             var go = InstantiateForTest(playerPrefab);
             go.name = "player 2 (server)";
             var identity = go.GetComponent<NetworkIdentity>();
-            var component = go.GetComponent<RpcUsageBehaviour>();
+            var component = go.GetComponent<T>();
             serverObjectManager.AddCharacter(serverPlayer2, identity);
 
 
@@ -88,7 +92,7 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             var found = _client2.client.World.TryGetIdentity(serverComponent.NetId, out var player1Character);
             if (!found)
                 Debug.LogError("Could not find instance of player 1's character on client 2");
-            clientComponent_on2 = player1Character.GetComponent<RpcUsageBehaviour>();
+            clientComponent_on2 = player1Character.GetComponent<T>();
         }
 
         public override void ExtraTearDown()
@@ -103,9 +107,12 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
                 GameObject.Destroy(obj);
             }
         }
+    }
 
+    public class RpcUsageClientServerTest_Player : RpcUsageClientServerTestBase<RpcUsageBehaviour_Player>
+    {
         [UnityTest]
-        public IEnumerator Player_OnlyCalledOnTarget()
+        public IEnumerator OnlyCalledOnTarget()
         {
             clientComponent.PlayerCalled += _client1Stub;
             clientComponent_on2.PlayerCalled += _client2Stub;
@@ -120,9 +127,12 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
             _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
         }
+    }
 
+    public class RpcUsageClientServerTest_Owner : RpcUsageClientServerTestBase<RpcUsageBehaviour_Owner>
+    {
         [UnityTest]
-        public IEnumerator Owner_OnlyCalledOnOwner()
+        public IEnumerator OnlyCalledOnOwner()
         {
             clientComponent.OwnerCalled += _client1Stub;
             clientComponent_on2.OwnerCalled += _client2Stub;
@@ -140,7 +150,7 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
 
 
         [UnityTest]
-        public IEnumerator Owner_ThrowsIfNullOwner()
+        public IEnumerator ThrowsIfNullOwner()
         {
             clientComponent.OwnerCalled += _client1Stub;
             clientComponent_on2.OwnerCalled += _client2Stub;
@@ -166,13 +176,16 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
             _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
         }
+    }
 
+    public class RpcUsageClientServerTest_Observers : RpcUsageClientServerTestBase<RpcUsageBehaviour_Observers>
+    {
         [UnityTest]
-        public IEnumerator Observers_CalledOnAllObservers_AllObservering()
+        public IEnumerator CalledOnAllObservers_AllObservering()
         {
-            clientComponent.PlayerCalled += _client1Stub;
-            clientComponent_on2.PlayerCalled += _client2Stub;
-            serverComponent.PlayerCalled += _serverStub;
+            clientComponent.ObserversCalled += _client1Stub;
+            clientComponent_on2.ObserversCalled += _client2Stub;
+            serverComponent.ObserversCalled += _serverStub;
 
             // ensure test is valid by checking players are in set
             var observers = serverComponent.Identity.observers;
@@ -190,11 +203,11 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
 
 
         [UnityTest]
-        public IEnumerator Observers_CalledOnAllObservers_SomeObservering()
+        public IEnumerator CalledOnAllObservers_SomeObservering()
         {
-            clientComponent.PlayerCalled += _client1Stub;
-            clientComponent_on2.PlayerCalled += _client2Stub;
-            serverComponent.PlayerCalled += _serverStub;
+            clientComponent.ObserversCalled += _client1Stub;
+            clientComponent_on2.ObserversCalled += _client2Stub;
+            serverComponent.ObserversCalled += _serverStub;
 
             // ensure test is valid by checking players are in set
             var observers = serverComponent.Identity.observers;
@@ -214,11 +227,11 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         }
 
         [UnityTest]
-        public IEnumerator Observers_CalledOnAllObservers_NoneObservering()
+        public IEnumerator CalledOnAllObservers_NoneObservering()
         {
-            clientComponent.PlayerCalled += _client1Stub;
-            clientComponent_on2.PlayerCalled += _client2Stub;
-            serverComponent.PlayerCalled += _serverStub;
+            clientComponent.ObserversCalled += _client1Stub;
+            clientComponent_on2.ObserversCalled += _client2Stub;
+            serverComponent.ObserversCalled += _serverStub;
 
             // ensure test is valid by checking players are in set
             var observers = serverComponent.Identity.observers;
