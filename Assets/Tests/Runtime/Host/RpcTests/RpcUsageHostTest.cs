@@ -386,7 +386,7 @@ namespace Mirage.Tests.Runtime.Host.RpcTests
             yield return null;
             yield return null;
 
-            _hostStub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _hostStub.Received(1).Invoke(NUM);
             _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
         }
     }
