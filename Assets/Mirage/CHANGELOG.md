@@ -1,3 +1,26 @@
+# [124.0.0](https://github.com/MirageNet/Mirage/compare/v123.4.0...v124.0.0) (2022-08-01)
+
+
+### Bug Fixes
+
+* adding error when target rpc is called with null ([73bbcc2](https://github.com/MirageNet/Mirage/commit/73bbcc206e78744d73e7d1e9858aac4ba47e75d3))
+* adding more validate for invoking ServerRpc in host mode ([26b3318](https://github.com/MirageNet/Mirage/commit/26b3318ea5aaa0b5b8d8ff643cb7b46aa69c7992))
+* fixing target rpc being called in host modified ([fa052d6](https://github.com/MirageNet/Mirage/commit/fa052d6c2bf1bbc176de5da4fce5af1e1fc94faa)), closes [#1095](https://github.com/MirageNet/Mirage/issues/1095)
+* fixing use of incorrect exception in rpc validate ([948c3a4](https://github.com/MirageNet/Mirage/commit/948c3a461ffe281bda052d340dbd39d33f96d2b5))
+* making rpc validate methods public ([3b7a5ae](https://github.com/MirageNet/Mirage/commit/3b7a5aeb15251edffb7f9e325921c315c91c6659))
+
+
+### Code Refactoring
+
+* moving the invoke check to ClientRpcSender ([3465258](https://github.com/MirageNet/Mirage/commit/346525809f54e8394fd3ccb79bebc37f4a64e81a))
+
+
+### BREAKING CHANGES
+
+* ServerRpc are now only invoked locally if in host mode
+* ServerRpc now throws InvalidOperationException if authority is required
+* ClientRpc are now only invoked locally if in host mode
+
 # [123.4.0](https://github.com/MirageNet/Mirage/compare/v123.3.3...v123.4.0) (2022-07-27)
 
 
