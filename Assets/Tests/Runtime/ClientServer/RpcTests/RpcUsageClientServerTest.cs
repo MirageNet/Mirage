@@ -11,30 +11,51 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
 {
     public class RpcUsageBehaviour_Player : NetworkBehaviour
     {
-        public event Action<int> PlayerCalled;
+        public event Action<int> Called;
+
         [ClientRpc(target = RpcTarget.Player)]
         public void RpcPlayer(INetworkPlayer _player, short arg1)
         {
-            PlayerCalled?.Invoke(arg1);
+            Called?.Invoke(arg1);
         }
     }
     public class RpcUsageBehaviour_Owner : NetworkBehaviour
     {
+        public event Action<int> Called;
 
-        public event Action<int> OwnerCalled;
         [ClientRpc(target = RpcTarget.Owner)]
         public void RpcOwner(short arg1)
         {
-            OwnerCalled?.Invoke(arg1);
+            Called?.Invoke(arg1);
         }
     }
     public class RpcUsageBehaviour_Observers : NetworkBehaviour
     {
-        public event Action<int> ObserversCalled;
+        public event Action<int> Called;
         [ClientRpc(target = RpcTarget.Observers)]
         public void RpcObservers(short arg1)
         {
-            ObserversCalled?.Invoke(arg1);
+            Called?.Invoke(arg1);
+        }
+    }
+    public class RpcUsageBehaviour_RequireAuthority : NetworkBehaviour
+    {
+        public event Action<int> Called;
+
+        [ServerRpc(requireAuthority = true)]
+        public void RpcRequireAuthority(short arg1)
+        {
+            Called?.Invoke(arg1);
+        }
+    }
+    public class RpcUsageBehaviour_IgnoreAuthority : NetworkBehaviour
+    {
+        public event Action<int> Called;
+
+        [ServerRpc(requireAuthority = false)]
+        public void RpcIgnoreAuthority(short arg1)
+        {
+            Called?.Invoke(arg1);
         }
     }
 
@@ -114,9 +135,9 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         [UnityTest]
         public IEnumerator OnlyCalledOnTarget()
         {
-            clientComponent.PlayerCalled += _client1Stub;
-            clientComponent_on2.PlayerCalled += _client2Stub;
-            serverComponent.PlayerCalled += _serverStub;
+            clientComponent.Called += _client1Stub;
+            clientComponent_on2.Called += _client2Stub;
+            serverComponent.Called += _serverStub;
 
             serverComponent.RpcPlayer(serverPlayer, NUM);
 
@@ -134,9 +155,9 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         [UnityTest]
         public IEnumerator OnlyCalledOnOwner()
         {
-            clientComponent.OwnerCalled += _client1Stub;
-            clientComponent_on2.OwnerCalled += _client2Stub;
-            serverComponent.OwnerCalled += _serverStub;
+            clientComponent.Called += _client1Stub;
+            clientComponent_on2.Called += _client2Stub;
+            serverComponent.Called += _serverStub;
 
             serverComponent.RpcOwner(NUM);
 
@@ -152,9 +173,9 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         [UnityTest]
         public IEnumerator ThrowsIfNullOwner()
         {
-            clientComponent.OwnerCalled += _client1Stub;
-            clientComponent_on2.OwnerCalled += _client2Stub;
-            serverComponent.OwnerCalled += _serverStub;
+            clientComponent.Called += _client1Stub;
+            clientComponent_on2.Called += _client2Stub;
+            serverComponent.Called += _serverStub;
 
             serverObjectManager.RemoveCharacter(serverPlayer, false);
 
@@ -183,9 +204,9 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         [UnityTest]
         public IEnumerator CalledOnAllObservers_AllObservering()
         {
-            clientComponent.ObserversCalled += _client1Stub;
-            clientComponent_on2.ObserversCalled += _client2Stub;
-            serverComponent.ObserversCalled += _serverStub;
+            clientComponent.Called += _client1Stub;
+            clientComponent_on2.Called += _client2Stub;
+            serverComponent.Called += _serverStub;
 
             // ensure test is valid by checking players are in set
             var observers = serverComponent.Identity.observers;
@@ -206,9 +227,9 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         [UnityTest]
         public IEnumerator CalledOnAllObservers_SomeObservering()
         {
-            clientComponent.ObserversCalled += _client1Stub;
-            clientComponent_on2.ObserversCalled += _client2Stub;
-            serverComponent.ObserversCalled += _serverStub;
+            clientComponent.Called += _client1Stub;
+            clientComponent_on2.Called += _client2Stub;
+            serverComponent.Called += _serverStub;
 
             // ensure test is valid by checking players are in set
             var observers = serverComponent.Identity.observers;
@@ -231,9 +252,9 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         [UnityTest]
         public IEnumerator CalledOnAllObservers_NoneObservering()
         {
-            clientComponent.ObserversCalled += _client1Stub;
-            clientComponent_on2.ObserversCalled += _client2Stub;
-            serverComponent.ObserversCalled += _serverStub;
+            clientComponent.Called += _client1Stub;
+            clientComponent_on2.Called += _client2Stub;
+            serverComponent.Called += _serverStub;
 
             // ensure test is valid by checking players are in set
             var observers = serverComponent.Identity.observers;
@@ -254,6 +275,245 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
 
             _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
             _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+
+        [UnityTest]
+        public IEnumerator ThrowsWhenCalledOnClient()
+        {
+            clientComponent.Called += _client1Stub;
+            clientComponent_on2.Called += _client2Stub;
+            serverComponent.Called += _serverStub;
+
+            yield return null;
+            yield return null;
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+            {
+                clientComponent.RpcObservers(NUM);
+            });
+
+            Assert.That(exception, Has.Message.EqualTo("Client RPC can only be called when server is active"));
+
+            // ensure that none were called, even if exception was throw
+            yield return null;
+            yield return null;
+
+            _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+
+        [UnityTest]
+        public IEnumerator ThrowsWhenCalledUnSpawnedObject()
+        {
+            var unspawned = CreateBehaviour<RpcUsageBehaviour_Observers>();
+            unspawned.Called += _serverStub;
+
+            yield return null;
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+            {
+                unspawned.RpcObservers(NUM);
+            });
+
+            Assert.That(exception, Has.Message.EqualTo("Client RPC can only be called when server is active"));
+
+            // ensure that none were called, even if exception was throw
+            yield return null;
+            yield return null;
+
+            _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+    }
+
+    public class RpcUsageClientServerTest_RequireAuthority : RpcUsageClientServerTestBase<RpcUsageBehaviour_RequireAuthority>
+    {
+        [UnityTest]
+        public IEnumerator CalledWhenCalledWithAuthority()
+        {
+            clientComponent.Called += _client1Stub;
+            clientComponent_on2.Called += _client2Stub;
+            serverComponent.Called += _serverStub;
+
+            yield return null;
+            yield return null;
+
+            clientComponent.RpcRequireAuthority(NUM);
+
+            yield return null;
+            yield return null;
+
+            _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _serverStub.Received(1).Invoke(NUM);
+        }
+
+        [UnityTest]
+        public IEnumerator ThrowsWhenCalledWithoutAuthority()
+        {
+            clientComponent.Called += _client1Stub;
+            clientComponent_on2.Called += _client2Stub;
+            serverComponent.Called += _serverStub;
+
+            yield return null;
+            yield return null;
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+            {
+                // call character 1 on client 2
+                clientComponent_on2.RpcRequireAuthority(NUM);
+            });
+
+            Assert.That(exception, Has.Message.EqualTo("Trying to send ServerRpc for object without authority."));
+
+            // ensure that none were called, even if exception was throw
+            yield return null;
+            yield return null;
+
+            _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+
+        [UnityTest]
+        public IEnumerator ThrowsWhenCalledOnServer()
+        {
+            clientComponent.Called += _client1Stub;
+            clientComponent_on2.Called += _client2Stub;
+            serverComponent.Called += _serverStub;
+
+            yield return null;
+            yield return null;
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+            {
+                serverComponent.RpcRequireAuthority(NUM);
+            });
+
+            Assert.That(exception, Has.Message.EqualTo("Server RPC can only be called when client is active"));
+
+            // ensure that none were called, even if exception was throw
+            yield return null;
+            yield return null;
+
+            _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+
+        [UnityTest]
+        public IEnumerator ThrowsWhenCalledUnSpawnedObject()
+        {
+            var unspawned = CreateBehaviour<RpcUsageBehaviour_RequireAuthority>();
+            unspawned.Called += _serverStub;
+
+            yield return null;
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+            {
+                unspawned.RpcRequireAuthority(NUM);
+            });
+
+            Assert.That(exception, Has.Message.EqualTo("Client RPC can only be called when server is active"));
+
+            // ensure that none were called, even if exception was throw
+            yield return null;
+            yield return null;
+
+            _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+    }
+
+    public class RpcUsageClientServerTest_IgnoreAuthority : RpcUsageClientServerTestBase<RpcUsageBehaviour_IgnoreAuthority>
+    {
+        [UnityTest]
+        public IEnumerator CalledWhenCalledWithAuthority()
+        {
+            clientComponent.Called += _client1Stub;
+            clientComponent_on2.Called += _client2Stub;
+            serverComponent.Called += _serverStub;
+
+            yield return null;
+            yield return null;
+
+            clientComponent.RpcIgnoreAuthority(NUM);
+
+            yield return null;
+            yield return null;
+
+            _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _serverStub.Received(1).Invoke(NUM);
+        }
+
+        [UnityTest]
+        public IEnumerator CalledWhenCalledWithOutAuthority()
+        {
+            clientComponent.Called += _client1Stub;
+            clientComponent_on2.Called += _client2Stub;
+            serverComponent.Called += _serverStub;
+
+            yield return null;
+            yield return null;
+
+            // call character 1 on client 2
+            clientComponent_on2.RpcIgnoreAuthority(NUM);
+
+            // ensure that none were called, even if exception was throw
+            yield return null;
+            yield return null;
+
+            _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _serverStub.Received(1).Invoke(NUM);
+        }
+
+        [UnityTest]
+        public IEnumerator ThrowsWhenCalledOnServer()
+        {
+            clientComponent.Called += _client1Stub;
+            clientComponent_on2.Called += _client2Stub;
+            serverComponent.Called += _serverStub;
+
+            yield return null;
+            yield return null;
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+            {
+                serverComponent.RpcIgnoreAuthority(NUM);
+            });
+
+            Assert.That(exception, Has.Message.EqualTo("Server RPC can only be called when client is active"));
+
+            // ensure that none were called, even if exception was throw
+            yield return null;
+            yield return null;
+
+            _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+
+        [UnityTest]
+        public IEnumerator ThrowsWhenCalledUnSpawnedObject()
+        {
+            var unspawned = CreateBehaviour<RpcUsageBehaviour_RequireAuthority>();
+            unspawned.Called += _serverStub;
+
+            yield return null;
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+            {
+                unspawned.RpcRequireAuthority(NUM);
+            });
+
+            Assert.That(exception, Has.Message.EqualTo("Client RPC can only be called when server is active"));
+
+            // ensure that none were called, even if exception was throw
+            yield return null;
+            yield return null;
+
             _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
         }
     }
