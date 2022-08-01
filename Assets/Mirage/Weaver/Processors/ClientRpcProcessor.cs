@@ -192,40 +192,25 @@ namespace Mirage.Weaver
                           : md.Module.ImportReference(() => ClientRpcSender.SendTarget(default, default, default, default, default));
         }
 
-        private void IsClient(ILProcessor worker, RpcTarget target, Action body)
+        private void InvokeLocally(ILProcessor worker, RpcTarget target, Action body)
         {
             // if (IsLocalClient) {
             var endif = worker.Create(OpCodes.Nop);
+
+            // behaviour
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsClient));
+            // rpcTarget
+            worker.Append(worker.Create(OpCodes.Ldc_I4, (int)target));
+            // networkPlayer (or null)
+            if (target == RpcTarget.Player)
+                // target will be arg1
+                worker.Append(worker.Create(OpCodes.Ldarg_1));
+            else
+                worker.Append(worker.Create(OpCodes.Ldnull));
+
+            // call function
+            worker.Append(worker.Create(OpCodes.Call, () => ClientRpcSender.ShouldInvokeLocally(default, default, default)));
             worker.Append(worker.Create(OpCodes.Brfalse, endif));
-
-            switch (target)
-            {
-                case RpcTarget.Observers:
-                    // if (this.IsLocalPlayerObserver())
-                    worker.Append(worker.Create(OpCodes.Ldarg_0));
-                    worker.Append(worker.Create(OpCodes.Call, () => ClientRpcSender.IsLocalPlayerObserver(default)));
-                    worker.Append(worker.Create(OpCodes.Brfalse, endif));
-                    break;
-
-                case RpcTarget.Owner:
-                    // if (this.IsLocalPlayerTarget(this.Owner))
-                    worker.Append(worker.Create(OpCodes.Ldarg_0));
-                    worker.Append(worker.Create(OpCodes.Ldarg_0));
-                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Owner));
-                    worker.Append(worker.Create(OpCodes.Call, () => ClientRpcSender.IsLocalPlayerTarget(default, default)));
-                    worker.Append(worker.Create(OpCodes.Brfalse, endif));
-                    break;
-                case RpcTarget.Player:
-                    // target will be arg1
-                    // if (this.IsLocalPlayerTarget(target))
-                    worker.Append(worker.Create(OpCodes.Ldarg_0));
-                    worker.Append(worker.Create(OpCodes.Ldarg_1));
-                    worker.Append(worker.Create(OpCodes.Call, () => ClientRpcSender.IsLocalPlayerTarget(default, default)));
-                    worker.Append(worker.Create(OpCodes.Brfalse, endif));
-                    break;
-            }
 
             body();
 
@@ -236,10 +221,10 @@ namespace Mirage.Weaver
 
         private void CallBody(ILProcessor worker, MethodDefinition rpc, RpcTarget target)
         {
-            IsClient(worker, target, () =>
-             {
-                 InvokeBody(worker, rpc);
-             });
+            InvokeLocally(worker, target, () =>
+            {
+                InvokeBody(worker, rpc);
+            });
         }
 
         private void InvokeBody(ILProcessor worker, MethodDefinition rpc)
