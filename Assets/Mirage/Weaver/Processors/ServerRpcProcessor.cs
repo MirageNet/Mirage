@@ -80,7 +80,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldc_I4, rpcIndex));
             worker.Append(worker.Create(OpCodes.Ldloc, writer));
             worker.Append(worker.Create(OpCodes.Ldc_I4, channel));
-            worker.Append(worker.Create(requireAuthority ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
+            worker.Append(worker.Create(requireAuthority.OpCode_Ldc()));
             worker.Append(worker.Create(OpCodes.Call, sendMethod));
 
             NetworkWriterHelper.CallRelease(module, worker, writer);
