@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Mirage.Logging;
 using Mirage.Serialization;
@@ -73,6 +74,40 @@ namespace Mirage.RemoteCalls
         }
 
         /// <summary>
+        /// Used by weaver to check if ClientRPC should be invoked locally in host mode
+        /// </summary>
+        /// <param name="behaviour"></param>
+        /// <param name="target"></param>
+        /// <param name="player">player used for RpcTarget.Player</param>
+        /// <returns></returns>
+        public static bool ShouldInvokeLocally(NetworkBehaviour behaviour, RpcTarget target, INetworkPlayer player)
+        {
+            // not server? error
+            if (!behaviour.IsServer)
+            {
+                throw new InvalidOperationException("Client RPC can only be called when server is active");
+            }
+
+            // not host? never invoke locally
+            if (!behaviour.IsClient)
+                return false;
+
+            // check if host player should receive
+            switch (target)
+            {
+                case RpcTarget.Observers:
+                    return IsLocalPlayerObserver(behaviour);
+                case RpcTarget.Owner:
+                    return IsLocalPlayerTarget(behaviour, behaviour.Owner);
+                case RpcTarget.Player:
+                    return IsLocalPlayerTarget(behaviour, player);
+            }
+
+            // should never get here
+            throw new InvalidEnumArgumentException();
+        }
+
+        /// <summary>
         /// Checks if host player can see the object
         /// <para>Weaver uses this to check if RPC should be invoked locally</para>
         /// </summary>
@@ -80,14 +115,8 @@ namespace Mirage.RemoteCalls
         /// <returns></returns>
         public static bool IsLocalPlayerObserver(NetworkBehaviour behaviour)
         {
-            if (behaviour.Server != null)
-            {
-                var local = behaviour.Server.LocalPlayer;
-                return behaviour.Identity.observers.Contains(local);
-            }
-
-            // todo should ClientRpc be called in client only mode
-            return true;
+            var local = behaviour.Server.LocalPlayer;
+            return behaviour.Identity.observers.Contains(local);
         }
 
         /// <summary>
@@ -98,14 +127,8 @@ namespace Mirage.RemoteCalls
         /// <returns></returns>
         public static bool IsLocalPlayerTarget(NetworkBehaviour behaviour, INetworkPlayer target)
         {
-            if (behaviour.Server != null)
-            {
-                var local = behaviour.Server.LocalPlayer;
-                return local == target;
-            }
-
-            // todo should ClientRpc be called in client only mode
-            return true;
+            var local = behaviour.Server.LocalPlayer;
+            return local == target;
         }
     }
 }
