@@ -49,6 +49,9 @@ namespace Mirage.Weaver
         /// </remarks>
         private MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute serverRpcAttr, int rpcIndex, ValueSerializer[] paramSerializers)
         {
+            var channel = serverRpcAttr.GetField(nameof(ServerRpcAttribute.channel), 0);
+            var requireAuthority = serverRpcAttr.GetField(nameof(ServerRpcAttribute.requireAuthority), true);
+
             var cmd = SubstituteMethod(md);
 
             var worker = md.Body.GetILProcessor();
@@ -58,7 +61,7 @@ namespace Mirage.Weaver
             //    call the body
             //    return;
             // }
-            CallBody(worker, cmd);
+            CallBody(worker, cmd, requireAuthority);
 
             // NetworkWriter writer = NetworkWriterPool.GetWriter()
             var writer = md.AddLocal<PooledNetworkWriter>();
@@ -69,10 +72,6 @@ namespace Mirage.Weaver
             WriteArguments(worker, md, writer, paramSerializers, RemoteCallType.ServerRpc);
 
             var cmdName = md.FullName;
-
-            var channel = serverRpcAttr.GetField(nameof(ServerRpcAttribute.channel), 0);
-            var requireAuthority = serverRpcAttr.GetField(nameof(ServerRpcAttribute.requireAuthority), true);
-
             var sendMethod = GetSendMethod(md, worker);
 
             // ServerRpcSender.Send(this, 12345, writer, channel, requireAuthority)
@@ -90,12 +89,13 @@ namespace Mirage.Weaver
             return cmd;
         }
 
-        public void IsServer(ILProcessor worker, Action body)
+        public void InvokeLocally(ILProcessor worker, bool requiredAuthority, Action body)
         {
             // if (IsServer) {
             var endif = worker.Create(OpCodes.Nop);
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsServer));
+            worker.Append(worker.Create(requiredAuthority.OpCode_Ldc()));
+            worker.Append(worker.Create(OpCodes.Call, () => ServerRpcSender.ShouldInvokeLocally(default, default)));
             worker.Append(worker.Create(OpCodes.Brfalse, endif));
 
             body();
@@ -105,9 +105,9 @@ namespace Mirage.Weaver
 
         }
 
-        private void CallBody(ILProcessor worker, MethodDefinition rpc)
+        private void CallBody(ILProcessor worker, MethodDefinition rpc, bool requiredAuthority)
         {
-            IsServer(worker, () =>
+            InvokeLocally(worker, requiredAuthority, () =>
             {
                 InvokeBody(worker, rpc);
                 worker.Append(worker.Create(OpCodes.Ret));
