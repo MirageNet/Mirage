@@ -127,7 +127,7 @@ namespace Mirage.Weaver
             var @delegate = CreateRpcDelegate(skeleton);
             worker.Append(worker.Create(OpCodes.Newobj, @delegate));
 
-            worker.Append(worker.Create(requireAuthority ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
+            worker.Append(worker.Create(requireAuthority.OpCode_Ldc()));
             worker.Append(worker.Create(OpCodes.Call, registerMethod));
         }
 

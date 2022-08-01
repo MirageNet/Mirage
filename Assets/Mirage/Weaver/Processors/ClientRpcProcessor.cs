@@ -169,7 +169,7 @@ namespace Mirage.Weaver
             // last arg of send is either bool, or NetworkPlayer
             // see ClientRpcSender.Send methods
             if (target == RpcTarget.Observers)
-                worker.Append(worker.Create(excludeOwner ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
+                worker.Append(worker.Create(excludeOwner.OpCode_Ldc()));
             else if (target == RpcTarget.Player && HasNetworkPlayerParameter(md))
                 worker.Append(worker.Create(OpCodes.Ldarg_1));
             else // owner, or Player with no arg

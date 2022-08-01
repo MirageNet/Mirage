@@ -146,7 +146,7 @@ namespace Mirage.Weaver.Serialization
                 if (settings.large.HasValue)
                 {
                     worker.Append(worker.Create(OpCodes.Ldc_I8, (long)settings.large.Value));
-                    worker.Append(worker.Create(settings.throwIfOverLarge ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
+                    worker.Append(worker.Create(settings.throwIfOverLarge.OpCode_Ldc()));
                     packerCtor = module.ImportReference(() => new VarIntPacker(default, default, default, default));
                 }
                 else

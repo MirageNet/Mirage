@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver
 {
@@ -371,6 +372,17 @@ namespace Mirage.Weaver
             }
 
             return fd;
+        }
+
+        /// <summary>
+        /// Converts bool to constant opcode
+        /// <para>bools are loaded using int32, with values 1 or 0</para>
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static OpCode OpCode_Ldc(this bool value)
+        {
+            return value ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0;
         }
     }
 }
