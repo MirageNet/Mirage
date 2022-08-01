@@ -365,7 +365,8 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
                 clientComponent_on2.RpcRequireAuthority(NUM);
             });
 
-            Assert.That(exception, Has.Message.EqualTo("Trying to send ServerRpc for object without authority."));
+            // should be full message (see in client) because server is not active
+            Assert.That(exception, Has.Message.EqualTo("Trying to send ServerRpc for object without authority. Mirage.Tests.Runtime.ClientServer.RpcTests.RpcUsageBehaviour_RequireAuthority.RpcRequireAuthority"));
 
             // ensure that none were called, even if exception was throw
             yield return null;
@@ -415,7 +416,7 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
                 unspawned.RpcRequireAuthority(NUM);
             });
 
-            Assert.That(exception, Has.Message.EqualTo("Client RPC can only be called when server is active"));
+            Assert.That(exception, Has.Message.EqualTo("Server RPC can only be called when client is active"));
 
             // ensure that none were called, even if exception was throw
             yield return null;
@@ -508,7 +509,7 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
                 unspawned.RpcRequireAuthority(NUM);
             });
 
-            Assert.That(exception, Has.Message.EqualTo("Client RPC can only be called when server is active"));
+            Assert.That(exception, Has.Message.EqualTo("Server RPC can only be called when client is active"));
 
             // ensure that none were called, even if exception was throw
             yield return null;

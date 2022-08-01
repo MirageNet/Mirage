@@ -1,10 +1,11 @@
+using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using UnityEngine;
 using UnityEngine.TestTools;
 using Guid = System.Guid;
+using Random = UnityEngine.Random;
 
 namespace Mirage.Tests.Runtime.ClientServer
 {
@@ -41,16 +42,16 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.That(serverComponent.cmdSender, Is.EqualTo(serverPlayer), "ServerRpc called on client will have client's player (server version)");
         });
 
-        [UnityTest]
-        public IEnumerator ServerRpcWithSenderOnServer() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void ServerRpcWithSenderOnServer()
         {
-            serverComponent.SendWithSender(1);
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+            {
+                serverComponent.SendWithSender(1);
+            });
 
-            await AsyncUtil.WaitUntilWithTimeout(() => serverComponent.cmdArg1 != 0);
-
-            Assert.That(serverComponent.cmdArg1, Is.EqualTo(1));
-            Assert.That(serverComponent.cmdSender, Is.Null, "ServerRPC called on server will have no sender");
-        });
+            Assert.That(exception, Has.Message.EqualTo("Server RPC can only be called when client is active"));
+        }
 
         [UnityTest]
         public IEnumerator ServerRpcWithNetworkIdentity() => UniTask.ToCoroutine(async () =>
@@ -102,7 +103,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             spawnDelegateTestCalled = 0;
             var hash = Guid.NewGuid().GetHashCode();
 
-            NetworkIdentity identity = CreateNetworkIdentity();
+            var identity = CreateNetworkIdentity();
             identity.PrefabHash = hash;
             identity.NetId = (uint)Random.Range(0, int.MaxValue);
 
@@ -120,7 +121,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             spawnDelegateTestCalled = 0;
             var hash = Guid.NewGuid().GetHashCode();
-            NetworkIdentity identity = CreateNetworkIdentity();
+            var identity = CreateNetworkIdentity();
             identity.PrefabHash = hash;
             identity.NetId = (uint)Random.Range(0, int.MaxValue);
 
