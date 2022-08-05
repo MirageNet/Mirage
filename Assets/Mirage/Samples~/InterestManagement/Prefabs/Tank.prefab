@@ -53,44 +53,43 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneId: 0
+  SpawnSettings:
+    SendPosition: 1
+    SendRotation: 1
+    SendScale: 1
+  _sceneId: 0
   ServerObjectManager: {fileID: 0}
   ClientObjectManager: {fileID: 0}
-  m_AssetId: 
-  OnStartServer:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 114654712548978148}
-        m_TargetAssemblyTypeName: Mirage.Examples.InterestManagement.Tank, Mirage.Examples
-        m_MethodName: SetRandomName
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  OnStartClient:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartLocalPlayer:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartAuthority:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopAuthority:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopClient:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopServer:
-    m_PersistentCalls:
-      m_Calls: []
-  hasSpawned: 0
+  _prefabHash: -99413737
+  _onStartServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartLocalPlayer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onAuthorityChanged:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onOwnerChanged:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _hasSpawned: 0
 --- !u!95 &2240606817507776182
 Animator:
   serializedVersion: 3
@@ -384,6 +383,7 @@ Light:
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
 --- !u!1 &4730779867780281009
@@ -484,6 +484,7 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: 38b49695fc0a4418bbc350f2366660c5, type: 3}
 --- !u!4 &7831918942946891954 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 400010, guid: 38b49695fc0a4418bbc350f2366660c5, type: 3}
+  m_CorrespondingSourceObject: {fileID: 400010, guid: 38b49695fc0a4418bbc350f2366660c5,
+    type: 3}
   m_PrefabInstance: {fileID: 7831918942947279416}
   m_PrefabAsset: {fileID: 0}

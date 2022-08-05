@@ -49,9 +49,43 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneId: 0
-  serverOnly: 0
-  m_AssetId: 
+  SpawnSettings:
+    SendPosition: 1
+    SendRotation: 1
+    SendScale: 1
+  _sceneId: 0
+  ServerObjectManager: {fileID: 0}
+  ClientObjectManager: {fileID: 0}
+  _prefabHash: 1292622813
+  _onStartServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartLocalPlayer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onAuthorityChanged:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onOwnerChanged:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _hasSpawned: 0
 --- !u!114 &160176458
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68,11 +102,7 @@ MonoBehaviour:
   syncInterval: 0.1
   VisibilityRange: 10
   VisibilityUpdateInterval: 1
-  ActualCheckMethod: 0
   ForceHidden: 0
-  CastLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!114 &160176461
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -323,6 +353,8 @@ SkinnedMeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 3
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -376,9 +408,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 3
+  serializedVersion: 4
   m_Convex: 0
-  m_CookingOptions: 14
+  m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: 38b49695fc0a4418bbc350f2366660c5, type: 3}
 --- !u!1 &4728827432125738153
 GameObject:

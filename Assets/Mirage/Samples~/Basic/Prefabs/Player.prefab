@@ -54,12 +54,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1088833922664441133}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -135,12 +137,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1088833923132447022}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 0}
   m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -153,6 +157,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!114 &1088833923132447017
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -184,9 +189,43 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  serverOnly: 0
-  m_AssetId: 
-  m_SceneId: 0
+  SpawnSettings:
+    SendPosition: 1
+    SendRotation: 1
+    SendScale: 1
+  _sceneId: 0
+  ServerObjectManager: {fileID: 0}
+  ClientObjectManager: {fileID: 0}
+  _prefabHash: 1361896671
+  _onStartServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartLocalPlayer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onAuthorityChanged:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onOwnerChanged:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _hasSpawned: 0
 --- !u!1 &1088833924003616756
 GameObject:
   m_ObjectHideFlags: 0
@@ -241,12 +280,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1088833924003616756}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []

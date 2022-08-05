@@ -50,6 +50,8 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -144,9 +146,43 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneId: 0
-  serverOnly: 0
-  m_AssetId: 
+  SpawnSettings:
+    SendPosition: 1
+    SendRotation: 1
+    SendScale: 1
+  _sceneId: 0
+  ServerObjectManager: {fileID: 0}
+  ClientObjectManager: {fileID: 0}
+  _prefabHash: -1316789914
+  _onStartServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartLocalPlayer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onAuthorityChanged:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onOwnerChanged:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _hasSpawned: 0
 --- !u!114 &114626868563338794
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -181,4 +217,3 @@ MonoBehaviour:
   LocalPositionSensitivity: 0.01
   LocalRotationSensitivity: 0.01
   LocalScaleSensitivity: 0.01
-  compressRotation: 1

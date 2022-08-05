@@ -59,6 +59,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -83,6 +84,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &1078519278818213949
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95,42 +97,43 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneId: 0
-  serverOnly: 0
-  m_AssetId: 
-  OnStartServer:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8309506939003697769}
-        m_MethodName: OnStartServer
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  OnStartClient:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartLocalPlayer:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartAuthority:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopAuthority:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopClient:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopServer:
-    m_PersistentCalls:
-      m_Calls: []
-  hasSpawned: 0
+  SpawnSettings:
+    SendPosition: 1
+    SendRotation: 1
+    SendScale: 1
+  _sceneId: 0
+  ServerObjectManager: {fileID: 0}
+  ClientObjectManager: {fileID: 0}
+  _prefabHash: -1655520525
+  _onStartServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartLocalPlayer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onAuthorityChanged:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onOwnerChanged:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _hasSpawned: 0
 --- !u!114 &3679374677650722848
 MonoBehaviour:
   m_ObjectHideFlags: 0
