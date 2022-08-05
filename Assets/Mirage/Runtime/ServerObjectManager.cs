@@ -8,6 +8,7 @@ using Mirage.Serialization;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
+using Object = UnityEngine.Object;
 
 namespace Mirage
 {
@@ -500,12 +501,8 @@ namespace Mirage
         /// <param name="owner">The connection that has authority over the object</param>
         public void Spawn(GameObject obj, int prefabHash, INetworkPlayer owner = null)
         {
-            // check first before setting prefab
-            ThrowIfPrefab(obj);
-
             var identity = obj.GetNetworkIdentity();
-            identity.PrefabHash = prefabHash;
-            Spawn(identity, owner);
+            Spawn(identity, prefabHash, owner);
         }
 
         /// <summary>
@@ -514,6 +511,27 @@ namespace Mirage
         public void Spawn(GameObject obj, INetworkPlayer owner = null)
         {
             var identity = obj.GetNetworkIdentity();
+            Spawn(identity, owner);
+        }
+
+        /// <summary>
+        /// Assigns <paramref name="prefabHash"/> to the <paramref name="obj"/> and then it with <paramref name="owner"/>
+        /// <para>
+        ///     <see cref="NetworkIdentity.PrefabHash"/> can only be set on an identity if the current value is Empty
+        /// </para>
+        /// <para>
+        ///     This method is useful if you are creating network objects at runtime and both server and client know what <see cref="Guid"/> to set on an object
+        /// </para>
+        /// </summary>
+        /// <param name="obj">The object to spawn.</param>
+        /// <param name="prefabHash">The prefabHash of the object to spawn. Used for custom spawn handlers.</param>
+        /// <param name="owner">The connection that has authority over the object</param>
+        public void Spawn(NetworkIdentity identity, int prefabHash, INetworkPlayer owner = null)
+        {
+            // check first before setting prefab
+            ThrowIfPrefab(identity);
+
+            identity.PrefabHash = prefabHash;
             Spawn(identity, owner);
         }
 
@@ -628,7 +646,7 @@ namespace Mirage
         /// <para>This check does nothing in builds</para>
         /// </summary>
         /// <exception cref="InvalidOperationException">Throws in the editor if object is part of a prefab</exception>
-        private static void ThrowIfPrefab(GameObject obj)
+        private static void ThrowIfPrefab(Object obj)
         {
 #if UNITY_EDITOR
             if (UnityEditor.PrefabUtility.IsPartOfPrefabAsset(obj))
