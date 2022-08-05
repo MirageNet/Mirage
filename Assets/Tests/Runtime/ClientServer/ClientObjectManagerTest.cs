@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
-using UnityEngine;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 
@@ -11,18 +10,16 @@ namespace Mirage.Tests.Runtime.ClientServer
     [TestFixture]
     public class ClientObjectManagerTest : ClientServerSetup<MockComponent>
     {
-        private GameObject playerReplacement;
-
         [Test]
         public void OnSpawnAssetSceneIDFailureExceptionTest()
         {
             var msg = new SpawnMessage();
-            var ex = Assert.Throws<InvalidOperationException>(() =>
+            var ex = Assert.Throws<SpawnObjectException>(() =>
             {
                 clientObjectManager.OnSpawn(msg);
             });
 
-            Assert.That(ex.Message, Is.EqualTo($"OnSpawn has empty prefabHash and sceneId for netId: {msg.netId}"));
+            Assert.That(ex.Message, Is.EqualTo($"Empty prefabHash and sceneId for netId: {msg.netId}"));
         }
 
         [UnityTest]
@@ -112,19 +109,27 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [Test]
-        public void GetPrefabEmptyNullTest()
+        public void ThrwosWhenGetPrefabIsGivenZero()
         {
-            var result = clientObjectManager.GetPrefab(0);
+            var exception = Assert.Throws<ArgumentException>(() =>
+            {
+                var result = clientObjectManager.GetPrefab(0);
+            });
 
-            Assert.That(result, Is.Null);
+            var expected = new ArgumentException("prefabHash was 0", "prefabHash");
+            Assert.That(exception, Has.Message.EqualTo(expected.Message));
         }
 
         [Test]
-        public void GetPrefabNotFoundNullTest()
+        public void ThrowsWhenGetPrefabNotFound()
         {
-            var result = clientObjectManager.GetPrefab(NewUniqueHash());
+            var prefabHash = NewUniqueHash();
+            var exception = Assert.Throws<SpawnObjectException>(() =>
+            {
+                var result = clientObjectManager.GetPrefab(prefabHash);
+            });
 
-            Assert.That(result, Is.Null);
+            Assert.That(exception, Has.Message.EqualTo($"No prefab for {prefabHash:X}. did you forget to add it to the ClientObjectManager?"));
         }
 
         //Used to ensure the test has a unique non empty guid

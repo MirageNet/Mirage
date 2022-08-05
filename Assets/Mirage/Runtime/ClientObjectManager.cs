@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
@@ -61,7 +62,7 @@ namespace Mirage
             }
             else
             {
-                Debug.LogWarning($"Client is null for ClientObjectManager on {this.gameObject.name}");
+                Debug.LogWarning($"Client is null for ClientObjectManager on {gameObject.name}");
             }
         }
 
@@ -204,16 +205,17 @@ namespace Mirage
         /// </summary>
         /// <param name="prefabHash">asset id of the prefab</param>
         /// <returns>true if prefab was registered</returns>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="prefabHash"/> is 0</exception>
+        /// <exception cref="SpawnObjectException">Thrown prefab </exception>
         public NetworkIdentity GetPrefab(int prefabHash)
         {
             if (prefabHash == 0)
-                return null;
+                throw new ArgumentException("prefabHash was 0", nameof(prefabHash));
 
             if (_prefabs.TryGetValue(prefabHash, out var identity))
-            {
                 return identity;
-            }
-            return null;
+
+            throw new SpawnObjectException($"No prefab for {prefabHash:X}. did you forget to add it to the ClientObjectManager?");
         }
 
         /// <summary>
@@ -417,9 +419,8 @@ namespace Mirage
         internal void OnSpawn(SpawnMessage msg)
         {
             if (msg.prefabHash == null && msg.sceneId == null)
-            {
-                throw new InvalidOperationException($"OnSpawn has empty prefabHash and sceneId for netId: {msg.netId}");
-            }
+                throw new SpawnObjectException($"Empty prefabHash and sceneId for netId: {msg.netId}");
+
             if (logger.LogEnabled()) logger.Log($"Client spawn handler instantiating netId={msg.netId} prefabHash={msg.prefabHash:X} sceneId={msg.sceneId:X} pos={msg.position}");
 
             // was the object already spawned?
@@ -433,11 +434,8 @@ namespace Mirage
                     : SpawnPrefab(msg);
             }
 
-            if (identity == null)
-            {
-                //object could not be found.
-                throw new InvalidOperationException($"Could not spawn prefabHash={msg.prefabHash:X} scene={msg.sceneId:X} netId={msg.netId}");
-            }
+            // should never happen, Spawn methods above should throw instead
+            Debug.Assert(identity != null);
 
             ApplySpawnPayload(identity, msg);
 
@@ -448,51 +446,51 @@ namespace Mirage
 
         private NetworkIdentity SpawnPrefab(SpawnMessage msg)
         {
+            // try spawn handler first, then prefab after
             if (_spawnHandlers.TryGetValue(msg.prefabHash.Value, out var handler) && handler != null)
             {
-                var obj = handler(msg);
-                if (obj == null)
-                {
-                    logger.LogWarning($"Client spawn handler for {msg.prefabHash:X} returned null");
-                    return null;
-                }
-                return obj;
-            }
-            var prefab = GetPrefab(msg.prefabHash.Value);
-            if (!(prefab is null))
-            {
-                // we need to set position and rotation here incase that their values can be used form awake/onenable
-                var pos = msg.position ?? prefab.transform.position;
-                var rot = msg.rotation ?? prefab.transform.rotation;
-                var obj = Instantiate(prefab, pos, rot);
-                if (logger.LogEnabled())
-                {
-                    logger.Log($"Client spawn handler instantiating [netId:{msg.netId} asset ID:{msg.prefabHash:X} pos:{msg.position} rotation: {msg.rotation}]");
-                }
+                if (logger.LogEnabled()) logger.Log($"Client spawn with custom handler: [netId:{msg.netId} prefabHash:{msg.prefabHash:X} pos:{msg.position} rotation: {msg.rotation}]");
 
+                var obj = handler.Invoke(msg);
+                if (obj == null)
+                    throw new SpawnObjectException($"Spawn handler for prefabHash={msg.prefabHash:X} returned null");
                 return obj;
             }
-            logger.LogError("Failed to spawn server object, did you forget to add it to the ClientObjectManager? prefabHash=" + msg.prefabHash + " netId=" + msg.netId);
-            return null;
+
+            var prefab = GetPrefab(msg.prefabHash.Value);
+
+            if (logger.LogEnabled()) logger.Log($"Client spawn from prefab: [netId:{msg.netId} prefabHash:{msg.prefabHash:X} pos:{msg.position} rotation: {msg.rotation}]");
+
+            // we need to set position and rotation here incase that their values are used from awake/onenable
+            var pos = msg.position ?? prefab.transform.position;
+            var rot = msg.rotation ?? prefab.transform.rotation;
+            return Instantiate(prefab, pos, rot);
         }
 
         internal NetworkIdentity SpawnSceneObject(SpawnMessage msg)
         {
             var spawned = SpawnSceneObject(msg.sceneId.Value);
-            if (spawned == null)
+            if (spawned != null)
             {
-                logger.LogError($"Spawn scene object not found for {msg.sceneId:X} SpawnableObjects.Count={spawnableObjects.Count}");
-
-                // dump the whole spawnable objects dict for easier debugging
-                if (logger.LogEnabled())
-                {
-                    foreach (var kvp in spawnableObjects)
-                        logger.Log($"Spawnable: SceneId={kvp.Key} name={kvp.Value.name}");
-                }
+                if (logger.LogEnabled()) logger.Log($"Client spawn from scene object [netId:{msg.netId}] [sceneId:{msg.sceneId:X}] obj:{spawned}");
+                return spawned;
             }
 
-            if (logger.LogEnabled()) logger.Log($"Client spawn for [netId:{msg.netId}] [sceneId:{msg.sceneId:X}] obj:{spawned}");
-            return spawned;
+            // failed to spawn
+            var errorMsg = $"Failed to spawn scene object sceneId={msg.sceneId:X}";
+            // dump the whole spawnable objects dict for easier debugging
+            if (logger.LogEnabled())
+            {
+                var builder = new StringBuilder();
+                builder.AppendLine($"{errorMsg} SpawnableObjects.Count={spawnableObjects.Count}");
+
+                foreach (var kvp in spawnableObjects)
+                    builder.AppendLine($"Spawnable: SceneId={kvp.Key} name={kvp.Value.name}");
+
+                logger.Log(builder.ToString());
+            }
+
+            throw new SpawnObjectException(errorMsg);
         }
 
         private NetworkIdentity SpawnSceneObject(ulong sceneId)

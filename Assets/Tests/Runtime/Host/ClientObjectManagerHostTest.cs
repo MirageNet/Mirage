@@ -11,18 +11,6 @@ namespace Mirage.Tests.Runtime.Host
     [TestFixture]
     public class ClientObjectManagerHostTest : HostSetup<MockComponent>
     {
-        [Test]
-        public void OnSpawnAssetSceneIDFailureExceptionTest()
-        {
-            var msg = new SpawnMessage();
-            var ex = Assert.Throws<InvalidOperationException>(() =>
-            {
-                clientObjectManager.OnSpawn(msg);
-            });
-
-            Assert.That(ex.Message, Is.EqualTo($"OnSpawn has empty prefabHash and sceneId for netId: {msg.netId}"));
-        }
-
         [UnityTest]
         public IEnumerator GetPrefabTest() => UniTask.ToCoroutine(async () =>
         {
@@ -104,22 +92,6 @@ namespace Mirage.Tests.Runtime.Host
         private void TestUnspawnDelegate(NetworkIdentity identity)
         {
             Object.Destroy(identity.gameObject);
-        }
-
-        [Test]
-        public void GetPrefabEmptyNullTest()
-        {
-            var result = clientObjectManager.GetPrefab(0);
-
-            Assert.That(result, Is.Null);
-        }
-
-        [Test]
-        public void GetPrefabNotFoundNullTest()
-        {
-            var result = clientObjectManager.GetPrefab(NewUniqueHash());
-
-            Assert.That(result, Is.Null);
         }
 
         //Used to ensure the test has a unique non empty guid
