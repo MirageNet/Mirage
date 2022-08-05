@@ -1,3 +1,20 @@
+# [125.0.0](https://github.com/MirageNet/Mirage/compare/v124.0.0...v125.0.0) (2022-08-05)
+
+
+### Bug Fixes
+
+* improving error handling for Client spawning ([02ca962](https://github.com/MirageNet/Mirage/commit/02ca962c9a64b415386c0e03a0a456ea3ba9245a))
+
+
+### Features
+
+* adding spawn overload for NetworkIdentity and PrefabHash ([9c51fef](https://github.com/MirageNet/Mirage/commit/9c51fef552d5ae9affb7109e8528576703ec1231))
+
+
+### BREAKING CHANGES
+
+* ClientObjectManager.GetPrefab now throws instead of returning null
+
 # [124.0.0](https://github.com/MirageNet/Mirage/compare/v123.4.0...v124.0.0) (2022-08-01)
 
 
