@@ -488,7 +488,7 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Assigns <paramref name="prefabHash"/> to the <paramref name="obj"/> and then it with <paramref name="owner"/>
+        /// Assigns <paramref name="prefabHash"/> to the <paramref name="obj"/> and then spawns it with <paramref name="owner"/>
         /// <para>
         ///     <see cref="NetworkIdentity.PrefabHash"/> can only be set on an identity if the current value is Empty
         /// </para>
@@ -515,7 +515,7 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Assigns <paramref name="prefabHash"/> to the <paramref name="obj"/> and then it with <paramref name="owner"/>
+        /// Assigns <paramref name="prefabHash"/> to the <paramref name="identity"/> and then spawns it with <paramref name="owner"/>
         /// <para>
         ///     <see cref="NetworkIdentity.PrefabHash"/> can only be set on an identity if the current value is Empty
         /// </para>
