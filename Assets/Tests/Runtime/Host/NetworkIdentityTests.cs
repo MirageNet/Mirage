@@ -86,10 +86,18 @@ namespace Mirage.Tests.Runtime.Host
         }
 
         [Test]
-        public void SpawnWithPrefabHash()
+        public void SpawnGameObjectWithPrefabHash()
         {
             var hash = Guid.NewGuid().GetHashCode();
             serverObjectManager.Spawn(gameObject, hash, server.LocalPlayer);
+            Assert.That(testIdentity.PrefabHash, Is.EqualTo(hash));
+        }
+
+        [Test]
+        public void SpawnNetworkIdentityWithPrefabHash()
+        {
+            var hash = Guid.NewGuid().GetHashCode();
+            serverObjectManager.Spawn(testIdentity, hash, server.LocalPlayer);
             Assert.That(testIdentity.PrefabHash, Is.EqualTo(hash));
         }
 
