@@ -1,3 +1,20 @@
+# [126.0.0](https://github.com/MirageNet/Mirage/compare/v125.0.0...v126.0.0) (2022-08-07)
+
+
+### Features
+
+* making RemoteCallCollection public ([2906f18](https://github.com/MirageNet/Mirage/commit/2906f18c70b026ecac9297dea7877d4845c4f00e))
+
+
+### Performance Improvements
+
+* removing allocations for validating network identity in debug mode ([1909749](https://github.com/MirageNet/Mirage/commit/190974954f0a8e803b1be99d4a9b0a21ec59b965))
+
+
+### BREAKING CHANGES
+
+* remoteCallCollection renamed to RemoteCallCollection (may require unity restart after import)
+
 # [125.0.0](https://github.com/MirageNet/Mirage/compare/v124.0.0...v125.0.0) (2022-08-05)
 
 
