@@ -286,7 +286,11 @@ namespace Mirage
             // we only need to do this in debug mode because results should be right
             foreach (var item in components)
             {
-                logger.Assert(item.Identity == this, $"Child NetworkBehaviour had a different Identity, this:{name}, Child Identity:{item.Identity.name}");
+                // assert
+                if (item.Identity != this)
+                {
+                    logger.LogError($"Child NetworkBehaviour had a different Identity, this:{name}, Child Identity:{item.Identity.name}");
+                }
             }
 #endif
             return components;
