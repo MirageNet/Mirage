@@ -43,7 +43,7 @@ namespace Mirage.RemoteCalls
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static RpcMessage CreateMessage(NetworkBehaviour behaviour, int index, NetworkWriter writer)
         {
-            var rpc = behaviour.remoteCallCollection.Get(index);
+            var rpc = behaviour.RemoteCallCollection.Get(index);
 
             Validate(behaviour, rpc);
 

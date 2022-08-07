@@ -46,7 +46,7 @@ namespace Mirage.RemoteCalls
 
         private static void Validate(NetworkBehaviour behaviour, int index, bool requireAuthority)
         {
-            var rpc = behaviour.remoteCallCollection.Get(index);
+            var rpc = behaviour.RemoteCallCollection.Get(index);
             var client = behaviour.Client;
 
             if (client == null || !client.Active)

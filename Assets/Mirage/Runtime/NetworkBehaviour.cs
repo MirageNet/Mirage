@@ -480,11 +480,17 @@ namespace Mirage
 
         // overriden by weaver
         protected internal virtual int GetRpcCount() => 0;
-        protected internal RemoteCallCollection remoteCallCollection;
+
+        /// <summary>
+        /// Collection that holds information about all RPC in this networkbehaviour (including derived classes)
+        /// <para>Can be used to get RPC name from its index</para>
+        /// <para>NOTE: Weaver uses this collection to add rpcs, If adding your own rpc do at your own risk</para>
+        /// </summary>
+        public readonly RemoteCallCollection RemoteCallCollection;
 
         public NetworkBehaviour()
         {
-            remoteCallCollection = new RemoteCallCollection(this);
+            RemoteCallCollection = new RemoteCallCollection(this);
         }
         #endregion
     }

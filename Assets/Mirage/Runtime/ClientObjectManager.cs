@@ -592,7 +592,7 @@ namespace Mirage
 
             var behaviour = identity.NetworkBehaviours[msg.componentIndex];
 
-            var remoteCall = behaviour.remoteCallCollection.Get(msg.functionIndex);
+            var remoteCall = behaviour.RemoteCallCollection.Get(msg.functionIndex);
 
             if (remoteCall.InvokeType != RpcInvokeType.ClientRpc)
             {

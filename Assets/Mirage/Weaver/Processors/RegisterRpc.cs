@@ -97,7 +97,7 @@ namespace Mirage.Weaver
             var index = rpcMethod.Index;
             var module = rpcMethod.stub.Module;
 
-            var collectionFieldInfo = typeof(NetworkBehaviour).GetField(nameof(NetworkBehaviour.remoteCallCollection), BindingFlags.NonPublic | BindingFlags.Instance);
+            var collectionFieldInfo = typeof(NetworkBehaviour).GetField(nameof(NetworkBehaviour.RemoteCallCollection), BindingFlags.Public | BindingFlags.Instance);
             var collectionField = module.ImportReference(collectionFieldInfo);
 
             // arg0 is remote collection
