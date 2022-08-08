@@ -75,7 +75,7 @@ namespace Mirage.Weaver
 
             return diag;
 
-            static string ArrayMessage(string prefix, string[] array)
+            string ArrayMessage(string prefix, string[] array)
             {
                 return array.Length == 0
                     ? $"{prefix}:[]"
