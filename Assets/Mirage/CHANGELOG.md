@@ -1,3 +1,10 @@
+## [126.0.1](https://github.com/MirageNet/Mirage/compare/v126.0.0...v126.0.1) (2022-08-08)
+
+
+### Bug Fixes
+
+* fixing compile error in unity 2019.4 ([864a144](https://github.com/MirageNet/Mirage/commit/864a144745e4121580550989af7d34b78394feb1))
+
 # [126.0.0](https://github.com/MirageNet/Mirage/compare/v125.0.0...v126.0.0) (2022-08-07)
 
 
