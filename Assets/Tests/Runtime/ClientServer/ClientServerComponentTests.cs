@@ -100,38 +100,46 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator OnSpawnSpawnHandlerTest() => UniTask.ToCoroutine(async () =>
         {
-            spawnDelegateTestCalled = 0;
+            int spawnDelegateCalled = 0;
             var hash = Guid.NewGuid().GetHashCode();
 
             var identity = CreateNetworkIdentity();
             identity.PrefabHash = hash;
             identity.NetId = (uint)Random.Range(0, int.MaxValue);
 
-            clientObjectManager.RegisterSpawnHandler(hash, SpawnDelegateTest, go => { });
-            clientObjectManager.RegisterPrefab(identity, hash);
+            SpawnHandlerDelegate spawnDelegate = (msg) =>
+            {
+                spawnDelegateCalled++;
+                return InstantiateForTest(identity);
+            };
+            clientObjectManager.RegisterSpawnHandler(hash, spawnDelegate, go => { });
             serverObjectManager.SendSpawnMessage(identity, serverPlayer);
 
-            await AsyncUtil.WaitUntilWithTimeout(() => spawnDelegateTestCalled != 0);
+            await AsyncUtil.WaitUntilWithTimeout(() => spawnDelegateCalled != 0);
 
-            Assert.That(spawnDelegateTestCalled, Is.EqualTo(1));
+            Assert.That(spawnDelegateCalled, Is.EqualTo(1));
         });
 
         [UnityTest]
         public IEnumerator OnDestroySpawnHandlerTest() => UniTask.ToCoroutine(async () =>
         {
-            spawnDelegateTestCalled = 0;
+            var spawnDelegateCalled = 0;
             var hash = Guid.NewGuid().GetHashCode();
             var identity = CreateNetworkIdentity();
             identity.PrefabHash = hash;
             identity.NetId = (uint)Random.Range(0, int.MaxValue);
 
+            SpawnHandlerDelegate spawnDelegate = (msg) =>
+            {
+                spawnDelegateCalled++;
+                return InstantiateForTest(identity);
+            };
             var unspawnDelegate = Substitute.For<UnSpawnDelegate>();
 
-            clientObjectManager.RegisterSpawnHandler(hash, SpawnDelegateTest, unspawnDelegate);
-            clientObjectManager.RegisterPrefab(identity, hash);
+            clientObjectManager.RegisterSpawnHandler(hash, spawnDelegate, unspawnDelegate);
             serverObjectManager.SendSpawnMessage(identity, serverPlayer);
 
-            await AsyncUtil.WaitUntilWithTimeout(() => spawnDelegateTestCalled != 0);
+            await AsyncUtil.WaitUntilWithTimeout(() => spawnDelegateCalled != 0);
 
             clientObjectManager.OnObjectDestroy(new ObjectDestroyMessage
             {
@@ -139,20 +147,6 @@ namespace Mirage.Tests.Runtime.ClientServer
             });
             unspawnDelegate.Received().Invoke(Arg.Any<NetworkIdentity>());
         });
-
-        private int spawnDelegateTestCalled;
-
-        private NetworkIdentity SpawnDelegateTest(SpawnMessage msg)
-        {
-            spawnDelegateTestCalled++;
-
-            var prefab = clientObjectManager.GetPrefab(msg.prefabHash.Value);
-            if (!(prefab is null))
-            {
-                return InstantiateForTest(prefab);
-            }
-            return null;
-        }
 
         [UnityTest]
         public IEnumerator ClientDisconnectTest() => UniTask.ToCoroutine(async () =>

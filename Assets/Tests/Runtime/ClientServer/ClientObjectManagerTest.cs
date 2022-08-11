@@ -38,7 +38,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         });
 
         [Test]
-        public void RegisterPrefabDelegateEmptyIdentityExceptionTest()
+        public void ThrowsIfPrefabHas0Hash()
         {
             var identity = CreateNetworkIdentity();
 
@@ -51,7 +51,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [Test]
-        public void RegisterPrefabDelegateTest()
+        public void RegisterPrefabDelegate()
         {
             var identity = CreateNetworkIdentity();
 
@@ -59,43 +59,170 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, TestUnspawnDelegate);
 
-            Assert.That(clientObjectManager._spawnHandlers.ContainsKey(identity.PrefabHash));
-            Assert.That(clientObjectManager._unspawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
+            var handlers = clientObjectManager._handlers[identity.PrefabHash];
+            Assert.That(handlers.Prefab == null, "should not have added prefab with handlers");
+            Assert.That(handlers.SpawnHandler == TestSpawnDelegate);
+            Assert.That(handlers.UnspawnHandler == TestUnspawnDelegate);
         }
 
         [Test]
-        public void UnregisterPrefabTest()
+        public void IsAllowedToGiveNullUnspawn()
         {
             var identity = CreateNetworkIdentity();
-
             identity.PrefabHash = NewUniqueHash();
 
-            clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, TestUnspawnDelegate);
+            clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, null);
 
-            Assert.That(clientObjectManager._spawnHandlers.ContainsKey(identity.PrefabHash));
-            Assert.That(clientObjectManager._unspawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
+            var handlers = clientObjectManager._handlers[identity.PrefabHash];
+            Assert.That(handlers.Prefab == null, "should not have added prefab with handlers");
+            Assert.That(handlers.SpawnHandler == TestSpawnDelegate);
+            Assert.That(handlers.UnspawnHandler == null);
+        }
+
+        [Test]
+        public void ThrowsIfSpawnHandlerNull()
+        {
+            var identity = CreateNetworkIdentity();
+            identity.PrefabHash = NewUniqueHash();
+
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                clientObjectManager.RegisterPrefab(identity, null, TestUnspawnDelegate);
+            });
+        }
+
+        [Test]
+        public void ThrowsIfPrefabAlreadyRegistered()
+        {
+            var identity = CreateNetworkIdentity();
+            identity.PrefabHash = NewUniqueHash();
+
+            clientObjectManager.RegisterPrefab(identity);
+
+            var exception = Assert.Throws<InvalidOperationException>(() => {
+                clientObjectManager.RegisterPrefab(identity, (msg) => null, (obj) => { });
+            });
+
+            Assert.That(exception, Has.Message.EqualTo($"Prefab with hash {identity.PrefabHash:X} already registered. " +
+                    $"Unregister before adding new or prefabshandlers. Too add Unspawn handler to prefab use RegisterUnspawnHandler instead"));
+        }
+
+        [Test]
+        public void ThrowsIfPrefabAlreadyRegisteredAsHandles()
+        {
+            var identity = CreateNetworkIdentity();
+            identity.PrefabHash = NewUniqueHash();
+
+            clientObjectManager.RegisterPrefab(identity);
+
+            var exception = Assert.Throws<InvalidOperationException>(() => {
+                clientObjectManager.RegisterSpawnHandler(identity.PrefabHash, (msg) => null, (obj) => { });
+            });
+
+            Assert.That(exception, Has.Message.EqualTo($"Prefab with hash {identity.PrefabHash:X} already registered. " +
+                    $"Unregister before adding new or prefabshandlers. Too add Unspawn handler to prefab use RegisterUnspawnHandler instead"));
+        }
+
+        [Test]
+        public void ThrowsIfHandlerAlreadyRegistered()
+        {
+            var identity = CreateNetworkIdentity();
+            identity.PrefabHash = NewUniqueHash();
+
+            clientObjectManager.RegisterSpawnHandler(identity.PrefabHash, (msg) => null, (obj) => { });
+
+            var exception = Assert.Throws<InvalidOperationException>(() => {
+                clientObjectManager.RegisterPrefab(identity);
+            });
+
+            Assert.That(exception, Has.Message.EqualTo($"Handlers with hash {identity.PrefabHash:X} already registered. " +
+                    $"Unregister before adding new or prefabshandlers. Too add Unspawn handler to prefab use RegisterUnspawnHandler instead"));
+        }
+
+        [Test]
+        public void CanRemovePrefab()
+        {
+            var identity = CreateNetworkIdentity();
+            identity.PrefabHash = NewUniqueHash();
+
+            clientObjectManager.RegisterPrefab(identity);
+
+            Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
 
             clientObjectManager.UnregisterPrefab(identity);
 
-            Assert.That(!clientObjectManager._spawnHandlers.ContainsKey(identity.PrefabHash));
-            Assert.That(!clientObjectManager._unspawnHandlers.ContainsKey(identity.PrefabHash));
+            // check was removed
+            Assert.IsFalse(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
         }
 
         [Test]
-        public void UnregisterSpawnHandlerTest()
+        public void CanRemoveHandler()
+        {
+            var identity = CreateNetworkIdentity();
+            identity.PrefabHash = NewUniqueHash();
+
+            clientObjectManager.RegisterSpawnHandler(identity.PrefabHash, (msg) => null, (obj) => { });
+
+            Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
+
+            clientObjectManager.UnregisterSpawnHandler(identity.PrefabHash);
+
+            // check was removed
+            Assert.IsFalse(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
+        }
+
+        [Test]
+        public void CanAddUnspawnToPrefab()
+        {
+            var identity = CreateNetworkIdentity();
+            identity.PrefabHash = NewUniqueHash();
+
+            clientObjectManager.RegisterPrefab(identity);
+            Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
+            var handler = clientObjectManager._handlers[identity.PrefabHash];
+            Assert.That(handler.Prefab == identity);
+            Assert.That(handler.SpawnHandler == null);
+            Assert.That(handler.UnspawnHandler == null);
+
+            clientObjectManager.RegisterUnspawnHandler(identity, TestUnspawnDelegate);
+            Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
+            handler = clientObjectManager._handlers[identity.PrefabHash];
+            Assert.That(handler.Prefab == identity);
+            Assert.That(handler.SpawnHandler == null);
+            Assert.That(handler.UnspawnHandler == TestUnspawnDelegate);
+        }
+
+        [Test]
+        public void UnregisterPrefab()
+        {
+            var identity = CreateNetworkIdentity();
+
+            identity.PrefabHash = NewUniqueHash();
+
+            clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, TestUnspawnDelegate);
+
+            Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
+
+            clientObjectManager.UnregisterPrefab(identity);
+
+            Assert.IsFalse(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
+        }
+
+        [Test]
+        public void UnregisterSpawnHandler()
         {
             var identity = CreateNetworkIdentity();
             identity.PrefabHash = NewUniqueHash();
 
             clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, TestUnspawnDelegate);
 
-            Assert.That(clientObjectManager._spawnHandlers.ContainsKey(identity.PrefabHash));
-            Assert.That(clientObjectManager._unspawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
 
             clientObjectManager.UnregisterSpawnHandler(identity.PrefabHash);
 
-            Assert.That(!clientObjectManager._spawnHandlers.ContainsKey(identity.PrefabHash));
-            Assert.That(!clientObjectManager._unspawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.IsFalse(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
         }
 
         private NetworkIdentity TestSpawnDelegate(SpawnMessage msg)
@@ -137,7 +264,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             var testGuid = Guid.NewGuid().GetHashCode();
 
-            if (clientObjectManager._prefabs.ContainsKey(testGuid))
+            if (clientObjectManager._handlers.ContainsKey(testGuid))
             {
                 testGuid = NewUniqueHash();
             }

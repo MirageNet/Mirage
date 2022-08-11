@@ -46,8 +46,11 @@ namespace Mirage.Tests.Runtime.Host
 
             clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, TestUnspawnDelegate);
 
-            Assert.That(clientObjectManager._spawnHandlers.ContainsKey(identity.PrefabHash));
-            Assert.That(clientObjectManager._unspawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
+            var handler = clientObjectManager._handlers[identity.PrefabHash];
+            Assert.That(handler.Prefab == null);
+            Assert.That(handler.SpawnHandler == TestSpawnDelegate);
+            Assert.That(handler.UnspawnHandler == TestUnspawnDelegate);
         }
 
         [Test]
@@ -58,13 +61,11 @@ namespace Mirage.Tests.Runtime.Host
 
             clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, TestUnspawnDelegate);
 
-            Assert.That(clientObjectManager._spawnHandlers.ContainsKey(identity.PrefabHash));
-            Assert.That(clientObjectManager._unspawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
 
             clientObjectManager.UnregisterPrefab(identity);
 
-            Assert.That(!clientObjectManager._spawnHandlers.ContainsKey(identity.PrefabHash));
-            Assert.That(!clientObjectManager._unspawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.IsFalse(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
         }
 
         [Test]
@@ -75,13 +76,11 @@ namespace Mirage.Tests.Runtime.Host
 
             clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, TestUnspawnDelegate);
 
-            Assert.That(clientObjectManager._spawnHandlers.ContainsKey(identity.PrefabHash));
-            Assert.That(clientObjectManager._unspawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
 
             clientObjectManager.UnregisterSpawnHandler(identity.PrefabHash);
 
-            Assert.That(!clientObjectManager._spawnHandlers.ContainsKey(identity.PrefabHash));
-            Assert.That(!clientObjectManager._unspawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.IsFalse(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
         }
 
         private NetworkIdentity TestSpawnDelegate(SpawnMessage msg)
@@ -99,7 +98,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             var testGuid = Guid.NewGuid().GetHashCode();
 
-            if (clientObjectManager._prefabs.ContainsKey(testGuid))
+            if (clientObjectManager._handlers.ContainsKey(testGuid))
             {
                 testGuid = NewUniqueHash();
             }
