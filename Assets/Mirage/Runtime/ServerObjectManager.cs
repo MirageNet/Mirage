@@ -788,6 +788,7 @@ namespace Mirage
         // note: can't use optional param here because we need just NetworkPlayer version for event
         public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter)
         {
+            // todo Call player.RemoveAllVisibleObjects() first so that it will send spawn message for objects destroyed in scene change
             if (logger.LogEnabled()) logger.Log("SetClientReadyInternal for conn:" + player);
 
             // client is ready to start spawning objects
