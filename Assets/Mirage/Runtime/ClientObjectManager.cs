@@ -314,6 +314,27 @@ namespace Mirage
         /// <param name="unspawnHandler">A method to use as a custom un-spawnhandler on clients.</param>
         public void RegisterSpawnHandler(int prefabHash, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
         {
+            ValidateRegisterSpawnHandler(prefabHash, spawnHandler, unspawnHandler);
+
+            _handlers[prefabHash] = new Handlers(spawnHandler, unspawnHandler);
+        }
+
+        public void RegisterSpawnHandler(NetworkIdentity identity, SpawnHandlerAsyncDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
+        {
+            ThrowIfZeroHash(identity);
+            var prefabHash = identity.PrefabHash;
+            RegisterSpawnHandler(prefabHash, spawnHandler, unspawnHandler);
+        }
+
+        public void RegisterSpawnHandler(int prefabHash, SpawnHandlerAsyncDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
+        {
+            ValidateRegisterSpawnHandler(prefabHash, spawnHandler, unspawnHandler);
+
+            _handlers[prefabHash] = new Handlers(spawnHandler, unspawnHandler);
+        }
+
+        private void ValidateRegisterSpawnHandler(int prefabHash, Delegate spawnHandler, UnSpawnDelegate unspawnHandler)
+        {
             if (spawnHandler == null)
                 throw new ArgumentNullException(nameof(spawnHandler));
 
@@ -326,8 +347,6 @@ namespace Mirage
                 var unspawnName = unspawnHandler?.Method.Name ?? "<NULL>";
                 logger.Log($"RegisterSpawnHandler PrefabHash:'{prefabHash:X}' Spawn:{spawnName} UnSpawn:{unspawnName}");
             }
-
-            _handlers[prefabHash] = new Handlers(spawnHandler, unspawnHandler);
         }
 
         /// <summary>
@@ -479,19 +498,51 @@ namespace Mirage
             if (!existing)
             {
                 //is the object on the prefab or scene object lists?
-                identity = msg.sceneId.HasValue
-                    ? SpawnSceneObject(msg)
-                    : SpawnPrefab(msg);
+                if (msg.sceneId.HasValue)
+                {
+                    identity = SpawnSceneObject(msg);
+                }
+                else if (IsAsyncSpawn(msg.prefabHash.Value, out var spawnHandlerAsync))
+                {
+                    OnSpawnAsync(spawnHandlerAsync, msg).Forget();
+                    return;
+                }
+                else
+                {
+                    identity = SpawnPrefab(msg);
+                }
             }
 
-            // should never happen, Spawn methods above should throw instead
-            Debug.Assert(identity != null);
+            AfterSpawn(msg, existing, identity);
+        }
 
-            ApplySpawnPayload(identity, msg);
+        private void AfterSpawn(SpawnMessage msg, bool alreadyExisted, NetworkIdentity spawnedIdentity)
+        {
+            // should never happen, Spawn methods above should throw instead
+            Debug.Assert(spawnedIdentity != null);
+
+            ApplySpawnPayload(spawnedIdentity, msg);
 
             // add after applying payload, but only if it is new object
-            if (!existing)
-                Client.World.AddIdentity(msg.netId, identity);
+            if (!alreadyExisted)
+                Client.World.AddIdentity(msg.netId, spawnedIdentity);
+        }
+
+        private bool IsAsyncSpawn(int prefabHash, out SpawnHandlerAsyncDelegate spawnHandlerAsync)
+        {
+            if (!_handlers.TryGetValue(prefabHash, out var handler))
+            {
+                ThrowMissingHandler(prefabHash);
+            }
+
+            spawnHandlerAsync = handler.SpawnHandlerAsync;
+            return spawnHandlerAsync != null;
+        }
+
+        private async UniTaskVoid OnSpawnAsync(SpawnHandlerAsyncDelegate spawnHandler, SpawnMessage msg)
+        {
+            var identity = await spawnHandler.Invoke(msg);
+            AfterSpawn(msg, false, identity);
         }
 
         private NetworkIdentity SpawnPrefab(SpawnMessage msg)
@@ -511,6 +562,9 @@ namespace Mirage
                     throw new SpawnObjectException($"Spawn handler for prefabHash={msg.prefabHash:X} returned null");
                 return obj;
             }
+
+            // checked/used else where
+            Debug.Assert(handler.SpawnHandlerAsync == null);
 
             var prefab = handler.Prefab;
 
@@ -715,6 +769,7 @@ namespace Mirage
             public readonly NetworkIdentity Prefab;
 
             public readonly SpawnHandlerDelegate SpawnHandler;
+            public readonly SpawnHandlerAsyncDelegate SpawnHandlerAsync;
 
             public UnSpawnDelegate UnspawnHandler { get; private set; }
 
