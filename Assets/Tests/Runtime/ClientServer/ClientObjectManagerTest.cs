@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 
@@ -89,7 +90,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                clientObjectManager.RegisterSpawnHandler(identity, null, TestUnspawnDelegate);
+                clientObjectManager.RegisterSpawnHandler(identity, (SpawnHandlerDelegate)null, TestUnspawnDelegate);
             });
         }
 
@@ -101,7 +102,8 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             clientObjectManager.RegisterPrefab(identity);
 
-            var exception = Assert.Throws<InvalidOperationException>(() => {
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+            {
                 clientObjectManager.RegisterSpawnHandler(identity, (msg) => null, (obj) => { });
             });
 
@@ -117,7 +119,8 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             clientObjectManager.RegisterPrefab(identity);
 
-            var exception = Assert.Throws<InvalidOperationException>(() => {
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+            {
                 clientObjectManager.RegisterSpawnHandler(identity.PrefabHash, (msg) => null, (obj) => { });
             });
 
@@ -133,7 +136,8 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             clientObjectManager.RegisterSpawnHandler(identity.PrefabHash, (msg) => null, (obj) => { });
 
-            var exception = Assert.Throws<InvalidOperationException>(() => {
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+            {
                 clientObjectManager.RegisterPrefab(identity);
             });
 
@@ -257,6 +261,69 @@ namespace Mirage.Tests.Runtime.ClientServer
             });
 
             Assert.That(exception, Has.Message.EqualTo($"No prefab for {prefabHash:X}. did you forget to add it to the ClientObjectManager?"));
+        }
+
+        [UnityTest]
+        public IEnumerator SpawnsAsync() => UniTask.ToCoroutine(async () =>
+        {
+            const int NET_ID = 1000;
+            const int DELAY = 200;
+            var pos = new Vector3(100, 0, 0);
+            var handlerStarted = 0;
+            var handlerFinished = 0;
+
+            var identity = CreateNetworkIdentity();
+            identity.PrefabHash = NewUniqueHash();
+            clientObjectManager.RegisterSpawnHandler(identity.PrefabHash, new SpawnHandlerAsyncDelegate(async (msg) =>
+            {
+                handlerStarted++;
+                await UniTask.Delay(DELAY);
+                handlerFinished++;
+                return identity;
+            }), (obj) => { });
+
+            var msg = new SpawnMessage
+            {
+                netId = NET_ID,
+                prefabHash = identity.PrefabHash,
+                payload = new ArraySegment<byte>(new byte[0]),
+                position = pos,
+            };
+
+            clientObjectManager.OnSpawn(msg);
+            var world = client.World;
+            // does not exist yet
+            Assert.IsFalse(world.TryGetIdentity(NET_ID, out var _));
+
+            Assert.That(handlerStarted, Is.EqualTo(1));
+            Assert.That(handlerFinished, Is.EqualTo(0));
+
+            // wait for delay+1 frame
+            await UniTask.Delay(DELAY);
+            await UniTask.Yield();
+
+            Assert.That(handlerStarted, Is.EqualTo(1));
+            Assert.That(handlerFinished, Is.EqualTo(1));
+            Assert.IsTrue(world.TryGetIdentity(NET_ID, out var spawned));
+            Assert.That(spawned.transform.position, Is.EqualTo(pos));
+        });
+
+        [Test]
+        public void ThrowsWhenAddingAsyncWhenAlreadyAdded()
+        {
+            var identity = CreateNetworkIdentity();
+            identity.PrefabHash = NewUniqueHash();
+
+            clientObjectManager.RegisterSpawnHandler(identity.PrefabHash, (msg) => null, (obj) => { });
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+            {
+                clientObjectManager.RegisterSpawnHandler(identity.PrefabHash, new SpawnHandlerAsyncDelegate(async (msg) => null), (obj) => { });
+            });
+
+            Assert.That(exception, Has.Message.EqualTo($"Handlers with hash {identity.PrefabHash:X} already registered. " +
+                    $"Unregister before adding new or prefabshandlers. Too add Unspawn handler to prefab use RegisterUnspawnHandler instead"));
+
         }
 
         //Used to ensure the test has a unique non empty guid
