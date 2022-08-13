@@ -594,6 +594,12 @@ namespace Mirage
             _onStopClient.Invoke();
         }
 
+        public event Action OnDirty;
+        internal void MarkAsDirty()
+        {
+            OnDirty?.Invoke();
+        }
+
         // random number that is unlikely to appear in a regular data stream
         private const byte BARRIER = 171;
 

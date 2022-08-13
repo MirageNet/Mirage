@@ -251,9 +251,7 @@ namespace Mirage
         private void SyncObject_OnChange()
         {
             if (IsServer)
-            {
-                Server.SyncVarSender.AddDirtyObject(Identity);
-            }
+                Identity.MarkAsDirty();
         }
 
         protected internal bool SyncVarEqual<T>(T value, T fieldValue)
@@ -271,7 +269,7 @@ namespace Mirage
         {
             SyncVarDirtyBits |= dirtyBit;
             if (IsServer)
-                Server.SyncVarSender.AddDirtyObject(Identity);
+                Identity.MarkAsDirty();
         }
 
         /// <summary>
