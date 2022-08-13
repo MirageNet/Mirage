@@ -181,7 +181,7 @@ namespace Mirage
             }
         }
 
-        #region Spawn Prefabs
+        #region Spawn Prefabs and handlers
         private void RegisterSpawnPrefabs()
         {
             for (var i = 0; i < spawnPrefabs.Count; i++)
@@ -249,7 +249,7 @@ namespace Mirage
             _handlers[prefabHash] = new Handlers(identity);
         }
 
-/// <summary>
+        /// <summary>
         /// Registers an unspawn handler for a prefab
         /// <para>Should be called after RegisterPrefab</para>
         /// </summary>
@@ -267,7 +267,7 @@ namespace Mirage
                 throw new InvalidOperationException($"No prefab with hash {prefabHash:X}. Prefab must be registered before adding unspawn handler");
             }
 
-            if (_handlers[prefabHash] .Prefab == null)
+            if (_handlers[prefabHash].Prefab == null)
             {
                 throw new InvalidOperationException($"Existing handler for {prefabHash:X} was not a prefab. Prefab must be registered before adding unspawn handler");
             }
@@ -288,9 +288,6 @@ namespace Mirage
             _handlers.Remove(prefabHash);
         }
 
-        #endregion
-
-        #region Spawn Handler
         /// <summary>
         /// Registers custom handlers for a prefab with the spawning system.
         /// <para>When a NetworkIdentity object is spawned on a server with NetworkServer.SpawnObject(), and the prefab that the object was created from was registered with RegisterPrefab(), the client will use that prefab to instantiate a corresponding client object with the same netId.</para>
