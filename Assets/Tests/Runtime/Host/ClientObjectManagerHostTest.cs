@@ -34,7 +34,7 @@ namespace Mirage.Tests.Runtime.Host
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, TestUnspawnDelegate);
+                clientObjectManager.RegisterSpawnHandler(identity, TestSpawnDelegate, TestUnspawnDelegate);
             });
         }
 
@@ -44,7 +44,7 @@ namespace Mirage.Tests.Runtime.Host
             var identity = CreateNetworkIdentity();
             identity.PrefabHash = NewUniqueHash();
 
-            clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, TestUnspawnDelegate);
+            clientObjectManager.RegisterSpawnHandler(identity, TestSpawnDelegate, TestUnspawnDelegate);
 
             Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
             var handler = clientObjectManager._handlers[identity.PrefabHash];
@@ -59,7 +59,7 @@ namespace Mirage.Tests.Runtime.Host
             var identity = CreateNetworkIdentity();
             identity.PrefabHash = NewUniqueHash();
 
-            clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, TestUnspawnDelegate);
+            clientObjectManager.RegisterSpawnHandler(identity, TestSpawnDelegate, TestUnspawnDelegate);
 
             Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
 
@@ -74,7 +74,7 @@ namespace Mirage.Tests.Runtime.Host
             var identity = CreateNetworkIdentity();
             identity.PrefabHash = NewUniqueHash();
 
-            clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, TestUnspawnDelegate);
+            clientObjectManager.RegisterSpawnHandler(identity, TestSpawnDelegate, TestUnspawnDelegate);
 
             Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
 

@@ -249,32 +249,7 @@ namespace Mirage
             _handlers[prefabHash] = new Handlers(identity);
         }
 
-        /// <summary>
-        /// Registers custom handlers for a prefab with the spawning system.
-        /// <para>When a NetworkIdentity object is spawned on a server with NetworkServer.SpawnObject(), and the prefab that the object was created from was registered with RegisterPrefab(), the client will use that prefab to instantiate a corresponding client object with the same netId.</para>
-        /// <para>The ClientObjectManager has a list of spawnable prefabs, it uses this function to register those prefabs with the ClientScene.</para>
-        /// <para>The set of current spawnable object is available in the ClientScene static member variable ClientScene.prefabs, which is a dictionary of PrefabHash and prefab references.</para>
-        /// </summary>
-        /// <seealso cref="RegisterUnspawnHandler"/>
-        /// <param name="identity">A Prefab that will be spawned.</param>
-        /// <param name="spawnHandler">A method to use as a custom spawnhandler on clients.</param>
-        /// <param name="unspawnHandler">A method to use as a custom un-spawnhandler on clients.</param>
-        public void RegisterPrefab(NetworkIdentity identity, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
-        {
-            if (spawnHandler == null)
-                throw new ArgumentNullException(nameof(spawnHandler));
-
-            ThrowIfZeroHash(identity);
-            var prefabHash = identity.PrefabHash;
-
-            ThrowIfExists(prefabHash);
-
-            if (logger.LogEnabled()) logger.Log($"Registering custom prefab '{identity.name}' as asset:{prefabHash:X} {spawnHandler.Method.Name}/{unspawnHandler.Method.Name}");
-
-            _handlers[prefabHash] = new Handlers(spawnHandler, unspawnHandler);
-        }
-
-        /// <summary>
+/// <summary>
         /// Registers an unspawn handler for a prefab
         /// <para>Should be called after RegisterPrefab</para>
         /// </summary>
@@ -316,6 +291,22 @@ namespace Mirage
         #endregion
 
         #region Spawn Handler
+        /// <summary>
+        /// Registers custom handlers for a prefab with the spawning system.
+        /// <para>When a NetworkIdentity object is spawned on a server with NetworkServer.SpawnObject(), and the prefab that the object was created from was registered with RegisterPrefab(), the client will use that prefab to instantiate a corresponding client object with the same netId.</para>
+        /// <para>The ClientObjectManager has a list of spawnable prefabs, it uses this function to register those prefabs with the ClientScene.</para>
+        /// <para>The set of current spawnable object is available in the ClientScene static member variable ClientScene.prefabs, which is a dictionary of PrefabHash and prefab references.</para>
+        /// </summary>
+        /// <seealso cref="RegisterUnspawnHandler"/>
+        /// <param name="identity">A Prefab that will be spawned.</param>
+        /// <param name="spawnHandler">A method to use as a custom spawnhandler on clients.</param>
+        /// <param name="unspawnHandler">A method to use as a custom un-spawnhandler on clients.</param>
+        public void RegisterSpawnHandler(NetworkIdentity identity, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
+        {
+            ThrowIfZeroHash(identity);
+            var prefabHash = identity.PrefabHash;
+            RegisterSpawnHandler(prefabHash, spawnHandler, unspawnHandler);
+        }
 
         /// <summary>
         /// This is an advanced spawning function that registers a custom prefabHash with the UNET spawning system.
