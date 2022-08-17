@@ -18,7 +18,7 @@ namespace Mirage
     /// </remarks>
     [AddComponentMenu("Network/NetworkServer")]
     [DisallowMultipleComponent]
-    public class NetworkServer : MonoBehaviour, INetworkServer
+    public class NetworkServer : MonoBehaviour
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkServer));
 
@@ -257,11 +257,6 @@ namespace Mirage
                 localClient.ConnectHost(this, dataHandler);
                 if (logger.LogEnabled()) logger.Log("NetworkServer StartHost");
             }
-        }
-
-        void INetworkServer.StartServer()
-        {
-            StartServer();
         }
 
         private void ThrowIfActive()
