@@ -77,6 +77,13 @@ namespace Mirage
         public IConnection Connection => _connection;
 
         /// <summary>
+        /// List of all networkIdentity that this player can see
+        /// <para>Only valid on server</para>
+        /// </summary>
+        public IReadOnlyCollection<NetworkIdentity> VisList => _visList;
+
+
+        /// <summary>
         /// Disconnects the player.
         /// <para>A disconnected player can not send messages</para>
         /// </summary>
@@ -213,6 +220,16 @@ namespace Mirage
         public void RemoveFromVisList(NetworkIdentity identity)
         {
             _visList.Remove(identity);
+        }
+
+        /// <summary>
+        /// Checks if player can see NetworkIdentity
+        /// </summary>
+        /// <param name="identity"></param>
+        /// <returns></returns>
+        public bool ContainsInVisList(NetworkIdentity identity)
+        {
+            return _visList.Contains(identity);
         }
 
         /// <summary>

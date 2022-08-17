@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Mirage.SocketLayer;
 
 namespace Mirage
@@ -39,9 +40,37 @@ namespace Mirage
     /// </summary>
     public interface IVisibilityTracker
     {
+        /// <summary>
+        /// Called when sending spawn message to client
+        /// </summary>
+        /// <param name="identity"></param>
         void AddToVisList(NetworkIdentity identity);
+
+        /// <summary>
+        /// Called when sending destroy message to client
+        /// </summary>
+        /// <param name="identity"></param>
         void RemoveFromVisList(NetworkIdentity identity);
+
+        /// <summary>
+        /// Removes all <see cref="NetworkIdentity"/> that this player can see
+        /// <para>This is called when loading a new scene</para>
+        /// </summary>
         void RemoveAllVisibleObjects();
+
+        /// <summary>
+        /// Checks if player can see <see cref="NetworkIdentity"/>
+        /// </summary>
+        /// <param name="identity"></param>
+        /// <returns></returns>
+        bool ContainsInVisList(NetworkIdentity identity);
+
+        /// <summary>
+        /// HashSet of all <see cref="NetworkIdentity"/> that this player can see
+        /// <para>Only valid on server</para>
+        /// <para>Reverse collection for <see cref="NetworkIdentity.observers"/></para>
+        /// </summary>
+        IReadOnlyCollection<NetworkIdentity> VisList { get; }
     }
 
     /// <summary>
