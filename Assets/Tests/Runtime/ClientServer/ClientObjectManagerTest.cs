@@ -318,7 +318,8 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             var exception = Assert.Throws<InvalidOperationException>(() =>
             {
-                clientObjectManager.RegisterSpawnHandler(identity.PrefabHash, new SpawnHandlerAsyncDelegate(async (msg) => null), (obj) => { });
+                var asyncHandler = new SpawnHandlerAsyncDelegate((msg) => UniTask.FromResult<NetworkIdentity>(null));
+                clientObjectManager.RegisterSpawnHandler(identity.PrefabHash, asyncHandler, (obj) => { });
             });
 
             Assert.That(exception, Has.Message.EqualTo($"Handlers with hash {identity.PrefabHash:X} already registered. " +
