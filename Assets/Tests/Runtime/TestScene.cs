@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,10 +12,19 @@ namespace Mirage.Tests.Runtime
         public static async UniTask UnloadAdditiveScenes()
         {
             var active = SceneManager.GetActiveScene();
+
+            // get all scenes and add to list first, so that because sceneCount will change as scene are unloaded
+            var toUnload = new List<Scene>();
             for (var i = 0; i < SceneManager.sceneCount; i++)
             {
                 var scene = SceneManager.GetSceneAt(i);
                 if (active == scene) { continue; }
+
+                toUnload.Add(scene);
+            }
+
+            foreach (var scene in toUnload)
+            {
                 var op = SceneManager.UnloadSceneAsync(scene);
                 if (op != null)
                     await op;
