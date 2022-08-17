@@ -34,7 +34,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
             var data = MessagePacker.Pack(message);
 
-            var unpacked = MessagePacker.Unpack<SceneMessage>(data);
+            var unpacked = MessagePacker.Unpack<SceneMessage>(data, null);
 
             Assert.That(unpacked.MainActivateScene, Is.EqualTo("Hello world"));
             Assert.That(unpacked.SceneOperation, Is.EqualTo(SceneOperation.LoadAdditive));
@@ -49,7 +49,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
             Assert.Throws<FormatException>(() =>
             {
-                _ = MessagePacker.Unpack<AddCharacterMessage>(data);
+                _ = MessagePacker.Unpack<AddCharacterMessage>(data, null);
             });
         }
 
@@ -73,7 +73,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
             Assert.Throws<FormatException>(delegate
             {
-                _ = MessagePacker.Unpack<SceneMessage>(data);
+                _ = MessagePacker.Unpack<SceneMessage>(data, null);
 
             });
         }

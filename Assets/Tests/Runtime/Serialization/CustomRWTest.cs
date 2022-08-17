@@ -40,7 +40,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
             var data = MessagePacker.Pack(quest);
 
-            var unpacked = MessagePacker.Unpack<MockQuest>(data);
+            var unpacked = MessagePacker.Unpack<MockQuest>(data, null);
             Assert.That(unpacked.Id, Is.EqualTo(100));
         }
     }

@@ -23,7 +23,7 @@ namespace Mirage.Tests.Runtime.Serialization
             var arr = MessagePacker.Pack(message);
 
             // deserialize the same data - do we get the same result?
-            var fresh = MessagePacker.Unpack<ServerRpcMessage>(arr);
+            var fresh = MessagePacker.Unpack<ServerRpcMessage>(arr, null);
             Assert.That(fresh.netId, Is.EqualTo(message.netId));
             Assert.That(fresh.componentIndex, Is.EqualTo(message.componentIndex));
             Assert.That(fresh.functionIndex, Is.EqualTo(message.functionIndex));
@@ -38,7 +38,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             // serialize
             var arr = MessagePacker.Pack(message);
-            var fresh = MessagePacker.Unpack<T>(arr);
+            var fresh = MessagePacker.Unpack<T>(arr, null);
             Assert.That(fresh, Is.EqualTo(message));
         }
 
@@ -109,7 +109,7 @@ namespace Mirage.Tests.Runtime.Serialization
                 payload = new ArraySegment<byte>(new byte[] { 0x01, 0x02 })
             };
             var arr = MessagePacker.Pack(message);
-            var fresh = MessagePacker.Unpack<RpcMessage>(arr);
+            var fresh = MessagePacker.Unpack<RpcMessage>(arr, null);
             Assert.That(fresh.netId, Is.EqualTo(message.netId));
             Assert.That(fresh.componentIndex, Is.EqualTo(message.componentIndex));
             Assert.That(fresh.functionIndex, Is.EqualTo(message.functionIndex));
@@ -138,7 +138,7 @@ namespace Mirage.Tests.Runtime.Serialization
                 payload = new ArraySegment<byte>(new byte[] { 0x01, 0x02 })
             };
             var arr = MessagePacker.Pack(message);
-            var fresh = MessagePacker.Unpack<SpawnMessage>(arr);
+            var fresh = MessagePacker.Unpack<SpawnMessage>(arr, null);
             Assert.That(fresh.netId, Is.EqualTo(message.netId));
             Assert.That(fresh.isLocalPlayer, Is.EqualTo(message.isLocalPlayer));
             Assert.That(fresh.isOwner, Is.EqualTo(message.isOwner));
@@ -164,7 +164,7 @@ namespace Mirage.Tests.Runtime.Serialization
                 payload = new ArraySegment<byte>(new byte[] { 0x01, 0x02 })
             };
             var arr = MessagePacker.Pack(message);
-            var fresh = MessagePacker.Unpack<UpdateVarsMessage>(arr);
+            var fresh = MessagePacker.Unpack<UpdateVarsMessage>(arr, null);
             Assert.That(fresh.netId, Is.EqualTo(message.netId));
             Assert.That(fresh.payload.Count, Is.EqualTo(message.payload.Count));
             for (var i = 0; i < fresh.payload.Count; ++i)

@@ -51,7 +51,7 @@ namespace Mirage.Tests.Runtime.Serialization
                 DoubleValue = 3.3,
                 StringValue = "2"
             });
-            var t = MessagePacker.Unpack<TestMessage>(arr);
+            var t = MessagePacker.Unpack<TestMessage>(arr, null);
 
             Assert.AreEqual(1, t.IntValue);
         }
@@ -66,7 +66,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
             var data = MessagePacker.Pack(intMessage);
 
-            var unpacked = MessagePacker.Unpack<ClassWithoutBaseMessage>(data);
+            var unpacked = MessagePacker.Unpack<ClassWithoutBaseMessage>(data, null);
 
             Assert.That(unpacked.array, Is.EquivalentTo(new[] { 3, 4, 5 }));
         }
@@ -82,7 +82,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
             var data = MessagePacker.Pack(intMessage);
 
-            var unpacked = MessagePacker.Unpack<OverrideMessage>(data);
+            var unpacked = MessagePacker.Unpack<OverrideMessage>(data, null);
 
             Assert.That(unpacked.someValue, Is.EqualTo(value));
         }
@@ -102,7 +102,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
             var data = MessagePacker.Pack(intMessage);
 
-            var unpacked = MessagePacker.Unpack<Layer3Message>(data);
+            var unpacked = MessagePacker.Unpack<Layer3Message>(data, null);
 
             Assert.That(unpacked.value1, Is.EqualTo(value1));
             Assert.That(unpacked.value2, Is.EqualTo(value2));

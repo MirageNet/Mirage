@@ -20,7 +20,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
                 var data = MessagePacker.Pack(array);
 
-                var unpacked = MessagePacker.Unpack<ArraySegment<byte>>(data);
+                var unpacked = MessagePacker.Unpack<ArraySegment<byte>>(data, null);
 
                 Assert.IsNotNull(unpacked.Array);
                 Assert.That(unpacked.Count, Is.EqualTo(0));
@@ -33,7 +33,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
                 var data = MessagePacker.Pack(array);
 
-                var unpacked = MessagePacker.Unpack<ArraySegment<byte>>(data);
+                var unpacked = MessagePacker.Unpack<ArraySegment<byte>>(data, null);
 
                 Assert.IsNull(unpacked.Array);
                 Assert.That(unpacked.Offset, Is.EqualTo(0));
@@ -48,7 +48,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
                 var data = MessagePacker.Pack(array);
 
-                var unpacked = MessagePacker.Unpack<ArraySegment<byte>>(data);
+                var unpacked = MessagePacker.Unpack<ArraySegment<byte>>(data, null);
 
                 Assert.IsNotNull(unpacked.Array);
                 Assert.That(unpacked.Count, Is.EqualTo(2));
@@ -65,7 +65,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
                 var data = MessagePacker.Pack(array);
 
-                var unpacked = MessagePacker.Unpack<ArraySegment<int>>(data);
+                var unpacked = MessagePacker.Unpack<ArraySegment<int>>(data, null);
 
                 Assert.IsNotNull(unpacked.Array);
                 Assert.That(unpacked.Count, Is.EqualTo(0));
@@ -78,7 +78,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
                 var data = MessagePacker.Pack(array);
 
-                var unpacked = MessagePacker.Unpack<ArraySegment<int>>(data);
+                var unpacked = MessagePacker.Unpack<ArraySegment<int>>(data, null);
 
                 Assert.IsNull(unpacked.Array);
                 Assert.That(unpacked.Offset, Is.EqualTo(0));
@@ -94,7 +94,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
                 var data = MessagePacker.Pack(array);
 
-                var unpacked = MessagePacker.Unpack<ArraySegment<int>>(data);
+                var unpacked = MessagePacker.Unpack<ArraySegment<int>>(data, null);
 
                 Assert.IsNotNull(unpacked.Array);
                 Assert.That(unpacked.Count, Is.EqualTo(2));

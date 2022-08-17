@@ -25,7 +25,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
             var data = MessagePacker.Pack(scriptableObject);
 
-            var unpacked = MessagePacker.Unpack<MyScriptableObject>(data);
+            var unpacked = MessagePacker.Unpack<MyScriptableObject>(data, null);
 
             Assert.That(unpacked, Is.Not.Null);
             Assert.That(unpacked.someData, Is.EqualTo(10));
