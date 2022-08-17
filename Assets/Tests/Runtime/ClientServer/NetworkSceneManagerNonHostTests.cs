@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
@@ -18,6 +19,9 @@ namespace Mirage.Tests.Runtime.ClientServer
         protected NetworkSceneManager serverSceneManager;
         protected NetworkSceneManager clientSceneManager;
 
+        // trying to debug assert failing in CI
+        private StackTraceLogType _stackTraceLogType;
+
         public override void ExtraSetup()
         {
             serverSceneManager = serverGo.AddComponent<NetworkSceneManager>();
@@ -28,10 +32,15 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             serverObjectManager.NetworkSceneManager = serverSceneManager;
             clientObjectManager.NetworkSceneManager = clientSceneManager;
+
+            // trying to debug assert failing in CI
+            this._stackTraceLogType = Application.GetStackTraceLogType(LogType.Assert);
+            Application.SetStackTraceLogType(LogType.Assert, StackTraceLogType.Full);
         }
 
         public override UniTask ExtraTearDownAsync()
         {
+            Application.SetStackTraceLogType(LogType.Assert, _stackTraceLogType);
             return TestScene.UnloadAdditiveScenes();
         }
 
@@ -158,6 +167,8 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator OnClientSceneChangedAdditiveListTest() => UniTask.ToCoroutine(async () =>
         {
+            
+
             clientSceneManager.OnClientFinishedSceneChange.AddListener(CheckForPendingAdditiveSceneList);
             clientSceneManager.ClientStartSceneMessage(client.Player, new SceneMessage { MainActivateScene = TestScene.Path, AdditiveScenes = new List<string> { TestScene.Path } });
 
