@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Mirage.Tests.Runtime
@@ -18,6 +19,8 @@ namespace Mirage.Tests.Runtime
                 if (op != null)
                     await op;
             }
+
+            Debug.Assert(SceneManager.sceneCount == 1, "Should have unloaded all expect 1 scene");
         }
     }
 }

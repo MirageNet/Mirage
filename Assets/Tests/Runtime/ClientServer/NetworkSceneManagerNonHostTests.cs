@@ -33,6 +33,8 @@ namespace Mirage.Tests.Runtime.ClientServer
             serverObjectManager.NetworkSceneManager = serverSceneManager;
             clientObjectManager.NetworkSceneManager = clientSceneManager;
 
+            Debug.Assert(SceneManager.sceneCount == 1, "scene count should be 1 at start of NetworkSceneManager Test");
+
             // trying to debug assert failing in CI
             _stackTraceLogType = Application.GetStackTraceLogType(LogType.Assert);
             Application.SetStackTraceLogType(LogType.Assert, StackTraceLogType.Full);
