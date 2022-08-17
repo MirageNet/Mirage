@@ -4,7 +4,7 @@ on:
     types: ['opened', 'edited', 'reopened', 'synchronize']
 
 jobs:
-  PR lint:
+  PR_lint:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -13,7 +13,7 @@ jobs:
     
     - uses: JulienKode/pull-request-name-linter-action@v0.5.0
 
-  Commit lint:
+  Commit_lint:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
