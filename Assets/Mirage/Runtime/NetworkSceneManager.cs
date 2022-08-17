@@ -18,7 +18,7 @@ namespace Mirage
     /// </summary>
     [AddComponentMenu("Network/NetworkSceneManager")]
     [DisallowMultipleComponent]
-    public class NetworkSceneManager : MonoBehaviour, INetworkSceneManager
+    public class NetworkSceneManager : MonoBehaviour
     {
         #region Fields
 
