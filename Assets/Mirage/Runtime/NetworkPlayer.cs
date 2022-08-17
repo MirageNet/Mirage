@@ -133,7 +133,7 @@ namespace Mirage
         /// </summary>
         // IMPORTANT: this needs to be <NetworkIdentity>, not <uint netId>. fixes a bug where DestroyOwnedObjects wouldn't find
         //            the netId anymore: https://github.com/vis2k/Mirror/issues/1380 . Works fine with NetworkIdentity pointers though.
-        private readonly HashSet<NetworkIdentity> _clientOwnedObjects = new HashSet<NetworkIdentity>();
+        private readonly HashSet<NetworkIdentity> _ownedObjects = new HashSet<NetworkIdentity>();
 
         /// <summary>
         /// Creates a new NetworkConnection with the specified address and connectionId
@@ -214,11 +214,13 @@ namespace Mirage
 
         public void AddToVisList(NetworkIdentity identity)
         {
+            if (logger.LogEnabled()) logger.Log($"Adding {identity} to Player[{this}] VisList");
             _visList.Add(identity);
         }
 
         public void RemoveFromVisList(NetworkIdentity identity)
         {
+            if (logger.LogEnabled()) logger.Log($"Removing {identity} from Player[{this}] VisList");
             _visList.Remove(identity);
         }
 
@@ -238,6 +240,8 @@ namespace Mirage
         /// </summary>
         public void RemoveAllVisibleObjects()
         {
+            if (logger.LogEnabled()) logger.Log($"Removing all from Player[{this}] VisList");
+
             foreach (var identity in _visList)
             {
                 identity.RemoveObserverInternal(this);
@@ -245,14 +249,18 @@ namespace Mirage
             _visList.Clear();
         }
 
-        public void AddOwnedObject(NetworkIdentity networkIdentity)
+        public void AddOwnedObject(NetworkIdentity identity)
         {
-            _clientOwnedObjects.Add(networkIdentity);
+            if (logger.LogEnabled()) logger.Log($"Adding {identity} to Player[{this}] OwnedObjects");
+
+            _ownedObjects.Add(identity);
         }
 
-        public void RemoveOwnedObject(NetworkIdentity networkIdentity)
+        public void RemoveOwnedObject(NetworkIdentity identity)
         {
-            _clientOwnedObjects.Remove(networkIdentity);
+            if (logger.LogEnabled()) logger.Log($"Removing {identity} from Player[{this}] OwnedObjects");
+
+            _ownedObjects.Remove(identity);
         }
 
         /// <summary>
@@ -261,8 +269,10 @@ namespace Mirage
         /// </summary>
         public void DestroyOwnedObjects()
         {
+            if (logger.LogEnabled()) logger.Log($"Destroying all Player[{this}] OwnedObjects");
+
             // create a copy because the list might be modified when destroying
-            var ownedObjects = new HashSet<NetworkIdentity>(_clientOwnedObjects);
+            var ownedObjects = new HashSet<NetworkIdentity>(_ownedObjects);
 
             foreach (var netIdentity in ownedObjects)
             {
@@ -283,7 +293,7 @@ namespace Mirage
                 Identity.ServerObjectManager.Destroy(Identity.gameObject);
 
             // clear the hashset because we destroyed them all
-            _clientOwnedObjects.Clear();
+            _ownedObjects.Clear();
         }
     }
 }
