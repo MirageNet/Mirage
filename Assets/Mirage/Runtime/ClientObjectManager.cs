@@ -206,12 +206,9 @@ namespace Mirage
         {
             ThrowIfZeroHash(prefabHash);
 
-            if (_handlers.TryGetValue(prefabHash, out var handler))
-            {
-                // check that handle hash prefab (might be deligate)
-                if (handler.Prefab != null)
-                    return handler.Prefab;
-            }
+            // find handler and check that handle hash prefab (might be deligate)
+            if (_handlers.TryGetValue(prefabHash, out var handler) && handler.Prefab != null)
+                return handler.Prefab;
 
             ThrowMissingHandler(prefabHash);
             return null;

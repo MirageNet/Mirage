@@ -4,7 +4,6 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Runtime.Serialization
 {
-    [TestFixture]
     public class ArraySegmentWriterTest
     {
         /// <summary>
