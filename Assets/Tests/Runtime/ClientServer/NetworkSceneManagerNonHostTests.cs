@@ -34,7 +34,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             clientObjectManager.NetworkSceneManager = clientSceneManager;
 
             // trying to debug assert failing in CI
-            this._stackTraceLogType = Application.GetStackTraceLogType(LogType.Assert);
+            _stackTraceLogType = Application.GetStackTraceLogType(LogType.Assert);
             Application.SetStackTraceLogType(LogType.Assert, StackTraceLogType.Full);
         }
 
@@ -54,14 +54,11 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [Test]
-        // test sometimes randomly fails in CI because of unity scene stuff,
-        // so if it does just try again
-        [Retry (5)] 
         public void FinishLoadSceneTest()
         {
             var func2 = Substitute.For<UnityAction<Scene, SceneOperation>>();
             clientSceneManager.OnClientFinishedSceneChange.AddListener(func2);
-            Debug.Assert(clientSceneManager._clientPendingAdditiveSceneLoadingList.Count == 0, "Pending scenes should be empty for this test");
+            Debug.Assert(clientSceneManager._clientPendingAdditiveSceneLoadingList.Count == 0, $"Pending scenes should be empty for this test, but was:\n{string.Join("\n", clientSceneManager._clientPendingAdditiveSceneLoadingList)}");
             clientSceneManager.CompleteLoadingScene(default, SceneOperation.Normal);
 
             func2.Received(1).Invoke(Arg.Any<Scene>(), Arg.Any<SceneOperation>());
@@ -171,8 +168,6 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator OnClientSceneChangedAdditiveListTest() => UniTask.ToCoroutine(async () =>
         {
-            
-
             clientSceneManager.OnClientFinishedSceneChange.AddListener(CheckForPendingAdditiveSceneList);
             clientSceneManager.ClientStartSceneMessage(client.Player, new SceneMessage { MainActivateScene = TestScene.Path, AdditiveScenes = new List<string> { TestScene.Path } });
 
