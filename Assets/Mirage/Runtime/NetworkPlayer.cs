@@ -193,7 +193,7 @@ namespace Mirage
         /// <param name="msg">The message to send.</param>
         /// <param name="channelId">The transport layer channel to send on.</param>
         /// <returns></returns>
-        public void Send<T>(T message, INotifyCallBack token)
+        public void Send<T>(T message, INotifyCallBack callBacks)
         {
             if (_isDisconnected) { return; }
 
@@ -203,7 +203,7 @@ namespace Mirage
 
                 var segment = writer.ToArraySegment();
                 NetworkDiagnostics.OnSend(message, segment.Count, 1);
-                _connection.SendNotify(segment, token);
+                _connection.SendNotify(segment, callBacks);
             }
         }
 

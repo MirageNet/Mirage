@@ -534,7 +534,7 @@ namespace Mirage
         /// <summary>
         /// This class will later be removed when we have a better implementation for IDataHandler
         /// </summary>
-        private class DataHandler : IDataHandler
+        private sealed class DataHandler : IDataHandler
         {
             private readonly IMessageReceiver _messageHandler;
             private readonly Dictionary<IConnection, INetworkPlayer> _players;

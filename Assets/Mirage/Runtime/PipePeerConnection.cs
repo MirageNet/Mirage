@@ -59,7 +59,7 @@ namespace Mirage
         }
 
         IEndPoint IConnection.EndPoint => new PipeEndPoint();
-        void IConnection.FlushBatch() { }
+        void IConnection.FlushBatch() { /* nothing to flush for pipe */ }
 
         public ConnectionState State { get; private set; } = ConnectionState.Connected;
 
@@ -107,8 +107,8 @@ namespace Mirage
 
             receive(message, offset, length);
         }
-        public void SendReliable(ArraySegment<byte> packet) => SendReliable(packet.Array, packet.Offset, packet.Count);
-        public void SendReliable(byte[] packet) => SendReliable(packet, 0, packet.Length);
+        public void SendReliable(ArraySegment<byte> message) => SendReliable(message.Array, message.Offset, message.Count);
+        public void SendReliable(byte[] message) => SendReliable(message, 0, message.Length);
 
 
         public void SendUnreliable(byte[] packet, int offset, int length)

@@ -217,7 +217,7 @@ namespace Mirage
         /// <summary>
         /// Wrapper for NetworkIdentity that will set and save fields
         /// </summary>
-        private class IdentityWrapper
+        private sealed class IdentityWrapper
         {
             private const ulong ID_MASK = 0x0000_0000_FFFF_FFFFul;
             private const ulong HASH_MASK = 0xFFFF_FFFF_0000_0000ul;
