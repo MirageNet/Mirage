@@ -53,10 +53,10 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void IsZeroByDefault()
         {
-            Assert.AreEqual(clientComponent.baseValue, 0);
-            Assert.AreEqual(clientComponent.baseValueWithHook, 0);
-            Assert.AreEqual(clientComponent.childValue, 0);
-            Assert.AreEqual(clientComponent.childValueWithHook, 0);
+            Assert.AreEqual(0, clientComponent.baseValue);
+            Assert.AreEqual(0, clientComponent.baseValueWithHook);
+            Assert.AreEqual(0, clientComponent.childValue);
+            Assert.AreEqual(0, clientComponent.childValueWithHook);
             Assert.IsNull(clientComponent.target);
             Assert.IsNull(clientComponent.targetIdentity);
             Assert.IsNull(clientComponent.childTarget);
@@ -70,7 +70,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             await UniTask.WaitUntil(() => clientComponent.baseValue != 0);
 
-            Assert.AreEqual(clientComponent.baseValue, 2);
+            Assert.AreEqual(2, clientComponent.baseValue);
         });
 
         [UnityTest]
@@ -113,7 +113,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             await UniTask.WaitUntil(() => clientComponent.childValue != 0);
 
-            Assert.AreEqual(clientComponent.childValue, 2);
+            Assert.AreEqual(2, clientComponent.childValue);
         });
 
         [UnityTest]
@@ -153,7 +153,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         public IEnumerator SpawnWithValue() => UniTask.ToCoroutine(async () =>
         {
             // create an object, set the target and spawn it
-            UnityEngine.GameObject newObject = InstantiateForTest(playerPrefab);
+            var newObject = InstantiateForTest(playerPrefab);
             var newBehavior = newObject.GetComponent<GenericBehaviourWithSyncVarImplement>();
             newBehavior.baseValue = 2;
             newBehavior.childValue = 22;
@@ -170,8 +170,8 @@ namespace Mirage.Tests.Runtime.ClientServer
             // check if the target was set correctly in the client
 
             var newClientBehavior = newClientObject.GetComponent<GenericBehaviourWithSyncVarImplement>();
-            Assert.AreEqual(newClientBehavior.baseValue, 2);
-            Assert.AreEqual(newClientBehavior.childValue, 22);
+            Assert.AreEqual(2, newClientBehavior.baseValue);
+            Assert.AreEqual(22, newClientBehavior.childValue);
             Assert.That(newClientBehavior.target, Is.SameAs(clientComponent));
             Assert.That(newClientBehavior.targetIdentity, Is.SameAs(clientIdentity));
             Assert.That(newClientBehavior.childTarget, Is.SameAs(clientComponent));

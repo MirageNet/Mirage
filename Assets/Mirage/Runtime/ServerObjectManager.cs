@@ -735,14 +735,6 @@ namespace Mirage
             return identity.IsSceneObject;
         }
 
-        private class NetworkIdentityComparer : IComparer<NetworkIdentity>
-        {
-            public int Compare(NetworkIdentity x, NetworkIdentity y)
-            {
-                return x.NetId.CompareTo(y.NetId);
-            }
-        }
-
         /// <summary>
         /// This causes NetworkIdentity objects in a scene to be spawned on a server.
         /// <para>
@@ -794,6 +786,14 @@ namespace Mirage
             // client is ready to start spawning objects
             if (ignoreHasCharacter || player.HasCharacter)
                 SpawnVisibleObjectForPlayer(player);
+        }
+
+        private sealed class NetworkIdentityComparer : IComparer<NetworkIdentity>
+        {
+            public int Compare(NetworkIdentity x, NetworkIdentity y)
+            {
+                return x.NetId.CompareTo(y.NetId);
+            }
         }
     }
 }

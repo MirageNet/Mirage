@@ -60,10 +60,10 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void IsZeroByDefault()
         {
-            Assert.AreEqual(clientComponent.baseValue, 0);
-            Assert.AreEqual(clientComponent.baseValueWithHook, 0);
-            Assert.AreEqual(clientComponent.implementValue, 0);
-            Assert.AreEqual(clientComponent.implementValueWithHook, 0);
+            Assert.AreEqual(0, clientComponent.baseValue);
+            Assert.AreEqual(0, clientComponent.baseValueWithHook);
+            Assert.AreEqual(0, clientComponent.implementValue);
+            Assert.AreEqual(0, clientComponent.implementValueWithHook);
             Assert.IsNull(clientComponent.target);
             Assert.IsNull(clientComponent.targetIdentity);
             Assert.IsNull(clientComponent.implementTarget);
@@ -77,7 +77,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             await UniTask.WaitUntil(() => clientComponent.baseValue != 0);
 
-            Assert.AreEqual(clientComponent.baseValue, 2);
+            Assert.AreEqual(2, clientComponent.baseValue);
         });
 
         [UnityTest]
@@ -120,7 +120,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             await UniTask.WaitUntil(() => clientComponent.implementValue != 0);
 
-            Assert.AreEqual(clientComponent.implementValue, 2);
+            Assert.AreEqual(2, clientComponent.implementValue);
         });
 
         [UnityTest]
@@ -176,8 +176,8 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             // check if the target was set correctly in the client
             var newClientBehavior = newClientObject.GetComponent<GenericBehaviourWithSyncVarNoMiddleImplement>();
-            Assert.AreEqual(newClientBehavior.baseValue, 2);
-            Assert.AreEqual(newClientBehavior.implementValue, 222);
+            Assert.AreEqual(2, newClientBehavior.baseValue);
+            Assert.AreEqual(222, newClientBehavior.implementValue);
             Assert.That(newClientBehavior.target, Is.SameAs(clientComponent));
             Assert.That(newClientBehavior.targetIdentity, Is.SameAs(clientIdentity));
             Assert.That(newClientBehavior.implementTarget, Is.SameAs(clientComponent));
