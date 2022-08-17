@@ -6,6 +6,8 @@ using Cysharp.Threading.Tasks;
 
 namespace Mirage.Tests
 {
+    public class AssertionMethodAttribute : Attribute { }
+
     public static class AsyncUtil
     {
         public static async UniTask<NetworkIdentity> WaitUntilSpawn(NetworkWorld world, uint netId)
@@ -16,6 +18,7 @@ namespace Mirage.Tests
             return identity;
         }
 
+        [AssertionMethod]
         public static UniTask WaitUntilWithTimeout(Func<bool> predicate, double seconds = 2)
         {
             return UniTask.WaitUntil(predicate).Timeout(TimeSpan.FromSeconds(seconds));
