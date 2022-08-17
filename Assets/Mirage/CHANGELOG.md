@@ -1,3 +1,15 @@
+# [126.1.0](https://github.com/MirageNet/Mirage/compare/v126.0.1...v126.1.0) (2022-08-17)
+
+
+### Bug Fixes
+
+* removing dependency on JetBrains.Annotations ([2e1263e](https://github.com/MirageNet/Mirage/commit/2e1263edce5f581978c7e397ca50ade1f19aff6d))
+
+
+### Features
+
+* adding more public methods for NetworkPlayer VisList ([ccc7ef5](https://github.com/MirageNet/Mirage/commit/ccc7ef55a3726616d4043edce38d053eabadf0ca))
+
 ## [126.0.1](https://github.com/MirageNet/Mirage/compare/v126.0.0...v126.0.1) (2022-08-08)
 
 
