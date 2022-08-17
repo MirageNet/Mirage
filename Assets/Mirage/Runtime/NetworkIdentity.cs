@@ -199,7 +199,7 @@ namespace Mirage
         /// <summary>
         /// The NetworkClient associated with this NetworkIdentity.
         /// </summary>
-        public INetworkClient Client { get; internal set; }
+        public NetworkClient Client { get; internal set; }
 
         /// <summary>
         /// The ClientObjectManager is present only for client instances.

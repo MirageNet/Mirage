@@ -46,7 +46,7 @@ namespace Mirage
         /// <summary>
         /// The host client for this server 
         /// </summary> 
-        INetworkClient LocalClient { get; }
+        NetworkClient LocalClient { get; }
 
         /// <summary>
         /// True if there is a local client connected to this server (host mode)
