@@ -4,15 +4,20 @@ on:
     types: ['opened', 'edited', 'reopened', 'synchronize']
 
 jobs:
-  lint:
+  PR lint:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Install Dependencies
       run: npm install @commitlint/config-conventional
     
-    - name: Pull Request Linter
-      uses: JulienKode/pull-request-name-linter-action@v0.5.0
+    - uses: JulienKode/pull-request-name-linter-action@v0.5.0
+
+  Commit lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Dependencies
+      run: npm install @commitlint/config-conventional
     
-    - name: Commit Linter
-      uses: wagoid/commitlint-github-action@v2.0.3
+    - uses: wagoid/commitlint-github-action@v2.0.3
