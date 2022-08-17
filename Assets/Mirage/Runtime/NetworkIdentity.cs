@@ -180,7 +180,7 @@ namespace Mirage
         /// <summary>
         /// The NetworkServer associated with this NetworkIdentity.
         /// </summary>
-        public INetworkServer Server { get; internal set; }
+        public NetworkServer Server { get; internal set; }
 
         /// <summary>
         /// The world this object exists in

@@ -223,7 +223,7 @@ namespace Mirage.Weaver
                 {
                     worker.Append(worker.Create(OpCodes.Ldarg_0));
                     worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Server));
-                    worker.Append(worker.Create(OpCodes.Callvirt, (INetworkServer server) => server.LocalPlayer));
+                    worker.Append(worker.Create(OpCodes.Callvirt, (NetworkServer server) => server.LocalPlayer));
                 }
                 else
                 {

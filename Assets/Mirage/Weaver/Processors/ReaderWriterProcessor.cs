@@ -292,8 +292,7 @@ namespace Mirage.Weaver
                 method.Is<MessageHandler>(nameof(MessageHandler.UnregisterHandler)) ||
                 method.Is<NetworkClient>(nameof(NetworkClient.Send)) ||
                 method.Is<NetworkServer>(nameof(NetworkServer.SendToAll)) ||
-                method.Is<NetworkServer>(nameof(NetworkServer.SendToMany)) ||
-                method.Is<INetworkServer>(nameof(INetworkServer.SendToAll));
+                method.Is<NetworkServer>(nameof(NetworkServer.SendToMany));
         }
 
         private static bool IsReadWriteMethod(MethodReference method)
