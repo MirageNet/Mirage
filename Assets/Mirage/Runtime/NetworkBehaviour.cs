@@ -488,7 +488,7 @@ namespace Mirage
         /// </summary>
         public readonly RemoteCallCollection RemoteCallCollection;
 
-        public NetworkBehaviour()
+        protected NetworkBehaviour()
         {
             RemoteCallCollection = new RemoteCallCollection(this);
         }
