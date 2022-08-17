@@ -52,7 +52,7 @@ namespace Mirage
             _offsetMax = double.MaxValue;
         }
 
-        internal void UpdateClient(INetworkClient client)
+        internal void UpdateClient(IMessageSender client)
         {
             if (UnityEngine.Time.time - _lastPingTime >= PingInterval)
             {

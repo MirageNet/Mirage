@@ -111,7 +111,7 @@ namespace Mirage
         /// <summary>
         /// The host client for this server 
         /// </summary>
-        public INetworkClient LocalClient { get; private set; }
+        public NetworkClient LocalClient { get; private set; }
 
         /// <summary>
         /// True if there is a local client connected to this server (host mode)
@@ -393,7 +393,7 @@ namespace Mirage
         /// Create Player on Server for hostmode and adds it to collections
         /// <para>Does not invoke <see cref="Connected"/> event, use <see cref="InvokeLocalConnected"/> instead at the correct time</para>
         /// </summary>
-        internal void AddLocalConnection(INetworkClient client, IConnection connection)
+        internal void AddLocalConnection(NetworkClient client, IConnection connection)
         {
             if (LocalPlayer != null)
             {

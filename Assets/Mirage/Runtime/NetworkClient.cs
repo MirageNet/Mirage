@@ -21,7 +21,7 @@ namespace Mirage
     /// </summary>
     [AddComponentMenu("Network/NetworkClient")]
     [DisallowMultipleComponent]
-    public class NetworkClient : MonoBehaviour, INetworkClient
+    public class NetworkClient : MonoBehaviour, IMessageSender
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkClient));
 
