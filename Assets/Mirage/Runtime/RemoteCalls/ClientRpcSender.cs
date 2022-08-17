@@ -64,13 +64,6 @@ namespace Mirage.RemoteCalls
             {
                 throw new InvalidOperationException($"RPC Function {rpc} called when server is not active.");
             }
-
-            // This cannot use Server.active, as that is not specific to this object.
-            if (!behaviour.IsServer)
-            {
-                if (logger.WarnEnabled()) logger.LogWarning($"ClientRpc {rpc} called on un-spawned object: {behaviour.name}");
-                return;
-            }
         }
 
         /// <summary>
