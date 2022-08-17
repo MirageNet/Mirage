@@ -17,7 +17,7 @@ namespace Mirage
     /// <para>NetworkConnection objects also act as observers for networked objects. When a connection is an observer of a networked object with a NetworkIdentity, then the object will be visible to corresponding client for the connection, and incremental state changes will be sent to the client.</para>
     /// <para>There are many virtual functions on NetworkConnection that allow its behaviour to be customized. NetworkClient and NetworkServer can both be made to instantiate custom classes derived from NetworkConnection by setting their networkConnectionClass member variable.</para>
     /// </remarks>
-    public sealed class NetworkPlayer : INetworkPlayer, IMessageSender
+    public sealed class NetworkPlayer : INetworkPlayer
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
 
@@ -214,13 +214,13 @@ namespace Mirage
 
         public void AddToVisList(NetworkIdentity identity)
         {
-            if (logger.LogEnabled()) logger.Log($"Adding {identity} to Player[{this}] VisList");
+            if (logger.LogEnabled()) logger.Log($"Adding {identity} to Player[{Address}] VisList");
             _visList.Add(identity);
         }
 
         public void RemoveFromVisList(NetworkIdentity identity)
         {
-            if (logger.LogEnabled()) logger.Log($"Removing {identity} from Player[{this}] VisList");
+            if (logger.LogEnabled()) logger.Log($"Removing {identity} from Player[{Address}] VisList");
             _visList.Remove(identity);
         }
 
@@ -240,7 +240,7 @@ namespace Mirage
         /// </summary>
         public void RemoveAllVisibleObjects()
         {
-            if (logger.LogEnabled()) logger.Log($"Removing all from Player[{this}] VisList");
+            if (logger.LogEnabled()) logger.Log($"Removing all from Player[{Address}] VisList");
 
             foreach (var identity in _visList)
             {
@@ -251,14 +251,14 @@ namespace Mirage
 
         public void AddOwnedObject(NetworkIdentity identity)
         {
-            if (logger.LogEnabled()) logger.Log($"Adding {identity} to Player[{this}] OwnedObjects");
+            if (logger.LogEnabled()) logger.Log($"Adding {identity} to Player[{Address}] OwnedObjects");
 
             _ownedObjects.Add(identity);
         }
 
         public void RemoveOwnedObject(NetworkIdentity identity)
         {
-            if (logger.LogEnabled()) logger.Log($"Removing {identity} from Player[{this}] OwnedObjects");
+            if (logger.LogEnabled()) logger.Log($"Removing {identity} from Player[{Address}] OwnedObjects");
 
             _ownedObjects.Remove(identity);
         }
@@ -269,7 +269,7 @@ namespace Mirage
         /// </summary>
         public void DestroyOwnedObjects()
         {
-            if (logger.LogEnabled()) logger.Log($"Destroying all Player[{this}] OwnedObjects");
+            if (logger.LogEnabled()) logger.Log($"Destroying all Player[{Address}] OwnedObjects");
 
             // create a copy because the list might be modified when destroying
             var ownedObjects = new HashSet<NetworkIdentity>(_ownedObjects);
