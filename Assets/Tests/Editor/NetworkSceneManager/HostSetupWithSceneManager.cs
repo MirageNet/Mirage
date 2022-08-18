@@ -1,8 +1,9 @@
-﻿using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
+using Mirage.Tests.EnterRuntime;
 
 namespace Mirage.Tests.Runtime.Host
 {
-    public class HostSetupWithSceneManager<T> : HostSetup<T> where T : NetworkBehaviour
+    public class HostSetupWithSceneManager<T> : HostSetup_EditorModeTest<T> where T : NetworkBehaviour
     {
         protected NetworkSceneManager sceneManager;
 
@@ -17,7 +18,7 @@ namespace Mirage.Tests.Runtime.Host
         }
         public override UniTask ExtraTearDownAsync()
         {
-            return TestScene.UnloadAdditiveScenes();
+            return TestScenes.UnloadAdditiveScenes();
         }
     }
 }

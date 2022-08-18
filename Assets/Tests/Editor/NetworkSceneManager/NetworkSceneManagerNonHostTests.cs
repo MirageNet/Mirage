@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Mirage.Tests.EnterRuntime;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -14,7 +15,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 {
     [TestFixture]
     [Category("LoadsScene")]
-    public class NetworkSceneManagerNonHostTests : ClientServerSetup<MockComponent>
+    public class NetworkSceneManagerNonHostTests : ClientServerSetup_EditorModeTest<MockComponent>
     {
         protected NetworkSceneManager serverSceneManager;
         protected NetworkSceneManager clientSceneManager;
@@ -51,7 +52,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             await WaitForLoad(clientSceneManager.SceneLoadingAsyncOperationInfo);
             await WaitForLoad(serverSceneManager.SceneLoadingAsyncOperationInfo);
 
-            await TestScene.UnloadAdditiveScenes();
+            await TestScenes.UnloadAdditiveScenes();
         }
 
         private static async UniTask WaitForLoad(AsyncOperation op)
@@ -104,7 +105,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             clientSceneManager.OnClientStartedSceneChange.AddListener((_, __) => startInvoked++);
             clientSceneManager.OnClientFinishedSceneChange.AddListener((_, __) => endInvoked++);
-            clientSceneManager.ClientStartSceneMessage(null, new SceneMessage { MainActivateScene = TestScene.Path });
+            clientSceneManager.ClientStartSceneMessage(null, new SceneMessage { MainActivateScene = TestScenes.Path });
 
             await AsyncUtil.WaitUntilWithTimeout(() => startInvoked == 1);
 
@@ -117,7 +118,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             await AsyncUtil.WaitUntilWithTimeout(() => endInvoked == 1);
 
-            Assert.That(clientSceneManager.ActiveScenePath, Is.EqualTo(TestScene.Path));
+            Assert.That(clientSceneManager.ActiveScenePath, Is.EqualTo(TestScenes.Path));
 
             Assert.That(startInvoked == 1, "Start should only be called once");
             Assert.That(endInvoked == 1, "End should only be called once");
@@ -137,7 +138,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             {
                 clientSceneManager.ClientStartSceneMessage(null, new SceneMessage
                 {
-                    MainActivateScene = TestScene.Path,
+                    MainActivateScene = TestScenes.Path,
                     SceneOperation = invalidOperation
                 });
             });
@@ -195,7 +196,7 @@ namespace Mirage.Tests.Runtime.ClientServer
                     noAdditiveScenesFound = true;
                 }
             });
-            clientSceneManager.ClientStartSceneMessage(client.Player, new SceneMessage { MainActivateScene = TestScene.Path, AdditiveScenes = new List<string> { TestScene.Path } });
+            clientSceneManager.ClientStartSceneMessage(client.Player, new SceneMessage { MainActivateScene = TestScenes.Path, AdditiveScenes = new List<string> { TestScenes.Path } });
 
             await AsyncUtil.WaitUntilWithTimeout(() => noAdditiveScenesFound);
 
@@ -209,12 +210,12 @@ namespace Mirage.Tests.Runtime.ClientServer
             //Check for the additive scene in the pending list at the time of ClientChangeScene before its removed as part of it being loaded.
             clientSceneManager.OnClientStartedSceneChange.AddListener((path, op) =>
             {
-                if (clientSceneManager._clientPendingAdditiveSceneLoadingList.Contains(TestScene.Path))
+                if (clientSceneManager._clientPendingAdditiveSceneLoadingList.Contains(TestScenes.Path))
                 {
                     additiveSceneWasFound = true;
                 }
             });
-            clientSceneManager.ClientStartSceneMessage(client.Player, new SceneMessage { MainActivateScene = TestScene.Path, AdditiveScenes = new List<string> { TestScene.Path } });
+            clientSceneManager.ClientStartSceneMessage(client.Player, new SceneMessage { MainActivateScene = TestScenes.Path, AdditiveScenes = new List<string> { TestScenes.Path } });
 
             Assert.That(additiveSceneWasFound);
         }

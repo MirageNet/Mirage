@@ -37,7 +37,7 @@ namespace Mirage.Tests.Runtime.Host
             var invokeAddPlayerMessage = false;
             ServerMessageHandler.RegisterHandler<AddCharacterMessage>(msg => invokeAddPlayerMessage = true);
 
-            sceneManager.ServerLoadSceneNormal(TestScene.Path);
+            sceneManager.ServerLoadSceneNormal(TestScenes.Path);
             // wait for messages to be processed
             await UniTask.Yield();
 
