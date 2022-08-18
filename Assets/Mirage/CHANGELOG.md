@@ -1,3 +1,20 @@
+# [127.0.0](https://github.com/MirageNet/Mirage/compare/v126.1.0...v127.0.0) (2022-08-18)
+
+
+* refactor(ClientObjectManager)!: renaming function that registers handlers ([b8b07ee](https://github.com/MirageNet/Mirage/commit/b8b07ee295a0942f9c9c1d5cf5ab23f348596485))
+* refactor(ClientObjectManager)!: merging prefab and handlers into class ([229aa4b](https://github.com/MirageNet/Mirage/commit/229aa4bf9396205cea3414d21cf310754d8030c7))
+
+
+### Features
+
+* adding async spawn handler ([993f425](https://github.com/MirageNet/Mirage/commit/993f425c6f81f0b84c7b7d03f1e2e8beff6a41db))
+
+
+### BREAKING CHANGES
+
+* RegisterPrefab that registers handlers is now called RegisterSpawnHandler
+* adding new exceptions to registering prefabs and handles
+
 # [126.1.0](https://github.com/MirageNet/Mirage/compare/v126.0.1...v126.1.0) (2022-08-17)
 
 
