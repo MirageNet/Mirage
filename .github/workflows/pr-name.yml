@@ -20,4 +20,4 @@ jobs:
     - name: Install Dependencies
       run: npm install @commitlint/config-conventional
     
-    - uses: wagoid/commitlint-github-action@v2.0.3
+    - uses: wagoid/commitlint-github-action@v5.0.2
