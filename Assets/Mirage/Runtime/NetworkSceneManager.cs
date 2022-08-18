@@ -707,7 +707,8 @@ namespace Mirage
         /// <param name="sceneLoadParameters">What settings should we be using for physics scene loading.</param>
         private async UniTask LoadSceneAdditiveAsync(string scenePath, IEnumerable<INetworkPlayer> players = null, LoadSceneParameters? sceneLoadParameters = null)
         {
-            SceneLoadingAsyncOperationInfo = sceneLoadParameters.HasValue ? SceneManager.LoadSceneAsync(scenePath, sceneLoadParameters.Value)
+            SceneLoadingAsyncOperationInfo = sceneLoadParameters.HasValue
+                ? SceneManager.LoadSceneAsync(scenePath, sceneLoadParameters.Value)
                 : SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Additive);
 
             await SceneLoadingAsyncOperationInfo;

@@ -40,10 +40,27 @@ namespace Mirage.Tests.Runtime.ClientServer
             Application.SetStackTraceLogType(LogType.Assert, StackTraceLogType.Full);
         }
 
-        public override UniTask ExtraTearDownAsync()
+        public override async UniTask ExtraTearDownAsync()
         {
             Application.SetStackTraceLogType(LogType.Assert, _stackTraceLogType);
-            return TestScene.UnloadAdditiveScenes();
+
+            // clear pending scenes then wait for current loading to finish
+            // this is so that scenes can then be correctly unloaded by TestScene.UnloadAdditiveScenes
+            clientSceneManager._clientPendingAdditiveSceneLoadingList.Clear();
+            serverSceneManager._clientPendingAdditiveSceneLoadingList.Clear();
+            await WaitForLoad(clientSceneManager.SceneLoadingAsyncOperationInfo);
+            await WaitForLoad(serverSceneManager.SceneLoadingAsyncOperationInfo);
+
+            await TestScene.UnloadAdditiveScenes();
+        }
+
+        private static async UniTask WaitForLoad(AsyncOperation op)
+        {
+            if (op != null)
+            {
+                op.allowSceneActivation = true;
+                await op;
+            }
         }
 
         [Test]
@@ -170,7 +187,14 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator OnClientSceneChangedAdditiveListTest() => UniTask.ToCoroutine(async () =>
         {
-            clientSceneManager.OnClientFinishedSceneChange.AddListener(CheckForPendingAdditiveSceneList);
+            var noAdditiveScenesFound = false;
+            clientSceneManager.OnClientFinishedSceneChange.AddListener((path, op) =>
+            {
+                if (clientSceneManager._clientPendingAdditiveSceneLoadingList.Count == 0)
+                {
+                    noAdditiveScenesFound = true;
+                }
+            });
             clientSceneManager.ClientStartSceneMessage(client.Player, new SceneMessage { MainActivateScene = TestScene.Path, AdditiveScenes = new List<string> { TestScene.Path } });
 
             await AsyncUtil.WaitUntilWithTimeout(() => noAdditiveScenesFound);
@@ -178,34 +202,21 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.That(noAdditiveScenesFound);
         });
 
-        private bool noAdditiveScenesFound;
-
-        private void CheckForPendingAdditiveSceneList(Scene scene, SceneOperation sceneOperation)
-        {
-            if (clientSceneManager._clientPendingAdditiveSceneLoadingList.Count == 0)
-            {
-                noAdditiveScenesFound = true;
-            }
-        }
-
         [Test]
         public void ClientSceneMessagePendingAdditiveSceneListTest()
         {
+            var additiveSceneWasFound = false;
             //Check for the additive scene in the pending list at the time of ClientChangeScene before its removed as part of it being loaded.
-            clientSceneManager.OnClientStartedSceneChange.AddListener(CheckForAdditiveScene);
+            clientSceneManager.OnClientStartedSceneChange.AddListener((path, op) =>
+            {
+                if (clientSceneManager._clientPendingAdditiveSceneLoadingList.Contains(TestScene.Path))
+                {
+                    additiveSceneWasFound = true;
+                }
+            });
             clientSceneManager.ClientStartSceneMessage(client.Player, new SceneMessage { MainActivateScene = TestScene.Path, AdditiveScenes = new List<string> { TestScene.Path } });
 
             Assert.That(additiveSceneWasFound);
-        }
-
-        private bool additiveSceneWasFound;
-
-        private void CheckForAdditiveScene(string scenePath, SceneOperation sceneOperation)
-        {
-            if (clientSceneManager._clientPendingAdditiveSceneLoadingList.Contains(TestScene.Path))
-            {
-                additiveSceneWasFound = true;
-            }
         }
     }
 }
