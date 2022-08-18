@@ -50,7 +50,7 @@ MonoBehaviour:
   _sceneId: 0
   ServerObjectManager: {fileID: 0}
   ClientObjectManager: {fileID: 0}
-  _prefabHash: 861834513
+  _prefabHash: -1308990054
   _onStartServer:
     _event:
       m_PersistentCalls:
