@@ -1,12 +1,10 @@
 using System;
 using NUnit.Framework;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Mirage.Tests
 {
-
-    public class CharacterSpawnerTest
+    public class CharacterSpawnerEditModeTest : TestBase
     {
         private GameObject go;
         private NetworkClient client;
@@ -23,7 +21,7 @@ namespace Mirage.Tests
         [SetUp]
         public void Setup()
         {
-            go = new GameObject();
+            go = CreateGameObject();
             client = go.AddComponent<NetworkClient>();
             server = go.AddComponent<NetworkServer>();
             spawner = go.AddComponent<CharacterSpawner>();
@@ -41,13 +39,13 @@ namespace Mirage.Tests
             spawner.ServerObjectManager = serverObjectManager;
             spawner.ClientObjectManager = clientObjectManager;
 
-            playerPrefab = new GameObject();
-            var playerId = playerPrefab.AddComponent<NetworkIdentity>();
+            var identity = CreateNetworkIdentity();
+            playerPrefab = identity.gameObject;
 
-            spawner.PlayerPrefab = playerId;
+            spawner.PlayerPrefab = identity;
 
-            pos1 = new GameObject().transform;
-            pos2 = new GameObject().transform;
+            pos1 = CreateGameObject().transform;
+            pos2 = CreateGameObject().transform;
             spawner.startPositions.Add(pos1);
             spawner.startPositions.Add(pos2);
         }
@@ -55,11 +53,7 @@ namespace Mirage.Tests
         [TearDown]
         public void TearDown()
         {
-            Object.DestroyImmediate(go);
-            Object.DestroyImmediate(playerPrefab);
-
-            Object.DestroyImmediate(pos1.gameObject);
-            Object.DestroyImmediate(pos2.gameObject);
+            TearDownTestObjects();
         }
 
         [Test]

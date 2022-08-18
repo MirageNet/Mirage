@@ -6,11 +6,10 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Events;
 using static Mirage.Tests.LocalConnections;
-using Object = UnityEngine.Object;
 
 namespace Mirage.Tests
 {
-    public class NetworkIdentityCallbackTests
+    public class NetworkIdentityCallbackTests : TestBase
     {
         #region test components
 
@@ -134,14 +133,14 @@ namespace Mirage.Tests
         [SetUp]
         public void SetUp()
         {
-            networkServerGameObject = new GameObject();
+            networkServerGameObject = CreateGameObject();
             server = networkServerGameObject.AddComponent<NetworkServer>();
             serverObjectManager = networkServerGameObject.AddComponent<ServerObjectManager>();
             serverObjectManager.Server = server;
             networkServerGameObject.AddComponent<NetworkClient>();
 
-            gameObject = new GameObject($"Test go {TestContext.CurrentContext.Test.Name}");
-            identity = gameObject.AddComponent<NetworkIdentity>();
+            identity = CreateNetworkIdentity();
+            gameObject = identity.gameObject;
             identity.Server = server;
             identity.ServerObjectManager = serverObjectManager;
 
@@ -152,10 +151,7 @@ namespace Mirage.Tests
         [TearDown]
         public void TearDown()
         {
-            // set isServer is false. otherwise Destroy instead of
-            // DestroyImmediate is called internally, giving an error in Editor
-            Object.DestroyImmediate(gameObject);
-            Object.DestroyImmediate(networkServerGameObject);
+            TearDownTestObjects();
         }
 
         // A Test behaves as an ordinary method
@@ -468,10 +464,9 @@ namespace Mirage.Tests
         {
             // create a networkidentity with a component that returns true
             // result should still be true.
-            var gameObjectTrue = new GameObject();
-            var identityTrue = gameObjectTrue.AddComponent<NetworkIdentity>();
-            var compTrue = gameObjectTrue.AddComponent<CheckObserverTrueNetworkBehaviour>();
-            Assert.That(identityTrue.OnCheckObserver(player1), Is.True);
+
+            var compTrue = CreateBehaviour<CheckObserverTrueNetworkBehaviour>();
+            Assert.That(compTrue.Identity.OnCheckObserver(player1), Is.True);
             Assert.That(compTrue.called, Is.EqualTo(1));
         }
 
@@ -481,10 +476,8 @@ namespace Mirage.Tests
             // create a networkidentity with a component that returns true and
             // one component that returns false.
             // result should still be false if any one returns false.
-            var gameObjectFalse = new GameObject();
-            var identityFalse = gameObjectFalse.AddComponent<NetworkIdentity>();
-            var compFalse = gameObjectFalse.AddComponent<CheckObserverFalseNetworkBehaviour>();
-            Assert.That(identityFalse.OnCheckObserver(player1), Is.False);
+            var compFalse = CreateBehaviour<CheckObserverFalseNetworkBehaviour>();
+            Assert.That(compFalse.Identity.OnCheckObserver(player1), Is.False);
             Assert.That(compFalse.called, Is.EqualTo(1));
         }
 

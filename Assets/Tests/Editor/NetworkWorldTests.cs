@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 
 namespace Mirage.Tests
 {
-    public class NetworkWorldTests
+    public class NetworkWorldTests : TestBase
     {
         private NetworkWorld world;
         private Action<NetworkIdentity> spawnListener;
@@ -25,12 +25,17 @@ namespace Mirage.Tests
             world.onUnspawn += unspawnListener;
             existingIds = new HashSet<uint>();
         }
+        [TearDown]
+        public void TearDown()
+        {
+            TearDownTestObjects();
+        }
 
         private void AddValidIdentity(out uint id, out NetworkIdentity identity)
         {
             id = getValidId();
 
-            identity = new GameObject("WorldTest").AddComponent<NetworkIdentity>();
+            identity = CreateNetworkIdentity();
             identity.NetId = id;
             world.AddIdentity(id, identity);
         }
@@ -166,7 +171,7 @@ namespace Mirage.Tests
         public void AddThrowsIfIdIs0()
         {
             uint id = 0;
-            var identity = new GameObject("WorldTest").AddComponent<NetworkIdentity>();
+            var identity = CreateNetworkIdentity();
             identity.NetId = id;
 
             var exception = Assert.Throws<ArgumentException>(() =>
@@ -185,7 +190,7 @@ namespace Mirage.Tests
             var id1 = getValidId();
             var id2 = getValidId();
 
-            var identity = new GameObject("WorldTest").AddComponent<NetworkIdentity>();
+            var identity = CreateNetworkIdentity();
             identity.NetId = id1;
 
 

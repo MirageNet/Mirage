@@ -1,24 +1,26 @@
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Mirage.Tests
 {
     [TestFixture]
-    public class NetworkTransformChildTest
+    public class NetworkTransformChildTest : TestBase
     {
         [Test]
         public void TargetComponentTest()
         {
-            NetworkTransformChild networkTransformChild;
-
-            var gameObject = new GameObject();
-            networkTransformChild = gameObject.AddComponent<NetworkTransformChild>();
+            var networkTransformChild = CreateBehaviour<NetworkTransformChild>();
 
             Assert.That(networkTransformChild.Target == null);
 
-            networkTransformChild.Target = gameObject.transform;
+            networkTransformChild.Target = networkTransformChild.transform;
 
             Assert.That(networkTransformChild.Target == networkTransformChild.transform);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            TearDownTestObjects();
         }
     }
 }

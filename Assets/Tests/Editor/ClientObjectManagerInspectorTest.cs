@@ -4,41 +4,37 @@ using UnityEngine;
 namespace Mirage.Tests
 {
     [TestFixture(Category = "ClientObjectManager")]
-    public class ClientObjectManagerInspectorTest
+    public class ClientObjectManagerInspectorTest : TestBase
     {
+        [TearDown]
+        public void TearDown()
+        {
+            TearDownTestObjects();
+        }
 
         [Test]
         public void RegisterPrefabs()
         {
-            var gameObject = new GameObject("NetworkObjectManager", typeof(ClientObjectManager));
-
-            var client = gameObject.GetComponent<ClientObjectManager>();
+            var com = CreateMonoBehaviour<ClientObjectManager>();
 
             var inspector = ScriptableObject.CreateInstance<ClientObjectManagerInspector>();
-            inspector.RegisterPrefabs(client);
+            inspector.RegisterPrefabs(com);
 
-            Assert.That(client.spawnPrefabs, Has.Count.GreaterThan(2));
-            GameObject.DestroyImmediate(gameObject);
-            GameObject.DestroyImmediate(inspector);
+            Assert.That(com.spawnPrefabs, Has.Count.GreaterThan(2));
         }
 
         [Test]
         public void PreserveExisting()
         {
-            var preexisting = new GameObject("object", typeof(NetworkIdentity));
+            var preexisting = CreateNetworkIdentity();
 
-            var gameObject = new GameObject("NetworkObjectManager", typeof(ClientObjectManager));
-            var client = gameObject.GetComponent<ClientObjectManager>();
-            client.spawnPrefabs.Add(preexisting.GetComponent<NetworkIdentity>());
+            var com = CreateMonoBehaviour<ClientObjectManager>();
+            com.spawnPrefabs.Add(preexisting);
 
             var inspector = ScriptableObject.CreateInstance<ClientObjectManagerInspector>();
+            inspector.RegisterPrefabs(com);
 
-            inspector.RegisterPrefabs(client);
-
-            Assert.That(client.spawnPrefabs, Contains.Item(preexisting.GetComponent<NetworkIdentity>()));
-
-            GameObject.DestroyImmediate(gameObject);
-            GameObject.DestroyImmediate(preexisting);
+            Assert.That(com.spawnPrefabs, Contains.Item(preexisting));
         }
     }
 }

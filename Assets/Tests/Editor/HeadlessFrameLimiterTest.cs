@@ -5,7 +5,7 @@ using Object = UnityEngine.Object;
 namespace Mirage.Tests
 {
     [TestFixture]
-    public class HeadlessFrameLimiterTest : MonoBehaviour
+    public class HeadlessFrameLimiterTest
     {
         protected GameObject testGO;
         protected HeadlessFrameLimiter comp;
