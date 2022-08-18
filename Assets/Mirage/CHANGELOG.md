@@ -1,3 +1,21 @@
+# [128.0.0](https://github.com/MirageNet/Mirage/compare/v127.0.0...v128.0.0) (2022-08-18)
+
+
+* refactor!: removing INetworkServer ([aaaba98](https://github.com/MirageNet/Mirage/commit/aaaba98d22cb7ba08f71b7782cfe0834af0128d1))
+* refactor!: removing INetworkClient ([15eb6d1](https://github.com/MirageNet/Mirage/commit/15eb6d1b872cfaa1abe9d02f19b4213864bf87a6))
+* refactor!: removing INetworkSceneManager ([e1fdf86](https://github.com/MirageNet/Mirage/commit/e1fdf86618bcbc401dd944f7c3a7a77155e9ab07))
+* refactor!: removing IServerObjectManager ([cf9f746](https://github.com/MirageNet/Mirage/commit/cf9f746e6160652ae0e2ce61bc77b9188d67ffa8))
+* refactor!: removing IClientObjectManager ([4559573](https://github.com/MirageNet/Mirage/commit/4559573d5063ea1f113fe499cf1fda14501ad226))
+
+
+### BREAKING CHANGES
+
+* interface for NetworkServer removed
+* interface for NetworkClient removed
+* interface for NetworkSceneManager removed
+* interface for ServerObjectManager removed
+* interface for ClientObjectManager removed
+
 # [127.0.0](https://github.com/MirageNet/Mirage/compare/v126.1.0...v127.0.0) (2022-08-18)
 
 
