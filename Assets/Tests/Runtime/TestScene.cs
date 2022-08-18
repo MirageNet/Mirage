@@ -30,6 +30,9 @@ namespace Mirage.Tests.Runtime
                     await op;
             }
 
+            // maybe test unload scene it self, if so wait for it to finish
+            await AsyncUtil.WaitUntilWithTimeout(() => SceneManager.sceneCount == 1);
+
             Debug.Assert(SceneManager.sceneCount == 1, "Should have unloaded all expect 1 scene");
         }
     }
