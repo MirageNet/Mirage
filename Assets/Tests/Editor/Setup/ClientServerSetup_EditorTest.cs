@@ -1,6 +1,4 @@
 using System.Collections;
-using Cysharp.Threading.Tasks;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace Mirage.Tests.EnterRuntime
@@ -10,18 +8,13 @@ namespace Mirage.Tests.EnterRuntime
         [UnitySetUp]
         public IEnumerator UnitySetUp()
         {
-            yield return new EnterPlayMode();
-            // load start scene because NetworkSceneManager doesn't like empty scenes with no names
-            yield return SceneManager.LoadSceneAsync(TestScenes.StartScene);
-            yield return null;
-            yield return ClientServerSetUp().ToCoroutine();
+            return EditorModeTestUtil.EnterPlayModeAndSetup(ClientServerSetUp);
         }
 
         [UnityTearDown]
         public IEnumerator UnityTearDown()
         {
-            yield return ClientServerTearDown().ToCoroutine();
-            yield return new ExitPlayMode();
+            return EditorModeTestUtil.TearDownAndExitPlayMode(ClientServerTearDown);
         }
     }
 }

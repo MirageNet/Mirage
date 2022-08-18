@@ -40,19 +40,9 @@ namespace Mirage.Tests.Runtime.ClientServer
             _stackTraceLogType = Application.GetStackTraceLogType(LogType.Assert);
             Application.SetStackTraceLogType(LogType.Assert, StackTraceLogType.Full);
         }
-
-        public override async UniTask ExtraTearDownAsync()
+        public override void ExtraTearDown()
         {
             Application.SetStackTraceLogType(LogType.Assert, _stackTraceLogType);
-
-            // clear pending scenes then wait for current loading to finish
-            // this is so that scenes can then be correctly unloaded by TestScene.UnloadAdditiveScenes
-            clientSceneManager._clientPendingAdditiveSceneLoadingList.Clear();
-            serverSceneManager._clientPendingAdditiveSceneLoadingList.Clear();
-            await WaitForLoad(clientSceneManager.SceneLoadingAsyncOperationInfo);
-            await WaitForLoad(serverSceneManager.SceneLoadingAsyncOperationInfo);
-
-            await TestScenes.UnloadAdditiveScenes();
         }
 
         private static async UniTask WaitForLoad(AsyncOperation op)

@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using Mirage.Tests.EnterRuntime;
 
 namespace Mirage.Tests.Runtime.Host
@@ -15,10 +14,6 @@ namespace Mirage.Tests.Runtime.Host
 
             serverObjectManager.NetworkSceneManager = sceneManager;
             clientObjectManager.NetworkSceneManager = sceneManager;
-        }
-        public override UniTask ExtraTearDownAsync()
-        {
-            return TestScenes.UnloadAdditiveScenes();
         }
     }
 }

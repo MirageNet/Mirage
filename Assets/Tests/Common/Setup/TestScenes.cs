@@ -10,7 +10,7 @@ namespace Mirage.Tests
         public const string Path = "Assets/Tests/Scenes/testScene.unity";
         public const string StartScene = "Assets/Tests/Scenes/editmodeStartScene.unity";
 
-        // todo this is so hacker, maybe these should be editor tests instead and stop/start play mode each time
+        // todo this is so hacky, maybe these should be editor tests instead and stop/start play mode each time
         public static async UniTask UnloadAdditiveScenes()
         {
             var active = SceneManager.GetActiveScene();
