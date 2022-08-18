@@ -3,18 +3,18 @@ using UnityEngine;
 
 using Object = UnityEngine.Object;
 
-namespace Mirage.Tests.Runtime
+namespace Mirage.Tests
 {
     public abstract class TestBase
     {
-        List<GameObject> toDestroy = new List<GameObject>();
+        private List<GameObject> toDestroy = new List<GameObject>();
 
         /// <summary>
         /// Call this from child class teardown
         /// </summary>
         protected void TearDownTestObjects()
         {
-            foreach (GameObject obj in toDestroy)
+            foreach (var obj in toDestroy)
             {
                 if (obj != null)
                 {
@@ -32,7 +32,7 @@ namespace Mirage.Tests.Runtime
         /// <returns></returns>
         protected GameObject InstantiateForTest(GameObject prefab)
         {
-            GameObject obj = Object.Instantiate(prefab);
+            var obj = Object.Instantiate(prefab);
             toDestroy.Add(obj);
             return obj;
         }
@@ -44,7 +44,7 @@ namespace Mirage.Tests.Runtime
         /// <returns></returns>
         protected TObj InstantiateForTest<TObj>(TObj prefab) where TObj : Component
         {
-            TObj obj = Object.Instantiate(prefab);
+            var obj = Object.Instantiate(prefab);
             toDestroy.Add(obj.gameObject);
             return obj;
         }
