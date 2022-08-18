@@ -181,12 +181,15 @@ namespace Mirage.Tests.Runtime.ClientServer
             var noAdditiveScenesFound = false;
             clientSceneManager.OnClientFinishedSceneChange.AddListener((path, op) =>
             {
+                Debug.Log($"OnClientFinishedSceneChange {clientSceneManager._clientPendingAdditiveSceneLoadingList.Count}");
                 if (clientSceneManager._clientPendingAdditiveSceneLoadingList.Count == 0)
                 {
                     noAdditiveScenesFound = true;
                 }
             });
             clientSceneManager.ClientStartSceneMessage(client.Player, new SceneMessage { MainActivateScene = TestScenes.Path, AdditiveScenes = new List<string> { TestScenes.Path } });
+            // mark scene as allowed to load, so that finished event will be called
+            clientSceneManager.ClientFinishedLoadingSceneMessage(client.Player, new SceneReadyMessage());
 
             await AsyncUtil.WaitUntilWithTimeout(() => noAdditiveScenesFound);
 
