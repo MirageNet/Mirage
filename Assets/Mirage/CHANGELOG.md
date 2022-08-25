@@ -1,3 +1,10 @@
+# [128.1.0](https://github.com/MirageNet/Mirage/compare/v128.0.0...v128.1.0) (2022-08-25)
+
+
+### Features
+
+* adding SpawnVisibleObjects method that can skip objects ([#1100](https://github.com/MirageNet/Mirage/issues/1100)) ([21bf049](https://github.com/MirageNet/Mirage/commit/21bf0499d4d238f97758effc2f85e4f29f9f9681))
+
 # [128.0.0](https://github.com/MirageNet/Mirage/compare/v127.0.0...v128.0.0) (2022-08-18)
 
 
