@@ -230,7 +230,7 @@ namespace Mirage
             // controller.
             //
             // IMPORTANT: do this in AddCharacter & ReplaceCharacter!
-            SpawnVisibleObjects(player);
+            SpawnVisibleObjects(player, identity);
 
             if (logger.LogEnabled()) logger.Log($"Replacing playerGameObject object netId: {identity.NetId} asset ID {identity.PrefabHash:X}");
 
@@ -745,6 +745,7 @@ namespace Mirage
         /// </para>
         /// </summary>
         /// <param name="player">The player to spawn objects for</param>
+        // note: can't use optional param here because we need just NetworkPlayer version for event
         public void SpawnVisibleObjects(INetworkPlayer player)
         {
             SpawnVisibleObjects(player, false, (HashSet<NetworkIdentity>)null);
@@ -755,10 +756,19 @@ namespace Mirage
         /// </summary>
         /// <param name="player">The player to spawn objects for</param>
         /// <param name="ignoreHasCharacter">If true will spawn visibile objects even if player does not have a spawned character yet</param>
-        // note: can't use optional param here because we need just NetworkPlayer version for event
         public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter)
         {
             SpawnVisibleObjects(player, ignoreHasCharacter, (HashSet<NetworkIdentity>)null);
+        }
+
+        /// <summary>
+        /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
+        /// </summary>
+        /// <param name="player">The player to spawn objects for</param>
+        /// <param name="ignoreHasCharacter">If true will spawn visibile objects even if player does not have a spawned character yet</param>
+        public void SpawnVisibleObjects(INetworkPlayer player, NetworkIdentity skip)
+        {
+            SpawnVisibleObjects(player, false, skip);
         }
 
         /// <summary>
