@@ -43,6 +43,10 @@ namespace Mirage
     public class ServerObjectManager : MonoBehaviour
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(ServerObjectManager));
+        /// <summary>
+        /// HashSet for NetworkIdentity that can be re-used without allocation
+        /// </summary>
+        private static HashSet<NetworkIdentity> _setCache = new HashSet<NetworkIdentity>();
 
         [FormerlySerializedAs("server")]
         public NetworkServer Server;
@@ -226,7 +230,7 @@ namespace Mirage
             // controller.
             //
             // IMPORTANT: do this in AddCharacter & ReplaceCharacter!
-            SpawnVisibleObjectForPlayer(player);
+            SpawnVisibleObjects(player);
 
             if (logger.LogEnabled()) logger.Log($"Replacing playerGameObject object netId: {identity.NetId} asset ID {identity.PrefabHash:X}");
 
@@ -234,35 +238,6 @@ namespace Mirage
 
             if (!keepAuthority)
                 previousCharacter.RemoveClientAuthority();
-        }
-
-        private void SpawnVisibleObjectForPlayer(INetworkPlayer player)
-        {
-            if (logger.LogEnabled()) logger.Log($"Checking Observers on {Server.World.SpawnedIdentities.Count} objects for player: {player}");
-
-            if (!player.SceneIsReady)
-            {
-                // client needs to finish loading scene before we can spawn objects
-                // otherwise it would not find scene objects.
-                return;
-            }
-
-            // add connection to each nearby NetworkIdentity's observers, which
-            // internally sends a spawn message for each one to the connection.
-            foreach (var identity in Server.World.SpawnedIdentities)
-            {
-                // todo, do we only need to spawn active objects here? or all objects?
-                if (identity.gameObject.activeSelf)
-                {
-                    if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} sceneId={identity.SceneId:X}");
-
-                    var visible = identity.OnCheckObserver(player);
-                    if (visible)
-                    {
-                        identity.AddObserver(player);
-                    }
-                }
-            }
         }
 
         /// <summary>
@@ -339,7 +314,7 @@ namespace Mirage
             }
 
             // spawn any new visible scene objects
-            SpawnVisibleObjects(player);
+            SpawnVisibleObjects(player, identity);
 
             if (logger.LogEnabled()) logger.Log($"Adding new playerGameObject object netId: {identity.NetId} asset ID {identity.PrefabHash:X}");
 
@@ -770,7 +745,10 @@ namespace Mirage
         /// </para>
         /// </summary>
         /// <param name="player">The player to spawn objects for</param>
-        public void SpawnVisibleObjects(INetworkPlayer player) => SpawnVisibleObjects(player, false);
+        public void SpawnVisibleObjects(INetworkPlayer player)
+        {
+            SpawnVisibleObjects(player, false, (HashSet<NetworkIdentity>)null);
+        }
 
         /// <summary>
         /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
@@ -780,13 +758,71 @@ namespace Mirage
         // note: can't use optional param here because we need just NetworkPlayer version for event
         public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter)
         {
+            SpawnVisibleObjects(player, ignoreHasCharacter, (HashSet<NetworkIdentity>)null);
+        }
+
+        /// <summary>
+        /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
+        /// </summary>
+        /// <param name="player">The player to spawn objects for</param>
+        /// <param name="ignoreHasCharacter">If true will spawn visibile objects even if player does not have a spawned character yet</param>
+        /// <param name="skip">NetworkIdentity to skip when spawning. Can be null</param>
+        public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter, NetworkIdentity skip)
+        {
+            _setCache.Clear();
+            _setCache.Add(skip);
+            SpawnVisibleObjects(player, ignoreHasCharacter, _setCache);
+        }
+
+        /// <summary>
+        /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
+        /// </summary>
+        /// <param name="player">The player to spawn objects for</param>
+        /// <param name="ignoreHasCharacter">If true will spawn visibile objects even if player does not have a spawned character yet</param>
+        /// <param name="skip">NetworkIdentity to skip when spawning. Can be null</param>
+        public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter, HashSet<NetworkIdentity> skip)
+        {
             // todo Call player.RemoveAllVisibleObjects() first so that it will send spawn message for objects destroyed in scene change
             if (logger.LogEnabled()) logger.Log("SetClientReadyInternal for conn:" + player);
 
             // client is ready to start spawning objects
             if (ignoreHasCharacter || player.HasCharacter)
-                SpawnVisibleObjectForPlayer(player);
+                SpawnVisibleObjectInternal(player, skip);
         }
+
+        private void SpawnVisibleObjectInternal(INetworkPlayer player, HashSet<NetworkIdentity> skip)
+        {
+            if (logger.LogEnabled()) logger.Log($"Checking Observers on {Server.World.SpawnedIdentities.Count} objects for player: {player}");
+
+            if (!player.SceneIsReady)
+            {
+                // client needs to finish loading scene before we can spawn objects
+                // otherwise it would not find scene objects.
+                return;
+            }
+
+            // add connection to each nearby NetworkIdentity's observers, which
+            // internally sends a spawn message for each one to the connection.
+            foreach (var identity in Server.World.SpawnedIdentities)
+            {
+                // allow for skips so that addChatacter doesn't send 2 spawn message for existing object
+                if (skip != null && skip.Contains(identity))
+                    continue;
+
+                // todo, do we only need to spawn active objects here? or all objects?
+                if (identity.gameObject.activeSelf)
+                {
+                    if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} sceneId={identity.SceneId:X}");
+
+                    var visible = identity.OnCheckObserver(player);
+                    if (visible)
+                    {
+                        identity.AddObserver(player);
+                    }
+                }
+            }
+        }
+
 
         private sealed class NetworkIdentityComparer : IComparer<NetworkIdentity>
         {
