@@ -325,30 +325,15 @@ namespace Mirage
             }
             internal set
             {
-                var newID = value;
-                var oldId = _prefabHash;
-
-                // they are the same, do nothing
-                if (oldId == newID)
-                    return;
-
-                // new is empty
-                if (newID == 0)
+                if (value == 0)
                 {
-                    throw new ArgumentException($"Cannot set PrefabHash to an empty guid on NetworkIdentity '{name}'. Old PrefabHash '{oldId}'.");
+                    throw new ArgumentException($"Cannot set PrefabHash to 0 on '{name}'. Old PrefabHash '{_prefabHash}'.");
                 }
 
-                // old not empty
-                if (oldId != 0)
-                {
-                    throw new InvalidOperationException($"Cannot set PrefabHash on NetworkIdentity '{name}' because it already had an PrefabHash. " +
-                        $"Current PrefabHash is '{oldId}', attempted new PrefabHash is '{newID}'.");
-                }
+                var old = _prefabHash;
+                _prefabHash = value;
 
-                // old is empty
-                _prefabHash = newID;
-
-                if (logger.LogEnabled()) logger.Log($"Setting PrefabHash on NetworkIdentity '{name}' with new PrefabHash '{newID}'");
+                if (logger.LogEnabled()) logger.Log($"Setting PrefabHash on '{name}' to '{value}', Old PrefabHash:{old}");
             }
         }
 
