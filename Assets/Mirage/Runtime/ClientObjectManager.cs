@@ -566,8 +566,20 @@ namespace Mirage
 
         private async UniTaskVoid OnSpawnAsync(SpawnHandlerAsyncDelegate spawnHandler, SpawnMessage msg)
         {
-            var identity = await spawnHandler.Invoke(msg);
-            AfterSpawn(msg, false, identity);
+            // copy payload into new buffer, because it will be release and re-used when this function awaits
+            // todo can this be optimized
+            using (var writer = NetworkWriterPool.GetWriter())
+            {
+                writer.Write(msg.payload);
+                // use read and write so that payload will look the same as original
+                using (var reader = NetworkReaderPool.GetReader(writer.ToArraySegment(), null))
+                {
+                    msg.payload = reader.Read<ArraySegment<byte>>();
+
+                    var identity = await spawnHandler.Invoke(msg);
+                    AfterSpawn(msg, false, identity);
+                }
+            }
         }
 
         private NetworkIdentity SpawnPrefab(SpawnMessage msg, SpawnHandler handler)
