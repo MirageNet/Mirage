@@ -131,13 +131,18 @@ namespace Mirage
                 }
                 catch (Exception e)
                 {
-                    var disconnectMessage = _disconnectOnException ? $", Closed connection: {player}" : "";
-                    logger.LogError($"{e.GetType()} in Message handler (see stack below){disconnectMessage}\n{e}");
-                    if (_disconnectOnException)
-                    {
-                        player.Disconnect();
-                    }
+                    LogAndCheckDisconnect(player, e);
                 }
+            }
+        }
+
+        public void LogAndCheckDisconnect(INetworkPlayer player, Exception e)
+        {
+            var disconnectMessage = _disconnectOnException ? $", Closed connection: {player}" : "";
+            logger.LogError($"{e.GetType()} in Message handler (see stack below){disconnectMessage}\n{e}");
+            if (_disconnectOnException)
+            {
+                player.Disconnect();
             }
         }
     }
