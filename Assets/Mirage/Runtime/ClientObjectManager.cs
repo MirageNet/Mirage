@@ -566,19 +566,28 @@ namespace Mirage
 
         private async UniTaskVoid OnSpawnAsync(SpawnHandlerAsyncDelegate spawnHandler, SpawnMessage msg)
         {
-            // copy payload into new buffer, because it will be release and re-used when this function awaits
-            // todo can this be optimized
-            using (var writer = NetworkWriterPool.GetWriter())
+            try
             {
-                writer.Write(msg.payload);
-                // use read and write so that payload will look the same as original
-                using (var reader = NetworkReaderPool.GetReader(writer.ToArraySegment(), null))
+                // copy payload into new buffer, because it will be release and re-used when this function awaits
+                // todo can this be optimized
+                using (var writer = NetworkWriterPool.GetWriter())
                 {
-                    msg.payload = reader.Read<ArraySegment<byte>>();
+                    writer.Write(msg.payload);
+                    // use read and write so that payload will look the same as original
+                    using (var reader = NetworkReaderPool.GetReader(writer.ToArraySegment(), null))
+                    {
+                        msg.payload = reader.Read<ArraySegment<byte>>();
 
-                    var identity = await spawnHandler.Invoke(msg);
-                    AfterSpawn(msg, false, identity);
+                        var identity = await spawnHandler.Invoke(msg);
+                        AfterSpawn(msg, false, identity);
+                    }
                 }
+            }
+            // todo, should we allow async message handler? then we can just try/catch in there. Would also simplify spawnasync
+            // this async is called from message handler, so we want to catch and maybe disconnect
+            catch (Exception e)
+            {
+                Client.MessageHandler.LogAndCheckDisconnect(Client.Player, e);
             }
         }
 
