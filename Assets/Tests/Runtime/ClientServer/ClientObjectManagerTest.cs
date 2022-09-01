@@ -63,7 +63,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
             var handlers = clientObjectManager._handlers[identity.PrefabHash];
             Assert.That(handlers.Prefab == null, "should not have added prefab with handlers");
-            Assert.That(handlers.SpawnHandler == TestSpawnDelegate);
+            Assert.That(handlers.Handler == TestSpawnDelegate);
             Assert.That(handlers.UnspawnHandler == TestUnspawnDelegate);
         }
 
@@ -78,7 +78,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
             var handlers = clientObjectManager._handlers[identity.PrefabHash];
             Assert.That(handlers.Prefab == null, "should not have added prefab with handlers");
-            Assert.That(handlers.SpawnHandler == TestSpawnDelegate);
+            Assert.That(handlers.Handler == TestSpawnDelegate);
             Assert.That(handlers.UnspawnHandler == null);
         }
 
@@ -187,14 +187,14 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
             var handler = clientObjectManager._handlers[identity.PrefabHash];
             Assert.That(handler.Prefab == identity);
-            Assert.That(handler.SpawnHandler == null);
+            Assert.That(handler.Handler == null);
             Assert.That(handler.UnspawnHandler == null);
 
             clientObjectManager.RegisterUnspawnHandler(identity, TestUnspawnDelegate);
             Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
             handler = clientObjectManager._handlers[identity.PrefabHash];
             Assert.That(handler.Prefab == identity);
-            Assert.That(handler.SpawnHandler == null);
+            Assert.That(handler.Handler == null);
             Assert.That(handler.UnspawnHandler == TestUnspawnDelegate);
         }
 
