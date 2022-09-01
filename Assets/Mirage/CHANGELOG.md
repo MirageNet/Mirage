@@ -1,3 +1,10 @@
+## [128.1.1](https://github.com/MirageNet/Mirage/compare/v128.1.0...v128.1.1) (2022-09-01)
+
+
+### Bug Fixes
+
+* fixing SetDisplayMetrics for host mode ([ce26e49](https://github.com/MirageNet/Mirage/commit/ce26e493491872332497b25dc582d6a57312f167))
+
 # [128.1.0](https://github.com/MirageNet/Mirage/compare/v128.0.0...v128.1.0) (2022-08-25)
 
 
