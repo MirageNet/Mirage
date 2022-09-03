@@ -100,7 +100,8 @@ namespace Mirage.Serialization
             // todo, should we be rounding down for abc? because if they are rounded up their sum may be greater than largest
 
             ulong combine = 0;
-            combine |= (ulong)index << (_bitCountPerElement * 3);
+            // write Index as (3-i) so that Quaternion.identity will be all zeros
+            combine |= (ulong)(3 - index) << (_bitCountPerElement * 3);
             combine |= (ulong)_floatPacker.PackNoClamp(a) << (_bitCountPerElement * 2);
             combine |= (ulong)_floatPacker.PackNoClamp(b) << _bitCountPerElement;
             combine |= _floatPacker.PackNoClamp(c);
@@ -213,7 +214,9 @@ namespace Mirage.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Quaternion Unpack(ulong combine)
         {
-            var index = (uint)(combine >> (_bitCountPerElement * 3));
+            // Index writen as (3-i)
+            // so (3-c) to decode
+            var index = 3 - (uint)(combine >> (_bitCountPerElement * 3));
 
             var a = _floatPacker.Unpack((uint)(combine >> (_bitCountPerElement * 2)) & _readMask);
             var b = _floatPacker.Unpack((uint)(combine >> (_bitCountPerElement * 1)) & _readMask);

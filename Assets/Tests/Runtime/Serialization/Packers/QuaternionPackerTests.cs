@@ -262,5 +262,12 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             }
         }
 
+        [Test]
+        [Description("Quaternion is a likely value, so packing to 0 will be useful compression")]
+        public void PackIdentityShouldBeZero()
+        {
+            var encoded = QuaternionPacker.PackAsInt(Quaternion.identity);
+            Assert.That(encoded, Is.Zero);
+        }
     }
 }
