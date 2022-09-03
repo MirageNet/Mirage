@@ -35,6 +35,15 @@ namespace Mirage.Serialization
         /// <summary>Default packer using 10 bits per element, 32 bits total</summary>
         public static readonly QuaternionPacker Default10 = new QuaternionPacker(10);
 
+        public static uint PackAsInt(Quaternion value)
+        {
+            return (uint)Default10.Pack(value);
+        }
+        public static Quaternion UnpackFromInt(uint value)
+        {
+            return Default10.Unpack(value);
+        }
+
         /// <summary>
         /// 1 / sqrt(2)
         /// </summary>
@@ -68,6 +77,11 @@ namespace Mirage.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Pack(NetworkWriter writer, Quaternion value)
         {
+            writer.Write(Pack(value), _totalBitCount);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ulong Pack(Quaternion value)
+        {
             QuickNormalize(ref value);
 
             FindLargestIndex(ref value, out var index);
@@ -85,12 +99,12 @@ namespace Mirage.Serialization
 
             // todo, should we be rounding down for abc? because if they are rounded up their sum may be greater than largest
 
-            writer.Write(
-                 ((ulong)index << (_bitCountPerElement * 3)) |
-                 ((ulong)_floatPacker.PackNoClamp(a) << (_bitCountPerElement * 2)) |
-                 ((ulong)_floatPacker.PackNoClamp(b) << _bitCountPerElement) |
-                 _floatPacker.PackNoClamp(c),
-                 _totalBitCount);
+            ulong combine = 0;
+            combine |= (ulong)index << (_bitCountPerElement * 3);
+            combine |= (ulong)_floatPacker.PackNoClamp(a) << (_bitCountPerElement * 2);
+            combine |= (ulong)_floatPacker.PackNoClamp(b) << _bitCountPerElement;
+            combine |= _floatPacker.PackNoClamp(c);
+            return combine;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -194,8 +208,11 @@ namespace Mirage.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Quaternion Unpack(NetworkReader reader)
         {
-            var combine = reader.Read(_totalBitCount);
-
+            return Unpack(reader.Read(_totalBitCount));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Quaternion Unpack(ulong combine)
+        {
             var index = (uint)(combine >> (_bitCountPerElement * 3));
 
             var a = _floatPacker.Unpack((uint)(combine >> (_bitCountPerElement * 2)) & _readMask);
