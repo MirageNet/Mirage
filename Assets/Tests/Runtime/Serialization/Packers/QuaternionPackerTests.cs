@@ -78,7 +78,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             return index;
         }
 
-        private static IEnumerable CompressesAndDecompressesCases()
+        private static IEnumerable PackAndUnpackCases()
         {
             for (var i = 8; i < 12; i++)
             {
@@ -92,7 +92,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         }
 
         [Test]
-        [TestCaseSource(nameof(CompressesAndDecompressesCases))]
+        [TestCaseSource(nameof(PackAndUnpackCases))]
 #if !UNITY_EDITOR
         [Ignore("Quaternion.Euler Requires unity engine to run")]
 #endif
@@ -205,5 +205,62 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             float assertSign = inSign == outSign ? 1 : -1;
             return assertSign;
         }
+
+
+        private static IEnumerable PackToIntCases()
+        {
+            yield return new TestCaseData(Quaternion.identity);
+            yield return new TestCaseData(Quaternion.Euler(25, 30, 0));
+            yield return new TestCaseData(Quaternion.Euler(-50, 30, 90));
+            yield return new TestCaseData(Quaternion.Euler(90, 90, 180));
+            yield return new TestCaseData(Quaternion.Euler(-20, 0, 45));
+            yield return new TestCaseData(Quaternion.Euler(80, 30, -45));
+        }
+        [Test]
+        [TestCaseSource(nameof(PackToIntCases))]
+#if !UNITY_EDITOR
+        [Ignore("Quaternion.Euler Requires unity engine to run")]
+#endif
+        public void PackAsInt(Quaternion inValue)
+        {
+            // precision for 1 element
+            var max = (1 / Mathf.Sqrt(2));
+            var precision = 2 * max / ((1 << 10) - 1);
+            // allow extra precision because largest is caculated using the other 3 values so may be out side of precision
+            precision *= 2;
+
+            var encoded = QuaternionPacker.PackAsInt(inValue);
+            var outValue = QuaternionPacker.UnpackFromInt(encoded);
+
+            //Debug.Log($"Packed: ({inValue.x:0.000},{inValue.y:0.000},{inValue.z:0.000},{inValue.w:0.000}) " +
+            //          $"UnPacked: ({outValue.x:0.000},{outValue.y:0.000},{outValue.z:0.000},{outValue.w:0.000})");
+
+            Assert.That(outValue.x, Is.Not.NaN, "x was NaN");
+            Assert.That(outValue.y, Is.Not.NaN, "y was NaN");
+            Assert.That(outValue.z, Is.Not.NaN, "z was NaN");
+            Assert.That(outValue.w, Is.Not.NaN, "w was NaN");
+
+            var assertSign = getAssertSign(inValue, outValue);
+
+            Assert.That(outValue.x, IsUnSignedEqualWithIn(inValue.x), $"x off by {Mathf.Abs(assertSign * inValue.x - outValue.x)}");
+            Assert.That(outValue.y, IsUnSignedEqualWithIn(inValue.y), $"y off by {Mathf.Abs(assertSign * inValue.y - outValue.y)}");
+            Assert.That(outValue.z, IsUnSignedEqualWithIn(inValue.z), $"z off by {Mathf.Abs(assertSign * inValue.z - outValue.z)}");
+            Assert.That(outValue.w, IsUnSignedEqualWithIn(inValue.w), $"w off by {Mathf.Abs(assertSign * inValue.w - outValue.w)}");
+
+            var inVec = inValue * Vector3.forward;
+            var outVec = outValue * Vector3.forward;
+
+            // allow for extra precision when rotating vector
+            Assert.AreEqual(inVec.x, outVec.x, precision * 2, $"vx off by {Mathf.Abs(inVec.x - outVec.x)}");
+            Assert.AreEqual(inVec.y, outVec.y, precision * 2, $"vy off by {Mathf.Abs(inVec.y - outVec.y)}");
+            Assert.AreEqual(inVec.z, outVec.z, precision * 2, $"vz off by {Mathf.Abs(inVec.z - outVec.z)}");
+
+
+            EqualConstraint IsUnSignedEqualWithIn(float v)
+            {
+                return Is.EqualTo(v).Within(precision).Or.EqualTo(assertSign * v).Within(precision);
+            }
+        }
+
     }
 }
