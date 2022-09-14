@@ -1,3 +1,15 @@
+# [128.2.0](https://github.com/MirageNet/Mirage/compare/v128.1.1...v128.2.0) (2022-09-14)
+
+
+### Features
+
+* adding pack as int functions to QuaternionPacker ([79ccc25](https://github.com/MirageNet/Mirage/commit/79ccc2556dce66d1d24b3baaf0705fb24165e167))
+
+
+### Performance Improvements
+
+* making QuaternionPacker pack to 0 for Quaternion.identity ([7c2bfe4](https://github.com/MirageNet/Mirage/commit/7c2bfe43b2ee45c640aaaf93f7ec37aa4fda7b80))
+
 ## [128.1.1](https://github.com/MirageNet/Mirage/compare/v128.1.0...v128.1.1) (2022-09-01)
 
 
