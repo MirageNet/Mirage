@@ -398,21 +398,24 @@ namespace Mirage
             _handlers.Clear();
         }
 
-        public void RegisterDynamicSpawnHandler(DynamicSpawnHandlerDelegate @delegate)
+        public void RegisterDynamicSpawnHandler(DynamicSpawnHandlerDelegate dynamicHandler)
         {
-            _dynamicHandlers.Add(@delegate);
+            if (dynamicHandler == null)
+                throw new ArgumentNullException(nameof(dynamicHandler));
+
+            _dynamicHandlers.Add(dynamicHandler);
         }
 
         private static void ThrowIfZeroHash(int prefabHash)
         {
             if (prefabHash == 0)
-                throw new ArgumentException("prefabHash was 0", nameof(prefabHash));
+                throw new ArgumentException("prefabHash is zero", nameof(prefabHash));
         }
         private static void ThrowIfZeroHash(NetworkIdentity identity)
         {
             if (identity.PrefabHash == 0)
             {
-                throw new InvalidOperationException($"Prefab hash on {identity.name} was zero");
+                throw new ArgumentException($"prefabHash is zero on {identity.name}", nameof(identity));
             }
         }
         private static void ThrowMissingHandler(int prefabHash)
