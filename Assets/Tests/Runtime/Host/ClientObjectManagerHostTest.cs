@@ -21,18 +21,19 @@ namespace Mirage.Tests.Runtime.Host
 
             await UniTask.Delay(1);
 
-            var result = clientObjectManager.GetPrefab(hash);
+            var handler = clientObjectManager.GetSpawnHandler(hash);
+            var result = handler.Prefab;
 
             Assert.That(result, Is.SameAs(identity));
         });
 
         [Test]
-        public void RegisterPrefabDelegateEmptyIdentityExceptionTest()
+        public void ThrowsIfRegisterSpawnHandlerIsGivenZeroPrefabHash()
         {
             var identity = CreateNetworkIdentity();
-            identity.PrefabHash = 0;
+            identity.Editor_PrefabHash = 0;
 
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
                 clientObjectManager.RegisterSpawnHandler(identity, TestSpawnDelegate, TestUnspawnDelegate);
             });

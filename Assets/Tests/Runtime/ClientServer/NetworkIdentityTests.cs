@@ -96,7 +96,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             var clone = CreateNetworkIdentity();
 
-            clone.PrefabHash = 0;
+            clone.Editor_PrefabHash = 0;
             Assert.That(clone.IsPrefab, Is.False);
         }
         [Test]
