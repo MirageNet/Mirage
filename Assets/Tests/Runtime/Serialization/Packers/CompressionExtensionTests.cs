@@ -16,8 +16,8 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Test]
         public void UnpackRotationUsesDefault9()
         {
-            writer.Write(0, 27);
-            writer.Write(3, 2);
+            // manually pack identity
+            writer.Write(0, 29);
             var reader = GetReader();
             Assert.That(reader.BitPosition, Is.EqualTo(0), "Check it starts at 0");
             var value = reader.ReadQuaternion();
