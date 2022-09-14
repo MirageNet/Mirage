@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Reflection;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine;
@@ -43,12 +44,15 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             var identity = CreateNetworkIdentity();
 
-            identity.PrefabHash = 0;
+            identity.Editor_PrefabHash = 0;
 
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                clientObjectManager.RegisterSpawnHandler(identity, TestSpawnDelegate, TestUnspawnDelegate);
-            });
+            var actual = Assert.Throws<ArgumentException>(() =>
+              {
+                  clientObjectManager.RegisterSpawnHandler(identity, TestSpawnDelegate, TestUnspawnDelegate);
+              });
+
+            var expected = new ArgumentException($"prefabHash is zero on {identity.name}", "identity");
+            Assert.That(actual, Has.Message.EqualTo(expected.Message));
         }
 
         [Test]
@@ -233,6 +237,12 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             return CreateNetworkIdentity();
         }
+        private NetworkIdentity TestSpawnDelegateWithMock(SpawnMessage msg)
+        {
+            var identity = CreateNetworkIdentity();
+            identity.gameObject.AddComponent<MockComponent>();
+            return identity;
+        }
 
         private void TestUnspawnDelegate(NetworkIdentity identity)
         {
@@ -247,7 +257,7 @@ namespace Mirage.Tests.Runtime.ClientServer
                 var result = clientObjectManager.GetPrefab(0);
             });
 
-            var expected = new ArgumentException("prefabHash was 0", "prefabHash");
+            var expected = new ArgumentException("prefabHash is zero", "prefabHash");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
         }
 
@@ -327,11 +337,116 @@ namespace Mirage.Tests.Runtime.ClientServer
 
         }
 
+        [Test]
+        public void CanAddDynamicHandler()
+        {
+            var del = new DynamicSpawnHandlerDelegate(DynamicHandler);
+            clientObjectManager.RegisterDynamicSpawnHandler(del);
+
+            Assert.That(clientObjectManager._dynamicHandlers.Contains(del));
+        }
+
+        [Test]
+        public void ThrowsIfDynamicHandlerIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                clientObjectManager.RegisterDynamicSpawnHandler(default(DynamicSpawnHandlerDelegate));
+            });
+        }
+
+        [Test]
+        public void DynamicHandlerCanReturnNull()
+        {
+            // register empty dynamic and prefab
+            clientObjectManager.RegisterDynamicSpawnHandler(EmptyDynamicHandler);
+            var prefab = CreateNetworkIdentity();
+            prefab.PrefabHash = NewUniqueHash();
+            clientObjectManager.RegisterPrefab(prefab);
+
+            // then get handler for that prefab
+
+            var handler = clientObjectManager.GetSpawnHandler(prefab.PrefabHash);
+            Assert.That(handler.Prefab, Is.EqualTo(prefab));
+        }
+
+        [Test]
+        public void ThrowsIfNoHandlerInDynamicOrOther()
+        {
+            // register empty dynamic and prefab
+            clientObjectManager.RegisterDynamicSpawnHandler(EmptyDynamicHandler);
+            var prefab = CreateNetworkIdentity();
+            prefab.PrefabHash = NewUniqueHash();
+            clientObjectManager.RegisterPrefab(prefab);
+
+            // then get handler for that prefab
+
+            var noHandlerHash = NewUniqueHash();
+
+            var actual = Assert.Throws<SpawnObjectException>(() =>
+            {
+                var handler = clientObjectManager.GetSpawnHandler(noHandlerHash);
+
+            });
+            var expected = new SpawnObjectException($"No prefab for {noHandlerHash:X}. did you forget to add it to the ClientObjectManager?");
+            Assert.That(actual, Has.Message.EqualTo(expected.Message));
+        }
+
+        [Test]
+        public void UsesHandlerFromDynamic()
+        {
+            // register empty dynamic and prefab
+            clientObjectManager.RegisterDynamicSpawnHandler(DynamicHandler);
+
+            // then get handler for that prefab
+            var handler100 = clientObjectManager.GetSpawnHandler(100);
+            var handler101 = clientObjectManager.GetSpawnHandler(101);
+
+            Assert.That(handler100.Handler.GetMethodInfo().Name, Is.EqualTo(nameof(TestSpawnDelegate)));
+            Assert.That(handler101.Handler.GetMethodInfo().Name, Is.EqualTo(nameof(TestSpawnDelegateWithMock)));
+        }
+
+        [Test]
+        public void UsesHandlerBeforeDynamicHandler()
+        {
+            // register empty dynamic and prefab
+            clientObjectManager.RegisterDynamicSpawnHandler(DynamicHandler);
+            var prefab = CreateNetworkIdentity();
+            prefab.PrefabHash = 100;
+            clientObjectManager.RegisterPrefab(prefab);
+
+
+            // then get handler for that prefab
+            var handler100 = clientObjectManager.GetSpawnHandler(100);
+            var handler101 = clientObjectManager.GetSpawnHandler(101);
+
+            Assert.That(handler100.Handler, Is.Null);
+            Assert.That(handler100.Prefab, Is.EqualTo(prefab));
+            Assert.That(handler101.Handler.GetMethodInfo().Name, Is.EqualTo(nameof(TestSpawnDelegateWithMock)));
+        }
+
+
+        private SpawnHandler EmptyDynamicHandler(int prefabHash)
+        {
+            return null;
+        }
+
+        private SpawnHandler DynamicHandler(int prefabHash)
+        {
+            if (prefabHash == 100)
+                return new SpawnHandler(TestSpawnDelegate, null);
+            else if (prefabHash == 101)
+                return new SpawnHandler(TestSpawnDelegateWithMock, null);
+            else
+                return null;
+        }
+
         //Used to ensure the test has a unique non empty guid
         private int NewUniqueHash()
         {
             var testGuid = Guid.NewGuid().GetHashCode();
 
+            // recursive, so dont need while
             if (clientObjectManager._handlers.ContainsKey(testGuid))
             {
                 testGuid = NewUniqueHash();
