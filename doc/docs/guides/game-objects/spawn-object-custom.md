@@ -76,183 +76,75 @@ Note that on the host, game objects are not spawned for the local client, becaus
 
 ## Setting Up a Game Object Pool with Custom Spawn Handlers
 
-Here is an example of how you might set up a simple game object pooling system with custom spawn handlers. Spawning and unspawning then puts game objects in or out of the pool.
+you can use custom spawn handlers in order set up object pooling so you dont need to instantiate and destroy objects each time you use them. 
 
-``` cs
-using System.Collections.Generic;
-using Mirage;
-using UnityEngine;
+A full guide on pooling can be found here: [Spawn Object Pooling](./spawn-object-pooling)
 
-namespace Mirage.Examples
+```cs
+void ClientConnected() 
 {
-    public class PrefabPoolManager : MonoBehaviour
-    {
-        [Header("Settings")]
-        public ClientObjectManager clientObjectManager;
-        public int startSize = 5;
-        public int maxSize = 20;
-        public NetworkIdentity prefab;
+    clientObjectManager.RegisterPrefab(prefab, PoolSpawnHandler, PoolUnspawnHandler);
+}
 
-        [Header("Debug")]
-        [SerializeField] int currentCount;
+// used by clientObjectManager.RegisterPrefab
+NetworkIdentity PoolSpawnHandler(SpawnMessage msg)
+{
+    return GetFromPool(msg.position, msg.rotation);
+}
 
-        Queue<NetworkIdentity> pool;
-
-        void Start()
-        {
-            InitializePool();
-
-            clientObjectManager.RegisterPrefab(prefab, SpawnHandler, UnspawnHandler);
-        }
-
-        // used by clientObjectManager.RegisterPrefab
-        NetworkIdentity SpawnHandler(SpawnMessage msg)
-        {
-            return GetFromPool(msg.position, msg.rotation);
-        }
-
-        // used by clientObjectManager.RegisterPrefab
-        void UnspawnHandler(NetworkIdentity spawned)
-        {
-            PutBackInPool(spawned);
-        }
-
-        void OnDestroy()
-        {
-            clientObjectManager.UnregisterPrefab(prefab);
-        }
-
-        private void InitializePool()
-        {
-            pool = new Queue<NetworkIdentity>();
-            for (int i = 0; i < startSize; i++)
-            {
-                NetworkIdentity next = CreateNew();
-
-                pool.Enqueue(next);
-            }
-        }
-
-        NetworkIdentity CreateNew()
-        {
-            if (currentCount > maxSize)
-            {
-                Debug.LogError($"Pool has reached max size of {maxSize}");
-                return null;
-            }
-
-            // use this object as parent so that objects dont crowd hierarchy
-            NetworkIdentity next = Instantiate(prefab, transform);
-            next.name = $"{prefab.name}_pooled_{currentCount}";
-            next.gameObject.SetActive(false);
-            currentCount++;
-            return next;
-        }
-
-        /// <summary>
-        /// Used to take Object from Pool.
-        /// <para>Should be used on server to get the next Object</para>
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="rotation"></param>
-        /// <returns></returns>
-        public NetworkIdentity GetFromPool(Vector3 position, Quaternion rotation)
-        {
-            NetworkIdentity next = pool.Count > 0
-                ? pool.Dequeue() // take from pool
-                : CreateNew(); // create new because pool is empty
-
-            // CreateNew might return null if max size is reached
-            if (next == null) { return null; }
-
-            // set position/rotation and set active
-            next.transform.position = position;
-            next.transform.rotation = rotation;
-            next.gameObject.SetActive(true);
-            return next;
-        }
-
-        /// <summary>
-        /// Used to put object back into pool so they can b
-        /// <para>Should be used on server after unspawning an object</para>
-        /// </summary>
-        /// <param name="spawned"></param>
-        public void PutBackInPool(NetworkIdentity spawned)
-        {
-            // disable object
-            spawned.gameObject.SetActive(false);
-
-            // add back to pool
-            pool.Enqueue(spawned);
-        }
-    }
+// used by clientObjectManager.RegisterPrefab
+void PoolUnspawnHandler(NetworkIdentity spawned)
+{
+    PutBackInPool(spawned);
 }
 ```
 
-To use this manager, create a new empty game object and add the `PrefabPoolManager` component (code above). Next, drag a prefab you want to spawn multiple times to the Prefab field, and set `startSize` and `maxSize` fields. `startSize` is how many will be spawned when your game starts. `maxSize` is the max number that can be spawned, if this number is reached then an error will be given when trying to more new objects.
+## Dynamic spawning 
 
-Finally, set up a reference to the PrefabPoolManager in the script you are using for player movement:
+Some times you may want to create objects at runtime and you might not know the prefab hash ahead of time. For this you can use Dynamic Spawn Handlers to return a spawn handler for a prefab hash.
 
-``` cs
-PrefabPoolManager prefabPoolManager;
+Below is an example where client pre-spawns objects while loading, and then network spawns them when receiving a `SpawnMessage` from server.
 
-void Start()
+Dynamic Handler avoid the need to add 1 spawn handler for each prefab hash. Instead you can just add a single dynamic handler that can then be used to find and return objects.
+
+```cs
+// store handler in field so that you dont need to allocate a new one for each DynamicSpawn call
+SpawnHandler _handler;
+List<NetworkIdentity> _preSpawnedObjects = new List<NetworkIdentity>();
+
+void Start() 
 {
-    prefabPoolManager = FindObjectOfType<PrefabPoolManager>();
-}
-```
-
-Your player logic might contain something like this, which moves and fires coins:
-
-``` cs
-void Update()
-{
-    if (!isLocalPlayer)
-        return;
+    _handler = new SpawnHandler(FindPreSpawnedObject, null);
     
-    // move
-    var x = Input.GetAxis("Horizontal") * 0.1f;
-    var z = Input.GetAxis("Vertical") * 0.1f;
-    transform.Translate(x, 0, z);
+    // fill _preSpawnedObjects here with objects
+    _preSpawnedObjects.Add(new GameObject("name").AddComponent<NetworkIdentity>());
+}
 
-    // shoot
-    if (Input.GetKeyDown(KeyCode.Space))
-    {
-        // Server RPC Call function is called on the client, but invoked on the server
-        CmdFire();
-    }
+public SpawnHandler DynamicSpawn(int prefabHash)
+{
+    if (IsPreSpawnedId(prefabHash))
+        // return a handler that is using FindPreSpawnedObject
+        return _handler;
+    else
+        return null;
+}
+
+bool IsPreSpawnedId(int prefabHash) 
+{
+    // prefabHash starts with 16 bits of 0, then it an id we are using for spawning
+    // this chance of this happening randomly is very low    
+    // you can do more validation on the hash based on use case
+    return (prefabHash & 0xFFFF) == 0;
+}
+
+// finds object based on hash and returns it
+public NetworkIdentity FindPreSpawnedObject(SpawnMessage spawnMessage)
+{
+    var prefabHash = spawnMessage.prefabHash.Value;
+    // we stored index in last 16 bits on hash
+    var index = prefabHash >> 16;
+    
+    var identity = _preSpawnedObjects[index];
+    return identity;
 }
 ```
-
-In the firing logic on the player, make it use the game object pool:
-
-``` cs
-[ServerRpc]
-void CmdFire()
-{
-    // Set up bullet on server
-    NetworkIdentity bullet = prefabPoolManager.GetFromPool(transform.position + transform.forward, Quaternion.identity);
-
-    Rigidbody rigidBody = bullet.GetComponent<Rigidbody>();
-    rigidBody.velocity = transform.forward * 4;
-
-    // tell server to send SpawnMessage, which will call SpawnHandler on client
-    ServerObjectManager.Spawn(bullet);
-
-    // destroy bullet after 2 seconds
-    StartCoroutine(DestroyDelay(bullet, 2.0f));
-}
-
-IEnumerator DestroyDelay(NetworkIdentity go, float delay)
-{
-    yield return new WaitForSeconds(delay);
-
-    // return object to pool on server
-    prefabPoolManager.PutBackInPool(go);
-
-    // tell server to send ObjectDestroyMessage, which will call UnspawnHandler on client
-    ServerObjectManager.Destroy(go, destroyServerObject: false);
-}
-```
-
-The Destroy method above shows how to return game objects to the pool so that they can be re-used when you fire again
