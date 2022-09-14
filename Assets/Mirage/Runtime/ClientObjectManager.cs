@@ -207,13 +207,43 @@ namespace Mirage
         /// <returns>true if prefab was registered</returns>
         /// <exception cref="ArgumentException">Thrown when <paramref name="prefabHash"/> is 0</exception>
         /// <exception cref="SpawnObjectException">Thrown prefab </exception>
+        [System.Obsolete("use GetSpawnHandler instead")]
         public NetworkIdentity GetPrefab(int prefabHash)
+        {
+            var handler = GetSpawnHandler(prefabHash);
+            if (handler.Prefab == null)
+                ThrowMissingHandler(prefabHash);
+
+            return handler.Prefab;
+        }
+
+        /// <summary>
+        /// Find the registered or dynamic handler for <paramref name="prefabHash"/>
+        /// <para>Useful for debuggers</para>
+        /// </summary>
+        /// <param name="prefabHash">asset id of the prefab</param>
+        /// <returns>true if prefab was registered</returns>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="prefabHash"/> is 0</exception>
+        /// <exception cref="SpawnObjectException">Thrown prefab </exception>
+        public SpawnHandler GetSpawnHandler(int prefabHash)
         {
             ThrowIfZeroHash(prefabHash);
 
-            // find handler and check that handle hash prefab (might be deligate)
-            if (_handlers.TryGetValue(prefabHash, out var handler) && handler.Prefab != null)
-                return handler.Prefab;
+            if (_handlers.TryGetValue(prefabHash, out var registeredHandle))
+            {
+                if (logger.LogEnabled()) logger.Log($"Found Registered Handle for {prefabHash}");
+                return registeredHandle;
+            }
+
+            foreach (var dynamicHandler in _dynamicHandlers)
+            {
+                var handler = dynamicHandler.Invoke(prefabHash);
+                if (handler != null)
+                {
+                    if (logger.LogEnabled()) logger.Log($"Found Dynamic Handle for {prefabHash}");
+                    return handler;
+                }
+            }
 
             ThrowMissingHandler(prefabHash);
             return null;
@@ -511,7 +541,7 @@ namespace Mirage
                 }
                 else if (msg.prefabHash.HasValue)
                 {
-                    var handler = GetSpawnHandler(msg);
+                    var handler = GetSpawnHandler(msg.prefabHash.Value);
                     if (handler.IsAsyncSpawn())
                     {
                         OnSpawnAsync(handler.HandlerAsync, msg).Forget();
@@ -526,30 +556,6 @@ namespace Mirage
             }
 
             AfterSpawn(msg, existing, identity);
-        }
-
-        private SpawnHandler GetSpawnHandler(SpawnMessage msg)
-        {
-            var prefabHash = msg.prefabHash.Value;
-
-            if (_handlers.TryGetValue(prefabHash, out var registeredHandle))
-            {
-                if (logger.LogEnabled()) logger.Log($"Found Registered Handle for {prefabHash}");
-                return registeredHandle;
-            }
-
-            foreach (var dynamicHandler in _dynamicHandlers)
-            {
-                var handler = dynamicHandler.Invoke(msg);
-                if (handler != null)
-                {
-                    if (logger.LogEnabled()) logger.Log($"Found Dynamic Handle for {prefabHash}");
-                    return handler;
-                }
-            }
-
-            ThrowMissingHandler(prefabHash);
-            return null;
         }
 
         private void AfterSpawn(SpawnMessage msg, bool alreadyExisted, NetworkIdentity spawnedIdentity)
