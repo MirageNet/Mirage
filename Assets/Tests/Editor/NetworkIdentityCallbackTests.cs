@@ -183,51 +183,33 @@ namespace Mirage.Tests
         }
 
         [Test]
-        public void SetPrefabHash_GivesErrorIfOneExists()
+        public void CanReplacePrefabHash()
         {
-            var hash1 = "Assets/Prefab/myPrefab.asset".GetStableHashCode();
+            var hash1 = 123;
             identity.PrefabHash = hash1;
 
             // assign a guid
-            var hash2 = "Assets/Prefab/myPrefab2.asset".GetStableHashCode();
-            var exception = Assert.Throws<InvalidOperationException>(() =>
-            {
-                identity.PrefabHash = hash2;
-            });
-
-            Assert.That(exception.Message, Is.EqualTo($"Cannot set PrefabHash on NetworkIdentity '{identity.name}' because it already had an PrefabHash. Current PrefabHash is '{hash1}', attempted new PrefabHash is '{hash2}'."));
-            // guid was changed
-            Assert.That(identity.PrefabHash, Is.EqualTo(hash1));
-        }
-
-        [Test]
-        public void SetPrefabHash_GivesErrorForEmptyGuid()
-        {
-            var hash1 = "Assets/Prefab/myPrefab.asset".GetStableHashCode();
-            identity.PrefabHash = hash1;
-
-            // assign a guid
-            var hash2 = 0;
-            var exception = Assert.Throws<ArgumentException>(() =>
-            {
-                identity.PrefabHash = hash2;
-            });
-
-            Assert.That(exception.Message, Is.EqualTo($"Cannot set PrefabHash to an empty guid on NetworkIdentity '{identity.name}'. Old PrefabHash '{hash1}'."));
-            // guid was NOT changed
-            Assert.That(identity.PrefabHash, Is.EqualTo(hash1));
-        }
-        [Test]
-        public void SetPrefabHash_DoesNotGiveErrorIfBothOldAndNewAreEmpty()
-        {
-            Debug.Assert(identity.PrefabHash == 0, "PrefabHash needs to be empty at the start of this test");
-            // assign a guid
-            var hash2 = 0;
-            // expect no errors
+            var hash2 = 1234;
             identity.PrefabHash = hash2;
 
-            // guid was still empty
-            Assert.That(identity.PrefabHash, Is.EqualTo(0));
+            Assert.That(identity.PrefabHash, Is.EqualTo(hash2));
+        }
+
+        [Test]
+        public void ThrowsIfSettingZero()
+        {
+            var hash = 123;
+            identity.PrefabHash = hash;
+
+            var exception = Assert.Throws<ArgumentException>(() =>
+            {
+                identity.PrefabHash = 0;
+            });
+
+            Assert.That(exception.Message, Is.EqualTo($"Cannot set PrefabHash to 0 on '{identity.name}'. Old PrefabHash '{hash}'."));
+
+            // guid was NOT changed
+            Assert.That(identity.PrefabHash, Is.EqualTo(hash));
         }
 
         [Test]
