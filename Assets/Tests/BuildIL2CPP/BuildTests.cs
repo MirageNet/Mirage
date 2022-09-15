@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Mirage.Tests.PlayerTests;
@@ -59,11 +60,17 @@ namespace Mirage.Tests.BuildIL2CPP
                         runSynchronously = true,
                     };
 
-                    using (var logCatcher = new LogErrorChecker())
+                    var group = BuildPipeline.GetBuildTargetGroup(target);
+                    using (var buildDefines = new CustomBuildDefines(group))
                     {
-                        runner.Execute(testSettings);
+                        buildDefines.AddDefine("MIRAGE_TESTS");
 
-                        hasErrors = logCatcher.HasErrors;
+                        using (var logCatcher = new LogErrorChecker())
+                        {
+                            runner.Execute(testSettings);
+
+                            hasErrors = logCatcher.HasErrors;
+                        }
                     }
                 }
             }
@@ -144,6 +151,55 @@ namespace Mirage.Tests.BuildIL2CPP
                 UnityEngine.Debug.Log("Revert IL2CPP");
                 PlayerSettings.SetScriptingBackend(group, startingBackend.Value);
             }
+        }
+    }
+
+    // code from: https://github.com/James-Frowen/NetworkingBuildWindow
+    public class CustomBuildDefines : IDisposable
+    {
+        private readonly string symbols;
+        private readonly BuildTargetGroup target;
+
+        public CustomBuildDefines(BuildTargetGroup target = BuildTargetGroup.Standalone)
+        {
+            this.target = target;
+            symbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(target);
+        }
+
+        public void AddDefine(string toAdd)
+        {
+            Debug.Log($"adding defines: {toAdd}");
+            var defines = symbols.Split(';');
+            var newDefines = toAdd.Split(';');
+
+            var buildDefines = new HashSet<string>(defines);
+            buildDefines.UnionWith(newDefines);
+
+            var defineString = string.Join(";", buildDefines);
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(target, defineString);
+        }
+        public void RemoveDefine(string toRemove)
+        {
+            Debug.Log($"removing defines: {toRemove}");
+            var defines = symbols.Split(';');
+            var badDefines = toRemove.Split(';');
+
+            var buildDefines = new HashSet<string>(defines);
+            foreach (var bad in badDefines)
+            {
+                buildDefines.Remove(bad);
+            }
+
+            var defineString = string.Join(";", buildDefines);
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(target, defineString);
+        }
+
+        public void Dispose() => AfterBuild();
+
+        public void AfterBuild()
+        {
+            Debug.Log("reseting defines");
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone, symbols);
         }
     }
 }
