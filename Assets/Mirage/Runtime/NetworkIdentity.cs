@@ -337,7 +337,7 @@ namespace Mirage
             }
         }
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR || MIRAGE_TESTS
         /// <summary>
         /// Gets PrefabHash avoiding runtime checks
         /// <para>used by NetworkIdentityIdGenerator</para>
