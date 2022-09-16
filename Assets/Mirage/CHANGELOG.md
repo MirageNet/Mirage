@@ -1,3 +1,18 @@
+# [128.3.0](https://github.com/MirageNet/Mirage/compare/v128.2.0...v128.3.0) (2022-09-16)
+
+
+### Bug Fixes
+
+* adding try/catch for spawn async ([9cad50a](https://github.com/MirageNet/Mirage/commit/9cad50a9eaf5d3fa476d470d22515440de25b7cc))
+* fixing async payload not being held ([2eafb46](https://github.com/MirageNet/Mirage/commit/2eafb4693f772ee8c48825fedf6d9620e53c5e3c))
+* improving log for server.spawn ([4cdb606](https://github.com/MirageNet/Mirage/commit/4cdb60611e71e36a4cb64caa6c2b7292339f56b6))
+
+
+### Features
+
+* adding way to return spawnHandler from prefabHash ([4d1d552](https://github.com/MirageNet/Mirage/commit/4d1d552737f3771405172200d4fe29efbc3724cb))
+* allowing PrefabHash to be set even if it already has value ([c764c1f](https://github.com/MirageNet/Mirage/commit/c764c1ff7e67627992270198b3350e67ae1d217f))
+
 # [128.2.0](https://github.com/MirageNet/Mirage/compare/v128.1.1...v128.2.0) (2022-09-14)
 
 
