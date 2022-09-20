@@ -23,7 +23,8 @@ namespace Mirage
 
         internal void Update()
         {
-            if (logger.LogEnabled()) logger.Log($"SyncVar Sender Update");
+            if (_dirtyObjects.Count > 0 && logger.LogEnabled())
+                logger.Log($"SyncVar Sender Update, {_dirtyObjects.Count} dirty objects");
 
             _dirtyObjectsTmp.Clear();
 
