@@ -1020,21 +1020,7 @@ namespace Mirage
             _onStopServer.Reset();
         }
 
-        internal void UpdateVars()
-        {
-            if (observers.Count > 0)
-            {
-                SendUpdateVarsMessage();
-            }
-            else
-            {
-                // clear all component's dirty bits.
-                // it would be spawned on new observers anyway.
-                ClearAllComponentsDirtyBits();
-            }
-        }
-
-        private void SendUpdateVarsMessage()
+        internal void SendUpdateVarsMessage()
         {
             // one writer for owner, one for observers
             using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
