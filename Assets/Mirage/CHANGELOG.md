@@ -1,3 +1,10 @@
+## [128.3.1](https://github.com/MirageNet/Mirage/compare/v128.3.0...v128.3.1) (2022-09-21)
+
+
+### Bug Fixes
+
+* **AckSystem:** fixing fragmented message having incorrect order ([1fb4970](https://github.com/MirageNet/Mirage/commit/1fb4970fc8b8bbdc65d64aa4a16d84903494f7b0))
+
 # [128.3.0](https://github.com/MirageNet/Mirage/compare/v128.2.0...v128.3.0) (2022-09-16)
 
 
