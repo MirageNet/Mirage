@@ -286,15 +286,20 @@ namespace Mirage.SocketLayer
 
             if (length + MIN_RELIABLE_HEADER_SIZE > _maxPacketSize)
             {
-                if (_allowFragmented)
-                {
-                    SendFragmented(message, offset, length);
-                    return;
-                }
-                else
-                {
+                if (!_allowFragmented)
                     throw new ArgumentException($"Message is bigger than MTU and fragmentation is disabled, max Reliable message size is {_maxPacketSize - MIN_RELIABLE_HEADER_SIZE}", nameof(length));
+
+                // if there is existing batch, send it first
+                // we need to do this so that fragmented message arrive in order
+                // if we dont, a message sent after maybe be added to batch and then have earlier order than fragmented message
+                if (_nextBatch != null)
+                {
+                    SendReliablePacket(_nextBatch);
+                    _nextBatch = null;
                 }
+
+                SendFragmented(message, offset, length);
+                return;
             }
 
 
