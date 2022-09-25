@@ -1,6 +1,5 @@
 using Mirage.Collections;
 using NUnit.Framework;
-using UnityEngine;
 
 using static Mirage.Tests.LocalConnections;
 
@@ -60,7 +59,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void OnStartServer()
         {
-            GameObject gameObject = CreateGameObject();
+            var gameObject = CreateGameObject();
             var netIdentity = gameObject.AddComponent<NetworkIdentity>();
             var comp = gameObject.AddComponent<OnStartServerTestComponent>();
             netIdentity.OnStartServer.AddListener(comp.OnStartServer);
@@ -74,7 +73,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void SpawnedObjectNoAuthority()
         {
-            SampleBehavior behaviour = CreateBehaviour<SampleBehavior>();
+            var behaviour = CreateBehaviour<SampleBehavior>();
             serverObjectManager.Spawn(behaviour.gameObject);
 
             client.Update();
@@ -91,6 +90,45 @@ namespace Mirage.Tests.Runtime.Host
         }
 
         [Test]
+        public void ReturnsCorrectBehaviourId()
+        {
+            playerIdentity.NetId = 42;
+
+            var compIndex = playerComponent.ComponentIndex;
+
+            var id = playerComponent.BehaviourId;
+            Assert.That(id.NetId, Is.EqualTo(42));
+            Assert.That(id.ComponentIndex, Is.EqualTo(compIndex));
+        }
+
+        [Test]
+        public void NetworkBehaviourIdEquals()
+        {
+            var id1 = new NetworkBehaviour.Id(10, 2);
+            var id2 = new NetworkBehaviour.Id(10, 2);
+
+            Assert.IsTrue(id1.Equals(id2));
+        }
+
+        [Test]
+        public void NetworkBehaviourIdNotEqualsNetID()
+        {
+            var id1 = new NetworkBehaviour.Id(10, 2);
+            var id2 = new NetworkBehaviour.Id(11, 2);
+
+            Assert.IsFalse(id1.Equals(id2));
+        }
+
+        [Test]
+        public void NetworkBehaviourIdNotEqualsCompIndex()
+        {
+            var id1 = new NetworkBehaviour.Id(10, 2);
+            var id2 = new NetworkBehaviour.Id(10, 1);
+
+            Assert.IsFalse(id1.Equals(id2));
+        }
+
+        [Test]
         public void HasIdentitysOwner()
         {
             (_, playerIdentity.Owner) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
@@ -100,7 +138,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ComponentIndex()
         {
-            NetworkIdentity extraObject = CreateNetworkIdentity();
+            var extraObject = CreateNetworkIdentity();
 
             var behaviour1 = extraObject.gameObject.AddComponent<SampleBehavior>();
             var behaviour2 = extraObject.gameObject.AddComponent<SampleBehavior>();

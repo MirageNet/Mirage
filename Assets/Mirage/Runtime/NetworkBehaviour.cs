@@ -121,6 +121,12 @@ namespace Mirage
         /// </summary>
         public NetworkTime NetworkTime => World.Time;
 
+        /// <summary>
+        /// Get Id of this NetworkBehaviour, Its NetId and ComponentIndex
+        /// </summary>
+        /// <returns></returns>
+        public Id BehaviourId => new Id(this);
+
         protected internal ulong SyncVarDirtyBits { get; private set; }
 
         private ulong _syncVarHookGuard;
@@ -493,5 +499,41 @@ namespace Mirage
             RemoteCallCollection = new RemoteCallCollection(this);
         }
         #endregion
+
+        public struct Id : IEquatable<Id>
+        {
+            public readonly uint NetId;
+            public readonly int ComponentIndex;
+
+            public Id(uint netId, int componentIndex)
+            {
+                NetId = netId;
+                ComponentIndex = componentIndex;
+            }
+
+            public Id(NetworkBehaviour behaviour)
+            {
+                NetId = behaviour.NetId;
+                ComponentIndex = behaviour.ComponentIndex;
+            }
+
+            public override int GetHashCode()
+            {
+                return ((int)NetId * 256) + ComponentIndex;
+            }
+
+            public bool Equals(Id other)
+            {
+                return (NetId == other.NetId) && (ComponentIndex == other.ComponentIndex);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is Id id)
+                    return Equals(id);
+                else
+                    return false;
+            }
+        }
     }
 }
