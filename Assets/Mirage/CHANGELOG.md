@@ -1,3 +1,10 @@
+# [128.4.0](https://github.com/MirageNet/Mirage/compare/v128.3.1...v128.4.0) (2022-09-25)
+
+
+### Features
+
+* adding Id to NetworkBehaviour ([8eafae5](https://github.com/MirageNet/Mirage/commit/8eafae5ad57ccde175c87ea4e5817a4ec8573bcc))
+
 ## [128.3.1](https://github.com/MirageNet/Mirage/compare/v128.3.0...v128.3.1) (2022-09-21)
 
 
