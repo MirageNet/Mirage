@@ -28,7 +28,7 @@ jobs:
           unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
       
       - name: Checkout repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3.1.0
 
       - name: Cache Library
         id: cache-library
@@ -78,7 +78,7 @@ jobs:
           unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
       
       - name: Checkout repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3.1.0
 
       - name: Cache Library
         id: cache-library
@@ -128,7 +128,7 @@ jobs:
           unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
       
       - name: Checkout repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3.1.0
 
       - name: Cache Library
         id: cache-library
@@ -151,7 +151,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3.1.0
 
       - uses: actions/setup-node@v3
         with:
@@ -200,7 +200,7 @@ jobs:
           unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
       
       - name: Checkout repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3.1.0
 
       - name: Cache Library
         id: cache-library
