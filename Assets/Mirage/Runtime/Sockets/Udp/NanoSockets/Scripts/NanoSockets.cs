@@ -21,7 +21,6 @@
  *  SOFTWARE.
  */
 
-#if UNITY_STANDALONE || UNITY_EDITOR
 using System;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -233,4 +232,3 @@ namespace NanoSockets
 #endif
     }
 }
-#endif

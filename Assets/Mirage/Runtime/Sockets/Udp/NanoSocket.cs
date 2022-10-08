@@ -1,4 +1,3 @@
-#if UNITY_STANDALONE || UNITY_EDITOR
 using System;
 using Mirage.SocketLayer;
 using NanoSockets;
@@ -90,4 +89,3 @@ namespace Mirage.Sockets.Udp
         }
     }
 }
-#endif
