@@ -1,3 +1,10 @@
+## [128.4.1](https://github.com/MirageNet/Mirage/compare/v128.4.0...v128.4.1) (2022-10-08)
+
+
+### Bug Fixes
+
+* miscellanous NanoSocket bits and pieces, add Mirage Standalone support ([#1106](https://github.com/MirageNet/Mirage/issues/1106)) ([1b7e097](https://github.com/MirageNet/Mirage/commit/1b7e0972160955a0cf972c289f82264614f7ba8b))
+
 # [128.4.0](https://github.com/MirageNet/Mirage/compare/v128.3.1...v128.4.0) (2022-09-25)
 
 
