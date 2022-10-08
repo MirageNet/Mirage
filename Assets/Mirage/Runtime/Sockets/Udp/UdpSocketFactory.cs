@@ -170,18 +170,27 @@ namespace Mirage.Sockets.Udp
 
         private void ThrowIfNotSupported()
         {
-            if (IsWebgl)
+            if (IsWebGL)
             {
                 throw new NotSupportedException("The WebGL platform does not support UDP Sockets. Please use WebSockets instead.");
             }
         }
 
-        private static bool IsWebgl => Application.platform == RuntimePlatform.WebGLPlayer;
-        private static bool IsDesktop =>
-            Application.platform == RuntimePlatform.LinuxPlayer
+        private static bool isThisADesktopTarget()
+        {
+#if UNITY_STANDALONE || UNITY_EDITOR
+            return Application.platform == RuntimePlatform.LinuxPlayer
             || Application.platform == RuntimePlatform.OSXPlayer
             || Application.platform == RuntimePlatform.WindowsPlayer
             || Application.isEditor;
+#else
+            // Added for basic support in Mirage Standalone.
+            return true;
+#endif
+        }
+
+        private static bool IsWebGL => Application.platform == RuntimePlatform.WebGLPlayer;
+        private static bool IsDesktop => isThisADesktopTarget();
     }
 
     public class EndPointWrapper : IEndPoint
