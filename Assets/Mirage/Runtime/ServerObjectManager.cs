@@ -558,7 +558,8 @@ namespace Mirage
 
         internal void SendSpawnMessage(NetworkIdentity identity, INetworkPlayer player)
         {
-            logger.Assert(!OnlySpawnOnAuthenticated || player.IsAuthenticated, "SendSpawnMessage should only be called if OnlySpanwOnAuthenticated is false or player is authenticated");
+            logger.Assert(!OnlySpawnOnAuthenticated || player.IsAuthenticated || identity.Visibility != null,
+                "SendSpawnMessage should only be called if OnlySpanwOnAuthenticated is false, player is authenticated, or there is custom visibility");
             if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId}");
 
             // one writer for owner, one for observers
