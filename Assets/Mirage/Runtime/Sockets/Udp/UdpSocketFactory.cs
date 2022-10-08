@@ -1,11 +1,9 @@
 // nanosockets breaks on some platforms (like iOS)
 // so only include it for standalone and editor
 // but not for mac because of code signing issue
-#if (UNITY_STANDALONE || UNITY_EDITOR) && !(UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX)
+#if !(UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX)
 #define NANO_SOCKET_ALLOWED
 #endif
-
-
 
 using Mirage.SocketLayer;
 using System;
@@ -68,16 +66,14 @@ namespace Mirage.Sockets.Udp
 
             // give different warning for OSX
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-            Debug.LogWarning("NanoSocket support on MacOS is tempermental due to codesigning issues.\nTo ensure functionality, C# sockets will be used instead. This message is harmless (don't panic!).");
-            SocketLib = SocketLib.Managed;
+            Debug.LogWarning("To ensure functionality, C# sockets will be used instead due to NanoSockets being tempermental. Don't panic: this message is harmless!");
+            this.SocketLib = SocketLib.Managed;
             return;
-
-            // "Standalone" here is referring to Win64 or Linux64, but not mac, because that should be covered by case above
 #elif NANO_SOCKET_ALLOWED
             // Attempt initialization of NanoSockets native library. If this fails, go back to native.
             InitializeNanoSockets();
 #else
-            Debug.LogWarning("NanoSocket does not support this platform (non-desktop platform detected). Switching to C# Managed sockets.");
+            Debug.LogWarning("NanoSocket doesn't support this platform, falling back to C# Managed Sockets.");
             this.SocketLib = SocketLib.Managed;
 #endif
         }
@@ -92,9 +88,9 @@ namespace Mirage.Sockets.Udp
 
                 initCount++;
             }
-            catch (DllNotFoundException)
+            catch (Exception ex)
             {
-                Debug.LogWarning("NanoSocket DLL not found or failed to load. Switching to C# Managed Sockets.");
+                Debug.LogWarning($"NanoSocket native library not found or failed to load; switching to C# Managed Sockets. Exception returned was:\n{ex}");
                 SocketLib = SocketLib.Managed;
             }
         }
@@ -107,10 +103,7 @@ namespace Mirage.Sockets.Udp
 #if NANO_SOCKET_ALLOWED
             initCount--;
 
-            if (initCount == 0)
-            {
-                UDP.Deinitialize();
-            }
+            if (initCount == 0) UDP.Deinitialize();
 #endif
         }
 
