@@ -5,6 +5,8 @@
 #define NANO_SOCKET_ALLOWED
 #endif
 
+
+
 using Mirage.SocketLayer;
 using System;
 using System.Net;
@@ -23,10 +25,10 @@ namespace Mirage.Sockets.Udp
         public string Address = "localhost";
         public ushort Port = 7777;
 
-        [Tooltip("Allows you to set which Socket implementation you want to use.\nAutomatic will use native (NanoSockets) on supported platforms (Windows, Mac & Linux).")]
-        public SocketLib SocketLib;
+        [Tooltip("Which socket implementation do you wish to use?\nThe default (automatic) will attempt to use NanoSockets on supported platforms (Windows, Mac & Linux) and fallback to C# Sockets if unsupported.")]
+        public SocketLib SocketLib = SocketLib.Automatic;
 
-        [Header("NanoSocket options")]
+        [Header("NanoSocket-specific Options")]
         public int BufferSize = 256 * 1024;
 
         public override int MaxPacketSize => UdpMTU.MaxPacketSize;
@@ -38,6 +40,7 @@ namespace Mirage.Sockets.Udp
             get => Address;
             set => Address = value;
         }
+
         int IHasPort.Port
         {
             get => Port;
@@ -54,12 +57,14 @@ namespace Mirage.Sockets.Udp
 
         private void Awake()
         {
+            // Do not attempt to initialize NanoSockets if we're not using them.
             if (!useNanoSocket) return;
 
-            // NanoSocket is only available on Windows, Mac and Linux
-            // However on newer versions of Mac it causes the standalone builds
-            // to be unable to load the NanoSocket native library. So we just use
-            // C# Managed sockets instead.
+            // NanoSocket is only available on Windows, Mac and Linux... but...
+            // However on some versions of Mac it causes the standalone builds
+            // to be unable to load the NanoSocket native library. Maybe a issue with
+            // unsigned libraries or maybe Gatekeeper? So we just use C# managed sockets instead.
+            // TODO: Review this and actually see if it's a problem on Monterey.
 
             // give different warning for OSX
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
