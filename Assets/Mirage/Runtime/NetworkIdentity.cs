@@ -815,8 +815,14 @@ namespace Mirage
             // add all server connections
             foreach (var player in Server.Players)
             {
-                if (player.SceneIsReady)
-                    AddObserver(player);
+                if (!player.SceneIsReady)
+                    continue;
+
+                // todo replace this with a better visibility system (where default checks auth/scene ready)
+                if (ServerObjectManager.OnlySpawnOnAuthenticated && !player.IsAuthenticated)
+                    continue;
+
+                AddObserver(player);
             }
 
             // add local host connection (if any)

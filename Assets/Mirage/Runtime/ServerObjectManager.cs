@@ -53,6 +53,10 @@ namespace Mirage
         [FormerlySerializedAs("networkSceneManager")]
         public NetworkSceneManager NetworkSceneManager;
 
+        [Header("Authentication")]
+        [Tooltip("Will only send spawn message to Players who are Authenticated. Checks the Player.IsAuthenticated property")]
+        public bool OnlySpawnOnAuthenticated;
+
         public INetIdGenerator NetIdGenerator;
         private uint _nextNetworkId = 1;
 
@@ -554,6 +558,7 @@ namespace Mirage
 
         internal void SendSpawnMessage(NetworkIdentity identity, INetworkPlayer player)
         {
+            logger.Assert(!OnlySpawnOnAuthenticated || player.IsAuthenticated, "SendSpawnMessage should only be called if OnlySpanwOnAuthenticated is false or player is authenticated");
             if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId}");
 
             // one writer for owner, one for observers
