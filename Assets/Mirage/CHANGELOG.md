@@ -1,3 +1,15 @@
+# [128.5.0](https://github.com/MirageNet/Mirage/compare/v128.4.1...v128.5.0) (2022-10-08)
+
+
+### Bug Fixes
+
+* checking for custom visibility in new assert ([f4b9597](https://github.com/MirageNet/Mirage/commit/f4b959789bc6505e782bfbcf12a1a09605ed26fe))
+
+
+### Features
+
+* adding option to stop spanwn on unauthenticated ([629fab8](https://github.com/MirageNet/Mirage/commit/629fab8a05a6d43f5e213aebf07f86a2743458ac))
+
 ## [128.4.1](https://github.com/MirageNet/Mirage/compare/v128.4.0...v128.4.1) (2022-10-08)
 
 
