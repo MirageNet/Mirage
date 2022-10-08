@@ -1,7 +1,7 @@
 // nanosockets breaks on some platforms (like iOS)
 // so only include it for standalone and editor
 // but not for mac because of code signing issue
-#if (UNITY_STANDALONE || UNITY_EDITOR) && !(UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX)
+#if !(UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX)
 #define NANO_SOCKET_ALLOWED
 #endif
 
@@ -23,10 +23,10 @@ namespace Mirage.Sockets.Udp
         public string Address = "localhost";
         public ushort Port = 7777;
 
-        [Tooltip("Allows you to set which Socket implementation you want to use.\nAutomatic will use native (NanoSockets) on supported platforms (Windows, Mac & Linux).")]
-        public SocketLib SocketLib;
+        [Tooltip("Which socket implementation do you wish to use?\nThe default (automatic) will attempt to use NanoSockets on supported platforms (Windows, Mac & Linux) and fallback to C# Sockets if unsupported.")]
+        public SocketLib SocketLib = SocketLib.Automatic;
 
-        [Header("NanoSocket options")]
+        [Header("NanoSocket-specific Options")]
         public int BufferSize = 256 * 1024;
 
         public override int MaxPacketSize => UdpMTU.MaxPacketSize;
@@ -38,6 +38,7 @@ namespace Mirage.Sockets.Udp
             get => Address;
             set => Address = value;
         }
+
         int IHasPort.Port
         {
             get => Port;
@@ -54,25 +55,25 @@ namespace Mirage.Sockets.Udp
 
         private void Awake()
         {
+            // Do not attempt to initialize NanoSockets if we're not using them.
             if (!useNanoSocket) return;
 
-            // NanoSocket is only available on Windows, Mac and Linux
-            // However on newer versions of Mac it causes the standalone builds
-            // to be unable to load the NanoSocket native library. So we just use
-            // C# Managed sockets instead.
+            // NanoSocket is only available on Windows, Mac and Linux... but...
+            // However on some versions of Mac it causes the standalone builds
+            // to be unable to load the NanoSocket native library. Maybe a issue with
+            // unsigned libraries or maybe Gatekeeper? So we just use C# managed sockets instead.
+            // TODO: Review this and actually see if it's a problem on Monterey.
 
             // give different warning for OSX
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-            Debug.LogWarning("NanoSocket support on MacOS is tempermental due to codesigning issues.\nTo ensure functionality, C# sockets will be used instead. This message is harmless (don't panic!).");
-            SocketLib = SocketLib.Managed;
+            Debug.LogWarning("To ensure functionality, C# sockets will be used instead due to NanoSockets being tempermental. Don't panic: this message is harmless!");
+            this.SocketLib = SocketLib.Managed;
             return;
-
-            // "Standalone" here is referring to Win64 or Linux64, but not mac, because that should be covered by case above
 #elif NANO_SOCKET_ALLOWED
             // Attempt initialization of NanoSockets native library. If this fails, go back to native.
             InitializeNanoSockets();
 #else
-            Debug.LogWarning("NanoSocket does not support this platform (non-desktop platform detected). Switching to C# Managed sockets.");
+            Debug.LogWarning("NanoSocket doesn't support this platform, falling back to C# Managed Sockets.");
             this.SocketLib = SocketLib.Managed;
 #endif
         }
@@ -87,9 +88,9 @@ namespace Mirage.Sockets.Udp
 
                 initCount++;
             }
-            catch (DllNotFoundException)
+            catch (Exception ex)
             {
-                Debug.LogWarning("NanoSocket DLL not found or failed to load. Switching to C# Managed Sockets.");
+                Debug.LogWarning($"NanoSocket native library not found or failed to load; switching to C# Managed Sockets. Exception returned was:\n{ex}");
                 SocketLib = SocketLib.Managed;
             }
         }
@@ -102,10 +103,7 @@ namespace Mirage.Sockets.Udp
 #if NANO_SOCKET_ALLOWED
             initCount--;
 
-            if (initCount == 0)
-            {
-                UDP.Deinitialize();
-            }
+            if (initCount == 0) UDP.Deinitialize();
 #endif
         }
 
@@ -172,18 +170,27 @@ namespace Mirage.Sockets.Udp
 
         private void ThrowIfNotSupported()
         {
-            if (IsWebgl)
+            if (IsWebGL)
             {
                 throw new NotSupportedException("The WebGL platform does not support UDP Sockets. Please use WebSockets instead.");
             }
         }
 
-        private static bool IsWebgl => Application.platform == RuntimePlatform.WebGLPlayer;
-        private static bool IsDesktop =>
-            Application.platform == RuntimePlatform.LinuxPlayer
+        private static bool isThisADesktopTarget()
+        {
+#if UNITY_STANDALONE || UNITY_EDITOR
+            return Application.platform == RuntimePlatform.LinuxPlayer
             || Application.platform == RuntimePlatform.OSXPlayer
             || Application.platform == RuntimePlatform.WindowsPlayer
             || Application.isEditor;
+#else
+            // Added for basic support in Mirage Standalone.
+            return true;
+#endif
+        }
+
+        private static bool IsWebGL => Application.platform == RuntimePlatform.WebGLPlayer;
+        private static bool IsDesktop => isThisADesktopTarget();
     }
 
     public class EndPointWrapper : IEndPoint
