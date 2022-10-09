@@ -61,7 +61,7 @@ namespace Mirage.Sockets.Udp
 
             if (CheckNanosocketsSupport())
             {
-                Debug.Log("DEBUG: Nanosockets supported on this platform");
+                // Debug.Log("DEBUG: Nanosockets supported on this platform");
                 InitializeNanoSockets();
             }
             else
