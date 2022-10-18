@@ -13,7 +13,6 @@ namespace Mirage.RemoteCalls
     /// <param name="obj"></param>
     /// <param name="reader"></param>
     public delegate void CmdDelegate(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId);
-    public delegate UniTask<T> RequestDelegate<T>(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId);
 
     // invoke type for Rpc
     public enum RpcInvokeType
@@ -110,34 +109,6 @@ namespace Mirage.RemoteCalls
             }
 
             return cmdHash;
-        }
-
-        public static void RegisterRequestDelegate<T>(Type invokeClass, string cmdName, RequestDelegate<T> func, bool cmdRequireAuthority = true)
-        {
-            async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
-            {
-                /// invoke the serverRpc and send a reply message
-                T result = await func(obj, reader, senderPlayer, replyId);
-
-                using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
-                {
-                    writer.Write(result);
-                    var serverRpcReply = new ServerRpcReply
-                    {
-                        replyId = replyId,
-                        payload = writer.ToArraySegment()
-                    };
-
-                    senderPlayer.Send(serverRpcReply);
-                }
-            }
-
-            void CmdWrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
-            {
-                Wrapper(obj, reader, senderPlayer, replyId).Forget();
-            }
-
-            RegisterDelegate(invokeClass, cmdName, RpcInvokeType.ServerRpc, CmdWrapper, cmdRequireAuthority);
         }
 
         static bool CheckIfDelegateExists(Type invokeClass, RpcInvokeType invokerType, CmdDelegate func, int cmdHash)

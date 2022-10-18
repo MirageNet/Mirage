@@ -234,25 +234,9 @@ namespace Mirage.Weaver
                 ConstructorInfo[] constructors = typeof(CmdDelegate).GetConstructors();
                 CmdDelegateConstructor = func.Module.ImportReference(constructors.First());
             }
-            else if (func.ReturnType.Is(typeof(UniTask<int>).GetGenericTypeDefinition()))
-            {
-                var taskReturnType = func.ReturnType as GenericInstanceType;
-
-                TypeReference returnType = taskReturnType.GenericArguments[0];
-                TypeReference genericDelegate = func.Module.ImportReference(typeof(RequestDelegate<int>).GetGenericTypeDefinition());
-
-                var delegateInstance = new GenericInstanceType(genericDelegate);
-                delegateInstance.GenericArguments.Add(returnType);
-
-                ConstructorInfo constructor = typeof(RequestDelegate<int>).GetConstructors().First();
-
-                MethodReference constructorRef = func.Module.ImportReference(constructor);
-
-                CmdDelegateConstructor = constructorRef.MakeHostInstanceGeneric(delegateInstance);
-            }
             else
             {
-                logger.Error("Use UniTask<x> to return a value from ServerRpc in" + func);
+                logger.Error("ServerRPC methods cannot return a value " + func);
                 return;
             }
 

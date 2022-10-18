@@ -257,18 +257,7 @@ namespace Mirage.Weaver
 
         private static MethodReference GetRegisterMethod(MethodDefinition func)
         {
-            if (func.ReturnType.Is(typeof(void)))
-                return func.Module.ImportReference(() => RemoteCallHelper.RegisterServerRpcDelegate(default, default, default, default));
-
-            var taskReturnType = func.ReturnType as GenericInstanceType;
-
-            TypeReference returnType = taskReturnType.GenericArguments[0];
-
-            var genericRegisterMethod = func.Module.ImportReference(() => RemoteCallHelper.RegisterRequestDelegate<object>(default, default, default, default)) as GenericInstanceMethod;
-
-            var registerInstance = new GenericInstanceMethod(genericRegisterMethod.ElementMethod);
-            registerInstance.GenericArguments.Add(returnType);
-            return registerInstance;
+            return func.Module.ImportReference(() => RemoteCallHelper.RegisterServerRpcDelegate(default, default, default, default));
         }
 
         public void ProcessServerRpc(MethodDefinition md, CustomAttribute serverRpcAttr)
