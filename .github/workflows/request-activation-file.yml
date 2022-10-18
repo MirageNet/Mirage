@@ -1,22 +1,31 @@
 name: RequestActivationFile
 
 on: 
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      unity-version:
+        description: 'What unityci container to use. Just need part after `ubuntu-`'     
+        required: true
+        default: '2020.3.17f1-base-0.15.0'
+      license-file:
+        description: 'Name of generated file, version expect -base...'     
+        required: true
+        default: '2020.3.17f1'
   
 jobs:
   requestActivationFile:
     runs-on: ubuntu-latest
-    container: unityci/editor:ubuntu-2020.1.17f1-base-0.10.0
+    container: unityci/editor:ubuntu-${{ github.event.inputs.unity-version }}
     steps:
       - name: Request manual activation file
         continue-on-error: true
         run: unity-editor -logFile /dev/stdout -createManualActivationFile -quit 
 
       - name: Upload License Request
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
             name: Manual Activation File
-            path: Unity_v2020.1.17f1.alf
+            path: Unity_v${{ github.event.inputs.license-file }}.alf
 
       - name: Next Steps
         run: |

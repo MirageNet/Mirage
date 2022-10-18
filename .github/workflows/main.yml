@@ -10,14 +10,12 @@ on:
       - '*.md'
 
 jobs:
-  CI:
-    name: Test
+  Tests2020:
+    name: Test 2020
     runs-on: ubuntu-latest
     # available list of containers here:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
-    container: unityci/editor:ubuntu-2020.1.17f1-base-0.10.0
-    env:
-      DOTNET_ROOT: '/opt/unity/Editor/Data/NetCore/Sdk-2.2.107'
+    container: unityci/editor:ubuntu-2020.3.30f1-base-1.0.1
 
     steps:
       - name: Activate unity
@@ -34,43 +32,131 @@ jobs:
 
       - name: Cache Library
         id: cache-library
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: Library
-          key: Library-2020.1.17
-
-      - name: Install sonar scanner
-        run: |
-          $DOTNET_ROOT/dotnet tool install dotnet-sonarscanner --tool-path . --version 4.7.1
-          apt update
-          apt install -y openjdk-11-jre-headless=11.0.11+9-0ubuntu2~18.04
+          key: Library-2020.3.30
 
       - name: Run editor Tests
-        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
+        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
         timeout-minutes: 20
         
       - name: Run play Tests
-        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
+        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
         timeout-minutes: 20
 
       - name: Archive test results
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: Test results
+          name: Test results 2020
           path: Tests
 
       - name: Publish test results
-        uses: MirageNet/nunit-reporter@v1.0.9
+        uses: MirageNet/nunit-reporter@v1.0.11
         if: always()
         with:
+          reportTitle: Test Report 2020
           path: "Tests/*.xml"
           access-token: ${{ secrets.GITHUB_TOKEN }}
-            
-      - uses: actions/setup-node@v2
+  
+  Tests2021:
+    name: Test 2021
+    runs-on: ubuntu-latest
+    # available list of containers here:
+    # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
+    container: unityci/editor:ubuntu-2021.3.5f1-base-1.0.1
+
+    steps:
+      - name: Activate unity
+        # exit code is 1 for manual activation
+        continue-on-error: true
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
+        run: |          
+          echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
+          unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
+      
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      - name: Cache Library
+        id: cache-library
+        uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-2021.3.5-2
+
+      - name: Run editor Tests
+        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
+        timeout-minutes: 20
+        
+      - name: Run play Tests
+        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
+        timeout-minutes: 20
+
+      - name: Archive test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: Test results 2021
+          path: Tests
+
+      - name: Publish test results
+        uses: MirageNet/nunit-reporter@v1.0.11
+        if: always()
+        with:
+          reportTitle: Test Report 2021
+          path: "Tests/*.xml"
+          access-token: ${{ secrets.GITHUB_TOKEN }}
+  
+  BuildIL2CPP:
+    name: BuildIL2CPP
+    runs-on: ubuntu-latest
+    # available list of containers here:
+    # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
+    container: unityci/editor:ubuntu-2020.3.30f1-linux-il2cpp-1.0.1
+    
+    steps:
+      - name: Activate unity
+        # exit code is 1 for manual activation
+        continue-on-error: true
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE2 }}
+        run: |          
+          echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
+          unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
+      
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      - name: Cache Library
+        id: cache-library
+        uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-2020.3.30
+
+      - name: Run by Build with il2cpp
+      # checks that all weaver generate code in the test dlls also compiles for IL2CPP
+        run: unity-editor -nographics -logFile /dev/stdout -executeMethod Mirage.Tests.BuildIL2CPP.BuildTests.BuildWithIl2CPP -quit
+        timeout-minutes: 20
+
+  Publish:
+    # only run once both tests and il2cpp have passed
+    needs: [Tests2020, Tests2021, BuildIL2CPP]
+    # only run on master
+    if: github.ref == 'refs/heads/master'
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      - uses: actions/setup-node@v3
         with:
           node-version: '14'
-  
+
       - name: Release
         uses: cycjimmy/semantic-release-action@v2
         id: semantic
@@ -82,9 +168,86 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # upload next version so that sonar job can use it
+      - run: echo ${{ steps.semantic.outputs.new_release_version }} > SemanticVersion.txt
+      - name: Archive Version
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: SemanticVersion
+          path: SemanticVersion.txt
+
+  SonarScan:
+    # needs coverage from test CI
+    # only need 2020 test because that is the container that this action uses 
+    needs: [Tests2020] 
+    name: SonarScan
+    runs-on: ubuntu-latest
+    # available list of containers here:
+    # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
+    container: unityci/editor:ubuntu-2020.3.30f1-base-1.0.1
+    env:
+      DOTNET_ROOT: '/opt/unity/Editor/Data/NetCore/Sdk-2.2.107'
+    steps:
+      - name: Activate unity
+        # exit code is 1 for manual activation
+        continue-on-error: true
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE2 }}
+        run: |          
+          echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
+          unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
+      
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      - name: Cache Library
+        id: cache-library
+        uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-2020.3.30
+
+      - name: Install sonar scanner
+        run: |
+          $DOTNET_ROOT/dotnet tool install dotnet-sonarscanner --tool-path . --version 5.4.0
+          apt update
+          apt install -y openjdk-11-jre-headless
+      
       - name: Generate Solution
         run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
+      
+      # unity 2020.3 outputs <ReferenceOutputAssembly>false</ReferenceOutputAssembly> on linux
+      # this breaks references to other csproj for docfx and sonar.
+      # This step is a work around for this so docfx runs in correctly
+      # replacing false with true in ReferenceOutputAssembly
+      - name: Fix Csproj
+        run: sed -i 's/<ReferenceOutputAssembly>false<\/ReferenceOutputAssembly>/<ReferenceOutputAssembly>true<\/ReferenceOutputAssembly>/g' *.csproj
 
+      - name: Get test coverages
+        uses: actions/download-artifact@v3
+        with:
+          name: Test results 2020
+          path: Tests
+    
+      # Get version from Release step
+      # Run this as late as possible, to give time for publish job to finish and upload
+      - name: Get version
+        continue-on-error: true
+        uses: actions/download-artifact@v3
+        with:
+          name: SemanticVersion
+          path: SemanticVersion
+      
+      - name: Set SEM_VERSION
+        # see https://stackoverflow.com/a/57969570/8479976
+        # note if SemanticVersion does not exist SEM_VERSION will just stay empty
+        run: echo "SEM_VERSION=$(cat SemanticVersion/SemanticVersion.txt)" >> $GITHUB_ENV
+
+      # echo the version for debugging
+      - name: Echo Version
+        run: echo ${{ env.SEM_VERSION }}
+  
       - name: SonarQube analysis
         env:
           FrameworkPathOverride: /opt/unity/Editor/Data/MonoBleedingEdge/
@@ -99,11 +262,12 @@ jobs:
             /d:sonar.verbose=false \
             /d:sonar.login=$SONAR_TOKEN \
             /d:sonar.host.url=https://sonarcloud.io \
-            /d:sonar.cpd.exclusions='Assets/Tests/**/*' \
-            ${{ steps.semantic.outputs.new_release_published == 'true' && format('/v:{0}',steps.semantic.outputs.new_release_version) || '' }} \
+            /d:sonar.exclusions=Assets/Mirage/Runtime/Sockets/Udp/NanoSockets/** \
+            /d:sonar.cpd.exclusions=Assets/Tests/** \
+            /d:sonar.coverage.exclusions=Assets/Tests/**,Assets/Mirage/Editor/** \
+            ${{ env.SEM_VERSION != '' && format('/v:{0}',env.SEM_VERSION) || '' }} \
             /d:sonar.cs.nunit.reportsPaths=Tests/editmode-results.xml,Tests/playmode-results.xml \
             /d:sonar.cs.opencover.reportsPaths=Tests/Mirage-opencov/EditMode/TestCoverageResults_0000.xml,Tests/Mirage-opencov/PlayMode/TestCoverageResults_0000.xml
           $DOTNET_ROOT/dotnet build Mirage.sln
           ./dotnet-sonarscanner end /d:sonar.login=$SONAR_TOKEN
-
-            
+ 

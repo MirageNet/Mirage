@@ -4,45 +4,83 @@ on: [push]
 
 jobs:
   build_doc:
-
     runs-on: ubuntu-latest
     # available list of containers here:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
-    container: unityci/editor:ubuntu-2020.1.17f1-base-0.10.0
+    container: unityci/editor:ubuntu-2021.3.4f1-base-1.0.1
 
     steps:
       - name: Activate unity
         # exit code is 1 for manual activation
         continue-on-error: true
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE2 }}
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
         run: |          
           echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
           unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit
+
 
       - uses: actions/checkout@v1
 
       - name: Cache Library
         id: cache-library
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: Library
-          key: Library-2020.1.17
+          key: Library-Library-2021.3.4
 
       - name: Generate Solution
-        run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
+        run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod GitTools.Solution.Sync -quit
 
-      - name: Install docfx
-        uses: MirageNet/setup-docfx@v1
+      # unity 2020.3 outputs <ReferenceOutputAssembly>false</ReferenceOutputAssembly> on linux
+      # this breaks references to other csproj for docfx and sonar.
+      # This step is a work around for this so docfx runs in correctly
+      # replacing false with true in ReferenceOutputAssembly
+      - name: Fix Csproj
+        run: sed -i 's/<ReferenceOutputAssembly>false<\/ReferenceOutputAssembly>/<ReferenceOutputAssembly>true<\/ReferenceOutputAssembly>/g' *.csproj
 
-      - name: Generate API
-        run: docfx metadata --logLevel Warning --warningsAsErrors doc/docfx.json
+      - uses: nikeee/docfx-action@v1.0.0
+        with:
+          args: metadata --logLevel Warning doc/docfx.json
 
-      - name: Build Docs
-        run: docfx build --logLevel Warning --warningsAsErrors doc/docfx.json
+      - name: Convert metadata to markdown
+        uses: fillefilip8/DocFxToMarkdown@1.4.0
+        with:
+          input-folder: doc/api
+          output-folder: doc/docs/reference
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: metadata
+          path: doc/docs/reference
+
+  publish_docs:
+    needs: [build_doc]
+    runs-on: ubuntu-latest
+    container: node:18
+    steps:
+      - uses: actions/checkout@v1
+        
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: metadata
+          path: doc/docs/reference
+
+      - name: Install dependencies
+        working-directory: doc
+        run: npm ci
+
+      - name: Build docusaurus
+        working-directory: doc
+        run: npm run build
+        env:
+          ORG_NAME: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
 
       - name: Publish docs
-        uses: crazy-max/ghaction-github-pages@v2.2.0
+        uses: crazy-max/ghaction-github-pages@v2.6.0
         if: github.ref == 'refs/heads/master'
         with:
           # Create incremental commit instead of doing push force
@@ -51,6 +89,6 @@ jobs:
           allow_empty_commit: true
           jekyll: false
           # Build directory to deploy
-          build_dir: doc/_site
+          build_dir: doc/build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
