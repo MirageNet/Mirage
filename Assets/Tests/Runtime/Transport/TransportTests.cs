@@ -72,7 +72,7 @@ namespace Mirage.Tests.Runtime
             Encoding utf8 = Encoding.UTF8;
             string message = "Hello from the client";
             byte[] data = utf8.GetBytes(message);
-            clientConnection.Send(new ArraySegment<byte>(data));
+            clientConnection.Send(data);
 
             var stream = new MemoryStream();
 
@@ -107,11 +107,11 @@ namespace Mirage.Tests.Runtime
             Encoding utf8 = Encoding.UTF8;
             string message = "Hello from the client 1";
             byte[] data = utf8.GetBytes(message);
-            clientConnection.Send(new ArraySegment<byte>(data));
+            clientConnection.Send(data);
 
             string message2 = "Hello from the client 2";
             byte[] data2 = utf8.GetBytes(message2);
-            clientConnection.Send(new ArraySegment<byte>(data2));
+            clientConnection.Send(data2);
 
             var stream = new MemoryStream();
 
@@ -131,7 +131,7 @@ namespace Mirage.Tests.Runtime
             Encoding utf8 = Encoding.UTF8;
             string message = "Hello from the server";
             byte[] data = utf8.GetBytes(message);
-            serverConnection.Send(new ArraySegment<byte>(data));
+            serverConnection.Send(data);
 
             var stream = new MemoryStream();
 
