@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Net;
 using Mirage.Serialization;
 using NSubstitute;
 using NUnit.Framework;
@@ -10,38 +11,58 @@ namespace Mirage.Tests.Runtime
     {
         private NetworkPlayer player;
         private byte[] serializedMessage;
-        private IConnection mockTransportConnection;
+        private MockConnection mockTransportConnection;
 
         private SceneMessage data;
 
-        private NotifyPacket lastSent;
 
         private Action<INetworkPlayer, object> delivered;
 
         private Action<INetworkPlayer, object> lost;
 
-        private byte[] lastSerializedPacket;
 
+        class MockConnection : IConnection
+        {
+            public NotifyPacket lastSent;
+            public byte[] lastSerializedPacket;
+
+            public void Disconnect()
+            {
+            }
+
+            public void Disconnect(Exception exception)
+            {
+            }
+
+            public void Dispose()
+            {
+            }
+
+            public void Send(ReadOnlySpan<byte> data, int channel = 0)
+            {
+                lastSerializedPacket = data.ToArray();
+                var reader = new NetworkReader(lastSerializedPacket);
+                _ = MessagePacker.UnpackId(reader);
+                lastSent = reader.ReadNotifyPacket();
+            }
+
+            public Cysharp.Threading.Tasks.UniTask<int> ReceiveAsync(MemoryStream buffer)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public EndPoint GetEndPointAddress()
+            {
+                return new IPEndPoint(IPAddress.Loopback, 0);
+            }
+        }
 
         [SetUp]
         public void SetUp()
         {
             data = new SceneMessage();
-            mockTransportConnection = Substitute.For<IConnection>();
 
-            void ParsePacket(ArraySegment<byte> data)
-            {
-                var reader = new NetworkReader(data);
-                _ = MessagePacker.UnpackId(reader);
-                lastSent = reader.ReadNotifyPacket();
-
-                lastSerializedPacket = new byte[data.Count];
-                Array.Copy(data.Array, data.Offset, lastSerializedPacket, 0, data.Count);
-            }
-
-            mockTransportConnection.Send(
-                Arg.Do<ArraySegment<byte>>(ParsePacket), Channel.Unreliable);
-
+            mockTransportConnection = new MockConnection();
             player = new NetworkPlayer(mockTransportConnection);
 
             serializedMessage = MessagePacker.Pack(new ReadyMessage());
@@ -90,7 +111,7 @@ namespace Mirage.Tests.Runtime
         {
             player.SendNotify(data, 1);
 
-            Assert.That(lastSent, Is.EqualTo(new NotifyPacket
+            Assert.That(mockTransportConnection.lastSent, Is.EqualTo(new NotifyPacket
             {
                 Sequence = 0,
                 ReceiveSequence = ushort.MaxValue,
@@ -102,7 +123,7 @@ namespace Mirage.Tests.Runtime
         public void SendsNotifyPacketWithSequence()
         {
             player.SendNotify(data, 1);
-            Assert.That(lastSent, Is.EqualTo(new NotifyPacket
+            Assert.That(mockTransportConnection.lastSent, Is.EqualTo(new NotifyPacket
             {
                 Sequence = 0,
                 ReceiveSequence = ushort.MaxValue,
@@ -110,14 +131,14 @@ namespace Mirage.Tests.Runtime
             }));
 
             player.SendNotify(data, 1);
-            Assert.That(lastSent, Is.EqualTo(new NotifyPacket
+            Assert.That(mockTransportConnection.lastSent, Is.EqualTo(new NotifyPacket
             {
                 Sequence = 1,
                 ReceiveSequence = ushort.MaxValue,
                 AckMask = 0
             }));
             player.SendNotify(data, 1);
-            Assert.That(lastSent, Is.EqualTo(new NotifyPacket
+            Assert.That(mockTransportConnection.lastSent, Is.EqualTo(new NotifyPacket
             {
                 Sequence = 2,
                 ReceiveSequence = ushort.MaxValue,
@@ -220,7 +241,7 @@ namespace Mirage.Tests.Runtime
 
             player.SendNotify(data, 1);
 
-            Assert.That(lastSent, Is.EqualTo(new NotifyPacket
+            Assert.That(mockTransportConnection.lastSent, Is.EqualTo(new NotifyPacket
             {
                 Sequence = 0,
                 ReceiveSequence = 100,
@@ -236,7 +257,7 @@ namespace Mirage.Tests.Runtime
             Action<SceneMessage> mockHandler = Substitute.For<Action<SceneMessage>>();
             player.RegisterHandler(mockHandler);
 
-            player.TransportReceive(new ArraySegment<byte>(lastSerializedPacket), Channel.Unreliable);
+            player.TransportReceive(new ArraySegment<byte>(mockTransportConnection.lastSerializedPacket), Channel.Unreliable);
             mockHandler.Received().Invoke(new SceneMessage());
         }
 

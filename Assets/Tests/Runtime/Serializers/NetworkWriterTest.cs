@@ -78,16 +78,14 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void TestWritingSegmentAndReadingSegment()
         {
-            byte[] data = { 1, 2, 3, 4 };
-            // [2, 3]
-            var segment = new ArraySegment<byte>(data, 1, 1);
-            writer.WriteBytesAndSizeSegment(segment);
+            ReadOnlySpan<byte> segment = stackalloc byte[] { 2 };
+            writer.WriteBytesAndSize(segment);
 
             var reader = new NetworkReader(writer.ToArray());
             ArraySegment<byte> deserialized = reader.ReadBytesAndSizeSegment();
-            Assert.That(deserialized.Count, Is.EqualTo(segment.Count));
-            for (int i = 0; i < segment.Count; ++i)
-                Assert.That(deserialized.Array[deserialized.Offset + i], Is.EqualTo(segment.Array[segment.Offset + i]));
+            Assert.That(deserialized.Count, Is.EqualTo(segment.Length));
+            for (int i = 0; i < segment.Length; ++i)
+                Assert.That(deserialized.Array[deserialized.Offset + i], Is.EqualTo(segment[i]));
         }
 
         [Test]
@@ -169,7 +167,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void TestWritingNegativeBytesAndSizeFailure()
         {
-            Assert.Throws<OverflowException>(() => writer.WriteBytesAndSize(new byte[0], 0, -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => writer.WriteBytesAndSize(new byte[0], 0, -1));
             Assert.That(writer.Position, Is.EqualTo(0));
         }
 

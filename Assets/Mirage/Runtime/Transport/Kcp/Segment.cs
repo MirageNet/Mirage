@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -43,9 +44,9 @@ namespace Mirage.KCP
         }
 
         // encode a segment into buffer
-        internal int Encode(byte[] ptr, int offset)
+        internal int Encode(Span<byte> ptr, int position)
         {
-            var encoder = new Encoder(ptr, offset);
+            var encoder = new Encoder(ptr, position);
             encoder.Encode32U(conversation);
             encoder.Encode8U((byte)cmd);
             encoder.Encode8U((byte)fragment);

@@ -49,7 +49,6 @@ namespace Mirage.KCP
         public const int RESERVED = sizeof(ulong);
 
         internal static readonly ArraySegment<byte> Hello = new ArraySegment<byte>(new byte[] { 0 });
-        private static readonly ArraySegment<byte> Goodby = new ArraySegment<byte>(new byte[] { 1 });
 
         protected KcpConnection(KcpDelayMode delayMode, int sendWindowSize, int receiveWindowSize)
         {
@@ -193,12 +192,12 @@ namespace Mirage.KCP
             }
         }
 
-        public void Send(ArraySegment<byte> data, int channel = Channel.Reliable)
+        public void Send(ReadOnlySpan<byte> data, int channel = Channel.Reliable)
         {
             if (channel == Channel.Reliable)
-                kcp.Send(data.Array, data.Offset, data.Count);
+                kcp.Send(data);
             else if (channel == Channel.Unreliable)
-                unreliable.Send(data.Array, data.Offset, data.Count);
+                unreliable.Send(data);
         }
 
         /// <summary>
@@ -262,8 +261,9 @@ namespace Mirage.KCP
 
             // if we receive a disconnect message,  then close everything
 
-            var dataSegment = new ArraySegment<byte>(buffer.GetBuffer(), 0, msgSize);
-            if (Utils.Equal(dataSegment, Goodby))
+            var dataSegment = new Span<byte>(buffer.GetBuffer(), 0, msgSize);
+            Span<byte> Goodby = stackalloc byte[] { 1 };
+            if (dataSegment.SequenceEqual( Goodby))
             {
                 open = false;
                 Disconnected?.Invoke();
@@ -277,6 +277,7 @@ namespace Mirage.KCP
         /// </summary>
         public virtual void Disconnect()
         {
+            Span<byte> Goodby = stackalloc byte[] { 1 };
             // send a disconnect message and disconnect
             if (open && socket.Connected)
             {

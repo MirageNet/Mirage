@@ -10,7 +10,7 @@ namespace Mirage
     {
         void Send<T>(T message, int channelId = Channel.Reliable);
 
-        void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable);
+        void Send(ReadOnlySpan<byte> segment, int channelId = Channel.Reliable);
     }
 
     /// <summary>

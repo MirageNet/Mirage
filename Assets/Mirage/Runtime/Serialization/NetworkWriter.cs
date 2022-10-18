@@ -125,6 +125,12 @@ namespace Mirage.Serialization
             return new ArraySegment<byte>(buffer, 0, Length);
         }
 
+        public ReadOnlySpan<byte> ToSpan()
+        {
+            return new Span<byte>(buffer, 0, Length);
+        }
+
+
         public void WriteByte(byte value)
         {
             EnsureLength(position + 1);
@@ -139,6 +145,13 @@ namespace Mirage.Serialization
             EnsureLength(position + count);
             Array.ConstrainedCopy(buffer, offset, this.buffer, position, count);
             position += count;
+        }
+
+        public void WriteBytes(ReadOnlySpan<byte> data)
+        {
+            EnsureLength(position + data.Length);
+            data.CopyTo(new Span<byte>(buffer, position, data.Length));
+            position += data.Length;
         }
 
         public void WriteUInt32(uint value)
@@ -269,8 +282,6 @@ namespace Mirage.Serialization
             writer.WriteBytes(stringBuffer, 0, size);
         }
 
-        // for byte arrays with dynamic size, where the reader doesn't know how many will come
-        // (like an inventory with different items etc.)
         public static void WriteBytesAndSize(this NetworkWriter writer, byte[] buffer, int offset, int count)
         {
             // null is supported because [SyncVar]s might be structs with null byte[] arrays
@@ -281,16 +292,31 @@ namespace Mirage.Serialization
                 writer.WritePackedUInt32(0u);
                 return;
             }
-            writer.WritePackedUInt32(checked((uint)count) + 1u);
-            writer.WriteBytes(buffer, offset, count);
+            WriteBytesAndSize(writer, new ReadOnlySpan<byte>(buffer, offset, count));
+        }
+
+        // for byte arrays with dynamic size, where the reader doesn't know how many will come
+        // (like an inventory with different items etc.)
+        public static void WriteBytesAndSize(this NetworkWriter writer, ReadOnlySpan<byte> data)
+        {
+            // null is supported because [SyncVar]s might be structs with null byte[] arrays
+            // write 0 for null array, increment normal size by 1 to save bandwith
+            // (using size=-1 for null would limit max size to 32kb instead of 64kb)
+            writer.WritePackedUInt32(checked((uint)data.Length) + 1u);
+            writer.WriteBytes(data);
         }
 
         // Weaver needs a write function with just one byte[] parameter
         // (we don't name it .Write(byte[]) because it's really a WriteBytesAndSize since we write size / null info too)
         public static void WriteBytesAndSize(this NetworkWriter writer, byte[] buffer)
         {
+            if (buffer == null)
+            {
+                writer.WritePackedUInt32(0u);
+                return;
+            }
             // buffer might be null, so we can't use .Length in that case
-            writer.WriteBytesAndSize(buffer, 0, buffer != null ? buffer.Length : 0);
+            writer.WriteBytesAndSize(buffer, 0, buffer.Length);
         }
 
         public static void WriteBytesAndSizeSegment(this NetworkWriter writer, ArraySegment<byte> buffer)

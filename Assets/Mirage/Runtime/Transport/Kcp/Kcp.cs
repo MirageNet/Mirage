@@ -229,33 +229,34 @@ namespace Mirage.KCP
 
         // ikcp_send
         // sends byte[] to the other end.
-        public void Send(byte[] buffer, int offset, int length)
+        public void Send(ReadOnlySpan<byte> data)
         {
-            if (length <= 0)
-                throw new ArgumentException($"You cannot send a packet with a {nameof(length)} of 0.");
-
+            if (data.Length <= 0)
+                throw new ArgumentException($"You cannot send a packet with a length of 0.");
             // streaming mode: removed. we never want to send 'hello' and
             // receive 'he' 'll' 'o'. we want to always receive 'hello'.
 
             int count;
-            if (length <= Mss)
+            if (data.Length <= Mss)
                 count = 1;
             else
-                count = (int)((length + Mss - 1) / Mss);
+                count = (int)((data.Length + Mss - 1) / Mss);
 
             if (count >= rcv_wnd)
-                throw new ArgumentException($"Your packet is too big and doesn't fit the receive window, either reduce its {nameof(length)}, call {nameof(SetWindowSize)} to increase the window or increase the {nameof(Mtu)}.");
+                throw new ArgumentException($"Your packet is too big and doesn't fit the receive window, either reduce its length, call {nameof(SetWindowSize)} to increase the window or increase the {nameof(Mtu)}.");
 
             if (count == 0)
                 count = 1;
 
+            int offset = 0;
+            int length = data.Length;
             // fragment
             for (int i = 0; i < count; i++)
             {
                 int size = Math.Min(length, (int)Mss);
                 var seg = Segment.Lease();
 
-                seg.data.Write(buffer, offset, size);
+                seg.data.Write(data.Slice(offset, size));
 
                 // seg.len = size: WriteBytes sets segment.Position!
                 seg.fragment = (byte)(count - i - 1);

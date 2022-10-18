@@ -44,10 +44,10 @@ namespace Mirage
         public void Disconnect()
         {
             // disconnect both ends of the pipe
-            connected.writer.WriteBytesAndSizeSegment(new ArraySegment<byte>(Array.Empty<byte>()));
+            connected.writer.WriteBytesAndSize(new ReadOnlySpan<byte>());
             connected.MessageCount.Release();
 
-            writer.WriteBytesAndSizeSegment(new ArraySegment<byte>(Array.Empty<byte>()));
+            writer.WriteBytesAndSize(new ReadOnlySpan<byte>());
             MessageCount.Release();
         }
 
@@ -80,11 +80,11 @@ namespace Mirage
             return 0;
         }
 
-        public void Send(ArraySegment<byte> data, int channel = Channel.Reliable)
+        public void Send(ReadOnlySpan<byte> data, int channel = Channel.Reliable)
         {
             // add some data to the writer in the connected connection
             // and increase the message count
-            connected.writer.WriteBytesAndSizeSegment(data);
+            connected.writer.WriteBytesAndSize(data);
             connected.MessageCount.Release();
         }
     }

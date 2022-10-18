@@ -7,14 +7,6 @@ namespace Mirage.Tests.Runtime
     [TestFixture]
     public class KcpClassTests : KcpSetup
     {
-        [Test]
-        public void SendExceptionTest()
-        {
-            Assert.Throws<ArgumentException>(() =>
-            {
-                server.Send(null, 0, 0);
-            });
-        }
 
         [Test]
         public void SetMtuExceptionTest()

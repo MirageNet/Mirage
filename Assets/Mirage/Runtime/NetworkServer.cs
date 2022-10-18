@@ -339,7 +339,7 @@ namespace Mirage
             {
                 // pack message into byte[] once
                 MessagePacker.Pack(msg, writer);
-                var segment = writer.ToArraySegment();
+                var segment = writer.ToSpan();
                 int count = 0;
 
                 foreach (INetworkPlayer player in players)
@@ -349,7 +349,7 @@ namespace Mirage
                     count++;
                 }
 
-                NetworkDiagnostics.OnSend(msg, channelId, segment.Count, count);
+                NetworkDiagnostics.OnSend(msg, channelId, segment.Length, count);
             }
         }
 

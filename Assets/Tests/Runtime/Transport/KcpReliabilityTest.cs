@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
@@ -33,7 +34,7 @@ namespace Mirage.Tests.Runtime
             for (byte i = 0; i < 50; i++)
             {
                 byte[] data = { i };
-                client.Send(data, 0, data.Length);
+                client.Send(data);
             }
 
             // receive the packets,  they should come in the same order as received
@@ -64,7 +65,7 @@ namespace Mirage.Tests.Runtime
                 data[i] = (byte)(i & 0xFF);
             }
 
-            client.Send(data, 0, data.Length);
+            client.Send(data);
 
             // receive the packet, it should be reassembled as a single packet
             byte[] buffer = new byte[data.Length];

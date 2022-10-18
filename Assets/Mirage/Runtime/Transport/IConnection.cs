@@ -8,7 +8,7 @@ namespace Mirage
 
     public interface IConnection
     {
-        void Send(ArraySegment<byte> data, int channel = Channel.Reliable);
+        void Send(ReadOnlySpan<byte> data, int channel = Channel.Reliable);
 
         /// <summary>
         /// reads a message from connection
