@@ -82,10 +82,5 @@ namespace Mirage.Weaver
             HasError("Abstract Rpcs are currently not supported, use virtual method instead", "System.Void ServerRpcTests.OverrideAbstractServerRpc.BaseBehaviour::CmdDoSomething()");
         }
 
-        [Test]
-        public void ServerRpcWithReturn()
-        {
-            IsSuccess();
-        }
     }
 }
