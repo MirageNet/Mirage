@@ -6,14 +6,29 @@ namespace Mirage.Serialization
 {
     public static class StringExtensions
     {
+        private static int maxStringLength = 1300;
+
         /// <summary>
-        /// Defaults MTU, 1300
-        /// <para>Can be changed by user if they need to</para>
+        /// Maximum number of bytes a string can be serialized to. This is to avoid allocation attack.
+        /// <para>Defaults MTU, 1300</para>
+        /// <para>NOTE: this is byte size after Encoding</para>
+        /// <para>IMPORTANT: Setting this property will resize the internal buffer. Do not call in hotpath. It is best to call once when you start the application</para>
         /// </summary>
-        public static int MaxStringLength = 1300;
+        public static int MaxStringLength
+        {
+            get => maxStringLength;
+            set
+            {
+                if (maxStringLength == value)
+                    return;
+
+                maxStringLength = value;
+                Array.Resize(ref stringBuffer, value);
+            }
+        }
 
         private static readonly UTF8Encoding defaultEncoding = new UTF8Encoding(false, true);
-        private static readonly byte[] stringBuffer = new byte[MaxStringLength];
+        private static byte[] stringBuffer = new byte[MaxStringLength];
 
         /// <param name="value">string or null</param>
         public static void WriteString(this NetworkWriter writer, string value) => WriteString(writer, value, defaultEncoding);
