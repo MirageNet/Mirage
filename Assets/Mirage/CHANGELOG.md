@@ -1,3 +1,15 @@
+# [128.6.0](https://github.com/MirageNet/Mirage/compare/v128.5.0...v128.6.0) (2022-11-02)
+
+
+### Bug Fixes
+
+* making MaxStringLength re-size the internal buffer to allow for bigger strings ([ed00f34](https://github.com/MirageNet/Mirage/commit/ed00f347d86bc0ab89eb78296a747ab5dae75cb0)), closes [#1109](https://github.com/MirageNet/Mirage/issues/1109)
+
+
+### Features
+
+* adding extra string methods to use different encoding ([586717b](https://github.com/MirageNet/Mirage/commit/586717b81370d26459bf1d7e989e6871edafa5d6))
+
 # [128.5.0](https://github.com/MirageNet/Mirage/compare/v128.4.1...v128.5.0) (2022-10-08)
 
 
