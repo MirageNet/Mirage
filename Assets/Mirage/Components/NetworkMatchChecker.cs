@@ -84,7 +84,7 @@ namespace Mirage
             matchPlayers[currentMatch].Add(Identity);
 
             // No need to rebuild anything here.
-            // identity.RebuildObservers is called right after this from NetworkServer.SpawnObject
+            // identity.RebuildObservers is called right after this from ServerObjectManager.Spawn
         }
 
         private void RebuildMatchObservers(Guid specificMatch)

@@ -251,7 +251,7 @@ namespace Mirage
             if (LocalClient != null)
             {
                 // we should call onStartHost after transport is ready to be used
-                // this allows server methods like NetworkServer.Spawn to be called in there
+                // this allows server methods like ServerObjectManager.Spawn to be called in there
                 _onStartHost?.Invoke();
 
                 localClient.ConnectHost(this, dataHandler);

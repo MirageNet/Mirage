@@ -245,13 +245,14 @@ namespace Mirage
         }
 
         /// <summary>
-        /// <para>When an <see cref="AddCharacterMessage"/> message handler has received a request from a player, the server calls this to associate the player object with the connection.</para>
-        /// <para>When a player is added for a connection, the client for that connection is made ready automatically. The player object is automatically spawned, so you do not need to call NetworkServer.Spawn for that object. This function is used for "adding" a player, not for "replacing" the player on a connection. If there is already a player on this playerControllerId for this connection, this will fail.</para>
+        /// <para>When <see cref="AddCharacterMessage"/> is received from a player, the server calls this to associate the character GameObject with the NetworkPlayer.</para>
+        /// <para>When a character is added for a player the object is automatically spawned, so you do not need to call ServerObjectManager.Spawn for that object.</para>
+        /// <para>This function is used for adding a character, not replacing. If there is already a character then use <see cref="ReplaceCharacter"/> instead.</para>
         /// </summary>
-        /// <param name="player">Connection which is adding the player.</param>
-        /// <param name="character">Player object spawned for the player.</param>
-        /// <param name="prefabHash"></param>
-        /// <returns></returns>
+        /// <param name="player">the Player to add the character to</param>
+        /// <param name="character">The Network Object to add to the Player. Can be spawned or unspawned. Calling this method will respawn it.</param>
+        /// <param name="prefabHash">New prefab hash to give to the player, used for dynamically creating objects at runtime.</param>
+        /// <exception cref="ArgumentException">throw when the player already has a character</exception>
         public void AddCharacter(INetworkPlayer player, GameObject character, int prefabHash)
         {
             var identity = character.GetNetworkIdentity();
@@ -259,27 +260,28 @@ namespace Mirage
         }
 
         /// <summary>
-        /// <para>When an <see cref="AddCharacterMessage"/> message handler has received a request from a player, the server calls this to associate the player object with the connection.</para>
-        /// <para>When a player is added for a connection, the client for that connection is made ready automatically. The player object is automatically spawned, so you do not need to call NetworkServer.Spawn for that object. This function is used for "adding" a player, not for "replacing" the player on a connection. If there is already a player on this playerControllerId for this connection, this will fail.</para>
+        /// <para>When <see cref="AddCharacterMessage"/> is received from a player, the server calls this to associate the character GameObject with the NetworkPlayer.</para>
+        /// <para>When a character is added for a player the object is automatically spawned, so you do not need to call ServerObjectManager.Spawn for that object.</para>
+        /// <para>This function is used for adding a character, not replacing. If there is already a character then use <see cref="ReplaceCharacter"/> instead.</para>
         /// </summary>
-        /// <param name="player">Connection which is adding the player.</param>
-        /// <param name="character">Player object spawned for the player.</param>
-        /// <param name="prefabHash"></param>
-        /// <returns></returns>
+        /// <param name="player">the Player to add the character to</param>
+        /// <param name="character">The Network Object to add to the Player. Can be spawned or unspawned. Calling this method will respawn it.</param>
+        /// <param name="prefabHash">New prefab hash to give to the player, used for dynamically creating objects at runtime.</param>
+        /// <exception cref="ArgumentException">throw when the player already has a character</exception>
         public void AddCharacter(INetworkPlayer player, NetworkIdentity character, int prefabHash)
         {
             character.PrefabHash = prefabHash;
             AddCharacter(player, character);
         }
 
-
         /// <summary>
-        /// <para>When an <see cref="AddCharacterMessage"/> message handler has received a request from a player, the server calls this to associate the player object with the connection.</para>
-        /// <para>When a player is added for a connection, the client for that connection is made ready automatically. The player object is automatically spawned, so you do not need to call NetworkServer.Spawn for that object. This function is used for "adding" a player, not for "replacing" the player on a connection. If there is already a player on this playerControllerId for this connection, this will fail.</para>
+        /// <para>When <see cref="AddCharacterMessage"/> is received from a player, the server calls this to associate the character GameObject with the NetworkPlayer.</para>
+        /// <para>When a character is added for a player the object is automatically spawned, so you do not need to call ServerObjectManager.Spawn for that object.</para>
+        /// <para>This function is used for adding a character, not replacing. If there is already a character then use <see cref="ReplaceCharacter"/> instead.</para>
         /// </summary>
-        /// <param name="player">Connection which is adding the player.</param>
-        /// <param name="character">Player object spawned for the player.</param>
-        /// <exception cref="ArgumentException">NetworkIdentity must not be null.</exception>
+        /// <param name="player">the Player to add the character to</param>
+        /// <param name="character">The Network Object to add to the Player. Can be spawned or unspawned. Calling this method will respawn it.</param>
+        /// <exception cref="ArgumentException">throw when the player already has a character</exception>
         public void AddCharacter(INetworkPlayer player, GameObject character)
         {
             var identity = character.GetNetworkIdentity();
@@ -287,12 +289,13 @@ namespace Mirage
         }
 
         /// <summary>
-        /// <para>When an <see cref="AddCharacterMessage"/> message handler has received a request from a player, the server calls this to associate the player object with the connection.</para>
-        /// <para>When a player is added for a connection, the client for that connection is made ready automatically. The player object is automatically spawned, so you do not need to call NetworkServer.Spawn for that object. This function is used for "adding" a player, not for "replacing" the player on a connection. If there is already a player on this playerControllerId for this connection, this will fail.</para>
+        /// <para>When <see cref="AddCharacterMessage"/> is received from a player, the server calls this to associate the character GameObject with the NetworkPlayer.</para>
+        /// <para>When a character is added for a player the object is automatically spawned, so you do not need to call ServerObjectManager.Spawn for that object.</para>
+        /// <para>This function is used for adding a character, not replacing. If there is already a character then use <see cref="ReplaceCharacter"/> instead.</para>
         /// </summary>
-        /// <param name="player">Connection which is adding the player.</param>
-        /// <param name="identity">Player object spawned for the player.</param>
-        /// <exception cref="ArgumentException">NetworkIdentity must not be null.</exception>
+        /// <param name="player">the Player to add the character to</param>
+        /// <param name="character">The Network Object to add to the Player. Can be spawned or unspawned. Calling this method will respawn it.</param>
+        /// <exception cref="ArgumentException">throw when the player already has a character</exception>
         public void AddCharacter(INetworkPlayer player, NetworkIdentity identity)
         {
             // cannot have an existing player object while trying to Add another.
@@ -720,7 +723,7 @@ namespace Mirage
         /// This causes NetworkIdentity objects in a scene to be spawned on a server.
         /// <para>
         ///     Calling SpawnObjects() causes all scene objects to be spawned.
-        ///     It is like calling NetworkServer.Spawn() for each of them.
+        ///     It is like calling Spawn() for each of them.
         /// </para>
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown when server is not active</exception>

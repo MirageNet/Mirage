@@ -374,7 +374,7 @@ namespace Mirage
 
         /// <summary>
         /// This is invoked for NetworkBehaviour objects when they become active on the server.
-        /// <para>This could be triggered by NetworkServer.Listen() for objects in the scene, or by NetworkServer.Spawn() for objects that are dynamically created.</para>
+        /// <para>This could be triggered by NetworkServer.Start() for objects in the scene, or by ServerObjectManager.Spawn() for objects you spawn at runtime.</para>
         /// <para>This will be called for objects on a "host" as well as for object on a dedicated server.</para>
         /// <para>OnStartServer is invoked before this object is added to collection of spawned objects</para>
         /// </summary>
@@ -401,7 +401,7 @@ namespace Mirage
         /// When <see cref="AssignClientAuthority"/> or <see cref="RemoveClientAuthority"/> is called on the server, this will be called on the client that owns the object.
         /// </para>
         /// <para>
-        /// When an object is spawned with <see cref="ServerObjectManager.Spawn">NetworkServer.Spawn</see> with a NetworkConnection parameter included,
+        /// When an object is spawned with <see cref="ServerObjectManager.Spawn">ServerObjectManager.Spawn</see> with a NetworkConnection parameter included,
         /// this will be called on the client that owns the object.
         /// </para>
         /// <para>NOTE: this even is only called for client and host</para>
@@ -491,7 +491,7 @@ namespace Mirage
         private void OnDestroy()
         {
             // Objects spawned from Instantiate are not allowed so are destroyed right away
-            // we don't want to call NetworkServer.Destroy if this is the case
+            // we don't want to call ServerObjectManager.Destroy if this is the case
             if (SpawnedFromInstantiate)
                 return;
 
@@ -959,7 +959,7 @@ namespace Mirage
 
         /// <summary>
         /// Removes ownership for an object.
-        /// <para>This applies to objects that had authority set by AssignClientAuthority, or <see cref="ServerObjectManager.Spawn">NetworkServer.Spawn</see> with a NetworkConnection
+        /// <para>This applies to objects that had authority set by AssignClientAuthority, or <see cref="ServerObjectManager.Spawn">ServerObjectManager.Spawn</see> with a NetworkConnection
         /// parameter included.</para>
         /// <para>Authority cannot be removed for player objects.</para>
         /// </summary>
