@@ -1,3 +1,10 @@
+# [128.7.0](https://github.com/MirageNet/Mirage/compare/v128.6.0...v128.7.0) (2022-11-09)
+
+
+### Features
+
+* adding send method that will exclude a single player ([f930bd0](https://github.com/MirageNet/Mirage/commit/f930bd01add2b8260705360da6b2096335d1ef71))
+
 # [128.6.0](https://github.com/MirageNet/Mirage/compare/v128.5.0...v128.6.0) (2022-11-02)
 
 
