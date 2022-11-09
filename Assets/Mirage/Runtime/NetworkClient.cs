@@ -97,7 +97,7 @@ namespace Mirage
 
 
         /// <summary>
-        /// NetworkClient can connect to local server in host mode too
+        /// Is this NetworkClient connected to a local server in host mode
         /// </summary>
         public bool IsLocalClient { get; private set; }
 
