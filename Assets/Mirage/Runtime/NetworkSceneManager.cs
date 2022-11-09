@@ -356,9 +356,6 @@ namespace Mirage
 
             OnServerStartedSceneChange?.Invoke(scenePath, sceneOperation);
 
-            if (players == null)
-                throw new ArgumentNullException(nameof(players), "No player's were added to send for information");
-
             if (!Server.LocalClientActive)
                 LoadSceneAsync(scenePath, players, sceneOperation, loadSceneParameters).Forget();
 
@@ -431,6 +428,7 @@ namespace Mirage
         public void ServerLoadSceneAdditively(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false, LoadSceneParameters? sceneLoadParameters = null)
         {
             ThrowIfNotServer();
+            ThrowIfPlayersNull(players);
 
             ServerSceneLoading(scenePath, players, shouldClientLoadNormally, SceneOperation.LoadAdditive, sceneLoadParameters);
         }
@@ -565,7 +563,14 @@ namespace Mirage
 
         private void ThrowIfNotServer()
         {
-            if (Server == null || !Server.Active) { throw new InvalidOperationException("Method can only be called if server is active"); }
+            if (Server == null || !Server.Active)
+                throw new InvalidOperationException("Method can only be called if server is active");
+        }
+
+        private void ThrowIfPlayersNull(IEnumerable<INetworkPlayer> players)
+        {
+            if (players == null)
+                throw new ArgumentNullException(nameof(players), "No player's were added to send for information");
         }
 
         #endregion
