@@ -504,6 +504,40 @@ namespace Mirage
             }
         }
 
+        /// <summary>
+        /// Sends a message to many connections, expect <paramref name="excluded"/>.
+        /// <para>
+        /// This can be useful if you want to send to a observers of an object expect the owner. Or if you want to send to all expect the local host player.
+        /// </para>
+        /// <para>WARNING: using this method <b>may</b> cause Enumerator to be boxed creating GC/alloc. Use <see cref="SendToMany{T}(IReadOnlyList{INetworkPlayer}, T, int)"/> version where possible</para>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="players"></param>
+        /// <param name="excluded">player to exclude, Can be null</param>
+        /// <param name="msg"></param>
+        /// <param name="channelId"></param>
+        public static void SendToManyExcept<T>(IEnumerable<INetworkPlayer> players, INetworkPlayer excluded, T msg, int channelId = Channel.Reliable)
+        {
+            using (var writer = NetworkWriterPool.GetWriter())
+            {
+                // pack message into byte[] once
+                MessagePacker.Pack(msg, writer);
+                var segment = writer.ToArraySegment();
+                var count = 0;
+
+                foreach (var player in players)
+                {
+                    if (player == excluded)
+                        continue;
+
+                    player.Send(segment, channelId);
+                    count++;
+                }
+
+                NetworkDiagnostics.OnSend(msg, segment.Count, count);
+            }
+        }
+
         //called once a client disconnects from the server
         private void OnDisconnected(INetworkPlayer player)
         {
