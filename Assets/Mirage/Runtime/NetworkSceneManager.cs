@@ -214,13 +214,17 @@ namespace Mirage
         {
             ThrowIfNotClient();
 
+            // server should load the scene instead of sending scene message
+            if (Client.IsLocalClient)
+                throw new InvalidOperationException("Host client should not be sent scene message");
+
             if (string.IsNullOrEmpty(message.MainActivateScene))
                 throw new ArgumentException($"[NetworkSceneManager] - SceneLoadStartedMessage: {nameof(message.MainActivateScene)} cannot be empty or null", nameof(message));
 
             if (logger.LogEnabled()) logger.Log($"[NetworkSceneManager] - SceneLoadStartedMessage: changing scenes from: {ActiveScenePath} to: {message.MainActivateScene}");
 
             //Additive are scenes loaded on server and this client is not a host client
-            if (message.AdditiveScenes != null && message.AdditiveScenes.Count > 0 && Client && !Client.IsLocalClient)
+            if (message.AdditiveScenes != null && message.AdditiveScenes.Count > 0 && Client)
             {
                 for (var sceneIndex = 0; sceneIndex < message.AdditiveScenes.Count; sceneIndex++)
                 {
@@ -356,8 +360,14 @@ namespace Mirage
 
             OnServerStartedSceneChange?.Invoke(scenePath, sceneOperation);
 
-            if (!Server.LocalClientActive)
-                LoadSceneAsync(scenePath, players, sceneOperation, loadSceneParameters).Forget();
+            if (Server.LocalClientActive)
+            {
+                // notify host client that scene loading is about to start
+                OnClientStartedSceneChange?.Invoke(scenePath, sceneOperation);
+            }
+
+            // always load on scene, even if host
+            LoadSceneAsync(scenePath, players, sceneOperation, loadSceneParameters).Forget();
 
             // notify all clients about the new scene
             if (shouldClientLoadOrUnloadNormally)
@@ -366,7 +376,8 @@ namespace Mirage
             }
 
             var message = new SceneMessage { MainActivateScene = scenePath, SceneOperation = sceneOperation };
-            NetworkServer.SendToMany(players, message);
+            // send to players, excluding host
+            NetworkServer.SendToManyExcept(players, excluded: Server.LocalPlayer, message);
         }
 
         /// <summary>
