@@ -237,7 +237,7 @@ namespace Mirage
             // Notify others that client has started to change scenes.
             OnClientStartedSceneChange?.Invoke(message.MainActivateScene, message.SceneOperation);
 
-            LoadSceneAsync(message.MainActivateScene, new[] { player }, message.SceneOperation).Forget();
+            LoadSceneAsync(message.MainActivateScene, sceneOperation: message.SceneOperation).Forget();
         }
 
         /// <summary>
