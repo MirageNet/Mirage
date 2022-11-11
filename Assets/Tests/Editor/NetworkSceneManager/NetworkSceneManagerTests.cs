@@ -18,15 +18,15 @@ namespace Mirage.Tests.Runtime.Host
     [Category("LoadsScene")]
     public class NetworkSceneManagerTests : HostSetupWithSceneManager<MockComponent>
     {
-        private UnityAction<Scene, SceneOperation> sceneEventFunction;
+        private UnityAction<Scene, SceneOperation> _onServerFinishedSceneChange;
 
         public override void ExtraSetup()
         {
             // call base for SceneManager Setup
             base.ExtraSetup();
 
-            sceneEventFunction = Substitute.For<UnityAction<Scene, SceneOperation>>();
-            sceneManager.OnServerFinishedSceneChange.AddListener(sceneEventFunction);
+            _onServerFinishedSceneChange = Substitute.For<UnityAction<Scene, SceneOperation>>();
+            sceneManager.OnServerFinishedSceneChange.AddListener(_onServerFinishedSceneChange);
         }
 
         [Test]
@@ -83,7 +83,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ServerChangedFiredOnceTest()
         {
-            sceneEventFunction.Received(1).Invoke(Arg.Any<Scene>(), Arg.Any<SceneOperation>());
+            _onServerFinishedSceneChange.Received(1).Invoke(Arg.Any<Scene>(), Arg.Any<SceneOperation>());
         }
 
         [Test]
