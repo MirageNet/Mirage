@@ -81,12 +81,6 @@ namespace Mirage.Tests.Runtime.Host
         });
 
         [Test]
-        public void ServerChangedFiredOnceTest()
-        {
-            _onServerFinishedSceneChange.Received(1).Invoke(Arg.Any<Scene>(), Arg.Any<SceneOperation>());
-        }
-
-        [Test]
         public void CheckServerSceneDataNotEmptyTest()
         {
             Assert.That(sceneManager.ServerSceneData, Is.Not.Null);

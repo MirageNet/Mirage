@@ -468,11 +468,14 @@ namespace Mirage
         {
             logger.Log("[NetworkSceneManager] - OnServerAuthenticated");
 
+            // dont need to load scenes for host player (they already have them loadeed becuase they are the serve)
+            if (Server.LocalPlayer == player)
+                return;
+
             var additiveScenes = GetAdditiveScenes();
 
             player.Send(new SceneMessage { MainActivateScene = ActiveScenePath, AdditiveScenes = additiveScenes });
             player.Send(new SceneReadyMessage());
-
         }
 
         private static List<string> GetAdditiveScenes()
