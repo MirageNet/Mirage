@@ -375,6 +375,15 @@ namespace Mirage
                 sceneOperation = SceneOperation.Normal;
             }
 
+            SendSceneMessage(players, scenePath, sceneOperation);
+        }
+
+        private void SendSceneMessage(IEnumerable<INetworkPlayer> players, string scenePath, SceneOperation sceneOperation)
+        {
+            // if only player if host, then return early to avoid serializing message to no one
+            if (players.Count() == 1 && players.First() == Server.LocalPlayer)
+                return;
+
             var message = new SceneMessage { MainActivateScene = scenePath, SceneOperation = sceneOperation };
             // send to players, excluding host
             NetworkServer.SendToManyExcept(players, excluded: Server.LocalPlayer, message);
