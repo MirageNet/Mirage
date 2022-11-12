@@ -22,6 +22,8 @@ namespace Mirage.Examples.Additive
             if (logger.LogEnabled()) logger.LogFormat(LogType.Log, "Loading {0}", subScene);
 
             var networkIdentity = other.gameObject.GetComponent<NetworkIdentity>();
+            // note: you may need to check if owner is the host player.
+            //       if they are the host, the scene will already be loaded on servere so does not need to be loaded
             networkIdentity.Owner.Send(new SceneMessage { MainActivateScene = subScene, SceneOperation = SceneOperation.LoadAdditive });
         }
 
@@ -31,6 +33,8 @@ namespace Mirage.Examples.Additive
             if (logger.LogEnabled()) logger.LogFormat(LogType.Log, "Unloading {0}", subScene);
 
             var networkIdentity = other.gameObject.GetComponent<NetworkIdentity>();
+            // note: you may need to check if owner is the host player.
+            //       if they are the host, you do not want to be unloading scene on server
             networkIdentity.Owner.Send(new SceneMessage { MainActivateScene = subScene, SceneOperation = SceneOperation.UnloadAdditive });
         }
     }
