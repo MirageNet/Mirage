@@ -416,13 +416,10 @@ namespace Mirage
             SetAllClientsNotReady(players);
             OnServerStartedSceneChange?.Invoke(scene.path, SceneOperation.UnloadAdditive);
 
-            // if not host
-            if (!Server.LocalClientActive)
-                UnLoadSceneAsync(scene, SceneOperation.UnloadAdditive).Forget();
+            UnLoadSceneAsync(scene, SceneOperation.UnloadAdditive).Forget();
 
             // notify all clients about the new scene
-            var msg = new SceneMessage { MainActivateScene = scene.path, SceneOperation = SceneOperation.UnloadAdditive };
-            NetworkServer.SendToMany(players, msg);
+            SendSceneMessage(players, scene.path, SceneOperation.UnloadAdditive);
         }
 
         /// <summary>
