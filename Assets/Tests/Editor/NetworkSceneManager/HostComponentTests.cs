@@ -103,8 +103,8 @@ namespace Mirage.Tests.Runtime.Host
             Assert.That(invoked, Is.EqualTo(1));
         }
 
-        [UnityTest]
-        public IEnumerator ClientSceneChangedOnReconnect() => UniTask.ToCoroutine(async () =>
+        [UnityTest, Description("Scene will already be loaded on host connect, so no events should be invoked")]
+        public IEnumerator HostDoesNotInvokeSceneChangeEventsOnConnect() => UniTask.ToCoroutine(async () =>
         {
             server.Stop();
 
@@ -116,7 +116,7 @@ namespace Mirage.Tests.Runtime.Host
             await StartHost();
 
             client.Update();
-            mockListener.Received().Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
+            mockListener.DidNotReceive().Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         });
     }
 }

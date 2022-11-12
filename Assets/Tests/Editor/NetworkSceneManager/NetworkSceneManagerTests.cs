@@ -8,6 +8,7 @@ using NUnit.Framework;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine;
 
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
@@ -61,24 +62,53 @@ namespace Mirage.Tests.Runtime.Host
         });
 
         [UnityTest]
-        public IEnumerator ServerChangeSceneTest() => UniTask.ToCoroutine(async () =>
+        public IEnumerator HostPlayerIsNotSentSceneMessage() => UniTask.ToCoroutine(async () =>
         {
             var invokeClientSceneMessage = false;
             var invokeNotReadyMessage = false;
-            var func1 = Substitute.For<UnityAction<string, SceneOperation>>();
+            var serverStartChange = Substitute.For<UnityAction<string, SceneOperation>>();
             ClientMessageHandler.RegisterHandler<SceneMessage>(msg => invokeClientSceneMessage = true);
             ClientMessageHandler.RegisterHandler<SceneNotReadyMessage>(msg => invokeNotReadyMessage = true);
-            sceneManager.OnServerStartedSceneChange.AddListener(func1);
+            sceneManager.OnServerStartedSceneChange.AddListener(serverStartChange);
 
             sceneManager.ServerLoadSceneNormal(TestScenes.Path);
 
             await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ActiveScenePath != null);
 
-            func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
+            serverStartChange.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
             Assert.That(sceneManager.ActiveScenePath, Is.Not.Null);
-            Assert.That(invokeClientSceneMessage, Is.True);
-            Assert.That(invokeNotReadyMessage, Is.True);
+            Assert.That(invokeClientSceneMessage, Is.False, "Client should not have receive Scene Message");
+            Assert.That(invokeNotReadyMessage, Is.True, "Client should not have receive Not Ready Message");
         });
+
+        [Test]
+        public void HostInvokesStartSceneChangeEvent()
+        {
+            var clientStartChange = Substitute.For<UnityAction<string, SceneOperation>>();
+            sceneManager.OnClientStartedSceneChange.AddListener(clientStartChange);
+
+            sceneManager.ServerLoadSceneNormal(TestScenes.Path);
+            clientStartChange.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
+        }
+
+        [UnityTest]
+        public IEnumerator HostInvokesFinishSceneChangeEvent() => UniTask.ToCoroutine(async () =>
+        {
+            // make sure we are in different scene for this test. we want to actaully load the scene
+            Debug.Assert(sceneManager.ActiveScenePath != TestScenes.Path);
+
+            var clientEndCHange = Substitute.For<UnityAction<Scene, SceneOperation>>();
+            sceneManager.OnClientFinishedSceneChange.AddListener(clientEndCHange);
+
+            sceneManager.ServerLoadSceneNormal(TestScenes.Path);
+            // should not be invoked till loading finishes
+            clientEndCHange.DidNotReceive().Invoke(Arg.Any<Scene>(), Arg.Any<SceneOperation>());
+
+            await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ActiveScenePath == TestScenes.Path);
+
+            clientEndCHange.Received(1).Invoke(Arg.Any<Scene>(), Arg.Any<SceneOperation>());
+        });
+
 
         [Test]
         public void CheckServerSceneDataNotEmptyTest()
@@ -247,7 +277,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator ServerUnloadSceneAdditivelyListenerInvokedTest() => UniTask.ToCoroutine(async () =>
         {
-            var _invokedOnServerStartedSceneChange = false;
+            var invokedOnServerStartedSceneChange = false;
 
             sceneManager.ServerLoadSceneNormal(TestScenes.Path);
 
@@ -257,13 +287,13 @@ namespace Mirage.Tests.Runtime.Host
             throw new System.NotSupportedException("Test not supported in player");
 #endif
 
-            sceneManager.OnServerStartedSceneChange.AddListener((arg0, operation) => _invokedOnServerStartedSceneChange = true);
+            sceneManager.OnServerStartedSceneChange.AddListener((arg0, operation) => invokedOnServerStartedSceneChange = true);
 
             sceneManager.ServerUnloadSceneAdditively(SceneManager.GetActiveScene(), new[] { server.LocalPlayer });
 
-            await AsyncUtil.WaitUntilWithTimeout(() => _invokedOnServerStartedSceneChange);
+            await AsyncUtil.WaitUntilWithTimeout(() => invokedOnServerStartedSceneChange);
 
-            Assert.That(_invokedOnServerStartedSceneChange, Is.True);
+            Assert.That(invokedOnServerStartedSceneChange, Is.True);
         });
 
         [Test]
