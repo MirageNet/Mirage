@@ -32,7 +32,8 @@ namespace Mirage.Weaver
         {
             Console.WriteLine($"Weaver[{td.Name}]{message}");
         }
-        static void Log(string msg)
+
+        private static void Log(string msg)
         {
             Console.WriteLine($"[Weaver] {msg}");
         }
@@ -125,6 +126,7 @@ namespace Mirage.Weaver
                 SymbolReaderProvider = new PortablePdbReaderProvider(),
                 AssemblyResolver = assemblyResolver,
                 ReflectionImporterProvider = new PostProcessorReflectionImporterProvider(),
+                // todo we may want to use Deferred here to speed up for some dlls. (needs more testing
                 ReadingMode = ReadingMode.Immediate
             };
 
