@@ -1,3 +1,19 @@
+# [129.0.0](https://github.com/MirageNet/Mirage/compare/v128.7.0...v129.0.0) (2022-11-14)
+
+
+### Bug Fixes
+
+* dont seend scene message on authenticate to host ([94ab113](https://github.com/MirageNet/Mirage/commit/94ab113c2fbe66e553ae268c0ca2ece246f8c3be))
+* fixing client networkplayer being given to host player ([7331eb0](https://github.com/MirageNet/Mirage/commit/7331eb05eae3056d0aaf1de6741b183c221e1a79))
+* fixing loading scenes in host mode ([9caeea8](https://github.com/MirageNet/Mirage/commit/9caeea8b144db9ca0c8bb1dfddef502ade587fa3))
+* not sending unload message to host player ([f1ace90](https://github.com/MirageNet/Mirage/commit/f1ace90f5f26593e65624a5b58386341fc944bb1))
+
+
+### BREAKING CHANGES
+
+* host no longer invokes scene start/finish events on when host player Authenticates
+* SceneMessage should no longer be sent to host player
+
 # [128.7.0](https://github.com/MirageNet/Mirage/compare/v128.6.0...v128.7.0) (2022-11-09)
 
 
