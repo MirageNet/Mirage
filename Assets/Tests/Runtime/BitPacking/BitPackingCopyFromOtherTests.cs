@@ -1,5 +1,6 @@
 using Mirage.Serialization;
 using NUnit.Framework;
+using Random = Mirage.Tests.BitPacking.TestRandom;
 
 namespace Mirage.Tests.Runtime.Serialization
 {
@@ -75,11 +76,11 @@ namespace Mirage.Tests.Runtime.Serialization
         [Repeat(100)]
         public void CopyFromOtherWriterUnAlignedBig()
         {
-            var value1 = (ulong)UnityEngine.Random.Range(0, 20000);
-            var value2 = (ulong)UnityEngine.Random.Range(0, 20000);
-            var value3 = (ulong)UnityEngine.Random.Range(0, 20000);
-            var value4 = (ulong)UnityEngine.Random.Range(0, 20000);
-            var value5 = (ulong)UnityEngine.Random.Range(0, 20000);
+            var value1 = (ulong)Random.Range(0, 20000);
+            var value2 = (ulong)Random.Range(0, 20000);
+            var value3 = (ulong)Random.Range(0, 20000);
+            var value4 = (ulong)Random.Range(0, 20000);
+            var value5 = (ulong)Random.Range(0, 20000);
             otherWriter.Write(value1, 46);
             otherWriter.Write(value2, 47);
             otherWriter.Write(value3, 48);
@@ -115,11 +116,11 @@ namespace Mirage.Tests.Runtime.Serialization
             }
 
 
-            var value1 = (ulong)UnityEngine.Random.Range(0, 20000);
-            var value2 = (ulong)UnityEngine.Random.Range(0, 20000);
-            var value3 = (ulong)UnityEngine.Random.Range(0, 20000);
-            var value4 = (ulong)UnityEngine.Random.Range(0, 20000);
-            var value5 = (ulong)UnityEngine.Random.Range(0, 20000);
+            var value1 = (ulong)Random.Range(0, 20000);
+            var value2 = (ulong)Random.Range(0, 20000);
+            var value3 = (ulong)Random.Range(0, 20000);
+            var value4 = (ulong)Random.Range(0, 20000);
+            var value5 = (ulong)Random.Range(0, 20000);
             otherWriter.Write(value1, 46);
             otherWriter.Write(value2, 47);
             otherWriter.Write(value3, 48);

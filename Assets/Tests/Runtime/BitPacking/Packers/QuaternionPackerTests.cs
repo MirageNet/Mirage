@@ -4,7 +4,7 @@ using Mirage.Serialization;
 using NUnit.Framework;
 using NUnit.Framework.Constraints;
 using UnityEngine;
-using Random = UnityEngine.Random;
+using Random = Mirage.Tests.BitPacking.TestRandom;
 using Range = NUnit.Framework.RangeAttribute;
 
 namespace Mirage.Tests.Runtime.Serialization.Packers
@@ -13,7 +13,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
     {
         private static Quaternion GetRandomQuaternion()
         {
-            return Random.rotationUniform.normalized;
+            return GetRandomQuaternionNotNormalized().normalized;
         }
 
         private static Quaternion GetRandomQuaternionNotNormalized()
