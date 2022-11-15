@@ -118,7 +118,10 @@ namespace Mirage.Serialization
                 }
             }
 
+            // define to allow debug.log to be skipped when running outside of unity
+#if !BIT_PACKING_NO_DEBUG
             Debug.LogWarning($"Resizing buffer, new size:{size} bytes");
+#endif
 
             FreeHandle();
 
@@ -449,7 +452,11 @@ namespace Mirage.Serialization
             //      if bitlength == 0 then write will return
             Write(*otherPtr, bitLength);
 
+            // define to allow debug.log to be skipped when running outside of unity
+#if !BIT_PACKING_NO_DEBUG
             Debug.Assert(_bitPosition == newBit, "bitPosition should already be equal to newBit because it would have incremented each WriteUInt64");
+#endif
+
             _bitPosition = newBit;
         }
     }

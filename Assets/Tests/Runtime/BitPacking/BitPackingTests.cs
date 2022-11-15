@@ -148,7 +148,11 @@ namespace Mirage.Tests.Runtime.Serialization
                     }
                 }
             }
+
+            // define to allow debug.log to be skipped when running outside of unity
+#if !BIT_PACKING_NO_DEBUG
             UnityEngine.Debug.Log($"{count} masks tested");
+#endif
         }
 
         /// <summary>
