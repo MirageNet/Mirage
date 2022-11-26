@@ -1,3 +1,10 @@
+## [129.0.1](https://github.com/MirageNet/Mirage/compare/v129.0.0...v129.0.1) (2022-11-26)
+
+
+### Bug Fixes
+
+* fixing unity version in package.json ([920493e](https://github.com/MirageNet/Mirage/commit/920493e1caf2c44f890e4b647658347cb78f32f8))
+
 # [129.0.0](https://github.com/MirageNet/Mirage/compare/v128.7.0...v129.0.0) (2022-11-14)
 
 
