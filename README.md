@@ -34,6 +34,7 @@ To install Mirage, follow these steps:
     - `com.cysharp.unitask`
     - `com.openupm`
     - `com.miragenet`
+    - `com.miragenet.mirage`
    ![Scoped Registry](/doc/static/img/scoped-registry.png)
 4) Close the project settings.
 5) Open the package manager by clicking on the `Window` menu and selecting `Package Manager`. Then select `Packages`, `My Registries`, select the latest version of Mirage and click install, like so:
