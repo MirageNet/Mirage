@@ -1,3 +1,10 @@
+## [129.0.2](https://github.com/MirageNet/Mirage/compare/v129.0.1...v129.0.2) (2022-11-27)
+
+
+### Bug Fixes
+
+* fixing COM throwing when registering same prefab twice ([5005daf](https://github.com/MirageNet/Mirage/commit/5005dafd82ca1c023f1fab5a16d9f3142dd5ef8f))
+
 ## [129.0.1](https://github.com/MirageNet/Mirage/compare/v129.0.0...v129.0.1) (2022-11-26)
 
 
