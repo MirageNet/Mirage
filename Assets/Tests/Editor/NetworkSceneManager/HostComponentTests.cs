@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Host
@@ -104,19 +105,23 @@ namespace Mirage.Tests.Runtime.Host
         }
 
         [UnityTest, Description("Scene will already be loaded on host connect, so no events should be invoked")]
-        public IEnumerator HostDoesNotInvokeSceneChangeEventsOnConnect() => UniTask.ToCoroutine(async () =>
+        public IEnumerator HostPlayerShouldReceiveClientStartFinishSceneEvents() => UniTask.ToCoroutine(async () =>
         {
             server.Stop();
 
             // wait for server to disconnect
             await UniTask.WaitUntil(() => !server.Active);
 
-            var mockListener = Substitute.For<UnityAction<string, SceneOperation>>();
-            sceneManager.OnClientStartedSceneChange.AddListener(mockListener);
+            var mockStart = Substitute.For<UnityAction<string, SceneOperation>>();
+            var mockFinish = Substitute.For<UnityAction<Scene, SceneOperation>>();
+            sceneManager.OnClientStartedSceneChange.AddListener(mockStart);
+            sceneManager.OnClientFinishedSceneChange.AddListener(mockFinish);
             await StartHost();
 
             client.Update();
-            mockListener.DidNotReceive().Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
+            var activeScene = SceneManager.GetActiveScene();
+            mockStart.Received(1).Invoke(activeScene.path, SceneOperation.Normal);
+            mockFinish.Received(1).Invoke(SceneManager.GetActiveScene(), SceneOperation.Normal);
         });
     }
 }
