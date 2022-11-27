@@ -476,12 +476,30 @@ namespace Mirage
 
             // dont need to load scenes for host player (they already have them loadeed becuase they are the serve)
             if (Server.LocalPlayer == player)
+            {
+                HostPlayerAuthenticated();
                 return;
+            }
 
             var additiveScenes = GetAdditiveScenes();
 
             player.Send(new SceneMessage { MainActivateScene = ActiveScenePath, AdditiveScenes = additiveScenes });
             player.Send(new SceneReadyMessage());
+        }
+
+        /// <summary>
+        /// for host, server loads scene not client, so we need special handling for host client so that other components like CharacterSpawner work correctly
+        /// </summary>
+        void HostPlayerAuthenticated()
+        {
+            // nornal client invokes start, then finish, even if scene is already loaded
+            OnClientStartedSceneChange?.Invoke(ActiveScenePath, SceneOperation.Normal);
+
+            // server server and client copy of hoost player as ready
+            Server.LocalClient.Player.SceneIsReady = true;
+            Server.LocalPlayer.SceneIsReady = true;
+
+            OnClientFinishedSceneChange?.Invoke(SceneManager.GetActiveScene(), SceneOperation.Normal);
         }
 
         private static List<string> GetAdditiveScenes()
