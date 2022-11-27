@@ -284,7 +284,7 @@ namespace Mirage
             ThrowIfZeroHash(identity);
 
             var prefabHash = identity.PrefabHash;
-            ThrowIfExists(prefabHash);
+            ThrowIfExists(prefabHash, identity);
 
             if (logger.LogEnabled()) logger.Log($"Registering prefab '{identity.name}' as asset:{prefabHash:X}");
             _handlers[prefabHash] = new SpawnHandler(identity);
@@ -435,11 +435,15 @@ namespace Mirage
         {
             throw new SpawnObjectException($"No prefab for {prefabHash:X}. did you forget to add it to the ClientObjectManager?");
         }
-        private void ThrowIfExists(int prefabHash)
+        private void ThrowIfExists(int prefabHash, NetworkIdentity newPrefab = null)
         {
             if (_handlers.ContainsKey(prefabHash))
             {
                 var old = _handlers[prefabHash];
+                // if trying to register the same prefab, dont throw
+                if (newPrefab != null && old.Prefab == newPrefab)
+                    return;
+
                 var typeString = old.Prefab != null
                     ? "Prefab"
                     : "Handlers";
