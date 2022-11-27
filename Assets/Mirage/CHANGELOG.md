@@ -1,3 +1,10 @@
+## [129.0.3](https://github.com/MirageNet/Mirage/compare/v129.0.2...v129.0.3) (2022-11-27)
+
+
+### Bug Fixes
+
+* fixing scene events not firing when host connects ([598057e](https://github.com/MirageNet/Mirage/commit/598057eda86bc0463aba54b89a106650467421c9))
+
 ## [129.0.2](https://github.com/MirageNet/Mirage/compare/v129.0.1...v129.0.2) (2022-11-27)
 
 
