@@ -1,3 +1,10 @@
+# [129.1.0](https://github.com/MirageNet/Mirage/compare/v129.0.3...v129.1.0) (2022-12-05)
+
+
+### Features
+
+* adding option to exclude NetworkBehaviourInspector ([99e9519](https://github.com/MirageNet/Mirage/commit/99e9519c59bc73d9f4bbdd02ae105178e09fb5c4))
+
 ## [129.0.3](https://github.com/MirageNet/Mirage/compare/v129.0.2...v129.0.3) (2022-11-27)
 
 
