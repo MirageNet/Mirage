@@ -1,6 +1,10 @@
 /*
  *  Lightweight UDP sockets abstraction for rapid implementation of message-oriented protocols
  *  Copyright (c) 2019 Stanislav Denisov
+ *  
+ *  NanoSockets modifications made by Mirage Team
+ *  Copyright (c) 2022 Mirage Team and contributors.
+ *  
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
