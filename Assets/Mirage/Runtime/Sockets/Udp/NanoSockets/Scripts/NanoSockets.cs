@@ -87,11 +87,45 @@ namespace NanoSockets
 
         public override string ToString()
         {
+            // FIX: Unity IL2CPP SIGABRT in 2021.3.15 on Linux builds
+            // Problem: On Linux IL2CPP builds, it seems something with
+            // IL2CPP and StringBuilder causes SIGABRT to be emitted due to
+            // a bad free of a pointer: "free(): invalid pointer". Unity will then
+            // commit suicide.
+            // Solution: This successfully works around it, unfortunately at
+            // a cost of 64 * 2 bytes of memory every time ToString() is called.
+            // Improvements welcome.
+
+            // Allocate 64 bytes of memory temporarily.
+            var ipPtr = Marshal.AllocHGlobal(64);
+            var ipAddress = string.Empty;
+
+            // Check if the GetIP call was possible
+            if (UDP.GetIP(ref this, ipPtr, 64) == 0)
+            {
+                // NanoSockets returned OK. Copy that to an ANSI string.
+                // Pretty sure we won't have UTF-8 in our IP addresses...
+                ipAddress = Marshal.PtrToStringAnsi(ipPtr, 64);
+
+                // Free the memory, otherwise memory leak = bad!
+                Marshal.FreeHGlobal(ipPtr);
+
+                return string.Format("{0}:{1}", ipAddress, port);
+            }
+            else
+            {
+                // Free the allocated memory, even though we didn't use it.
+                Marshal.FreeHGlobal(ipPtr);
+                // Return a UNKNOWN string just to make the function happy.
+                return "UNKNOWN";
+            }
+
+            // Original code is as follows.
+            /*
             var ip = new StringBuilder(64);
-
             NanoSockets.UDP.GetIP(ref this, ip, 64);
-
             return string.Format("IP:{0} Port:{1}", ip, this.port);
+            */
         }
 
         public static Address CreateFromIpPort(string ip, ushort port)
