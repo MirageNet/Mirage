@@ -1,11 +1,12 @@
 {
     "name": "Mirage.Sockets.Udp",
+    "rootNamespace": "",
     "references": [
         "GUID:c0b2064c294eb174c9f3f7da398eb677"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
-    "allowUnsafeCode": false,
+    "allowUnsafeCode": true,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
