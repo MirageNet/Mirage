@@ -99,21 +99,12 @@ namespace NanoSockets
             // commit suicide.
             // Solution: Allocate 64 bytes on the stack, tell NanoSockets to put the
             // IP into that, then read as string in the return function. Tested and
-            // confirmed working on Manjaro x64.
-
+            // confirmed working on Manjaro x64 (Unity 2021.3.15).
 
             // Attempt v2 (2022-12-09): Use unsafe pointer for the IP string.
             var ptr = stackalloc char[64];
             UDP.GetIP(ref this, (IntPtr)ptr, 64);
             return $"IP: {new string(ptr)} Port: {this.Port}";
-
-            // Original code is as follows.
-            /*
-            // function header: public override string ToString()
-            var ip = new StringBuilder(64);
-            NanoSockets.UDP.GetIP(ref this, ip, 64);
-            return string.Format("IP:{0} Port:{1}", ip, this.port);
-            */
         }
 
         public static Address CreateFromIpPort(string ip, ushort port)
