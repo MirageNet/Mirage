@@ -1,3 +1,10 @@
+## [129.1.3](https://github.com/MirageNet/Mirage/compare/v129.1.2...v129.1.3) (2022-12-10)
+
+
+### Bug Fixes
+
+* setting field value ([f9b1f65](https://github.com/MirageNet/Mirage/commit/f9b1f651ab1c6a29d201a3d9c96a5d5f2f42944d))
+
 ## [129.1.2](https://github.com/MirageNet/Mirage/compare/v129.1.1...v129.1.2) (2022-12-10)
 
 
