@@ -212,7 +212,6 @@ namespace Mirage.Sockets.Udp
             || Application.isEditor;
 #endif
         }
-
     }
 
     public class EndPointWrapper : IEndPoint

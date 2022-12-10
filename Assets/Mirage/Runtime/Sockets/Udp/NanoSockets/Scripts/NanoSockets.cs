@@ -1,7 +1,10 @@
 /*
  *  Lightweight UDP sockets abstraction for rapid implementation of message-oriented protocols
  *  Copyright (c) 2019 Stanislav Denisov
- *
+ *  
+ *  NanoSockets modifications made by Mirage Team
+ *  Copyright (c) 2022 Mirage Team and contributors.
+ *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
@@ -25,6 +28,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
+using Mirage.SocketLayer;
 
 namespace NanoSockets
 {
@@ -85,13 +89,22 @@ namespace NanoSockets
             return hash;
         }
 
-        public override string ToString()
+             
+        public unsafe override string ToString()
         {
-            var ip = new StringBuilder(64);
+            // FIX: Unity IL2CPP SIGABRT in 2021.3.15 on Linux builds
+            // Problem: On Linux IL2CPP builds, it seems something with
+            // IL2CPP and StringBuilder causes SIGABRT to be emitted due to
+            // a bad free of a pointer: "free(): invalid pointer". Unity will then
+            // commit suicide.
+            // Solution: Allocate 64 bytes on the stack, tell NanoSockets to put the
+            // IP into that, then read as string in the return function. Tested and
+            // confirmed working on Manjaro x64 (Unity 2021.3.15).
 
-            NanoSockets.UDP.GetIP(ref this, ip, 64);
-
-            return string.Format("IP:{0} Port:{1}", ip, this.port);
+            // Attempt v2 (2022-12-09): Use unsafe pointer for the IP string.
+            var ptr = stackalloc char[64];
+            UDP.GetIP(ref this, (IntPtr)ptr, 64);
+            return $"IP: {new string(ptr)} Port: {this.Port}";
         }
 
         public static Address CreateFromIpPort(string ip, ushort port)
