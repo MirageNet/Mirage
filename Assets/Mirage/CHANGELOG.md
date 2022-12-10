@@ -1,3 +1,10 @@
+## [129.1.1](https://github.com/MirageNet/Mirage/compare/v129.1.0...v129.1.1) (2022-12-10)
+
+
+### Bug Fixes
+
+* il2cpp linux runtime SIGABRT crash with nanosockets (unity 2021.3.15) ([#1116](https://github.com/MirageNet/Mirage/issues/1116)) ([ff7148b](https://github.com/MirageNet/Mirage/commit/ff7148b47eb55e4211db22bc2bfaf6a9c3315e7e))
+
 # [129.1.0](https://github.com/MirageNet/Mirage/compare/v129.0.3...v129.1.0) (2022-12-05)
 
 
