@@ -1,3 +1,10 @@
+## [129.1.2](https://github.com/MirageNet/Mirage/compare/v129.1.1...v129.1.2) (2022-12-10)
+
+
+### Bug Fixes
+
+* adding null check for failing to resolve assembly ([13ce8a9](https://github.com/MirageNet/Mirage/commit/13ce8a9f7a3bfa6d142defa2b336a738d635c69c))
+
 ## [129.1.1](https://github.com/MirageNet/Mirage/compare/v129.1.0...v129.1.1) (2022-12-10)
 
 
