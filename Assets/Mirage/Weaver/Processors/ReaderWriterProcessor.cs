@@ -38,6 +38,7 @@ namespace Mirage.Weaver
             this.module = module;
             this.readers = readers;
             this.writers = writers;
+            this.logger = logger;
             extensionHelper = new SerailizeExtensionHelper(module, readers, writers);
 
             var typeInMirage = module.ImportReference(typeof(NetworkWriter));
