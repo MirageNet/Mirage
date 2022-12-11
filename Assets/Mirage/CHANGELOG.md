@@ -1,3 +1,10 @@
+# [129.2.0](https://github.com/MirageNet/Mirage/compare/v129.1.4...v129.2.0) (2022-12-11)
+
+
+### Features
+
+* adding functions to manually update server and client ([d18ef5a](https://github.com/MirageNet/Mirage/commit/d18ef5a94ec3b2c59dbc59605f37c448e2658712))
+
 ## [129.1.4](https://github.com/MirageNet/Mirage/compare/v129.1.3...v129.1.4) (2022-12-11)
 
 
