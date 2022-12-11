@@ -1,3 +1,10 @@
+## [129.1.4](https://github.com/MirageNet/Mirage/compare/v129.1.3...v129.1.4) (2022-12-11)
+
+
+### Bug Fixes
+
+* fixing string encoding from GetIP IntPtr ([5073a5f](https://github.com/MirageNet/Mirage/commit/5073a5f92086f73c0de536ded1f4a39b676e0379))
+
 ## [129.1.3](https://github.com/MirageNet/Mirage/compare/v129.1.2...v129.1.3) (2022-12-10)
 
 
