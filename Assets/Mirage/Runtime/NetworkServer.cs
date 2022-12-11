@@ -142,6 +142,12 @@ namespace Mirage
         public SyncVarSender SyncVarSender { get; private set; }
         public MessageHandler MessageHandler { get; private set; }
 
+        /// <summary>
+        /// Set to true if you want to manually call <see cref="UpdateReceive"/> and <see cref="UpdateSent"/> and stop mirage from automatically calling them
+        /// </summary>
+        [HideInInspector]
+        public bool ManualUpdate = false;
+
         private void OnDestroy()
         {
             // if gameobject with server on is destroyed, stop the server
@@ -290,7 +296,16 @@ namespace Mirage
 
         internal void Update()
         {
-            _peer?.UpdateReceive();
+            if (ManualUpdate)
+                return;
+
+            UpdateReceive();
+            UpdateSent();
+        }
+
+        public void UpdateReceive() => _peer?.UpdateReceive();
+        public void UpdateSent()
+        {
             SyncVarSender?.Update();
             _peer?.UpdateSent();
         }

@@ -95,6 +95,11 @@ namespace Mirage
         public NetworkWorld World { get; private set; }
         public MessageHandler MessageHandler { get; private set; }
 
+        /// <summary>
+        /// Set to true if you want to manually call <see cref="UpdateReceive"/> and <see cref="UpdateSent"/> and stop mirage from automatically calling them
+        /// </summary>
+        [HideInInspector]
+        public bool ManualUpdate = false;
 
         /// <summary>
         /// Is this NetworkClient connected to a local server in host mode
@@ -298,9 +303,16 @@ namespace Mirage
                 // only update things while connected
                 World.Time.UpdateClient(this);
             }
-            _peer?.UpdateReceive();
-            _peer?.UpdateSent();
+
+            if (ManualUpdate)
+                return;
+
+            UpdateReceive();
+            UpdateSent();
         }
+
+        public void UpdateReceive() => _peer?.UpdateReceive();
+        public void UpdateSent() => _peer?.UpdateSent();
 
         internal void RegisterHostHandlers()
         {
