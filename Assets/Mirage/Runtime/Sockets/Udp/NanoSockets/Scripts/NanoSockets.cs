@@ -104,7 +104,8 @@ namespace NanoSockets
             // Attempt v2 (2022-12-09): Use unsafe pointer for the IP string.
             var ptr = stackalloc char[64];
             UDP.GetIP(ref this, (IntPtr)ptr, 64);
-            return $"IP: {new string(ptr)} Port: {this.Port}";
+            var ip = Marshal.PtrToStringAnsi((IntPtr)ptr);
+            return $"IP: {ip} Port: {Port}";
         }
 
         public static Address CreateFromIpPort(string ip, ushort port)
