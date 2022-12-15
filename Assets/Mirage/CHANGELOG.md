@@ -1,3 +1,10 @@
+## [129.2.1](https://github.com/MirageNet/Mirage/compare/v129.2.0...v129.2.1) (2022-12-15)
+
+
+### Bug Fixes
+
+* marking RemoteCallCollection as NonSerialized ([c6ef84b](https://github.com/MirageNet/Mirage/commit/c6ef84ba8fb20cf589ab6c4f50147b263711ea64))
+
 # [129.2.0](https://github.com/MirageNet/Mirage/compare/v129.1.4...v129.2.0) (2022-12-11)
 
 
