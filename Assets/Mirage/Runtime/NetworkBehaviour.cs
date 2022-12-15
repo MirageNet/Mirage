@@ -492,6 +492,7 @@ namespace Mirage
         /// <para>Can be used to get RPC name from its index</para>
         /// <para>NOTE: Weaver uses this collection to add rpcs, If adding your own rpc do at your own risk</para>
         /// </summary>
+        [NonSerialized]
         public readonly RemoteCallCollection RemoteCallCollection;
 
         protected NetworkBehaviour()
