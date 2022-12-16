@@ -12,6 +12,9 @@ namespace Mirage.EditorScripts.Logging
     {
         private static LogLevelsGUI _drawer;
 
+        // -1 => no type, will show as empty dropdown
+        private const LogType NO_LEVEL = (LogType)(-1);
+
         public static void DrawSettings(LogSettingsSO settings)
         {
             if (_drawer == null)
@@ -43,6 +46,7 @@ namespace Mirage.EditorScripts.Logging
         /// Keep track of gui changed. If it has changed then we need to update <see cref="LogFactory"/> and save the new levels to file
         /// </summary>
         private bool guiChanged;
+        private LogType? _filter;
 
         public LogLevelsGUI(LogSettingsSO settings)
         {
@@ -61,11 +65,16 @@ namespace Mirage.EditorScripts.Logging
             using (new LogGUIScope())
             {
                 EditorGUILayout.HelpBox("You may need to run your game a few times for this list to properly populate!", MessageType.Info);
-                DrawAllLevelDropdown();
+
+                DrawSetAllDropDown();
 
                 EditorGUILayout.Space();
 
-                foreach (var group in settings.LogLevels.GroupBy(x => x.Namespace).OrderBy(x => x.Key))
+                DrawFilterByDropDown();
+
+                EditorGUILayout.Space();
+
+                foreach (var group in GetGroups())
                 {
                     DrawGroup(group);
                 }
@@ -81,7 +90,19 @@ namespace Mirage.EditorScripts.Logging
             }
         }
 
-        private void DrawAllLevelDropdown()
+        private IOrderedEnumerable<IGrouping<string, LogSettingsSO.LoggerSettings>> GetGroups()
+        {
+            IEnumerable<LogSettingsSO.LoggerSettings> levels = settings.LogLevels;
+            if (_filter.HasValue)
+            {
+                var filter = _filter.Value;
+                levels = levels.Where(x => x.logLevel == filter);
+            }
+
+            return levels.GroupBy(x => x.Namespace).OrderBy(x => x.Key);
+        }
+
+        private void DrawSetAllDropDown()
         {
             using (var scope = new EditorGUI.ChangeCheckScope())
             {
@@ -91,6 +112,20 @@ namespace Mirage.EditorScripts.Logging
                 {
                     SetGroupLevel(settings.LogLevels, allLogType);
                 }
+            }
+        }
+        private void DrawFilterByDropDown()
+        {
+            var result = (LogType)EditorGUILayout.EnumPopup("filter by level", _filter ?? NO_LEVEL);
+
+            if (result == NO_LEVEL)
+                _filter = null;
+            else
+                _filter = result;
+
+            if (GUILayout.Button("Clear filter", GUILayout.Width(100)))
+            {
+                _filter = null;
             }
         }
 
@@ -209,8 +244,7 @@ namespace Mirage.EditorScripts.Logging
             }
             else
             {
-                // -1 => no type, will show as empty dropdown
-                return (LogType)(-1);
+                return NO_LEVEL;
             }
         }
         private void SetGroupLevel(IEnumerable<LogSettingsSO.LoggerSettings> group, LogType level)
