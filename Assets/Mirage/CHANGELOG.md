@@ -1,3 +1,10 @@
+# [129.3.0](https://github.com/MirageNet/Mirage/compare/v129.2.1...v129.3.0) (2022-12-16)
+
+
+### Features
+
+* adding filter to log settings ([d50e754](https://github.com/MirageNet/Mirage/commit/d50e7543be2179db0674e456f23ec0afa30df89f))
+
 ## [129.2.1](https://github.com/MirageNet/Mirage/compare/v129.2.0...v129.2.1) (2022-12-15)
 
 
