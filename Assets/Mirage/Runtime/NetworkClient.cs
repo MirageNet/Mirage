@@ -282,16 +282,41 @@ namespace Mirage
         /// <returns>True if message was sent.</returns>
         public void Send<T>(T message, int channelId = Channel.Reliable)
         {
+            // Coburn, 2022-12-19: Fix NetworkClient.Send triggering NullReferenceException
+            // This is caused by Send() being fired after the Player object is disposed or reset
+            // to null. Instead, throw a InvalidOperationException if that is the case.
+
+            // Throw a IOE if NetworkClient's connection is null.
+            if (Player == null)
+                throw new InvalidOperationException("Cannot send the data. Send was called while the NetworkClient connection was null. " +
+                    "The connection may have been disconnected or terminated.");
+
+            // Otherwise, send it off.
             Player.Send(message, channelId);
         }
 
         public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
+            // For more information, see notes in Send<T> ...
+            // Throw a IOE if NetworkClient's connection is null.
+            if (Player == null)
+                throw new InvalidOperationException("Cannot send the data. Send was called while the NetworkClient connection was null. " +
+                    "The connection may have been disconnected or terminated.");
+
+            // Otherwise, send it off.
             Player.Send(segment, channelId);
         }
 
         public void Send<T>(T message, INotifyCallBack notifyCallBack)
         {
+            // For more information, see notes in Send<T> ...
+
+            // Throw a IOE if NetworkClient's connection is null.
+            if (Player == null)
+                throw new InvalidOperationException("Cannot send the data. Send was called while the NetworkClient connection was null. " +
+                    "The connection may have been disconnected or terminated.");
+
+            // Otherwise, send it off.
             Player.Send(message, notifyCallBack);
         }
 
