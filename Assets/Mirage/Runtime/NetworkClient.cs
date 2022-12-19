@@ -310,7 +310,6 @@ namespace Mirage
         public void Send<T>(T message, INotifyCallBack notifyCallBack)
         {
             // For more information, see notes in Send<T> ...
-
             // Throw a IOE if NetworkClient's connection is null.
             if (Player == null)
                 throw new InvalidOperationException("Cannot send the data. Send was called while the NetworkClient connection was null. " +
