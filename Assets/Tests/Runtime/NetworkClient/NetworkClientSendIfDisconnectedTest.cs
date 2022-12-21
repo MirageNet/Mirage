@@ -19,6 +19,12 @@ namespace Mirage.Tests.Runtime
             // Initialize...
             clientGO = new GameObject("Mirage Network Client Object", typeof(NetworkClient));
             clientNetClient = clientGO.GetComponent<NetworkClient>();
+
+            // Ensure that these are correct for this test.
+            // - The NetworkClient reference is not null.
+            // - The NetworkClient Player reference must be null.
+            Debug.Assert(clientNetClient != null);
+            Debug.Assert(clientNetClient.Player == null);           
         }
 
         [TearDown]
@@ -28,34 +34,12 @@ namespace Mirage.Tests.Runtime
         }
 
         [Test]
-        // Ensure that the created client game object and it's component(s) isn't null.
-        public void EnsureNetworkClientIsNotNull()
-        {
-            Assert.IsNotNull(clientGO);
-            Assert.IsNotNull(clientNetClient);
-        }
-
-        [Test]
-        // Ensure that the client object's Player reference is null.
-        public void EnsureNetworkClientPlayerIsNull()
-        {
-            Assert.IsNull(clientNetClient.Player);
-        }
-
-        [Test]
         // Make sure we throw IOE to prevent Send attempts.
         public void EnsureNetworkClientDoesntSendWhenDisconnected()
         {
             // Send out data.
             // This should always invoke a InvalidOperationException.
-            try
-            {
-                clientNetClient.Send(new byte[] { 0x13, 0x37, 0x69 });
-            }
-            catch (Exception ex)
-            {
-                Assert.That(ex is InvalidOperationException);
-            }
+            Assert.Throws<InvalidOperationException>(() => clientNetClient.Send(new byte[] { 0x13, 0x37, 0x69 }));
         }
     }
 }
