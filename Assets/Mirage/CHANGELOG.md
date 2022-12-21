@@ -1,3 +1,10 @@
+## [129.3.1](https://github.com/MirageNet/Mirage/compare/v129.3.0...v129.3.1) (2022-12-21)
+
+
+### Bug Fixes
+
+* throw InvalidOperationException if network client attempts to send messages while disconnected ([#1118](https://github.com/MirageNet/Mirage/issues/1118)) ([b7ae4de](https://github.com/MirageNet/Mirage/commit/b7ae4deab1fe197def84d81e81cab257f25010c9))
+
 # [129.3.0](https://github.com/MirageNet/Mirage/compare/v129.2.1...v129.3.0) (2022-12-16)
 
 
