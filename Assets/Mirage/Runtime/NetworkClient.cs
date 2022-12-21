@@ -384,7 +384,7 @@ namespace Mirage
         private void ThrowIfSendingWhileNotConnected()
         {
             throw new InvalidOperationException("Attempting to send data while not connected. This is not allowed. " +
-                "NetworkClient Player connection reference is null, in which the the connection may have been disconnected/terminated before the Send function was called.");
+                "NetworkClient Player connection reference is null, in which the connection may have been disconnected/terminated before the Send function was called.");
         }
 
         internal class DataHandler : IDataHandler
