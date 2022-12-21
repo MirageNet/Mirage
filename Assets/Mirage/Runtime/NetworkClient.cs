@@ -286,10 +286,8 @@ namespace Mirage
             // This is caused by Send() being fired after the Player object is disposed or reset
             // to null. Instead, throw a InvalidOperationException if that is the case.
 
-            // Throw a IOE if NetworkClient's connection is null.
             if (Player == null)
-                throw new InvalidOperationException("Cannot send the data. Send was called while the NetworkClient connection was null. " +
-                    "The connection may have been disconnected or terminated.");
+                ThrowIfSendingWhileNotConnected();
 
             // Otherwise, send it off.
             Player.Send(message, channelId);
@@ -298,10 +296,8 @@ namespace Mirage
         public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
             // For more information, see notes in Send<T> ...
-            // Throw a IOE if NetworkClient's connection is null.
             if (Player == null)
-                throw new InvalidOperationException("Cannot send the data. Send was called while the NetworkClient connection was null. " +
-                    "The connection may have been disconnected or terminated.");
+                ThrowIfSendingWhileNotConnected();
 
             // Otherwise, send it off.
             Player.Send(segment, channelId);
@@ -310,10 +306,8 @@ namespace Mirage
         public void Send<T>(T message, INotifyCallBack notifyCallBack)
         {
             // For more information, see notes in Send<T> ...
-            // Throw a IOE if NetworkClient's connection is null.
             if (Player == null)
-                throw new InvalidOperationException("Cannot send the data. Send was called while the NetworkClient connection was null. " +
-                    "The connection may have been disconnected or terminated.");
+                ThrowIfSendingWhileNotConnected();
 
             // Otherwise, send it off.
             Player.Send(message, notifyCallBack);
@@ -385,6 +379,12 @@ namespace Mirage
                 _peer.Close();
                 _peer = null;
             }
+        }
+
+        private void ThrowIfSendingWhileNotConnected()
+        {
+            throw new InvalidOperationException("Attempting to send data while not connected. This is not allowed. " +
+                "NetworkClient Player connection reference is null, in which the the connection may have been disconnected/terminated before the Send function was called.");
         }
 
         internal class DataHandler : IDataHandler
