@@ -1,3 +1,10 @@
+## [129.3.2](https://github.com/MirageNet/Mirage/compare/v129.3.1...v129.3.2) (2022-12-22)
+
+
+### Bug Fixes
+
+* errors and warnings on 2023.1 alpha ([#1120](https://github.com/MirageNet/Mirage/issues/1120)) ([37fa113](https://github.com/MirageNet/Mirage/commit/37fa1132828ea72515d9351b7acc8110225e6da3))
+
 ## [129.3.1](https://github.com/MirageNet/Mirage/compare/v129.3.0...v129.3.1) (2022-12-21)
 
 
