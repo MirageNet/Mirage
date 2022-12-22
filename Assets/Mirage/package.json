@@ -11,7 +11,7 @@
     },
     "dependencies": {
         "com.unity.nuget.mono-cecil": "1.10.1",
-        "com.cysharp.unitask": "2.0.36"
+        "com.cysharp.unitask": "2.3.3"
     },
     "samples": [
         {
