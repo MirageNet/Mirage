@@ -29,7 +29,7 @@ namespace Mirage.Logging
             if (cache != null)
                 return cache;
 
-#if UNITY_2021_1_OR_NEWER
+#if UNITY_2023_1_OR_NEWER
             cache = Object.FindFirstObjectByType<LogSettingsSO>();
 #else
             cache = Object.FindObjectOfType<LogSettingsSO>();
