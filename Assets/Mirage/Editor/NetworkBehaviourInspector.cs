@@ -264,25 +264,31 @@ namespace Mirage
 
         private void DrawSyncList(SyncListField syncListField)
         {
-            syncListField.visible = EditorGUILayout.Foldout(syncListField.visible, syncListField.label);
+            syncListField.visible = EditorGUILayout.Foldout(syncListField.visible, syncListField.label, true);
             if (syncListField.visible)
             {
-                using (new EditorGUI.IndentLevelScope())
+                EditorGUILayout.BeginVertical("OL box");
+                int count = 0;
+                var fieldValue = syncListField.field.GetValue(_targetObject);
+                if (fieldValue is IEnumerable synclist)
                 {
-                    var fieldValue = syncListField.field.GetValue(_targetObject);
-                    if (fieldValue is IEnumerable synclist)
+                    var index = 0;
+                    foreach (var item in synclist)
                     {
-                        var index = 0;
-                        foreach (var item in synclist)
-                        {
-                            var itemValue = item != null ? item.ToString() : "NULL";
-                            var itemLabel = "Element " + index;
-                            EditorGUILayout.LabelField(itemLabel, itemValue);
+                        var itemValue = item != null ? item.ToString() : "NULL";
+                        var itemLabel = "Element " + index;
+                        EditorGUILayout.LabelField(itemLabel, itemValue);
 
-                            index++;
-                        }
+                        index++;
+                        count++;
                     }
                 }
+
+                if (count == 0)
+                {
+                    EditorGUILayout.LabelField("List is empty");
+                }
+                EditorGUILayout.EndVertical();
             }
         }
 
