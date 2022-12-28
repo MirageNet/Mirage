@@ -1,19 +1,11 @@
-#if UNITY_2022_2_OR_NEWER
-#define USE_UI_TOOLKIT
-#endif // UNITY_2022_2_OR_NEWER
-
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
-#if USE_UI_TOOLKIT
-using UnityEditor.UIElements;
-using UnityEngine.UIElements;
-#endif // USE_UI_TOOLKIT
 
 namespace Mirage
 {
     [CustomPropertyDrawer(typeof(FoldoutEventAttribute))]
-    public class FoldoutEventDrawer : PropertyDrawer
+    public partial class FoldoutEventDrawer : PropertyDrawer
     {
         private UnityEventDrawer _unityEventDrawer;
 
@@ -61,21 +53,5 @@ namespace Mirage
                 UnityEventDrawer.OnGUI(eventRec, property, label);
             }
         }
-
-#if USE_UI_TOOLKIT
-        public override VisualElement CreatePropertyGUI(SerializedProperty property)
-        {
-            var foldout = new Foldout()
-            {
-                text = property.displayName,
-            };
-
-            foldout.Add(UnityEventDrawer.CreatePropertyGUI(property));
-
-            foldout.BindProperty(property);
-
-            return foldout;
-        }
-#endif // USE_UI_TOOLKIT
     }
 }

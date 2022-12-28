@@ -1,18 +1,10 @@
-#if UNITY_2022_2_OR_NEWER
-#define USE_UI_TOOLKIT
-#endif
-
 using UnityEditor;
 using UnityEngine;
-#if USE_UI_TOOLKIT
-using UnityEditor.UIElements;
-using UnityEngine.UIElements;
-#endif
 
 namespace Mirage
 {
     [CustomPropertyDrawer(typeof(SyncVarAttribute))]
-    public class SyncVarAttributeDrawer : PropertyDrawer
+    public partial class SyncVarAttributeDrawer : PropertyDrawer
     {
         private static readonly GUIContent syncVarIndicatorContent = new GUIContent("SyncVar", "This variable has been marked with the [SyncVar] attribute.");
 
@@ -32,45 +24,5 @@ namespace Mirage
         {
             return EditorGUI.GetPropertyHeight(property);
         }
-
-#if USE_UI_TOOLKIT
-        public override VisualElement CreatePropertyGUI(SerializedProperty property)
-        {
-            var container = new VisualElement()
-            {
-                style =
-                {
-                    flexDirection = FlexDirection.Row
-                }
-            };
-
-            var field = new PropertyField(property)
-            {
-                style =
-                {
-                    flexGrow = 1
-                }
-            };
-            field.BindProperty(property);
-            container.Add(field);
-
-            var label = new Label(syncVarIndicatorContent.text)
-            {
-                tooltip = syncVarIndicatorContent.tooltip,
-                style =
-                {
-                    fontSize = 10,
-                    flexGrow = 0,
-                    unityTextAlign = TextAnchor.MiddleLeft,
-                    marginLeft = 2,
-                    marginRight = 2
-                }
-            };
-
-            container.Add(label);
-
-            return container;
-        }
-#endif // USE_UI_TOOLKIT
     }
 } //namespace
