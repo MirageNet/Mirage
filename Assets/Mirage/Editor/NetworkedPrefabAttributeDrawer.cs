@@ -48,14 +48,14 @@ namespace Mirage
 
             var y = position.y;
 
-            // If there's a fix message, show it.
+            // If there's a fix message and there's a target object, show the error.
             var fixMessage = GetFixMessage(_targetObjectHasIdentity, _targetObjectIsRegistered);
-            if (!string.IsNullOrEmpty(fixMessage))
+            if (!string.IsNullOrEmpty(fixMessage) && _currentTargetObject != null)
             {
                 var r = new Rect(position.x, position.y, position.width - 63, HELP_BOX_HEIGHT);
 
                 EditorGUI.HelpBox(r, fixMessage, MessageType.Error);
-                if (GUI.Button(new Rect(r.width + 3, r.y, 60, HELP_BOX_HEIGHT), "Fix"))
+                if (GUI.Button(new Rect(r.width + 21, r.y, 60, HELP_BOX_HEIGHT), "Fix"))
                 {
                     Fix(_currentTargetObject, _targetObjectHasIdentity, _targetObjectIsRegistered);
                 }
@@ -85,9 +85,9 @@ namespace Mirage
             _clientObjects = FindClientObjectManager();
             Validate(property.objectReferenceValue);
 
-            var height = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+            var height = EditorGUIUtility.singleLineHeight;
             // If it has some issue, add the help box height.
-            if (!_targetObjectHasIdentity || !_targetObjectIsRegistered)
+            if ((!_targetObjectHasIdentity || !_targetObjectIsRegistered) && _currentTargetObject != null)
             {
                 height += HELP_BOX_HEIGHT + EditorGUIUtility.standardVerticalSpacing;
             }
