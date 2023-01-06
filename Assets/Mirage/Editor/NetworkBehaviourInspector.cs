@@ -12,6 +12,7 @@ namespace Mirage
 #if !EXCLUDE_NETWORK_BEHAVIOUR_INSPECTOR
     [CustomEditor(typeof(NetworkBehaviour), true)]
     [CanEditMultipleObjects]
+#endif
     public partial class NetworkBehaviourInspector : Editor
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkBehaviourInspector));
@@ -35,7 +36,6 @@ namespace Mirage
             _drawer.DrawDefaultSyncSettings();
         }
     }
-#endif
 
     /// <summary>
     /// split from Editor class so that people can use this with custom inspectoer
