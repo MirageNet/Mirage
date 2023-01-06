@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Mirage
 {
     [CustomPropertyDrawer(typeof(FoldoutEventAttribute))]
-    public class FoldoutEventDrawer : PropertyDrawer
+    public partial class FoldoutEventDrawer : PropertyDrawer
     {
         private UnityEventDrawer _unityEventDrawer;
 

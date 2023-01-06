@@ -12,7 +12,7 @@ namespace Mirage
 #if !EXCLUDE_NETWORK_BEHAVIOUR_INSPECTOR
     [CustomEditor(typeof(NetworkBehaviour), true)]
     [CanEditMultipleObjects]
-    public class NetworkBehaviourInspector : Editor
+    public partial class NetworkBehaviourInspector : Editor
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkBehaviourInspector));
         private NetworkBehaviourInspectorDrawer _drawer;
@@ -40,7 +40,7 @@ namespace Mirage
     /// <summary>
     /// split from Editor class so that people can use this with custom inspectoer
     /// </summary>
-    public class NetworkBehaviourInspectorDrawer
+    public partial class NetworkBehaviourInspectorDrawer
     {
         /// <summary>
         /// List of all visible syncVars in target class
@@ -141,7 +141,7 @@ namespace Mirage
     /// Draws sync lists in inspector
     /// <para>because synclists are not serailzied by unity they will not show up in the default inspector, so we need a custom draw to draw them</para>
     /// </summary>
-    public class SyncListDrawer
+    public partial class SyncListDrawer
     {
         private readonly Object _targetObject;
         private readonly List<SyncListField> _syncListFields;
@@ -174,25 +174,31 @@ namespace Mirage
 
         private void DrawSyncList(SyncListField syncListField)
         {
-            syncListField.visible = EditorGUILayout.Foldout(syncListField.visible, syncListField.label);
+            syncListField.visible = EditorGUILayout.Foldout(syncListField.visible, syncListField.label, true);
             if (syncListField.visible)
             {
-                using (new EditorGUI.IndentLevelScope())
+                EditorGUILayout.BeginVertical("OL box");
+                int count = 0;
+                var fieldValue = syncListField.field.GetValue(_targetObject);
+                if (fieldValue is IEnumerable synclist)
                 {
-                    var fieldValue = syncListField.field.GetValue(_targetObject);
-                    if (fieldValue is IEnumerable synclist)
+                    var index = 0;
+                    foreach (var item in synclist)
                     {
-                        var index = 0;
-                        foreach (var item in synclist)
-                        {
-                            var itemValue = item != null ? item.ToString() : "NULL";
-                            var itemLabel = "Element " + index;
-                            EditorGUILayout.LabelField(itemLabel, itemValue);
+                        var itemValue = item != null ? item.ToString() : "NULL";
+                        var itemLabel = "Element " + index;
+                        EditorGUILayout.LabelField(itemLabel, itemValue);
 
-                            index++;
-                        }
+                        index++;
+                        count++;
                     }
                 }
+
+                if (count == 0)
+                {
+                    EditorGUILayout.LabelField("List is empty");
+                }
+                EditorGUILayout.EndVertical();
             }
         }
 
@@ -201,12 +207,28 @@ namespace Mirage
             public bool visible;
             public readonly FieldInfo field;
             public readonly string label;
+            public readonly List<object> items;
 
             public SyncListField(FieldInfo field)
             {
                 this.field = field;
                 visible = false;
                 label = field.Name + "  [" + field.FieldType.Name + "]";
+                items = new List<object>();
+            }
+
+            public void UpdateItems(object target)
+            {
+                var fieldValue = field.GetValue(target);
+                if (fieldValue is IEnumerable syncList)
+                {
+                    items.Clear();
+
+                    foreach (var item in syncList)
+                    {
+                        items.Add(item);
+                    }
+                }
             }
         }
     }

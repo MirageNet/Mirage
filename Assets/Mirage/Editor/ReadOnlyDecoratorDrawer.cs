@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Mirage
 {
     [CustomPropertyDrawer(typeof(ReadOnlyInspectorAttribute))]
-    public class ReadOnlyDecoratorDrawer : PropertyDrawer
+    public partial class ReadOnlyDecoratorDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {

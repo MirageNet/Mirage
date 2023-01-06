@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Mirage
 {
     [CustomPropertyDrawer(typeof(SyncVarAttribute))]
-    public class SyncVarAttributeDrawer : PropertyDrawer
+    public partial class SyncVarAttributeDrawer : PropertyDrawer
     {
         private static readonly GUIContent syncVarIndicatorContent = new GUIContent("SyncVar", "This variable has been marked with the [SyncVar] attribute.");
 
