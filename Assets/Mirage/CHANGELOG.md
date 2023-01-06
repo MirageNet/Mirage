@@ -1,3 +1,10 @@
+# [129.4.0](https://github.com/MirageNet/Mirage/compare/v129.3.2...v129.4.0) (2023-01-06)
+
+
+### Features
+
+* ui toolkit network behaviour editor for unity 2022.2 and newer ([#1121](https://github.com/MirageNet/Mirage/issues/1121)) ([f626c77](https://github.com/MirageNet/Mirage/commit/f626c77304b03ce7a177d00b0283754407bf1531))
+
 ## [129.3.2](https://github.com/MirageNet/Mirage/compare/v129.3.1...v129.3.2) (2022-12-22)
 
 
