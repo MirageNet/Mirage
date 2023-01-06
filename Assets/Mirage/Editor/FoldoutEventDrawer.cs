@@ -5,6 +5,7 @@ using UnityEngine;
 namespace Mirage
 {
     [CustomPropertyDrawer(typeof(FoldoutEventAttribute))]
+    // UITookit used in 2022+, see FoldoutEventDrawerUIToolkit.cs
     public partial class FoldoutEventDrawer : PropertyDrawer
     {
         private UnityEventDrawer _unityEventDrawer;

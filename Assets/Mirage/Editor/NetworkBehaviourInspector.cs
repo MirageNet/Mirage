@@ -13,6 +13,7 @@ namespace Mirage
     [CustomEditor(typeof(NetworkBehaviour), true)]
     [CanEditMultipleObjects]
 #endif
+    // UITookit used in 2022+, see NetworkBehaviourInspectorUIToolkit.cs
     public partial class NetworkBehaviourInspector : Editor
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkBehaviourInspector));
@@ -178,7 +179,7 @@ namespace Mirage
             if (syncListField.visible)
             {
                 EditorGUILayout.BeginVertical("OL box");
-                int count = 0;
+                var count = 0;
                 var fieldValue = syncListField.field.GetValue(_targetObject);
                 if (fieldValue is IEnumerable synclist)
                 {

@@ -1,9 +1,10 @@
-﻿using UnityEditor;
+using UnityEditor;
 using UnityEngine;
 
 namespace Mirage
 {
     [CustomPropertyDrawer(typeof(ReadOnlyInspectorAttribute))]
+    // UITookit used in 2022+, see ReadOnlyDecoratorDrawerUIToolkit.cs
     public partial class ReadOnlyDecoratorDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)

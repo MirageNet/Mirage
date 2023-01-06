@@ -6,7 +6,6 @@ using UnityEngine;
 
 namespace Mirage
 {
-#if !EXCLUDE_NETWORK_BEHAVIOUR_INSPECTOR
     public partial class NetworkBehaviourInspector
     {
         public override VisualElement CreateInspectorGUI()
@@ -46,7 +45,6 @@ namespace Mirage
             return root;
         }
     }
-#endif // !EXCLUDE_NETWORK_BEHAVIOUR_INSPECTOR
 
     public partial class NetworkBehaviourInspectorDrawer
     {
