@@ -17,7 +17,6 @@ namespace Mirage
             for (bool enterChildren = true; iterator.NextVisible(enterChildren); enterChildren = false)
             {
                 var field = new PropertyField(iterator);
-                field.Bind(serializedObject);
 
                 // Disable the script field.
                 if (iterator.propertyPath == "m_Script")
