@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Mirage
 {
     [CustomEditor(typeof(NetworkPrefabs))]
-    public partial class NetworkPrefabsDrawer : Editor
+    public partial class NetworkPrefabsInspector : Editor
     {
         private SerializedProperty prefabs;
 

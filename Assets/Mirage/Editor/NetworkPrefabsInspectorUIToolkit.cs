@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 
 namespace Mirage
 {
-    public partial class NetworkPrefabsDrawer
+    public partial class NetworkPrefabsInspector
     {
         private ListView listView;
 
