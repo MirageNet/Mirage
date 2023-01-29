@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,54 +7,61 @@ namespace Mirage
     [CanEditMultipleObjects]
     public class ClientObjectManagerInspector : Editor
     {
+        private SerializedProperty networkPrefabs;
+
+        private void OnEnable()
+        {
+            networkPrefabs = serializedObject.FindProperty(nameof(ClientObjectManager.NetworkPrefabs));
+        }
+
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
 
-            if (GUILayout.Button("Register All Prefabs"))
+            if (networkPrefabs.objectReferenceValue == null)
             {
-                Undo.RecordObject(target, "Register prefabs for spawn");
-                PrefabUtility.RecordPrefabInstancePropertyModifications(target);
-                RegisterPrefabs((ClientObjectManager)target);
-            }
-        }
-
-        public void RegisterPrefabs(ClientObjectManager gameObject)
-        {
-            var prefabs = LoadPrefabsContaining<NetworkIdentity>("Assets");
-
-            foreach (var existing in gameObject.spawnPrefabs)
-            {
-                prefabs.Add(existing);
-            }
-            gameObject.spawnPrefabs.Clear();
-            gameObject.spawnPrefabs.AddRange(prefabs);
-        }
-
-        private static ISet<T> LoadPrefabsContaining<T>(string path) where T : Component
-        {
-            var result = new HashSet<T>();
-
-            var guids = AssetDatabase.FindAssets("t:GameObject", new[] { path });
-
-            for (var i = 0; i < guids.Length; i++)
-            {
-                var assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
-
-                var obj = AssetDatabase.LoadAssetAtPath<T>(assetPath);
-
-                if (obj != null)
+                if (GUILayout.Button("Create NetworkPrefabs"))
                 {
-                    result.Add(obj);
-                }
-
-                if (i % 100 == 99)
-                {
-                    EditorUtility.UnloadUnusedAssetsImmediate();
+                    var path = EditorUtility.SaveFilePanelInProject("Create NetworkPrefabs", "NetworkPrefabs", "asset", "Create NetworkPrefabs");
+                    CreateNetworkPrefabs(path);
                 }
             }
-            EditorUtility.UnloadUnusedAssetsImmediate();
-            return result;
         }
+
+        public void CreateNetworkPrefabs(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return;
+            }
+
+            var prefabs = CreateInstance<NetworkPrefabs>();
+            AssetDatabase.CreateAsset(prefabs, path);
+            AssetDatabase.SaveAssets();
+            networkPrefabs.objectReferenceValue = prefabs;
+            serializedObject.ApplyModifiedProperties();
+
+            RegisterOldPrefabs(prefabs);
+        }
+
+#pragma warning disable CS0618 // Type or member is obsolete
+        private void RegisterOldPrefabs(NetworkPrefabs prefabs)
+        {
+            var so = new SerializedObject(prefabs);
+            so.Update();
+
+            var spawnPrefabs = so.FindProperty(nameof(NetworkPrefabs.Prefabs));
+
+            // Disable warning about obsolete field because we are using it for backwards compatibility.
+            spawnPrefabs.arraySize = ((ClientObjectManager)target).spawnPrefabs.Count;
+
+            for (var i = 0; i < spawnPrefabs.arraySize; i++)
+            {
+                spawnPrefabs.GetArrayElementAtIndex(i).objectReferenceValue = ((ClientObjectManager)target).spawnPrefabs[i];
+            }
+
+            so.ApplyModifiedProperties();
+        }
+#pragma warning restore CS0618
     }
 }

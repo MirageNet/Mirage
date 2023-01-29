@@ -27,8 +27,15 @@ namespace Mirage
         /// List of prefabs that will be registered with the spawning system.
         /// <para>For each of these prefabs, ClientManager.RegisterPrefab() will be automatically invoke.</para>
         /// </summary>
-        [Header("Prefabs")]
+        [Obsolete("Use NetworkPrefabs instead")]
+        [HideInInspector]
         public List<NetworkIdentity> spawnPrefabs = new List<NetworkIdentity>();
+
+        /// <summary>
+        /// A scriptable object that holds all the prefabs that will be registered with the spawning system.
+        /// <para>For each of these prefabs, ClientManager.RegisterPrefab() will be automatically invoked.</para>
+        /// </summary>
+        public NetworkPrefabs NetworkPrefabs;
 
         /// <summary>
         /// This is a dictionary of the prefabs and deligates that are registered on the client with ClientScene.RegisterPrefab().
@@ -37,7 +44,7 @@ namespace Mirage
         internal readonly Dictionary<int, SpawnHandler> _handlers = new Dictionary<int, SpawnHandler>();
 
         /// <summary>
-        /// List of handler that will be used 
+        /// List of handler that will be used
         /// </summary>
         internal readonly List<DynamicSpawnHandlerDelegate> _dynamicHandlers = new List<DynamicSpawnHandlerDelegate>();
 
@@ -72,7 +79,14 @@ namespace Mirage
         private void OnValidate()
         {
             _validateCache.Clear();
-            foreach (var prefab in spawnPrefabs)
+
+            // If the NetworkPrefabs is null, then we can't validate anything.
+            if (NetworkPrefabs == null || NetworkPrefabs.Prefabs == null)
+            {
+                return;
+            }
+
+            foreach (var prefab in NetworkPrefabs.Prefabs)
             {
                 if (prefab == null)
                     continue;
@@ -189,9 +203,9 @@ namespace Mirage
         #region Spawn Prefabs and handlers
         private void RegisterSpawnPrefabs()
         {
-            for (var i = 0; i < spawnPrefabs.Count; i++)
+            for (var i = 0; i < NetworkPrefabs.Prefabs.Count; i++)
             {
-                var prefab = spawnPrefabs[i];
+                var prefab = NetworkPrefabs.Prefabs[i];
                 if (prefab != null)
                 {
                     RegisterPrefab(prefab);
@@ -252,8 +266,8 @@ namespace Mirage
         /// <summary>
         /// Registers a prefab with the spawning system.
         /// <para>
-        /// When a NetworkIdentity object is spawned on the server with ServerObjectManager.Spawn(), 
-        /// the server will send a spawn message to the client with the PrefabHash. 
+        /// When a NetworkIdentity object is spawned on the server with ServerObjectManager.Spawn(),
+        /// the server will send a spawn message to the client with the PrefabHash.
         /// the client then finds the prefab registered with RegisterPrefab() to instantiate the client object.
         /// </para>
         /// <para>The ClientObjectManager has a list of spawnable prefabs, it uses this function to register those prefabs with the ClientScene.</para>
@@ -270,8 +284,8 @@ namespace Mirage
         /// <summary>
         /// Registers a prefab with the spawning system.
         /// <para>
-        /// When a NetworkIdentity object is spawned on the server with ServerObjectManager.Spawn(), 
-        /// the server will send a spawn message to the client with the PrefabHash. 
+        /// When a NetworkIdentity object is spawned on the server with ServerObjectManager.Spawn(),
+        /// the server will send a spawn message to the client with the PrefabHash.
         /// the client then finds the prefab registered with RegisterPrefab() to instantiate the client object.
         /// </para>
         /// <para>The ClientObjectManager has a list of spawnable prefabs, it uses this function to register those prefabs with the ClientScene.</para>
@@ -332,8 +346,8 @@ namespace Mirage
         /// <summary>
         /// Registers custom handlers for a prefab with the spawning system.
         /// <para>
-        /// When a NetworkIdentity object is spawned on the server with ServerObjectManager.Spawn(), 
-        /// the server will send a spawn message to the client with the PrefabHash. 
+        /// When a NetworkIdentity object is spawned on the server with ServerObjectManager.Spawn(),
+        /// the server will send a spawn message to the client with the PrefabHash.
         /// the client then finds the prefab registered with RegisterPrefab() to instantiate the client object.
         /// </para>
         /// <para>The ClientObjectManager has a list of spawnable prefabs, it uses this function to register those prefabs with the ClientScene.</para>
