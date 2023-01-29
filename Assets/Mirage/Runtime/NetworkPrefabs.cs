@@ -8,6 +8,6 @@ namespace Mirage
     /// </summary>
     public sealed class NetworkPrefabs : ScriptableObject
     {
-        public List<NetworkIdentity> Prefabs = default;
+        public List<NetworkIdentity> Prefabs = new List<NetworkIdentity>();
     }
 }

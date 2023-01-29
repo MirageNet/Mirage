@@ -15,8 +15,7 @@ namespace Mirage
             var button = new Button(() =>
             {
                 serializedObject.Update();
-                RegisterPrefabs(prefabs);
-                serializedObject.ApplyModifiedProperties();
+                RegisterPrefabs();
             }) { text = "Register All Prefabs" };
 
             root.Add(button);

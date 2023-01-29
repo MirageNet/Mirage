@@ -20,7 +20,7 @@ namespace Mirage
 
             if (GUILayout.Button("Register All Prefabs"))
             {
-                RegisterPrefabs(prefabs);
+                RegisterPrefabs();
             }
 
             EditorGUILayout.PropertyField(prefabs);
@@ -28,13 +28,13 @@ namespace Mirage
             serializedObject.ApplyModifiedProperties();
         }
 
-        public void RegisterPrefabs(SerializedProperty property)
+        public void RegisterPrefabs()
         {
             var loadedPrefabs = LoadPrefabsContaining<NetworkIdentity>("Assets");
 
-            for (var i = 0; i < property.arraySize; i++)
+            for (var i = 0; i < prefabs.arraySize; i++)
             {
-                var item = property.GetArrayElementAtIndex(i).objectReferenceValue;
+                var item = prefabs.GetArrayElementAtIndex(i).objectReferenceValue;
 
                 if (item != null && item is NetworkIdentity identity)
                 {
@@ -42,15 +42,17 @@ namespace Mirage
                 }
             }
 
-            property.ClearArray();
-            property.arraySize = loadedPrefabs.Count;
+            prefabs.ClearArray();
+            prefabs.arraySize = loadedPrefabs.Count;
 
             var index = 0;
             foreach (var prefab in loadedPrefabs)
             {
-                property.GetArrayElementAtIndex(index).objectReferenceValue = prefab;
+                prefabs.GetArrayElementAtIndex(index).objectReferenceValue = prefab;
                 index++;
             }
+
+            serializedObject.ApplyModifiedProperties();
         }
 
         private static ISet<T> LoadPrefabsContaining<T>(string path) where T : Component

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -21,24 +20,28 @@ namespace Mirage
 
             if (networkPrefabs.objectReferenceValue == null)
             {
-                if(GUILayout.Button("Create NetworkPrefabs"))
+                if (GUILayout.Button("Create NetworkPrefabs"))
                 {
                     var path = EditorUtility.SaveFilePanelInProject("Create NetworkPrefabs", "NetworkPrefabs", "asset", "Create NetworkPrefabs");
-
-                    if (string.IsNullOrWhiteSpace(path))
-                    {
-                        return;
-                    }
-
-                    var prefabs = CreateInstance<NetworkPrefabs>();
-                    AssetDatabase.CreateAsset(prefabs, path);
-                    AssetDatabase.SaveAssets();
-                    networkPrefabs.objectReferenceValue = prefabs;
-                    serializedObject.ApplyModifiedProperties();
-
-                    RegisterOldPrefabs(prefabs);
+                    CreateNetworkPrefabs(path);
                 }
             }
+        }
+
+        public void CreateNetworkPrefabs(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return;
+            }
+
+            var prefabs = CreateInstance<NetworkPrefabs>();
+            AssetDatabase.CreateAsset(prefabs, path);
+            AssetDatabase.SaveAssets();
+            networkPrefabs.objectReferenceValue = prefabs;
+            serializedObject.ApplyModifiedProperties();
+
+            RegisterOldPrefabs(prefabs);
         }
 
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -60,43 +63,5 @@ namespace Mirage
             so.ApplyModifiedProperties();
         }
 #pragma warning restore CS0618
-
-        public void RegisterPrefabs(ClientObjectManager gameObject)
-        {
-            var prefabs = LoadPrefabsContaining<NetworkIdentity>("Assets");
-
-            foreach (var existing in gameObject.spawnPrefabs)
-            {
-                prefabs.Add(existing);
-            }
-            gameObject.spawnPrefabs.Clear();
-            gameObject.spawnPrefabs.AddRange(prefabs);
-        }
-
-        private static ISet<T> LoadPrefabsContaining<T>(string path) where T : Component
-        {
-            var result = new HashSet<T>();
-
-            var guids = AssetDatabase.FindAssets("t:GameObject", new[] { path });
-
-            for (var i = 0; i < guids.Length; i++)
-            {
-                var assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
-
-                var obj = AssetDatabase.LoadAssetAtPath<T>(assetPath);
-
-                if (obj != null)
-                {
-                    result.Add(obj);
-                }
-
-                if (i % 100 == 99)
-                {
-                    EditorUtility.UnloadUnusedAssetsImmediate();
-                }
-            }
-            EditorUtility.UnloadUnusedAssetsImmediate();
-            return result;
-        }
     }
 }
