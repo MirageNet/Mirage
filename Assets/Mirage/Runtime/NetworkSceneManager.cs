@@ -343,7 +343,7 @@ namespace Mirage
         /// <param name="players">List of player's we want to send the new scene loading or unloading to.</param>
         /// <param name="shouldClientLoadOrUnloadNormally">Should client load or unload the scene in normal non additive way</param>
         /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
-        private void ServerSceneLoading(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadOrUnloadNormally, SceneOperation sceneOperation = SceneOperation.Normal, LoadSceneParameters? loadSceneParameters = null)
+        private async void ServerSceneLoading(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadOrUnloadNormally, SceneOperation sceneOperation = SceneOperation.Normal, LoadSceneParameters? loadSceneParameters = null)
         {
             if (string.IsNullOrEmpty(scenePath))
             {
@@ -366,16 +366,18 @@ namespace Mirage
                 OnClientStartedSceneChange?.Invoke(scenePath, sceneOperation);
             }
 
-            // always load on scene, even if host
-            LoadSceneAsync(scenePath, players, sceneOperation, loadSceneParameters).Forget();
+            // Coburn, 2023-01-29: Patched the following to not use Forget UniTask functionality.
+            // ALWAYS load the scene, even if we're the host.
+            // Cache the async scene load task...
+            var loadTask = LoadSceneAsync(scenePath, players, sceneOperation, loadSceneParameters);
 
-            // notify all clients about the new scene
-            if (shouldClientLoadOrUnloadNormally)
-            {
-                sceneOperation = SceneOperation.Normal;
-            }
+            // Send out the message to do the change. This'll notify all clients.
+            SendSceneMessage(players, scenePath, shouldClientLoadOrUnloadNormally ? SceneOperation.Normal : sceneOperation);
 
-            SendSceneMessage(players, scenePath, sceneOperation);
+            // Use await to wait for the scene to fully load
+            await loadTask;
+
+            // Load scene complete
         }
 
         private void SendSceneMessage(IEnumerable<INetworkPlayer> players, string scenePath, SceneOperation sceneOperation)
