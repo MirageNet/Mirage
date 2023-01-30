@@ -343,7 +343,7 @@ namespace Mirage
         /// <param name="players">List of player's we want to send the new scene loading or unloading to.</param>
         /// <param name="shouldClientLoadOrUnloadNormally">Should client load or unload the scene in normal non additive way</param>
         /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
-        private async UniTask ServerSceneLoading(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadOrUnloadNormally, SceneOperation sceneOperation = SceneOperation.Normal, LoadSceneParameters? loadSceneParameters = null)
+        private UniTask ServerSceneLoading(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadOrUnloadNormally, SceneOperation sceneOperation = SceneOperation.Normal, LoadSceneParameters? loadSceneParameters = null)
         {
             if (string.IsNullOrEmpty(scenePath))
             {
@@ -368,14 +368,13 @@ namespace Mirage
 
             // Coburn, 2023-01-29: Patched the following to not use Forget UniTask functionality.
             // ALWAYS load the scene, even if we're the host.
-            // Cache the async scene load task...
+            // return the task after sending the message
             var loadTask = LoadSceneAsync(scenePath, players, sceneOperation, loadSceneParameters);
 
             // Send out the message to do the change. This'll notify all clients.
             SendSceneMessage(players, scenePath, shouldClientLoadOrUnloadNormally ? SceneOperation.Normal : sceneOperation);
 
-            // Use await to wait for the scene to fully load.
-            await loadTask;
+            return loadTask;
         }
 
         private void SendSceneMessage(IEnumerable<INetworkPlayer> players, string scenePath, SceneOperation sceneOperation)
@@ -395,7 +394,7 @@ namespace Mirage
         /// <param name="scene">What scene do we want to tell server and clients to unload.</param>
         /// <param name="players">The players we want to tell to unload the scene.</param>
         // Coburn, 2023-01-29: Is this a typo with the capital 'L'? Should it be ServerSceneUnloading?
-        public async UniTask ServerSceneUnLoading(Scene scene, IEnumerable<INetworkPlayer> players)
+        public UniTask ServerSceneUnLoading(Scene scene, IEnumerable<INetworkPlayer> players)
         {
             if (!scene.IsValid())
             {
@@ -419,14 +418,13 @@ namespace Mirage
             // Notify interested references that we're doing a scene operation...
             OnServerStartedSceneChange?.Invoke(scene.path, SceneOperation.UnloadAdditive);
 
-            // Cache the unload task.
+            // return the task after sending the message
             var unloadTask = UnLoadSceneAsync(scene, SceneOperation.UnloadAdditive);
 
             // notify all clients about the new scene
             SendSceneMessage(players, scene.path, SceneOperation.UnloadAdditive);
 
-            // Wait until the unload task is completed.
-            await unloadTask;
+            return unloadTask;
         }
 
         /// <summary>
@@ -434,11 +432,11 @@ namespace Mirage
         /// </summary>
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
         /// <param name="sceneLoadParameters">What settings should we be using for physics scene loading.</param>
-        public async UniTask ServerLoadSceneNormal(string scenePath, LoadSceneParameters? sceneLoadParameters = null)
+        public UniTask ServerLoadSceneNormal(string scenePath, LoadSceneParameters? sceneLoadParameters = null)
         {
             ThrowIfNotServer();
 
-            await ServerSceneLoading(scenePath, Server.Players, true, SceneOperation.Normal, sceneLoadParameters);            
+            return ServerSceneLoading(scenePath, Server.Players, true, SceneOperation.Normal, sceneLoadParameters);
         }
 
         /// <summary>
@@ -449,12 +447,12 @@ namespace Mirage
         /// <param name="shouldClientLoadNormally">Should the clients load this additively too or load it full normal scene change.</param>
         /// <param name="createPhysicsScene">Should we be creating a physics scene or not</param>
         /// <param name="sceneLoadParameters">What settings should we be using for physics scene loading.</param>
-        public async UniTask ServerLoadSceneAdditively(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false, LoadSceneParameters? sceneLoadParameters = null)
+        public UniTask ServerLoadSceneAdditively(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false, LoadSceneParameters? sceneLoadParameters = null)
         {
             ThrowIfNotServer();
             ThrowIfPlayersNull(players);
 
-            await ServerSceneLoading(scenePath, players, shouldClientLoadNormally, SceneOperation.LoadAdditive, sceneLoadParameters);
+            return ServerSceneLoading(scenePath, players, shouldClientLoadNormally, SceneOperation.LoadAdditive, sceneLoadParameters);
         }
 
         /// <summary>
@@ -462,11 +460,11 @@ namespace Mirage
         /// </summary>
         /// <param name="scene">The scene handle which we want to unload additively.</param>
         /// <param name="players">Collection of player's that are receiving the new scene unload.</param>
-        public async UniTask ServerUnloadSceneAdditively(Scene scene, IEnumerable<INetworkPlayer> players)
+        public UniTask ServerUnloadSceneAdditively(Scene scene, IEnumerable<INetworkPlayer> players)
         {
             ThrowIfNotServer();
 
-            await ServerSceneUnLoading(scene, players);
+            return ServerSceneUnLoading(scene, players);
         }
 
         /// <summary>
@@ -497,7 +495,7 @@ namespace Mirage
         /// <summary>
         /// for host, server loads scene not client, so we need special handling for host client so that other components like CharacterSpawner work correctly
         /// </summary>
-        void HostPlayerAuthenticated()
+        private void HostPlayerAuthenticated()
         {
             // nornal client invokes start, then finish, even if scene is already loaded
             OnClientStartedSceneChange?.Invoke(ActiveScenePath, SceneOperation.Normal);
