@@ -9,7 +9,6 @@ using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine;
-using NSubstitute.ExceptionExtensions;
 
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
@@ -117,18 +116,14 @@ namespace Mirage.Tests.Runtime.Host
             Assert.That(sceneManager.ServerSceneData, Is.Not.Null);
         }
 
-        [UnityTest]
-        public IEnumerator ChangeServerSceneExceptionTest() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void ChangeServerSceneExceptionTest()
         {
-            try
+            Assert.Throws<ArgumentNullException>(() =>
             {
-                await sceneManager.ServerLoadSceneNormal(string.Empty);
-            }
-            catch (Exception ex)
-            {
-                Assert.AreEqual(ex.GetType(), typeof(ArgumentNullException));
-            }
-        });
+                sceneManager.ServerLoadSceneNormal(string.Empty).Forget();
+            });
+        }
 
         [Test]
         public void ReadyTest()
@@ -234,142 +229,135 @@ namespace Mirage.Tests.Runtime.Host
             Assert.That(sceneManager.Client.Player.SceneIsReady, Is.Not.True);
         });
 
-        [UnityTest]
-        public IEnumerator ServerUnloadSceneCheckServerNotNullTest() => UniTask.ToCoroutine(async () => {
-            var message = new InvalidOperationException("Method can only be called if server is active").Message;
-
-            await sceneManager.ServerLoadSceneNormal(TestScenes.Path);
+        [Test]
+        public void ServerUnloadSceneCheckServerNotNullTest()
+        {
+            sceneManager.ServerLoadSceneNormal(TestScenes.Path);
 
             sceneManager.Server = null;
 
-            try
+            var exception = Assert.Throws<InvalidOperationException>(() =>
             {
+                sceneManager.ServerUnloadSceneAdditively(SceneManager.GetActiveScene(), new[] { server.LocalPlayer }).Forget();
+            });
 
-            } catch(Exception ex)
+            var message = new InvalidOperationException("Method can only be called if server is active").Message;
+            Assert.That(exception, Has.Message.EqualTo(message));
+        }
+
+        [Test]
+        public void ServerUnloadSceneAdditivelySceneNotNullTest()
+        {
+            sceneManager.ServerLoadSceneNormal(TestScenes.Path);
+
+            var exception = Assert.Throws<ArgumentNullException>(() =>
             {
-                Assert.That(ex, Has.Message.EqualTo(message));
-            }        
-        });
+                sceneManager.ServerUnloadSceneAdditively(default, null).Forget();
+            });
+
+            var message = new ArgumentNullException("scene", "[NetworkSceneManager] - ServerChangeScene: " + "scene" + " cannot be null").Message;
+            Assert.That(exception, Has.Message.EqualTo(message));
+        }
+
+        [Test]
+        public void ServerUnloadSceneAdditivelyPlayersNotNullTest()
+        {
+            sceneManager.ServerLoadSceneNormal(TestScenes.Path);
+
+            var exception = Assert.Throws<ArgumentNullException>(() =>
+            {
+                sceneManager.ServerUnloadSceneAdditively(SceneManager.GetActiveScene(), null).Forget();
+            });
+
+            var message = new ArgumentNullException("players", "[NetworkSceneManager] - list of player's cannot be null or no players.").Message;
+            Assert.That(exception, Has.Message.EqualTo(message));
+        }
 
         [UnityTest]
-        public IEnumerator ServerUnloadSceneAdditivelySceneNotNullTest() => UniTask.ToCoroutine(async () =>
+        public IEnumerator ServerUnloadSceneAdditivelyListenerInvokedTest() => UniTask.ToCoroutine(async () =>
         {
-            var message = new ArgumentNullException("scene", "[NetworkSceneManager] - ServerChangeScene: " + "scene" + " cannot be null").Message;
+            var invokedOnServerStartedSceneChange = false;
 
-            try
-            {
-                await sceneManager.ServerLoadSceneNormal(TestScenes.Path);
-            }
-            catch (Exception ex)
-            {
-                Assert.That(ex, Has.Message.EqualTo(message));
-            }
-        });
-
-    [UnityTest]
-    public IEnumerator ServerUnloadSceneAdditivelyPlayersNotNullTest() => UniTask.ToCoroutine(async () =>
-    {
-        var message = new ArgumentNullException("players", "[NetworkSceneManager] - list of player's cannot be null or no players.").Message;
-
-        try
-        {
             await sceneManager.ServerLoadSceneNormal(TestScenes.Path);
-        }
-        catch (ArgumentNullException ex)
-        {
-            Assert.That(ex, Has.Message.EqualTo(message));
-        }
-
-    });
-
-    [UnityTest]
-    public IEnumerator ServerUnloadSceneAdditivelyListenerInvokedTest() => UniTask.ToCoroutine(async () =>
-    {
-        var invokedOnServerStartedSceneChange = false;
-
-        sceneManager.ServerLoadSceneNormal(TestScenes.Path);
 
 #if UNITY_EDITOR
-        await EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Tests/Performance/Runtime/10K/Scenes/Scene.unity", new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive });
+            await EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Tests/Performance/Runtime/10K/Scenes/Scene.unity", new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive });
 #else
             throw new System.NotSupportedException("Test not supported in player");
 #endif
 
-        sceneManager.OnServerStartedSceneChange.AddListener((arg0, operation) => invokedOnServerStartedSceneChange = true);
+            sceneManager.OnServerStartedSceneChange.AddListener((arg0, operation) => invokedOnServerStartedSceneChange = true);
 
-        sceneManager.ServerUnloadSceneAdditively(SceneManager.GetActiveScene(), new[] { server.LocalPlayer });
+            sceneManager.ServerUnloadSceneAdditively(SceneManager.GetActiveScene(), new[] { server.LocalPlayer }).Forget();
 
-        await AsyncUtil.WaitUntilWithTimeout(() => invokedOnServerStartedSceneChange);
+            await AsyncUtil.WaitUntilWithTimeout(() => invokedOnServerStartedSceneChange);
 
-        Assert.That(invokedOnServerStartedSceneChange, Is.True);
-    });
-
-    [UnityTest]
-    public IEnumerator ServerSceneLoadingNullPlayersCheckTest() => UniTask.ToCoroutine(async () =>
-    {
-        var message = new ArgumentNullException("players", "No player's were added to send for information").Message;
-
-        try
-        {
-            await sceneManager.ServerLoadSceneAdditively(TestScenes.Path, null);
-        }
-        catch (ArgumentNullException ex)
-        {
-            Assert.That(ex, Has.Message.EqualTo(message));
-        }
-    });
-
-    [Test]
-    public void IsPlayerInSceneThrowForInvalidScene()
-    {
-        var exception = Assert.Throws<ArgumentException>(() =>
-        {
-            sceneManager.IsPlayerInScene(default, server.LocalPlayer);
+            Assert.That(invokedOnServerStartedSceneChange, Is.True);
         });
 
-        var message = new ArgumentException("Scene is not valid", "scene").Message;
-        Assert.That(exception, Has.Message.EqualTo(message));
-    }
-
-    [Test]
-    public void IsPlayerInSceneThrowForNotFoundScene()
-    {
-        var scene = SceneManager.CreateScene("Not Found Scene");
-        var exception = Assert.Throws<KeyNotFoundException>(() =>
+        [Test]
+        public void ServerSceneLoadingNullPlayersCheckTest()
         {
-            sceneManager.IsPlayerInScene(scene, server.LocalPlayer);
+            var exception = Assert.Throws<ArgumentNullException>(() =>
+            {
+                sceneManager.ServerLoadSceneAdditively(TestScenes.Path, null).Forget();
+            });
+
+            var message = new ArgumentNullException("players", "No player's were added to send for information").Message;
+            Assert.That(exception, Has.Message.EqualTo(message));
+        }
+
+        [Test]
+        public void IsPlayerInSceneThrowForInvalidScene()
+        {
+            var exception = Assert.Throws<ArgumentException>(() =>
+            {
+                sceneManager.IsPlayerInScene(default, server.LocalPlayer);
+            });
+
+            var message = new ArgumentException("Scene is not valid", "scene").Message;
+            Assert.That(exception, Has.Message.EqualTo(message));
+        }
+
+        [Test]
+        public void IsPlayerInSceneThrowForNotFoundScene()
+        {
+            var scene = SceneManager.CreateScene("Not Found Scene");
+            var exception = Assert.Throws<KeyNotFoundException>(() =>
+            {
+                sceneManager.IsPlayerInScene(scene, server.LocalPlayer);
+            });
+
+            var message = new KeyNotFoundException($"Could not find player list for scene:{scene}").Message;
+            Assert.That(exception, Has.Message.EqualTo(message));
+
+            // cleanup
+            SceneManager.UnloadSceneAsync(scene);
+        }
+
+
+        [UnityTest]
+        public IEnumerator OnServerDisconnectPlayerTest() => UniTask.ToCoroutine(async () =>
+        {
+            sceneManager.ServerLoadSceneNormal(TestScenes.Path);
+
+            await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ServerSceneData.Count > 0);
+
+            sceneManager.OnServerPlayerDisconnected(sceneManager.Server.Players.ElementAt(0));
+
+            Assert.That(sceneManager.IsPlayerInScene(sceneManager.ServerSceneData.ElementAt(0).Key,
+                server.Players.ElementAt(0)), Is.False);
         });
 
-        var message = new KeyNotFoundException($"Could not find player list for scene:{scene}").Message;
-        Assert.That(exception, Has.Message.EqualTo(message));
+        [UnityTest]
+        public IEnumerator IsPlayerInSceneTest() => UniTask.ToCoroutine(async () =>
+        {
+            sceneManager.ServerLoadSceneNormal(TestScenes.Path);
 
-        // cleanup
-        SceneManager.UnloadSceneAsync(scene);
+            await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ServerSceneData.Count > 0);
+
+            Assert.That(sceneManager.IsPlayerInScene(sceneManager.ServerSceneData.ElementAt(0).Key, server.Players.ElementAt(0)),
+                Is.True);
+        });
     }
-
-
-    [UnityTest]
-    public IEnumerator OnServerDisconnectPlayerTest() => UniTask.ToCoroutine(async () =>
-    {
-        sceneManager.ServerLoadSceneNormal(TestScenes.Path);
-
-        await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ServerSceneData.Count > 0);
-
-        sceneManager.OnServerPlayerDisconnected(sceneManager.Server.Players.ElementAt(0));
-
-        Assert.That(sceneManager.IsPlayerInScene(sceneManager.ServerSceneData.ElementAt(0).Key,
-            server.Players.ElementAt(0)), Is.False);
-    });
-
-    [UnityTest]
-    public IEnumerator IsPlayerInSceneTest() => UniTask.ToCoroutine(async () =>
-    {
-        sceneManager.ServerLoadSceneNormal(TestScenes.Path);
-
-        await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ServerSceneData.Count > 0);
-
-        Assert.That(sceneManager.IsPlayerInScene(sceneManager.ServerSceneData.ElementAt(0).Key, server.Players.ElementAt(0)),
-            Is.True);
-    });
-}
 }
