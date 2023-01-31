@@ -1,3 +1,15 @@
+# [129.5.0](https://github.com/MirageNet/Mirage/compare/v129.4.0...v129.5.0) (2023-01-31)
+
+
+### Bug Fixes
+
+* ui toolkit list fields not being reorderable ([1c77772](https://github.com/MirageNet/Mirage/commit/1c77772046a7db0f77fbd3515812ddc6a702444c))
+
+
+### Features
+
+* adding async versions to NetworkSceneManager functions ([#1128](https://github.com/MirageNet/Mirage/issues/1128)) ([abae4c8](https://github.com/MirageNet/Mirage/commit/abae4c80d5acba540b6fd5ac130b50d0493b0331))
+
 # [129.4.0](https://github.com/MirageNet/Mirage/compare/v129.3.2...v129.4.0) (2023-01-06)
 
 
