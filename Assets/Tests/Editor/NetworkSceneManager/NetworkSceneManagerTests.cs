@@ -121,7 +121,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                sceneManager.ServerLoadSceneNormal(string.Empty).Forget();
+                sceneManager.ServerLoadSceneNormal(string.Empty);
             });
         }
 
@@ -238,7 +238,7 @@ namespace Mirage.Tests.Runtime.Host
 
             var exception = Assert.Throws<InvalidOperationException>(() =>
             {
-                sceneManager.ServerUnloadSceneAdditively(SceneManager.GetActiveScene(), new[] { server.LocalPlayer }).Forget();
+                sceneManager.ServerUnloadSceneAdditively(SceneManager.GetActiveScene(), new[] { server.LocalPlayer });
             });
 
             var message = new InvalidOperationException("Method can only be called if server is active").Message;
@@ -252,12 +252,13 @@ namespace Mirage.Tests.Runtime.Host
 
             var exception = Assert.Throws<ArgumentNullException>(() =>
             {
-                sceneManager.ServerUnloadSceneAdditively(default, null).Forget();
+                sceneManager.ServerUnloadSceneAdditively(default, null);
             });
 
             var message = new ArgumentNullException("scene", "[NetworkSceneManager] - ServerChangeScene: " + "scene" + " cannot be null").Message;
             Assert.That(exception, Has.Message.EqualTo(message));
         }
+
 
         [Test]
         public void ServerUnloadSceneAdditivelyPlayersNotNullTest()
@@ -266,7 +267,7 @@ namespace Mirage.Tests.Runtime.Host
 
             var exception = Assert.Throws<ArgumentNullException>(() =>
             {
-                sceneManager.ServerUnloadSceneAdditively(SceneManager.GetActiveScene(), null).Forget();
+                sceneManager.ServerUnloadSceneAdditively(SceneManager.GetActiveScene(), null);
             });
 
             var message = new ArgumentNullException("players", "[NetworkSceneManager] - list of player's cannot be null or no players.").Message;
@@ -278,7 +279,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             var invokedOnServerStartedSceneChange = false;
 
-            await sceneManager.ServerLoadSceneNormal(TestScenes.Path);
+            sceneManager.ServerLoadSceneNormal(TestScenes.Path);
 
 #if UNITY_EDITOR
             await EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Tests/Performance/Runtime/10K/Scenes/Scene.unity", new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive });
@@ -288,7 +289,7 @@ namespace Mirage.Tests.Runtime.Host
 
             sceneManager.OnServerStartedSceneChange.AddListener((arg0, operation) => invokedOnServerStartedSceneChange = true);
 
-            sceneManager.ServerUnloadSceneAdditively(SceneManager.GetActiveScene(), new[] { server.LocalPlayer }).Forget();
+            sceneManager.ServerUnloadSceneAdditively(SceneManager.GetActiveScene(), new[] { server.LocalPlayer });
 
             await AsyncUtil.WaitUntilWithTimeout(() => invokedOnServerStartedSceneChange);
 
@@ -300,7 +301,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             var exception = Assert.Throws<ArgumentNullException>(() =>
             {
-                sceneManager.ServerLoadSceneAdditively(TestScenes.Path, null).Forget();
+                sceneManager.ServerLoadSceneAdditively(TestScenes.Path, null);
             });
 
             var message = new ArgumentNullException("players", "No player's were added to send for information").Message;
@@ -318,7 +319,6 @@ namespace Mirage.Tests.Runtime.Host
             var message = new ArgumentException("Scene is not valid", "scene").Message;
             Assert.That(exception, Has.Message.EqualTo(message));
         }
-
         [Test]
         public void IsPlayerInSceneThrowForNotFoundScene()
         {
