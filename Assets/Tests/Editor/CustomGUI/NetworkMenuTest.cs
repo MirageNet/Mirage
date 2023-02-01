@@ -2,7 +2,7 @@ using Mirage.Sockets.Udp;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.CustomGUI
 {
     public class NetworkMenuTest
     {

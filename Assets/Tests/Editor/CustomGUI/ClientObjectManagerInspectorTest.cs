@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEditor;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.CustomGUI
 {
     [TestFixture(Category = "ClientObjectManager")]
     public class ClientObjectManagerInspectorTest : InspectorTestBase

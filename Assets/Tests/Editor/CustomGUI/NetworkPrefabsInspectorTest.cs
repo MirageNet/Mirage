@@ -1,9 +1,9 @@
 using NUnit.Framework;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.CustomGUI
 {
     [TestFixture(Category = "NetworkPrefabs")]
-    public class NetworkPrefabsTest : InspectorTestBase
+    public class NetworkPrefabsInspectorTest : InspectorTestBase
     {
         [TearDown]
         public void TearDown()
