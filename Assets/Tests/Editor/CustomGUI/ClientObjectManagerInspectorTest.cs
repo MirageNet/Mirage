@@ -95,6 +95,9 @@ namespace Mirage.Tests.CustomGUI
             var id1 = CreateNetworkIdentity();
             var id2 = CreateNetworkIdentity();
             var id3 = CreateNetworkIdentity();
+            id1.PrefabHash = 10;
+            id2.PrefabHash = 11;
+            id3.PrefabHash = 12;
 
             com.spawnPrefabs.Add(id1);
             com.spawnPrefabs.Add(id2);
