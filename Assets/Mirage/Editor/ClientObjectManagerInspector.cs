@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,61 +8,89 @@ namespace Mirage
     [CanEditMultipleObjects]
     public class ClientObjectManagerInspector : Editor
     {
-        private SerializedProperty networkPrefabs;
-
-        private void OnEnable()
-        {
-            networkPrefabs = serializedObject.FindProperty(nameof(ClientObjectManager.NetworkPrefabs));
-        }
-
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
 
-            if (networkPrefabs.objectReferenceValue == null)
+            var com = (ClientObjectManager)target;
+
+            if (com.NetworkPrefabs != null && com.spawnPrefabs.Count > 0)
             {
-                if (GUILayout.Button("Create NetworkPrefabs"))
+                if (GUILayout.Button("Move 'spawnPrefabs' to 'NetworkPrefabs'"))
                 {
-                    var path = EditorUtility.SaveFilePanelInProject("Create NetworkPrefabs", "NetworkPrefabs", "asset", "Create NetworkPrefabs");
-                    CreateNetworkPrefabs(path);
+                    MovePrefabsToSO(com);
                 }
             }
+
+            if (GUILayout.Button("Register All Prefabs"))
+            {
+                RegisterAllPrefabs();
+            }
         }
 
-        public void CreateNetworkPrefabs(string path)
+        private void MovePrefabsToSO(ClientObjectManager com)
         {
-            if (string.IsNullOrWhiteSpace(path))
-            {
-                return;
-            }
+            Undo.RecordObject(com.NetworkPrefabs, "Adding prefabs from com.spawnPrefabs");
 
-            var prefabs = CreateInstance<NetworkPrefabs>();
-            AssetDatabase.CreateAsset(prefabs, path);
-            AssetDatabase.SaveAssets();
-            networkPrefabs.objectReferenceValue = prefabs;
+            AddToPrefabList(com.NetworkPrefabs.Prefabs, com.spawnPrefabs);
+            var listProp = serializedObject.FindProperty(nameof(ClientObjectManager.spawnPrefabs));
+            Undo.RecordObject(target, "Clearing com.spawnPrefabs");
+            listProp.arraySize = 0;
             serializedObject.ApplyModifiedProperties();
-
-            RegisterOldPrefabs(prefabs);
         }
 
-#pragma warning disable CS0618 // Type or member is obsolete
-        private void RegisterOldPrefabs(NetworkPrefabs prefabs)
+        private void RegisterAllPrefabs()
         {
-            var so = new SerializedObject(prefabs);
-            so.Update();
+            var com = (ClientObjectManager)target;
+            var foundPrefabs = LoadPrefabsContaining<NetworkIdentity>("Assets");
 
-            var spawnPrefabs = so.FindProperty(nameof(NetworkPrefabs.Prefabs));
-
-            // Disable warning about obsolete field because we are using it for backwards compatibility.
-            spawnPrefabs.arraySize = ((ClientObjectManager)target).spawnPrefabs.Count;
-
-            for (var i = 0; i < spawnPrefabs.arraySize; i++)
+            // first use networkprefabs for list, if null then use the list field
+            if (com.NetworkPrefabs != null)
             {
-                spawnPrefabs.GetArrayElementAtIndex(i).objectReferenceValue = ((ClientObjectManager)target).spawnPrefabs[i];
+                Undo.RecordObject(com.NetworkPrefabs, "Register prefabs for spawn");
+                AddToPrefabList(com.NetworkPrefabs.Prefabs, foundPrefabs);
             }
-
-            so.ApplyModifiedProperties();
+            else
+            {
+                Undo.RecordObject(target, "Register prefabs for spawn");
+                PrefabUtility.RecordPrefabInstancePropertyModifications(target);
+                AddToPrefabList(com.spawnPrefabs, foundPrefabs);
+            }
         }
-#pragma warning restore CS0618
+
+        public static void AddToPrefabList(List<NetworkIdentity> existingList, IEnumerable<NetworkIdentity> newPrefabs)
+        {
+            var set = new HashSet<NetworkIdentity>();
+            set.UnionWith(newPrefabs);
+            set.UnionWith(existingList);
+            existingList.Clear();
+            existingList.AddRange(newPrefabs);
+        }
+
+        private static ISet<T> LoadPrefabsContaining<T>(string path) where T : Component
+        {
+            var result = new HashSet<T>();
+
+            var guids = AssetDatabase.FindAssets("t:GameObject", new[] { path });
+
+            for (var i = 0; i < guids.Length; i++)
+            {
+                var assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
+
+                var obj = AssetDatabase.LoadAssetAtPath<T>(assetPath);
+
+                if (obj != null)
+                {
+                    result.Add(obj);
+                }
+
+                if (i % 100 == 99)
+                {
+                    EditorUtility.UnloadUnusedAssetsImmediate();
+                }
+            }
+            EditorUtility.UnloadUnusedAssetsImmediate();
+            return result;
+        }
     }
 }
