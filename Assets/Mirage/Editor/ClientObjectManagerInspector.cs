@@ -30,9 +30,12 @@ namespace Mirage
         public void MovePrefabsToSO()
         {
             var com = (ClientObjectManager)target;
-            Undo.RecordObject(com.NetworkPrefabs, "Adding prefabs from com.spawnPrefabs");
 
+            // add to new
+            Undo.RecordObject(com.NetworkPrefabs, "Adding prefabs from com.spawnPrefabs");
             AddToPrefabList(com.NetworkPrefabs.Prefabs, com.spawnPrefabs);
+
+            // clear old
             var listProp = serializedObject.FindProperty(nameof(ClientObjectManager.spawnPrefabs));
             Undo.RecordObject(target, "Clearing com.spawnPrefabs");
             listProp.arraySize = 0;
@@ -64,7 +67,7 @@ namespace Mirage
             set.UnionWith(newPrefabs);
             set.UnionWith(existingList);
             existingList.Clear();
-            existingList.AddRange(newPrefabs);
+            existingList.AddRange(set);
         }
 
         public static ISet<NetworkIdentity> LoadAllNetworkIdentities()
