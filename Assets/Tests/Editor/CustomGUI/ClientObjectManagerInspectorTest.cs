@@ -27,7 +27,7 @@ namespace Mirage.Tests.CustomGUI
         }
 
         [Test]
-        public void LoadAll()
+        public void LoadAllFindsSomePrefabs()
         {
             var found = ClientObjectManagerInspector.LoadAllNetworkIdentities();
 
@@ -35,7 +35,7 @@ namespace Mirage.Tests.CustomGUI
         }
 
         [Test]
-        public void PreserveExisting()
+        public void AddToPrefabListPreserveExistingitems()
         {
             var preexisting = CreateNetworkIdentity();
 
