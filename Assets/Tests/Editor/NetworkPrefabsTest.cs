@@ -16,7 +16,7 @@ namespace Mirage.Tests
         {
             var com = CreateScriptableObject<NetworkPrefabs>();
 
-            var inspector = CreateEditor<NetworkPrefabsDrawer>(com);
+            var inspector = CreateEditor<NetworkPrefabsInspector>(com);
 
             inspector.RegisterPrefabs();
 
@@ -31,7 +31,7 @@ namespace Mirage.Tests
             var com = CreateScriptableObject<NetworkPrefabs>();
             com.Prefabs.Add(preexisting);
 
-            var inspector = CreateEditor<NetworkPrefabsDrawer>(com);
+            var inspector = CreateEditor<NetworkPrefabsInspector>(com);
 
             inspector.RegisterPrefabs();
 
