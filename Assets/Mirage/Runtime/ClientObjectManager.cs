@@ -27,8 +27,6 @@ namespace Mirage
         /// List of prefabs that will be registered with the spawning system.
         /// <para>For each of these prefabs, ClientManager.RegisterPrefab() will be automatically invoke.</para>
         /// </summary>
-        [Obsolete("Use NetworkPrefabs instead")]
-        [HideInInspector]
         public List<NetworkIdentity> spawnPrefabs = new List<NetworkIdentity>();
 
         /// <summary>
@@ -80,13 +78,16 @@ namespace Mirage
         {
             _validateCache.Clear();
 
-            // If the NetworkPrefabs is null, then we can't validate anything.
-            if (NetworkPrefabs == null || NetworkPrefabs.Prefabs == null)
-            {
-                return;
-            }
+            ValidatePrefabs(spawnPrefabs);
+            ValidatePrefabs(NetworkPrefabs?.Prefabs);
+        }
 
-            foreach (var prefab in NetworkPrefabs.Prefabs)
+        private void ValidatePrefabs(IEnumerable<NetworkIdentity> prefabs)
+        {
+            if (prefabs == null)
+                return;
+
+            foreach (var prefab in prefabs)
             {
                 if (prefab == null)
                     continue;
@@ -111,7 +112,8 @@ namespace Mirage
         private void OnClientConnected(INetworkPlayer player)
         {
             _syncVarReceiver = new SyncVarReceiver(Client, Client.World);
-            RegisterSpawnPrefabs();
+            RegisterSpawnPrefabs(spawnPrefabs);
+            RegisterSpawnPrefabs(NetworkPrefabs?.Prefabs);
 
             // prepare objects right away so objects in first scene can be spawned
             // if user changes scenes without NetworkSceneManager then they will need to manually call it again
@@ -201,15 +203,17 @@ namespace Mirage
         }
 
         #region Spawn Prefabs and handlers
-        private void RegisterSpawnPrefabs()
+        private void RegisterSpawnPrefabs(IEnumerable<NetworkIdentity> prefabs)
         {
-            for (var i = 0; i < NetworkPrefabs.Prefabs.Count; i++)
+            if (prefabs == null)
+                return;
+
+            foreach (var prefab in prefabs)
             {
-                var prefab = NetworkPrefabs.Prefabs[i];
-                if (prefab != null)
-                {
-                    RegisterPrefab(prefab);
-                }
+                if (prefab == null)
+                    continue;
+
+                RegisterPrefab(prefab);
             }
         }
 
