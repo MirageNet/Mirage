@@ -112,8 +112,8 @@ namespace Mirage
         private void OnClientConnected(INetworkPlayer player)
         {
             _syncVarReceiver = new SyncVarReceiver(Client, Client.World);
-            RegisterSpawnPrefabs(spawnPrefabs);
-            RegisterSpawnPrefabs(NetworkPrefabs?.Prefabs);
+            RegisterPrefabs(spawnPrefabs);
+            RegisterPrefabs(NetworkPrefabs?.Prefabs);
 
             // prepare objects right away so objects in first scene can be spawned
             // if user changes scenes without NetworkSceneManager then they will need to manually call it again
@@ -203,7 +203,11 @@ namespace Mirage
         }
 
         #region Spawn Prefabs and handlers
-        private void RegisterSpawnPrefabs(IEnumerable<NetworkIdentity> prefabs)
+        /// <summary>
+        /// Calls <see cref="RegisterPrefab(NetworkIdentity)"/> on each object in the <paramref name="prefabs"/> collection
+        /// </summary>
+        /// <param name="prefabs"></param>
+        public void RegisterPrefabs(IEnumerable<NetworkIdentity> prefabs)
         {
             if (prefabs == null)
                 return;
