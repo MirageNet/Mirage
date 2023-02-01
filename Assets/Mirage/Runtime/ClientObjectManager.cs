@@ -77,10 +77,14 @@ namespace Mirage
 
         private void OnValidate()
         {
+            // clear before just incase it didn't clear last time
             _validateCache.Clear();
 
             ValidatePrefabs(spawnPrefabs);
             ValidatePrefabs(NetworkPrefabs?.Prefabs);
+
+            // clear after so unity can release prefabs if it wants to
+            _validateCache.Clear();
         }
 
         private void ValidatePrefabs(IEnumerable<NetworkIdentity> prefabs)
