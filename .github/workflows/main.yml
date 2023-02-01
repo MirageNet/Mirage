@@ -35,7 +35,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: Library
-          key: Library-2020.3.30-2
+          key: Library-2020.3.30-3
 
       - name: Run editor Tests
         run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
