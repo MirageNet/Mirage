@@ -13,12 +13,11 @@ namespace Mirage
             base.OnInspectorGUI();
 
             var com = (ClientObjectManager)target;
-
             if (com.NetworkPrefabs != null && com.spawnPrefabs.Count > 0)
             {
                 if (GUILayout.Button("Move 'spawnPrefabs' to 'NetworkPrefabs'"))
                 {
-                    MovePrefabsToSO(com);
+                    MovePrefabsToSO();
                 }
             }
 
@@ -28,8 +27,9 @@ namespace Mirage
             }
         }
 
-        private void MovePrefabsToSO(ClientObjectManager com)
+        public void MovePrefabsToSO()
         {
+            var com = (ClientObjectManager)target;
             Undo.RecordObject(com.NetworkPrefabs, "Adding prefabs from com.spawnPrefabs");
 
             AddToPrefabList(com.NetworkPrefabs.Prefabs, com.spawnPrefabs);
@@ -39,10 +39,10 @@ namespace Mirage
             serializedObject.ApplyModifiedProperties();
         }
 
-        private void RegisterAllPrefabs()
+        public void RegisterAllPrefabs()
         {
             var com = (ClientObjectManager)target;
-            var foundPrefabs = LoadPrefabsContaining<NetworkIdentity>("Assets");
+            var foundPrefabs = LoadAllNetworkIdentities();
 
             // first use networkprefabs for list, if null then use the list field
             if (com.NetworkPrefabs != null)
@@ -67,6 +67,10 @@ namespace Mirage
             existingList.AddRange(newPrefabs);
         }
 
+        public static ISet<NetworkIdentity> LoadAllNetworkIdentities()
+        {
+            return LoadPrefabsContaining<NetworkIdentity>("Assets");
+        }
         private static ISet<T> LoadPrefabsContaining<T>(string path) where T : Component
         {
             var result = new HashSet<T>();
