@@ -77,5 +77,20 @@ namespace Mirage
             nsm.Server = networkServer;
             return go;
         }
+
+        /// <summary>
+        /// Creates a new game object with NetworkManager and other network components attached, Including UdpSocketFactory
+        /// </summary>
+        /// <returns></returns>
+        [MenuItem("GameObject/Network/NetworkIdentity", priority = 7)]
+        public static GameObject CreateNetworkIdentity()
+        {
+            var components = new Type[]
+            {
+                typeof(NetworkIdentity),
+            };
+            var go = new GameObject("NetworkIdentity", components);
+            return go;
+        }
     }
 }
