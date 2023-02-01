@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEditor;
 
@@ -25,67 +26,94 @@ namespace Mirage.Tests
             }
         }
 
-        //[Test]
-        //public void CreateNetworkPrefabs()
-        //{
-        //    var com = CreateMonoBehaviour<ClientObjectManager>();
+        [Test]
+        public void LoadAll()
+        {
+            var found = ClientObjectManagerInspector.LoadAllNetworkIdentities();
 
-        //    var inspector = CreateEditor<ClientObjectManagerInspector>(com);
-        //    inspector.CreateNetworkPrefabs(NETWORK_PREFABS_PATH);
+            Assert.That(found, Has.Count.GreaterThan(2));
+        }
 
-        //    Assert.That(com.NetworkPrefabs, Is.Not.Null);
-        //}
+        [Test]
+        public void PreserveExisting()
+        {
+            var preexisting = CreateNetworkIdentity();
 
-        //[Test]
-        //public void CreateNetworkPrefabsWithNullPath()
-        //{
-        //    var com = CreateMonoBehaviour<ClientObjectManager>();
+            var existing = new List<NetworkIdentity>();
+            existing.Add(preexisting);
 
-        //    var inspector = CreateEditor<ClientObjectManagerInspector>(com);
-        //    inspector.CreateNetworkPrefabs(null);
+            var found = ClientObjectManagerInspector.LoadAllNetworkIdentities();
+            ClientObjectManagerInspector.AddToPrefabList(existing, found);
 
-        //    Assert.That(com.NetworkPrefabs, Is.Null);
-        //}
+            Assert.That(existing, Contains.Item(preexisting));
+        }
 
-        //[Test]
-        //public void CreateNetworkPrefabsWithEmptyPath()
-        //{
-        //    var com = CreateMonoBehaviour<ClientObjectManager>();
+        [Test]
+        public void RegisterAllWithField()
+        {
+            var com = CreateMonoBehaviour<ClientObjectManager>();
+            var inspector = CreateEditor<ClientObjectManagerInspector>(com);
 
-        //    var inspector = CreateEditor<ClientObjectManagerInspector>(com);
-        //    inspector.CreateNetworkPrefabs("");
+            Assert.That(com.spawnPrefabs, Has.Count.EqualTo(0));
+            Assert.That(com.NetworkPrefabs, Is.Null);
 
-        //    Assert.That(com.NetworkPrefabs, Is.Null);
-        //}
+            inspector.RegisterAllPrefabs();
 
-        //[Test]
-        //public void CreateNetworkPrefabsWithWhitespacePath()
-        //{
-        //    var com = CreateMonoBehaviour<ClientObjectManager>();
+            // finds prefabs and adds them to field
+            Assert.That(com.spawnPrefabs, Has.Count.GreaterThan(2));
+            Assert.That(com.NetworkPrefabs, Is.Null);
+        }
 
-        //    var inspector = CreateEditor<ClientObjectManagerInspector>(com);
-        //    inspector.CreateNetworkPrefabs(" ");
+        [Test]
+        public void RegisterAllWithSO()
+        {
+            var com = CreateMonoBehaviour<ClientObjectManager>();
+            var inspector = CreateEditor<ClientObjectManagerInspector>(com);
+            var so = CreateScriptableObject<NetworkPrefabs>();
+            com.NetworkPrefabs = so;
 
-        //    Assert.That(com.NetworkPrefabs, Is.Null);
-        //}
+            Assert.That(com.spawnPrefabs, Has.Count.EqualTo(0));
+            Assert.That(com.NetworkPrefabs, Is.Not.Null);
+            Assert.That(com.NetworkPrefabs.Prefabs, Has.Count.EqualTo(0));
 
-        //        [Test]
-        //        public void CreateNetworkPrefabsKeepsOldPrefabs()
-        //        {
-        //            var existing = CreateNetworkIdentity();
-        //            var com = CreateMonoBehaviour<ClientObjectManager>();
+            inspector.RegisterAllPrefabs();
 
-        //            var prefab = PrefabUtility.SaveAsPrefabAsset(existing.gameObject, NETWORKED_PREFAB_PATH);
-        //            // We disable the warning as we're using it for backwards compatibility reasons.
-        //#pragma warning disable CS0618 // Type or member is obsolete
-        //            com.spawnPrefabs.Add(prefab.GetComponent<NetworkIdentity>());
-        //#pragma warning restore CS0618
+            // finds prefabs and adds them to SO
+            Assert.That(com.spawnPrefabs, Has.Count.EqualTo(0), "field should stay zero when using SO");
+            Assert.That(com.NetworkPrefabs, Is.Not.Null);
+            Assert.That(com.NetworkPrefabs.Prefabs, Has.Count.GreaterThan(2));
+        }
 
-        //            var inspector = CreateEditor<ClientObjectManagerInspector>(com);
-        //            inspector.CreateNetworkPrefabs(NETWORK_PREFABS_PATH);
+        [Test]
+        public void MovePrefabs()
+        {
+            var com = CreateMonoBehaviour<ClientObjectManager>();
+            var inspector = CreateEditor<ClientObjectManagerInspector>(com);
+            var so = CreateScriptableObject<NetworkPrefabs>();
+            com.NetworkPrefabs = so;
 
-        //            Assert.That(com.NetworkPrefabs, Is.Not.Null);
-        //            Assert.That(com.NetworkPrefabs.Prefabs, Contains.Item(prefab.GetComponent<NetworkIdentity>()));
-        //        }
+            var id1 = CreateNetworkIdentity();
+            var id2 = CreateNetworkIdentity();
+            var id3 = CreateNetworkIdentity();
+
+            com.spawnPrefabs.Add(id1);
+            com.spawnPrefabs.Add(id2);
+
+            so.Prefabs.Add(id3);
+
+            Assert.That(com.spawnPrefabs, Has.Count.EqualTo(2));
+            Assert.That(com.NetworkPrefabs, Is.Not.Null);
+            Assert.That(com.NetworkPrefabs.Prefabs, Has.Count.EqualTo(1));
+
+            inspector.MovePrefabsToSO();
+
+            // finds prefabs and adds them to SO
+            Assert.That(com.spawnPrefabs, Has.Count.EqualTo(0), "field should stay zero when using SO");
+            Assert.That(com.NetworkPrefabs, Is.Not.Null);
+            Assert.That(com.NetworkPrefabs.Prefabs, Has.Count.EqualTo(3));
+            Assert.That(com.NetworkPrefabs.Prefabs, Contains.Item(id1));
+            Assert.That(com.NetworkPrefabs.Prefabs, Contains.Item(id2));
+            Assert.That(com.NetworkPrefabs.Prefabs, Contains.Item(id3));
+        }
     }
 }
