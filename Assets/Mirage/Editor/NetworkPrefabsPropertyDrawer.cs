@@ -112,7 +112,7 @@ namespace Mirage
                 // spacing between foldout and list
                 height += EditorGUIUtility.standardVerticalSpacing;
 
-                if (property.objectReferenceValue != null && property.isExpanded)
+                if (property.objectReferenceValue != null)
                 {
                     var obj = new SerializedObject(property.objectReferenceValue);
                     var prop = obj.FindProperty(nameof(NetworkPrefabs.Prefabs));
