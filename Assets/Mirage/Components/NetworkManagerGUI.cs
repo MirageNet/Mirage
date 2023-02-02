@@ -5,16 +5,29 @@ namespace Mirage
 {
     public class NetworkManagerGUI : MonoBehaviour
     {
-        [Tooltip("If enabled, we'll automatically reference NetworkManager in script's initialization.\nIf you've already set the NetworkManager field, auto configuring will not be performed.")]
-        public bool AutoConfigureNetworkManager = false;
-        public NetworkManager NetworkManager;
+        #region Fields
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkManagerGUI));
 
+        [Header("Defaults")]
+        [Tooltip("This is the default string displayed in the client address text box.")]
         public string NetworkAddress = "localhost";
 
-        [Range(0.01f, 10f)]
-        public float Scale = 1f;
-        public TextAnchor GUIAnchor = TextAnchor.UpperLeft;
+        [Header("References")]
+        [Tooltip("If enabled, we'll automatically reference NetworkManager in script's initialization.\nIf you've already set the NetworkManager field, auto configuring will not be performed.")]
+        public bool AutoConfigureNetworkManager = true;
 
+        [Tooltip("The value in this property field (if set) will not be overwritten if Auto Configuration is enabled.")]
+        public NetworkManager NetworkManager;
+
+        [Header("Cosmetics")]
+        [Range(0.01f, 10f), Tooltip("Adjusts scale of the GUI elements. 1x is normal size. 2x might be sane for big screens. <= 0.5x or > 2x is silly.")]
+        public float Scale = 1f;
+
+        [Tooltip("Select where you want the NetworkManagerGUI elements to be located on the screen.")]
+        public TextAnchor GUIAnchor = TextAnchor.UpperLeft;
+        #endregion
+
+        #region Unity Methods
         private void Awake()
         {
             // Coburn, 2023-01-29: 
@@ -54,7 +67,9 @@ namespace Mirage
                 StatusLabels(GetRectFromAnchor(GUIAnchor, 100));
             }
         }
+        #endregion
 
+        #region GUI Internals
         private void StartButtons(Rect position)
         {
             GUILayout.BeginArea(position);
@@ -138,10 +153,6 @@ namespace Mirage
             GUILayout.EndArea();
         }
 
-        private const int WIDTH = 200;
-        private const int PADDING_X = 10;
-        private const int PADDING_Y = 10;
-
         private static Rect GetRectFromAnchor(TextAnchor anchor, int height)
         {
             switch (anchor)
@@ -191,7 +202,9 @@ namespace Mirage
                     return new Vector2(Screen.width, Screen.height);
             }
         }
+        #endregion
 
+        #region GUI Button Click Handlers
         private void ClickHost()
         {
             NetworkManager.Server.StartServer(NetworkManager.Client);
@@ -206,5 +219,12 @@ namespace Mirage
         {
             NetworkManager.Client.Connect(NetworkAddress);
         }
+        #endregion
+
+        #region Constants.
+        private const int WIDTH = 200;
+        private const int PADDING_X = 10;
+        private const int PADDING_Y = 10;
+        #endregion
     }
 }
