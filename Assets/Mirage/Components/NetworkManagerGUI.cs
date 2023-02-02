@@ -45,7 +45,6 @@ namespace Mirage
 
             GUIUtility.ScaleAroundPivot(Vector2.one * Scale, GetPivotFromAnchor(GUIAnchor));
 
-
             if (!NetworkManager.Server.Active && !NetworkManager.Client.Active)
             {
                 StartButtons(GetRectFromAnchor(GUIAnchor, 71));
@@ -150,19 +149,19 @@ namespace Mirage
                 case TextAnchor.UpperLeft:
                     return new Rect(PADDING_X, PADDING_Y, WIDTH, height);
                 case TextAnchor.UpperCenter:
-                    return new Rect(Screen.width / 2 - (WIDTH / 2), PADDING_Y, WIDTH, height);
+                    return new Rect((Screen.width / 2) - (WIDTH / 2), PADDING_Y, WIDTH, height);
                 case TextAnchor.UpperRight:
                     return new Rect(Screen.width - (WIDTH + PADDING_X), PADDING_Y, WIDTH, height);
                 case TextAnchor.MiddleLeft:
-                    return new Rect(PADDING_X, Screen.height / 2 - (height / 2), WIDTH, height);
+                    return new Rect(PADDING_X, (Screen.height / 2) - (height / 2), WIDTH, height);
                 case TextAnchor.MiddleCenter:
-                    return new Rect(Screen.width / 2 - (WIDTH / 2), Screen.height / 2 - (height / 2), WIDTH, height);
+                    return new Rect((Screen.width / 2) - (WIDTH / 2), (Screen.height / 2) - (height / 2), WIDTH, height);
                 case TextAnchor.MiddleRight:
-                    return new Rect(Screen.width - (WIDTH + PADDING_X), Screen.height / 2 - (height / 2), WIDTH, height);
+                    return new Rect(Screen.width - (WIDTH + PADDING_X), (Screen.height / 2) - (height / 2), WIDTH, height);
                 case TextAnchor.LowerLeft:
                     return new Rect(PADDING_X, Screen.height - (height + PADDING_Y), WIDTH, height);
                 case TextAnchor.LowerCenter:
-                    return new Rect(Screen.width / 2 - (WIDTH / 2), Screen.height - (height + PADDING_Y), WIDTH, height);
+                    return new Rect((Screen.width / 2) - (WIDTH / 2), Screen.height - (height + PADDING_Y), WIDTH, height);
                 default: // Lower right
                     return new Rect(Screen.width - (WIDTH + PADDING_X), Screen.height - (height + PADDING_Y), WIDTH, height);
             }
