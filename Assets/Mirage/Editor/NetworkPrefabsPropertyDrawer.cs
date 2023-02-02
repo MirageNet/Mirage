@@ -1,4 +1,4 @@
-﻿using Mirage.EditorScripts.Logging;
+using Mirage.EditorScripts.Logging;
 using UnityEditor;
 using UnityEngine;
 
@@ -19,8 +19,7 @@ namespace Mirage
             }
             else
             {
-                EditorGUI.PropertyField(rect, property, label);
-                //valueGUI(rect, property, label);
+                valueGUI(rect, property, label);
             }
         }
 
@@ -55,17 +54,76 @@ namespace Mirage
             // name of gameobject that this property is on
             var gameObjectName = property.serializedObject.targetObject.name;
 
-            var value = ScriptableObjectUtility.CreateAsset<NetworkPrefabs>(gameObjectName + "_NetworkPrefabs", "Assets");
+            var value = ScriptableObjectUtility.CreateAsset<NetworkPrefabs>("NetworkPrefabs_" + gameObjectName, "Assets");
 
             property.objectReferenceValue = value;
             property.serializedObject.ApplyModifiedProperties();
         }
 
-        protected virtual void valueGUI(Rect rect, SerializedProperty property, GUIContent label)
+        private void valueGUI(Rect rect, SerializedProperty property, GUIContent label)
         {
-            // todo draw internal list here
-            //drawCanEditVar(pos, property, label);
-            //drawPropertyField(refWidth, refRect, property, GUIContent.none);
+            var labelHeight = EditorGUIUtility.singleLineHeight;
+            var labelWidth = EditorGUIUtility.labelWidth;
+            var labelRect = new Rect(rect.x, rect.y, labelWidth, labelHeight);
+
+            var referenceRect = new Rect(rect.x + labelWidth, rect.y, rect.width - labelWidth, labelHeight);
+            EditorGUI.LabelField(labelRect, label);
+
+            EditorGUI.BeginChangeCheck();
+            EditorGUI.PropertyField(referenceRect, property, GUIContent.none);
+            if (EditorGUI.EndChangeCheck())
+                property.serializedObject.ApplyModifiedProperties();
+
+            // value might have changed, so return if now null
+            if (property.objectReferenceValue == null)
+                return;
+
+            var listY = rect.y + labelHeight + EditorGUIUtility.standardVerticalSpacing;
+            var listRect = new Rect(rect.x, listY, rect.width, rect.height - listY);
+            DrawList(listRect, property);
+        }
+
+        private static void DrawList(Rect rect, SerializedProperty property)
+        {
+            var obj = new SerializedObject(property.objectReferenceValue);
+            var prop = obj.FindProperty(nameof(NetworkPrefabs.Prefabs));
+
+            EditorGUI.BeginChangeCheck();
+
+            EditorGUI.indentLevel++;
+            EditorGUI.PropertyField(rect, prop, true);
+            EditorGUI.indentLevel--;
+
+            if (EditorGUI.EndChangeCheck())
+                obj.ApplyModifiedProperties();
+        }
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            if (property.objectReferenceValue == null)
+            {
+                return EditorGUI.GetPropertyHeight(property, label);
+            }
+            else
+            {
+                var height = 0f;
+                height += EditorGUI.GetPropertyHeight(property, label);
+
+                // spacing between foldout and list
+                height += EditorGUIUtility.standardVerticalSpacing;
+
+                if (property.objectReferenceValue != null && property.isExpanded)
+                {
+                    var obj = new SerializedObject(property.objectReferenceValue);
+                    var prop = obj.FindProperty(nameof(NetworkPrefabs.Prefabs));
+                    height += EditorGUI.GetPropertyHeight(prop, true);
+                }
+
+                // spacing after list
+                height += EditorGUIUtility.standardVerticalSpacing;
+
+                return height;
+            }
         }
     }
 }
