@@ -29,7 +29,7 @@ namespace Mirage.Tests.CustomGUI
         [Test]
         public void LoadAllFindsSomePrefabs()
         {
-            var found = ClientObjectManagerInspector.LoadAllNetworkIdentities();
+            var found = NetworkPrefabUtils.LoadAllNetworkIdentities();
 
             Assert.That(found, Has.Count.GreaterThan(2));
         }
@@ -42,8 +42,8 @@ namespace Mirage.Tests.CustomGUI
             var existing = new List<NetworkIdentity>();
             existing.Add(preexisting);
 
-            var found = ClientObjectManagerInspector.LoadAllNetworkIdentities();
-            ClientObjectManagerInspector.AddToPrefabList(existing, found);
+            var found = NetworkPrefabUtils.LoadAllNetworkIdentities();
+            NetworkPrefabUtils.AddToPrefabList(existing, found);
 
             Assert.That(existing, Contains.Item(preexisting));
         }
