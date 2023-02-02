@@ -4,7 +4,10 @@ namespace Mirage
 {
     public class NetworkManagerGUI : MonoBehaviour
     {
+        [Tooltip("If enabled, we'll automatically reference NetworkManager in script's initialization.\nIf you've already set the NetworkManager field, auto configuring will not be performed.")]
+        public bool AutoConfigureNetworkManager = false;
         public NetworkManager NetworkManager;
+
         public string NetworkAddress = "localhost";
 
         [Range(0.01f, 10f)]
