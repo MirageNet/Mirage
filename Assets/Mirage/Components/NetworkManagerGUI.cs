@@ -86,6 +86,7 @@ namespace Mirage
         {
             GUILayout.BeginArea(position);
 
+            // Coburn, 2023-02-02, possible TODO: Remove the server buttons for WebGL since it can't be used as server
             if (Application.platform == RuntimePlatform.WebGLPlayer)
             {
                 GUILayout.Box("WebGL cannot host");
