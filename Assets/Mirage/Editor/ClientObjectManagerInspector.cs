@@ -33,7 +33,7 @@ namespace Mirage
 
             // add to new
             Undo.RecordObject(com.NetworkPrefabs, "Adding prefabs from com.spawnPrefabs");
-            AddToPrefabList(com.NetworkPrefabs.Prefabs, com.spawnPrefabs);
+            NetworkPrefabUtils.AddToPrefabList(com.NetworkPrefabs.Prefabs, com.spawnPrefabs);
 
             // clear old
             var listProp = serializedObject.FindProperty(nameof(ClientObjectManager.spawnPrefabs));
@@ -45,59 +45,20 @@ namespace Mirage
         public void RegisterAllPrefabs()
         {
             var com = (ClientObjectManager)target;
-            var foundPrefabs = LoadAllNetworkIdentities();
+            var foundPrefabs = NetworkPrefabUtils.LoadAllNetworkIdentities();
 
             // first use networkprefabs for list, if null then use the list field
             if (com.NetworkPrefabs != null)
             {
                 Undo.RecordObject(com.NetworkPrefabs, "Register prefabs for spawn");
-                AddToPrefabList(com.NetworkPrefabs.Prefabs, foundPrefabs);
+                NetworkPrefabUtils.AddToPrefabList(com.NetworkPrefabs.Prefabs, foundPrefabs);
             }
             else
             {
                 Undo.RecordObject(target, "Register prefabs for spawn");
                 PrefabUtility.RecordPrefabInstancePropertyModifications(target);
-                AddToPrefabList(com.spawnPrefabs, foundPrefabs);
+                NetworkPrefabUtils.AddToPrefabList(com.spawnPrefabs, foundPrefabs);
             }
-        }
-
-        public static void AddToPrefabList(List<NetworkIdentity> existingList, IEnumerable<NetworkIdentity> newPrefabs)
-        {
-            var set = new HashSet<NetworkIdentity>();
-            set.UnionWith(newPrefabs);
-            set.UnionWith(existingList);
-            existingList.Clear();
-            existingList.AddRange(set);
-        }
-
-        public static ISet<NetworkIdentity> LoadAllNetworkIdentities()
-        {
-            return LoadPrefabsContaining<NetworkIdentity>("Assets");
-        }
-        private static ISet<T> LoadPrefabsContaining<T>(string path) where T : Component
-        {
-            var result = new HashSet<T>();
-
-            var guids = AssetDatabase.FindAssets("t:GameObject", new[] { path });
-
-            for (var i = 0; i < guids.Length; i++)
-            {
-                var assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
-
-                var obj = AssetDatabase.LoadAssetAtPath<T>(assetPath);
-
-                if (obj != null)
-                {
-                    result.Add(obj);
-                }
-
-                if (i % 100 == 99)
-                {
-                    EditorUtility.UnloadUnusedAssetsImmediate();
-                }
-            }
-            EditorUtility.UnloadUnusedAssetsImmediate();
-            return result;
         }
     }
 }

@@ -18,12 +18,12 @@ namespace Mirage
 
         public void RegisterPrefabs()
         {
-            var foundPrefabs = ClientObjectManagerInspector.LoadAllNetworkIdentities();
+            var foundPrefabs = NetworkPrefabUtils.LoadAllNetworkIdentities();
 
             var target = (NetworkPrefabs)this.target;
 
             Undo.RecordObject(target, "Register prefabs for spawn");
-            ClientObjectManagerInspector.AddToPrefabList(target.Prefabs, foundPrefabs);
+            NetworkPrefabUtils.AddToPrefabList(target.Prefabs, foundPrefabs);
         }
     }
 }
