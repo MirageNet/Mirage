@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,8 +9,59 @@ namespace Mirage
     {
         public override void OnInspectorGUI()
         {
-            base.OnInspectorGUI();
+            DefaultInspector();
 
+            DrawButtons();
+        }
+
+        private void DefaultInspector()
+        {
+            serializedObject.UpdateIfRequiredOrScript();
+            var itt = serializedObject.GetIterator();
+            //script field
+            itt.NextVisible(true);
+            GUI.enabled = false;
+            EditorGUILayout.PropertyField(itt);
+            GUI.enabled = true;
+
+            // other fields
+            while (itt.NextVisible(false))
+            {
+                if (OverrideProperty(itt))
+                    continue;
+
+                EditorGUILayout.PropertyField(itt, true);
+            }
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        private bool OverrideProperty(SerializedProperty property)
+        {
+            if (property.propertyPath == nameof(ClientObjectManager.spawnPrefabs))
+                return OverrideSpawnPrefabProperty(property);
+
+            return false;
+        }
+
+        private bool OverrideSpawnPrefabProperty(SerializedProperty property)
+        {
+            var com = (ClientObjectManager)target;
+
+            // if networkPrefab has value and no items in spawnprefabs list,
+            // then hide the list
+            var removeField = com.NetworkPrefabs != null && property.arraySize == 0;
+            if (removeField) ;
+            {
+                EditorGUILayout.Space(5);
+                EditorGUILayout.LabelField("Prefabs", EditorStyles.boldLabel);
+                EditorGUILayout.Space(3);
+            }
+
+            return removeField;
+        }
+
+        public void DrawButtons()
+        {
             var com = (ClientObjectManager)target;
             if (com.NetworkPrefabs != null && com.spawnPrefabs.Count > 0)
             {
