@@ -35,7 +35,16 @@ namespace Mirage
 
         private void OnGUI()
         {
+            // Coburn, 2023-02-02: Apparently NMGUI can somehow lose reference to NetworkManager for reasons unknown
+            // (maybe due to being in and out of DDOL and scene changes?) to prevent a NRE being spewed every OnGUI
+            // update, short-circuit here to prevent log spam.
+            if (NetworkManager == null)
+            {
+                return;
+            }
+
             GUIUtility.ScaleAroundPivot(Vector2.one * Scale, GetPivotFromAnchor(GUIAnchor));
+
 
             if (!NetworkManager.Server.Active && !NetworkManager.Client.Active)
             {
