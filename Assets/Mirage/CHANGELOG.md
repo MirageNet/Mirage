@@ -1,3 +1,20 @@
+# [129.6.0](https://github.com/MirageNet/Mirage/compare/v129.5.0...v129.6.0) (2023-02-02)
+
+
+### Bug Fixes
+
+* fixing networkprefab drawer height ([8884070](https://github.com/MirageNet/Mirage/commit/888407035284074def8a885dd456f2365a64fd25))
+
+
+### Features
+
+* adding buttons that create gameobject with NetworkIdentity ([0115818](https://github.com/MirageNet/Mirage/commit/01158185d64ab3e03f227dd553a5e3401a4be488))
+* adding custom drawer for networkprefab field ([bb34c04](https://github.com/MirageNet/Mirage/commit/bb34c04a0871103a806bf510049232dab3623a8f))
+* drawing prefab list under NetworkPrefab reference ([8c63726](https://github.com/MirageNet/Mirage/commit/8c637263cff3270badc8bfcaf6d6bce5f9291b49))
+* hiding COM prefab list when it is empty and NetworkPrefab is set ([5088d33](https://github.com/MirageNet/Mirage/commit/5088d33b5d2a5375ec5549c63372cdf83425eb83))
+* making RegisterPrefabs public ([77c8a48](https://github.com/MirageNet/Mirage/commit/77c8a48049eae823c4b9496e0fe4dc50ad22d14b))
+* use scriptable object for spawnable prefabs ([#1127](https://github.com/MirageNet/Mirage/issues/1127)) ([1973e76](https://github.com/MirageNet/Mirage/commit/1973e76e3abed43ffc47b57f117772f2627cf803))
+
 # [129.5.0](https://github.com/MirageNet/Mirage/compare/v129.4.0...v129.5.0) (2023-01-31)
 
 
