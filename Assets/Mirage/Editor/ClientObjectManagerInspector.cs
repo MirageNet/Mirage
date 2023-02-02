@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Mirage
 {
+    /// <summary>
+    /// Hides the <see cref="ClientObjectManager.spawnPrefabs"/> field when it is empty and <see cref="ClientObjectManager.NetworkPrefabs"/> is not null
+    /// </summary>
     [CustomEditor(typeof(ClientObjectManager), true)]
     [CanEditMultipleObjects]
     public class ClientObjectManagerInspector : Editor
