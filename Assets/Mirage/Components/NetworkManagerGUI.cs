@@ -6,7 +6,6 @@ namespace Mirage
 {
     public class NetworkManagerGUI : MonoBehaviour
     {
-        #region Fields
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkManagerGUI));
 
         [Header("Defaults")]
@@ -26,9 +25,7 @@ namespace Mirage
 
         [Tooltip("Select where you want the NetworkManagerGUI elements to be located on the screen.")]
         public TextAnchor GUIAnchor = TextAnchor.UpperLeft;
-        #endregion
 
-        #region Unity Methods
         private void Awake()
         {
             // Coburn, 2023-01-29: 
@@ -79,9 +76,7 @@ namespace Mirage
                 StatusLabels(GetRectFromAnchor(GUIAnchor, 100));
             }
         }
-        #endregion
-
-        #region GUI Internals
+        
         private void StartButtons(Rect position)
         {
             GUILayout.BeginArea(position);
@@ -148,6 +143,7 @@ namespace Mirage
                     }
                 }
             }
+            
             if (NetworkManager.Client.IsConnected)
             {
                 GUILayout.Label($"Client: address={NetworkAddress}");
@@ -215,9 +211,7 @@ namespace Mirage
                     return new Vector2(Screen.width, Screen.height);
             }
         }
-        #endregion
-
-        #region GUI Button Click Handlers
+        
         private void ClickHost()
         {
             NetworkManager.Server.StartServer(NetworkManager.Client);
@@ -232,12 +226,9 @@ namespace Mirage
         {
             NetworkManager.Client.Connect(NetworkAddress);
         }
-        #endregion
-
-        #region Constants.
+        
         private const int WIDTH = 200;
         private const int PADDING_X = 10;
         private const int PADDING_Y = 10;
-        #endregion
     }
 }
