@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Mirage
@@ -13,6 +14,24 @@ namespace Mirage
         [Range(0.01f, 10f)]
         public float Scale = 1f;
         public TextAnchor GUIAnchor = TextAnchor.UpperLeft;
+
+        private void Awake()
+        {
+            // Coburn, 2023-01-29: 
+            // If automatic configuration of NetworkManager is enabled, then attempt to grab the
+            // NetworkManager that this script is attached to.
+            if (AutoConfigureNetworkManager && NetworkManager == null)
+            {
+                NetworkManager = GetComponent<NetworkManager>();
+
+                // Is this STILL null? Then we throw in the towel and go home.
+                if (NetworkManager == null)
+                {
+                    throw new ArgumentNullException("NetworkManager", $"You requested automatic configuration for the NetworkManagerGUI component on '{gameObject.name}'" +
+                        $" but one could not be found. Either disable automatic configuration or ensure this script is on a GameObject with a Mirage NetworkManager.");
+                }
+            }
+        }
 
         private void OnGUI()
         {
