@@ -58,6 +58,7 @@ namespace Mirage
 
             property.objectReferenceValue = value;
             property.serializedObject.ApplyModifiedProperties();
+            GUIUtility.ExitGUI();
         }
 
         private void valueGUI(Rect rect, SerializedProperty property, GUIContent label)
