@@ -1,13 +1,10 @@
 using System;
-using Mirage.Logging;
 using UnityEngine;
 
 namespace Mirage
 {
     public class NetworkManagerGUI : MonoBehaviour
     {
-        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkManagerGUI));
-
         [Header("Defaults")]
         [Tooltip("This is the default string displayed in the client address text box.")]
         public string NetworkAddress = "localhost";
@@ -28,29 +25,25 @@ namespace Mirage
 
         private void Awake()
         {
-            // Coburn, 2023-01-29: 
+            // Coburn, 2023-02-02: 
             // If automatic configuration of NetworkManager is enabled, then attempt to grab the
             // NetworkManager that this script is attached to.
             if (AutoConfigureNetworkManager)
             {
+                // Ensure this is null before doing anything. If not, return early.
+                if (NetworkManager != null)
+                {
+                    return;
+                }
+
+                // Attempt to get the NetworkManager component.
+                NetworkManager = GetComponent<NetworkManager>();
+
+                // Is this STILL null? Then we throw in the towel and go home.
                 if (NetworkManager == null)
                 {
-                    NetworkManager = GetComponent<NetworkManager>();
-
-                    // Is this STILL null? Then we throw in the towel and go home.
-                    if (NetworkManager == null)
-                    {
-                        throw new ArgumentNullException("NetworkManager", $"You requested automatic configuration for the NetworkManagerGUI component on '{gameObject.name}'" +
-                            $" but one could not be found. Either disable automatic configuration or ensure this script is on a GameObject with a Mirage NetworkManager.");
-                    }
-                }
-                else
-                {
-                    if (logger.logEnabled)
-                    {
-                        logger.LogWarning($"You have enabled Auto Configure for this NetworkManagerGUI component on '{gameObject.name}' but the NetworkManager field is already set. " +
-                            $"Auto Configuration can only be performed if the NetworkManager reference is set to null.");
-                    }
+                    throw new InvalidOperationException($"You requested automatic configuration for the NetworkManagerGUI component on '{gameObject.name}'" +
+                        $" but one could not be found. Either disable automatic configuration or ensure this script is on a GameObject with a Mirage NetworkManager.");
                 }
             }
         }
@@ -76,7 +69,7 @@ namespace Mirage
                 StatusLabels(GetRectFromAnchor(GUIAnchor, 100));
             }
         }
-        
+
         private void StartButtons(Rect position)
         {
             GUILayout.BeginArea(position);
@@ -143,7 +136,7 @@ namespace Mirage
                     }
                 }
             }
-            
+
             if (NetworkManager.Client.IsConnected)
             {
                 GUILayout.Label($"Client: address={NetworkAddress}");
@@ -211,7 +204,7 @@ namespace Mirage
                     return new Vector2(Screen.width, Screen.height);
             }
         }
-        
+
         private void ClickHost()
         {
             NetworkManager.Server.StartServer(NetworkManager.Client);
@@ -226,7 +219,7 @@ namespace Mirage
         {
             NetworkManager.Client.Connect(NetworkAddress);
         }
-        
+
         private const int WIDTH = 200;
         private const int PADDING_X = 10;
         private const int PADDING_Y = 10;
