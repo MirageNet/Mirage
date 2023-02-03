@@ -1,3 +1,11 @@
+## [129.6.1](https://github.com/MirageNet/Mirage/compare/v129.6.0...v129.6.1) (2023-02-03)
+
+
+### Bug Fixes
+
+* fixing typo in DisallowMultipleComponent ([715aa33](https://github.com/MirageNet/Mirage/commit/715aa33f7050ffada635232da834479562aade32))
+* **NetworkManagerGUI:** prevent potential NRE spam if reference is lost and tidy up ([#1130](https://github.com/MirageNet/Mirage/issues/1130)) ([86b5c3d](https://github.com/MirageNet/Mirage/commit/86b5c3d75e45ab17e83f12b1458bf617e2c4e17c))
+
 # [129.6.0](https://github.com/MirageNet/Mirage/compare/v129.5.0...v129.6.0) (2023-02-02)
 
 
