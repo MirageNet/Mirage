@@ -7,7 +7,7 @@ namespace Mirage.Tests
 {
     public abstract class TestBase
     {
-        private List<GameObject> toDestroy = new List<GameObject>();
+        protected List<Object> toDestroy = new List<Object>();
 
         /// <summary>
         /// Call this from child class teardown
@@ -50,7 +50,7 @@ namespace Mirage.Tests
         }
 
         /// <summary>
-        /// Creates a new NetworkIdentity that can be used by tests, then destroyed in teardown 
+        /// Creates a new NetworkIdentity that can be used by tests, then destroyed in teardown
         /// </summary>
         /// <returns></returns>
         protected NetworkIdentity CreateNetworkIdentity()
@@ -61,7 +61,7 @@ namespace Mirage.Tests
         }
 
         /// <summary>
-        /// Creates a new NetworkIdentity and Behaviour that can be used by tests, then destroyed in teardown 
+        /// Creates a new NetworkIdentity and Behaviour that can be used by tests, then destroyed in teardown
         /// </summary>
         /// <returns></returns>
         protected T CreateBehaviour<T>() where T : NetworkBehaviour
@@ -72,7 +72,7 @@ namespace Mirage.Tests
         }
 
         /// <summary>
-        /// Creates a new MonoBehaviour that can be used by tests, then destroyed in teardown 
+        /// Creates a new MonoBehaviour that can be used by tests, then destroyed in teardown
         /// </summary>
         /// <returns></returns>
         protected T CreateMonoBehaviour<T>() where T : MonoBehaviour
@@ -83,7 +83,17 @@ namespace Mirage.Tests
         }
 
         /// <summary>
-        /// Creates a new NetworkIdentity that can be used by tests, then destroyed in teardown 
+        /// Creates a new ScriptableObject that can be used by tests, then destroyed in teardown
+        /// </summary>
+        protected T CreateScriptableObject<T>() where T : ScriptableObject
+        {
+            var obj = ScriptableObject.CreateInstance<T>();
+            toDestroy.Add(obj);
+            return obj;
+        }
+
+        /// <summary>
+        /// Creates a new NetworkIdentity that can be used by tests, then destroyed in teardown
         /// </summary>
         /// <returns></returns>
         protected GameObject CreateGameObject()

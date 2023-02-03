@@ -1,61 +1,117 @@
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
 namespace Mirage
 {
+    /// <summary>
+    /// Hides the <see cref="ClientObjectManager.spawnPrefabs"/> field when it is empty and <see cref="ClientObjectManager.NetworkPrefabs"/> is not null
+    /// </summary>
     [CustomEditor(typeof(ClientObjectManager), true)]
     [CanEditMultipleObjects]
     public class ClientObjectManagerInspector : Editor
     {
         public override void OnInspectorGUI()
         {
-            base.OnInspectorGUI();
+            DefaultInspector();
+
+            DrawButtons();
+        }
+
+        private void DefaultInspector()
+        {
+            serializedObject.UpdateIfRequiredOrScript();
+            var itt = serializedObject.GetIterator();
+            //script field
+            itt.NextVisible(true);
+            GUI.enabled = false;
+            EditorGUILayout.PropertyField(itt);
+            GUI.enabled = true;
+
+            // other fields
+            while (itt.NextVisible(false))
+            {
+                if (OverrideProperty(itt))
+                    continue;
+
+                EditorGUILayout.PropertyField(itt, true);
+            }
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        private bool OverrideProperty(SerializedProperty property)
+        {
+            if (property.propertyPath == nameof(ClientObjectManager.spawnPrefabs))
+                return OverrideSpawnPrefabProperty(property);
+
+            return false;
+        }
+
+        private bool OverrideSpawnPrefabProperty(SerializedProperty property)
+        {
+            var com = (ClientObjectManager)target;
+
+            // if networkPrefab has value and no items in spawnprefabs list,
+            // then hide the list
+            var removeField = com.NetworkPrefabs != null && property.arraySize == 0;
+            if (removeField) ;
+            {
+                EditorGUILayout.Space(5);
+                EditorGUILayout.LabelField("Prefabs", EditorStyles.boldLabel);
+                EditorGUILayout.Space(3);
+            }
+
+            return removeField;
+        }
+
+        public void DrawButtons()
+        {
+            var com = (ClientObjectManager)target;
+            if (com.NetworkPrefabs != null && com.spawnPrefabs.Count > 0)
+            {
+                if (GUILayout.Button("Move 'spawnPrefabs' to 'NetworkPrefabs'"))
+                {
+                    MovePrefabsToSO();
+                }
+            }
 
             if (GUILayout.Button("Register All Prefabs"))
             {
+                RegisterAllPrefabs();
+            }
+        }
+
+        public void MovePrefabsToSO()
+        {
+            var com = (ClientObjectManager)target;
+
+            // add to new
+            Undo.RecordObject(com.NetworkPrefabs, "Adding prefabs from com.spawnPrefabs");
+            NetworkPrefabUtils.AddToPrefabList(com.NetworkPrefabs.Prefabs, com.spawnPrefabs);
+
+            // clear old
+            var listProp = serializedObject.FindProperty(nameof(ClientObjectManager.spawnPrefabs));
+            Undo.RecordObject(target, "Clearing com.spawnPrefabs");
+            listProp.arraySize = 0;
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        public void RegisterAllPrefabs()
+        {
+            var com = (ClientObjectManager)target;
+            var foundPrefabs = NetworkPrefabUtils.LoadAllNetworkIdentities();
+
+            // first use networkprefabs for list, if null then use the list field
+            if (com.NetworkPrefabs != null)
+            {
+                Undo.RecordObject(com.NetworkPrefabs, "Register prefabs for spawn");
+                NetworkPrefabUtils.AddToPrefabList(com.NetworkPrefabs.Prefabs, foundPrefabs);
+            }
+            else
+            {
                 Undo.RecordObject(target, "Register prefabs for spawn");
                 PrefabUtility.RecordPrefabInstancePropertyModifications(target);
-                RegisterPrefabs((ClientObjectManager)target);
+                NetworkPrefabUtils.AddToPrefabList(com.spawnPrefabs, foundPrefabs);
             }
-        }
-
-        public void RegisterPrefabs(ClientObjectManager gameObject)
-        {
-            var prefabs = LoadPrefabsContaining<NetworkIdentity>("Assets");
-
-            foreach (var existing in gameObject.spawnPrefabs)
-            {
-                prefabs.Add(existing);
-            }
-            gameObject.spawnPrefabs.Clear();
-            gameObject.spawnPrefabs.AddRange(prefabs);
-        }
-
-        private static ISet<T> LoadPrefabsContaining<T>(string path) where T : Component
-        {
-            var result = new HashSet<T>();
-
-            var guids = AssetDatabase.FindAssets("t:GameObject", new[] { path });
-
-            for (var i = 0; i < guids.Length; i++)
-            {
-                var assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
-
-                var obj = AssetDatabase.LoadAssetAtPath<T>(assetPath);
-
-                if (obj != null)
-                {
-                    result.Add(obj);
-                }
-
-                if (i % 100 == 99)
-                {
-                    EditorUtility.UnloadUnusedAssetsImmediate();
-                }
-            }
-            EditorUtility.UnloadUnusedAssetsImmediate();
-            return result;
         }
     }
 }
