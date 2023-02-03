@@ -245,6 +245,7 @@ namespace Mirage
                 Undo.RecordObject(holder, $"Adding {prefab.name} to {holder.name}");
                 holder.Prefabs.Add(prefab);
             }
+            GUIUtility.ExitGUI();
         }
 
         private IEnumerable<NetworkPrefabs> FindHolders()
