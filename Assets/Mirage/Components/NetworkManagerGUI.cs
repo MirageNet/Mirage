@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Mirage
 {
-    [DisallowMultipleComponents]
+    [DisallowMultipleComponent]
     public class NetworkManagerGUI : MonoBehaviour
     {
         [Header("Defaults")]
