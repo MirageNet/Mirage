@@ -1,3 +1,10 @@
+## [129.6.2](https://github.com/MirageNet/Mirage/compare/v129.6.1...v129.6.2) (2023-02-03)
+
+
+### Bug Fixes
+
+* stopping exception when creating new SO ([f55e929](https://github.com/MirageNet/Mirage/commit/f55e9295cbfb15146cbbae927e4468d7665dec4c))
+
 ## [129.6.1](https://github.com/MirageNet/Mirage/compare/v129.6.0...v129.6.1) (2023-02-03)
 
 
