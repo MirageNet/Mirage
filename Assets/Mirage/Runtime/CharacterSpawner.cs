@@ -53,7 +53,7 @@ namespace Mirage
 
 
         // Start is called before the first frame update
-        public virtual void Awake()
+        protected internal virtual void Awake()
         {
             if (PlayerPrefab == null)
             {
@@ -81,7 +81,7 @@ namespace Mirage
             }
         }
 
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             if (Client != null && SceneManager != null)
             {
