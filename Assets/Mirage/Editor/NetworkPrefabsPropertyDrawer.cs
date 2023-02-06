@@ -55,6 +55,7 @@ namespace Mirage
             var gameObjectName = property.serializedObject.targetObject.name;
 
             var value = ScriptableObjectUtility.CreateAsset<NetworkPrefabs>("NetworkPrefabs_" + gameObjectName, "Assets");
+            NetworkPrefabsCache.ClearCache();
 
             property.objectReferenceValue = value;
             property.serializedObject.ApplyModifiedProperties();
