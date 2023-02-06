@@ -18,51 +18,7 @@ namespace Mirage
             public const string OK = "Installed@2x";
         }
 
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-        {
-            if (InvalidFieldType(property))
-            {
-                var remaining = DrawIcon(position, Icons.INVALID, "Invalid field type. Must be GameObject or Component");
-                EditorGUI.PropertyField(remaining, property, label);
-                return;
-            }
-
-            // if field null, nothing to check
-            if (property.objectReferenceValue == null)
-            {
-                EditorGUI.PropertyField(position, property, label);
-                return;
-            }
-
-            var obj = property.objectReferenceValue;
-            var gameObject = GetGameObject(obj);
-
-            // if object is in scene, nothing to check
-            if (gameObject.scene.IsValid())
-            {
-                var remaining = DrawIcon(position, Icons.ERR0R, "Scene object can not be Network Prefab");
-                EditorGUI.PropertyField(remaining, property, label);
-                return;
-            }
-
-            if (!gameObject.TryGetComponent<NetworkIdentity>(out var identity))
-            {
-                if (DrawButton(position, "Add Identity", out var remaining))
-                {
-                    Undo.AddComponent<NetworkIdentity>(gameObject);
-                }
-                remaining = DrawIcon(remaining, Icons.ERR0R, "Prefab does not have Network Identity");
-
-                EditorGUI.PropertyField(remaining, property, label);
-                return;
-            }
-
-            // check if prefab is in NetworkPrefabs
-            {
-                var remaining = CheckPrefabIsRegistered(position, identity);
-                EditorGUI.PropertyField(remaining, property, label);
-            }
-        }
+        private static readonly StringBuilder builder = new StringBuilder();
 
         /// <summary>
         /// Draws error icon in square box (using rect from <paramref name="rect"/>) and returns remaining rect
@@ -109,6 +65,48 @@ namespace Mirage
             return GUI.Button(buttonRect, content);
         }
 
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            if (InvalidFieldType(property))
+            {
+                var remaining = DrawIcon(position, Icons.INVALID, "Invalid field type. Must be GameObject or Component");
+                EditorGUI.PropertyField(remaining, property, label);
+                return;
+            }
+
+            // if field null, nothing to check
+            if (property.objectReferenceValue == null)
+            {
+                EditorGUI.PropertyField(position, property, label);
+                return;
+            }
+
+            var obj = property.objectReferenceValue;
+            var gameObject = GetGameObject(obj);
+
+            // if object is in scene, nothing to check
+            if (gameObject.scene.IsValid())
+            {
+                var remaining = DrawIcon(position, Icons.ERR0R, "Scene object can not be Network Prefab");
+                EditorGUI.PropertyField(remaining, property, label);
+                return;
+            }
+
+            if (!gameObject.TryGetComponent<NetworkIdentity>(out var identity))
+            {
+                var remaining = DrawNoIdentityGui(position, gameObject);
+                EditorGUI.PropertyField(remaining, property, label);
+                return;
+            }
+
+            // add scope here because "remaining" is used in earlier if scopes
+            {
+                // check if prefab is in NetworkPrefabs
+                var remaining = CheckPrefabIsRegistered(position, identity);
+                EditorGUI.PropertyField(remaining, property, label);
+            }
+        }
+
         private bool InvalidFieldType(SerializedProperty property)
         {
             // not a referecne, invalid
@@ -138,6 +136,16 @@ namespace Mirage
                 throw new System.ArgumentException($"object was not GameObject or Component");
         }
 
+        private static Rect DrawNoIdentityGui(Rect position, GameObject gameObject)
+        {
+            var remaining = DrawIcon(position, Icons.ERR0R, "Prefab does not have Network Identity");
+            if (DrawButton(remaining, "Add Identity", out remaining))
+            {
+                Undo.AddComponent<NetworkIdentity>(gameObject);
+            }
+
+            return remaining;
+        }
 
         /// <summary>
         /// Checks if prefab is in <see cref="NetworkPrefabs"/> list, If not shows fix or warning button. Will returns left over rect to draw field
@@ -146,12 +154,11 @@ namespace Mirage
         /// <param name="gameObject"></param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        private Rect CheckPrefabIsRegistered(Rect position, NetworkIdentity prefab)
+        private static Rect CheckPrefabIsRegistered(Rect position, NetworkIdentity prefab)
         {
-            var allHolders = FindHolders();
+            var allHolders = NetworkPrefabsCache.GetHolders();
 
-            var holderCount = allHolders.Count();
-            if (holderCount == 0)
+            if (allHolders.Count == 0)
             {
                 return DrawIcon(position, Icons.WARN, "Could not find NetworkPrefabs ScriptableObject");
             }
@@ -159,86 +166,106 @@ namespace Mirage
             var registeredInAll = allHolders.All(x => x.Prefabs.Contains(prefab));
             var registeredInNone = allHolders.All(x => !x.Prefabs.Contains(prefab));
 
-            string iconType;
-            if (registeredInAll) iconType = Icons.OK;
-            else if (registeredInNone) iconType = Icons.ERR0R;
-            else  /*some*/ iconType = Icons.WARN;
+            builder.Clear();
+            bool showRegisterButton;
 
-            var builder = new StringBuilder();
-            var showRegisterButton = false;
-
-            if (holderCount == 1)
+            if (allHolders.Count == 1)
             {
                 var holder = allHolders.First();
-                if (registeredInAll)
-                    builder.AppendLine($"Prefab registed with {holder.name}");
-                else
-                {
-                    showRegisterButton = true;
-
-                    builder.AppendLine($"Prefab not registed with {holder.name}");
-                }
+                showRegisterButton = CreateOneHolderMessage(holder, registeredInAll);
             }
-            else // more than 1
+            else // more than 1 holder
             {
-                if (registeredInAll)
-                {
-                    builder.AppendLine("Prefab registed with all NetworkPrefabs:");
-                    foreach (var holder in allHolders)
-                    {
-                        builder.AppendLine($" - {holder.name}");
-                    }
-                }
-                else if (registeredInNone)
-                {
-                    showRegisterButton = true;
-
-                    builder.AppendLine("Prefab not registed with any NetworkPrefabs:");
-                    foreach (var holder in allHolders)
-                    {
-                        builder.AppendLine($" - {holder.name}");
-                    }
-                }
-                else
-                {
-                    showRegisterButton = true;
-
-                    builder.AppendLine("Prefab registed with some NetworkPrefabs");
-                    builder.AppendLine("\nRegisted with:");
-                    foreach (var holder in allHolders.Where(x => x.Prefabs.Contains(prefab)))
-                    {
-                        builder.AppendLine($" - {holder.name}");
-                    }
-                    builder.AppendLine("\nNot Registed with:");
-                    foreach (var holder in allHolders.Where(x => !x.Prefabs.Contains(prefab)))
-                    {
-                        builder.AppendLine($" - {holder.name}");
-                    }
-                }
+                showRegisterButton = CreateManyHolderMessage(allHolders, prefab, registeredInAll, registeredInNone);
             }
 
             // make sure to do builder.ToString before drawing button, because we want to re-use builder for dialog message
-            var remaining = DrawIcon(position, iconType, builder.ToString());
+            var message = builder.ToString();
+            var iconType = GetIconType(registeredInAll, registeredInNone);
+            var remaining = DrawIcon(position, iconType, message);
 
             if (showRegisterButton)
             {
-                if (DrawButton(remaining, "Register", out remaining))
-                {
-                    builder.Clear();
-                    foreach (var holder in allHolders.Where(x => !x.Prefabs.Contains(prefab)))
-                    {
-                        builder.AppendLine($" - {holder.name}");
-                    }
+                remaining = DrawRegisterButton(remaining, allHolders, prefab);
+            }
 
-                    if (EditorUtility.DisplayDialog("Register Prefab with NetworkPrefabs", $"Do you want to add {prefab.name} to:\n{builder}", "Add to all", "Cancel"))
-                        Register(allHolders, prefab);
-                }
+            builder.Clear();
+            return remaining;
+        }
+
+        private static Rect DrawRegisterButton(Rect rect, IReadOnlyList<NetworkPrefabs> allHolders, NetworkIdentity prefab)
+        {
+            if (DrawButton(rect, "Register", out var remaining))
+            {
+                builder.Clear();
+                var holdersWithoutPrefab = allHolders.Where(x => !x.Prefabs.Contains(prefab));
+                AppendHolderNames(holdersWithoutPrefab);
+
+                if (EditorUtility.DisplayDialog("Register Prefab with NetworkPrefabs", $"Do you want to add {prefab.name} to:\n{builder}", "Add to all", "Cancel"))
+                    Register(allHolders, prefab);
             }
 
             return remaining;
         }
 
-        private void Register(IEnumerable<NetworkPrefabs> allHolders, NetworkIdentity prefab)
+        private static bool CreateOneHolderMessage(NetworkPrefabs holder, bool registeredInAll)
+        {
+            if (registeredInAll)
+            {
+                builder.AppendLine($"Prefab registed with {holder.name}");
+                return false;
+            }
+            else
+            {
+                builder.AppendLine($"Prefab not registed with {holder.name}");
+                return true;
+            }
+        }
+
+        private static bool CreateManyHolderMessage(IReadOnlyList<NetworkPrefabs> allHolders, NetworkIdentity prefab, bool registeredInAll, bool registeredInNone)
+        {
+            if (registeredInAll)
+            {
+                builder.AppendLine("Prefab registed with all NetworkPrefabs:");
+                AppendHolderNames(allHolders);
+                return false;
+            }
+            else if (registeredInNone)
+            {
+                builder.AppendLine("Prefab not registed with any NetworkPrefabs:");
+                AppendHolderNames(allHolders);
+                return true;
+            }
+            else // in some
+            {
+                builder.AppendLine("Prefab registed with some NetworkPrefabs");
+                builder.AppendLine("\nRegisted with:");
+                AppendHolderNames(allHolders.Where(x => x.Prefabs.Contains(prefab)));
+                builder.AppendLine("\nNot Registed with:");
+                AppendHolderNames(allHolders.Where(x => !x.Prefabs.Contains(prefab)));
+
+                return true;
+            }
+        }
+
+        private static void AppendHolderNames(IEnumerable<NetworkPrefabs> allHolders)
+        {
+            foreach (var holder in allHolders)
+            {
+                builder.AppendLine($" - {holder.name}");
+            }
+        }
+
+        private static string GetIconType(bool registeredInAll, bool registeredInNone)
+        {
+            string iconType;
+            if (registeredInAll) iconType = Icons.OK;
+            else if (registeredInNone) iconType = Icons.ERR0R;
+            else  /*some*/ iconType = Icons.WARN;
+            return iconType;
+        }
+
+        private static void Register(IEnumerable<NetworkPrefabs> allHolders, NetworkIdentity prefab)
         {
             foreach (var holder in allHolders)
             {
@@ -246,13 +273,6 @@ namespace Mirage
                 holder.Prefabs.Add(prefab);
             }
             GUIUtility.ExitGUI();
-        }
-
-        private IEnumerable<NetworkPrefabs> FindHolders()
-        {
-            return AssetDatabase.FindAssets($"t:{nameof(NetworkPrefabs)}")
-                .Select(AssetDatabase.GUIDToAssetPath)
-                .Select(AssetDatabase.LoadAssetAtPath<NetworkPrefabs>);
         }
     }
 }
