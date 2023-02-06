@@ -528,6 +528,7 @@ namespace Mirage
 
             var additiveScenes = GetAdditiveScenes();
 
+            SetClientNotReady(player);
             player.Send(new SceneMessage { MainActivateScene = ActiveScenePath, AdditiveScenes = additiveScenes });
             player.Send(new SceneReadyMessage());
         }
