@@ -53,7 +53,7 @@ namespace Mirage
 
 
         // Start is called before the first frame update
-        protected virtual void Awake()
+        protected internal virtual void Awake()
         {
             if (PlayerPrefab == null)
             {
