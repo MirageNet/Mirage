@@ -32,9 +32,13 @@ namespace Mirage
         [FormerlySerializedAs("server")]
         public NetworkServer Server;
 
-        [FormerlySerializedAs("loadMultipleAdditive")]
-        [Tooltip("If true, the server will create a new additive scene for every client that joins, and that client will receive all loaded additive scenes upon joining")]
-        public bool loadMultipleAdditiveScenes = true;
+        [FormerlySerializedAs("loadMultipleAdditiveScenes")]
+        [Tooltip("Should server create multiple additive scenes for clients?")]
+        public bool LoadMultipleAdditiveScenes = true;
+        
+        [FormerlySerializedAs("sendAdditiveScenesOnAuthenticate")]
+        [Tooltip("Should server send all additive scenes to new clients when they join?")]
+        public bool SendAdditiveScenesOnAuthenticate = true;
 
         /// <summary>
         ///     Sets the NetworksSceneManagers GameObject to DontDestroyOnLoad. Default = true.
@@ -366,26 +370,27 @@ namespace Mirage
             bool serverSceneIsLoaded = GetSceneByPathOrName(scenePath).isLoaded;
 
             //Only do a guarantee load if we are loading multiple additive scenes, otherwise only load if unloaded
-            bool serverShouldLoad = loadMultipleAdditiveScenes ? true : !serverSceneIsLoaded;
-
+            bool serverShouldLoad = LoadMultipleAdditiveScenes ? true : !serverSceneIsLoaded;
+            
+            UniTask loadTask = UniTask.CompletedTask;
+                
             if (serverShouldLoad)
-                OnServerStartedSceneChange?.Invoke(scenePath, sceneOperation);
-
-            if (Server.LocalClientActive && serverShouldLoad)
             {
-                // notify host client that scene loading is about to start
-                OnClientStartedSceneChange?.Invoke(scenePath, sceneOperation);
+                OnServerStartedSceneChange?.Invoke(scenePath, sceneOperation);
+                
+                if (Server.LocalClientActive)
+                {
+                    // notify host client that scene loading is about to start
+                    OnClientStartedSceneChange?.Invoke(scenePath, sceneOperation);
+                }
+                
+                loadTask = LoadSceneAsync(scenePath, players, sceneOperation, loadSceneParameters);
             }
 
             // Coburn, 2023-01-29: Patched the following to not use Forget UniTask functionality.
             // Moddingdudes, 2023-02-06: This is only for multiple additive, we want just one additive option
             // ALWAYS load the scene, even if we're the host.
             // return the task after sending the message
-
-            UniTask loadTask = UniTask.CompletedTask;
-
-            if (serverShouldLoad)
-                loadTask = LoadSceneAsync(scenePath, players, sceneOperation, loadSceneParameters);
 
             // Send out the message to do the change. This'll notify all clients.
             SendSceneMessage(players, scenePath, shouldClientLoadOrUnloadNormally ? SceneOperation.Normal : sceneOperation);
@@ -544,7 +549,7 @@ namespace Mirage
 
             SetClientNotReady(player);
 
-            if (loadMultipleAdditiveScenes)
+            if (SendAdditiveScenesOnAuthenticate)
             {
                 //Client should receive all open additive scenes, as server will have multiple for them
 
