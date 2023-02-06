@@ -9,7 +9,7 @@ namespace Mirage.Examples.Pong
         public GameObject ballPrefab;
         private GameObject ball;
 
-        public override void Awake()
+        protected override void Awake()
         {
             base.Awake();
 
