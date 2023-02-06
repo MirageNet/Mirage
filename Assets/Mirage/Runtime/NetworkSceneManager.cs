@@ -444,8 +444,7 @@ namespace Mirage
             OnServerStartedSceneChange?.Invoke(scene.path, SceneOperation.UnloadAdditive);
 
             // return the task after sending the message
-            var unloadTask = Un
-            (scene, SceneOperation.UnloadAdditive);
+            var unloadTask = UnLoadSceneAsync(scene, SceneOperation.UnloadAdditive);
 
             // notify all clients about the new scene
             SendSceneMessage(players, scene.path, SceneOperation.UnloadAdditive);
