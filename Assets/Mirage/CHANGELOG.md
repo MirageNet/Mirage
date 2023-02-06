@@ -1,3 +1,16 @@
+# [130.1.0](https://github.com/MirageNet/Mirage/compare/v130.0.0...v130.1.0) (2023-02-06)
+
+
+### Bug Fixes
+
+* adding exitgui to stop error ([df719b2](https://github.com/MirageNet/Mirage/commit/df719b2ab86311f66e874716ef3fa612e111e868))
+
+
+### Features
+
+* add networked prefab attribute ([9fdd2ec](https://github.com/MirageNet/Mirage/commit/9fdd2ec872f6c603efaa49a27ca7b28a41adf464))
+* making NetworkedPrefab attribute work with new NetworkPrefabs SO ([37c4877](https://github.com/MirageNet/Mirage/commit/37c4877d09f352f2648c67e71d441ca73ebc6cd8))
+
 # [130.0.0](https://github.com/MirageNet/Mirage/compare/v129.6.2...v130.0.0) (2023-02-06)
 
 
