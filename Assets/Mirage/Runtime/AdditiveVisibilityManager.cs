@@ -100,7 +100,7 @@ namespace Mirage
             //This will prevent that.
             if (ForceVisibleSceneNames.Contains(scene.name))
             {
-                if (logger.LogEnabled()) logger.Log($"[AdditiveVisibilityManager] - Ignoring SetSceneVisibility request because scene ({scene.name}) was foudn in ForceVisibleSceneNames collection");
+                if (logger.LogEnabled()) logger.Log($"[AdditiveVisibilityManager] - Ignoring SetSceneVisibility request because scene ({scene.name}) was found in ForceVisibleSceneNames collection");
 
                 return;
             }
