@@ -190,4 +190,11 @@ namespace Mirage
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class ReadOnlyInspectorAttribute : PropertyAttribute { }
+
+    /// <summary>
+    /// Forces the user to provide a prefab that has a NetworkIdentity component and is registered.
+    /// Also provides a fix button to fix the prefab if it hasn't been networked.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field)]
+    public sealed class NetworkedPrefabAttribute : PropertyAttribute { }
 }

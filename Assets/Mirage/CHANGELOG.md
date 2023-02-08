@@ -1,3 +1,34 @@
+# [130.1.0](https://github.com/MirageNet/Mirage/compare/v130.0.0...v130.1.0) (2023-02-06)
+
+
+### Bug Fixes
+
+* adding exitgui to stop error ([df719b2](https://github.com/MirageNet/Mirage/commit/df719b2ab86311f66e874716ef3fa612e111e868))
+
+
+### Features
+
+* add networked prefab attribute ([9fdd2ec](https://github.com/MirageNet/Mirage/commit/9fdd2ec872f6c603efaa49a27ca7b28a41adf464))
+* making NetworkedPrefab attribute work with new NetworkPrefabs SO ([37c4877](https://github.com/MirageNet/Mirage/commit/37c4877d09f352f2648c67e71d441ca73ebc6cd8))
+
+# [130.0.0](https://github.com/MirageNet/Mirage/compare/v129.6.2...v130.0.0) (2023-02-06)
+
+
+### Bug Fixes
+
+* **Examples:** updating Paddlespawner awake function to be protected ([241a421](https://github.com/MirageNet/Mirage/commit/241a421e88d4357c39c01fdf3af6c8c52d0d6367))
+* marking scene as not ready when player first joins server ([f523143](https://github.com/MirageNet/Mirage/commit/f523143d59f7e14b8571a3bec676b1fb0b6c297d))
+
+
+* feat(CharacterSpawner)!: making Awake and OnDestroy protected virtual ([14ed80a](https://github.com/MirageNet/Mirage/commit/14ed80adbc2003e2817a2eddfae37c057b78def7))
+
+
+### BREAKING CHANGES
+
+* CharacterSpawner.Awake is now protected instead of public
+
+Co-authored-by: James Frowen <jamesfrowen5@gmail.com>
+
 ## [129.6.2](https://github.com/MirageNet/Mirage/compare/v129.6.1...v129.6.2) (2023-02-03)
 
 
