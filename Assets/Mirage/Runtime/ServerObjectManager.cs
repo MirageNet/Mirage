@@ -349,6 +349,10 @@ namespace Mirage
         /// <param name="player"></param>
         internal void ShowToPlayer(NetworkIdentity identity, INetworkPlayer player)
         {
+            var visiblity = identity.Visibility;
+            if (visiblity != null)
+                visiblity.InvokeVisibilityChanged(player, true);
+
             // dont send if loading scene
             if (player.SceneIsReady)
                 SendSpawnMessage(identity, player);
@@ -356,6 +360,10 @@ namespace Mirage
 
         internal void HideToPlayer(NetworkIdentity identity, INetworkPlayer player)
         {
+            var visiblity = identity.Visibility;
+            if (visiblity != null)
+                visiblity.InvokeVisibilityChanged(player, false);
+
             player.Send(new ObjectHideMessage { netId = identity.NetId });
         }
 
