@@ -32,6 +32,9 @@ namespace Mirage
         [FormerlySerializedAs("server")]
         public NetworkServer Server;
 
+        [Tooltip("Should server send all additive scenes to new clients when they join?")]
+        public bool SendAdditiveScenesOnAuthenticate = true;
+
         /// <summary>
         ///     Sets the NetworksSceneManagers GameObject to DontDestroyOnLoad. Default = true.
         /// </summary>
@@ -526,10 +529,22 @@ namespace Mirage
                 return;
             }
 
-            var additiveScenes = GetAdditiveScenes();
-
             SetClientNotReady(player);
-            player.Send(new SceneMessage { MainActivateScene = ActiveScenePath, AdditiveScenes = additiveScenes });
+
+            SceneMessage sceneMessage;
+            if (SendAdditiveScenesOnAuthenticate)
+            {
+                //Client should receive all open additive scenes, as server will have multiple for them
+                var additiveScenes = GetAdditiveScenes();
+                sceneMessage = new SceneMessage { MainActivateScene = ActiveScenePath, AdditiveScenes = additiveScenes };
+            }
+            else
+            {
+                //Client will not be receiving additive scenes, no need to allocate garbage via GetAdditiveScenes list
+                sceneMessage = new SceneMessage { MainActivateScene = ActiveScenePath };
+            }
+
+            player.Send(sceneMessage);
             player.Send(new SceneReadyMessage());
         }
 
