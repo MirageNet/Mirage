@@ -348,11 +348,7 @@ namespace Mirage
         /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
         private UniTask ServerSceneLoading(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadOrUnloadNormally, SceneOperation sceneOperation = SceneOperation.Normal, LoadSceneParameters? loadSceneParameters = null)
         {
-            if (string.IsNullOrEmpty(scenePath))
-            {
-                throw new ArgumentNullException(nameof(scenePath),
-                    "[NetworkSceneManager] - ServerChangeScene: " + nameof(scenePath) + " cannot be empty or null");
-            }
+            ThrowIfScenePathEmpty(scenePath);
 
             if (logger.LogEnabled()) logger.Log("[NetworkSceneManager] - ServerChangeScene " + scenePath);
 
@@ -657,6 +653,15 @@ namespace Mirage
                 player.RemoveAllVisibleObjects();
 
                 player.Send(new SceneNotReadyMessage());
+            }
+        }
+
+        private void ThrowIfScenePathEmpty(string scenePath)
+        {
+            if (string.IsNullOrEmpty(scenePath))
+            {
+                throw new ArgumentNullException(nameof(scenePath),
+                    "[NetworkSceneManager] - ServerChangeScene: " + nameof(scenePath) + " cannot be empty or null");
             }
         }
 
