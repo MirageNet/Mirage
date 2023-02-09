@@ -340,6 +340,25 @@ namespace Mirage
         }
 
         /// <summary>
+        /// Loads a scene on players but NOT on server
+        /// <para>Note: does not load for Host player, they should be loaded using server methods instead</para>
+        /// </summary>
+        /// <param name="scenePath"></param>
+        /// <param name="players"></param>
+        /// <param name="shouldClientLoadOrUnloadNormally"></param>
+        /// <param name="sceneOperation"></param>
+        /// <param name="loadSceneParameters"></param>
+        public void ServerLoadForPlayers(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadOrUnloadNormally, SceneOperation sceneOperation = SceneOperation.Normal)
+        {
+            ThrowIfScenePathEmpty(scenePath);
+
+            if (logger.LogEnabled()) logger.Log("[NetworkSceneManager] - ServerLoadForPlayers " + scenePath);
+            SetAllClientsNotReady(players);
+
+            SendSceneMessage(players, scenePath, shouldClientLoadOrUnloadNormally ? SceneOperation.Normal : sceneOperation);
+        }
+
+        /// <summary>
         ///     Allows server to fully load new scene or additive load in another scene.
         /// </summary>
         /// <param name="scenePath">The full path to the scenes files or the names of the scenes.</param>
