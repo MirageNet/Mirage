@@ -25,7 +25,7 @@ namespace Mirage
             if (!IsLocalClient)
                 return;
 
-            // set host visibility on Spawn because OnVisibilityChanged isn't called on spawn, only when it changes
+            // set host visbility here because "OnVisibilityChanged(..., false)" is not called when spawning
             var visibility = Identity.Visibility;
             var visible = visibility.OnCheckObserver(Server.LocalPlayer);
             SetHostVisibility(visible);

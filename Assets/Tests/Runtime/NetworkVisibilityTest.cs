@@ -57,7 +57,7 @@ namespace Mirage.Tests.Runtime
 
 
         [Test]
-        public void EventNotCalledWhenSpawningOrDestroying()
+        public void EventCalledWhenSpawning()
         {
             var otherObj = CreateBehaviour<MockVisibility>();
             otherObj.Visible = true;
@@ -65,8 +65,19 @@ namespace Mirage.Tests.Runtime
             otherObj.OnVisibilityChanged += sub;
 
             serverObjectManager.Spawn(otherObj.Identity);
-            // not called when spawning when not visible
-            sub.DidNotReceiveWithAnyArgs().Invoke(default, default);
+            sub.Received(1).Invoke(serverPlayer, true);
+        }
+
+        [Test]
+        public void EventNotCalledWhenDestroying()
+        {
+            var otherObj = CreateBehaviour<MockVisibility>();
+            otherObj.Visible = true;
+
+            serverObjectManager.Spawn(otherObj.Identity);
+
+            var sub = Substitute.For<NetworkVisibility.VisibilityChanged>();
+            otherObj.OnVisibilityChanged += sub;
 
             serverObjectManager.Destroy(otherObj.gameObject);
             sub.DidNotReceiveWithAnyArgs().Invoke(default, default);

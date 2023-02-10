@@ -16,7 +16,8 @@ namespace Mirage
 
         /// <summary>
         /// Invoked on server when visibility changes for player
-        /// <para>Invoked before Show/Hide/Spawn message is sent to client</para>
+        /// <para>Invoked before Spawn/Show/Hide message is sent to client</para>
+        /// <para>Invoked when object is spawned, but not when it is desotroyed</para>
         /// </summary>
         public event VisibilityChanged OnVisibilityChanged;
 
