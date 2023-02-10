@@ -1,3 +1,18 @@
+# [130.2.0](https://github.com/MirageNet/Mirage/compare/v130.1.0...v130.2.0) (2023-02-10)
+
+
+### Bug Fixes
+
+* making HostRendererVisibility hide objects when it is spawned if not visible ([03976a5](https://github.com/MirageNet/Mirage/commit/03976a538d3d35f838c509924dd7b49698f1546d))
+
+
+### Features
+
+* adding a function for server to tell clients to load scene ([14283b1](https://github.com/MirageNet/Mirage/commit/14283b1489430d21e12fe75e44f0621f214462a3))
+* adding component that can be used to disable renderers on host player ([64c09bf](https://github.com/MirageNet/Mirage/commit/64c09bfb532afc29e9956839d7715fb9f3d8016c))
+* adding event that is invoked when object visibility changes ([d82cd76](https://github.com/MirageNet/Mirage/commit/d82cd7638f7175cb9e5e8a16c59fb9aa19342652))
+* adding option to not send additive scenes when client connects ([f39414b](https://github.com/MirageNet/Mirage/commit/f39414be4f072981dd75612ef526cd0eb8aa3f91))
+
 # [130.1.0](https://github.com/MirageNet/Mirage/compare/v130.0.0...v130.1.0) (2023-02-06)
 
 
