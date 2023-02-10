@@ -1,3 +1,10 @@
+# [130.3.0](https://github.com/MirageNet/Mirage/compare/v130.2.0...v130.3.0) (2023-02-10)
+
+
+### Features
+
+* making SetHostVisibility virtual ([aef174c](https://github.com/MirageNet/Mirage/commit/aef174c5f24b2edc20de2e4c471fc5193eb4f440))
+
 # [130.2.0](https://github.com/MirageNet/Mirage/compare/v130.1.0...v130.2.0) (2023-02-10)
 
 
