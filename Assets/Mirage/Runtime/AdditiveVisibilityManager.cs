@@ -17,6 +17,13 @@ namespace Mirage
         public NetworkServer Server;
 
         /// <summary>
+        /// Checks scenes every frame for dirty objects that should have their renderers updated.
+        /// Note: This option can have a heavy performance impact. If this is a concern, manually invoke UpdateGameObjectVisibility
+        /// when a GameObject moves scenes to prevent the update check
+        /// </summary>
+        public bool CheckScenesUpdate = true;
+
+        /// <summary>
         /// Ignored by visibilty manager. Useful for shared scenes or when you want additive scenes that are still visible by player
         /// </summary>
         public List<string> ForceVisibleSceneNames = new List<string>();
@@ -40,12 +47,26 @@ namespace Mirage
             //Check if local players scene has changed
             //This is an every frame scene check, so there may be a better way
 
-            Scene playerScene = localPlayer.Identity.gameObject.scene;
+            CheckForPlayerSceneChange(localPlayer);
+            
+            for (int i=0; i<SceneManager.sceneCount; i++)
+            {
+                Scene scene = SceneManager.GetSceneAt(i);
+                bool playerInScene = localPlayer.Identity.gameObject.scene == scene;
+
+                if (!ForceVisibleSceneNames.Contains(scene.name))
+                    SetSceneVisibility(scene, playerInScene);
+            }
+        }
+
+        private void CheckForPlayerSceneChange(INetworkPlayer player)
+        {
+            Scene playerScene = player.Identity.gameObject.scene;
 
             if (playerScene != playerSceneCache)
             {
                 //Player has changed scenes
-                OnLocalPlayerChangedScenes(localPlayer, playerSceneCache, playerScene);
+                OnLocalPlayerChangedScenes(player, playerSceneCache, playerScene);
 
                 //Make sure to update our cache
                 playerSceneCache = playerScene;
@@ -60,7 +81,8 @@ namespace Mirage
             //We want to hide the old scene objects and reveal the new scene objects
 
             if (oldScene.IsValid() && oldScene.isLoaded)
-                SetSceneVisibility(oldScene, false);
+                if (!ForceVisibleSceneNames.Contains(oldScene.name))
+                    SetSceneVisibility(oldScene, false);
 
             SetSceneVisibility(newScene, true);
         }
@@ -71,6 +93,12 @@ namespace Mirage
 
             if (logger.LogEnabled()) logger.Log("[AdditiveVisibilityManager] - Scene Loaded");
             
+            if (ForceVisibleSceneNames.Contains(scene.name))
+            {
+                //Skip because we don't want to mess with visibility of force scene visibility
+                return;
+            }
+
             //Attempt to get the local player
             //If the player does not exist, we do not want to continue with our visibility check
             if (!TryGetLocalPlayerIfCharacterExists(out INetworkPlayer localPlayer)) return;
@@ -83,6 +111,40 @@ namespace Mirage
                 if (logger.LogEnabled()) logger.Log($"[AdditiveVisibilityManager] - Disabling visibility for scene {scene.name}");
 
                 SetSceneVisibility(scene, false);
+            }
+        }
+
+        /// <summary>
+        /// Updates the visibility state of a GameObjects renderer.
+        /// Typically used when you want manual control over GameObject scene flow
+        /// </summary>
+        /// <param name="target">The target GameObject that should be updated</param>
+        public void UpdateGameObjectVisibility(GameObject target)
+        {
+            //Attempt to get local player, necessary for scene check
+            if (!TryGetLocalPlayerIfCharacterExists(out INetworkPlayer localPlayer)) return;
+
+            Renderer[] objectRenderers = target.GetComponentsInChildren<Renderer>();
+
+            //If this object does not have any renderers, then don't bother continuing
+            if (objectRenderers.Length <= 0) return;
+
+            if (localPlayer.Identity.gameObject.scene == target.scene)
+            {
+                //Objects are in the same scene, so it should be visible
+
+                foreach (Renderer renderer in objectRenderers)
+                {
+                    renderer.enabled = true;
+                }
+            }
+            else
+            {
+                //Objects are not in the sames cene, so they should not be visible
+                foreach (Renderer renderer in objectRenderers)
+                {
+                    renderer.enabled = false;
+                }
             }
         }
 
