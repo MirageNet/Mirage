@@ -55,7 +55,7 @@ namespace Mirage
                 SetHostVisibility(visible);
         }
 
-        private void SetHostVisibility(bool visible)
+        protected virtual void SetHostVisibility(bool visible)
         {
             for (var i = 0; i < _renderers.Length; i++)
                 _renderers[i].enabled = visible;
