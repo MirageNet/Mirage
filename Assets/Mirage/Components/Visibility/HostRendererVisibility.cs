@@ -16,6 +16,19 @@ namespace Mirage
             _visibility = GetComponent<NetworkVisibility>();
             _visibility.OnVisibilityChanged += OnVisibilityChanged;
             _renderers = GetComponentsInChildren<Renderer>();
+
+            Identity.OnStartServer.AddListener(OnStartServer);
+        }
+
+        private void OnStartServer()
+        {
+            if (!IsLocalClient)
+                return;
+
+            // set host visibility on Spawn because OnVisibilityChanged isn't called on spawn, only when it changes
+            var visibility = Identity.Visibility;
+            var visible = visibility.OnCheckObserver(Server.LocalPlayer);
+            SetHostVisibility(visible);
         }
 
         private void OnDestroy()
