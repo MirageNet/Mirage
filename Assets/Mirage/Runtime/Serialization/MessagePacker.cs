@@ -3,6 +3,16 @@ using System.Collections.Generic;
 
 namespace Mirage.Serialization
 {
+    /// <summary>
+    /// Class that will cache the ID for type T
+    /// <para>avoids needing to calculate the stable hash of the full name each time a message is sent</para>
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public static class MessageIdCache<T>
+    {
+        public static readonly int Id = MessagePacker.GetId(typeof(T));
+    }
+
     // message packing all in one place, instead of constructing headers in all
     // kinds of different places
     //
@@ -44,11 +54,21 @@ namespace Mirage.Serialization
             messageTypes[id] = typeof(T);
         }
 
+        /// <summary>
+        /// Gets the Id from <see cref="MessageIdCache"/> for <typeparamref name="T"/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static int GetId<T>()
         {
-            return GetId(typeof(T));
+            return MessageIdCache<T>.Id;
         }
 
+        /// <summary>
+        /// Used to calculate new hash for <paramref name="type"/>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static int GetId(Type type)
         {
             // paul: 16 bits is enough to avoid collisions
