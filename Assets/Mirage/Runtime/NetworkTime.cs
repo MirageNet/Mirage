@@ -5,10 +5,29 @@ using Stopwatch = System.Diagnostics.Stopwatch;
 
 namespace Mirage
 {
+    public class s { }
+
+
+    /// <summary>
+    /// Calcualtes Latency of player
+    /// </summary>
+    public interface ILatencyTracker
+    {
+    }
+
+    public interface INetworkTime
+    {
+        /// <summary>
+        /// The time in seconds since the server started.
+        /// </summary>
+        double Time { get; }
+    }
+
+
     /// <summary>
     /// Synchronize time between the server and the clients
     /// </summary>
-    public class NetworkTime
+    public class NetworkTime : INetworkTime
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkTime));
 
@@ -58,7 +77,8 @@ namespace Mirage
             {
                 var pingMessage = new NetworkPingMessage
                 {
-                    clientTime = LocalTime()
+                    clientTime = LocalTime(),
+                    RTT = (float)Rtt,
                 };
                 client.Send(pingMessage, Channel.Unreliable);
                 _lastPingTime = UnityEngine.Time.time;
@@ -77,6 +97,7 @@ namespace Mirage
                 clientTime = msg.clientTime,
                 serverTime = LocalTime()
             };
+            player.RTT = msg.RTT;
 
             player.Send(pongMsg, Channel.Unreliable);
         }

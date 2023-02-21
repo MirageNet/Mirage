@@ -97,6 +97,8 @@ namespace Mirage
 
         void Disconnect();
         void MarkAsDisconnected();
+
+        float RTT { get; set; }
     }
 
     public interface IAuthenticatedObject

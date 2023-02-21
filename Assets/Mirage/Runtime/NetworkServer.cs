@@ -56,6 +56,12 @@ namespace Mirage
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
 
+        /// <summary>
+        /// Tracker used for new connected players
+        /// <para>If setting this after players have connected then you need to set </para>
+        /// </summary> 
+        public ILatencyTracker LatencyTracker;
+
         [Header("Events")]
         [SerializeField] private AddLateEvent _started = new AddLateEvent();
         /// <summary>

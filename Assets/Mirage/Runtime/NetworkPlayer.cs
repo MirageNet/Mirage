@@ -76,6 +76,8 @@ namespace Mirage
 
         public IConnection Connection => _connection;
 
+        public float RTT { get; set; }
+
         /// <summary>
         /// List of all networkIdentity that this player can see
         /// <para>Only valid on server</para>
@@ -143,7 +145,6 @@ namespace Mirage
         {
             _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         }
-
 
         /// <summary>
         /// This sends a network message to the connection.

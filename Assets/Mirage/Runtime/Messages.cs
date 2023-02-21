@@ -4,9 +4,6 @@ using UnityEngine;
 
 namespace Mirage
 {
-
-    #region Public System Messages
-
     /// <summary>
     /// Sent to client to mark their scene as not ready
     /// <para>Client can sent <see cref="SceneReadyMessage"/> once its scene is ready again</para>
@@ -32,9 +29,7 @@ namespace Mirage
     [NetworkMessage]
     public struct SceneReadyMessage { }
 
-    #endregion
 
-    #region System Messages required for code gen path
     [NetworkMessage]
     public struct ServerRpcMessage
     {
@@ -79,9 +74,7 @@ namespace Mirage
         // -> ArraySegment to avoid unnecessary allocations
         public ArraySegment<byte> payload;
     }
-    #endregion
 
-    #region Internal System Messages
     [NetworkMessage]
     public struct SpawnMessage
     {
@@ -158,21 +151,38 @@ namespace Mirage
         public ArraySegment<byte> payload;
     }
 
-    // A client sends this message to the server
-    // to calculate RTT and synchronize time
+    /// <summary>
+    /// A client sends this message to the server
+    /// to calculate RTT and synchronize time
+    /// </summary>
     [NetworkMessage]
     public struct NetworkPingMessage
     {
+        /// <summary>
+        /// Time client sent this message
+        /// </summary>
         public double clientTime;
+
+        /// <summary>
+        /// Current RTT calculated by client
+        /// </summary>
+        public float RTT;
     }
 
-    // The server responds with this message
-    // The client can use this to calculate RTT and sync time
+    /// <summary>
+    /// The server responds with this message
+    /// The client can use this to calculate RTT and sync time 
+    /// </summary>
     [NetworkMessage]
     public struct NetworkPongMessage
     {
+        /// <summary>
+        /// Time client sent in <see cref="NetworkPingMessage"/>. just echo back the value client sent, so that client can use it to calculate RTT
+        /// </summary>
         public double clientTime;
+        /// <summary>
+        /// Time server processed <see cref="NetworkPingMessage"/> and sent this message as a reply
+        /// </summary>
         public double serverTime;
     }
-    #endregion
 }
