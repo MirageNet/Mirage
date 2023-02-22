@@ -105,13 +105,14 @@ namespace Mirage
         // Executed at the client when we receive a Pong message
         // find out how long it took since we sent the Ping
         // and update time offset
-        internal void OnClientPong(NetworkPongMessage msg)
+        internal void OnClientPong(INetworkPlayer player, NetworkPongMessage msg)
         {
             var now = LocalTime();
 
             // how long did this message take to come back
             var newRtt = now - msg.clientTime;
             _rtt.Add(newRtt);
+            player.RTT = (float)Rtt;
 
             // the difference in time between the client and the server
             // but subtract half of the rtt to compensate for latency

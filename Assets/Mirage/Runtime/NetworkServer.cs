@@ -207,12 +207,13 @@ namespace Mirage
             logger.Assert(Players.Count == 0, "Player should have been reset since previous session");
             logger.Assert(_connections.Count == 0, "Connections should have been reset since previous session");
 
-            World = new NetworkWorld();
+            var time = new NetworkTime();
+            World = new NetworkWorld(time);
             SyncVarSender = new SyncVarSender();
 
             LocalClient = localClient;
             MessageHandler = new MessageHandler(World, DisconnectOnException);
-            MessageHandler.RegisterHandler<NetworkPingMessage>(World.Time.OnServerPing);
+            MessageHandler.RegisterHandler<NetworkPingMessage>(time.OnServerPing);
 
             var dataHandler = new DataHandler(MessageHandler, _connections);
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;

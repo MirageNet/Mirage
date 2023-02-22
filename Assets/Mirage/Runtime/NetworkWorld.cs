@@ -27,10 +27,15 @@ namespace Mirage
         /// <summary>
         /// Time kept in this world
         /// </summary>
-        public NetworkTime Time { get; } = new NetworkTime();
+        public readonly INetworkTime Time;
 
         private readonly Dictionary<uint, NetworkIdentity> _spawnedObjects = new Dictionary<uint, NetworkIdentity>();
         public IReadOnlyCollection<NetworkIdentity> SpawnedIdentities => _spawnedObjects.Values;
+
+        public NetworkWorld(NetworkTime time)
+        {
+            Time = time;
+        }
 
         public bool TryGetIdentity(uint netId, out NetworkIdentity identity)
         {
@@ -105,11 +110,6 @@ namespace Mirage
         internal void ClearSpawnedObjects()
         {
             _spawnedObjects.Clear();
-        }
-
-        public NetworkWorld()
-        {
-
         }
     }
 }

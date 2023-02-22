@@ -81,6 +81,7 @@ namespace Mirage
 
         internal ConnectState _connectState = ConnectState.Disconnected;
 
+
         /// <summary>
         /// active is true while a client is connecting/connected
         /// (= while the network is active)
@@ -93,6 +94,7 @@ namespace Mirage
         public bool IsConnected => _connectState == ConnectState.Connected;
 
         public NetworkWorld World { get; private set; }
+        public NetworkTime Time { get; private set; }
         public MessageHandler MessageHandler { get; private set; }
 
         /// <summary>
@@ -118,7 +120,8 @@ namespace Mirage
 
             _connectState = ConnectState.Connecting;
 
-            World = new NetworkWorld();
+            Time = new NetworkTime();
+            World = new NetworkWorld(Time);
 
             var endPoint = SocketFactory.GetConnectEndPoint(address, port);
             if (logger.LogEnabled()) logger.Log($"Client connecting to endpoint: {endPoint}");
@@ -168,7 +171,7 @@ namespace Mirage
 
         private void Peer_OnConnected(IConnection conn)
         {
-            World.Time.UpdateClient(this);
+            Time.UpdateClient(this);
             _connectState = ConnectState.Connected;
             _connected.Invoke(Player);
         }
@@ -319,7 +322,7 @@ namespace Mirage
             if (!IsLocalClient && Active && _connectState == ConnectState.Connected)
             {
                 // only update things while connected
-                World.Time.UpdateClient(this);
+                Time.UpdateClient(this);
             }
 
             if (ManualUpdate)
@@ -339,7 +342,7 @@ namespace Mirage
 
         internal void RegisterMessageHandlers()
         {
-            MessageHandler.RegisterHandler<NetworkPongMessage>(World.Time.OnClientPong);
+            MessageHandler.RegisterHandler<NetworkPongMessage>(Time.OnClientPong);
         }
 
         /// <summary>

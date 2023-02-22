@@ -119,7 +119,7 @@ namespace Mirage
         /// <summary>
         /// Returns the appropriate NetworkTime instance based on if this NetworkBehaviour is running as a Server or Client.
         /// </summary>
-        public NetworkTime NetworkTime => World.Time;
+        public INetworkTime NetworkTime => World.Time;
 
         /// <summary>
         /// Get Id of this NetworkBehaviour, Its NetId and ComponentIndex
