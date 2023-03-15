@@ -19,9 +19,9 @@ namespace Mirage.Tests.Runtime
         {
             var serverList = new SyncList<TestPlayer>();
             var clientList = new SyncList<TestPlayer>();
-            SerializeHelper.SerializeAllTo(serverList, clientList);
+            SyncObjectHelper.SerializeAllTo(serverList, clientList);
             serverList.Add(new TestPlayer { item = new TestItem { price = 10 } });
-            SerializeHelper.SerializeDeltaTo(serverList, clientList);
+            SyncObjectHelper.SerializeDeltaTo(serverList, clientList);
             Assert.That(serverList.IsDirty, Is.False);
 
             var player = serverList[0];
