@@ -20,6 +20,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         }
 
         [Test]
+        [TestCase(0, ExpectedResult = 0)]
         [TestCase(0b1UL, ExpectedResult = 1)]
         [TestCase(0b10UL, ExpectedResult = 2)]
         [TestCase(0b11UL, ExpectedResult = 2)]

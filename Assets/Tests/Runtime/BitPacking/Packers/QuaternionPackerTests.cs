@@ -91,21 +91,20 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             }
         }
 
+#if UNITY_EDITOR
+        // Quaternion.Euler Requires unity engine to run
         [Test]
         [TestCaseSource(nameof(PackAndUnpackCases))]
-#if !UNITY_EDITOR
-        [Ignore("Quaternion.Euler Requires unity engine to run")]
 #endif
         public void PackAndUnpack(int bits, Quaternion inValue)
         {
             RunPackAndUnpack(bits, inValue);
         }
 
-
+#if UNITY_EDITOR
+        // Quaternion.Euler Requires unity engine to run
         [Test]
         [Repeat(1000)]
-#if !UNITY_EDITOR
-        [Ignore("Quaternion.Euler Requires unity engine to run")]
 #endif
         public void PackAndUnpackRepeat([Range(8, 12)] int bits)
         {
@@ -114,10 +113,10 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             RunPackAndUnpack(bits, inValue);
         }
 
+#if UNITY_EDITOR
+        // Quaternion.Euler Requires unity engine to run
         [Test]
         [Repeat(1000)]
-#if !UNITY_EDITOR
-        [Ignore("Quaternion.Euler Requires unity engine to run")]
 #endif
         public void PackAndUnpackRepeatNotNormalized([Range(8, 12)] int bits)
         {
@@ -216,10 +215,11 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             yield return new TestCaseData(Quaternion.Euler(-20, 0, 45));
             yield return new TestCaseData(Quaternion.Euler(80, 30, -45));
         }
+
+#if UNITY_EDITOR
+        // Quaternion.Euler Requires unity engine to run
         [Test]
         [TestCaseSource(nameof(PackToIntCases))]
-#if !UNITY_EDITOR
-        [Ignore("Quaternion.Euler Requires unity engine to run")]
 #endif
         public void PackAsInt(Quaternion inValue)
         {
