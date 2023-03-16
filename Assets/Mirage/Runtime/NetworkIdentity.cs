@@ -187,6 +187,12 @@ namespace Mirage
         /// </summary>
         public NetworkWorld World { get; internal set; }
 
+        /// <summary>
+        /// True while applying spawn payload within OnDeserializeAll
+        /// <para>Can be used inside syncvar hooks to tell if object has just spawned</para>
+        /// </summary>
+        public bool InitialState { get; private set; }
+
         [Header("Runtime References")]
 
         /// <summary>
@@ -714,6 +720,8 @@ namespace Mirage
 
         internal void OnDeserializeAll(NetworkReader reader, bool initialState)
         {
+            InitialState = initialState;
+
             // deserialize all components that were received
             var components = NetworkBehaviours;
             // check if we can read at least 1 byte
@@ -729,6 +737,8 @@ namespace Mirage
                     OnDeserialize(components[index], reader, initialState);
                 }
             }
+
+            InitialState = false;
         }
 
         internal void SetServerValues(NetworkServer networkServer, ServerObjectManager serverObjectManager)
