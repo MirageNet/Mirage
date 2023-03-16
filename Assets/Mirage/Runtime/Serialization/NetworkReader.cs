@@ -322,6 +322,34 @@ namespace Mirage.Serialization
         }
 
         /// <summary>
+        /// Reads <paramref name="bits"/> without moving position
+        /// </summary>
+        /// <param name="bits"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ulong Peak(int bits)
+        {
+            var pos = _bitPosition;
+            var value = Read(bits);
+            // reset position after reading
+            _bitPosition = pos;
+            return value;
+        }
+
+        /// <summary>
+        /// Skips a number of <paramref name="bits"/>
+        /// </summary>
+        /// <param name="bits"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Skip(int bits)
+        {
+            var newPosition = _bitPosition + bits;
+            CheckNewLength(newPosition);
+            _bitPosition = newPosition;
+        }
+
+        /// <summary>
         /// Reads n <paramref name="bits"/> from buffer at <paramref name="bitPosition"/>
         /// </summary>
         /// <param name="bits">number of bits in value to write</param>
