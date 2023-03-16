@@ -72,6 +72,9 @@ namespace Mirage.Serialization
         /// <returns></returns>
         public static int BitCount(ulong max)
         {
+            if (max == 0)
+                return 0;
+
             return (int)Math.Floor(Math.Log(max, 2)) + 1;
         }
     }
