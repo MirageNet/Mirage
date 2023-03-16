@@ -1,3 +1,10 @@
+# [130.4.0](https://github.com/MirageNet/Mirage/compare/v130.3.0...v130.4.0) (2023-03-16)
+
+
+### Features
+
+* adding bool for InitialState ([cce01f8](https://github.com/MirageNet/Mirage/commit/cce01f805b15a36493efd38c0b2c0d1c5cfd0b83))
+
 # [130.3.0](https://github.com/MirageNet/Mirage/compare/v130.2.0...v130.3.0) (2023-02-10)
 
 
