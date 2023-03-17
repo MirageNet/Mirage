@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Mirage.Serialization.HuffmanCoding;
 using Mirage.Serialization.HuffmanCoding.Training;
@@ -10,13 +11,10 @@ namespace Mirage.Tests.Runtime.Serialization.HuffmanCoding
         {
             get
             {
-                for (var i = 0; i < 2; i++)
+                var groupCounts = new int[] { 1, 2, 3, 4, 8 };
+                foreach (var count in groupCounts)
                 {
-                    var groupCounts = new int[] { 1, 2, 3, 4, 8 };
-                    foreach (var count in groupCounts)
-                    {
-                        yield return new object[] { count, (DataType)i };
-                    }
+                    yield return new object[] { count, DataType.GeneratedRandom };
                 }
             }
         }
@@ -26,6 +24,7 @@ namespace Mirage.Tests.Runtime.Serialization.HuffmanCoding
     {
         Raw = 0,
         DeltaZeroPacked = 1,
+        GeneratedRandom = 2,
     }
 
     public abstract class HuffmanCodingTestBase
@@ -44,7 +43,21 @@ namespace Mirage.Tests.Runtime.Serialization.HuffmanCoding
 
         protected void Train(int? maxDepth)
         {
-            var raw = _dataType == DataType.Raw ? Debugging.LoadRaw() : Debugging.RawZeroPacked();
+            List<byte[]> raw = null;
+            switch (_dataType)
+            {
+                case DataType.Raw:
+                    throw new NotSupportedException("needs data set");
+                    //raw = Debugging.LoadRaw();
+                    break;
+                case DataType.DeltaZeroPacked:
+                    throw new NotSupportedException("needs data set");
+                    //raw = Debugging.RawZeroPacked();
+                    break;
+                case DataType.GeneratedRandom:
+                    raw = Debugging.CreateRaw();
+                    break;
+            }
             var data = TrainModel.CreateFrequencyData(_groupSize, raw);
             _tree = CreateTree.Create(data, maxDepth);
             _model = TrainModel.CreateModel(_groupSize, _tree);

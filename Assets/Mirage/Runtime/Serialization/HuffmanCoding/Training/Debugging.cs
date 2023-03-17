@@ -17,7 +17,69 @@ namespace Mirage.Serialization.HuffmanCoding.Training
     {
         private static List<byte[]> _rawCache;
         private static List<byte[]> _zeroPackCache;
+        private static readonly Random random = new Random();
 
+        public static List<byte[]> CreateRaw()
+        {
+            if (_rawCache != null && _rawCache.Count != 0)
+                return _rawCache;
+
+
+            var frameCount = 100;
+            var rawFrames = new List<byte[]>(frameCount);
+            for (var i = 1; i <= frameCount; i++)
+            {
+                var raw = new byte[10_000];
+                fixed (byte* ptr = &raw[0])
+                {
+                    FillWithRandom((int*)ptr, 2500);
+                }
+                rawFrames.Add(raw);
+
+                if (raw.Length % 4 != 0)
+                    throw new Exception($"total bytes was not multiple of 4");
+            }
+            _rawCache = rawFrames;
+            return _rawCache;
+        }
+
+        private static void FillWithRandom(int* raw, int count)
+        {
+            // different groups, so that numbers are not just pure random, but weighted instead
+
+            for (var i = 0; i < count; i++)
+            {
+                var group = random.Next(0, 100);
+                if (group < 10)
+                {
+                    raw[i] = 0;
+                }
+                else if (group < 50)
+                {
+                    raw[i] = random.Next(1, 1 << 4);
+                }
+                else if (group < 60)
+                {
+                    raw[i] = random.Next(1 << 4, 1 << 6);
+                }
+                else if (group < 70)
+                {
+                    raw[i] = random.Next(1 << 6, 1 << 12);
+                }
+                else if (group < 80)
+                {
+                    raw[i] = random.Next(1 << 12, 1 << 20);
+                }
+                else
+                {
+                    raw[i] = random.Next(1 << 20, 1 << 30);
+                }
+
+                var sign = random.Next(0, 1);
+                if (sign == 1)
+                    raw[i] = -raw[i];
+            }
+        }
 
         public static List<byte[]> LoadRaw(string pathFormat)
         {
@@ -91,12 +153,12 @@ namespace Mirage.Serialization.HuffmanCoding.Training
         /// Using delta to write zero count instead of each zero
         /// </summary>
         /// <returns></returns>
-        public static List<byte[]> RawZeroPacked()
+        public static List<byte[]> RawZeroPacked(string pathFormat)
         {
             if (_zeroPackCache != null && _zeroPackCache.Count != 0)
                 return _zeroPackCache;
 
-            var raw = LoadRaw();
+            var raw = LoadRaw(pathFormat);
             var deltaRaw = new List<byte[]>(raw.Count);
 
             var delta = new DeltaSnapshot_ValueZeroCounts();
