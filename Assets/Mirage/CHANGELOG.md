@@ -1,3 +1,11 @@
+## [130.4.1](https://github.com/MirageNet/Mirage/compare/v130.4.0...v130.4.1) (2023-03-21)
+
+
+### Bug Fixes
+
+* fixing nanosockets build error on some platforms ([fbd136c](https://github.com/MirageNet/Mirage/commit/fbd136cd03bb3aac8bd283d2bc0eb8c622db3b56))
+* fixing typo causing Prefabs header being drawn twice ([2c86fc0](https://github.com/MirageNet/Mirage/commit/2c86fc028f8d15e2cb387316444f7a33d9c0d0d9))
+
 # [130.4.0](https://github.com/MirageNet/Mirage/compare/v130.3.0...v130.4.0) (2023-03-16)
 
 
