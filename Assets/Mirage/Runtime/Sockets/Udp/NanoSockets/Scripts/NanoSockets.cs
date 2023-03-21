@@ -1,3 +1,5 @@
+// windows, linux or standalone c#, unless EXCLUDE_NANOSOCKETS is defined
+#if !EXCLUDE_NANOSOCKETS && (UNITY_EDITOR_WIN || UNITY_EDITOR_LINUX || UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || NETCOREAPP || NET_5_0_OR_GREATER)
 /*
  *  Lightweight UDP sockets abstraction for rapid implementation of message-oriented protocols
  *  Copyright (c) 2019 Stanislav Denisov
@@ -246,3 +248,4 @@ namespace NanoSockets
 #endif
     }
 }
+#endif
