@@ -53,7 +53,7 @@ namespace Mirage
             // if networkPrefab has value and no items in spawnprefabs list,
             // then hide the list
             var removeField = com.NetworkPrefabs != null && property.arraySize == 0;
-            if (removeField) ;
+            if (removeField)
             {
                 EditorGUILayout.Space(5);
                 EditorGUILayout.LabelField("Prefabs", EditorStyles.boldLabel);
