@@ -21,7 +21,7 @@ namespace Mirage
         public static readonly SyncSettings Default = new SyncSettings
         {
             From = SyncFrom.Server,
-            To = SyncTo.Owner | SyncTo.Observers,
+            To = SyncTo.Owner | SyncTo.ObserversOnly,
             Interval = 0.1f,
         };
 

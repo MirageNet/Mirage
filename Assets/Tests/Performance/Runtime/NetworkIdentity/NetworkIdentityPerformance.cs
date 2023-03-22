@@ -31,8 +31,9 @@ namespace Mirage.Tests.Performance
             identity.Owner = Substitute.For<INetworkPlayer>();
             identity.observers.Add(identity.Owner);
             health = gameObject.AddComponent<Health>();
-            health.syncMode = SyncMode.Owner;
-            health.syncInterval = 0f;
+            health.SyncSettings.From = SyncFrom.Server;
+            health.SyncSettings.To = SyncTo.Owner;
+            health.SyncSettings.Timing = SyncTiming.NoInterval;
         }
         [TearDown]
         public void TearDown()

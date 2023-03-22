@@ -26,8 +26,9 @@ namespace Mirage.Tests.Performance
             for (var i = 0; i < healthCount; i++)
             {
                 health[i] = gameObject.AddComponent<Health>();
-                health[i].syncMode = SyncMode.Owner;
-                health[i].syncInterval = 0f;
+                health[i].SyncSettings.From = SyncFrom.Server;
+                health[i].SyncSettings.To = SyncTo.Owner;
+                health[i].SyncSettings.Timing = SyncTiming.NoInterval;
             }
         }
         [TearDown]

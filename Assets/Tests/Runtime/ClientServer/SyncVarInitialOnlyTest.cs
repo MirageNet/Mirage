@@ -24,13 +24,13 @@ namespace Mirage.Tests.Runtime.ClientServer
         public void ChangingInitOnlyVarWontSetBehaviourDirty()
         {
             serverComponent.weaponIndex = 10;
-            Assert.That(serverComponent.IsDirty(), Is.False);
+            Assert.That(serverComponent.AnyDirtyBits(), Is.False);
 
             serverComponent.otherValue = 5.2f;
-            Assert.That(serverComponent.IsDirty(), Is.False);
+            Assert.That(serverComponent.AnyDirtyBits(), Is.False);
 
             serverComponent.health = 20;
-            Assert.That(serverComponent.IsDirty(), Is.True);
+            Assert.That(serverComponent.AnyDirtyBits(), Is.True);
         }
 
         [UnityTest]
@@ -50,13 +50,13 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator BothSyncVarsAreSetIntially()
         {
-            SyncVarInitialOnly prefab = CreateBehaviour<SyncVarInitialOnly>();
+            var prefab = CreateBehaviour<SyncVarInitialOnly>();
             var identity = prefab.GetComponent<NetworkIdentity>();
             identity.PrefabHash = Guid.NewGuid().GetHashCode();
 
             clientObjectManager.RegisterPrefab(identity);
 
-            GameObject clone = InstantiateForTest(prefab.gameObject);
+            var clone = InstantiateForTest(prefab.gameObject);
             var behaviour = clone.GetComponent<SyncVarInitialOnly>();
             behaviour.weaponIndex = 3;
             behaviour.health = 20;

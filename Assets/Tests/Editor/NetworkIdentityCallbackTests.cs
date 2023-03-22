@@ -473,10 +473,7 @@ namespace Mirage.Tests
 
             // set some unique values to serialize
             comp1.value = 12345;
-            comp1.syncMode = SyncMode.Observers;
-            compExc.syncMode = SyncMode.Observers;
             comp2.value = "67890";
-            comp2.syncMode = SyncMode.Owner;
 
             // serialize all
             var ownerWriter = new NetworkWriter(1300);
