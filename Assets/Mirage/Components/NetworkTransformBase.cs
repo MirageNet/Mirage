@@ -118,7 +118,7 @@ namespace Mirage
 
             // movement speed: based on how far it moved since last time
             // has to be calculated before 'start' is overwritten
-            temp.MovementSpeed = EstimateMovementSpeed(goal, temp, TargetComponent, syncInterval);
+            temp.MovementSpeed = EstimateMovementSpeed(goal, temp, TargetComponent, SyncSettings.Interval);
 
             // reassign start wisely
             // -> first ever data point? then make something up for previous one
@@ -127,7 +127,7 @@ namespace Mirage
             {
                 start = new DataPoint
                 {
-                    TimeStamp = Time.time - syncInterval,
+                    TimeStamp = Time.time - SyncSettings.Interval,
                     // local position/rotation for VR support
                     LocalPosition = TargetComponent.localPosition,
                     LocalRotation = TargetComponent.localRotation,
@@ -278,7 +278,7 @@ namespace Mirage
         private bool NeedsTeleport()
         {
             // calculate time between the two data points
-            var startTime = start != null ? start.TimeStamp : Time.time - syncInterval;
+            var startTime = start != null ? start.TimeStamp : Time.time - SyncSettings.Interval;
             var goalTime = goal != null ? goal.TimeStamp : Time.time;
             var difference = goalTime - startTime;
             var timeSinceGoalReceived = Time.time - goalTime;
@@ -345,7 +345,7 @@ namespace Mirage
             // send to server if we have local authority (and aren't the server)
             // -> only if connectionToServer has been initialized yet too
             // check only each 'syncInterval'
-            if (!IsServer && IsClientWithAuthority && Time.time - lastClientSendTime >= syncInterval)
+            if (!IsServer && IsClientWithAuthority && Time.time - lastClientSendTime >= SyncSettings.Interval)
             {
                 if (HasEitherMovedRotatedScaled())
                 {

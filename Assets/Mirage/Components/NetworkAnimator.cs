@@ -47,6 +47,7 @@ namespace Mirage
         private int[] animationHash;
         private int[] transitionHash;
         private float[] layerWeight;
+        [System.Obsolete("Use _nextSyncTime instead", true)]
         private float nextSendTime;
 
         private bool SendMessagesAllowed
@@ -157,16 +158,19 @@ namespace Mirage
 
         private void CheckSendRate()
         {
-            var now = Time.time;
-            if (SendMessagesAllowed && syncInterval >= 0 && now > nextSendTime)
-            {
-                nextSendTime = now + syncInterval;
+            if (!SendMessagesAllowed)
+                return;
 
-                using (var writer = NetworkWriterPool.GetWriter())
-                {
-                    if (WriteParameters(writer))
-                        SendAnimationParametersMessage(writer.ToArraySegment());
-                }
+            var now = Time.time;
+            if (!TimeToSync(now))
+                return;
+
+            SyncSettings.UpdateTime(ref _nextSyncTime, now);
+
+            using (var writer = NetworkWriterPool.GetWriter())
+            {
+                if (WriteParameters(writer))
+                    SendAnimationParametersMessage(writer.ToArraySegment());
             }
         }
 
