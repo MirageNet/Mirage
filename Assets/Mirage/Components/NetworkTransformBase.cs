@@ -16,11 +16,13 @@
 // * Only way for smooth movement is to use a fixed movement speed during
 //   interpolation. interpolation over time is never that good.
 //
+using System;
 using Mirage.Serialization;
 using UnityEngine;
 
 namespace Mirage
 {
+    [Obsolete("NetworkTransform is not optimzied so should not used in production.")]
     public abstract class NetworkTransformBase : NetworkBehaviour
     {
         [Header("Authority")]
