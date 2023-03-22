@@ -19,6 +19,7 @@ namespace Mirage
     [AddComponentMenu("Network/NetworkAnimator")]
     [RequireComponent(typeof(NetworkIdentity))]
     [HelpURL("https://miragenet.github.io/Mirage/docs/components/network-animator")]
+    [Obsolete("NetworkAnimator is not optimzied so should not used in production.")]
     public class NetworkAnimator : NetworkBehaviour
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkAnimator));
