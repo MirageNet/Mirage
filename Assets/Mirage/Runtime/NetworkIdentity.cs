@@ -703,7 +703,7 @@ namespace Mirage
         {
             foreach (var behaviour in NetworkBehaviours)
             {
-                if (behaviour.StillDirty())
+                if (behaviour.AnyDirtyBits())
                     return true;
             }
             return false;
@@ -1086,7 +1086,7 @@ namespace Mirage
                     // synced yet.
                     // (we serialized only the IsDirty() components, or all of
                     //  them if initialState. clearing the dirty ones is enough.)
-                    ClearDirtyComponentsDirtyBits();
+                    ClearShouldSyncDirtyOnly();
                 }
             }
         }
@@ -1124,24 +1124,26 @@ namespace Mirage
         }
 
         /// <summary>
-        /// clear all component's dirty bits no matter what
+        /// Clears dirty bits and sets the next sync time on each Component 
         /// </summary>
-        internal void ClearAllComponentsDirtyBits()
+        internal void ClearShouldSync()
         {
             // store time as variable so we dont have to call property for each component
             var now = Time.time;
 
             foreach (var comp in NetworkBehaviours)
             {
-                comp.ClearAllDirtyBits(now);
+                comp.ClearShouldSync(now);
             }
         }
 
         /// <summary>
-        /// Clear only dirty component's dirty bits. ignores components which
-        /// may be dirty but not ready to be synced yet (because of syncInterval)
+        /// Clear dirty bits of Component only if it is after syncInterval
+        /// <para>
+        /// Note: generally this is called after syncing to clear dirty bits of components we just synced
+        /// </para>
         /// </summary>
-        internal void ClearDirtyComponentsDirtyBits()
+        internal void ClearShouldSyncDirtyOnly()
         {
             // store time as variable so we dont have to call property for each component
             var now = Time.time;
@@ -1149,9 +1151,9 @@ namespace Mirage
             foreach (var comp in NetworkBehaviours)
             {
                 // todo this seems weird, should we be clearing this somewhere else?
-                if (comp.ShouldSync(now))
+                if (comp.TimeToSync(now))
                 {
-                    comp.ClearAllDirtyBits(now);
+                    comp.ClearShouldSync(now);
                 }
             }
         }

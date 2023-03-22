@@ -49,7 +49,7 @@ namespace Mirage
 
                     // clear all component's dirty bits.
                     // it would be spawned on new observers anyway.
-                    identity.ClearAllComponentsDirtyBits();
+                    identity.ClearShouldSync();
                 }
             }
 

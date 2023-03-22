@@ -38,6 +38,7 @@ namespace Mirage
         /// Sync settings for this NetworkBehaviour
         /// <para>Settings will be hidden in inspector unless Behaviour has SyncVar or SyncObjects</para>
         /// </summary>
+        // todo custom drawer to hide this
         public SyncSettings SyncSettings = SyncSettings.Default;
 
         // hidden because NetworkBehaviourInspector shows it only if has OnSerialize.
@@ -300,9 +301,14 @@ namespace Mirage
         /// This clears all the dirty bits that were set on this script by SetDirtyBits();
         /// <para>This is automatically invoked when an update is sent for this object, but can be called manually as well.</para>
         /// </summary>
+        [System.Obsolete("Use ClearShouldSync instead", true)] // renamed because ClearAllDirtyBits name is misleading because it also sets time
         public void ClearAllDirtyBits(float now)
         {
-            SyncSettings.UpdateTime(ref _nextSyncTime, now);
+            ClearShouldSync(now);
+        }
+
+        public void ClearDirtyBits()
+        {
             _syncVarDirtyBits = 0L;
 
             // flush all unsynchronized changes in syncobjects
@@ -313,16 +319,14 @@ namespace Mirage
             _anySyncObjectDirty = false;
         }
 
-        private bool CheckSyncObjectDirty() // todo can we remove this?
+        /// <summary>
+        /// Clears dirty bits and sets the next sync time
+        /// </summary>
+        /// <param name="now"></param>
+        public void ClearShouldSync(float now)
         {
-            for (var i = 0; i < syncObjects.Count; i++)
-            {
-                if (syncObjects[i].IsDirty)
-                {
-                    return true;
-                }
-            }
-            return false;
+            SyncSettings.UpdateTime(ref _nextSyncTime, now);
+            ClearDirtyBits();
         }
 
         /// <summary>
@@ -364,10 +368,8 @@ namespace Mirage
         // true if this component has data that has not been
         // synchronized.  Note that it may not synchronize
         // right away because of syncInterval
-        public bool StillDirty()
-        {
-            return SyncVarDirtyBits != 0L || AnySyncObjectDirty;
-        }
+        [System.Obsolete("Use AnyDirtyBits instead", true)] // duplicate method
+        public bool StillDirty() => AnyDirtyBits();
 
         /// <summary>
         /// Virtual function to override to send custom serialization data. The corresponding function to send serialization data is OnDeserialize().
