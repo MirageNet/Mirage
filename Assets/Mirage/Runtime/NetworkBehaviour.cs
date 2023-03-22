@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Mirage.Collections;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
@@ -11,7 +12,9 @@ namespace Mirage
     /// <summary>
     /// Sync to everyone, or only to owner.
     /// </summary>
+    [System.Obsolete("Use new SyncSettings instead", true)]
     public enum SyncMode { Observers, Owner }
+
 
     /// <summary>
     /// Base class which should be inherited by scripts which contain networking functionality.
@@ -28,21 +31,29 @@ namespace Mirage
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkBehaviour));
 
-        internal float _lastSyncTime;
+        // protected because it is ok for child classes to set this if they want
+        protected internal float _nextSyncTime;
+
+        /// <summary>
+        /// Sync settings for this NetworkBehaviour
+        /// <para>Settings will be hidden in inspector unless Behaviour has SyncVar or SyncObjects</para>
+        /// </summary>
+        public SyncSettings SyncSettings = SyncSettings.Default;
 
         // hidden because NetworkBehaviourInspector shows it only if has OnSerialize.
         /// <summary>
         /// sync mode for OnSerialize
         /// </summary>
+        [System.Obsolete("Use new SyncSettings instead", true)]
         [HideInInspector] public SyncMode syncMode = SyncMode.Observers;
 
         // hidden because NetworkBehaviourInspector shows it only if has OnSerialize.
         /// <summary>
         /// sync interval for OnSerialize (in seconds)
         /// </summary>
-        [Tooltip("Time in seconds until next change is synchronized to the client. '0' means send immediately if changed. '0.5' means only send changes every 500ms.\n(This is for state synchronization like SyncVars, SyncLists, OnSerialize. Not for Cmds, Rpcs, etc.)")]
         // [0,2] should be enough. anything >2s is too laggy anyway.
         [Range(0, 2)]
+        [System.Obsolete("Use new SyncSettings instead", true)]
         [HideInInspector] public float syncInterval = 0.1f;
 
         /// <summary>
@@ -127,7 +138,11 @@ namespace Mirage
         /// <returns></returns>
         public Id BehaviourId => new Id(this);
 
-        protected internal ulong SyncVarDirtyBits { get; private set; }
+        private ulong _syncVarDirtyBits;
+        private bool _anySyncObjectDirty;
+
+        protected internal ulong SyncVarDirtyBits => _syncVarDirtyBits;
+        protected internal bool AnySyncObjectDirty => _anySyncObjectDirty;
 
         private ulong _syncVarHookGuard;
 
@@ -256,8 +271,9 @@ namespace Mirage
 
         private void SyncObject_OnChange()
         {
-            if (IsServer)
+            if (IsServer) // todo change to syncfrom
             {
+                _anySyncObjectDirty = true;
                 Server.SyncVarSender.AddDirtyObject(Identity);
             }
         }
@@ -275,7 +291,7 @@ namespace Mirage
         /// <param name="dirtyBit">Bit mask to set.</param>
         public void SetDirtyBit(ulong dirtyBit)
         {
-            SyncVarDirtyBits |= dirtyBit;
+            _syncVarDirtyBits |= dirtyBit;
             if (IsServer)
                 Server.SyncVarSender.AddDirtyObject(Identity);
         }
@@ -284,27 +300,22 @@ namespace Mirage
         /// This clears all the dirty bits that were set on this script by SetDirtyBits();
         /// <para>This is automatically invoked when an update is sent for this object, but can be called manually as well.</para>
         /// </summary>
-        public void ClearAllDirtyBits()
+        public void ClearAllDirtyBits(float now)
         {
-            _lastSyncTime = Time.time;
-            SyncVarDirtyBits = 0L;
+            SyncSettings.UpdateTime(ref _nextSyncTime, now);
+            _syncVarDirtyBits = 0L;
 
             // flush all unsynchronized changes in syncobjects
-            // note: don't use List.ForEach here, this is a hot path
-            //   List.ForEach: 432b/frame
-            //   for: 231b/frame
-            for (var i = 0; i < syncObjects.Count; ++i)
+            for (var i = 0; i < syncObjects.Count; i++)
             {
                 syncObjects[i].Flush();
             }
+            _anySyncObjectDirty = false;
         }
 
-        private bool AnySyncObjectDirty()
+        private bool CheckSyncObjectDirty() // todo can we remove this?
         {
-            // note: don't use Linq here. 1200 networked objects:
-            //   Linq: 187KB GC/frame;, 2.66ms time
-            //   for: 8KB GC/frame; 1.28ms time
-            for (var i = 0; i < syncObjects.Count; ++i)
+            for (var i = 0; i < syncObjects.Count; i++)
             {
                 if (syncObjects[i].IsDirty)
                 {
@@ -314,21 +325,48 @@ namespace Mirage
             return false;
         }
 
-        public bool IsDirty()
+        /// <summary>
+        /// True if this behaviour is dirty and it is time to sync
+        /// </summary>
+        /// <param name="time"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool ShouldSync(float time)
         {
-            if (Time.time - _lastSyncTime >= syncInterval)
-            {
-                return SyncVarDirtyBits != 0L || AnySyncObjectDirty();
-            }
-            return false;
+            return AnyDirtyBits() && TimeToSync(time);
         }
+
+        /// <summary>
+        /// If it is time to sync based on last sync and <see cref="SyncSettings"/>
+        /// </summary>
+        /// <param name="time"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TimeToSync(float time)
+        {
+            return time >= _nextSyncTime;
+        }
+
+        /// <summary>
+        /// Are any SyncVar or SyncObjects dirty
+        /// </summary>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool AnyDirtyBits()
+        {
+            return SyncVarDirtyBits != 0L || AnySyncObjectDirty;
+        }
+
+        // old version of ShouldSync, name isn't great so use 
+        [System.Obsolete("Use ShouldSync instead", true)]
+        public bool IsDirty(float time) => ShouldSync(time);
 
         // true if this component has data that has not been
         // synchronized.  Note that it may not synchronize
         // right away because of syncInterval
         public bool StillDirty()
         {
-            return SyncVarDirtyBits != 0L || AnySyncObjectDirty();
+            return SyncVarDirtyBits != 0L || AnySyncObjectDirty;
         }
 
         /// <summary>

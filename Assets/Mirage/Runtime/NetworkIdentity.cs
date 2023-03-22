@@ -633,9 +633,9 @@ namespace Mirage
         /// <para>We pass dirtyComponentsMask into this function so that we can check if any Components are dirty before creating writers</para>
         /// </summary>
         /// <param name="initialState"></param>
-        /// <param name="ownerWriter"></param>
+        /// <param name="mainWriter"></param>
         /// <param name="observersWriter"></param>
-        internal (int ownerWritten, int observersWritten) OnSerializeAll(bool initialState, NetworkWriter ownerWriter, NetworkWriter observersWriter)
+        internal (int ownerWritten, int observersWritten) OnSerializeAll(bool initialState, NetworkWriter mainWriter, NetworkWriter observersWriter)
         {
             var ownerWritten = 0;
             var observersWritten = 0;
@@ -643,45 +643,54 @@ namespace Mirage
             // check if components are in byte.MaxRange just to be 100% sure
             // that we avoid overflows
             var components = NetworkBehaviours;
+            // store time as variable so we dont have to call property for each component
+            var now = Time.time;
 
             // serialize all components
             for (var i = 0; i < components.Length; ++i)
             {
-                // is this component dirty?
-                // -> always serialize if initialState so all components are included in spawn packet
-                // -> note: IsDirty() is false if the component isn't dirty or sendInterval isn't elapsed yet
                 var comp = components[i];
-                if (initialState || comp.IsDirty())
+
+                // check if we should be writing this components
+                if (!comp.SyncSettings.ShouldSyncFrom(this))
+                    continue;
+
+                // always sync for initial
+                // so check ShouldSync if initial is false
+                if (!initialState && !comp.ShouldSync(now))
+                    continue;
+
+                if (logger.LogEnabled()) logger.Log($"OnSerializeAllSafely: '{name}', component '{comp.GetType()}', initial state: '{initialState}'");
+
+                // remember start position in case we need to copy it into
+                // observers writer too
+                var startBitPosition = mainWriter.BitPosition;
+
+                // write index as byte [0..255]
+                mainWriter.WriteByte((byte)i);
+
+                // serialize into ownerWriter first
+                // (owner always gets everything!)
+                OnSerialize(comp, mainWriter, initialState);
+                ownerWritten++;
+
+                // copy into observersWriter too if SyncMode.Observers
+                // -> we copy instead of calling OnSerialize again because
+                //    we don't know what magic the user does in OnSerialize.
+                // -> it's not guaranteed that calling it twice gets the
+                //    same result
+                // -> it's not guaranteed that calling it twice doesn't mess
+                //    with the user's OnSerialize timing code etc.
+                // => so we just copy the result without touching
+                //    OnSerialize again
+
+
+                // should copy to observer writer
+                if (comp.SyncSettings.CopyToObservers())
                 {
-                    if (logger.LogEnabled()) logger.Log($"OnSerializeAllSafely: '{name}', component '{comp.GetType()}', initial state: '{initialState}'");
-
-                    // remember start position in case we need to copy it into
-                    // observers writer too
-                    var startBitPosition = ownerWriter.BitPosition;
-
-                    // write index as byte [0..255]
-                    ownerWriter.WriteByte((byte)i);
-
-                    // serialize into ownerWriter first
-                    // (owner always gets everything!)
-                    OnSerialize(comp, ownerWriter, initialState);
-                    ownerWritten++;
-
-                    // copy into observersWriter too if SyncMode.Observers
-                    // -> we copy instead of calling OnSerialize again because
-                    //    we don't know what magic the user does in OnSerialize.
-                    // -> it's not guaranteed that calling it twice gets the
-                    //    same result
-                    // -> it's not guaranteed that calling it twice doesn't mess
-                    //    with the user's OnSerialize timing code etc.
-                    // => so we just copy the result without touching
-                    //    OnSerialize again
-                    if (comp.syncMode == SyncMode.Observers)
-                    {
-                        var bitLength = ownerWriter.BitPosition - startBitPosition;
-                        observersWriter.CopyFromWriter(ownerWriter, startBitPosition, bitLength);
-                        observersWritten++;
-                    }
+                    var bitLength = mainWriter.BitPosition - startBitPosition;
+                    observersWriter.CopyFromWriter(mainWriter, startBitPosition, bitLength);
+                    observersWritten++;
                 }
             }
 
@@ -1119,9 +1128,12 @@ namespace Mirage
         /// </summary>
         internal void ClearAllComponentsDirtyBits()
         {
+            // store time as variable so we dont have to call property for each component
+            var now = Time.time;
+
             foreach (var comp in NetworkBehaviours)
             {
-                comp.ClearAllDirtyBits();
+                comp.ClearAllDirtyBits(now);
             }
         }
 
@@ -1131,11 +1143,15 @@ namespace Mirage
         /// </summary>
         internal void ClearDirtyComponentsDirtyBits()
         {
+            // store time as variable so we dont have to call property for each component
+            var now = Time.time;
+
             foreach (var comp in NetworkBehaviours)
             {
-                if (comp.IsDirty())
+                // todo this seems weird, should we be clearing this somewhere else?
+                if (comp.ShouldSync(now))
                 {
-                    comp.ClearAllDirtyBits();
+                    comp.ClearAllDirtyBits(now);
                 }
             }
         }

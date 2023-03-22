@@ -39,6 +39,7 @@ namespace Mirage
 
                     identity.SendUpdateVarsMessage();
 
+                    // todo, why didn't it sync? is it from interval? can we return still dirty from SendUpdateVarsMessage, instead of having to recheck everything?
                     if (identity.StillDirty())
                         _dirtyObjectsTmp.Add(identity);
                 }
