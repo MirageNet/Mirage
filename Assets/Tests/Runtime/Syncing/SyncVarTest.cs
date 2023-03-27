@@ -2,7 +2,7 @@ using Mirage.Serialization;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirage.Tests.Runtime.Serialization
+namespace Mirage.Tests.Runtime.Syncing
 {
     internal class MockPlayer : NetworkBehaviour
     {

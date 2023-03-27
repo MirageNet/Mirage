@@ -3,7 +3,7 @@ using Mirage.Serialization;
 using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
 
-namespace Mirage.Tests.Runtime.Serialization
+namespace Mirage.Tests.Runtime.Syncing
 {
     public class HookOrderBehaviour : NetworkBehaviour
     {

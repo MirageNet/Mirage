@@ -1,6 +1,6 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 
-namespace Mirage.Tests.Runtime.Serialization
+namespace Mirage.Tests.Runtime.Syncing
 {
     public class SyncDirectionTest : TestBase
     {

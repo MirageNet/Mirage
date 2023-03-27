@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Mirage.Tests.Runtime.SyncVarWithBaseClass
+namespace Mirage.Tests.Runtime.Syncing.SyncVarWithBaseClass
 {
     public class A : NetworkBehaviour
     {
