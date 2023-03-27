@@ -1,10 +1,11 @@
 using Mirage.Serialization;
+using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
 using UnityEngine;
 
 namespace Mirage.Tests.Runtime.Syncing
 {
-    internal class MockPlayer : NetworkBehaviour
+    public class MockPlayer : NetworkBehaviour
     {
         public struct Guild
         {
@@ -18,7 +19,7 @@ namespace Mirage.Tests.Runtime.Syncing
         public NetworkIdentity target;
     }
 
-    public class SyncVarTest : TestBase
+    public class SyncVarTest : ClientServerSetup<MockPlayer>
     {
         private readonly NetworkWriter ownerWriter = new NetworkWriter(1300);
         private readonly NetworkWriter observersWriter = new NetworkWriter(1300);
@@ -30,8 +31,6 @@ namespace Mirage.Tests.Runtime.Syncing
             ownerWriter.Reset();
             observersWriter.Reset();
             reader.Dispose();
-
-            TearDownTestObjects();
         }
 
 
@@ -119,7 +118,10 @@ namespace Mirage.Tests.Runtime.Syncing
             };
             player1.guild = myGuild;
 
-            // serialize all the data as we would for the network
+            // spawn so server value is set
+            serverObjectManager.Spawn(player1.Identity);
+
+            //serialize all the data as we would for the network
             player1.Identity.OnSerializeAll(true, ownerWriter, observersWriter);
 
             // set up a "client" object

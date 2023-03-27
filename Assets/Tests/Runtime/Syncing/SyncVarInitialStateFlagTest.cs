@@ -1,5 +1,6 @@
 using System;
 using Mirage.Serialization;
+using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
 
 namespace Mirage.Tests.Runtime.Syncing
@@ -11,7 +12,7 @@ namespace Mirage.Tests.Runtime.Syncing
         [SyncVar(hook = nameof(Hook))]
         public int number;
     }
-    public class SyncVarInitialStateFlagTest : TestBase
+    public class SyncVarInitialStateFlagTest : ClientServerSetup<SyncVarInitialStateFlagBehaviour>
     {
         private readonly NetworkWriter ownerWriter = new NetworkWriter(1300);
         private readonly NetworkWriter observersWriter = new NetworkWriter(1300);
@@ -20,8 +21,6 @@ namespace Mirage.Tests.Runtime.Syncing
         [TearDown]
         public void TearDown()
         {
-            TearDownTestObjects();
-
             ownerWriter.Reset();
             observersWriter.Reset();
             reader.Dispose();
@@ -32,22 +31,19 @@ namespace Mirage.Tests.Runtime.Syncing
         [TestCase(false)]
         public void InitialStateHasCorrectValue(bool input)
         {
-            var server = CreateBehaviour<SyncVarInitialStateFlagBehaviour>();
-            var client = CreateBehaviour<SyncVarInitialStateFlagBehaviour>();
-
-            server.number = 10;
+            serverComponent.number = 10;
 
             var invoked = 0;
             var result = false;
-            client.Hook += (_) =>
+            clientComponent.Hook += (_) =>
             {
                 invoked++;
-                result = client.Identity.InitialState;
+                result = clientIdentity.InitialState;
             };
 
-            server.Identity.OnSerializeAll(input, ownerWriter, observersWriter);
+            serverIdentity.OnSerializeAll(input, ownerWriter, observersWriter);
             reader.Reset(observersWriter.ToArraySegment());
-            client.Identity.OnDeserializeAll(reader, input);
+            clientIdentity.OnDeserializeAll(reader, input);
 
             Assert.That(invoked, Is.EqualTo(1));
             Assert.That(result, Is.EqualTo(input));
