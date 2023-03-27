@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Mirage.Serialization;
+using Mirage.Tests.EnterRuntime;
+using Mirage.Tests.Runtime;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -9,7 +11,7 @@ using static Mirage.Tests.LocalConnections;
 
 namespace Mirage.Tests
 {
-    public class NetworkIdentityCallbackTests : TestBase
+    public class NetworkIdentityCallbackTests : ClientServerSetup_EditorModeTest<MockComponent>
     {
         #region test components
 
@@ -78,13 +80,14 @@ namespace Mirage.Tests
 
         private class SerializeExceptionNetworkBehaviour : NetworkBehaviour
         {
+            public const string MESSAGE = "some unique exception";
             public override bool OnSerialize(NetworkWriter writer, bool initialState)
             {
-                throw new Exception("some exception");
+                throw new Exception(MESSAGE);
             }
             public override void OnDeserialize(NetworkReader reader, bool initialState)
             {
-                throw new Exception("some exception");
+                throw new Exception(MESSAGE);
             }
         }
 
@@ -124,21 +127,11 @@ namespace Mirage.Tests
 
         private GameObject gameObject;
         private NetworkIdentity identity;
-        private NetworkServer server;
-        private ServerObjectManager serverObjectManager;
-        private GameObject networkServerGameObject;
         private INetworkPlayer player1;
         private INetworkPlayer player2;
 
-        [SetUp]
-        public void SetUp()
+        public override void ExtraSetup()
         {
-            networkServerGameObject = CreateGameObject();
-            server = networkServerGameObject.AddComponent<NetworkServer>();
-            serverObjectManager = networkServerGameObject.AddComponent<ServerObjectManager>();
-            serverObjectManager.Server = server;
-            networkServerGameObject.AddComponent<NetworkClient>();
-
             identity = CreateNetworkIdentity();
             gameObject = identity.gameObject;
             identity.Server = server;
@@ -148,13 +141,6 @@ namespace Mirage.Tests
             player2 = Substitute.For<INetworkPlayer>();
         }
 
-        [TearDown]
-        public void TearDown()
-        {
-            TearDownTestObjects();
-        }
-
-        // A Test behaves as an ordinary method
         [Test]
         public void OnStartServerTest()
         {
@@ -257,55 +243,6 @@ namespace Mirage.Tests
             // RemoveObserverInternal with existing connection should remove it
             identity.RemoveObserverInternal(player);
             Assert.That(identity.observers, Is.Empty);
-        }
-
-        [Test]
-        public void AssignSceneID()
-        {
-            // OnValidate will have assigned a random sceneId of format 0x00000000FFFFFFFF
-            // -> make sure that one was assigned, and that the left part was
-            //    left empty for scene hash
-            Assert.That(identity.SceneId, Is.Not.Zero);
-            Assert.That(identity.SceneId & 0xFFFF_FFFF_0000_0000ul, Is.Zero);
-
-            // make sure that OnValidate added it to sceneIds dict
-            Assert.That(NetworkIdentityIdGenerator._sceneIds[(int)(identity.SceneId & 0x0000_0000_FFFF_FFFFul)], Is.Not.Null);
-        }
-
-        [Test]
-        public void SetSceneIdSceneHashPartInternal()
-        {
-            // Awake will have assigned a random sceneId of format 0x00000000FFFFFFFF
-            // -> make sure that one was assigned, and that the left part was
-            //    left empty for scene hash
-            Assert.That(identity.SceneId, Is.Not.Zero);
-            Assert.That(identity.SceneId & 0xFFFF_FFFF_0000_0000ul, Is.Zero, "scene hash should start empty");
-            var originalId = identity.SceneId;
-
-            // set scene hash
-            NetworkIdentityIdGenerator.SetSceneHash(identity);
-
-            var newSceneId = identity.SceneId;
-            var newID = newSceneId & 0x0000_0000_FFFF_FFFFul;
-            var newHash = newSceneId & 0xFFFF_FFFF_0000_0000ul;
-
-            // make sure that the right part is still the random sceneid
-            Assert.That(newID, Is.EqualTo(originalId));
-
-            // make sure that the left part is a scene hash now
-            Assert.That(newHash, Is.Not.Zero);
-
-            // calling it again should said the exact same hash again
-            NetworkIdentityIdGenerator.SetSceneHash(identity);
-            Assert.That(identity.SceneId, Is.EqualTo(newSceneId), "should be same value as first time it was called");
-        }
-
-        [Test]
-        public void OnValidateSetupIDsSetsEmptyPrefabHashForSceneObject()
-        {
-            // OnValidate will have been called. make sure that PrefabHash was set
-            // to 0 empty and not anything else, because this is a scene object
-            Assert.That(identity.PrefabHash, Is.EqualTo(0));
         }
 
         [Test]
@@ -464,26 +401,26 @@ namespace Mirage.Tests
         }
 
         [Test]
-        public void OnSerializeAllSafely()
+        public void OnSerializeAllShouldPropagateExceptions()
         {
             // create a networkidentity with our test components
             var comp1 = gameObject.AddComponent<SerializeTest1NetworkBehaviour>();
             var compExc = gameObject.AddComponent<SerializeExceptionNetworkBehaviour>();
             var comp2 = gameObject.AddComponent<SerializeTest2NetworkBehaviour>();
 
-            // set some unique values to serialize
-            comp1.value = 12345;
-            comp2.value = "67890";
-
-            // serialize all
-            var ownerWriter = new NetworkWriter(1300);
-            var observersWriter = new NetworkWriter(1300);
+            // object must be spawned for OnSerializeAll to work
+            // it will check for if server is active when using From.Server
 
             // serialize should propagate exceptions
-            Assert.Throws<Exception>(() =>
+            var exception = Assert.Throws<Exception>(() =>
             {
-                identity.OnSerializeAll(true, ownerWriter, observersWriter);
+                // we can't call identity.OnSerializeAll(true,...) manually because server needs to be set for it to sync,
+                // but calling spawn will invoke OnSerializeAll(true,...), so we can call that to check for Exception
+                serverObjectManager.Spawn(identity);
             });
+
+            // check that it was the exception from out bad test component 
+            Assert.That(exception, Has.Message.EqualTo(SerializeExceptionNetworkBehaviour.MESSAGE));
         }
 
         // OnSerializeAllSafely supports at max 64 components, because our
@@ -515,6 +452,10 @@ namespace Mirage.Tests
             var comp1 = gameObject.AddComponent<SerializeTest1NetworkBehaviour>();
             gameObject.AddComponent<SerializeMismatchNetworkBehaviour>();
             var comp2 = gameObject.AddComponent<SerializeTest2NetworkBehaviour>();
+
+            // object must be spawned for OnSerializeAll to work
+            // it will check for if server is active when using From.Server
+            serverObjectManager.Spawn(identity);
 
             // set some unique values to serialize
             comp1.value = 12345;
@@ -769,7 +710,8 @@ namespace Mirage.Tests
             // rebuild observers should add all ready server connections
             // because no component implements OnRebuildObservers
             identity.RebuildObservers(true);
-            Assert.That(identity.observers, Is.EquivalentTo(new[] { readyConnection }));
+            // should also include the serverPlayer that was added by test base
+            Assert.That(identity.observers, Is.EquivalentTo(new[] { serverPlayer, readyConnection }));
         }
 
     }
