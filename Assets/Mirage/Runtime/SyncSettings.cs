@@ -52,7 +52,7 @@ namespace Mirage
             {
                 // only write if either owner or ObserversOnly
                 // otherwise we can just skip the component
-                return (To & SyncTo.Observers) != 0;
+                return (To & (SyncTo.Owner | SyncTo.ObserversOnly)) != 0;
             }
 
             if ((From & SyncFrom.Owner) != 0 && identity.HasAuthority)
@@ -76,6 +76,17 @@ namespace Mirage
 
         public static bool IsValidDirection(SyncFrom from, SyncTo to)
         {
+            var fromNone = from == SyncFrom.None;
+            var toNone = to == SyncTo.None;
+
+            // both true, allowed
+            if (fromNone && toNone)
+                return true;
+            // both false, allowed, but 1 false not allowed
+            if (fromNone != toNone)
+                return false;
+
+
             if ((from & SyncFrom.Owner) != 0)
             {
                 // if from owner,
@@ -89,8 +100,27 @@ namespace Mirage
             {
                 // if from server,
                 // must be to Owner or Observers
-                // Observers is optional
-                if ((to & SyncTo.Owner) == 0)
+                // either is fine
+                if ((to & (SyncTo.Owner | SyncTo.ObserversOnly)) == 0)
+                    return false;
+            }
+
+
+            if ((to & SyncTo.Owner) != 0)
+            {
+                // if to owner, from server must be true
+                // this check if different than above,
+                // it is making sure From.Owner and To.Owner aren't both true without From.Server also being true
+                if ((from & SyncFrom.Server) == 0)
+                    return false;
+            }
+
+            if ((to & SyncTo.Server) != 0)
+            {
+                // if to owner, from server must be true
+                // this check if different than above,
+                // it is making sure From.Owner and To.Owner aren't both true without From.Server also being true
+                if ((from & SyncFrom.Owner) == 0)
                     return false;
             }
 
@@ -116,9 +146,6 @@ namespace Mirage
         Owner = 1,
         ObserversOnly = 2,
         Server = 4,
-
-        Observers = Owner | ObserversOnly,
-        ServerAndObservers = Server | ObserversOnly
     }
 
     public enum SyncTiming : byte
