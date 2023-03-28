@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Mirage
 {
+    [Serializable]
     [StructLayout(LayoutKind.Explicit, Size = 8)]
     public struct SyncSettings
     {
@@ -146,6 +147,8 @@ namespace Mirage
         Owner = 1,
         ObserversOnly = 2,
         Server = 4,
+
+        OwnerAndObservers = Owner | ObserversOnly,
     }
 
     public enum SyncTiming : byte
