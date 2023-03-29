@@ -8,15 +8,15 @@ namespace Mirage
     [StructLayout(LayoutKind.Explicit, Size = 8)]
     public struct SyncSettings
     {
+        public const string INTERVAL_TOOLTIP = "Time in seconds until next change is synchronized to the client. '0' means send immediately if changed. '0.5' means only send changes every 500ms.\n(This is for state synchronization like SyncVars, SyncLists, OnSerialize. Not for Cmds, Rpcs, etc.)";
+
         [FieldOffset(0)]
         public SyncFrom From;
         [FieldOffset(1)]
         public SyncTo To;
         [FieldOffset(2)]
         public SyncTiming Timing;
-
-        [Tooltip("Time in seconds until next change is synchronized to the client. '0' means send immediately if changed. '0.5' means only send changes every 500ms.\n(This is for state synchronization like SyncVars, SyncLists, OnSerialize. Not for Cmds, Rpcs, etc.)")]
-        [FieldOffset(4)]
+        [FieldOffset(4), Tooltip(INTERVAL_TOOLTIP)]
         public float Interval;
 
         public static readonly SyncSettings Default = new SyncSettings

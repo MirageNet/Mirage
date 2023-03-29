@@ -48,8 +48,26 @@ namespace Mirage
             }
 
             var intervalLabelRect = new Rect(position.x, position.y + yOffset + EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing, labelWidth, EditorGUIUtility.singleLineHeight);
-            var timingRect = new Rect(position.x + labelWidth, position.y + yOffset + EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing, fieldWidth, EditorGUIUtility.singleLineHeight);
-            var intervalRect = new Rect(position.x + labelWidth + fieldWidth, position.y + yOffset + EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing, fieldWidth, EditorGUIUtility.singleLineHeight);
+            var timingRect = new Rect(position.x + labelWidth + fieldWidth, position.y + yOffset + EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing, fieldWidth, EditorGUIUtility.singleLineHeight);
+            var intervalRect = new Rect(position.x + labelWidth, position.y + yOffset + EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing, fieldWidth, EditorGUIUtility.singleLineHeight);
+
+            const int FromLabelWidth = 30;
+            const int ToLabelWidth = 18;
+
+            // Calculate rects for the new labels
+            var fromLabelRect = new Rect(fromRect.x, fromRect.y, FromLabelWidth, EditorGUIUtility.singleLineHeight);
+            var toLabelRect = new Rect(toRect.x, toRect.y, ToLabelWidth, EditorGUIUtility.singleLineHeight);
+
+            // Adjust the position and size of the From and To fields
+            fromRect.x += FromLabelWidth;
+            fromRect.width -= FromLabelWidth;
+
+            toRect.x += ToLabelWidth;
+            toRect.width -= ToLabelWidth;
+
+            // Draw the new labels
+            EditorGUI.LabelField(fromLabelRect, "From");
+            EditorGUI.LabelField(toLabelRect, "To");
 
             // Draw direction label and fields
             EditorGUI.LabelField(directionLabelRect, "Direction");
@@ -59,9 +77,22 @@ namespace Mirage
             toProperty.intValue = (int)(SyncTo)EditorGUI.EnumFlagsField(toRect, GUIContent.none, (SyncTo)toProperty.intValue);
 
             // Draw interval label and fields
-            EditorGUI.LabelField(intervalLabelRect, "Interval");
+            var intervalLabel = new GUIContent("Interval", tooltip: SyncSettings.INTERVAL_TOOLTIP);
+            EditorGUI.LabelField(intervalLabelRect, intervalLabel);
             EditorGUI.PropertyField(timingRect, property.FindPropertyRelative("Timing"), GUIContent.none);
-            EditorGUI.PropertyField(intervalRect, property.FindPropertyRelative("Interval"), GUIContent.none);
+            // disable the Interval box if NoInterval is set, and show 0 instead
+            var guiEnabled = GUI.enabled;
+            if ((SyncTiming)property.FindPropertyRelative("Timing").intValue == SyncTiming.NoInterval)
+            {
+                GUI.enabled = false;
+                _ = EditorGUI.IntField(intervalRect, GUIContent.none, 0);
+            }
+            else
+            {
+                EditorGUI.PropertyField(intervalRect, property.FindPropertyRelative("Interval"), GUIContent.none);
+            }
+            GUI.enabled = guiEnabled;
+
         }
 
         private void DisplayWarningMessageIfSyncIsInvalid(Rect position, SerializedProperty property)
