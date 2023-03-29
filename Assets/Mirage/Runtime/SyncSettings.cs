@@ -65,10 +65,12 @@ namespace Mirage
             return false;
         }
 
-        public bool CopyToObservers()
+        public bool CopyToObservers(NetworkIdentity identity)
         {
-            if ((From & SyncFrom.Server) != 0)
+            // sending from server
+            if ((From & SyncFrom.Server) != 0 && identity.IsServer)
             {
+                // include ObserversOnly
                 return (To & SyncTo.ObserversOnly) != 0;
             }
 
@@ -126,6 +128,59 @@ namespace Mirage
             }
 
             return true;
+        }
+
+        public static string InvalidReason(SyncFrom from, SyncTo to)
+        {
+            var fromNone = from == SyncFrom.None;
+            var toNone = to == SyncTo.None;
+
+            // both true, allowed
+            if (fromNone && toNone)
+                return string.Empty;
+            // both false, allowed, but 1 false not allowed
+            if (fromNone != toNone)
+                return "Invalid sync: either both 'from' and 'to' must be 'None' or neither can be 'None'";
+
+
+            if ((from & SyncFrom.Owner) != 0)
+            {
+                // if from owner,
+                // server must be included in SyncTo
+                // Observers is optional
+                if ((to & SyncTo.Server) == 0)
+                    return "Invalid sync: when syncing from Owner, Server must be included in SyncTo";
+            }
+
+            if ((from & SyncFrom.Server) != 0)
+            {
+                // if from server,
+                // must be to Owner or Observers
+                // either is fine
+                if ((to & (SyncTo.Owner | SyncTo.ObserversOnly)) == 0)
+                    return "Invalid sync: when syncing from Server, either Owner or ObserversOnly must be included in SyncTo";
+            }
+
+
+            if ((to & SyncTo.Owner) != 0)
+            {
+                // if to owner, from server must be true
+                // this check if different than above,
+                // it is making sure From.Owner and To.Owner aren't both true without From.Server also being true
+                if ((from & SyncFrom.Server) == 0)
+                    return "Invalid sync: when syncing to Owner, Server must be included in SyncFrom";
+            }
+
+            if ((to & SyncTo.Server) != 0)
+            {
+                // if to owner, from server must be true
+                // this check if different than above,
+                // it is making sure From.Owner and To.Owner aren't both true without From.Server also being true
+                if ((from & SyncFrom.Owner) == 0)
+                    return "Invalid sync: when syncing to Server, Owner must be included in SyncFrom";
+            }
+
+            return string.Empty;
         }
     }
 
