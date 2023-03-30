@@ -10,6 +10,7 @@ namespace Mirage.Tests.Runtime.Syncing
         public IEnumerator DoesErrorStuff()
         {
             Assert.Fail();
+            yield return null;
         }
     }
 }
