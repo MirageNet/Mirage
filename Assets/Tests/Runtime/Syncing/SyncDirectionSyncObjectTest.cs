@@ -1,10 +1,11 @@
 using System.Collections;
+using Mirage.Collections;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Syncing
 {
-    public class MockPlayerWithList  : MockPlayer
+    public class MockPlayerWithList : MockPlayer
     {
         public SyncList<int> MySyncList = new SyncList<int>();
     }
