@@ -65,6 +65,12 @@ namespace Mirage
             return false;
         }
 
+        public bool ToObserverWriterOnly(NetworkIdentity identity)
+        {
+            // if server, and not sending to owner, then just use ObserverWriter
+            return identity.IsServer && ((To & (SyncTo.Owner)) == 0);
+        }
+
         public bool CopyToObservers(NetworkIdentity identity)
         {
             // sending from server

@@ -97,6 +97,18 @@ namespace Mirage.Weaver.NetworkBehaviours
             worker.Append(worker.Create(OpCodes.Ldc_I4, behaviour.SyncVars.Count));
             worker.Append(worker.Create(OpCodes.Call, readBitsMethod));
             worker.Append(worker.Create(OpCodes.Stloc, DirtyBitsLocal));
+
+            SetDeserializeMask();
+        }
+
+        private void SetDeserializeMask()
+        {
+            // Generates: SetDeserializeMask(mask, n)
+            // n is syncvars in base class
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(worker.Create(OpCodes.Ldloc, DirtyBitsLocal));
+            worker.Append(worker.Create(OpCodes.Ldc_I4, behaviour.syncVarCounter.GetInBase()));
+            worker.Append(worker.Create<NetworkBehaviour>(OpCodes.Call, nb => nb.SetDeserializeMask(default, default)));
         }
 
         internal void WriteIfSyncVarDirty(FoundSyncVar syncVar, Action body)

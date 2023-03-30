@@ -272,7 +272,7 @@ namespace Mirage
 
         private void SyncObject_OnChange()
         {
-            if (IsServer) // todo change to syncfrom
+            if (SyncSettings.ShouldSyncFrom(Identity))
             {
                 _anySyncObjectDirty = true;
                 Server.SyncVarSender.AddDirtyObject(Identity);
@@ -289,13 +289,26 @@ namespace Mirage
         /// Used to set the behaviour as dirty, so that a network update will be sent for the object.
         /// these are masks, not bit numbers, ie. 0x004 not 2
         /// </summary>
-        /// <param name="dirtyBit">Bit mask to set.</param>
-        public void SetDirtyBit(ulong dirtyBit)
+        /// <param name="bitMask">Bit mask to set.</param>
+        public void SetDirtyBit(ulong bitMask)
         {
-            _syncVarDirtyBits |= dirtyBit;
-            if (IsServer)
-                Server.SyncVarSender.AddDirtyObject(Identity);
+            _syncVarDirtyBits |= bitMask;
+
+            if (SyncSettings.ShouldSyncFrom(Identity))
+                Identity.SyncVarSender.AddDirtyObject(Identity);
         }
+
+
+        /// <summary>
+        /// Used to clear dirty bit.
+        /// <para>Object may still be in dirty list, so will be checked in next update. but values in this mask will no longer be set until they are changed again</para>
+        /// </summary>
+        /// <param name="bitMask">Bit mask to set.</param>
+        public void ClearDirtyBit(ulong bitMask)
+        {
+            _syncVarDirtyBits &= ~bitMask;
+        }
+
 
         /// <summary>
         /// This clears all the dirty bits that were set on this script by SetDirtyBits();
@@ -384,23 +397,12 @@ namespace Mirage
         /// <returns>True if data was written.</returns>
         public virtual bool OnSerialize(NetworkWriter writer, bool initialState)
         {
-            bool objectWritten;
-            // if initialState: write all SyncVars.
-            // otherwise write dirtyBits+dirty SyncVars
-            if (initialState)
-            {
-                objectWritten = SerializeObjectsAll(writer);
-            }
-            else
-            {
-                objectWritten = SerializeObjectsDelta(writer);
-            }
+            var objectWritten = SerializeObjects(writer, initialState);
 
             var syncVarWritten = SerializeSyncVars(writer, initialState);
 
             return objectWritten || syncVarWritten;
         }
-
 
         /// <summary>
         /// Virtual function to override to receive custom serialization data. The corresponding function to send serialization data is OnSerialize().
@@ -409,15 +411,9 @@ namespace Mirage
         /// <param name="initialState">True if being sent initial state.</param>
         public virtual void OnDeserialize(NetworkReader reader, bool initialState)
         {
-            if (initialState)
-            {
-                DeSerializeObjectsAll(reader);
-            }
-            else
-            {
-                DeSerializeObjectsDelta(reader);
-            }
+            DeserializeObjects(reader, initialState);
 
+            _deserializeMask = 0;
             DeserializeSyncVars(reader, initialState);
         }
 
@@ -447,6 +443,15 @@ namespace Mirage
             //   read dirty SyncVars
         }
 
+        /// <summary>
+        /// mask from the most recent DeserializeSyncVars
+        /// </summary>
+        internal ulong _deserializeMask;
+        protected internal void SetDeserializeMask(ulong dirtyBit, int offset)
+        {
+            _deserializeMask |= dirtyBit << offset;
+        }
+
         internal ulong DirtyObjectBits()
         {
             ulong dirtyObjects = 0;
@@ -459,6 +464,21 @@ namespace Mirage
                 }
             }
             return dirtyObjects;
+        }
+
+        public bool SerializeObjects(NetworkWriter writer, bool initialState)
+        {
+            if (syncObjects.Count == 0)
+                return false;
+
+            if (initialState)
+            {
+                return SerializeObjectsAll(writer);
+            }
+            else
+            {
+                return SerializeObjectsDelta(writer);
+            }
         }
 
         public bool SerializeObjectsAll(NetworkWriter writer)
@@ -489,6 +509,21 @@ namespace Mirage
                 }
             }
             return dirty;
+        }
+
+        internal void DeserializeObjects(NetworkReader reader, bool initialState)
+        {
+            if (syncObjects.Count == 0)
+                return;
+
+            if (initialState)
+            {
+                DeSerializeObjectsAll(reader);
+            }
+            else
+            {
+                DeSerializeObjectsDelta(reader);
+            }
         }
 
         internal void DeSerializeObjectsAll(NetworkReader reader)
