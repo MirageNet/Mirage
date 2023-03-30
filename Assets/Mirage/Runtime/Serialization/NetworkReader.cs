@@ -50,6 +50,11 @@ namespace Mirage.Serialization
         private int _bitLength;
 
         /// <summary>
+        /// Pointer to the managed buffer being used internally
+        /// </summary>
+        internal void* BufferPointer => _longPtr;
+
+        /// <summary>
         /// Size of buffer that is being read from
         /// </summary>
         public int BitLength

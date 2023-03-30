@@ -414,13 +414,25 @@ namespace Mirage.Serialization
         /// <param name="other"></param>
         /// <param name="otherBitPosition"></param>
         /// <param name="bitLength"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyFromWriter(NetworkWriter other, int otherBitPosition, int bitLength)
+        {
+            CopyFromPointer(other._longPtr, otherBitPosition, bitLength);
+        }
+
+        /// <summary>
+        /// Copies <paramref name="bitLength"/> bits from <paramref name="ptr"/> starting at <paramref name="otherBitPosition"/>
+        /// </summary>
+        /// <param name="other"></param>
+        /// <param name="otherBitPosition"></param>
+        /// <param name="bitLength"></param>
+        public void CopyFromPointer(void* ptr, int otherBitPosition, int bitLength)
         {
             var newBit = _bitPosition + bitLength;
             CheckCapacity(newBit);
 
             var ulongPos = otherBitPosition >> 6;
-            var otherPtr = other._longPtr + ulongPos;
+            var otherPtr = (ulong*)ptr + ulongPos;
 
 
             var firstBitOffset = otherBitPosition & 0b11_1111;
