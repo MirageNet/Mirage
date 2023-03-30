@@ -48,6 +48,7 @@ namespace Mirage.Serialization
             if (pool == null) throw new InvalidOperationException("Configure must be called before ");
             var writer = pool.Take();
             writer.Reset();
+            writer._inPool = false;
             return writer;
         }
     }
@@ -57,6 +58,11 @@ namespace Mirage.Serialization
     /// </summary>
     public sealed class PooledNetworkWriter : NetworkWriter, IDisposable
     {
+        /// <summary>
+        /// if the wirter is currently in the pool, or if release should put it in there
+        /// </summary>
+        internal bool _inPool;
+
         private readonly Pool<PooledNetworkWriter> _pool;
 
         private PooledNetworkWriter(int bufferSize, Pool<PooledNetworkWriter> pool) : base(bufferSize)
@@ -74,8 +80,13 @@ namespace Mirage.Serialization
         /// </summary>
         public void Release()
         {
+            // already in pool dont add it again
+            if (_inPool)
+                return;
+
             Reset();
             _pool.Put(this);
+            _inPool = true;
         }
 
         void IDisposable.Dispose() => Release();
