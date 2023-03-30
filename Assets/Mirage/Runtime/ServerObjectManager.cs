@@ -426,6 +426,7 @@ namespace Mirage
         {
             OnServerRpc(player, msg.netId, msg.componentIndex, msg.functionIndex, msg.payload, default);
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void OnServerRpc(INetworkPlayer player, uint netId, int componentIndex, int functionIndex, ArraySegment<byte> payload, int replyId)
         {

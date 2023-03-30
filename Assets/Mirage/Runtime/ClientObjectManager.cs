@@ -54,7 +54,6 @@ namespace Mirage
         public readonly Dictionary<ulong, NetworkIdentity> spawnableObjects = new Dictionary<ulong, NetworkIdentity>();
 
         internal ServerObjectManager _serverObjectManager;
-        private SyncVarReceiver _syncVarReceiver;
 
         public void Start()
         {
@@ -116,7 +115,6 @@ namespace Mirage
 
         private void OnClientConnected(INetworkPlayer player)
         {
-            _syncVarReceiver = new SyncVarReceiver(Client, Client.World);
             RegisterPrefabs(spawnPrefabs);
             RegisterPrefabs(NetworkPrefabs?.Prefabs);
 
@@ -138,7 +136,6 @@ namespace Mirage
         {
             ClearSpawners();
             DestroyAllClientObjects();
-            _syncVarReceiver = null;
         }
 
         private void OnFinishedSceneChange(Scene scene, SceneOperation sceneOperation)

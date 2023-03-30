@@ -93,6 +93,8 @@ namespace Mirage
         public bool IsConnected => _connectState == ConnectState.Connected;
 
         public NetworkWorld World { get; private set; }
+        public SyncVarSender SyncVarSender { get; private set; }
+        private SyncVarReceiver _syncVarReceiver;
         public MessageHandler MessageHandler { get; private set; }
 
         /// <summary>
@@ -119,6 +121,8 @@ namespace Mirage
             _connectState = ConnectState.Connecting;
 
             World = new NetworkWorld();
+            SyncVarSender = new SyncVarSender();
+            _syncVarReceiver = new SyncVarReceiver(this, World);
 
             var endPoint = SocketFactory.GetConnectEndPoint(address, port);
             if (logger.LogEnabled()) logger.Log($"Client connecting to endpoint: {endPoint}");
@@ -330,7 +334,11 @@ namespace Mirage
         }
 
         public void UpdateReceive() => _peer?.UpdateReceive();
-        public void UpdateSent() => _peer?.UpdateSent();
+        public void UpdateSent()
+        {
+            SyncVarSender?.Update();
+            _peer?.UpdateSent();
+        }
 
         internal void RegisterHostHandlers()
         {

@@ -140,6 +140,8 @@ namespace Mirage
 
         public NetworkWorld World { get; private set; }
         public SyncVarSender SyncVarSender { get; private set; }
+
+        private SyncVarReceiver _syncVarReceiver;
         public MessageHandler MessageHandler { get; private set; }
 
         /// <summary>
@@ -207,6 +209,10 @@ namespace Mirage
             LocalClient = localClient;
             MessageHandler = new MessageHandler(World, DisconnectOnException);
             MessageHandler.RegisterHandler<NetworkPingMessage>(World.Time.OnServerPing);
+
+            // create after MessageHandler, SyncVarReceiver uses it 
+            _syncVarReceiver = new SyncVarReceiver(this, World);
+
 
             var dataHandler = new DataHandler(MessageHandler, _connections);
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
