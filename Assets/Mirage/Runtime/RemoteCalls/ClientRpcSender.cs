@@ -11,7 +11,7 @@ namespace Mirage.RemoteCalls
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientRpcSender));
 
-        public static void Send(NetworkBehaviour behaviour, int index, NetworkWriter writer, int channelId, bool excludeOwner)
+        public static void Send(NetworkBehaviour behaviour, int index, NetworkWriter writer, Channel channelId, bool excludeOwner)
         {
             var message = CreateMessage(behaviour, index, writer);
 
@@ -21,7 +21,7 @@ namespace Mirage.RemoteCalls
             behaviour.Identity.SendToRemoteObservers(message, includeOwner, channelId);
         }
 
-        public static void SendTarget(NetworkBehaviour behaviour, int index, NetworkWriter writer, int channelId, INetworkPlayer player)
+        public static void SendTarget(NetworkBehaviour behaviour, int index, NetworkWriter writer, Channel channelId, INetworkPlayer player)
         {
             var message = CreateMessage(behaviour, index, writer);
 

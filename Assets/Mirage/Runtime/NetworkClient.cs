@@ -284,7 +284,7 @@ namespace Mirage
         /// <param name="message"></param>
         /// <param name="channelId"></param>
         /// <returns>True if message was sent.</returns>
-        public void Send<T>(T message, int channelId = Channel.Reliable)
+        public void Send<T>(T message, Channel channelId = Channel.Reliable)
         {
             // Coburn, 2022-12-19: Fix NetworkClient.Send triggering NullReferenceException
             // This is caused by Send() being fired after the Player object is disposed or reset
@@ -297,7 +297,7 @@ namespace Mirage
             Player.Send(message, channelId);
         }
 
-        public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
+        public void Send(ArraySegment<byte> segment, Channel channelId = Channel.Reliable)
         {
             // For more information, see notes in Send<T> ...
             if (Player == null)

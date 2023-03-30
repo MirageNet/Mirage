@@ -9,8 +9,8 @@ namespace Mirage
     /// </summary>
     public interface IMessageSender
     {
-        void Send<T>(T message, int channelId = Channel.Reliable);
-        void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable);
+        void Send<T>(T message, Channel channelId = Channel.Reliable);
+        void Send(ArraySegment<byte> segment, Channel channelId = Channel.Reliable);
         void Send<T>(T message, INotifyCallBack notifyCallBack);
     }
 

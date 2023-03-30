@@ -9,7 +9,7 @@ namespace Mirage.RemoteCalls
     /// </summary>
     public static class ServerRpcSender
     {
-        public static void Send(NetworkBehaviour behaviour, int index, NetworkWriter writer, int channelId, bool requireAuthority)
+        public static void Send(NetworkBehaviour behaviour, int index, NetworkWriter writer, Channel channelId, bool requireAuthority)
         {
             Validate(behaviour, index, requireAuthority);
 
@@ -24,7 +24,7 @@ namespace Mirage.RemoteCalls
             behaviour.Client.Send(message, channelId);
         }
 
-        public static UniTask<T> SendWithReturn<T>(NetworkBehaviour behaviour, int index, NetworkWriter writer, int channelId, bool requireAuthority)
+        public static UniTask<T> SendWithReturn<T>(NetworkBehaviour behaviour, int index, NetworkWriter writer, Channel channelId, bool requireAuthority)
         {
             Validate(behaviour, index, requireAuthority);
             var message = new ServerRpcWithReplyMessage

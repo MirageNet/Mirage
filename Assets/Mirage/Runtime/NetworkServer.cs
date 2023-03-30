@@ -445,7 +445,7 @@ namespace Mirage
         /// <typeparam name="T">Message type</typeparam>
         /// <param name="msg">Message</param>
         /// <param name="channelId">Transport channel to use</param>
-        public void SendToAll<T>(T msg, int channelId = Channel.Reliable)
+        public void SendToAll<T>(T msg, Channel channelId = Channel.Reliable)
         {
             if (logger.LogEnabled()) logger.Log("Server.SendToAll id:" + typeof(T));
 
@@ -479,7 +479,7 @@ namespace Mirage
         /// <param name="players"></param>
         /// <param name="msg"></param>
         /// <param name="channelId"></param>
-        public static void SendToMany<T>(IEnumerable<INetworkPlayer> players, T msg, int channelId = Channel.Reliable)
+        public static void SendToMany<T>(IEnumerable<INetworkPlayer> players, T msg, Channel channelId = Channel.Reliable)
         {
             using (var writer = NetworkWriterPool.GetWriter())
             {
@@ -507,7 +507,7 @@ namespace Mirage
         /// <remarks>
         /// Using list in foreach loop causes Unity's mono version to box the struct which causes allocations, <see href="https://docs.unity3d.com/2019.4/Documentation/Manual/BestPracticeUnderstandingPerformanceInUnity4-1.html">Understanding the managed heap</see>
         /// </remarks>
-        public static void SendToMany<T>(IReadOnlyList<INetworkPlayer> players, T msg, int channelId = Channel.Reliable)
+        public static void SendToMany<T>(IReadOnlyList<INetworkPlayer> players, T msg, Channel channelId = Channel.Reliable)
         {
             using (var writer = NetworkWriterPool.GetWriter())
             {
@@ -537,7 +537,7 @@ namespace Mirage
         /// <param name="excluded">player to exclude, Can be null</param>
         /// <param name="msg"></param>
         /// <param name="channelId"></param>
-        public static void SendToManyExcept<T>(IEnumerable<INetworkPlayer> players, INetworkPlayer excluded, T msg, int channelId = Channel.Reliable)
+        public static void SendToManyExcept<T>(IEnumerable<INetworkPlayer> players, INetworkPlayer excluded, T msg, Channel channelId = Channel.Reliable)
         {
             using (var writer = NetworkWriterPool.GetWriter())
             {

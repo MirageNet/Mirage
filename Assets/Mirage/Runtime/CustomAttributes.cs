@@ -63,7 +63,7 @@ namespace Mirage
     [AttributeUsage(AttributeTargets.Method)]
     public class ServerRpcAttribute : Attribute
     {
-        public int channel = Channel.Reliable;
+        public Channel channel = Channel.Reliable;
         public bool requireAuthority = true;
     }
 
@@ -93,7 +93,7 @@ namespace Mirage
     [AttributeUsage(AttributeTargets.Method)]
     public class ClientRpcAttribute : Attribute
     {
-        public int channel = Channel.Reliable;
+        public Channel channel = Channel.Reliable;
         public RpcTarget target = RpcTarget.Observers;
         public bool excludeOwner;
     }

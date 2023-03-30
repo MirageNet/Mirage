@@ -82,7 +82,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         [TestCase(Channel.Reliable)]
         [TestCase(Channel.Unreliable)]
-        public void SendCallsSendOnConnection(int channel)
+        public void SendCallsSendOnConnection(Channel channel)
         {
             var message = new byte[] { 0, 1, 2 };
             player.Send(new ArraySegment<byte>(message), channel);

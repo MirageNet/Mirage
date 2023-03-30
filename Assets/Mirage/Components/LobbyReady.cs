@@ -22,7 +22,7 @@ namespace Mirage
             }
         }
 
-        public void SendToReady<T>(NetworkIdentity identity, T msg, bool includeOwner = true, int channelId = Channel.Reliable)
+        public void SendToReady<T>(NetworkIdentity identity, T msg, bool includeOwner = true, Channel channelId = Channel.Reliable)
         {
             if (logger.LogEnabled()) logger.Log("Server.SendToReady msgType:" + typeof(T));
 

@@ -152,7 +152,7 @@ namespace Mirage
         /// <param name="msg">The message to send.</param>
         /// <param name="channelId">The transport layer channel to send on.</param>
         /// <returns></returns>
-        public void Send<T>(T message, int channelId = Channel.Reliable)
+        public void Send<T>(T message, Channel channelId = Channel.Reliable)
         {
             if (_isDisconnected) { return; }
 
@@ -172,7 +172,7 @@ namespace Mirage
         /// </summary>
         /// <param name="segment"></param>
         /// <param name="channelId"></param>
-        public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
+        public void Send(ArraySegment<byte> segment, Channel channelId = Channel.Reliable)
         {
             if (_isDisconnected) { return; }
 
