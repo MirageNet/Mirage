@@ -56,7 +56,7 @@ namespace Mirage.Tests.Performance
             for (var j = 0; j < 1000; j++)
             {
                 health.SetDirtyBit(1UL);
-                identity.SendUpdateVarsMessage();
+                SyncVarSender.SendUpdateVarsMessage(identity);
             }
         }
 
@@ -74,7 +74,7 @@ namespace Mirage.Tests.Performance
         {
             for (var j = 0; j < 1000; j++)
             {
-                identity.SendUpdateVarsMessage();
+                SyncVarSender.SendUpdateVarsMessage(identity);
             }
         }
     }

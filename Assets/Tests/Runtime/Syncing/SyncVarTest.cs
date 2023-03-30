@@ -10,6 +10,11 @@ namespace Mirage.Tests.Runtime.Syncing
         public struct Guild
         {
             public string name;
+
+            public Guild(string name)
+            {
+                this.name = name;
+            }
         }
 
         [SyncVar]
