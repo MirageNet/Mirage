@@ -65,20 +65,25 @@ namespace Mirage
             toRect.x += ToLabelWidth;
             toRect.width -= ToLabelWidth;
 
+            // main labels
+            // indent main labels, but not the ones that are next to fields (or they will me shifted/hidden by field)
+            EditorGUI.indentLevel++;
+            EditorGUI.LabelField(directionLabelRect, "Direction");
+            var intervalLabel = new GUIContent("Interval", tooltip: SyncSettings.INTERVAL_TOOLTIP);
+            EditorGUI.LabelField(intervalLabelRect, intervalLabel);
+            EditorGUI.indentLevel--;
+
             // Draw the new labels
             EditorGUI.LabelField(fromLabelRect, "From");
             EditorGUI.LabelField(toLabelRect, "To");
 
             // Draw direction label and fields
-            EditorGUI.LabelField(directionLabelRect, "Direction");
             var fromProperty = property.FindPropertyRelative("From");
             fromProperty.intValue = (int)(SyncFrom)EditorGUI.EnumFlagsField(fromRect, GUIContent.none, (SyncFrom)fromProperty.intValue);
             var toProperty = property.FindPropertyRelative("To");
             toProperty.intValue = (int)(SyncTo)EditorGUI.EnumFlagsField(toRect, GUIContent.none, (SyncTo)toProperty.intValue);
 
             // Draw interval label and fields
-            var intervalLabel = new GUIContent("Interval", tooltip: SyncSettings.INTERVAL_TOOLTIP);
-            EditorGUI.LabelField(intervalLabelRect, intervalLabel);
             EditorGUI.PropertyField(timingRect, property.FindPropertyRelative("Timing"), GUIContent.none);
             // disable the Interval box if NoInterval is set, and show 0 instead
             var guiEnabled = GUI.enabled;
