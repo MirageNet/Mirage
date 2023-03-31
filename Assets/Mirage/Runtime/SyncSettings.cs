@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -26,18 +27,24 @@ namespace Mirage
             Interval = 0.1f,
         };
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void UpdateTime(ref float nextSyncTime, float now)
         {
-            switch (Timing)
+            UpdateTime(Interval, Timing, ref nextSyncTime, now);
+        }
+
+        public static void UpdateTime(float interval, SyncTiming timing, ref float nextSyncTime, float now)
+        {
+            switch (timing)
             {
                 case SyncTiming.Variable:
                     // atlesat Interval before next sync 
-                    nextSyncTime = now + Interval;
+                    nextSyncTime = now + interval;
                     break;
                 case SyncTiming.Fixed:
                     // just add Interval, so that it syncs 1/Interval times per second
                     // see SyncTiming.Fixed for example
-                    nextSyncTime += Interval;
+                    nextSyncTime += interval;
                     break;
                 default:
                 case SyncTiming.NoInterval:
