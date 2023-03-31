@@ -1,3 +1,42 @@
+# [131.0.0](https://github.com/MirageNet/Mirage/compare/v130.4.1...v131.0.0) (2023-03-31)
+
+
+### Bug Fixes
+
+* adding safety when returning to pool ([22e2990](https://github.com/MirageNet/Mirage/commit/22e2990c5a1093fd5cd0c6f71584cdbeadfbf7b2))
+* fixing drawer to indent fields ([a28a5cf](https://github.com/MirageNet/Mirage/commit/a28a5cf14eaf0d763625bd3fcaf7c965bc8b26d5))
+* fixing errors when owner is set before world is ([01ad248](https://github.com/MirageNet/Mirage/commit/01ad248d64eaa5916d3e15bdf9c8333f43b7e6d9))
+* fixing IsValidDirection method ([e437a10](https://github.com/MirageNet/Mirage/commit/e437a1087007c16396d781aec3dc716b19e03242))
+* RegisterPrefabs now has option to skip over existing handlers ([ec80990](https://github.com/MirageNet/Mirage/commit/ec80990563793eae26f03a71cb1aa01514f45d60))
+
+
+* refactor!: converting Channel to enum ([9142513](https://github.com/MirageNet/Mirage/commit/9142513a48831793308c35d9dc0ad9a2be086270))
+* refactor!: renaming functions used to clear dirty bits ([775698c](https://github.com/MirageNet/Mirage/commit/775698cc3f983f061997ec04cf5d00450834a052))
+* refactor!: starting to use syncSettings ([f673f9b](https://github.com/MirageNet/Mirage/commit/f673f9b90087ded3211e8304f933fc144c821607))
+* refactor!: deleting Experimental components ([fb5c2a6](https://github.com/MirageNet/Mirage/commit/fb5c2a6d9497453d73ea0d5ea8b4ebbec82a91c2))
+
+
+### Features
+
+* adding angle and vec2 packer ([039e9cd](https://github.com/MirageNet/Mirage/commit/039e9cddf7a65d7c4b3ddde6d0655e58da9db0e2))
+* adding drawer for sync settings ([10ab69e](https://github.com/MirageNet/Mirage/commit/10ab69e7a8e87b0e0b994a78b9c65b1c17c64a0c))
+* adding event to world that is invoked when authority changes ([5739296](https://github.com/MirageNet/Mirage/commit/573929658612ffcdf0a392276d6f3de9d4291005))
+* adding helper methods for networkWorld ([5ad1f83](https://github.com/MirageNet/Mirage/commit/5ad1f837d22f0710574d0b98e3e1f403084f73f7))
+* adding methods to write from pointer ([0b3ae5e](https://github.com/MirageNet/Mirage/commit/0b3ae5e8cd3b873b8dab61ba8bcee7291b573865))
+* adding OwnerAndObservers option so it shows in inspector ([26ec10d](https://github.com/MirageNet/Mirage/commit/26ec10d838799a81dd95407a93b8f1f813cf032d))
+* adding static version of update time so that other classes can use it ([d96ed04](https://github.com/MirageNet/Mirage/commit/d96ed04e7fbf1b4ae63fa2c6501c0b1904cbdc33))
+* adding sync settings ([53ceb2a](https://github.com/MirageNet/Mirage/commit/53ceb2ac06bc96347af2fafd996cd9a72df1d00f))
+* SyncStack ([bef8514](https://github.com/MirageNet/Mirage/commit/bef85141ac6b954baa633873fc0f64ecc6229607))
+
+
+### BREAKING CHANGES
+
+* RegisterPrefabs now has an extra dontAddIfExist bool argument
+* Channel is not an enum instead of an int
+* ClearAllDirtyBits renamed to ClearShouldSync
+* Renaming and Obsolete of custom serialize methods
+* deleting Experimental components
+
 ## [130.4.1](https://github.com/MirageNet/Mirage/compare/v130.4.0...v130.4.1) (2023-03-21)
 
 
