@@ -1,3 +1,10 @@
+## [131.0.1](https://github.com/MirageNet/Mirage/compare/v131.0.0...v131.0.1) (2023-03-31)
+
+
+### Bug Fixes
+
+* hiding SyncSettings when there is nothing to sync ([53f3c62](https://github.com/MirageNet/Mirage/commit/53f3c623a2c2af252ff73fb9a1840ce4c77e5cc8))
+
 # [131.0.0](https://github.com/MirageNet/Mirage/compare/v130.4.1...v131.0.0) (2023-03-31)
 
 
