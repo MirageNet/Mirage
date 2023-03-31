@@ -70,6 +70,11 @@ namespace Mirage
             // this can happen client side. we check for this case in TryGetValue above
             _spawnedObjects[netId] = identity;
             onSpawn?.Invoke(identity);
+
+            // owner might be set before World is
+            // so we need to invoke authChange now if the object has an owner
+            if (identity.Owner != null)
+                InvokeOnAuthorityChanged(identity, true, identity.Owner);
         }
 
         internal void RemoveIdentity(NetworkIdentity identity)

@@ -234,7 +234,8 @@ namespace Mirage
                 if (_owner != null)
                 {
                     // invoke OnAuthority for remove owner and then again if there is new owner
-                    World.InvokeOnAuthorityChanged(this, false, _owner);
+                    // world can be null if owner is set before object is spawned
+                    World?.InvokeOnAuthorityChanged(this, false, _owner);
                     _owner.RemoveOwnedObject(this);
                 }
 
@@ -244,7 +245,7 @@ namespace Mirage
 
                 // only invoke again if new owner is not null
                 if (_owner != null)
-                    World.InvokeOnAuthorityChanged(this, true, _owner);
+                    World?.InvokeOnAuthorityChanged(this, true, _owner);
             }
         }
 
