@@ -32,9 +32,6 @@ These core components are included in Mirage:
 -   [Network Proximity Checker](/docs/components/network-proximity-checker)  
     The Network Proximity Checker component controls the visibility of game objects for network clients, based on proximity to players.
 
--   [Network Rigidbody](/docs/components/network-rigidbody)
-    The Network Rigidbody synchronizes velocity and other properties of a rigidbody across the network.
-
 -   [Network Room Manager](/docs/components/network-room-manager)  
     The Network Room Manager is an extension component of Network Manager that provides a basic functional room.
 
