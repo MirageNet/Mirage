@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
@@ -16,9 +16,6 @@ namespace Mirage.Tests.Runtime.ClientServer
 
         public override async UniTask LateSetup()
         {
-            base.ExtraSetup();
-
-
             serverIdentity2 = InstantiateForTest(playerPrefab).GetComponent<NetworkIdentity>();
             serverObjectManager.Spawn(serverIdentity2);
 
