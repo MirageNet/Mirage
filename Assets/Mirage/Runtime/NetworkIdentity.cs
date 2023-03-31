@@ -232,11 +232,19 @@ namespace Mirage
                     return;
 
                 if (_owner != null)
+                {
+                    // invoke OnAuthority for remove owner and then again if there is new owner
+                    World.InvokeOnAuthorityChanged(this, false, _owner);
                     _owner.RemoveOwnedObject(this);
+                }
 
                 _owner = value;
                 _owner?.AddOwnedObject(this);
                 _onOwnerChanged.Invoke(_owner);
+
+                // only invoke again if new owner is not null
+                if (_owner != null)
+                    World.InvokeOnAuthorityChanged(this, true, _owner);
             }
         }
 
@@ -555,11 +563,19 @@ namespace Mirage
         internal void CallStartAuthority()
         {
             _onAuthorityChanged.Invoke(true);
+
+            // dont invoke in host mode, server will invoke it when owner is changed
+            if (!IsServer)
+                World.InvokeOnAuthorityChanged(this, true, null);
         }
 
         internal void CallStopAuthority()
         {
             _onAuthorityChanged.Invoke(false);
+
+            // dont invoke in host mode, server will invoke it when owner is changed
+            if (!IsServer)
+                World.InvokeOnAuthorityChanged(this, false, null);
         }
 
         /// <summary>
