@@ -8,13 +8,6 @@ namespace Mirage.Tests.Runtime.Syncing
 {
     public class SyncDirectionErrorTest : SyncDirectionTestBase<MockPlayer>
     {
-        [UnityTest]
-        public IEnumerator DoesErrorStuff()
-        {
-            Assert.Fail();
-            yield return null;
-        }
-
         [Test]
         public void ClientWithOutAuth()
         {
