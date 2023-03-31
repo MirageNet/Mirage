@@ -115,8 +115,8 @@ namespace Mirage
 
         private void OnClientConnected(INetworkPlayer player)
         {
-            RegisterPrefabs(spawnPrefabs);
-            RegisterPrefabs(NetworkPrefabs?.Prefabs);
+            RegisterPrefabs(spawnPrefabs, true);
+            RegisterPrefabs(NetworkPrefabs?.Prefabs, true);
 
             // prepare objects right away so objects in first scene can be spawned
             // if user changes scenes without NetworkSceneManager then they will need to manually call it again
@@ -209,7 +209,8 @@ namespace Mirage
         /// Calls <see cref="RegisterPrefab(NetworkIdentity)"/> on each object in the <paramref name="prefabs"/> collection
         /// </summary>
         /// <param name="prefabs"></param>
-        public void RegisterPrefabs(IEnumerable<NetworkIdentity> prefabs)
+        /// <param name="skipExisting">Dont call <see cref="RegisterPrefab"/> for prefab's who's hash is already in the list of handlers. This can happen if custom handler is added for a prefab in the insepctor list</param>
+        public void RegisterPrefabs(IEnumerable<NetworkIdentity> prefabs, bool skipExisting)
         {
             if (prefabs == null)
                 return;
@@ -218,6 +219,15 @@ namespace Mirage
             {
                 if (prefab == null)
                     continue;
+
+                if (skipExisting)
+                {
+                    // check if the hash is ready in collection
+                    // if it is, then skip
+                    var prefabHash = prefab.PrefabHash;
+                    if (_handlers.ContainsKey(prefabHash))
+                        continue;
+                }
 
                 RegisterPrefab(prefab);
             }
