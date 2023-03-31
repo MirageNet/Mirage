@@ -322,6 +322,8 @@ namespace Mirage.Tests
         {
             var startAuth = 0;
             var stopAuth = 0;
+            // NotifyAuthority needs world to be set. this different than the owner case because world will always be set in the client's case
+            identity.World = new NetworkWorld();
             identity.OnAuthorityChanged.AddListener(auth =>
             {
                 if (auth) startAuth++;
