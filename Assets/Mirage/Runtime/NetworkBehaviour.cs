@@ -10,13 +10,6 @@ using UnityEngine;
 namespace Mirage
 {
     /// <summary>
-    /// Sync to everyone, or only to owner.
-    /// </summary>
-    [System.Obsolete("Use new SyncSettings instead", true)]
-    public enum SyncMode { Observers, Owner }
-
-
-    /// <summary>
     /// Base class which should be inherited by scripts which contain networking functionality.
     ///
     /// </summary>
@@ -38,24 +31,7 @@ namespace Mirage
         /// Sync settings for this NetworkBehaviour
         /// <para>Settings will be hidden in inspector unless Behaviour has SyncVar or SyncObjects</para>
         /// </summary>
-        // todo custom drawer to hide this
         public SyncSettings SyncSettings = SyncSettings.Default;
-
-        // hidden because NetworkBehaviourInspector shows it only if has OnSerialize.
-        /// <summary>
-        /// sync mode for OnSerialize
-        /// </summary>
-        [System.Obsolete("Use new SyncSettings instead", true)]
-        [HideInInspector] public SyncMode syncMode = SyncMode.Observers;
-
-        // hidden because NetworkBehaviourInspector shows it only if has OnSerialize.
-        /// <summary>
-        /// sync interval for OnSerialize (in seconds)
-        /// </summary>
-        // [0,2] should be enough. anything >2s is too laggy anyway.
-        [Range(0, 2)]
-        [System.Obsolete("Use new SyncSettings instead", true)]
-        [HideInInspector] public float syncInterval = 0.1f;
 
         /// <summary>
         /// Returns true if this object is active on an active server.

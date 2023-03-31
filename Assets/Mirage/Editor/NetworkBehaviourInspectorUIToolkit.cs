@@ -52,28 +52,6 @@ namespace Mirage
             return _syncListDrawer?.Create();
         }
 
-        public VisualElement CreateDefaultSyncSettings()
-        {
-            if (!_syncsAnything)
-            {
-                return null;
-            }
-
-            var root = new VisualElement();
-
-            root.Add(CreateHeader("Sync Settings"));
-
-            var syncMode = new PropertyField(_serializedObject.FindProperty("syncMode"));
-            syncMode.Bind(_serializedObject);
-            root.Add(syncMode);
-
-            var syncInterval = new PropertyField(_serializedObject.FindProperty("syncInterval"));
-            syncInterval.Bind(_serializedObject);
-            root.Add(syncInterval);
-
-            return root;
-        }
-
         public static VisualElement CreateHeader(string text)
         {
             var root = new VisualElement();

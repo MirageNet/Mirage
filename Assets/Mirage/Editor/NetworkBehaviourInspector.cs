@@ -34,7 +34,6 @@ namespace Mirage
         {
             DrawDefaultInspector();
             _drawer.DrawDefaultSyncLists();
-            _drawer.DrawDefaultSyncSettings();
         }
     }
 
@@ -113,28 +112,6 @@ namespace Mirage
         public void DrawDefaultSyncLists()
         {
             _syncListDrawer?.Draw();
-        }
-
-        /// <summary>
-        /// Draws SyncSettings if the NetworkBehaviour has anything to sync
-        /// </summary>
-        public void DrawDefaultSyncSettings()
-        {
-            // does it sync anything? then show extra properties
-            // (no need to show it if the class only has Cmds/Rpcs and no sync)
-            if (!_syncsAnything)
-            {
-                return;
-            }
-
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Sync Settings", EditorStyles.boldLabel);
-
-            EditorGUILayout.PropertyField(_serializedObject.FindProperty("syncMode"));
-            EditorGUILayout.PropertyField(_serializedObject.FindProperty("syncInterval"));
-
-            // apply
-            _serializedObject.ApplyModifiedProperties();
         }
     }
 
