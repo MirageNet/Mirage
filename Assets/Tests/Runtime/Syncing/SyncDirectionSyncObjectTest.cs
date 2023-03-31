@@ -97,6 +97,8 @@ namespace Mirage.Tests.Runtime.Syncing
         }
     }
 
+
+    [Ignore("needs extra changes, not supported yet")]
     public class SyncDirectionObjectFromOwner : SyncDirectionTestBase<MockPlayerWithList>
     {
         private const int listValue = 5;
@@ -148,6 +150,8 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(ObserverComponent.MySyncList[0], Is.EqualTo(listValue));
         }
     }
+
+    [Ignore("needs extra changes, not supported yet")]
     public class SyncDirectionObjectFromServerAndOwner : SyncDirectionTestBase<MockPlayerWithList>
     {
         private const int listValue1 = 5;

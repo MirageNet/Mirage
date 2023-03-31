@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Mirage.Serialization;
 using Mirage.Tests.Runtime.ClientServer;
@@ -28,7 +28,12 @@ namespace Mirage.Tests.Runtime.Syncing
         protected T OwnerComponent => clientComponent;
 
         protected NetworkIdentity ServerExtraIdentity { get; private set; }
+        protected T ServerExtraComponent { get; private set; }
+        /// <summary>
+        /// Object on the owner's instance, but is not owned by them
+        /// </summary>
         protected NetworkIdentity OwnerExtraIdentity { get; private set; }
+        protected T OwnerExtraComponent { get; private set; }
 
         [TearDown]
         public void TearDown()
@@ -67,6 +72,7 @@ namespace Mirage.Tests.Runtime.Syncing
             Debug.Assert(ObserverComponent != null);
 
             ServerExtraIdentity = InstantiateForTest(playerPrefab).GetNetworkIdentity();
+            ServerExtraComponent = ServerExtraIdentity.GetComponent<T>();
             Debug.Assert(ServerExtraIdentity != null);
             serverObjectManager.Spawn(ServerExtraIdentity);
 
@@ -75,24 +81,23 @@ namespace Mirage.Tests.Runtime.Syncing
             if (client.World.TryGetIdentity(ServerExtraIdentity.NetId, out var ownerExtra))
             {
                 OwnerExtraIdentity = ownerExtra;
+                OwnerExtraComponent = ownerExtra.GetComponent<T>();
             }
         }
 
-        protected void SetDirection(SyncFrom from, SyncTo to)
+        protected static void SetDirection(NetworkBehaviour behaviour, SyncFrom from, SyncTo to)
         {
             Debug.Assert(SyncSettings.IsValidDirection(from, to));
 
-            serverComponent.SyncSettings.From = from;
-            serverComponent.SyncSettings.To = to;
-            serverComponent._nextSyncTime = Time.time;
-
-            OwnerComponent.SyncSettings.From = from;
-            OwnerComponent.SyncSettings.To = to;
-            OwnerComponent._nextSyncTime = Time.time;
-
-            ObserverComponent.SyncSettings.From = from;
-            ObserverComponent.SyncSettings.To = to;
-            ObserverComponent._nextSyncTime = Time.time;
+            behaviour.SyncSettings.From = from;
+            behaviour.SyncSettings.To = to;
+            behaviour._nextSyncTime = Time.time;
+        }
+        protected void SetDirection(SyncFrom from, SyncTo to)
+        {
+            SetDirection(serverComponent, from, to);
+            SetDirection(OwnerComponent, from, to);
+            SetDirection(ObserverComponent, from, to);
         }
     }
 }
