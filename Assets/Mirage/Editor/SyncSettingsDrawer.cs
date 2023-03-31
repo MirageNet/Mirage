@@ -6,8 +6,53 @@ namespace Mirage
     [CustomPropertyDrawer(typeof(SyncSettings))]
     public class SyncSettingsDrawer : PropertyDrawer
     {
+        /// <summary>
+        /// no syncvar/syncobject/serailize Override
+        /// </summary>
+        /// <param name="property"></param>
+        /// <returns></returns>
+        private static bool NoSyncInBehaviour(SerializedProperty property)
+        {
+            var targets = property.serializedObject.targetObjects;
+            foreach (var target in targets)
+            {
+                Debug.Assert(target is NetworkBehaviour);
+                var syncAny = NetworkBehaviourInspectorDrawer.SyncsAnything(target);
+                if (syncAny)
+                    return false;
+            }
+            return true;
+        }
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            if (NoSyncInBehaviour(property))
+                return 0;
+
+            var baseHeight = base.GetPropertyHeight(property, label);
+            if (property.isExpanded)
+            {
+                var height = (baseHeight * 3) + (EditorGUIUtility.standardVerticalSpacing * 2);
+
+                // Check if the sync is invalid and increase height if it is
+                if (InvalidDirection(property, out _))
+                {
+                    height += (EditorGUIUtility.singleLineHeight * 2) + EditorGUIUtility.standardVerticalSpacing; // Increase height to make room for warning message
+                }
+
+                return height;
+            }
+            else
+            {
+                return baseHeight;
+            }
+        }
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            if (NoSyncInBehaviour(property))
+                return;
+
             EditorGUI.BeginProperty(position, label, property);
 
             // Draw foldout arrow and label
@@ -110,27 +155,6 @@ namespace Mirage
 
                 // Draw warning message
                 EditorGUI.HelpBox(warningRect, reason, MessageType.Warning);
-            }
-        }
-
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        {
-            var baseHeight = base.GetPropertyHeight(property, label);
-            if (property.isExpanded)
-            {
-                var height = (baseHeight * 3) + (EditorGUIUtility.standardVerticalSpacing * 2);
-
-                // Check if the sync is invalid and increase height if it is
-                if (InvalidDirection(property, out _))
-                {
-                    height += (EditorGUIUtility.singleLineHeight * 2) + EditorGUIUtility.standardVerticalSpacing; // Increase height to make room for warning message
-                }
-
-                return height;
-            }
-            else
-            {
-                return baseHeight;
             }
         }
 
