@@ -1,3 +1,10 @@
+## [131.0.2](https://github.com/MirageNet/Mirage/compare/v131.0.1...v131.0.2) (2023-04-01)
+
+
+### Bug Fixes
+
+* not sending to owner if they are host player ([1c5eed5](https://github.com/MirageNet/Mirage/commit/1c5eed5a247023e1652e0a83cda6c9aa00edb54e))
+
 ## [131.0.1](https://github.com/MirageNet/Mirage/compare/v131.0.0...v131.0.1) (2023-03-31)
 
 
