@@ -16,6 +16,7 @@ namespace Mirage.Tests
         protected ServerObjectManager serverObjectManager;
         protected ClientObjectManager clientObjectManager;
 
+        protected GameObject playerPrefab;
         protected GameObject playerGO;
         protected NetworkIdentity playerIdentity;
         protected T playerComponent;
@@ -67,10 +68,17 @@ namespace Mirage.Tests
             {
                 await StartHost();
 
-                playerGO = new GameObject("playerGO", typeof(Rigidbody));
-                playerIdentity = playerGO.AddComponent<NetworkIdentity>();
-                playerIdentity.PrefabHash = Guid.NewGuid().GetHashCode();
-                playerComponent = playerGO.AddComponent<T>();
+                // create and register a prefab
+                playerPrefab = new GameObject("player (unspawned)", typeof(NetworkIdentity), typeof(Rigidbody), typeof(T));
+                // DontDestroyOnLoad so that "prefab" wont be destroyed by scene loading
+                // also means that NetworkScenePostProcess will skip this unspawned object
+                playerPrefab.GetNetworkIdentity().PrefabHash = Guid.NewGuid().GetHashCode();
+                Object.DontDestroyOnLoad(playerPrefab);
+                clientObjectManager.RegisterPrefab(playerPrefab.GetNetworkIdentity());
+
+                playerGO = InstantiateForTest(playerPrefab);
+                playerIdentity = playerGO.GetComponent<NetworkIdentity>();
+                playerComponent = playerGO.GetComponent<T>();
 
                 serverObjectManager.AddCharacter(server.LocalPlayer, playerGO);
 

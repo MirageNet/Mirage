@@ -41,6 +41,8 @@ namespace Mirage.Tests.Runtime.Syncing
             _ownerWriter.Reset();
             _observersWriter.Reset();
             _reader.Dispose();
+
+            GameObject.Destroy(_client2.go);
         }
 
         public override async UniTask LateSetup()

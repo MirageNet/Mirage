@@ -1,3 +1,4 @@
+using System;
 using Mirage.Serialization;
 using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
@@ -22,6 +23,21 @@ namespace Mirage.Tests.Runtime.Syncing
 
         [SyncVar]
         public NetworkIdentity target;
+
+
+        public event Action OnSerializeCalled;
+        public event Action OnDeserializeCalled;
+
+        public override bool OnSerialize(NetworkWriter writer, bool initialState)
+        {
+            OnSerializeCalled?.Invoke();
+            return base.OnSerialize(writer, initialState);
+        }
+        public override void OnDeserialize(NetworkReader reader, bool initialState)
+        {
+            OnDeserializeCalled?.Invoke();
+            base.OnDeserialize(reader, initialState);
+        }
     }
 
     public class SyncVarTest : ClientServerSetup<MockPlayer>
