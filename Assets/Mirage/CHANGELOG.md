@@ -1,3 +1,15 @@
+# [131.1.0](https://github.com/MirageNet/Mirage/compare/v131.0.2...v131.1.0) (2023-04-01)
+
+
+### Bug Fixes
+
+* fixing sync direction drawer showing incorrect warning ([11a7ab6](https://github.com/MirageNet/Mirage/commit/11a7ab601463061cbe21aad435a979d884b6da83))
+
+
+### Features
+
+* adding struct to sync a prefab over network using its hash ([15e7bbe](https://github.com/MirageNet/Mirage/commit/15e7bbe44220005d287b12ace9edb7e0d365900a))
+
 ## [131.0.2](https://github.com/MirageNet/Mirage/compare/v131.0.1...v131.0.2) (2023-04-01)
 
 
