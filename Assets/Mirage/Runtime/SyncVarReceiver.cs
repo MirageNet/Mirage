@@ -29,11 +29,9 @@ namespace Mirage
 
         private void AddHandlers(NetworkClient client)
         {
-            if (client.IsLocalClient)
-            {
-                client.MessageHandler.RegisterHandler<UpdateVarsMessage>(_ => { });
-            }
-            else
+            // dont add if host player
+            // server should never sent to host
+            if (!client.IsLocalClient)
             {
                 client.MessageHandler.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
             }

@@ -89,20 +89,7 @@ namespace Mirage
                     //  below too)
                     if (ownerWritten > 0)
                     {
-                        INetworkPlayer player;
-
-                        if (identity.IsServer)
-                            player = identity.Owner;
-                        else if (identity.HasAuthority)
-                            player = identity.Client.Player;
-                        else
-                            throw new InvalidOperationException("Should be server or have auth if sending to OwnerWriter");
-
-                        if (player != null && player.SceneIsReady)
-                        {
-                            varsMessage.payload = ownerWriter.ToArraySegment();
-                            player.Send(varsMessage);
-                        }
+                        SendToRemoteOwner(identity, ownerWriter, varsMessage);
                     }
 
                     // send observersWriter to everyone but owner
@@ -123,6 +110,31 @@ namespace Mirage
                     // TODO move this inside OnSerializeAll
                     identity.ClearShouldSyncDirtyOnly();
                 }
+            }
+        }
+
+        private static void SendToRemoteOwner(NetworkIdentity identity, PooledNetworkWriter ownerWriter, UpdateVarsMessage varsMessage)
+        {
+            INetworkPlayer player;
+
+            if (identity.IsServer)
+            {
+                player = identity.Owner;
+
+                // if target player is host, dont send
+                if (player == identity.Server.LocalPlayer)
+                    return;
+            }
+            else if (identity.HasAuthority) // client only and auth
+                player = identity.Client.Player;
+            else
+                throw new InvalidOperationException("Should be server or have auth if sending to OwnerWriter");
+
+            // check player is ready
+            if (player != null && player.SceneIsReady)
+            {
+                varsMessage.payload = ownerWriter.ToArraySegment();
+                player.Send(varsMessage);
             }
         }
     }
