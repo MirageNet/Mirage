@@ -160,8 +160,8 @@ namespace Mirage
 
         private static bool InvalidDirection(SerializedProperty property, out string reason)
         {
-            var from = (SyncFrom)property.FindPropertyRelative("From").enumValueIndex;
-            var to = (SyncTo)property.FindPropertyRelative("To").enumValueIndex;
+            var from = (SyncFrom)property.FindPropertyRelative("From").intValue;
+            var to = (SyncTo)property.FindPropertyRelative("To").intValue;
             reason = SyncSettings.InvalidReason(from, to);
             return !string.IsNullOrEmpty(reason);
         }
