@@ -1,8 +1,8 @@
 #if UNITY_2022_2_OR_NEWER // Unity uses UI toolkit by default for inspectors in 2022.2 and up.
-using UnityEditor.UIElements;
-using UnityEngine.UIElements;
 using System.Globalization;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Mirage
 {
@@ -14,7 +14,7 @@ namespace Mirage
 
             // Create the default inspector.
             var iterator = serializedObject.GetIterator();
-            for (bool enterChildren = true; iterator.NextVisible(enterChildren); enterChildren = false)
+            for (var enterChildren = true; iterator.NextVisible(enterChildren); enterChildren = false)
             {
                 var field = new PropertyField(iterator);
 
@@ -32,13 +32,6 @@ namespace Mirage
             if (syncLists != null)
             {
                 root.Add(syncLists);
-            }
-
-            // Crete the sync settings editor.
-            var syncSettings = _drawer.CreateDefaultSyncSettings();
-            if (syncSettings != null)
-            {
-                root.Add(syncSettings);
             }
 
             return root;
