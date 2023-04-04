@@ -16,7 +16,7 @@ namespace Mirage.Tests
         protected ServerObjectManager serverObjectManager;
         protected ClientObjectManager clientObjectManager;
 
-        protected GameObject playerPrefab;
+        protected NetworkIdentity playerPrefab;
         protected GameObject playerGO;
         protected NetworkIdentity playerIdentity;
         protected T playerComponent;
@@ -68,15 +68,19 @@ namespace Mirage.Tests
             {
                 await StartHost();
 
-                // create and register a prefab
-                playerPrefab = new GameObject("player (unspawned)", typeof(NetworkIdentity), typeof(Rigidbody), typeof(T));
+                playerPrefab = CreateBehaviour<T>(true).Identity;
+                playerPrefab.name = "player (unspawned)";
+                playerPrefab.gameObject.AddComponent<Rigidbody>();// not sure why we add RB, but it was here previously so keeping it in
+
                 // DontDestroyOnLoad so that "prefab" wont be destroyed by scene loading
                 // also means that NetworkScenePostProcess will skip this unspawned object
-                playerPrefab.GetNetworkIdentity().PrefabHash = Guid.NewGuid().GetHashCode();
+                playerPrefab.PrefabHash = Guid.NewGuid().GetHashCode();
                 Object.DontDestroyOnLoad(playerPrefab);
-                clientObjectManager.RegisterPrefab(playerPrefab.GetNetworkIdentity());
 
-                playerGO = InstantiateForTest(playerPrefab);
+
+                clientObjectManager.RegisterPrefab(playerPrefab);
+
+                playerGO = InstantiateForTest(playerPrefab.gameObject);
                 playerIdentity = playerGO.GetComponent<NetworkIdentity>();
                 playerComponent = playerGO.GetComponent<T>();
 

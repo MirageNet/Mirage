@@ -62,7 +62,7 @@ namespace Mirage.Tests.Runtime.Syncing
             // get new player
             var serverPlayer2 = server.Players.First(x => x != server.LocalPlayer);
 
-            _client2.clientObjectManager.RegisterPrefab(playerPrefab.GetNetworkIdentity());
+            _client2.clientObjectManager.RegisterPrefab(playerPrefab);
 
             // wait for client and server to initialize themselves
             await UniTask.Yield();
@@ -80,7 +80,7 @@ namespace Mirage.Tests.Runtime.Syncing
             ObserverComponent = player1Character.GetComponent<MockPlayer>();
             Debug.Assert(ObserverComponent != null);
 
-            ServerExtraIdentity = InstantiateForTest(playerPrefab).GetNetworkIdentity();
+            ServerExtraIdentity = InstantiateForTest(playerPrefab);
             ServerExtraComponent = ServerExtraIdentity.GetComponent<MockPlayer>();
             Debug.Assert(ServerExtraIdentity != null);
             serverObjectManager.Spawn(ServerExtraIdentity);

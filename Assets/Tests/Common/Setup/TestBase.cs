@@ -33,6 +33,7 @@ namespace Mirage.Tests
         protected GameObject InstantiateForTest(GameObject prefab)
         {
             var obj = Object.Instantiate(prefab);
+            obj.SetActive(true);
             toDestroy.Add(obj);
             return obj;
         }
@@ -45,6 +46,7 @@ namespace Mirage.Tests
         protected TObj InstantiateForTest<TObj>(TObj prefab) where TObj : Component
         {
             var obj = Object.Instantiate(prefab);
+            obj.gameObject.SetActive(true);
             toDestroy.Add(obj.gameObject);
             return obj;
         }
@@ -53,33 +55,31 @@ namespace Mirage.Tests
         /// Creates a new NetworkIdentity that can be used by tests, then destroyed in teardown
         /// </summary>
         /// <returns></returns>
-        protected NetworkIdentity CreateNetworkIdentity()
+        protected NetworkIdentity CreateNetworkIdentity(bool disable = false)
         {
-            var go = new GameObject($"A NetworkIdentity {toDestroy.Count}", typeof(NetworkIdentity));
-            toDestroy.Add(go);
-            return go.GetComponent<NetworkIdentity>();
+            var go = CreateGameObject($"A GameObject {toDestroy.Count}", disable);
+            return go.AddComponent<NetworkIdentity>();
         }
 
         /// <summary>
         /// Creates a new NetworkIdentity and Behaviour that can be used by tests, then destroyed in teardown
         /// </summary>
         /// <returns></returns>
-        protected T CreateBehaviour<T>() where T : NetworkBehaviour
+        protected T CreateBehaviour<T>(bool disable = false) where T : NetworkBehaviour
         {
-            var go = new GameObject($"A NetworkBehaviour {typeof(T).Name} {toDestroy.Count}", typeof(NetworkIdentity), typeof(T));
-            toDestroy.Add(go);
-            return go.GetComponent<T>();
+            var go = CreateGameObject($"A NetworkBehaviour {typeof(T).Name} {toDestroy.Count}", disable);
+            go.AddComponent<NetworkIdentity>();
+            return go.AddComponent<T>();
         }
 
         /// <summary>
         /// Creates a new MonoBehaviour that can be used by tests, then destroyed in teardown
         /// </summary>
         /// <returns></returns>
-        protected T CreateMonoBehaviour<T>() where T : MonoBehaviour
+        protected T CreateMonoBehaviour<T>(bool disable = false) where T : MonoBehaviour
         {
-            var go = new GameObject($"A MonoBehaviour {typeof(T).Name} {toDestroy.Count}", typeof(T));
-            toDestroy.Add(go);
-            return go.GetComponent<T>();
+            var go = CreateGameObject($"A MonoBehaviour {typeof(T).Name} {toDestroy.Count}", disable);
+            return go.AddComponent<T>();
         }
 
         /// <summary>
@@ -96,9 +96,22 @@ namespace Mirage.Tests
         /// Creates a new NetworkIdentity that can be used by tests, then destroyed in teardown
         /// </summary>
         /// <returns></returns>
-        protected GameObject CreateGameObject()
+        protected GameObject CreateGameObject(bool disable = false)
         {
-            var go = new GameObject($"A GameObject {toDestroy.Count}");
+            return CreateGameObject($"A GameObject {toDestroy.Count}", disable);
+        }
+
+
+        /// <summary>
+        /// Creates a new NetworkIdentity that can be used by tests, then destroyed in teardown
+        /// </summary>
+        /// <returns></returns>
+        protected GameObject CreateGameObject(string name, bool disable)
+        {
+            var go = new GameObject(name);
+            // it is useful to disable object that will be used as prefabs, so that awake will not call on them
+            if (disable)
+                go.SetActive(false);
             toDestroy.Add(go);
             return go;
         }

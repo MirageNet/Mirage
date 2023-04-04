@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using Mirage.Tests.Runtime.ClientServer;
 using Mirage.Tests.Runtime.ClientServer.RpcTests;
 using NSubstitute;
 using NUnit.Framework;
@@ -44,14 +43,8 @@ namespace Mirage.Tests.Runtime.Host.RpcTests
         public override async UniTask LateSetup()
         {
             _client2 = new ClientInstance<T>(ClientConfig, networkManagerGo.GetComponent<TestSocketFactory>());
-            _client2.client.Connect("localhost");
 
-            await AsyncUtil.WaitUntilWithTimeout(() => server.Players.Count > 1);
-
-            // get new player
-            serverPlayer2 = server.Players.Where(x => x != server.LocalPlayer).First();
-
-            var prefab = CreateBehaviour<T>();
+            var prefab = CreateBehaviour<T>(true);
             {
                 // create and register a prefab
                 // DontDestroyOnLoad so that "prefab" wont be destroyed by scene loading
@@ -60,9 +53,17 @@ namespace Mirage.Tests.Runtime.Host.RpcTests
 
                 var identity = prefab.GetComponent<NetworkIdentity>();
                 identity.PrefabHash = Guid.NewGuid().GetHashCode();
-                _client2.clientObjectManager.RegisterPrefab(playerIdentity);
+                _client2.clientObjectManager.RegisterPrefab(playerPrefab);
                 _client2.clientObjectManager.RegisterPrefab(identity);
             }
+
+            // connect after registering prefabs
+            _client2.client.Connect("localhost");
+
+            await AsyncUtil.WaitUntilWithTimeout(() => server.Players.Count > 1);
+
+            // get new player
+            serverPlayer2 = server.Players.Where(x => x != server.LocalPlayer).First();
 
             // wait for client and server to initialize themselves
             await UniTask.Yield();
@@ -75,12 +76,12 @@ namespace Mirage.Tests.Runtime.Host.RpcTests
                 client2Component_onHost = go.GetComponent<T>();
                 serverObjectManager.AddCharacter(serverPlayer2, identity);
             }
+
             // wait for client to spawn it
             await AsyncUtil.WaitUntilWithTimeout(() => _client2.client.Player.HasCharacter);
 
             _client2.SetupCharacter();
             client2Component_on2 = _client2.component;
-
 
             var found = _client2.client.World.TryGetIdentity(playerComponent.NetId, out var player1Character);
             if (!found)
