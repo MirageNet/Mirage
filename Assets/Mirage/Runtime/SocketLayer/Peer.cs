@@ -383,13 +383,13 @@ namespace Mirage.SocketLayer
             if (!Validate(packet)) { return; }
 
 
-            if (!_connectKeyValidator.Validate(packet.Buffer.array))
-            {
-                RejectConnectionWithReason(endPoint, RejectReason.KeyInvalid);
-            }
-            else if (AtMaxConnections())
+            if (AtMaxConnections())
             {
                 RejectConnectionWithReason(endPoint, RejectReason.ServerFull);
+            }
+            else if (!_connectKeyValidator.Validate(packet.Buffer.array))
+            {
+                RejectConnectionWithReason(endPoint, RejectReason.KeyInvalid);
             }
             // todo do other security stuff here:
             // - white/black list for endpoint?
