@@ -1,3 +1,11 @@
+## [131.1.1](https://github.com/MirageNet/Mirage/compare/v131.1.0...v131.1.1) (2023-04-04)
+
+
+### Bug Fixes
+
+* fixing compile error  with inspector in 2022 ([cb7fa26](https://github.com/MirageNet/Mirage/commit/cb7fa26182a5c8d9811a8b12d3554152072ccda8))
+* improving host syncing for new direction ([645570c](https://github.com/MirageNet/Mirage/commit/645570c852561c6658a0e1bf94bf0b35e2d884c6))
+
 # [131.1.0](https://github.com/MirageNet/Mirage/compare/v131.0.2...v131.1.0) (2023-04-01)
 
 
