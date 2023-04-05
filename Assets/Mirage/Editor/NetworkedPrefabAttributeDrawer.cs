@@ -271,6 +271,9 @@ namespace Mirage
             {
                 Undo.RecordObject(holder, $"Adding {prefab.name} to {holder.name}");
                 holder.Prefabs.Add(prefab);
+
+                // seems like we need to also mark dirty for non-scene objects
+                EditorUtility.SetDirty(holder);
             }
             GUIUtility.ExitGUI();
         }

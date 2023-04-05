@@ -22,8 +22,9 @@ namespace Mirage
 
             var target = (NetworkPrefabs)this.target;
 
-            Undo.RecordObject(target, "Register prefabs for spawn");
+            Undo.RecordObject(target, $"Register All Prefabs to SO {target.name}");
             NetworkPrefabUtils.AddToPrefabList(target.Prefabs, foundPrefabs);
+            EditorUtility.SetDirty(target);
         }
     }
 }

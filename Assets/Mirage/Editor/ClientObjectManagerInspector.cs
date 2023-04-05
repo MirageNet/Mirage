@@ -85,8 +85,9 @@ namespace Mirage
             var com = (ClientObjectManager)target;
 
             // add to new
-            Undo.RecordObject(com.NetworkPrefabs, "Adding prefabs from com.spawnPrefabs");
+            Undo.RecordObject(com.NetworkPrefabs, "Adding prefabs to SO {com.NetworkPrefabs.name}");
             NetworkPrefabUtils.AddToPrefabList(com.NetworkPrefabs.Prefabs, com.spawnPrefabs);
+            EditorUtility.SetDirty(com.NetworkPrefabs);
 
             // clear old
             var listProp = serializedObject.FindProperty(nameof(ClientObjectManager.spawnPrefabs));
@@ -103,12 +104,13 @@ namespace Mirage
             // first use networkprefabs for list, if null then use the list field
             if (com.NetworkPrefabs != null)
             {
-                Undo.RecordObject(com.NetworkPrefabs, "Register prefabs for spawn");
+                Undo.RecordObject(com.NetworkPrefabs, $"Register All Prefabs to SO {com.NetworkPrefabs.name}");
                 NetworkPrefabUtils.AddToPrefabList(com.NetworkPrefabs.Prefabs, foundPrefabs);
+                EditorUtility.SetDirty(com.NetworkPrefabs);
             }
             else
             {
-                Undo.RecordObject(target, "Register prefabs for spawn");
+                Undo.RecordObject(com.NetworkPrefabs, $"Register All Prefabs to COM {com.name}");
                 PrefabUtility.RecordPrefabInstancePropertyModifications(target);
                 NetworkPrefabUtils.AddToPrefabList(com.spawnPrefabs, foundPrefabs);
             }
