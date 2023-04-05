@@ -1,3 +1,11 @@
+## [131.1.2](https://github.com/MirageNet/Mirage/compare/v131.1.1...v131.1.2) (2023-04-05)
+
+
+### Bug Fixes
+
+* fixing incorrect Undo.RecordObject target ([0db933a](https://github.com/MirageNet/Mirage/commit/0db933a124d99aead1937b4f10ae65624918b425))
+* fixing register button not setting holder as dirty ([762e295](https://github.com/MirageNet/Mirage/commit/762e295a7a1c36117aa5f49ff0e7802f73c13afc))
+
 ## [131.1.1](https://github.com/MirageNet/Mirage/compare/v131.1.0...v131.1.1) (2023-04-04)
 
 
