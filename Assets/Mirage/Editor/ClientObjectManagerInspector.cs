@@ -110,7 +110,7 @@ namespace Mirage
             }
             else
             {
-                Undo.RecordObject(com.NetworkPrefabs, $"Register All Prefabs to COM {com.name}");
+                Undo.RecordObject(com, $"Register All Prefabs to COM {com.name}");
                 PrefabUtility.RecordPrefabInstancePropertyModifications(target);
                 NetworkPrefabUtils.AddToPrefabList(com.spawnPrefabs, foundPrefabs);
             }
