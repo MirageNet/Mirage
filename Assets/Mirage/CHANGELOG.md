@@ -1,3 +1,32 @@
+# [132.0.0](https://github.com/MirageNet/Mirage/compare/v131.1.3...v132.0.0) (2023-04-10)
+
+
+### Bug Fixes
+
+* fixing sample ([7d1d6f7](https://github.com/MirageNet/Mirage/commit/7d1d6f7c29cb846e2522c8ecd1e2198617632819))
+* renaming SpawnObjects to SpawnSceneObjects ([6b89619](https://github.com/MirageNet/Mirage/commit/6b89619fb1958243803fa0b425ae4089daaa74ae))
+
+
+### Code Refactoring
+
+* renaming Start to Setup for public methods to start ServerObjectManager late ([d5f0647](https://github.com/MirageNet/Mirage/commit/d5f0647bdb02c6d0cb968db2db56b7abc177473b))
+
+
+* refactor!: moving scene code out of ServerObjectManager ([f2b3938](https://github.com/MirageNet/Mirage/commit/f2b3938b120850cf6840c300adaa6c7a0b89440b))
+* refactor!: adding INetworkVisibility ([e47d4a3](https://github.com/MirageNet/Mirage/commit/e47d4a371b331e168d46608703c585847a2f8052))
+
+
+### Features
+
+* adding to string override for network identity. ([279e207](https://github.com/MirageNet/Mirage/commit/279e2075411359a60ad4b1d5ad198d20508b30c1))
+
+
+### BREAKING CHANGES
+
+* NetworkSceneManager now requires a reference to ServerObjectManager in the inspector
+* ServerObjectManager.Start renamed to Setup
+* NetworkIdentity.Visibility can now throw if called before Object is spawned
+
 ## [131.1.3](https://github.com/MirageNet/Mirage/compare/v131.1.2...v131.1.3) (2023-04-10)
 
 
