@@ -744,6 +744,9 @@ namespace Mirage
             return identity.IsSceneObject;
         }
 
+        [System.Obsolete("Renamed to SpawnSceneObjects")]
+        public void SpawnObjects() => SpawnSceneObjects();
+
         /// <summary>
         /// This causes NetworkIdentity objects in a scene to be spawned on a server.
         /// <para>
@@ -752,7 +755,7 @@ namespace Mirage
         /// </para>
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown when server is not active</exception>
-        public void SpawnObjects()
+        public void SpawnSceneObjects()
         {
             // only if server active
             if (!Server || !Server.Active)
