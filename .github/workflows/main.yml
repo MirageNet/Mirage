@@ -13,103 +13,34 @@ jobs:
   Tests2020:
     name: Test 2020
     runs-on: ubuntu-latest
-    # available list of containers here:
-    # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
-    container: unityci/editor:ubuntu-2020.3.30f1-base-1.0.1
-
     steps:
-      - name: Activate unity
-        # exit code is 1 for manual activation
-        continue-on-error: true
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE2 }}
-        run: |          
-          echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
-          unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
-      
-      - name: Checkout repository
-        uses: actions/checkout@v1
-
-      - name: Cache Library
-        id: cache-library
-        uses: actions/cache@v3
+      - name: Run Tests
+        uses: ./.github/workflows/RunTest.yml
+        secrets: 
+          unity_license: ${{ secrets.UNITY_LICENSE2 }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          path: Library
-          key: Library-2020.3.30-3
+          # available list of containers here:
+          # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
+          unity_container: unityci/editor:ubuntu-2020.3.30f1-base-1.0.1
+          cache_key: Library-2020.3.30-3
+          test_results_name: Test results 2020
 
-      - name: Run editor Tests
-        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
-        timeout-minutes: 20
-        
-      - name: Run play Tests
-        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
-        timeout-minutes: 20
-
-      - name: Archive test results
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: Test results 2020
-          path: Tests
-
-      - name: Publish test results
-        uses: MirageNet/nunit-reporter@v1.0.11
-        if: always()
-        with:
-          reportTitle: Test Report 2020
-          path: "Tests/*.xml"
-          access-token: ${{ secrets.GITHUB_TOKEN }}
-  
   Tests2021:
     name: Test 2021
     runs-on: ubuntu-latest
-    # available list of containers here:
-    # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
-    container: unityci/editor:ubuntu-2021.3.5f1-base-1.0.1
 
     steps:
-      - name: Activate unity
-        # exit code is 1 for manual activation
-        continue-on-error: true
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
-        run: |          
-          echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
-          unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
-      
-      - name: Checkout repository
-        uses: actions/checkout@v1
-
-      - name: Cache Library
-        id: cache-library
-        uses: actions/cache@v3
+      - name: Run Tests
+        uses: ./.github/workflows/RunTest.yml
+        secrets:
+          unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          path: Library
-          key: Library-2021.3.5-2
+          unity_container: unityci/editor:ubuntu-2021.3.5f1-base-1.0.1
+          cache_key: Library-2021.3.5-2
+          test_results_name: Test results 2021
 
-      - name: Run editor Tests
-        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
-        timeout-minutes: 20
-        
-      - name: Run play Tests
-        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
-        timeout-minutes: 20
-
-      - name: Archive test results
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: Test results 2021
-          path: Tests
-
-      - name: Publish test results
-        uses: MirageNet/nunit-reporter@v1.0.11
-        if: always()
-        with:
-          reportTitle: Test Report 2021
-          path: "Tests/*.xml"
-          access-token: ${{ secrets.GITHUB_TOKEN }}
-  
   BuildIL2CPP:
     name: BuildIL2CPP
     runs-on: ubuntu-latest

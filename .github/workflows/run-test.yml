@@ -1,0 +1,61 @@
+on:
+  workflow_call:
+    inputs:
+      unity_container:
+        required: true
+      cache_key:
+        required: true
+      test_results_name:
+        required: true
+    secrets:
+      unity_license:
+        required: true
+      GITHUB_TOKEN: 
+        required: true
+
+jobs:
+  run_tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    container: ${{ inputs.unity_container }}
+    steps:
+      - name: Activate unity
+        continue-on-error: true
+        env:
+          UNITY_LICENSE: ${{ secrets.unity_license }}
+        run: |          
+          echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
+          unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
+
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      - name: Cache Library
+        id: cache-library
+        uses: actions/cache@v3
+        with:
+          path: Library
+          key: ${{ inputs.cache_key }}
+
+      - name: Run editor Tests
+        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
+        timeout-minutes: 20
+        
+      - name: Run play Tests
+        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
+        timeout-minutes: 20
+
+      - name: Archive test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: ${{ inputs.test_results_name }}
+          path: Tests
+
+      - name: Publish test results
+        uses: MirageNet/nunit-reporter@v1.0.11
+        if: always()
+        with:
+          reportTitle:  ${{ inputs.test_results_name }}
+          path: "Tests/*.xml"
+          access-token: ${{ secrets.GITHUB_TOKEN }}
