@@ -8,34 +8,29 @@ on:
 
 jobs:
   Tests2020:
-    name: Test 2020
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run Tests
-        uses: ./.github/workflows/RunTest.yml@main
-        secrets: 
-          unity_license: ${{ secrets.UNITY_LICENSE2 }}
-          access_token: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          # available list of containers here:
-          # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
-          unity_container: unityci/editor:ubuntu-2020.3.30f1-base-1.0.1
-          cache_key: Library-2020.3.30-3
-          test_results_name: Test results 2020
+    # note: reuseable workflow is a job, not a step
+    name: Run Tests 2020
+    uses: ./.github/workflows/RunTest.yml@main
+    secrets: 
+      unity_license: ${{ secrets.UNITY_LICENSE2 }}
+      access_token: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      # available list of containers here:
+      # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
+      unity_container: unityci/editor:ubuntu-2020.3.30f1-base-1.0.1
+      cache_key: Library-2020.3.30-3
+      test_results_name: Test results 2020
 
   Tests2021:
-    name: Test 2021
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run Tests
-        uses: ./.github/workflows/RunTest.yml@main
-        secrets:
-          unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
-          access_token: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          unity_container: unityci/editor:ubuntu-2021.3.5f1-base-1.0.1
-          cache_key: Library-2021.3.5-2
-          test_results_name: Test results 2021
+    name: Run Tests 2020
+    uses: ./.github/workflows/RunTest.yml@main
+    secrets:
+      unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
+      access_token: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      unity_container: unityci/editor:ubuntu-2021.3.5f1-base-1.0.1
+      cache_key: Library-2021.3.5-2
+      test_results_name: Test results 2021
 
   BuildIL2CPP:
     name: BuildIL2CPP

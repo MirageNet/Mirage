@@ -1,3 +1,4 @@
+name: Run Tests
 on:
   workflow_call:
     inputs:
@@ -15,7 +16,6 @@ on:
 
 jobs:
   run_tests:
-    name: Run Tests
     runs-on: ubuntu-latest
     container: ${{ inputs.unity_container }}
     steps:
