@@ -1,3 +1,10 @@
+## [132.0.1](https://github.com/MirageNet/Mirage/compare/v132.0.0...v132.0.1) (2023-04-10)
+
+
+### Bug Fixes
+
+* adding angle packer ([fcbd007](https://github.com/MirageNet/Mirage/commit/fcbd0070a1d393e5808a9de2c5d4816057a2536c))
+
 # [132.0.0](https://github.com/MirageNet/Mirage/compare/v131.1.3...v132.0.0) (2023-04-10)
 
 
