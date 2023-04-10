@@ -10,7 +10,7 @@ jobs:
   Tests2020:
     # note: reuseable workflow is a job, not a step
     name: Run Tests 2020
-    uses: ./RunTest.yml
+    uses: ./.github/workflows/run-rest.yml
     secrets: 
       unity_license: ${{ secrets.UNITY_LICENSE2 }}
       access_token: ${{ secrets.GITHUB_TOKEN }}
@@ -23,7 +23,7 @@ jobs:
 
   Tests2021:
     name: Run Tests 2020
-    uses: ./RunTest.yml
+    uses: ./.github/workflows/run-rest.yml
     secrets:
       unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
       access_token: ${{ secrets.GITHUB_TOKEN }}
