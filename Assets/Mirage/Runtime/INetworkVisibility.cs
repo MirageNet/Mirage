@@ -5,7 +5,7 @@ namespace Mirage
     public interface INetworkVisibility
     {
         bool OnCheckObserver(INetworkPlayer player);
-        void OnRebuildObservers(HashSet<INetworkPlayer> newObservers, bool initialize);
+        void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize);
     }
 
     /// <summary>
@@ -24,7 +24,7 @@ namespace Mirage
 
         public bool OnCheckObserver(INetworkPlayer player) => true;
 
-        public void OnRebuildObservers(HashSet<INetworkPlayer> newObservers, bool initialize)
+        public void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
         {
             // add all server connections
             foreach (var player in _server.Players)
@@ -36,13 +36,13 @@ namespace Mirage
                 if (_objectManager.OnlySpawnOnAuthenticated && !player.IsAuthenticated)
                     continue;
 
-                newObservers.Add(player);
+                observers.Add(player);
             }
 
             // add local host connection (if any)
             if (_server.LocalPlayer != null && _server.LocalPlayer.SceneIsReady)
             {
-                newObservers.Add(_server.LocalPlayer);
+                observers.Add(_server.LocalPlayer);
             }
         }
     }
