@@ -1245,6 +1245,11 @@ namespace Mirage
             }
         }
 
+        public override string ToString()
+        {
+            return $"Identity[{NetId}, {name}]";
+        }
+
         [System.Serializable]
         public struct TransformSpawnSettings
         {
