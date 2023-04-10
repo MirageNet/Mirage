@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2021 James Frowen
@@ -47,7 +47,7 @@ namespace Mirage.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Pack(NetworkWriter writer, float value)
         {
-            value = Mathf.DeltaAngle(value, 0);
+            value = Mathf.DeltaAngle(0, value);
             _floatPacker.PackNoClamp(writer, value);
         }
 
