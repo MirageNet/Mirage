@@ -6,8 +6,6 @@ using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 using Object = UnityEngine.Object;
 
 namespace Mirage
@@ -48,11 +46,7 @@ namespace Mirage
         /// </summary>
         private static HashSet<NetworkIdentity> _setCache = new HashSet<NetworkIdentity>();
 
-        [FormerlySerializedAs("server")]
         public NetworkServer Server;
-        [FormerlySerializedAs("networkSceneManager")]
-        public NetworkSceneManager NetworkSceneManager;
-
         private bool _hasSetup;
 
         [Header("Authentication")]
@@ -79,12 +73,6 @@ namespace Mirage
             Server.Started.AddListener(OnServerStarted);
             Server.OnStartHost.AddListener(StartedHost);
             Server.Stopped.AddListener(OnServerStopped);
-
-            if (NetworkSceneManager != null)
-            {
-                NetworkSceneManager.OnServerFinishedSceneChange.AddListener(OnFinishedSceneChange);
-                NetworkSceneManager.OnPlayerSceneReady.AddListener(SpawnVisibleObjects);
-            }
         }
 
         private void Start()
@@ -120,30 +108,27 @@ namespace Mirage
             _nextNetworkId = 1;
         }
 
-        private void OnFinishedSceneChange(Scene scene, SceneOperation sceneOperation)
+        internal void SpawnOrActivate()
         {
-            Server.World.RemoveDestroyedObjects();
-
-            SpawnOrActivate();
-        }
-
-        private void SpawnOrActivate()
-        {
-            if (Server && Server.Active)
+            if (!Server || !Server.Active)
             {
-                SpawnObjects();
+                logger.LogWarning("SpawnOrActivate called when server was not active");
+                return;
+            }
 
-                // host mode?
-                if (Server.LocalClientActive)
-                {
-                    StartHostClientObjects();
-                }
+            SpawnSceneObjects();
+
+            // host mode?
+            if (Server.LocalClientActive)
+            {
+                StartHostClientObjects();
             }
         }
 
         /// <summary>
         /// Loops spawned collection for NetworkIdentities that are not IsClient and calls StartClient().
         /// </summary>
+        // todo can this function be removed? do we only need to run it when host connects?
         private void StartHostClientObjects()
         {
             foreach (var identity in Server.World.SpawnedIdentities)

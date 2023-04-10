@@ -12,7 +12,7 @@ namespace Mirage.Tests.Runtime.Host
             sceneManager.Client = client;
             sceneManager.Server = server;
 
-            serverObjectManager.NetworkSceneManager = sceneManager;
+            sceneManager.ServerObjectManager = serverObjectManager;
             clientObjectManager.NetworkSceneManager = sceneManager;
         }
     }

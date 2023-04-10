@@ -109,8 +109,9 @@ namespace Mirage.HeadlessBenchmark
             networkSceneManager.Server = server;
 
             serverObjectManager.Server = server;
-            serverObjectManager.NetworkSceneManager = networkSceneManager;
-            serverObjectManager.Start();
+            serverObjectManager.Setup();
+
+            networkSceneManager.ServerObjectManager = serverObjectManager;
 
             var spawner = serverGo.GetComponent<CharacterSpawner>();
             spawner.ServerObjectManager = serverObjectManager;

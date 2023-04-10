@@ -53,7 +53,7 @@ namespace Mirage
 
             var serverObjectManager = go.GetComponent<ServerObjectManager>();
             serverObjectManager.Server = networkServer;
-            serverObjectManager.NetworkSceneManager = nsm;
+            nsm.ServerObjectManager = serverObjectManager;
 
             var clientObjectManager = go.GetComponent<ClientObjectManager>();
             clientObjectManager.Client = networkClient;

@@ -26,11 +26,9 @@ namespace Mirage
 
         [Header("Setup Settings")]
 
-        [FormerlySerializedAs("client")]
         public NetworkClient Client;
-
-        [FormerlySerializedAs("server")]
         public NetworkServer Server;
+        public ServerObjectManager ServerObjectManager;
 
         [Tooltip("Should server send all additive scenes to new clients when they join?")]
         public bool SendAdditiveScenesOnAuthenticate = true;
@@ -607,6 +605,10 @@ namespace Mirage
 
             Server.SendToAll(new SceneReadyMessage());
 
+            // clean up and invoke server functions before user events
+            Server.World.RemoveDestroyedObjects();
+            ServerObjectManager.SpawnOrActivate();
+
             OnServerFinishedSceneChange?.Invoke(scene, operation);
         }
 
@@ -624,7 +626,7 @@ namespace Mirage
         }
 
         /// <summary>
-        /// default ready handler.
+        /// default ready handler. called on server
         /// </summary>
         /// <param name="player"></param>
         /// <param name="msg"></param>
@@ -634,6 +636,8 @@ namespace Mirage
 
             player.SceneIsReady = true;
 
+            // invoke server functions before user events
+            ServerObjectManager.SpawnVisibleObjects(player, false, (HashSet<NetworkIdentity>)null);
             OnPlayerSceneReady.Invoke(player);
         }
 
