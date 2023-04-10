@@ -10,7 +10,7 @@ on:
     secrets:
       unity_license:
         required: true
-      GITHUB_TOKEN: 
+      access_token: 
         required: true
 
 jobs:
@@ -58,4 +58,4 @@ jobs:
         with:
           reportTitle:  ${{ inputs.test_results_name }}
           path: "Tests/*.xml"
-          access-token: ${{ secrets.GITHUB_TOKEN }}
+          access-token: ${{ secrets.access_token }}

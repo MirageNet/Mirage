@@ -18,7 +18,7 @@ jobs:
         uses: ./.github/workflows/RunTest.yml
         secrets: 
           unity_license: ${{ secrets.UNITY_LICENSE2 }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          access_token: ${{ secrets.GITHUB_TOKEN }}
         with:
           # available list of containers here:
           # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
@@ -29,13 +29,12 @@ jobs:
   Tests2021:
     name: Test 2021
     runs-on: ubuntu-latest
-
     steps:
       - name: Run Tests
         uses: ./.github/workflows/RunTest.yml
         secrets:
           unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          access_token: ${{ secrets.GITHUB_TOKEN }}
         with:
           unity_container: unityci/editor:ubuntu-2021.3.5f1-base-1.0.1
           cache_key: Library-2021.3.5-2
