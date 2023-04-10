@@ -3,7 +3,7 @@ name: Tag Pull Request
 on:
   push:
     branches:
-      - master
+      - main
  
 jobs:
   triage:

@@ -81,7 +81,7 @@ jobs:
 
       - name: Publish docs
         uses: crazy-max/ghaction-github-pages@v3.1.0
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         with:
           # Create incremental commit instead of doing push force
           keep_history: true

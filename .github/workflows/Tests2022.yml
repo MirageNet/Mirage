@@ -1,7 +1,4 @@
 name: Test 2022
-#on:
-#  pull_request: {}
-#  push: { branches: [master] }
 
 on: 
   workflow_dispatch

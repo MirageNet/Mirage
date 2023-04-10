@@ -30,7 +30,7 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve("./sidebars.js"),
-          editUrl: `${githubUrl}/tree/master/doc/`,
+          editUrl: `${githubUrl}/tree/main/doc/`,
           remarkPlugins: [require("mdx-mermaid")],
         },
         blog: false,

@@ -5,7 +5,7 @@ title: Spawn Player - Custom
 # Custom Character Spawning
 
 :::note
-Full scripts for this page can be found in the SpawnCustomPlayer sample in the package manager or on [GitHub](https://github.com/MirageNet/Mirage/tree/master/Assets/Mirage/Samples%7E/SpawnCustomPlayer)
+Full scripts for this page can be found in the SpawnCustomPlayer sample in the package manager or on [GitHub](https://github.com/MirageNet/Mirage/tree/main/Assets/Mirage/Samples%7E/SpawnCustomPlayer)
 :::
 
 Mirage comes with a CharacterSpawner which will automatically spawn a character object when a client connects.

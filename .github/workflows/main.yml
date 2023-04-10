@@ -1,7 +1,4 @@
 name: CI
-#on:
-#  pull_request: {}
-#  push: { branches: [master] }
 
 on: 
   push:
@@ -15,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run Tests
-        uses: ./.github/workflows/RunTest.yml@master
+        uses: ./.github/workflows/RunTest.yml@main
         secrets: 
           unity_license: ${{ secrets.UNITY_LICENSE2 }}
           access_token: ${{ secrets.GITHUB_TOKEN }}
@@ -31,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run Tests
-        uses: ./.github/workflows/RunTest.yml@master
+        uses: ./.github/workflows/RunTest.yml@main
         secrets:
           unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
           access_token: ${{ secrets.GITHUB_TOKEN }}
@@ -75,8 +72,8 @@ jobs:
   Publish:
     # only run once both tests and il2cpp have passed
     needs: [Tests2020, Tests2021, BuildIL2CPP]
-    # only run on master
-    if: github.ref == 'refs/heads/master'
+    # only run on main
+    if: github.ref == 'refs/heads/main'
     name: Publish
     runs-on: ubuntu-latest
     steps:
@@ -95,7 +92,7 @@ jobs:
             @semantic-release/exec
             @semantic-release/changelog
             @semantic-release/git
-          branch: master
+          branch: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
