@@ -1,18 +1,21 @@
 name: Run Tests
 on:
   workflow_call:
-    inputs:
-      unity_container:
-        required: true
-      cache_key:
-        required: true
-      test_results_name:
-        required: true
     secrets:
       unity_license:
         required: true
       access_token: 
         required: true
+    inputs:
+      unity_container:
+        required: true
+        type: string
+      cache_key:
+        required: true
+        type: string
+      test_results_name:
+        required: true
+        type: string
 
 jobs:
   run_tests:
