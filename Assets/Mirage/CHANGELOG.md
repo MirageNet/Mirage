@@ -1,3 +1,10 @@
+## [131.1.3](https://github.com/MirageNet/Mirage/compare/v131.1.2...v131.1.3) (2023-04-10)
+
+
+### Bug Fixes
+
+* setting reason too None if packet length is not 3 ([dcc4fa9](https://github.com/MirageNet/Mirage/commit/dcc4fa920d908837c29274ce76762f698e7466c1))
+
 ## [131.1.2](https://github.com/MirageNet/Mirage/compare/v131.1.1...v131.1.2) (2023-04-05)
 
 
