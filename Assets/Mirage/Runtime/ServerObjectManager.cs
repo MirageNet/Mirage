@@ -53,6 +53,8 @@ namespace Mirage
         [FormerlySerializedAs("networkSceneManager")]
         public NetworkSceneManager NetworkSceneManager;
 
+        private bool _hasSetup;
+
         [Header("Authentication")]
         [Tooltip("Will only send spawn message to Players who are Authenticated. Checks the Player.IsAuthenticated property")]
         public bool OnlySpawnOnAuthenticated;
@@ -64,20 +66,31 @@ namespace Mirage
 
         public INetworkVisibility DefaultVisibility { get; private set; }
 
-        public void Start()
+        public void Setup()
+        {
+            if (_hasSetup)
+                return;
+
+            if (Server == null)
+                throw new InvalidOperationException("Server reference is null");
+
+            _hasSetup = true;
+
+            Server.Started.AddListener(OnServerStarted);
+            Server.OnStartHost.AddListener(StartedHost);
+            Server.Stopped.AddListener(OnServerStopped);
+
+            if (NetworkSceneManager != null)
+            {
+                NetworkSceneManager.OnServerFinishedSceneChange.AddListener(OnFinishedSceneChange);
+                NetworkSceneManager.OnPlayerSceneReady.AddListener(SpawnVisibleObjects);
+            }
+        }
+
+        private void Start()
         {
             if (Server != null)
-            {
-                Server.Started.AddListener(OnServerStarted);
-                Server.OnStartHost.AddListener(StartedHost);
-                Server.Stopped.AddListener(OnServerStopped);
-
-                if (NetworkSceneManager != null)
-                {
-                    NetworkSceneManager.OnServerFinishedSceneChange.AddListener(OnFinishedSceneChange);
-                    NetworkSceneManager.OnPlayerSceneReady.AddListener(SpawnVisibleObjects);
-                }
-            }
+                Setup();
         }
 
         internal void RegisterMessageHandlers()
