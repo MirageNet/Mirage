@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run Tests
-        uses: ./.github/workflows/RunTest.yml
+        uses: ./.github/workflows/RunTest.yml@master
         secrets: 
           unity_license: ${{ secrets.UNITY_LICENSE2 }}
           access_token: ${{ secrets.GITHUB_TOKEN }}
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run Tests
-        uses: ./.github/workflows/RunTest.yml
+        uses: ./.github/workflows/RunTest.yml@master
         secrets:
           unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
           access_token: ${{ secrets.GITHUB_TOKEN }}
