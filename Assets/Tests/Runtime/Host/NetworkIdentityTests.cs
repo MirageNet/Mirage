@@ -216,12 +216,13 @@ namespace Mirage.Tests.Runtime.Host
     {
         private NetworkIdentity testIdentity;
 
-        public override void ExtraSetup()
+        public override UniTask LateSetup()
         {
             testIdentity = CreateNetworkIdentity();
             server.Started.AddListener(() => serverObjectManager.Spawn(testIdentity));
-        }
 
+            return UniTask.CompletedTask;
+        }
 
         [UnityTest]
         public IEnumerator ClientNotNullAfterSpawnInStarted() => UniTask.ToCoroutine(async () =>

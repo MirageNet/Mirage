@@ -615,8 +615,7 @@ namespace Mirage.Tests
 
             // get new observers
             var observers = new HashSet<INetworkPlayer>();
-            var result = identity.GetNewObservers(observers, true);
-            Assert.That(result, Is.True);
+            identity.GetNewObservers(observers, true);
             Assert.That(observers.Count, Is.EqualTo(1));
             Assert.That(observers.Contains(comp.observer), Is.True);
         }
@@ -624,23 +623,20 @@ namespace Mirage.Tests
         [Test]
         public void GetNewObserversClearsHashSet()
         {
+            var sub1 = Substitute.For<INetworkPlayer>();
+            var sub2 = Substitute.For<INetworkPlayer>();
+
             // get new observers. no observer components so it should just clear
             // it and not do anything else
             var observers = new HashSet<INetworkPlayer>
             {
-                player1
+                // add values that GetNewObservers wont add itself
+               sub1, sub2
             };
-            identity.GetNewObservers(observers, true);
-            Assert.That(observers.Count, Is.EqualTo(0));
-        }
 
-        [Test]
-        public void GetNewObserversFalseIfNoComponents()
-        {
-            // get new observers. no observer components so it should be false
-            var observers = new HashSet<INetworkPlayer>();
-            var result = identity.GetNewObservers(observers, true);
-            Assert.That(result, Is.False);
+            identity.GetNewObservers(observers, true);
+            Assert.That(observers, Does.Not.Contains(sub1));
+            Assert.That(observers, Does.Not.Contains(sub2));
         }
 
         // RebuildObservers should always add the own ready connection

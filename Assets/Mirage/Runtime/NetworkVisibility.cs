@@ -3,14 +3,11 @@ using UnityEngine;
 
 namespace Mirage
 {
-    // the name NetworkProximityCheck implies that it's only about objects in
-    // proximity to the player. But we might have room based, guild based,
-    // instanced based checks too, so NetworkVisibility is more fitting.
-    //
-    // note: we inherit from NetworkBehaviour so we can reuse .Identity, etc.
-    // note: unlike UNET, we only allow 1 proximity checker per NetworkIdentity.
+    /// <summary>
+    /// NetworkBehaviour that calculates if the gameObject should be visible to different players or not
+    /// </summary>
     [DisallowMultipleComponent]
-    public abstract class NetworkVisibility : NetworkBehaviour
+    public abstract class NetworkVisibility : NetworkBehaviour, INetworkVisibility
     {
         public delegate void VisibilityChanged(INetworkPlayer player, bool visible);
 

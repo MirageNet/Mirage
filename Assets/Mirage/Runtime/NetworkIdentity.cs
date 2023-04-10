@@ -315,15 +315,33 @@ namespace Mirage
             return components;
         }
 
-        private NetworkVisibility _visibility;
-        public NetworkVisibility Visibility
+        private INetworkVisibility _visibility;
+        /// <summary>
+        /// Returns the NetworkVisibility behaviour on this gameObject, or a default visibility where all objects are visible.
+        /// <para>Note: NetworkVisibility must be on same gameObject has NetworkIdentity, not on a child object</para>
+        /// </summary>
+        public INetworkVisibility Visibility
         {
             get
             {
                 if (_visibility is null)
                 {
-                    _visibility = GetComponent<NetworkVisibility>();
+                    // try get behaviour, otherwise just set default class
+                    if (TryGetComponent<NetworkVisibility>(out var visibilityBehaviour))
+                        _visibility = visibilityBehaviour;
+                    else
+                    {
+                        if (ServerObjectManager == null)
+                            throw new InvalidOperationException("Can't get default Visibility before object is spawned");
+
+                        var defaultVisibility = ServerObjectManager.DefaultVisibility;
+                        if (defaultVisibility is null)
+                            throw new InvalidOperationException("DefaultVisibility was null on ObjectManager, make sure ServerObjectManager has referecne to server, and server has started");
+
+                        _visibility = defaultVisibility;
+                    }
                 }
+
                 return _visibility;
             }
         }
@@ -580,25 +598,11 @@ namespace Mirage
         }
 
         /// <summary>
-        /// check if observer can be seen by connection.
-        /// <list type="bullet">
-        ///     <item><description>
-        ///         returns visibility.OnCheckObserver
-        ///     </description></item>
-        ///     <item><description>
-        ///         returns true if we have no NetworkVisibility, default objects are visible
-        ///     </description></item>
-        /// </list>
-        /// </summary>
-        /// <param name="player"></param>
+        /// Check if observer can be seen by player.
         /// <returns></returns>
         internal bool OnCheckObserver(INetworkPlayer player)
         {
-            if (Visibility != null)
-            {
-                return Visibility.OnCheckObserver(player);
-            }
-            return true;
+            return Visibility.OnCheckObserver(player);
         }
 
         internal void StopClient()
@@ -926,54 +930,15 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Helper function to call OnRebuildObservers in all components
-        /// <para>HashSet is passed in so we can cache it!</para>
-        /// <para>Returns true if we have a NetworkVisibility, false otherwise</para>
-        /// <para>Initialize is true on first rebuild, false on consecutive rebuilds</para>
+        /// Helper function to call OnRebuildObservers on <see cref="Visibility"/> using <see cref="NetworkServer.Players"/> 
         /// </summary>
-        /// <param name="observersSet"></param>
-        /// <param name="initialize"></param>
-        /// <returns></returns>
-        internal bool GetNewObservers(HashSet<INetworkPlayer> observersSet, bool initialize)
+        /// <param name="observersSet">set to clear and fill with new observers</param>
+        /// <param name="initialize">If Object is being first spawned or refreshed later on</param>
+        internal void GetNewObservers(HashSet<INetworkPlayer> observersSet, bool initialize)
         {
             observersSet.Clear();
 
-            if (Visibility != null)
-            {
-                Visibility.OnRebuildObservers(observersSet, initialize);
-                return true;
-            }
-
-            // we have no NetworkVisibility. return false to indicate that we
-            // should use the default implementation.
-            return false;
-        }
-
-        /// <summary>
-        /// Helper function to add all server connections as observers.
-        /// This is used if none of the components provides their own
-        /// OnRebuildObservers function.
-        /// </summary>
-        internal void AddAllReadyServerConnectionsToObservers()
-        {
-            // add all server connections
-            foreach (var player in Server.Players)
-            {
-                if (!player.SceneIsReady)
-                    continue;
-
-                // todo replace this with a better visibility system (where default checks auth/scene ready)
-                if (ServerObjectManager.OnlySpawnOnAuthenticated && !player.IsAuthenticated)
-                    continue;
-
-                AddObserver(player);
-            }
-
-            // add local host connection (if any)
-            if (Server.LocalPlayer != null && Server.LocalPlayer.SceneIsReady)
-            {
-                AddObserver(Server.LocalPlayer);
-            }
+            Visibility.OnRebuildObservers(observersSet, initialize);
         }
 
         private static readonly HashSet<INetworkPlayer> newObservers = new HashSet<INetworkPlayer>();
@@ -988,27 +953,12 @@ namespace Mirage
             var changed = false;
 
             // call OnRebuildObservers function
-            var rebuildOverwritten = GetNewObservers(newObservers, initialize);
+            GetNewObservers(newObservers, initialize);
 
-            // if player connection: ensure player always see himself no matter what.
-            // -> fixes https://github.com/vis2k/Mirror/issues/692 where a
-            //    player might teleport out of the ProximityChecker's cast,
-            //    losing the own connection as observer.
+            // ensure player always sees objects they own
             if (Owner != null && Owner.SceneIsReady)
             {
                 newObservers.Add(Owner);
-            }
-
-            // if no NetworkVisibility component, then add all server connections.
-            if (!rebuildOverwritten)
-            {
-                // only add all connections when rebuilding the first time.
-                // second time we just keep them without rebuilding anything.
-                if (initialize)
-                {
-                    AddAllReadyServerConnectionsToObservers();
-                }
-                return;
             }
 
             changed = AddNewObservers(initialize, changed);

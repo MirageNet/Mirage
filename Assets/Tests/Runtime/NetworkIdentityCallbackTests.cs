@@ -37,7 +37,7 @@ namespace Mirage.Tests.Runtime
 
 
         [Test]
-        public void AddAllReadyServerConnectionsToObservers()
+        public void AlwaysVisibleAddsAllReadyPlayers()
         {
             player1.SceneIsReady.Returns(true);
             player2.SceneIsReady.Returns(false);
@@ -54,18 +54,20 @@ namespace Mirage.Tests.Runtime
             // call OnStartServer so that observers dict is created
             identity.StartServer();
 
+            var alwaysVisible = new AlwaysVisible(serverObjectManager);
+
             // add all to observers. should have the two ready connections then.
-            identity.AddAllReadyServerConnectionsToObservers();
-            Assert.That(identity.observers, Is.EquivalentTo(new[] { player1, server.LocalPlayer, serverPlayer }));
+            var newObservers = new HashSet<INetworkPlayer>();
+            alwaysVisible.OnRebuildObservers(newObservers, true);
+
+            Assert.That(newObservers, Is.EquivalentTo(new[] { player1, server.LocalPlayer, serverPlayer }));
 
             // clean up
             server.Stop();
         }
 
-        // RebuildObservers should always add the own ready connection
-        // (if any). fixes https://github.com/vis2k/Mirror/issues/692
         [Test]
-        public void RebuildObserversAddsOwnReadyPlayer()
+        public void RebuildObserversShouldAddOwner()
         {
             // add at least one observers component, otherwise it will just add
             // all server connections

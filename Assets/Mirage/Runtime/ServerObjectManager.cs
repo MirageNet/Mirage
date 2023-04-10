@@ -62,6 +62,8 @@ namespace Mirage
 
         private uint GetNextNetworkId() => NetIdGenerator?.GenerateNetId() ?? checked(_nextNetworkId++);
 
+        public INetworkVisibility DefaultVisibility { get; private set; }
+
         public void Start()
         {
             if (Server != null)
@@ -86,6 +88,7 @@ namespace Mirage
 
         private void OnServerStarted()
         {
+            DefaultVisibility = new AlwaysVisible(this);
             RegisterMessageHandlers();
             SpawnOrActivate();
         }
@@ -350,8 +353,8 @@ namespace Mirage
         internal void ShowToPlayer(NetworkIdentity identity, INetworkPlayer player)
         {
             var visiblity = identity.Visibility;
-            if (visiblity != null)
-                visiblity.InvokeVisibilityChanged(player, true);
+            if (visiblity is NetworkVisibility networkVisibility)
+                networkVisibility.InvokeVisibilityChanged(player, true);
 
             // dont send if loading scene
             if (player.SceneIsReady)
@@ -361,8 +364,8 @@ namespace Mirage
         internal void HideToPlayer(NetworkIdentity identity, INetworkPlayer player)
         {
             var visiblity = identity.Visibility;
-            if (visiblity != null)
-                visiblity.InvokeVisibilityChanged(player, false);
+            if (visiblity is NetworkVisibility networkVisibility)
+                networkVisibility.InvokeVisibilityChanged(player, false);
 
             player.Send(new ObjectHideMessage { netId = identity.NetId });
         }
@@ -570,8 +573,8 @@ namespace Mirage
 
         internal void SendSpawnMessage(NetworkIdentity identity, INetworkPlayer player)
         {
-            logger.Assert(!OnlySpawnOnAuthenticated || player.IsAuthenticated || identity.Visibility != null,
-                "SendSpawnMessage should only be called if OnlySpanwOnAuthenticated is false, player is authenticated, or there is custom visibility");
+            logger.Assert(!OnlySpawnOnAuthenticated || player.IsAuthenticated || identity.Visibility != DefaultVisibility,
+                "SendSpawnMessage should only be called if OnlySpawnOnAuthenticated is false, player is authenticated, or there is custom visibility");
             if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId}");
 
             // one writer for owner, one for observers

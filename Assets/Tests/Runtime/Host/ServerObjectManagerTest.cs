@@ -17,7 +17,9 @@ namespace Mirage.Tests.Runtime.Host
 
             var player = Substitute.For<INetworkPlayer>();
 
-            NetworkIdentity identity = CreateNetworkIdentity();
+            var identity = CreateNetworkIdentity();
+            // objectManager must be set in order for Visibility too be called
+            identity.ServerObjectManager = serverObjectManager;
 
             serverObjectManager.HideToPlayer(identity, player);
 
@@ -56,7 +58,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator DestroyAllSpawnedOnStopTest() => UniTask.ToCoroutine(async () =>
         {
-            NetworkIdentity spawnTestObj = CreateNetworkIdentity();
+            var spawnTestObj = CreateNetworkIdentity();
             serverObjectManager.Spawn(spawnTestObj);
 
             // need to grab reference to world before Stop, becuase stop will clear reference
