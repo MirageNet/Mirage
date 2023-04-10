@@ -542,7 +542,12 @@ namespace Mirage.SocketLayer
 
         private void HandleConnectionDisconnect(Connection connection, Packet packet)
         {
-            var reason = (DisconnectReason)packet.Buffer.array[2];
+            DisconnectReason reason;
+            if (packet.Length == 3)
+                reason = (DisconnectReason)packet.Buffer.array[2];
+            else
+                reason = DisconnectReason.None;
+
             connection.Disconnect(reason, false);
         }
 
