@@ -22,7 +22,7 @@ jobs:
       test_results_name: Test results 2020
 
   Tests2021:
-    name: Run Tests 20201
+    name: Run Tests 2021
     uses: ./.github/workflows/run-test.yml
     secrets:
       unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
@@ -31,6 +31,19 @@ jobs:
       unity_container: unityci/editor:ubuntu-2021.3.5f1-base-1.0.1
       cache_key: Library-2021.3.5-2
       test_results_name: Test results 2021
+
+  Tests2022:
+    name: Run Tests 2022
+    uses: ./.github/workflows/run-test.yml
+    secrets:
+      # checking if same license will work
+      unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
+      access_token: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      unity_container: unityci/editor:ubuntu-2022.2.8f1-base-1.0.1
+      cache_key: Library-2022.2.8
+      test_results_name: Test results 2022
+
 
   BuildIL2CPP:
     name: BuildIL2CPP
@@ -66,7 +79,7 @@ jobs:
 
   Publish:
     # only run once both tests and il2cpp have passed
-    needs: [Tests2020, Tests2021, BuildIL2CPP]
+    needs: [Tests2020, Tests2021, Tests2022, BuildIL2CPP]
     # only run on main
     if: github.ref == 'refs/heads/main'
     name: Publish
