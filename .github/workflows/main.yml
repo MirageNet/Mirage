@@ -18,7 +18,7 @@ jobs:
       # available list of containers here:
       # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
       unity_container: unityci/editor:ubuntu-2020.3.30f1-base-1.0.1
-      cache_key: Library-2020.3.30-3
+      cache_key: Library-2020.3.30-0
       test_results_name: Test results 2020
 
   Tests2021:
@@ -29,7 +29,7 @@ jobs:
       access_token: ${{ secrets.GITHUB_TOKEN }}
     with:
       unity_container: unityci/editor:ubuntu-2021.3.5f1-base-1.0.1
-      cache_key: Library-2021.3.5-2
+      cache_key: Library-2021.3.5-0
       test_results_name: Test results 2021
 
   Tests2022:
@@ -41,7 +41,7 @@ jobs:
       access_token: ${{ secrets.GITHUB_TOKEN }}
     with:
       unity_container: unityci/editor:ubuntu-2022.2.8f1-base-1.0.1
-      cache_key: Library-2022.2.8
+      cache_key: Library-2022.2.8-0
       test_results_name: Test results 2022
 
 

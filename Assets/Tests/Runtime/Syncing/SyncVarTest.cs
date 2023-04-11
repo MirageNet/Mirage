@@ -143,13 +143,16 @@ namespace Mirage.Tests.Runtime.Syncing
             serverObjectManager.Spawn(player1.Identity);
 
             //serialize all the data as we would for the network
-            player1.Identity.OnSerializeAll(true, ownerWriter, observersWriter);
+            var (ownerWritten, observersWritten) = player1.Identity.OnSerializeAll(true, ownerWriter, observersWriter);
+
+            Assert.That(ownerWritten, Is.EqualTo(0), "no owner, should have only written to observersWriter");
+            Assert.That(observersWritten, Is.GreaterThanOrEqualTo(1), "should have written to observer writer");
 
             // set up a "client" object
             var player2 = CreateBehaviour<MockPlayer>();
 
             // apply all the data from the server object
-            reader.Reset(ownerWriter.ToArray());
+            reader.Reset(observersWriter.ToArray());
             player2.Identity.OnDeserializeAll(reader, true);
 
             // check that the syncvars got updated
