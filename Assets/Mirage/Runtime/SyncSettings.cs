@@ -96,8 +96,9 @@ namespace Mirage
             if ((To & (SyncTo.Owner)) == 0)
                 return true;
 
-            // if host, then use ObserverWriter
-            if (identity.IsClient)
+            // if hostOwner, then use ObserverWriter
+            // HasAuthority is only true on server then it most also be host mode
+            if (identity.HasAuthority)
                 return true;
 
             return false;
