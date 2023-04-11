@@ -466,7 +466,10 @@ namespace Mirage.Tests
             // serialize
             var ownerWriter = new NetworkWriter(1300);
             var observersWriter = new NetworkWriter(1300);
-            identity.OnSerializeAll(true, ownerWriter, observersWriter);
+            var (ownerWritten, observersWritten) = identity.OnSerializeAll(true, ownerWriter, observersWriter);
+
+            Assert.That(ownerWritten, Is.EqualTo(0), "no owner, should have only written to observersWriter");
+            Assert.That(observersWritten, Is.GreaterThanOrEqualTo(1), "should have written to observer writer");
 
             // reset component values
             comp1.value = 0;
@@ -474,7 +477,7 @@ namespace Mirage.Tests
 
             // deserialize all
             var reader = new NetworkReader();
-            reader.Reset(ownerWriter.ToArraySegment());
+            reader.Reset(observersWriter.ToArraySegment());
             Assert.Throws<DeserializeFailedException>(() =>
             {
                 identity.OnDeserializeAll(reader, true);
