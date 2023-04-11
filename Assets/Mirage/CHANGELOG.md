@@ -1,3 +1,10 @@
+## [132.0.2](https://github.com/MirageNet/Mirage/compare/v132.0.1...v132.0.2) (2023-04-11)
+
+
+### Bug Fixes
+
+* fixing hostmode not sending syncvar to remote owner ([925d57d](https://github.com/MirageNet/Mirage/commit/925d57db73df5bb0211235355c94afe1247c29f0))
+
 ## [132.0.1](https://github.com/MirageNet/Mirage/compare/v132.0.0...v132.0.1) (2023-04-10)
 
 
