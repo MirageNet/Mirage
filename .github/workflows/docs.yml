@@ -76,7 +76,7 @@ jobs:
         run: curl -LJO https://github.com/James-Frowen/EmbedCodeInMarkdown/releases/download/v1.0.0/EmbedCodeInMarkdown
       
       - name: Run EmbedCodeInMarkdown
-        run: ./EmbedCodeInMarkdown -docs="doc/docs/" -code="Assets/Mirage/Samples~/"
+        run: chmod +x ./EmbedCodeInMarkdown && ./EmbedCodeInMarkdown -docs="doc/docs/" -code="Assets/Mirage/Samples~/"
 
       - name: Build docusaurus
         working-directory: doc
