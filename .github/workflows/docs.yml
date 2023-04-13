@@ -73,7 +73,7 @@ jobs:
         run: npm ci
 
       - name: Download EmbedCodeInMarkdown
-        run: curl -LJO https://github.com/James-Frowen/EmbedCodeInMarkdown/releases/download/v1.0.0/EmbedCodeInMarkdown
+        run: curl -LJO https://github.com/James-Frowen/EmbedCodeInMarkdown/releases/download/v1.0.1/EmbedCodeInMarkdown
       
       - name: Run EmbedCodeInMarkdown
         run: chmod +x ./EmbedCodeInMarkdown && ./EmbedCodeInMarkdown -docs="doc/docs/" -code="Assets/Mirage/Samples~/"
