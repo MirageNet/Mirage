@@ -11,46 +11,6 @@ For the most part, we recommend the high-level [ServerRpc](/docs/guides/remote-a
 4. Use the `Send()` method on the [NetworkClient](/docs/reference/Mirage/NetworkClient), [NetworkServer](/docs/reference/Mirage/NetworkServer), or [NetworkPlayer](/docs/reference/Mirage/NetworkPlayer) classes depending on which way you want to send the message.
 
 ## Example
-``` cs
-using UnityEngine;
-using Mirage;
-
-public class Scores : MonoBehaviour
-{
-    // attach these in the inspector
-    public NetworkServer Server;
-    public NetworkClient Client;
-
-    // using structs to prevent GC allocations
-    public struct ScoreMessage
-    {
-        public int score;
-        public Vector3 scorePos;
-        public int lives;
-    }
-
-    private void Awake() 
-    {
-        Client.MessageHandler.RegisterHandler<ScoreMessage>(OnScore); // Register Client to listen for the ScoreMessage
-    }
-    
-    public void SendScore(int score, Vector3 scorePos, int lives)
-    {
-        ScoreMessage msg = new ScoreMessage()
-        {
-            score = score,
-            scorePos = scorePos,
-            lives = lives
-        };
-
-        Server.SendToAll(msg);
-    }
-
-    private void OnScore(INetworkPlayer player, ScoreMessage msg)
-    {
-        Debug.Log("ScoreMessage received on client with score " + msg.score);
-    }
-}
-```
+{{{ Path:'Snippets/SendNetworkMessage.cs' Name:'send-score' }}}
 
 Note that there is no serialization code for the `ScoreMessage` struct in this source code example. Mirage will generate a reader and writer for ScoreMessage when it sees that it is being sent.
