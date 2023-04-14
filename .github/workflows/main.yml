@@ -8,8 +8,8 @@ on:
       - 'Packages/**'  
       - 'ProjectSettings/**'  
       - '.releaserc.yml'
-      - '.github\workflows\main.yml'
-      - '.github\workflows\run-test.yml'
+      - '.github/workflows/main.yml'
+      - '.github/workflows/run-test.yml'
 
 jobs:
   Tests2020:
