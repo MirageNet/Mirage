@@ -2,8 +2,6 @@ name: Main Test and Release
 
 on:
   push:
-    branches:
-      - main
     paths:
     # run when unity asset is changed, or CI is updated
       - 'Assets/**'
@@ -50,7 +48,6 @@ jobs:
       unity_container: unityci/editor:ubuntu-2022.2.8f1-base-1.0.1
       cache_key: Library-2022.2.8
       test_results_name: Test results 2022
-
 
   BuildIL2CPP:
     name: BuildIL2CPP

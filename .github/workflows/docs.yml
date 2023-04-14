@@ -9,7 +9,9 @@ on:
       - 'doc/**'    
       - '.github\workflows\docs.yml'    
   workflow_run:
-    workflows: ["Test and Release"]
+    branches:
+      - main
+    workflows: ["Main Test and Release"]
     types:
       - completed
 env:
