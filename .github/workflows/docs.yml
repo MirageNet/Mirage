@@ -17,6 +17,7 @@ on:
       - completed
 env:
   CACHE_NAME: api-reference
+  CACHE_PATH: doc/docs/reference
 
 jobs:
   # check if api_reference is cached
@@ -29,7 +30,7 @@ jobs:
         id: cache
         uses: actions/cache@v3
         with:
-          path: doc/docs/reference
+          path: ${{ env.CACHE_PATH }}
           key: ${{ env.CACHE_NAME }}
       - env:
           CACHE_EXISTS: ${{steps.cache.outputs.cache-hit}}
@@ -102,7 +103,7 @@ jobs:
         id: cache-apo-reference
         uses: actions/cache@v3
         with:
-          path: doc/docs/reference
+          path: ${{ env.CACHE_PATH }}
           key: ${{ env.CACHE_NAME }}
       
       # Clear old api
@@ -115,6 +116,8 @@ jobs:
         with:
           input-folder: doc/api
           output-folder: doc/docs/reference
+      - run: ls doc/docs/reference
+      - run: ls Mirage/doc/docs/reference
 
   build_and_deploy:
     # always run, but wait for build_api_reference first
@@ -132,7 +135,7 @@ jobs:
         id: cache-api-reference
         uses: actions/cache@v3
         with:
-          path: doc/docs/reference
+          path: ${{ env.CACHE_PATH }}
           key: ${{ env.CACHE_NAME }}
 
       # copies change log from mirage folder to docs
