@@ -30,6 +30,7 @@ namespace Mirage
                 var handler = manager.GetSpawnHandler(PrefabHash);
                 Prefab = handler.Prefab;
             }
+
             return Prefab;
         }
 
@@ -51,6 +52,7 @@ namespace Mirage
                     }
                 }
             }
+
             return Prefab;
         }
     }
@@ -59,19 +61,16 @@ namespace Mirage
     {
         public static void WriteSyncPrefab(this NetworkWriter writer, SyncPrefab value)
         {
-            if (value.PrefabHash == 0)
-                value.PrefabHash = GetPrefabHash(value);
+            // update hash to be the prefab's hash
+            if (value.Prefab != null)
+            {
+                var hash = value.Prefab.PrefabHash;
+                // unless it is zero
+                if (hash != 0)
+                    value.PrefabHash = hash;
+            }
 
             writer.WriteInt32(value.PrefabHash);
-        }
-
-        private static int GetPrefabHash(SyncPrefab value)
-        {
-            var prefab = value.Prefab;
-            if (prefab == null)
-                return 0;
-
-            return prefab.PrefabHash;
         }
 
         public static SyncPrefab ReadSyncPrefab(this NetworkReader reader)

@@ -1007,7 +1007,7 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void WriteNetworkBehaviorNotNull()
         {
-            MockComponent mock = CreateBehaviour<MockComponent>();
+            var mock = CreateBehaviour<MockComponent>();
             // init lazy props
             _ = mock.Identity.NetworkBehaviours;
             mock.Identity.NetId = 1;
@@ -1032,7 +1032,7 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void WriteNetworkBehaviorArray()
         {
-            MockComponent mock = CreateBehaviour<MockComponent>();
+            var mock = CreateBehaviour<MockComponent>();
             // init lazy props
             _ = mock.Identity.NetworkBehaviours;
             mock.Identity.NetId = 1;
@@ -1054,7 +1054,7 @@ namespace Mirage.Tests.Runtime.Serialization
         public void WriteNetworkBehaviorDestroyed()
         {
             // setup
-            MockComponent mock = CreateBehaviour<MockComponent>();
+            var mock = CreateBehaviour<MockComponent>();
             // init lazy props
             _ = mock.Identity.NetworkBehaviours;
             mock.Identity.NetId = 1;
