@@ -15,7 +15,7 @@ on:
     types:
       - completed
 env:
-  CACHE_key: api-reference
+  CACHE_NAME: api-reference
 
 jobs:
   # check if api_reference is cached
@@ -29,7 +29,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: doc/docs/reference
-          key: ${{ env.CACHE_KEY }}
+          key: ${{ env.CACHE_NAME }}
 
   build_api_reference:
     # run after check cache
@@ -87,7 +87,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: doc/docs/reference
-          key: ${{ env.CACHE_KEY }}
+          key: ${{ env.CACHE_NAME }}
       
       # Clear old api
       - name: Clear Api reference directory
@@ -123,7 +123,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: doc/docs/reference
-          key: ${{ env.CACHE_KEY }}
+          key: ${{ env.CACHE_NAME }}
 
       # copies change log from mirage folder to docs
       - name: Copy Change Log
