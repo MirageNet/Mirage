@@ -15,7 +15,7 @@ on:
     types:
       - completed
 env:
-  CACHE_key: ${{ env.CACHE_KEY }}
+  CACHE_key: api-reference
 
 jobs:
   # check if api_reference is cached
