@@ -30,6 +30,9 @@ jobs:
         with:
           path: doc/docs/reference
           key: ${{ env.CACHE_NAME }}
+      - env:
+          CACHE_EXISTS: ${{steps.cache.outputs.cache-hit}}
+        run: echo "CACHE_EXISTS = $CACHE_EXISTS"
 
 
   debug_if: 
@@ -40,7 +43,6 @@ jobs:
           CACHE_EXISTS: ${{needs.check_cache.outputs.cache-exists}}
           OUTPUT2: ${{needs.job1.outputs.output2}}
         run: echo "CACHE_EXISTS = $CACHE_EXISTS"
-
 
   build_api_reference:
     # run after check cache
