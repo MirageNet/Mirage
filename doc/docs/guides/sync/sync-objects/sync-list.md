@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 1
 ---
 # Sync List
 [`SyncList`](/docs/reference/Mirage.Collections/SyncList-1) is an array-based list similar to C\# [List<T\>](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1?view=netstandard-2.0) that synchronizes its contents from the server to the clients.

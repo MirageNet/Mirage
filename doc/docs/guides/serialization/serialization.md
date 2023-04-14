@@ -1,7 +1,7 @@
 ---
-sidebar_position: 7
+sidebar_position: 3
 ---
-# Serialization
+# Advanced Serialization
 
 This page goes into depth about Serialization, for the basics see [Data Types](/docs/guides/data-types).
 

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 2
 ---
 # Sync Dictionary
 [`SyncDictionary`](/docs/reference/Mirage.Collections/SyncDictionary-2) is an associative array containing an unordered list of key, value pairs. Keys and values can be any of [Mirage supported types](/docs/guides/data-types).

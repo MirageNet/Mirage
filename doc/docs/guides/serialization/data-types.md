@@ -1,6 +1,7 @@
 ---
-sidebar_position: 6
+sidebar_position: 2
 ---
+
 # Data Types
 
 The client and server can pass data to each other via [RPC Methods](/docs/guides/remote-actions/), [State Synchronization](/docs/guides/sync/), or [Network Messages](/docs/guides/remote-actions/network-messages).
