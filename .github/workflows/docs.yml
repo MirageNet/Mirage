@@ -20,44 +20,51 @@ env:
   CACHE_PATH: doc/docs/reference
 
 jobs:
-  # check if api_reference is cached
-  check_cache:
+  check-cache:
     runs-on: ubuntu-latest
     outputs:
-      cache-exists: ${{ steps.cache.outputs.cache-hit }}
+      need-build-api: ${{ steps.check-cache.outputs.need-build-api }}
     steps:
+      - name: Check workflow_run event
+        id: check-workflow-run
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_run" ] && [ "${{ github.event.workflow_run.conclusion }}" == "success" ]; then
+            echo "::set-output name=from-workflow::true"
+          else
+            echo "::set-output name=from-workflow::false"
+          fi
+      - name: Check workflow_run event
+        id: check-dispatch-run
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "::set-output name=from-dispatch::true"
+          else
+            echo "::set-output name=from-dispatch::false"
+          fi
+      
       - name: Cache Api reference
-        id: cache
+        id: cache-api-reference
         uses: actions/cache@v3
         with:
           path: ${{ env.CACHE_PATH }}
           key: ${{ env.CACHE_NAME }}
-      - env:
-          CACHE_EXISTS: ${{steps.cache.outputs.cache-hit}}
-        run: echo "CACHE_EXISTS = $CACHE_EXISTS"
-      - run: ls doc/docs/reference
-
-  debug_if: 
-    needs: check_cache
-    runs-on: ubuntu-latest
-    steps:
-      - env:
-          CACHE_EXISTS: ${{needs.check_cache.outputs.cache-exists}}
-          OUTPUT2: ${{needs.job1.outputs.output2}}
-        run: echo "CACHE_EXISTS = $CACHE_EXISTS"
+      - name: Set output
+        id: check-cache
+        run: |
+          if [ "${{ steps.check-workflow-run.outputs.from-workflow }}" == "true" ]; then
+            echo "::set-output name=need-build-api::true"
+          elif [ "${{ steps.check-dispatch-run.outputs.from-dispatch }}" == "true" ]; then
+            echo "::set-output name=need-build-api::true"
+          elif [ "${{ steps.cache-api-reference.outputs.cache-hit }}" == "true" ];  then
+            echo "::set-output name=need-build-api::false"
+          else
+            echo "::set-output name=need-build-api::true"
+          fi
 
   build_api_reference:
     # run after check cache
-    needs: check_cache
-    # Run if Code files are updated (and test complete)
-    # OR if workflow_dispatch (allows for force run if something goes wrong)
-    # OR if cache doesn't exist
-    if: >-
-      ${{ 
-        (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
-        github.event_name == 'workflow_dispatch' ||
-        needs.check_cache.outputs.cache-exists != 'true'
-      }}
+    needs: check-cache
+    if: needs.check-cache.outputs.need-build-api == 'true'
 
     runs-on: ubuntu-latest
     # available list of containers here:
