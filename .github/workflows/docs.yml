@@ -31,6 +31,17 @@ jobs:
           path: doc/docs/reference
           key: ${{ env.CACHE_NAME }}
 
+
+  debug_if: 
+    needs: check_cache
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          CACHE_EXISTS: ${{needs.check_cache.outputs.cache-exists}}
+          OUTPUT2: ${{needs.job1.outputs.output2}}
+        run: echo "CACHE_EXISTS = $CACHE_EXISTS"
+
+
   build_api_reference:
     # run after check cache
     needs: check_cache
