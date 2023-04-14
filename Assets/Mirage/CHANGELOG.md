@@ -1,3 +1,10 @@
+## [132.0.3](https://github.com/MirageNet/Mirage/compare/v132.0.2...v132.0.3) (2023-04-14)
+
+
+### Bug Fixes
+
+* SyncPrefab now uses Prefab field to write even if hash is not zero ([57eea65](https://github.com/MirageNet/Mirage/commit/57eea65b675480c7e6a76e522a67bee76859bb55))
+
 ## [132.0.2](https://github.com/MirageNet/Mirage/compare/v132.0.1...v132.0.2) (2023-04-11)
 
 
