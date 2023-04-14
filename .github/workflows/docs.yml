@@ -22,10 +22,10 @@ jobs:
   check_cache:
     runs-on: ubuntu-latest
     outputs:
-      cache-exists: ${{ steps.cache-apo-reference.outputs.cache-hit }}
+      cache-exists: ${{ steps.cache.outputs.cache-hit }}
     steps:
       - name: Cache Api reference
-        id: cache-apo-reference
+        id: cache
         uses: actions/cache@v3
         with:
           path: doc/docs/reference
@@ -36,7 +36,7 @@ jobs:
     needs: check_cache
     # Run if Code files are updated (and test complete)
     # OR if cache doesn't exist
-    if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || needs.check_cache.outputs.cache-exists == 'false' }}
+    if: needs.check_cache.outputs.cache-exists == 'false'
 
     runs-on: ubuntu-latest
     # available list of containers here:
