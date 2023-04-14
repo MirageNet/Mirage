@@ -1,7 +1,6 @@
 name: Main Build and Deploy Docs
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
@@ -15,60 +14,12 @@ on:
     workflows: ["Main Test and Release"]
     types:
       - completed
-env:
-  CACHE_NAME: api-reference
-  CACHE_PATH: doc/docs/reference
 
 jobs:
-  check-cache:
-    runs-on: ubuntu-latest
-    outputs:
-      need-build-api: ${{ steps.check-cache.outputs.need-build-api }}
-    steps:
-      - uses: actions/checkout@v1
-      - name: Check workflow_run event
-        id: check-workflow-run
-        run: |
-          if [ "${{ github.event_name }}" == "workflow_run" ] && [ "${{ github.event.workflow_run.conclusion }}" == "success" ]; then
-            echo "::set-output name=from-workflow::true"
-          else
-            echo "::set-output name=from-workflow::false"
-          fi
-      - name: Check workflow_dispatch event
-        id: check-dispatch-run
-        run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "::set-output name=from-dispatch::true"
-          else
-            echo "::set-output name=from-dispatch::false"
-          fi
-      
-      - name: Cache Api reference
-        id: cache-api-reference
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.CACHE_PATH }}
-          key: ${{ env.CACHE_NAME }}
-          lookup-only: true
-    
-      - name: Set output
-        id: check-cache
-        run: |
-          if [ "${{ steps.check-workflow-run.outputs.from-workflow }}" == "true" ]; then
-            echo "::set-output name=need-build-api::true"
-          elif [ "${{ steps.check-dispatch-run.outputs.from-dispatch }}" == "true" ]; then
-            echo "::set-output name=need-build-api::true"
-          elif [ "${{ steps.cache-api-reference.outputs.cache-hit }}" == "true" ];  then
-            echo "::set-output name=need-build-api::false"
-          else
-            echo "::set-output name=need-build-api::true"
-          fi
-
   build_api_reference:
-    # run after check cache
-    needs: check-cache
-    if: needs.check-cache.outputs.need-build-api == 'true'
-
+    # if not workflow_run, or if workflow was successful
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    
     runs-on: ubuntu-latest
     # available list of containers here:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
@@ -84,21 +35,7 @@ jobs:
           echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
           unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit
 
-
       - uses: actions/checkout@v1
-      
-      # Pull the api cache
-      - name: Cache Api reference
-        id: cache-api-reference
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.CACHE_PATH }}
-          key: ${{ env.CACHE_NAME }}
-      - name: Check Cache
-        env:
-          CACHE_EXISTS: ${{ steps.cache-api-reference.outputs.cache-hit }}
-        run: echo "CACHE_EXISTS = $CACHE_EXISTS"
-
 
       - name: Cache Library
         id: cache-library
@@ -121,23 +58,20 @@ jobs:
         with:
           args: metadata --logLevel Warning doc/docfx.json
 
-      
-      # Clear old api
-      - name: Clear Api reference directory
-        run: rm -rf doc/docs/reference/*
-      
       # Build new api (will update cache when job finishes)
       - name: Convert metadata to markdown
         uses: fillefilip8/DocFxToMarkdown@1.4.0
         with:
           input-folder: doc/api
           output-folder: doc/docs/reference
-      - run: ls doc/docs/reference
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: metadata
+          path: doc/docs/reference
 
   build_and_deploy:
-    # always run, but wait for build_api_reference first
-    # we only run build_api_reference if code has changed, or if no api found
-    if: ${{ always() }}
     needs: build_api_reference
     
     runs-on: ubuntu-latest
@@ -145,13 +79,11 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      # pull cache
-      - name: Cache Api reference
-        id: cache-api-reference
-        uses: actions/cache@v3
+      - name: Download artifact
+        uses: actions/download-artifact@v3
         with:
-          path: ${{ env.CACHE_PATH }}
-          key: ${{ env.CACHE_NAME }}
+          name: metadata
+          path: doc/docs/reference
 
       # copies change log from mirage folder to docs
       - name: Copy ChangeLog
