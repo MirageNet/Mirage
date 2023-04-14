@@ -8,7 +8,7 @@ This section of the Mirage documentation covers different aspects of how data is
 - [Data Types](/docs/guides/serialization/data-types)
   Information about the different data types supported in Mirage, including basic C# types, Unity math types, NetworkIdentity, and GameObject with NetworkIdentity.e
 
-- [Advanced Serialization](/docs/guides/serialization/serialization)
+- [Advanced Serialization](/docs/guides/serialization/advanced)
   In-depth explanation of how serialization works in Mirage, including how it is implemented using Weaver and Mono.Ccil.
 
 - [Generics](/docs/guides/serialization/generics)
