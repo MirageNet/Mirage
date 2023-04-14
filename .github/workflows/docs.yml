@@ -136,8 +136,10 @@ jobs:
           key: ${{ env.CACHE_NAME }}
 
       # copies change log from mirage folder to docs
-      - name: Copy Change Log
+      - name: Copy ChangeLog
         run: cp "Assets/Mirage/CHANGELOG.md" "doc/docs/general/"
+      - name: Escape HTML in ChangeLog
+        run: sed -i 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g' doc/docs/general/CHANGELOG.md
 
       - name: Install dependencies
         working-directory: doc
