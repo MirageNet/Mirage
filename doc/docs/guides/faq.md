@@ -31,8 +31,8 @@ This page is a work in progress
   ```
 
   For More details 
-  - [Data Types](/docs/guides/data-types)
-  - [Serialization](/docs/guides/serialization)
+  - [Data Types](/docs/guides/serialization/data-types)
+  - [Serialization](/docs/guides/serialization/advanced)
 
 </details>
 

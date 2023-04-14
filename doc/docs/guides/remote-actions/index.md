@@ -27,8 +27,8 @@ The diagram below shows the directions that remote actions take:
 
 ## Arguments to Remote Actions
 
-Mirage serializes RPC arguments to send them over the network. You can use any [supported Mirage type](/docs/guides/data-types).
+Mirage serializes RPC arguments to send them over the network. You can use any [supported Mirage type](/docs/guides/serialization/data-types).
 
 There are limits to what can be arguments. GameObject, NetworkIdentity, and NetworkBehaviour can be sent because they have a Network ID. But, Mirage can't send other Unity Objects by itself because it will have no way to find them on the other side.
 
-It is also possible to create serializer functions for unsupported types. You can find out more information [here](/docs/guides/data-types#custom-data-types).
+It is also possible to create serializer functions for unsupported types. You can find out more information [here](/docs/guides/serialization/data-types#custom-data-types).

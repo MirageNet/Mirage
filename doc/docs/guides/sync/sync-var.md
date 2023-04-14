@@ -9,7 +9,7 @@ The state of SyncVars is applied to game objects on clients before [Identity.OnS
 :::
 
 
-SyncVars can use any [type supported by Mirage](/docs/guides/data-types). You can have up to 64 SyncVars on a single NetworkBehaviour script, including [SyncLists](/docs/guides/sync/sync-list) and other sync types.
+SyncVars can use any [type supported by Mirage](/docs/guides/serialization/data-types). You can have up to 64 SyncVars on a single NetworkBehaviour script, including [SyncLists](/docs/guides/sync/sync-objects/sync-list) and other sync types.
 
 The server automatically sends SyncVar updates when the value of a SyncVar changes, so you do not need to track when they change or send information about the changes yourself. Changing a value in the inspector will not trigger an update.
 

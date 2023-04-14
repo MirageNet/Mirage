@@ -7,7 +7,7 @@ sidebar_position: 6
 
 Unlike SyncHashSets, all elements in a SyncSortedSet are sorted when they are inserted. Please note this has some performance implications.
 
-A SyncSortedSet can contain any [supported Mirage type](/docs/guides/data-types) 
+A SyncSortedSet can contain any [supported Mirage type](/docs/guides/serialization/data-types) 
 
 ## Usage
 

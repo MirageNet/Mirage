@@ -60,7 +60,7 @@ public class MyComponent : MonoBehaviour {
 You can also simply drag your `OnStartServer` method in the [NetworkIdentity.OnStartServer](/docs/reference/Mirage/NetworkIdentity#onstartserver) event in the inspector.
 
 During the spawn, a message will be sent to all the clients telling them to spawn the object. The message
-will include all the data in [SyncVars](/docs/guides/sync/sync-var), [SyncLists](/docs/guides/sync/sync-list), [SyncHashSet](/docs/guides/sync/sync-hash-set), [SyncDictionary](/docs/guides/sync/sync-dictionary)
+will include all the data in [SyncVars](/docs/guides/sync/sync-var), [SyncLists](/docs/guides/sync/sync-objects/sync-list), [SyncHashSet](/docs/guides/sync/sync-objects/sync-hash-set), [SyncDictionary](/docs/guides/sync/sync-objects/sync-dictionary)
 
 ## Client Instantiate
 

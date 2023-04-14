@@ -6,7 +6,7 @@ sidebar_position: 5
 
 ## No Writer found for X
 
-Mirage normally generates readers and writers for any [Data Type](/docs/guides/data-types)
+Mirage normally generates readers and writers for any [Data Type](/docs/guides/serialization/data-types)
 In order to do so, it needs to know what types you want to read or write.
 You are getting this error because Mirage did not know you wanted to read or write this type.
 
@@ -14,7 +14,7 @@ Mirage scans your code looking for calls to `Send`, `ReceiveHandler`, `Write` or
 It will also recognize [SyncVars](/docs/guides/sync/) and parameters of [Remote Calls](/docs/guides/remote-actions/). 
 If it does not find one, it assumes you are not trying to serialize the type so it does not generate the reader and writer.
 
-For example, you might get this error with this code when trying to sync the [SyncList](/docs/guides/sync/sync-list).
+For example, you might get this error with this code when trying to sync the [SyncList](/docs/guides/sync/sync-objects/sync-list).
 
 ```cs
 public struct MyCustomType

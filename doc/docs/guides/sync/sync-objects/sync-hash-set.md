@@ -5,7 +5,7 @@ sidebar_position: 3
 
 [`SyncHashSet`](/docs/reference/Mirage.Collections/SyncHashSet-1) is a set similar to C\# [HashSet<T\>](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1) that synchronizes its contents from the server to the clients.
 
-A SyncHashSet can contain any [supported Mirage type](/docs/guides/data-types) 
+A SyncHashSet can contain any [supported Mirage type](/docs/guides/serialization/data-types) 
 
 ## Usage
 

@@ -3,7 +3,7 @@ sidebar_position: 3
 ---
 # Advanced Serialization
 
-This page goes into depth about Serialization, for the basics see [Data Types](/docs/guides/data-types).
+This page goes into depth about Serialization, for the basics see [Data Types](/docs/guides/serialization/data-types).
 
 Mirage creates `Serialize` and `Deserialize` functions for types using Weaver. Weaver edits the dll after unity compiles 
 them using [Mono.Cecil](https://github.com/jbevain/cecil). This allows Mirage to have a lot of complex features like 

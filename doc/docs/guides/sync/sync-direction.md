@@ -15,7 +15,7 @@ For example, suppose you are making an inventory system. Suppose players A, B, a
 
 each one of them would have an Inventory component
 
-Suppose Player A picks up some loot.  The server adds the loot to Player's A inventory,  which would have a [SyncLists](/docs/guides/sync/sync-list) of Items. 
+Suppose Player A picks up some loot.  The server adds the loot to Player's A inventory,  which would have a [SyncLists](/docs/guides/sync/sync-objects/sync-list) of Items. 
 
 By default,  Mirage now has to synchronize player A's inventory everywhere, which means sending an update message to client A, client B, and client C, because they all have a copy of Player A. This is wasteful, Client B and Client C do not need to know about Player's A inventory, they never see it on screen. It is also a security problem, someone could hack the client and display other people's inventory and use it to their advantage.
 

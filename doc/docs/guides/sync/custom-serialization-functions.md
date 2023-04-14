@@ -25,4 +25,4 @@ The `OnSerialize` function should return true to indicate that an update should 
 
 The `OnSerialize` function is only called for `initialState` or when the [NetworkBehaviour](/docs/reference/Mirage/NetworkBehaviour) is dirty. A [NetworkBehaviour](/docs/reference/Mirage/NetworkBehaviour) will only be dirty if a `SyncVar` or `SyncObject` (e.g. `SyncList`) has changed since the last OnSerialize call. After data has been sent the [NetworkBehaviour](/docs/reference/Mirage/NetworkBehaviour) will not be dirty again until the next `syncInterval` (set in the inspector). A [NetworkBehaviour](/docs/reference/Mirage/NetworkBehaviour) can also be marked as dirty by manually calling `SetDirtyBit` (this does not bypass the `syncInterval` limit).
  
-Although this works,  it is usually better to let Mirage generate these methods and provide [custom serializers](/docs/guides/data-types) for your specific field.
+Although this works,  it is usually better to let Mirage generate these methods and provide [custom serializers](/docs/guides/serialization/data-types) for your specific field.

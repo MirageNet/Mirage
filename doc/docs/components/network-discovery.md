@@ -49,7 +49,7 @@ Sometimes you want to provide more information in the discovery messages. Some u
 -   The client can show the language
 -   The client can show if the server is password protected
 
-The message classes define what is sent between the client and server. As long as you keep your messages simple using the [Data Types](/docs/guides/data-types) that Mirage can serialize, you won't need to write custom serializers for them.
+The message classes define what is sent between the client and server. As long as you keep your messages simple using the [Data Types](/docs/guides/serialization/data-types) that Mirage can serialize, you won't need to write custom serializers for them.
 
 ```cs
 public class DiscoveryRequest

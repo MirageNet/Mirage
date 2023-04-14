@@ -28,7 +28,7 @@ Making the RPC itself generic does not work. For example, `MyRpc<T>(T value)` wi
 
 ## Ensure Type has Write and Read functions
 
-For a type to work as a generic, it must have a write and read that Mirage can find. For built-in types, this is done automatically (see [Serialization](/docs/guides/serialization)).
+For a type to work as a generic, it must have a write and read that Mirage can find. For built-in types, this is done automatically (see [Serialization](/docs/guides/serialization/advanced)).
 
 For custom types Mirage will try to automatically find them and generate functions, however, this does not always work. Adding `[NetworkMessage]` to the type will tell Mirage to generate functions for it.
 

@@ -4,7 +4,7 @@ sidebar_position: 1
 # Sync List
 [`SyncList`](/docs/reference/Mirage.Collections/SyncList-1) is an array-based list similar to C\# [List<T\>](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1?view=netstandard-2.0) that synchronizes its contents from the server to the clients.
 
-A [SyncList](/docs/reference/Mirage.Collections/SyncList-1) can contain any [supported Mirage type](/docs/guides/data-types).
+A [SyncList](/docs/reference/Mirage.Collections/SyncList-1) can contain any [supported Mirage type](/docs/guides/serialization/data-types).
 
 ## Usage
 Add a field of type [SyncList](/docs/reference/Mirage.Collections/SyncList-1) on any [NetworkIdentity](/docs/reference/Mirage/NetworkIdentity) where `T` can be any supported Mirage type and initialize it.

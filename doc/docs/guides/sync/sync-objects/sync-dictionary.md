@@ -2,9 +2,9 @@
 sidebar_position: 2
 ---
 # Sync Dictionary
-[`SyncDictionary`](/docs/reference/Mirage.Collections/SyncDictionary-2) is an associative array containing an unordered list of key, value pairs. Keys and values can be any of [Mirage supported types](/docs/guides/data-types).
+[`SyncDictionary`](/docs/reference/Mirage.Collections/SyncDictionary-2) is an associative array containing an unordered list of key, value pairs. Keys and values can be any of [Mirage supported types](/docs/guides/serialization/data-types).
 
-SyncDictionary works much like [SyncLists](/docs/guides/sync/sync-list): when you make a change on the server, the change is propagated to all clients and the appropriate callback is called.
+SyncDictionary works much like [SyncLists](/docs/guides/sync/sync-objects/sync-list): when you make a change on the server, the change is propagated to all clients and the appropriate callback is called.
 
 ## Usage
 Add a field of type [SyncDictionary](/docs/reference/Mirage.Collections/SyncDictionary-2) on any [NetworkBehaviour](/docs/reference/Mirage/NetworkBehaviour) where `TKey` and `TValue` can be any supported Mirage type and initialize it.

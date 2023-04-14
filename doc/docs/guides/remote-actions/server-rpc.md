@@ -5,7 +5,7 @@ sidebar_position: 3
 
 Server RPC Calls are sent from character objects on the client to character objects on the server. For security, Server RPC Calls can only be sent from YOUR character object by default, so you cannot control the objects of other players. You can bypass the authority check using `[ServerRpc(requireAuthority = false)]`.
 
-To make a function into a Server RPC call, add the [ServerRpc] custom attribute to it. This function will now be run on the server when it is called on the client. Any parameters of the [allowed data types](/docs/guides/data-types) will be automatically passed to the server with the Server RPC Call.
+To make a function into a Server RPC call, add the [ServerRpc] custom attribute to it. This function will now be run on the server when it is called on the client. Any parameters of the [allowed data types](/docs/guides/serialization/data-types) will be automatically passed to the server with the Server RPC Call.
 
 Server RPC Calls functions cannot be static. 
 
@@ -49,7 +49,7 @@ Be careful of sending ServerRpcs from the client every frame! This can cause a l
 ### Returning values
 
 ServerRpcs can return values. It can take a long time for the server to reply, so they must return a UniTask which the client can await.
-To return a value, add a return value using `UniTask<MyReturnType>` where `MyReturnType` is any [supported Mirage type](/docs/guides/data-types). In the server, you can make your method async,  or you can use `UniTask.FromResult(myResult);`. For example:
+To return a value, add a return value using `UniTask<MyReturnType>` where `MyReturnType` is any [supported Mirage type](/docs/guides/serialization/data-types). In the server, you can make your method async,  or you can use `UniTask.FromResult(myResult);`. For example:
 
 ```cs
 public class Shop: NetworkBehavior {

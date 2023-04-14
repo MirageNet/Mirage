@@ -6,7 +6,7 @@ For the most part, we recommend the high-level [ServerRpc](/docs/guides/remote-a
 
 ## Usage
 1. Define a new struct (rather than a class to prevent GC allocations) that will represent your message.
-2. Add any [supported Mirage types](/docs/guides/data-types) as public fields of that struct. This will be the data you want to send.
+2. Add any [supported Mirage types](/docs/guides/serialization/data-types) as public fields of that struct. This will be the data you want to send.
 3. Register a handler for that message on the [NetworkServer](/docs/reference/Mirage/NetworkServer) and/or [NetworkClient](/docs/reference/Mirage/NetworkClient)'s `MessageHandler` depending on where you want to listen for that message being received.
 4. Use the `Send()` method on the [NetworkClient](/docs/reference/Mirage/NetworkClient), [NetworkServer](/docs/reference/Mirage/NetworkServer), or [NetworkPlayer](/docs/reference/Mirage/NetworkPlayer) classes depending on which way you want to send the message.
 
