@@ -55,7 +55,7 @@ jobs:
       ${{ 
         (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
         github.event_name == 'workflow_dispatch' ||
-        needs.check_cache.outputs.cache-exists == 'false'
+        needs.check_cache.outputs.cache-exists != 'true'
       }}
 
     runs-on: ubuntu-latest
