@@ -111,12 +111,6 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      # debug stuff, I want to check this is using the commit with the updated change log
-      - name: Log latest commit
-        run: |
-          git fetch --prune --unshallow
-          echo "$(git log -3 --pretty=format:'%s')"
-
       # pull cache
       - name: Cache Api reference
         id: cache-api-reference
