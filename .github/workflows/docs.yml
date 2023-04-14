@@ -1,6 +1,7 @@
 name: Main Build and Deploy Docs
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -36,11 +37,7 @@ jobs:
     needs: check_cache
     # Run if Code files are updated (and test complete)
     # OR if cache doesn't exist
-    if: >-
-      ${{ 
-        (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
-        needs.check_cache.outputs.cache-exists == 'false'
-      }}
+    if: (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || needs.check_cache.outputs.cache-exists == 'false'
 
     runs-on: ubuntu-latest
     # available list of containers here:
