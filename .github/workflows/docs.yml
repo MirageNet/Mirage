@@ -1,9 +1,45 @@
-name: Docs
+name: Build and Deploy Docs
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
+    paths:
+    # run if any file in the docs folder is pushed
+      - 'doc/**'    
+      - '.github\workflows\docs.yml'    
+  workflow_run:
+    workflows: ["Test and Release"]
+    types:
+      - completed
+env:
+  CACHE_key: ${{ env.CACHE_KEY }}
 
 jobs:
-  build_doc:
+  # check if api_reference is cached
+  check_cache:
+    runs-on: ubuntu-latest
+    outputs:
+      cache-exists: ${{ steps.cache-apo-reference.outputs.cache-hit }}
+    steps:
+      - name: Cache Api reference
+        id: cache-apo-reference
+        uses: actions/cache@v3
+        with:
+          path: doc/docs/reference
+          key: ${{ env.CACHE_KEY }}
+
+  build_api_reference:
+    # run after check cache
+    needs: check_cache
+    # Run if Code files are updated (and test complete)
+    # OR if cache doesn't exist
+    if: >-
+      ${{ 
+        (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
+        needs.check_cache.outputs.cache-exists == 'false'
+      }}
+
     runs-on: ubuntu-latest
     # available list of containers here:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
@@ -43,30 +79,53 @@ jobs:
         with:
           args: metadata --logLevel Warning doc/docfx.json
 
+      # Pull the api cache
+      - name: Cache Api reference
+        id: cache-apo-reference
+        uses: actions/cache@v3
+        with:
+          path: doc/docs/reference
+          key: ${{ env.CACHE_KEY }}
+      
+      # Clear old api
+      - name: Clear Api reference directory
+        run: rm -rf doc/docs/reference/*
+      
+      # Build new api (will update cache when job finishes)
       - name: Convert metadata to markdown
         uses: fillefilip8/DocFxToMarkdown@1.4.0
         with:
           input-folder: doc/api
           output-folder: doc/docs/reference
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: metadata
-          path: doc/docs/reference
-
-  publish_docs:
-    needs: [build_doc]
+  build_and_deploy:
+    # always run, but wait for build_api_reference first
+    # we only run build_api_reference if code has changed, or if no api found
+    if: ${{ always() }}
+    needs: build_api_reference
+    
     runs-on: ubuntu-latest
     container: node:18
     steps:
       - uses: actions/checkout@v1
-        
-      - name: Download artifact
-        uses: actions/download-artifact@v3
+
+      # debug stuff, I want to check this is using the commit with the updated change log
+      - name: Log latest commit
+        run: |
+          git fetch --prune --unshallow
+          echo "$(git log -3 --pretty=format:'%s')"
+
+      # pull cache
+      - name: Cache Api reference
+        id: cache-api-reference
+        uses: actions/cache@v3
         with:
-          name: metadata
           path: doc/docs/reference
+          key: ${{ env.CACHE_KEY }}
+
+      # copies change log from mirage folder to docs
+      - name: Copy Change Log
+        run: cp "Assets/Mirage/CHANGELOG.md" "doc/docs/general/"
 
       - name: Install dependencies
         working-directory: doc

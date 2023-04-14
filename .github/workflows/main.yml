@@ -1,10 +1,17 @@
-name: CI
+name: Test and Release
 
-on: 
+on:
   push:
-    paths-ignore:
-      - 'doc/**'
-      - '*.md'
+    branches:
+      - main
+    paths:
+    # run when unity asset is changed, or CI is updated
+      - 'Assets/**'
+      - 'Packages/**'  
+      - 'ProjectSettings/**'  
+      - '.releaserc.yml'
+      - '.github\workflows\main.yml'
+      - '.github\workflows\run-test.yml'
 
 jobs:
   Tests2020:
