@@ -113,8 +113,6 @@ jobs:
         if: github.ref == 'refs/heads/main'
         with:
           keep_history: false
-          # Allow an empty commit to be created
-          allow_empty_commit: true
           jekyll: false
           # Build directory to deploy
           build_dir: doc/build
