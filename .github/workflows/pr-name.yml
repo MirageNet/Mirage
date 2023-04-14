@@ -1,4 +1,4 @@
-name: pr-name-linter
+name: Github pr-name-linter
 on:
   pull_request:
     types: ['opened', 'edited', 'reopened', 'synchronize']

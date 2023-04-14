@@ -1,4 +1,4 @@
-name: Tag Pull Request
+name: Github label conflicts
 
 on:
   push:
