@@ -35,7 +35,7 @@ jobs:
       - env:
           CACHE_EXISTS: ${{steps.cache.outputs.cache-hit}}
         run: echo "CACHE_EXISTS = $CACHE_EXISTS"
-
+      - run: ls doc/docs/reference
 
   debug_if: 
     needs: check_cache
@@ -76,6 +76,19 @@ jobs:
 
 
       - uses: actions/checkout@v1
+      
+      # Pull the api cache
+      - name: Cache Api reference
+        id: cache-api-reference
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.CACHE_PATH }}
+          key: ${{ env.CACHE_NAME }}
+      - name: Check Cache
+        env:
+          CACHE_EXISTS: ${{ steps.cache-api-reference.outputs.cache-hit }}
+        run: echo "CACHE_EXISTS = $CACHE_EXISTS"
+
 
       - name: Cache Library
         id: cache-library
@@ -98,13 +111,6 @@ jobs:
         with:
           args: metadata --logLevel Warning doc/docfx.json
 
-      # Pull the api cache
-      - name: Cache Api reference
-        id: cache-apo-reference
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.CACHE_PATH }}
-          key: ${{ env.CACHE_NAME }}
       
       # Clear old api
       - name: Clear Api reference directory
@@ -117,7 +123,6 @@ jobs:
           input-folder: doc/api
           output-folder: doc/docs/reference
       - run: ls doc/docs/reference
-      - run: ls Mirage/doc/docs/reference
 
   build_and_deploy:
     # always run, but wait for build_api_reference first

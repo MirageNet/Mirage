@@ -5,7 +5,7 @@ sidebar_position: 1
 
 This section of the Mirage documentation covers different aspects of how data is serialized, including the types of data that Mirage supports, advanced serialization techniques, the use of generics, and the SyncPrefab struct for synchronizing prefabs over the network.
 
-- [Data Types](/docs/guides/serialization/sync-var)
+- [Data Types](/docs/guides/serialization/data-types)
   Information about the different data types supported in Mirage, including basic C# types, Unity math types, NetworkIdentity, and GameObject with NetworkIdentity.e
 
 - [Advanced Serialization](/docs/guides/serialization/serialization)

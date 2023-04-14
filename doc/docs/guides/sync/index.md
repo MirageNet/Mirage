@@ -18,5 +18,3 @@ Data is not synchronized in the opposite direction - from remote clients to the 
     An unordered set of values that do not repeat.
 -   [SyncSortedSet](/docs/guides/sync/sync-objects/sync-sorted-set)  
     A sorted set of values that do not repeat.
--   [SyncPrefab](/docs/guides/sync/sync-prefab)  
-    Wrapper around `NetworkIdentity` to allow a prefab to be synced
