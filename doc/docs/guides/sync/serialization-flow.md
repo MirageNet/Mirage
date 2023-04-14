@@ -1,7 +1,6 @@
 ---
 sidebar_position: 5
 ---
-
 ## Serialization Flow
 
 Game objects with the Network Identity component attached can have multiple scripts derived from [NetworkBehaviour](/docs/reference/Mirage/NetworkBehaviour). The flow for serializing these game objects is:
