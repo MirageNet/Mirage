@@ -1,10 +1,7 @@
 ---
 sidebar_position: 6
 ---
-
-
-# Code generation 
-
+# Code Generation 
 
 So for this script:
 

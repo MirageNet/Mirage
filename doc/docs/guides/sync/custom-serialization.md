@@ -1,7 +1,6 @@
 ---
 sidebar_position: 7
 ---
-
 # Advanced State Synchronization
 
 In most cases, the use of SyncVars is enough for your game scripts to serialize their state to clients. However, in some cases, you might require more complex serialization code. This page is only relevant for advanced developers who need customized synchronization solutions that go beyond Mirage’s normal SyncVar feature.
