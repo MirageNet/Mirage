@@ -25,6 +25,7 @@ jobs:
     outputs:
       need-build-api: ${{ steps.check-cache.outputs.need-build-api }}
     steps:
+      - uses: actions/checkout@v1
       - name: Check workflow_run event
         id: check-workflow-run
         run: |
@@ -33,7 +34,7 @@ jobs:
           else
             echo "::set-output name=from-workflow::false"
           fi
-      - name: Check workflow_run event
+      - name: Check workflow_dispatch event
         id: check-dispatch-run
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
@@ -48,6 +49,8 @@ jobs:
         with:
           path: ${{ env.CACHE_PATH }}
           key: ${{ env.CACHE_NAME }}
+          lookup-only: true
+    
       - name: Set output
         id: check-cache
         run: |
