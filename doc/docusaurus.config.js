@@ -17,6 +17,7 @@ const config = {
   tagline: "Easy to use high performance Network library for Unity",
   url: `https://${orgName}.github.io/`,
   baseUrl: `/${repoName}/`,
+  trailingSlash: false,
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
