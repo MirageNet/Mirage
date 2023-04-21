@@ -13,8 +13,9 @@ namespace Mirage.Tests.Runtime.ClientServer
     {
         private WovenTestMessage message;
 
-        public override void ExtraSetup()
+        protected async override UniTask ExtraSetup() 
         {
+            await base.ExtraSetup();
             message = new WovenTestMessage
             {
                 IntValue = 1,

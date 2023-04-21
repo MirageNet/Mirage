@@ -4,32 +4,37 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Runtime.ClientServer
 {
-    [TestFixture]
-    public class NetworkAuthenticatorTest : ClientServerSetup<MockComponent>
+    public class MockAuthentication : NetworkAuthenticator
+    {
+        public override void ClientAuthenticate(INetworkPlayer player) => ClientAccept(player);
+        public override void ServerAuthenticate(INetworkPlayer player) => ServerAccept(player);
+        public override void ClientSetup(NetworkClient client) { }
+        public override void ServerSetup(NetworkServer server) { }
+    }
+
+    public class NetworkAuthenticatorTest : ClientServerSetup
     {
         private NetworkAuthenticator serverAuthenticator;
         private NetworkAuthenticator clientAuthenticator;
         private Action<INetworkPlayer> serverMockMethod;
         private Action<INetworkPlayer> clientMockMethod;
 
-        private class NetworkAuthenticationImpl : NetworkAuthenticator
+        protected override void ExtraServerSetup()
         {
-            public override void ClientAuthenticate(INetworkPlayer player) => ClientAccept(player);
-            public override void ServerAuthenticate(INetworkPlayer player) => ServerAccept(player);
-            public override void ClientSetup(NetworkClient client) { }
-            public override void ServerSetup(NetworkServer server) { }
-        }
+            base.ExtraServerSetup();
 
-        public override void ExtraSetup()
-        {
-            serverAuthenticator = serverGo.AddComponent<NetworkAuthenticationImpl>();
-            clientAuthenticator = clientGo.AddComponent<NetworkAuthenticationImpl>();
+            serverAuthenticator = serverGo.AddComponent<MockAuthentication>();
             server.authenticator = serverAuthenticator;
-            client.authenticator = clientAuthenticator;
-
             serverMockMethod = Substitute.For<Action<INetworkPlayer>>();
             serverAuthenticator.OnServerAuthenticated += serverMockMethod;
+        }
+        protected override void ExtraClientSetup(IClientInstance instance)
+        {
+            base.ExtraClientSetup(instance);
+            var client = instance.Client;
 
+            clientAuthenticator = instance.GameObject.AddComponent<MockAuthentication>();
+            client.authenticator = clientAuthenticator;
             clientMockMethod = Substitute.For<Action<INetworkPlayer>>();
             clientAuthenticator.OnClientAuthenticated += clientMockMethod;
         }

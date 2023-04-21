@@ -6,12 +6,11 @@ namespace Mirage.Tests.Runtime.Host
     {
         protected NetworkSceneManager sceneManager;
 
-        public override void ExtraSetup()
+        protected override void ExtraServerSetup()
         {
-            sceneManager = networkManagerGo.AddComponent<NetworkSceneManager>();
+            sceneManager = serverGo.AddComponent<NetworkSceneManager>();
             sceneManager.Client = client;
             sceneManager.Server = server;
-
             sceneManager.ServerObjectManager = serverObjectManager;
             clientObjectManager.NetworkSceneManager = sceneManager;
         }

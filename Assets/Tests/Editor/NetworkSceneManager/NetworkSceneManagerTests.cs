@@ -21,8 +21,9 @@ namespace Mirage.Tests.Runtime.Host
     {
         private UnityAction<Scene, SceneOperation> _onServerFinishedSceneChange;
 
-        public override void ExtraSetup()
+        protected async override UniTask ExtraSetup() 
         {
+            await base.ExtraSetup();
             // call base for SceneManager Setup
             base.ExtraSetup();
 

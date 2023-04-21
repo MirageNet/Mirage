@@ -14,9 +14,9 @@ namespace Mirage.Tests.Runtime.ClientServer
         private NetworkWorld ClientWorld => client.World;
         private NetworkWorld ServerWorld => server.World;
 
-        public override async UniTask LateSetup()
+        protected override async UniTask LateSetup()
         {
-            serverIdentity2 = InstantiateForTest(playerPrefab).GetComponent<NetworkIdentity>();
+            serverIdentity2 = InstantiateForTest(_characterPrefabGo).GetComponent<NetworkIdentity>();
             serverObjectManager.Spawn(serverIdentity2);
 
             await UniTask.DelayFrame(2);

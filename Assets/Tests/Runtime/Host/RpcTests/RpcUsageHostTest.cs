@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Linq;
 using Cysharp.Threading.Tasks;
 using Mirage.Tests.Runtime.ClientServer.RpcTests;
 using NSubstitute;
@@ -17,76 +16,30 @@ namespace Mirage.Tests.Runtime.Host.RpcTests
         protected Action<int> _hostStub;
         protected Action<int> _client2Stub;
 
-        protected ClientInstance<T> _client2;
         /// <summary>
         /// Player for client 2 on server
         /// </summary>
-        protected INetworkPlayer serverPlayer2;
+        protected INetworkPlayer serverPlayer2 => ServerPlayer(0);
         protected INetworkPlayer hostPlayer => server.LocalPlayer;
 
-        /// <summary>
-        /// Component of player 1 character on client 2
-        /// </summary>
-        protected T hostComponent_on2;
-        protected T hostComponent_onHost => playerComponent;
+        protected T hostComponent_onHost => hostComponent;
+        /// <summary>Component of player 1 character on client 2</summary>
+        protected T hostComponent_on2 => _remoteClients[0].Get(hostComponent);
 
-        protected T client2Component_onHost;
-        protected T client2Component_on2;
+        protected T client2Component_onHost => ServerComponent(0);
+        protected T client2Component_on2 => _remoteClients[0].Get(client2Component_onHost);
 
-        public override void ExtraSetup()
+        protected override async UniTask ExtraSetup()
         {
-            base.ExtraSetup();
+            await base.ExtraSetup();
             _hostStub = Substitute.For<Action<int>>();
             _client2Stub = Substitute.For<Action<int>>();
         }
 
-        public override async UniTask LateSetup()
+        protected override async UniTask LateSetup()
         {
-            _client2 = new ClientInstance<T>(ClientConfig, networkManagerGo.GetComponent<TestSocketFactory>());
-
-            var prefab = CreateBehaviour<T>(true);
-            {
-                // create and register a prefab
-                // DontDestroyOnLoad so that "prefab" wont be destroyed by scene loading
-                // also means that NetworkScenePostProcess will skip this unspawned object
-                GameObject.DontDestroyOnLoad(prefab);
-
-                var identity = prefab.GetComponent<NetworkIdentity>();
-                identity.PrefabHash = Guid.NewGuid().GetHashCode();
-                _client2.clientObjectManager.RegisterPrefab(playerPrefab);
-                _client2.clientObjectManager.RegisterPrefab(identity);
-            }
-
-            // connect after registering prefabs
-            _client2.client.Connect("localhost");
-
-            await AsyncUtil.WaitUntilWithTimeout(() => server.Players.Count > 1);
-
-            // get new player
-            serverPlayer2 = server.Players.Where(x => x != server.LocalPlayer).First();
-
-            // wait for client and server to initialize themselves
-            await UniTask.Yield();
-
-            {
-                // create a player object in the server
-                var go = GameObject.Instantiate(prefab);
-                go.name = "player 2 (server)";
-                var identity = go.GetComponent<NetworkIdentity>();
-                client2Component_onHost = go.GetComponent<T>();
-                serverObjectManager.AddCharacter(serverPlayer2, identity);
-            }
-
-            // wait for client to spawn it
-            await AsyncUtil.WaitUntilWithTimeout(() => _client2.client.Player.HasCharacter);
-
-            _client2.SetupCharacter();
-            client2Component_on2 = _client2.component;
-
-            var found = _client2.client.World.TryGetIdentity(playerComponent.NetId, out var player1Character);
-            if (!found)
-                Debug.LogError("Could not find instance of player 1's character on client 2");
-            hostComponent_on2 = player1Character.GetComponent<T>();
+            await base.LateSetup();
+            await AddClient();
 
             Debug.Assert(hostComponent_on2 != null);
             Debug.Assert(client2Component_onHost != null);
@@ -100,19 +53,6 @@ namespace Mirage.Tests.Runtime.Host.RpcTests
 
             Debug.Assert(client2Component_onHost.Owner == serverPlayer2);
             Debug.Assert(hostComponent_onHost.Owner == server.LocalPlayer);
-        }
-
-        public override void ExtraTearDown()
-        {
-            var toDestroy = _client2.client.World.SpawnedIdentities.ToArray();
-
-            if (_client2.client.Active) _client2.client.Disconnect();
-            GameObject.Destroy(_client2.go);
-
-            foreach (var obj in toDestroy)
-            {
-                GameObject.Destroy(obj);
-            }
         }
     }
     public class RpcUsageHostTest_Player : RpcUsageHostTestBase<RpcUsageBehaviour_Player>

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using Mirage.SocketLayer;
 using NUnit.Framework;
 using UnityEngine;
@@ -7,7 +8,7 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
 {
-    public class NetworkClientDisconnectTest : ClientServerSetup<MockComponent>
+    public class NetworkClientDisconnectTest : ClientServerSetup
     {
         private readonly Config config = new Config()
         {
@@ -127,10 +128,22 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
         }
     }
 
-    public class NetworkClientConnectFailedFullServerTest : ClientServerSetup<MockComponent>
+    public class NoConnectClientServerSetup : ServerSetup
+    {
+        protected NetworkClient client;
+
+        protected override async UniTask ExtraSetup()
+        {
+            await base.ExtraSetup();
+
+            var instance = CreateClientInstance();
+            client = instance.Client;
+        }
+    }
+
+    public class NetworkClientConnectFailedFullServerTest : NoConnectClientServerSetup
     {
         protected override Config ServerConfig => new Config { MaxConnections = 0 };
-        protected override bool AutoConnectClient => false;
 
         [UnityTest]
         public IEnumerator DisconnectEventWhenFull()
@@ -152,10 +165,8 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
         }
     }
 
-    public class NetworkClientConnectFailedTest : ClientServerSetup<MockComponent>
+    public class NetworkClientConnectFailedTest : NoConnectClientServerSetup
     {
-        protected override bool AutoConnectClient => false;
-
         public override void ExtraTearDown()
         {
             TestSocket.StopAllMessages = false;
@@ -213,11 +224,10 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
         }
     }
 
-    public class NetworkClientConnectFailedBadKeyTest : ClientServerSetup<MockComponent>
+    public class NetworkClientConnectFailedBadKeyTest : NoConnectClientServerSetup
     {
         protected override Config ServerConfig => new Config { key = "Server Key" };
         protected override Config ClientConfig => new Config { key = "Client Key" };
-        protected override bool AutoConnectClient => false;
 
         [UnityTest]
         public IEnumerator DisconnectEventWhenFull()

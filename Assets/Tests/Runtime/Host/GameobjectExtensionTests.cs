@@ -1,6 +1,5 @@
 using System;
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Mirage.Tests.Runtime.Host
 {
@@ -9,14 +8,14 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void GetNetworkIdentity()
         {
-            Assert.That(playerGO.GetNetworkIdentity(), Is.EqualTo(playerIdentity));
+            Assert.That(hostPlayerGO.GetNetworkIdentity(), Is.EqualTo(hostIdentity));
         }
 
         [Test]
         public void GetNoNetworkIdentity()
         {
             // create a GameObject without NetworkIdentity
-            GameObject goWithout = CreateGameObject();
+            var goWithout = CreateGameObject();
 
             // GetNetworkIdentity for GO without identity
             // (error log is expected)

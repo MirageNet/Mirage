@@ -21,6 +21,7 @@ namespace Mirage.Tests.BaseSetups
         protected ServerInstance _serverInstance;
         protected List<ClientInstance> _remoteClients = new List<ClientInstance>();
         private int _clientNameIndex;
+        protected NetworkIdentity _characterPrefab;
 
         // properties to make it easier to use in tests
         protected GameObject serverGo => _serverInstance.GameObject;
@@ -32,10 +33,10 @@ namespace Mirage.Tests.BaseSetups
         protected NetworkIdentity ServerIdentity(int i) => _serverInstance.Players[i].Identity;
         protected INetworkPlayer ServerPlayer(int i) => _serverInstance.Players[i].Player;
 
-        protected NetworkIdentity _characterPrefab;
         protected GameObject _characterPrefabGo => _characterPrefab.gameObject;
 
         protected virtual bool HostMode => false;
+        protected virtual bool StartServer => true;
         protected virtual Config ServerConfig => null;
         protected virtual Config ClientConfig => null;
 
@@ -44,10 +45,18 @@ namespace Mirage.Tests.BaseSetups
             Console.WriteLine($"[MirageTest] UnitySetUp class:{TestContext.CurrentContext.Test.ClassName} method:{TestContext.CurrentContext.Test.MethodName}");
 
             _clientNameIndex = 0;
-            _serverInstance = HostMode
-                ? new HostInstance(ServerConfig)
-                : new ServerInstance(ServerConfig);
-            ExtraServerSetup();
+            if (HostMode)
+            {
+                var hostInstance = new HostInstance(ServerConfig);
+                _serverInstance = hostInstance;
+                ExtraServerSetup();
+                ExtraClientSetup(hostInstance);
+            }
+            else
+            {
+                _serverInstance = new ServerInstance(ServerConfig);
+                ExtraServerSetup();
+            }
 
             // create prefab
             _characterPrefab = CreateNetworkIdentity(disable: true);
@@ -60,13 +69,17 @@ namespace Mirage.Tests.BaseSetups
             // create prefab before Setup, so i can be added to inside extra setup
             ExtraPrefabSetup(_characterPrefab);
 
-            // wait 2 frames for start to be called
-            await UniTask.DelayFrame(2);
+            // wait a frame for start to be called
+            await UniTask.DelayFrame(1);
 
             // start via instance, incase it is HostInstance
-            _serverInstance.StartServer();
+            if (StartServer)
+                _serverInstance.StartServer();
 
             await ExtraSetup();
+
+            if (_serverInstance is HostInstance host)
+                ExtraClientLateSetup(host);
 
             await LateSetup();
         }
@@ -83,14 +96,16 @@ namespace Mirage.Tests.BaseSetups
 
         /// <summary>
         /// called before Start() after client objects is setup
+        /// <para>Called on client and host</para>
         /// </summary>
-        protected virtual void ExtraClientSetup(ClientInstance instance) { }
+        protected virtual void ExtraClientSetup(IClientInstance instance) { }
 
         /// <summary>
         /// Called after client is connected and spawned character
+        /// <para>Called on client and host</para>
         /// </summary>
         /// <param name="instance"></param>
-        protected virtual void ExtraClientLateSetup(ClientInstance instance) { }
+        protected virtual void ExtraClientLateSetup(IClientInstance instance) { }
 
         /// <summary>
         /// Called after server is ready, before LateSetup
@@ -111,6 +126,9 @@ namespace Mirage.Tests.BaseSetups
         public ClientInstance CreateClientInstance(bool extraSetup = true)
         {
             var instance = new ClientInstance(ClientConfig, _serverInstance.SocketFactory, _clientNameIndex.ToString());
+            // make sure to add to destory, just incase AddClient is not called after this
+            toDestroy.Add(instance.GameObject);
+
             _clientNameIndex++;
             if (extraSetup)
                 ExtraClientSetup(instance);
@@ -159,10 +177,7 @@ namespace Mirage.Tests.BaseSetups
 
             instance.ClientObjectManager.RegisterPrefab(_characterPrefab);
 
-            // wait for client and server to initialize themselves
-            await UniTask.Yield();
-
-            _serverInstance.AddCharacter(serverPlayer, _characterPrefab);
+            _serverInstance.SpawnCharacter(serverPlayer, _characterPrefab);
             // wait for client to spawn it
             await AsyncUtil.WaitUntilWithTimeout(() => instance.Client.Player.HasCharacter);
         }
@@ -199,6 +214,12 @@ namespace Mirage.Tests.BaseSetups
 
             ExtraTearDown();
             await ExtraTearDownAsync();
+
+            // clear all references so that next test doesn't use them by mistake
+            _serverInstance = null;
+            _remoteClients.Clear();
+            _clientNameIndex = 0;
+            _characterPrefab = null;
 
             Console.WriteLine($"[MirageTest] UnityTearDown class:{TestContext.CurrentContext.Test.ClassName} method:{TestContext.CurrentContext.Test.MethodName}");
         }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Mirage.Serialization;
 using Mirage.Tests.EnterRuntime;
 using Mirage.Tests.Runtime;
@@ -126,8 +127,9 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
         private INetworkPlayer player1;
         private INetworkPlayer player2;
 
-        public override void ExtraSetup()
+        protected override async UniTask ExtraSetup()
         {
+            await base.ExtraSetup();
             identity = CreateNetworkIdentity();
             gameObject = identity.gameObject;
             identity.Server = server;

@@ -14,19 +14,23 @@ namespace Mirage.Tests.Runtime.Syncing
             // set all
             SetDirection(SyncFrom.Server, SyncTo.Owner);
 
+            // extra objects on client0
+            var clientExtraIdentity = _remoteClients[0].Get(ServerExtraIdentity);
+            var clientExtraComponent = _remoteClients[0].Get(ServerExtraComponent);
+
             // set just owner (to fake bad client)
-            OwnerExtraIdentity.HasAuthority = true;
-            SetDirection(OwnerExtraComponent, SyncFrom.Owner, SyncTo.Server);
+            clientExtraIdentity.HasAuthority = true;
+            SetDirection(clientExtraComponent, SyncFrom.Owner, SyncTo.Server);
 
             // set value to update syncvar
-            OwnerExtraComponent.guild = new MockPlayer.Guild("Bad");
+            clientExtraComponent.guild = new MockPlayer.Guild("Bad");
 
-            SendSyncVars(OwnerExtraIdentity);
+            SendSyncVars(clientExtraIdentity);
 
             LogAssert.Expect(LogType.Warning, $"UpdateVarsMessage for object without authority [netId={ServerExtraComponent.NetId}]");
             // should not throw, but should give warning
             var msgType = MessagePacker.UnpackId(_reader);
-            server.MessageHandler.InvokeHandler(serverPlayer, msgType, _reader);
+            server.MessageHandler.InvokeHandler(ServerPlayer(0), msgType, _reader);
 
             Assert.That(ServerExtraComponent.guild.name, Is.Null.Or.Empty, "Server should not have updated value");
         }
@@ -66,28 +70,18 @@ namespace Mirage.Tests.Runtime.Syncing
             var serverComp3 = serverIdentity.GetComponent<MockPlayerWithList>();
 
             // spawn with Authority
-            clientObjectManager.RegisterPrefab(prefab);
-            _client2.clientObjectManager.RegisterPrefab(prefab); // add with client2 as well, to stop error
-            serverObjectManager.Spawn(serverIdentity, serverPlayer);
+            ClientObjectManager(0).RegisterPrefab(prefab);
+            // add with client2 as well, to stop error
+            ClientObjectManager(1).RegisterPrefab(prefab);
+            serverObjectManager.Spawn(serverIdentity, ServerPlayer(0));
 
             yield return null;
             yield return null;
 
-            MockComponent ownerComp1 = null;
-            MockPlayer ownerComp2 = null;
-            MockPlayerWithList ownerComp3 = null;
-
-            if (client.World.TryGetIdentity(serverIdentity.NetId, out var ownerIdentity))
-            {
-                ownerIdentity.gameObject.SetActive(true);
-                ownerComp1 = ownerIdentity.GetComponent<MockComponent>();
-                ownerComp2 = ownerIdentity.GetComponent<MockPlayer>();
-                ownerComp3 = ownerIdentity.GetComponent<MockPlayerWithList>();
-            }
-            else
-            {
-                Assert.Fail("Failed to create client object");
-            }
+            var ownerIdentity = _remoteClients[0].Get(serverIdentity);
+            var ownerComp1 = _remoteClients[0].Get(serverComp1);
+            var ownerComp2 = _remoteClients[0].Get(serverComp2);
+            var ownerComp3 = _remoteClients[0].Get(serverComp3);
 
             SetDirection(serverComp1, SyncFrom.Server, SyncTo.Owner);
             SetDirection(serverComp2, SyncFrom.Owner, SyncTo.Server); // comp2 is client auth
@@ -109,7 +103,7 @@ namespace Mirage.Tests.Runtime.Syncing
 
             var exception = Assert.Throws<DeserializeFailedException>(() =>
             {
-                server.MessageHandler.InvokeHandler(serverPlayer, msgType, _reader);
+                server.MessageHandler.InvokeHandler(ServerPlayer(0), msgType, _reader);
             });
 
             // values not set

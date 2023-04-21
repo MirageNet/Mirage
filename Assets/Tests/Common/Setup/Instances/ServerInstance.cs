@@ -18,16 +18,16 @@ namespace Mirage.Tests
         /// Clients that want to connect to this Instance should use this socket factory
         /// </summary>
         public readonly TestSocketFactory SocketFactory;
-
-        public override NetworkWorld World => Server.World;
-
+        /// <summary>Set used by GetNewPlayer</summary>
+        private readonly HashSet<INetworkPlayer> _foundPlayers = new HashSet<INetworkPlayer>();
         public readonly List<LocalPlayerObject> _players = new List<LocalPlayerObject>();
+
         /// <summary>
-        /// NOTE: if there is a host player, then their index will be 0
+        /// Remote players (WILL NOT INCLUDE HOST)
         /// </summary>
         public IReadOnlyList<LocalPlayerObject> Players => _players;
 
-        private readonly HashSet<INetworkPlayer> _foundPlayers = new HashSet<INetworkPlayer>();
+        public override NetworkWorld World => Server.World;
 
         public ServerInstance(Config config)
         {
@@ -46,6 +46,11 @@ namespace Mirage.Tests
             Server.StartServer();
         }
 
+        /// <summary>
+        /// Will return new players, Note this could return host player
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         internal INetworkPlayer GetNewPlayer()
         {
             var foundCount = 0;
@@ -71,18 +76,26 @@ namespace Mirage.Tests
             return found;
         }
 
-        public void AddCharacter(INetworkPlayer player, NetworkIdentity prefab)
+        public void SpawnCharacter(INetworkPlayer player, NetworkIdentity prefab)
         {
             var identity = Object.Instantiate(prefab);
             identity.name = "player (server)";
+            // prefab is not active, we set it active here
+            // note: this is needed for SOM to spawn the object on cliente
+            identity.gameObject.SetActive(true);
             ServerObjectManager.AddCharacter(player, identity);
 
-            _players.Add(new LocalPlayerObject
+            AddToPlayerList(player, new LocalPlayerObject
             {
                 Player = player,
                 Identity = identity,
                 GameObject = identity.gameObject,
             });
+        }
+
+        protected virtual void AddToPlayerList(INetworkPlayer player, LocalPlayerObject localPlayerObject)
+        {
+            _players.Add(localPlayerObject);
         }
 
 

@@ -6,11 +6,13 @@ namespace Mirage.Tests.BaseSetups
     public class HostSetup_Base : ServerSetup_Base
     {
         protected new HostInstance _serverInstance => (HostInstance)base._serverInstance;
-        protected override bool HostMode => true;
+        protected sealed override bool HostMode => true;
 
         protected override async UniTask ExtraSetup()
         {
-            await SpawnCharacter(_serverInstance);
+            // dont spawn character if server is no auto started
+            if (StartServer)
+                await SpawnCharacter(_serverInstance);
         }
 
         // host properties to make it easier to use in tests
@@ -31,9 +33,10 @@ namespace Mirage.Tests.BaseSetups
             prefab.gameObject.AddComponent<T>();
         }
 
+        /// <summary>Object on host/server that Remote client owns</summary>
         protected T ServerComponent(int i) => ServerGameObject(i).GetComponent<T>();
 
         // host properties to make it easier to use in tests
-        protected T hostComponent => ServerComponent(0);
+        protected T hostComponent => _serverInstance.HostPlayer.GameObject.GetComponent<T>();
     }
 }

@@ -6,8 +6,21 @@ using UnityEngine.TestTools;
 namespace Mirage.Tests.Runtime.Host
 {
     [TestFixture]
-    public class NetworkManagerTest : HostSetup<MockComponent>
+    public class NetworkManagerTest : HostSetup
     {
+        private NetworkManager manager;
+
+        protected override void ExtraServerSetup()
+        {
+            base.ExtraServerSetup();
+
+            manager = serverGo.AddComponent<NetworkManager>();
+            manager.Server = server;
+            manager.ServerObjectManager = serverObjectManager;
+            manager.Client = client;
+            manager.ClientObjectManager = clientObjectManager;
+        }
+
         [Test]
         public void IsNetworkActiveTest()
         {

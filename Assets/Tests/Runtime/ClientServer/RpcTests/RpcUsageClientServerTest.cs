@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Linq;
 using Cysharp.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
@@ -9,7 +8,12 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.ClientServer.RpcTests
 {
-    public class RpcUsageBehaviour_Player : NetworkBehaviour
+    public interface IRpcUsageBehaviour
+    {
+        event Action<int> Called;
+    }
+
+    public class RpcUsageBehaviour_Player : NetworkBehaviour, IRpcUsageBehaviour
     {
         public event Action<int> Called;
 
@@ -19,7 +23,7 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             Called?.Invoke(arg1);
         }
     }
-    public class RpcUsageBehaviour_Owner : NetworkBehaviour
+    public class RpcUsageBehaviour_Owner : NetworkBehaviour, IRpcUsageBehaviour
     {
         public event Action<int> Called;
 
@@ -29,7 +33,7 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             Called?.Invoke(arg1);
         }
     }
-    public class RpcUsageBehaviour_Observers : NetworkBehaviour
+    public class RpcUsageBehaviour_Observers : NetworkBehaviour, IRpcUsageBehaviour
     {
         public event Action<int> Called;
         [ClientRpc(target = RpcTarget.Observers)]
@@ -38,7 +42,7 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             Called?.Invoke(arg1);
         }
     }
-    public class RpcUsageBehaviour_RequireAuthority : NetworkBehaviour
+    public class RpcUsageBehaviour_RequireAuthority : NetworkBehaviour, IRpcUsageBehaviour
     {
         public event Action<int> Called;
 
@@ -48,7 +52,7 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             Called?.Invoke(arg1);
         }
     }
-    public class RpcUsageBehaviour_IgnoreAuthority : NetworkBehaviour
+    public class RpcUsageBehaviour_IgnoreAuthority : NetworkBehaviour, IRpcUsageBehaviour
     {
         public event Action<int> Called;
 
@@ -59,73 +63,29 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         }
     }
 
-    public abstract class RpcUsageClientServerTestBase<T> : ClientServerSetup<T> where T : NetworkBehaviour
+    public abstract class RpcUsageClientServerTestBase<T> : MultiRemoteClientSetup<T> where T : NetworkBehaviour, IRpcUsageBehaviour
     {
+        protected override int RemoteClientCount => 2;
         protected const short NUM = 52;
 
-        protected Action<int> _client1Stub;
-        protected Action<int> _client2Stub;
         protected Action<int> _serverStub;
+        protected Action<int>[] _clientStub;
 
-        protected ClientInstance<T> _client2;
-        /// <summary>
-        /// Player for client 2 on server
-        /// </summary>
-        protected INetworkPlayer serverPlayer2;
-
-        /// <summary>
-        /// Component of player 1 character on client 2
-        /// </summary>
-        protected T clientComponent_on2;
-
-        public override void ExtraSetup()
+        protected override async UniTask LateSetup()
         {
-            base.ExtraSetup();
-            _client1Stub = Substitute.For<Action<int>>();
-            _client2Stub = Substitute.For<Action<int>>();
+            await base.LateSetup();
+
+            // 0 will be owned by 0th client
+            var serverComp = ServerComponent(0);
+
             _serverStub = Substitute.For<Action<int>>();
-        }
+            serverComp.Called += _serverStub;
 
-        public override async UniTask LateSetup()
-        {
-            _client2 = new ClientInstance<T>(ClientConfig, _server.socketFactory);
-            _client2.clientObjectManager.RegisterPrefab(playerPrefab.GetNetworkIdentity());
-            _client2.client.Connect("localhost");
-
-            await AsyncUtil.WaitUntilWithTimeout(() => server.Players.Count > 1);
-
-            // get new player
-            serverPlayer2 = server.Players.Where(x => x != serverPlayer).First();
-
-            // create a player object in the server
-            var go = InstantiateForTest(playerPrefab);
-            go.name = "player 2 (server)";
-            var identity = go.GetComponent<NetworkIdentity>();
-            var component = go.GetComponent<T>();
-            serverObjectManager.AddCharacter(serverPlayer2, identity);
-
-
-            // wait for client to spawn it
-            await AsyncUtil.WaitUntilWithTimeout(() => _client2.client.Player.HasCharacter);
-
-            _client2.SetupCharacter();
-
-            var found = _client2.client.World.TryGetIdentity(serverComponent.NetId, out var player1Character);
-            if (!found)
-                Debug.LogError("Could not find instance of player 1's character on client 2");
-            clientComponent_on2 = player1Character.GetComponent<T>();
-        }
-
-        public override void ExtraTearDown()
-        {
-            var toDestroy = _client2.client.World.SpawnedIdentities.ToArray();
-
-            if (_client2.client.Active) _client2.client.Disconnect();
-            GameObject.Destroy(_client2.go);
-
-            foreach (var obj in toDestroy)
+            _clientStub = new Action<int>[RemoteClientCount];
+            for (var i = 0; i < RemoteClientCount; i++)
             {
-                GameObject.Destroy(obj);
+                _clientStub[i] = Substitute.For<Action<int>>();
+                _remoteClients[i].Get(serverComp).Called += _clientStub[i];
             }
         }
     }
@@ -135,17 +95,13 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         [UnityTest]
         public IEnumerator OnlyCalledOnTarget()
         {
-            clientComponent.Called += _client1Stub;
-            clientComponent_on2.Called += _client2Stub;
-            serverComponent.Called += _serverStub;
-
-            serverComponent.RpcPlayer(serverPlayer, NUM);
+            ServerComponent(0).RpcPlayer(ServerPlayer(0), NUM);
 
             yield return null;
             yield return null;
 
-            _client1Stub.Received(1).Invoke(NUM);
-            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[0].Received(1).Invoke(NUM);
+            _clientStub[1].DidNotReceiveWithAnyArgs().Invoke(default);
             _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
         }
     }
@@ -155,17 +111,13 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         [UnityTest]
         public IEnumerator OnlyCalledOnOwner()
         {
-            clientComponent.Called += _client1Stub;
-            clientComponent_on2.Called += _client2Stub;
-            serverComponent.Called += _serverStub;
-
-            serverComponent.RpcOwner(NUM);
+            ServerComponent(0).RpcOwner(NUM);
 
             yield return null;
             yield return null;
 
-            _client1Stub.Received(1).Invoke(NUM);
-            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[0].Received(1).Invoke(NUM);
+            _clientStub[1].DidNotReceiveWithAnyArgs().Invoke(default);
             _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
         }
 
@@ -173,18 +125,14 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         [UnityTest]
         public IEnumerator ThrowsIfNullOwner()
         {
-            clientComponent.Called += _client1Stub;
-            clientComponent_on2.Called += _client2Stub;
-            serverComponent.Called += _serverStub;
-
-            serverObjectManager.RemoveCharacter(serverPlayer, false);
+            serverObjectManager.RemoveCharacter(ServerPlayer(0), false);
 
             yield return null;
             yield return null;
 
             var exception = Assert.Throws<InvalidOperationException>(() =>
             {
-                serverComponent.RpcOwner(NUM);
+                ServerComponent(0).RpcOwner(NUM);
             });
 
             Assert.That(exception, Has.Message.EqualTo("Player target was null for Rpc"));
@@ -193,8 +141,8 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             yield return null;
             yield return null;
 
-            _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
-            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[0].DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[1].DidNotReceiveWithAnyArgs().Invoke(default);
             _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
         }
     }
@@ -204,22 +152,18 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         [UnityTest]
         public IEnumerator CalledOnAllObservers_AllObservering()
         {
-            clientComponent.Called += _client1Stub;
-            clientComponent_on2.Called += _client2Stub;
-            serverComponent.Called += _serverStub;
-
             // ensure test is valid by checking players are in set
-            var observers = serverComponent.Identity.observers;
-            Debug.Assert(observers.Contains(serverPlayer));
-            Debug.Assert(observers.Contains(serverPlayer2));
+            var observers = ServerComponent(0).Identity.observers;
+            Debug.Assert(observers.Contains(ServerPlayer(0)));
+            Debug.Assert(observers.Contains(ServerPlayer(1)));
 
-            serverComponent.RpcObservers(NUM);
+            ServerComponent(0).RpcObservers(NUM);
 
             yield return null;
             yield return null;
 
-            _client1Stub.Received(1).Invoke(NUM);
-            _client2Stub.Received(1).Invoke(NUM);
+            _clientStub[0].Received(1).Invoke(NUM);
+            _clientStub[1].Received(1).Invoke(NUM);
             _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
         }
 
@@ -227,70 +171,55 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         [UnityTest]
         public IEnumerator CalledOnAllObservers_SomeObservering()
         {
-            clientComponent.Called += _client1Stub;
-            clientComponent_on2.Called += _client2Stub;
-            serverComponent.Called += _serverStub;
-
             // ensure test is valid by checking players are in set
-            var observers = serverComponent.Identity.observers;
-            Debug.Assert(observers.Contains(serverPlayer));
-            Debug.Assert(observers.Contains(serverPlayer2));
+            var observers = ServerIdentity(0).observers;
+            Debug.Assert(observers.Contains(ServerPlayer(0)));
+            Debug.Assert(observers.Contains(ServerPlayer(1)));
 
             // remove player and check it doesn't receive it
-            serverComponent.Identity.observers.Remove(serverPlayer2);
+            ServerIdentity(0).observers.Remove(ServerPlayer(1));
 
-            serverComponent.RpcObservers(NUM);
+            ServerComponent(0).RpcObservers(NUM);
 
             yield return null;
             yield return null;
 
-            _client1Stub.Received(1).Invoke(NUM);
-            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[0].Received(1).Invoke(NUM);
+            _clientStub[1].DidNotReceiveWithAnyArgs().Invoke(default);
             _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
         }
 
         [UnityTest]
         public IEnumerator CalledOnAllObservers_NoneObservering()
         {
-            clientComponent.Called += _client1Stub;
-            clientComponent_on2.Called += _client2Stub;
-            serverComponent.Called += _serverStub;
-
             // ensure test is valid by checking players are in set
-            var observers = serverComponent.Identity.observers;
-            Debug.Assert(observers.Contains(serverPlayer));
-            Debug.Assert(observers.Contains(serverPlayer2));
+            var observers = ServerIdentity(0).observers;
+            Debug.Assert(observers.Contains(ServerPlayer(0)));
+            Debug.Assert(observers.Contains(ServerPlayer(1)));
 
             // remove player and check it doesn't receive it
-            serverComponent.Identity.observers.Remove(serverPlayer2);
+            ServerIdentity(0).observers.Remove(ServerPlayer(1));
 
             // we also have to remove auth before we can remove observers
-            serverObjectManager.RemoveCharacter(serverPlayer, false);
-            serverComponent.Identity.observers.Remove(serverPlayer);
+            serverObjectManager.RemoveCharacter(ServerPlayer(0), false);
+            ServerIdentity(0).observers.Remove(ServerPlayer(0));
 
-            serverComponent.RpcObservers(NUM);
+            ServerComponent(0).RpcObservers(NUM);
 
             yield return null;
             yield return null;
 
-            _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
-            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[0].DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[1].DidNotReceiveWithAnyArgs().Invoke(default);
             _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
         }
 
         [UnityTest]
         public IEnumerator ThrowsWhenCalledOnClient()
         {
-            clientComponent.Called += _client1Stub;
-            clientComponent_on2.Called += _client2Stub;
-            serverComponent.Called += _serverStub;
-
-            yield return null;
-            yield return null;
-
             var exception = Assert.Throws<InvalidOperationException>(() =>
             {
-                clientComponent.RpcObservers(NUM);
+                ClientComponent(0).RpcObservers(NUM);
             });
 
             Assert.That(exception, Has.Message.EqualTo("Client RPC can only be called when server is active"));
@@ -299,8 +228,8 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             yield return null;
             yield return null;
 
-            _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
-            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[0].DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[1].DidNotReceiveWithAnyArgs().Invoke(default);
             _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
         }
 
@@ -332,37 +261,23 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         [UnityTest]
         public IEnumerator CalledWhenCalledWithAuthority()
         {
-            clientComponent.Called += _client1Stub;
-            clientComponent_on2.Called += _client2Stub;
-            serverComponent.Called += _serverStub;
+            ClientComponent(0).RpcRequireAuthority(NUM);
 
             yield return null;
             yield return null;
 
-            clientComponent.RpcRequireAuthority(NUM);
-
-            yield return null;
-            yield return null;
-
-            _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
-            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[0].DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[1].DidNotReceiveWithAnyArgs().Invoke(default);
             _serverStub.Received(1).Invoke(NUM);
         }
 
         [UnityTest]
         public IEnumerator ThrowsWhenCalledWithoutAuthority()
         {
-            clientComponent.Called += _client1Stub;
-            clientComponent_on2.Called += _client2Stub;
-            serverComponent.Called += _serverStub;
-
-            yield return null;
-            yield return null;
-
             var exception = Assert.Throws<InvalidOperationException>(() =>
             {
-                // call character 1 on client 2
-                clientComponent_on2.RpcRequireAuthority(NUM);
+                // call character[0] on client[1]
+                _remoteClients[1].Get(ClientComponent(0)).RpcRequireAuthority(NUM);
             });
 
             // should be full message (see in client) because server is not active
@@ -372,24 +287,17 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             yield return null;
             yield return null;
 
-            _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
-            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[0].DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[1].DidNotReceiveWithAnyArgs().Invoke(default);
             _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
         }
 
         [UnityTest]
         public IEnumerator ThrowsWhenCalledOnServer()
         {
-            clientComponent.Called += _client1Stub;
-            clientComponent_on2.Called += _client2Stub;
-            serverComponent.Called += _serverStub;
-
-            yield return null;
-            yield return null;
-
             var exception = Assert.Throws<InvalidOperationException>(() =>
             {
-                serverComponent.RpcRequireAuthority(NUM);
+                ServerComponent(0).RpcRequireAuthority(NUM);
             });
 
             Assert.That(exception, Has.Message.EqualTo("Server RPC can only be called when client is active"));
@@ -398,8 +306,8 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             yield return null;
             yield return null;
 
-            _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
-            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[0].DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[1].DidNotReceiveWithAnyArgs().Invoke(default);
             _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
         }
 
@@ -431,58 +339,37 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         [UnityTest]
         public IEnumerator CalledWhenCalledWithAuthority()
         {
-            clientComponent.Called += _client1Stub;
-            clientComponent_on2.Called += _client2Stub;
-            serverComponent.Called += _serverStub;
+            ClientComponent(0).RpcIgnoreAuthority(NUM);
 
             yield return null;
             yield return null;
 
-            clientComponent.RpcIgnoreAuthority(NUM);
-
-            yield return null;
-            yield return null;
-
-            _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
-            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[0].DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[1].DidNotReceiveWithAnyArgs().Invoke(default);
             _serverStub.Received(1).Invoke(NUM);
         }
 
         [UnityTest]
         public IEnumerator CalledWhenCalledWithOutAuthority()
         {
-            clientComponent.Called += _client1Stub;
-            clientComponent_on2.Called += _client2Stub;
-            serverComponent.Called += _serverStub;
-
-            yield return null;
-            yield return null;
-
             // call character 1 on client 2
-            clientComponent_on2.RpcIgnoreAuthority(NUM);
+            _remoteClients[1].Get(ClientComponent(0)).RpcIgnoreAuthority(NUM);
 
             // ensure that none were called, even if exception was throw
             yield return null;
             yield return null;
 
-            _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
-            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[0].DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[1].DidNotReceiveWithAnyArgs().Invoke(default);
             _serverStub.Received(1).Invoke(NUM);
         }
 
         [UnityTest]
         public IEnumerator ThrowsWhenCalledOnServer()
         {
-            clientComponent.Called += _client1Stub;
-            clientComponent_on2.Called += _client2Stub;
-            serverComponent.Called += _serverStub;
-
-            yield return null;
-            yield return null;
-
             var exception = Assert.Throws<InvalidOperationException>(() =>
             {
-                serverComponent.RpcIgnoreAuthority(NUM);
+                ServerComponent(0).RpcIgnoreAuthority(NUM);
             });
 
             Assert.That(exception, Has.Message.EqualTo("Server RPC can only be called when client is active"));
@@ -491,8 +378,8 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             yield return null;
             yield return null;
 
-            _client1Stub.DidNotReceiveWithAnyArgs().Invoke(default);
-            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[0].DidNotReceiveWithAnyArgs().Invoke(default);
+            _clientStub[1].DidNotReceiveWithAnyArgs().Invoke(default);
             _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
         }
 

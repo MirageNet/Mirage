@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Mirage.Tests.Runtime.ClientServer;
+using Cysharp.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -24,8 +24,9 @@ namespace Mirage.Tests.Runtime
         private INetworkPlayer player1;
         private INetworkPlayer player2;
 
-        public override void ExtraSetup()
+        protected override async UniTask ExtraSetup()
         {
+            await base.ExtraSetup();
             gameObject = CreateGameObject();
             identity = gameObject.AddComponent<NetworkIdentity>();
             identity.Server = server;
@@ -61,9 +62,6 @@ namespace Mirage.Tests.Runtime
             alwaysVisible.OnRebuildObservers(newObservers, true);
 
             Assert.That(newObservers, Is.EquivalentTo(new[] { player1, server.LocalPlayer, serverPlayer }));
-
-            // clean up
-            server.Stop();
         }
 
         [Test]

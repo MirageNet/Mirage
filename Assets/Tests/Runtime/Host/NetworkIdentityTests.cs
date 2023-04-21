@@ -15,8 +15,9 @@ namespace Mirage.Tests.Runtime.Host
         private GameObject gameObject;
         private NetworkIdentity testIdentity;
 
-        public override void ExtraSetup()
+        protected async override UniTask ExtraSetup() 
         {
+            await base.ExtraSetup();
             testIdentity = CreateNetworkIdentity();
             gameObject = testIdentity.gameObject;
         }
@@ -180,13 +181,13 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void IdentityClientValueSet()
         {
-            Assert.That(playerIdentity.Client, Is.Not.Null);
+            Assert.That(hostIdentity.Client, Is.Not.Null);
         }
 
         [Test]
         public void IdentityServerValueSet()
         {
-            Assert.That(playerIdentity.Server, Is.Not.Null);
+            Assert.That(hostIdentity.Server, Is.Not.Null);
         }
 
         [UnityTest]
@@ -216,7 +217,7 @@ namespace Mirage.Tests.Runtime.Host
     {
         private NetworkIdentity testIdentity;
 
-        public override UniTask LateSetup()
+        protected override UniTask LateSetup()
         {
             testIdentity = CreateNetworkIdentity();
             server.Started.AddListener(() => serverObjectManager.Spawn(testIdentity));

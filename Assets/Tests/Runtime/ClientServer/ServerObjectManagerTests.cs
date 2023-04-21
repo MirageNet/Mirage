@@ -115,7 +115,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void SpawnSceneObject()
         {
-            var sceneObject = InstantiateForTest(playerPrefab).GetComponent<NetworkIdentity>();
+            var sceneObject = InstantiateForTest(_characterPrefabGo).GetComponent<NetworkIdentity>();
             sceneObject.SetSceneId(42);
 
             Debug.Assert(!sceneObject.IsSpawned, "Identity should be unspawned for this test");
@@ -126,7 +126,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void DoesNotSpawnNonSceneObject()
         {
-            var sceneObject = InstantiateForTest(playerPrefab).GetComponent<NetworkIdentity>();
+            var sceneObject = InstantiateForTest(_characterPrefabGo).GetComponent<NetworkIdentity>();
             sceneObject.SetSceneId(0);
 
             Debug.Assert(!sceneObject.IsSpawned, "Identity should be unspawned for this test");
@@ -139,7 +139,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             var mockHandler = Substitute.For<Action<NetworkIdentity>>();
             server.World.onSpawn += mockHandler;
-            var newObj = InstantiateForTest(playerPrefab);
+            var newObj = InstantiateForTest(_characterPrefabGo);
             serverObjectManager.Spawn(newObj);
 
             mockHandler.Received().Invoke(Arg.Any<NetworkIdentity>());
@@ -151,7 +151,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             var mockHandler = Substitute.For<Action<NetworkIdentity>>();
             client.World.onSpawn += mockHandler;
-            var newObj = InstantiateForTest(playerPrefab);
+            var newObj = InstantiateForTest(_characterPrefabGo);
             serverObjectManager.Spawn(newObj);
 
             await UniTask.WaitUntil(() => mockHandler.ReceivedCalls().Any()).Timeout(TimeSpan.FromMilliseconds(200));
@@ -165,7 +165,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             var mockHandler = Substitute.For<Action<NetworkIdentity>>();
             client.World.onUnspawn += mockHandler;
-            var newObj = InstantiateForTest(playerPrefab);
+            var newObj = InstantiateForTest(_characterPrefabGo);
             serverObjectManager.Spawn(newObj);
             serverObjectManager.Destroy(newObj);
 
@@ -178,7 +178,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             var mockHandler = Substitute.For<Action<NetworkIdentity>>();
             server.World.onUnspawn += mockHandler;
-            var newObj = InstantiateForTest(playerPrefab);
+            var newObj = InstantiateForTest(_characterPrefabGo);
             serverObjectManager.Spawn(newObj);
             serverObjectManager.Destroy(newObj);
             mockHandler.Received().Invoke(newObj.GetComponent<NetworkIdentity>());

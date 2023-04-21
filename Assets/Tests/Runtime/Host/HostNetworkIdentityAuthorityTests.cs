@@ -13,7 +13,7 @@ namespace Mirage.Tests.Runtime.Host
         private NetworkWorld HostWorld => server.World;
         private INetworkPlayer serverPlayer => server.LocalPlayer;
 
-        public override UniTask LateSetup()
+        protected override UniTask LateSetup()
         {
             hostIdentity2 = CreateBehaviour<MockComponent>().GetComponent<NetworkIdentity>();
             serverObjectManager.Spawn(hostIdentity2);

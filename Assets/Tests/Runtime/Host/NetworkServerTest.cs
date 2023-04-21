@@ -10,8 +10,10 @@ namespace Mirage.Tests.Runtime.Host
         private readonly List<INetworkPlayer> serverConnectedCalls = new List<INetworkPlayer>();
         private readonly List<INetworkPlayer> clientConnectedCalls = new List<INetworkPlayer>();
 
-        public override void ExtraSetup()
+        protected override void ExtraServerSetup()
         {
+            base.ExtraServerSetup();
+
             serverConnectedCalls.Clear();
             clientConnectedCalls.Clear();
 

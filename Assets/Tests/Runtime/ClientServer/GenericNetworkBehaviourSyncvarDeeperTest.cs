@@ -223,7 +223,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         public IEnumerator SpawnWithValue() => UniTask.ToCoroutine(async () =>
         {
             // create an object, set the target and spawn it
-            UnityEngine.GameObject newObject = InstantiateForTest(playerPrefab);
+            UnityEngine.GameObject newObject = InstantiateForTest(_characterPrefabGo);
             var newBehavior = newObject.GetComponent<GenericBehaviourWithSyncVarDeeperImplement>();
             newBehavior.baseValue = 2;
             newBehavior.middleValue = 22;

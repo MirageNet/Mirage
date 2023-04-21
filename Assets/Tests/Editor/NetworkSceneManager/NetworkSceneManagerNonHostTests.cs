@@ -23,8 +23,9 @@ namespace Mirage.Tests.Runtime.ClientServer
         // trying to debug assert failing in CI
         private StackTraceLogType _stackTraceLogType;
 
-        public override void ExtraSetup()
+        protected override async UniTask ExtraSetup()
         {
+            await base.ExtraSetup();
             serverSceneManager = serverGo.AddComponent<NetworkSceneManager>();
             clientSceneManager = clientGo.AddComponent<NetworkSceneManager>();
 
@@ -43,15 +44,6 @@ namespace Mirage.Tests.Runtime.ClientServer
         public override void ExtraTearDown()
         {
             Application.SetStackTraceLogType(LogType.Assert, _stackTraceLogType);
-        }
-
-        private static async UniTask WaitForLoad(AsyncOperation op)
-        {
-            if (op != null)
-            {
-                op.allowSceneActivation = true;
-                await op;
-            }
         }
 
         [Test]

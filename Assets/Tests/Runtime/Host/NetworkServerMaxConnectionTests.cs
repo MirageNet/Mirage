@@ -1,6 +1,7 @@
+using System.Collections;
 using Mirage.SocketLayer;
 using NUnit.Framework;
-using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Host
 {
@@ -12,12 +13,12 @@ namespace Mirage.Tests.Runtime.Host
             MaxConnections = 0
         };
 
-        [Test]
-        public void DisconnectsConnectionsOverMax()
+        [UnityTest]
+        public IEnumerator DisconnectsConnectionsOverMax()
         {
-            GameObject secondGO = CreateGameObject();
+            var secondGO = CreateGameObject();
             var secondClient = secondGO.AddComponent<NetworkClient>();
-            var socketFactory = networkManagerGo.GetComponent<TestSocketFactory>();
+            var socketFactory = serverGo.GetComponent<TestSocketFactory>();
 
             secondClient.SocketFactory = socketFactory;
 
@@ -30,7 +31,7 @@ namespace Mirage.Tests.Runtime.Host
             secondClient.Connect("localhost");
 
             // updates both so that connect and reject message is received 
-            DoUpdate();
+            yield return null;
             secondClient.Update();
 
             Assert.That(server.Players, Has.Count.EqualTo(1));

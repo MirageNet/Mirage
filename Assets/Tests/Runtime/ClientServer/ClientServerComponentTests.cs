@@ -100,7 +100,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator OnSpawnSpawnHandlerTest() => UniTask.ToCoroutine(async () =>
         {
-            int spawnDelegateCalled = 0;
+            var spawnDelegateCalled = 0;
             var hash = Guid.NewGuid().GetHashCode();
 
             var identity = CreateNetworkIdentity();

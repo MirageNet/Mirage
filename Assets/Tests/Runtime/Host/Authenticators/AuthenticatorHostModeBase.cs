@@ -1,17 +1,35 @@
-﻿using NUnit.Framework;
+using System;
+using Mirage.Authenticators;
+using NUnit.Framework;
 
 namespace Mirage.Tests.Runtime.Host.Authenticators
 {
-    public abstract class AuthenticatorHostModeBase : HostSetup<MockComponent>
+    [TestFixture(arguments: (Type)null)]
+    [TestFixture(arguments: typeof(BasicAuthenticator))]
+    public class AuthenticatorHostMode : HostSetup
     {
-        protected abstract void AddAuthenticator();
-
+        private readonly Type _authType;
         private int serverAuthCalled;
         private int clientAuthCalled;
 
-        public sealed override void ExtraSetup()
+        public AuthenticatorHostMode(Type authType)
         {
-            AddAuthenticator();
+            _authType = authType;
+        }
+
+        protected override void ExtraServerSetup()
+        {
+            base.ExtraServerSetup();
+
+            if (_authType != null)
+            {
+                var auth = serverGo.AddComponent(_authType) as NetworkAuthenticator;
+                server.authenticator = auth;
+                client.authenticator = auth;
+
+                if (auth is BasicAuthenticator basic)
+                    basic.serverCode = "1234";
+            }
 
             // reset fields
             serverAuthCalled = 0;

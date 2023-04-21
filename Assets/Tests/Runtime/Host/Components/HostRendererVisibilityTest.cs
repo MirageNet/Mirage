@@ -9,7 +9,7 @@ namespace Mirage.Tests.Runtime.Host
         private MockVisibility _visibility;
         private Renderer _renderer;
 
-        public override UniTask LateSetup()
+        protected override UniTask LateSetup()
         {
             _visibility = CreateBehaviour<MockVisibility>();
             _renderer = _visibility.gameObject.AddComponent<MeshRenderer>();

@@ -10,14 +10,13 @@ namespace Mirage.Tests.Runtime.Host
     {
         private CharacterSpawner spawner;
 
-        public override void ExtraSetup()
+        protected override void ExtraServerSetup()
         {
-            // call base for SceneManager Setup
-            base.ExtraSetup();
+            base.ExtraServerSetup();
 
             // disable so awake isn't called till setup finished
-            networkManagerGo.SetActive(false);
-            spawner = networkManagerGo.AddComponent<CharacterSpawner>();
+            serverGo.SetActive(false);
+            spawner = serverGo.AddComponent<CharacterSpawner>();
 
             spawner.Client = client;
             spawner.Server = server;
@@ -28,7 +27,7 @@ namespace Mirage.Tests.Runtime.Host
             spawner.PlayerPrefab = CreateNetworkIdentity();
 
             spawner.AutoSpawn = false;
-            networkManagerGo.SetActive(true);
+            serverGo.SetActive(true);
         }
 
         [UnityTest]

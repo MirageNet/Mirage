@@ -14,32 +14,32 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void IsServerOnly()
         {
-            Assert.That(playerComponent.IsServerOnly, Is.False);
+            Assert.That(hostComponent.IsServerOnly, Is.False);
         }
 
         [Test]
         public void IsServer()
         {
-            Assert.That(playerComponent.IsServer, Is.True);
+            Assert.That(hostComponent.IsServer, Is.True);
         }
 
         [Test]
         public void IsClient()
         {
-            Assert.That(playerComponent.IsClient, Is.True);
+            Assert.That(hostComponent.IsClient, Is.True);
         }
 
         [Test]
         public void IsClientOnly()
         {
-            Assert.That(playerComponent.IsClientOnly, Is.False);
+            Assert.That(hostComponent.IsClientOnly, Is.False);
         }
 
         [Test]
         public void PlayerHasAuthorityByDefault()
         {
             // no authority by default
-            Assert.That(playerComponent.HasAuthority, Is.True);
+            Assert.That(hostComponent.HasAuthority, Is.True);
         }
 
         private class OnStartServerTestComponent : NetworkBehaviour
@@ -85,18 +85,18 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void HasIdentitysNetId()
         {
-            playerIdentity.NetId = 42;
-            Assert.That(playerComponent.NetId, Is.EqualTo(42));
+            hostIdentity.NetId = 42;
+            Assert.That(hostComponent.NetId, Is.EqualTo(42));
         }
 
         [Test]
         public void ReturnsCorrectBehaviourId()
         {
-            playerIdentity.NetId = 42;
+            hostIdentity.NetId = 42;
 
-            var compIndex = playerComponent.ComponentIndex;
+            var compIndex = hostComponent.ComponentIndex;
 
-            var id = playerComponent.BehaviourId;
+            var id = hostComponent.BehaviourId;
             Assert.That(id.NetId, Is.EqualTo(42));
             Assert.That(id.ComponentIndex, Is.EqualTo(compIndex));
         }
@@ -131,8 +131,8 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void HasIdentitysOwner()
         {
-            (_, playerIdentity.Owner) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
-            Assert.That(playerComponent.Owner, Is.EqualTo(playerIdentity.Owner));
+            (_, hostIdentity.Owner) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
+            Assert.That(hostComponent.Owner, Is.EqualTo(hostIdentity.Owner));
         }
 
         [Test]

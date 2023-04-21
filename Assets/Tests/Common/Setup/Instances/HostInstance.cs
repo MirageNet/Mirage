@@ -1,4 +1,4 @@
-﻿using Mirage.SocketLayer;
+using Mirage.SocketLayer;
 using UnityEngine;
 
 namespace Mirage.Tests
@@ -8,7 +8,7 @@ namespace Mirage.Tests
         public NetworkClient Client { get; }
         public ClientObjectManager ClientObjectManager { get; }
 
-        public LocalPlayerObject HostPlayer => Players[0];
+        public LocalPlayerObject HostPlayer { get; private set; }
 
         public HostInstance(Config serverConfig) : base(serverConfig)
         {
@@ -20,6 +20,18 @@ namespace Mirage.Tests
         public override void StartServer()
         {
             Server.StartServer(Client);
+        }
+
+        protected override void AddToPlayerList(INetworkPlayer player, LocalPlayerObject localPlayerObject)
+        {
+            if (player == Server.LocalPlayer)
+            {
+                HostPlayer = localPlayerObject;
+            }
+            else
+            {
+                base.AddToPlayerList(player, localPlayerObject);
+            }
         }
     }
 }

@@ -11,70 +11,76 @@ namespace Mirage.Tests.Runtime.Host
     public class HostComponentTests : HostSetupWithSceneManager<MockComponent>
     {
         [UnityTest]
-        public IEnumerator ServerRpc() => UniTask.ToCoroutine(async () =>
+        public IEnumerator ServerRpc()
         {
-            playerComponent.Send2Args(1, "hello");
+            base.hostComponent.Send2Args(1, "hello");
 
-            await AsyncUtil.WaitUntilWithTimeout(() => playerComponent.cmdArg1 != 0);
+            yield return null;
+            yield return null;
 
-            Assert.That(playerComponent.cmdArg1, Is.EqualTo(1));
-            Assert.That(playerComponent.cmdArg2, Is.EqualTo("hello"));
-        });
+            Assert.That(hostComponent.cmdArg1, Is.EqualTo(1));
+            Assert.That(hostComponent.cmdArg2, Is.EqualTo("hello"));
+        }
 
         [UnityTest]
-        public IEnumerator ServerRpcWithSender() => UniTask.ToCoroutine(async () =>
+        public IEnumerator ServerRpcWithSender()
         {
-            playerComponent.SendWithSender(1);
+            base.hostComponent.SendWithSender(1);
 
-            await AsyncUtil.WaitUntilWithTimeout(() => playerComponent.cmdArg1 != 0);
+            yield return null;
+            yield return null;
 
-            Assert.That(playerComponent.cmdArg1, Is.EqualTo(1));
-            Assert.That(playerComponent.cmdSender, Is.EqualTo(server.LocalPlayer), "Server Rpc call on host will have localplayer (server version) as sender");
-        });
+            Assert.That(hostComponent.cmdArg1, Is.EqualTo(1));
+            Assert.That(hostComponent.cmdSender, Is.EqualTo(server.LocalPlayer), "Server Rpc call on host will have localplayer (server version) as sender");
+        }
 
         [UnityTest]
-        public IEnumerator ServerRpcWithNetworkIdentity() => UniTask.ToCoroutine(async () =>
+        public IEnumerator ServerRpcWithNetworkIdentity()
         {
-            playerComponent.CmdNetworkIdentity(playerIdentity);
+            hostComponent.CmdNetworkIdentity(hostIdentity);
 
-            await AsyncUtil.WaitUntilWithTimeout(() => playerComponent.cmdNi != null);
+            yield return null;
+            yield return null;
 
-            Assert.That(playerComponent.cmdNi, Is.SameAs(playerIdentity));
-        });
+            Assert.That(hostComponent.cmdNi, Is.SameAs(hostIdentity));
+        }
 
         [UnityTest]
-        public IEnumerator ClientRpc() => UniTask.ToCoroutine(async () =>
+        public IEnumerator ClientRpc()
         {
-            playerComponent.RpcTest(1, "hello");
+            base.hostComponent.RpcTest(1, "hello");
             // process spawn message from server
-            await AsyncUtil.WaitUntilWithTimeout(() => playerComponent.rpcArg1 != 0);
+            yield return null;
+            yield return null;
 
-            Assert.That(playerComponent.rpcArg1, Is.EqualTo(1));
-            Assert.That(playerComponent.rpcArg2, Is.EqualTo("hello"));
-        });
-
-        [UnityTest]
-        public IEnumerator ClientConnRpc() => UniTask.ToCoroutine(async () =>
-        {
-            playerComponent.ClientConnRpcTest(manager.Server.LocalPlayer, 1, "hello");
-            // process spawn message from server
-            await AsyncUtil.WaitUntilWithTimeout(() => playerComponent.targetRpcArg1 != 0);
-
-            Assert.That(playerComponent.targetRpcPlayer, Is.EqualTo(manager.Client.Player));
-            Assert.That(playerComponent.targetRpcArg1, Is.EqualTo(1));
-            Assert.That(playerComponent.targetRpcArg2, Is.EqualTo("hello"));
-        });
+            Assert.That(hostComponent.rpcArg1, Is.EqualTo(1));
+            Assert.That(hostComponent.rpcArg2, Is.EqualTo("hello"));
+        }
 
         [UnityTest]
-        public IEnumerator ClientOwnerRpc() => UniTask.ToCoroutine(async () =>
+        public IEnumerator ClientConnRpc()
         {
-            playerComponent.RpcOwnerTest(1, "hello");
+            hostComponent.ClientConnRpcTest(server.LocalPlayer, 1, "hello");
             // process spawn message from server
-            await AsyncUtil.WaitUntilWithTimeout(() => playerComponent.rpcOwnerArg1 != 0);
+            yield return null;
+            yield return null;
 
-            Assert.That(playerComponent.rpcOwnerArg1, Is.EqualTo(1));
-            Assert.That(playerComponent.rpcOwnerArg2, Is.EqualTo("hello"));
-        });
+            Assert.That(hostComponent.targetRpcPlayer, Is.EqualTo(client.Player));
+            Assert.That(hostComponent.targetRpcArg1, Is.EqualTo(1));
+            Assert.That(hostComponent.targetRpcArg2, Is.EqualTo("hello"));
+        }
+
+        [UnityTest]
+        public IEnumerator ClientOwnerRpc()
+        {
+            base.hostComponent.RpcOwnerTest(1, "hello");
+            // process spawn message from server
+            yield return null;
+            yield return null;
+
+            Assert.That(hostComponent.rpcOwnerArg1, Is.EqualTo(1));
+            Assert.That(hostComponent.rpcOwnerArg2, Is.EqualTo("hello"));
+        }
 
         [Test]
         public void StopHostTest()
@@ -116,7 +122,9 @@ namespace Mirage.Tests.Runtime.Host
             var mockFinish = Substitute.For<UnityAction<Scene, SceneOperation>>();
             sceneManager.OnClientStartedSceneChange.AddListener(mockStart);
             sceneManager.OnClientFinishedSceneChange.AddListener(mockFinish);
-            await StartHost();
+
+            // start host again
+            server.StartServer(client);
 
             client.Update();
             var activeScene = SceneManager.GetActiveScene();

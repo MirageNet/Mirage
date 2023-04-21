@@ -29,30 +29,30 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ValidateSceneObject()
         {
-            playerIdentity.SetSceneId(42);
-            Assert.That(serverObjectManager.ValidateSceneObject(playerIdentity), Is.True);
-            playerIdentity.SetSceneId(0);
-            Assert.That(serverObjectManager.ValidateSceneObject(playerIdentity), Is.False);
+            hostIdentity.SetSceneId(42);
+            Assert.That(serverObjectManager.ValidateSceneObject(hostIdentity), Is.True);
+            hostIdentity.SetSceneId(0);
+            Assert.That(serverObjectManager.ValidateSceneObject(hostIdentity), Is.False);
         }
 
         [Test]
         public void HideFlagsTest()
         {
             // shouldn't be valid for certain hide flags
-            playerGO.hideFlags = HideFlags.NotEditable;
-            Assert.That(serverObjectManager.ValidateSceneObject(playerIdentity), Is.False);
-            playerGO.hideFlags = HideFlags.HideAndDontSave;
-            Assert.That(serverObjectManager.ValidateSceneObject(playerIdentity), Is.False);
+            hostPlayerGO.hideFlags = HideFlags.NotEditable;
+            Assert.That(serverObjectManager.ValidateSceneObject(hostIdentity), Is.False);
+            hostPlayerGO.hideFlags = HideFlags.HideAndDontSave;
+            Assert.That(serverObjectManager.ValidateSceneObject(hostIdentity), Is.False);
         }
 
         [Test]
         public void UnSpawn()
         {
             // unspawn
-            serverObjectManager.Destroy(playerGO, false);
+            serverObjectManager.Destroy(hostPlayerGO, false);
 
             // it should have been marked for reset now
-            Assert.That(playerIdentity.NetId, Is.Zero);
+            Assert.That(hostIdentity.NetId, Is.Zero);
         }
 
         [UnityTest]

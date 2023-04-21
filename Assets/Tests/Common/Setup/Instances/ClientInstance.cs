@@ -40,6 +40,7 @@ namespace Mirage.Tests
 
     public interface IClientInstance
     {
+        GameObject GameObject { get; }
         NetworkClient Client { get; }
         ClientObjectManager ClientObjectManager { get; }
     }

@@ -5,13 +5,15 @@ namespace Mirage.Tests
 {
     public abstract class BaseInstance
     {
-        public GameObject GameObject;
+        public GameObject GameObject { get; protected set; }
         public abstract NetworkWorld World { get; }
 
         public void AddCleanupObjects(List<Object> toDestroy)
         {
             toDestroy.Add(GameObject);
-            toDestroy.AddRange(World.SpawnedIdentities);
+            // could be null if stopped manually by test
+            if (World != null)
+                toDestroy.AddRange(World.SpawnedIdentities);
         }
 
         public NetworkIdentity Get(uint netId)

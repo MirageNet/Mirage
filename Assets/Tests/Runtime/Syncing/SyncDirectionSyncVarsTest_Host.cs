@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Cysharp.Threading.Tasks;
 using Mirage.Serialization;
 using Mirage.Tests.Runtime.Host;
@@ -39,25 +38,17 @@ namespace Mirage.Tests.Runtime.Syncing
         protected readonly NetworkWriter _observersWriter = new NetworkWriter(1300);
         protected readonly MirageNetworkReader _reader = new MirageNetworkReader();
 
-        protected ClientInstance<MockPlayer> _client2;
-
-        /// <summary>
-        /// Object that client1 Owns on client2
-        /// </summary>
-        protected MockPlayer ObserverComponent { get; private set; }
-
-        protected NetworkIdentity ServerExtraIdentity { get; private set; }
-        protected MockPlayer ServerExtraComponent { get; private set; }
-        /// <summary>
-        /// Object on the owner's instance, but is not owned by them
-        /// </summary>
-        protected NetworkIdentity OwnerExtraIdentity { get; private set; }
-        protected MockPlayer OwnerExtraComponent { get; private set; }
-
-
         protected int _onSerializeCalled;
         protected int _onDeserializeCalled;
         protected INetworkPlayer _serverPlayer2;
+
+
+        /// <summary>Object on client0 that hostOwns</summary>
+        protected MockPlayer ObserverComponent => _remoteClients[0].Get(hostComponent);
+
+        /// <summary>Objcet that server controls</summary>
+        protected NetworkIdentity HostExtraIdentity { get; private set; }
+        protected MockPlayer HostExtraComponent { get; private set; }
 
         protected void ResetCounters()
         {
@@ -73,49 +64,18 @@ namespace Mirage.Tests.Runtime.Syncing
             _reader.Dispose();
         }
 
-        public override async UniTask LateSetup()
+        protected override async UniTask LateSetup()
         {
-            _client2 = new ClientInstance<MockPlayer>(ClientConfig, (TestSocketFactory)server.SocketFactory);
-            _client2.client.Connect("localhost");
+            await AddClient();
 
-            await AsyncUtil.WaitUntilWithTimeout(() => server.Players.Count > 1);
-
-            // get new player
-            _serverPlayer2 = server.Players.First(x => x != server.LocalPlayer);
-
-            _client2.clientObjectManager.RegisterPrefab(playerPrefab);
-
-            // wait for client and server to initialize themselves
-            await UniTask.Yield();
-
-            var serverCharacter2 = InstantiateForTest(playerPrefab);
-            serverObjectManager.AddCharacter(_serverPlayer2, serverCharacter2);
-
-            await AsyncUtil.WaitUntilWithTimeout(() => _client2.client.Player.HasCharacter);
-
-            _client2.SetupCharacter();
-
-            var found = _client2.client.World.TryGetIdentity(playerComponent.NetId, out var player1Character);
-            if (!found)
-                Debug.LogError("Could not find instance of player 1's character on client 2");
-            ObserverComponent = player1Character.GetComponent<MockPlayer>();
-            Debug.Assert(ObserverComponent != null);
-
-            ServerExtraIdentity = InstantiateForTest(playerPrefab);
-            ServerExtraComponent = ServerExtraIdentity.GetComponent<MockPlayer>();
-            Debug.Assert(ServerExtraIdentity != null);
-            serverObjectManager.Spawn(ServerExtraIdentity);
+            HostExtraIdentity = InstantiateForTest(_characterPrefab);
+            HostExtraComponent = HostExtraIdentity.GetComponent<MockPlayer>();
+            serverObjectManager.Spawn(HostExtraIdentity);
 
             await UniTask.Yield();
 
-            if (client.World.TryGetIdentity(ServerExtraIdentity.NetId, out var ownerExtra))
-            {
-                OwnerExtraIdentity = ownerExtra;
-                OwnerExtraComponent = ownerExtra.GetComponent<MockPlayer>();
-            }
-
-            playerComponent.OnSerializeCalled += () => _onSerializeCalled++;
-            playerComponent.OnDeserializeCalled += () => _onDeserializeCalled++;
+            hostComponent.OnSerializeCalled += () => _onSerializeCalled++;
+            hostComponent.OnDeserializeCalled += () => _onDeserializeCalled++;
         }
 
         protected static void SetDirection(NetworkBehaviour behaviour, SyncFrom from, SyncTo to)
@@ -128,8 +88,10 @@ namespace Mirage.Tests.Runtime.Syncing
         }
         protected void SetDirection(SyncFrom from, SyncTo to)
         {
-            SetDirection(playerComponent, from, to);
-            SetDirection(ObserverComponent, from, to);
+            RunOnAll(hostComponent, comp =>
+            {
+                SetDirection(comp, from, to);
+            });
         }
     }
 
@@ -141,8 +103,8 @@ namespace Mirage.Tests.Runtime.Syncing
             SetDirection(SyncFrom.Server, SyncTo.Owner);
 
             ResetCounters();
-            playerComponent.guild = guild;
-            playerComponent.target = ServerExtraIdentity;
+            hostComponent.guild = guild;
+            hostComponent.target = HostExtraIdentity;
 
             // wait for sync
             yield return null;
@@ -152,8 +114,8 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(_onSerializeCalled, Is.Zero);
             Assert.That(_onDeserializeCalled, Is.Zero);
 
-            Assert.That(playerComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(playerComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(hostComponent.guild.name, Is.EqualTo(guild.name));
+            Assert.That(hostComponent.target, Is.EqualTo(HostExtraIdentity));
 
             Assert.That(ObserverComponent.guild.name, Is.Null.Or.Empty);
             Assert.That(ObserverComponent.target, Is.Null);
@@ -165,8 +127,8 @@ namespace Mirage.Tests.Runtime.Syncing
             SetDirection(SyncFrom.Server, SyncTo.ObserversOnly);
 
             ResetCounters();
-            playerComponent.guild = guild;
-            playerComponent.target = ServerExtraIdentity;
+            hostComponent.guild = guild;
+            hostComponent.target = HostExtraIdentity;
 
             // wait for sync
             yield return null;
@@ -175,11 +137,11 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(_onSerializeCalled, Is.EqualTo(1));
             Assert.That(_onDeserializeCalled, Is.Zero);
 
-            Assert.That(playerComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(playerComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(hostComponent.guild.name, Is.EqualTo(guild.name));
+            Assert.That(hostComponent.target, Is.EqualTo(HostExtraIdentity));
 
             Assert.That(ObserverComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(ObserverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(ObserverComponent.target, Is.EqualTo(_remoteClients[0].Get(HostExtraIdentity)));
         }
 
         [UnityTest]
@@ -188,8 +150,8 @@ namespace Mirage.Tests.Runtime.Syncing
             SetDirection(SyncFrom.Server, SyncTo.OwnerAndObservers);
 
             ResetCounters();
-            playerComponent.guild = guild;
-            playerComponent.target = ServerExtraIdentity;
+            hostComponent.guild = guild;
+            hostComponent.target = HostExtraIdentity;
 
             // wait for sync
             yield return null;
@@ -199,11 +161,11 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(_onSerializeCalled, Is.EqualTo(1));
             Assert.That(_onDeserializeCalled, Is.Zero);
 
-            Assert.That(playerComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(playerComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(hostComponent.guild.name, Is.EqualTo(guild.name));
+            Assert.That(hostComponent.target, Is.EqualTo(HostExtraIdentity));
 
             Assert.That(ObserverComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(ObserverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(ObserverComponent.target, Is.EqualTo(_remoteClients[0].Get(HostExtraIdentity)));
         }
     }
 
@@ -215,8 +177,8 @@ namespace Mirage.Tests.Runtime.Syncing
             SetDirection(SyncFrom.Owner, SyncTo.Server);
 
             ResetCounters();
-            playerComponent.guild = guild;
-            playerComponent.target = OwnerExtraIdentity;
+            hostComponent.guild = guild;
+            hostComponent.target = HostExtraIdentity;
 
             // wait for sync
             yield return null;
@@ -225,8 +187,8 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(_onSerializeCalled, Is.Zero);
             Assert.That(_onDeserializeCalled, Is.Zero);
 
-            Assert.That(playerComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(playerComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(hostComponent.guild.name, Is.EqualTo(guild.name));
+            Assert.That(hostComponent.target, Is.EqualTo(HostExtraIdentity));
 
             Assert.That(ObserverComponent.guild.name, Is.Null.Or.Empty);
             Assert.That(ObserverComponent.target, Is.Null);
@@ -238,8 +200,8 @@ namespace Mirage.Tests.Runtime.Syncing
             SetDirection(SyncFrom.Owner, SyncTo.Server | SyncTo.ObserversOnly);
 
             ResetCounters();
-            playerComponent.guild = guild;
-            playerComponent.target = OwnerExtraIdentity;
+            hostComponent.guild = guild;
+            hostComponent.target = HostExtraIdentity;
 
             // wait for sync
             yield return null;
@@ -248,11 +210,12 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(_onSerializeCalled, Is.EqualTo(1));
             Assert.That(_onDeserializeCalled, Is.Zero);
 
-            Assert.That(playerComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(playerComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(hostComponent.guild.name, Is.EqualTo(guild.name));
+            Assert.That(hostComponent.target, Is.EqualTo(HostExtraIdentity));
 
             Assert.That(ObserverComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(ObserverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            var onObserver = _remoteClients[0].Get(HostExtraIdentity);
+            Assert.That(ObserverComponent.target, Is.EqualTo(onObserver));
         }
     }
 
@@ -264,8 +227,8 @@ namespace Mirage.Tests.Runtime.Syncing
             SetDirection(SyncFrom.Server | SyncFrom.Owner, SyncTo.Server | SyncTo.Owner);
 
             ResetCounters();
-            playerComponent.guild = guild;
-            playerComponent.target = ServerExtraIdentity;
+            hostComponent.guild = guild;
+            hostComponent.target = HostExtraIdentity;
 
             // wait for sync
             yield return null;
@@ -274,8 +237,8 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(_onSerializeCalled, Is.Zero);
             Assert.That(_onDeserializeCalled, Is.Zero);
 
-            Assert.That(playerComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(playerComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(hostComponent.guild.name, Is.EqualTo(guild.name));
+            Assert.That(hostComponent.target, Is.EqualTo(HostExtraIdentity));
 
             Assert.That(ObserverComponent.guild.name, Is.Null.Or.Empty);
             Assert.That(ObserverComponent.target, Is.Null);
@@ -287,8 +250,8 @@ namespace Mirage.Tests.Runtime.Syncing
             SetDirection(SyncFrom.Server | SyncFrom.Owner, SyncTo.Server | SyncTo.ObserversOnly);
 
             ResetCounters();
-            playerComponent.guild = guild;
-            playerComponent.target = ServerExtraIdentity;
+            hostComponent.guild = guild;
+            hostComponent.target = HostExtraIdentity;
 
             // wait for sync
             yield return null;
@@ -298,11 +261,11 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(_onSerializeCalled, Is.EqualTo(1));
             Assert.That(_onDeserializeCalled, Is.Zero);
 
-            Assert.That(playerComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(playerComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(hostComponent.guild.name, Is.EqualTo(guild.name));
+            Assert.That(hostComponent.target, Is.EqualTo(HostExtraIdentity));
 
             Assert.That(ObserverComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(ObserverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(ObserverComponent.target, Is.EqualTo(_remoteClients[0].Get(HostExtraIdentity)));
         }
 
         [UnityTest]
@@ -311,8 +274,8 @@ namespace Mirage.Tests.Runtime.Syncing
             SetDirection(SyncFrom.Server | SyncFrom.Owner, SyncTo.Server | SyncTo.Owner | SyncTo.ObserversOnly);
 
             ResetCounters();
-            playerComponent.guild = guild;
-            playerComponent.target = ServerExtraIdentity;
+            hostComponent.guild = guild;
+            hostComponent.target = HostExtraIdentity;
 
             // wait for sync
             yield return null;
@@ -321,11 +284,11 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(_onSerializeCalled, Is.EqualTo(1));
             Assert.That(_onDeserializeCalled, Is.Zero);
 
-            Assert.That(playerComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(playerComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(hostComponent.guild.name, Is.EqualTo(guild.name));
+            Assert.That(hostComponent.target, Is.EqualTo(HostExtraIdentity));
 
             Assert.That(ObserverComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(ObserverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(ObserverComponent.target, Is.EqualTo(_remoteClients[0].Get(HostExtraIdentity)));
         }
     }
 
@@ -340,14 +303,14 @@ namespace Mirage.Tests.Runtime.Syncing
         /// </summary>
         private MockPlayerHook ownerWithHook;
 
-        public override async UniTask LateSetup()
+        protected override async UniTask LateSetup()
         {
             await base.LateSetup();
 
             var prefab = CreateBehaviour<MockPlayerHook>(true).Identity;
             prefab.PrefabHash = 456;
 
-            _client2.clientObjectManager.RegisterPrefab(prefab);
+            _remoteClients[0].ClientObjectManager.RegisterPrefab(prefab);
             clientObjectManager.RegisterPrefab(prefab);
 
             var clone = InstantiateForTest(prefab);
@@ -357,10 +320,7 @@ namespace Mirage.Tests.Runtime.Syncing
 
             await UniTask.DelayFrame(2);
 
-            if (_client2.client.World.TryGetIdentity(hostWithHook.NetId, out var ownerIdentity))
-            {
-                ownerWithHook = ownerIdentity.GetComponent<MockPlayerHook>();
-            }
+            ownerWithHook = _remoteClients[0].Get(hostWithHook);
         }
 
         [UnityTest]

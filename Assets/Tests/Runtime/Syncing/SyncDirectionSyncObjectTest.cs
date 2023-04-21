@@ -32,9 +32,9 @@ namespace Mirage.Tests.Runtime.Syncing
         {
             SetDirection(SyncFrom.Server, SyncTo.Owner);
 
-            serverComponent.guild = guild;
-            serverComponent.target = ServerExtraIdentity;
-            serverComponent.MySyncList.Add(listValue);
+            ServerComponent.guild = guild;
+            ServerComponent.target = ServerExtraIdentity;
+            ServerComponent.MySyncList.Add(listValue);
 
             // wait for sync
             yield return null;
@@ -54,9 +54,9 @@ namespace Mirage.Tests.Runtime.Syncing
         {
             SetDirection(SyncFrom.Server, SyncTo.ObserversOnly);
 
-            serverComponent.guild = guild;
-            serverComponent.target = ServerExtraIdentity;
-            serverComponent.MySyncList.Add(listValue);
+            ServerComponent.guild = guild;
+            ServerComponent.target = ServerExtraIdentity;
+            ServerComponent.MySyncList.Add(listValue);
 
             // wait for sync
             yield return null;
@@ -67,7 +67,7 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(OwnerComponent.MySyncList.Count, Is.Zero);
 
             Assert.That(ObserverComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(ObserverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(ObserverComponent.target, Is.EqualTo(_remoteClients[1].Get(ServerExtraIdentity)));
             Assert.That(ObserverComponent.MySyncList.Count, Is.EqualTo(1));
             Assert.That(ObserverComponent.MySyncList[0], Is.EqualTo(listValue));
         }
@@ -77,9 +77,9 @@ namespace Mirage.Tests.Runtime.Syncing
         {
             SetDirection(SyncFrom.Server, SyncTo.OwnerAndObservers);
 
-            serverComponent.guild = guild;
-            serverComponent.target = ServerExtraIdentity;
-            serverComponent.MySyncList.Add(listValue);
+            ServerComponent.guild = guild;
+            ServerComponent.target = ServerExtraIdentity;
+            ServerComponent.MySyncList.Add(listValue);
 
             // wait for sync
             yield return null;
@@ -91,7 +91,7 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(OwnerComponent.MySyncList[0], Is.EqualTo(listValue));
 
             Assert.That(ObserverComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(ObserverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(ObserverComponent.target, Is.EqualTo(_remoteClients[1].Get(ServerExtraIdentity)));
             Assert.That(ObserverComponent.MySyncList.Count, Is.EqualTo(1));
             Assert.That(ObserverComponent.MySyncList[0], Is.EqualTo(listValue));
         }
@@ -109,17 +109,17 @@ namespace Mirage.Tests.Runtime.Syncing
             SetDirection(SyncFrom.Owner, SyncTo.Server);
 
             OwnerComponent.guild = guild;
-            OwnerComponent.target = OwnerExtraIdentity;
+            OwnerComponent.target = _remoteClients[0].Get(ServerExtraIdentity);
             OwnerComponent.MySyncList.Add(listValue);
 
             // wait for sync
             yield return null;
             yield return null;
 
-            Assert.That(serverComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(serverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
-            Assert.That(serverComponent.MySyncList.Count, Is.EqualTo(1));
-            Assert.That(serverComponent.MySyncList[0], Is.EqualTo(listValue));
+            Assert.That(ServerComponent.guild.name, Is.EqualTo(guild.name));
+            Assert.That(ServerComponent.target, Is.EqualTo(ServerExtraIdentity));
+            Assert.That(ServerComponent.MySyncList.Count, Is.EqualTo(1));
+            Assert.That(ServerComponent.MySyncList[0], Is.EqualTo(listValue));
 
             Assert.That(ObserverComponent.guild.name, Is.Null.Or.Empty);
             Assert.That(ObserverComponent.target, Is.Null);
@@ -132,20 +132,20 @@ namespace Mirage.Tests.Runtime.Syncing
             SetDirection(SyncFrom.Owner, SyncTo.Server | SyncTo.ObserversOnly);
 
             OwnerComponent.guild = guild;
-            OwnerComponent.target = OwnerExtraIdentity;
+            OwnerComponent.target = _remoteClients[0].Get(ServerExtraIdentity);
             OwnerComponent.MySyncList.Add(listValue);
 
             // wait for sync
             yield return null;
             yield return null;
 
-            Assert.That(serverComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(serverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
-            Assert.That(serverComponent.MySyncList.Count, Is.EqualTo(1));
-            Assert.That(serverComponent.MySyncList[0], Is.EqualTo(listValue));
+            Assert.That(ServerComponent.guild.name, Is.EqualTo(guild.name));
+            Assert.That(ServerComponent.target, Is.EqualTo(ServerExtraIdentity));
+            Assert.That(ServerComponent.MySyncList.Count, Is.EqualTo(1));
+            Assert.That(ServerComponent.MySyncList[0], Is.EqualTo(listValue));
 
             Assert.That(ObserverComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(ObserverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(ObserverComponent.target, Is.EqualTo(_remoteClients[1].Get(ServerExtraIdentity)));
             Assert.That(ObserverComponent.MySyncList.Count, Is.EqualTo(1));
             Assert.That(ObserverComponent.MySyncList[0], Is.EqualTo(listValue));
         }
@@ -162,9 +162,9 @@ namespace Mirage.Tests.Runtime.Syncing
         {
             SetDirection(SyncFrom.Server | SyncFrom.Owner, SyncTo.Server | SyncTo.Owner);
 
-            serverComponent.guild = guild;
-            serverComponent.target = ServerExtraIdentity;
-            serverComponent.MySyncList.Add(listValue1);
+            ServerComponent.guild = guild;
+            ServerComponent.target = ServerExtraIdentity;
+            ServerComponent.MySyncList.Add(listValue1);
 
             // wait for sync
             yield return null;
@@ -175,10 +175,10 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(OwnerComponent.MySyncList.Count, Is.EqualTo(1));
             Assert.That(OwnerComponent.MySyncList[0], Is.EqualTo(listValue1));
 
-            Assert.That(serverComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(serverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
-            Assert.That(serverComponent.MySyncList.Count, Is.EqualTo(1));
-            Assert.That(serverComponent.MySyncList[0], Is.EqualTo(listValue1));
+            Assert.That(ServerComponent.guild.name, Is.EqualTo(guild.name));
+            Assert.That(ServerComponent.target, Is.EqualTo(ServerExtraIdentity));
+            Assert.That(ServerComponent.MySyncList.Count, Is.EqualTo(1));
+            Assert.That(ServerComponent.MySyncList[0], Is.EqualTo(listValue1));
 
             Assert.That(ObserverComponent.guild.name, Is.Null.Or.Empty);
             Assert.That(ObserverComponent.target, Is.Null);
@@ -198,11 +198,11 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(OwnerComponent.MySyncList[0], Is.EqualTo(listValue1));
             Assert.That(OwnerComponent.MySyncList[1], Is.EqualTo(listValue2));
 
-            Assert.That(serverComponent.guild.name, Is.EqualTo(guild2.name));
-            Assert.That(serverComponent.target, Is.Null);
-            Assert.That(serverComponent.MySyncList.Count, Is.EqualTo(2));
-            Assert.That(serverComponent.MySyncList[0], Is.EqualTo(listValue1));
-            Assert.That(serverComponent.MySyncList[1], Is.EqualTo(listValue2));
+            Assert.That(ServerComponent.guild.name, Is.EqualTo(guild2.name));
+            Assert.That(ServerComponent.target, Is.Null);
+            Assert.That(ServerComponent.MySyncList.Count, Is.EqualTo(2));
+            Assert.That(ServerComponent.MySyncList[0], Is.EqualTo(listValue1));
+            Assert.That(ServerComponent.MySyncList[1], Is.EqualTo(listValue2));
 
             Assert.That(ObserverComponent.guild.name, Is.Null.Or.Empty);
             Assert.That(ObserverComponent.target, Is.Null);
@@ -214,9 +214,9 @@ namespace Mirage.Tests.Runtime.Syncing
         {
             SetDirection(SyncFrom.Server | SyncFrom.Owner, SyncTo.Server | SyncTo.ObserversOnly);
 
-            serverComponent.guild = guild;
-            serverComponent.target = ServerExtraIdentity;
-            serverComponent.MySyncList.Add(listValue1);
+            ServerComponent.guild = guild;
+            ServerComponent.target = ServerExtraIdentity;
+            ServerComponent.MySyncList.Add(listValue1);
 
             // wait for sync
             yield return null;
@@ -226,13 +226,13 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(OwnerComponent.target, Is.Null);
             Assert.That(OwnerComponent.MySyncList.Count, Is.Zero);
 
-            Assert.That(serverComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(serverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
-            Assert.That(serverComponent.MySyncList.Count, Is.EqualTo(1));
-            Assert.That(serverComponent.MySyncList[0], Is.EqualTo(listValue1));
+            Assert.That(ServerComponent.guild.name, Is.EqualTo(guild.name));
+            Assert.That(ServerComponent.target, Is.EqualTo(ServerExtraIdentity));
+            Assert.That(ServerComponent.MySyncList.Count, Is.EqualTo(1));
+            Assert.That(ServerComponent.MySyncList[0], Is.EqualTo(listValue1));
 
             Assert.That(ObserverComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(ObserverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(ObserverComponent.target, Is.EqualTo(_remoteClients[1].Get(ServerExtraIdentity)));
             Assert.That(ObserverComponent.MySyncList.Count, Is.EqualTo(1));
             Assert.That(ObserverComponent.MySyncList[0], Is.EqualTo(listValue1));
 
@@ -249,16 +249,16 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(OwnerComponent.MySyncList.Count, Is.EqualTo(1));
             Assert.That(OwnerComponent.MySyncList[0], Is.EqualTo(listValue1));
 
-            Assert.That(serverComponent.guild.name, Is.EqualTo(guild2.name));
+            Assert.That(ServerComponent.guild.name, Is.EqualTo(guild2.name));
             // target should not be changed
-            Assert.That(serverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
-            Assert.That(serverComponent.MySyncList.Count, Is.EqualTo(1));
-            Assert.That(serverComponent.MySyncList.Count, Is.EqualTo(2));
-            Assert.That(serverComponent.MySyncList[0], Is.EqualTo(listValue1));
-            Assert.That(serverComponent.MySyncList[1], Is.EqualTo(listValue2));
+            Assert.That(ServerComponent.target, Is.EqualTo(ServerExtraIdentity));
+            Assert.That(ServerComponent.MySyncList.Count, Is.EqualTo(1));
+            Assert.That(ServerComponent.MySyncList.Count, Is.EqualTo(2));
+            Assert.That(ServerComponent.MySyncList[0], Is.EqualTo(listValue1));
+            Assert.That(ServerComponent.MySyncList[1], Is.EqualTo(listValue2));
 
             Assert.That(ObserverComponent.guild.name, Is.EqualTo(guild2.name));
-            Assert.That(ObserverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(ObserverComponent.target, Is.EqualTo(_remoteClients[1].Get(ServerExtraIdentity)));
             Assert.That(ObserverComponent.MySyncList.Count, Is.EqualTo(2));
             Assert.That(ObserverComponent.MySyncList[0], Is.EqualTo(listValue1));
             Assert.That(ObserverComponent.MySyncList[1], Is.EqualTo(listValue2));
@@ -270,9 +270,9 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.Fail();
             SetDirection(SyncFrom.Server | SyncFrom.Owner, SyncTo.Server | SyncTo.Owner | SyncTo.ObserversOnly);
 
-            serverComponent.guild = guild;
-            serverComponent.target = ServerExtraIdentity;
-            serverComponent.MySyncList.Add(listValue1);
+            ServerComponent.guild = guild;
+            ServerComponent.target = ServerExtraIdentity;
+            ServerComponent.MySyncList.Add(listValue1);
 
             // wait for sync
             yield return null;
@@ -283,13 +283,13 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(OwnerComponent.MySyncList.Count, Is.EqualTo(1));
             Assert.That(OwnerComponent.MySyncList[0], Is.EqualTo(listValue1));
 
-            Assert.That(serverComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(serverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
-            Assert.That(serverComponent.MySyncList.Count, Is.EqualTo(1));
-            Assert.That(serverComponent.MySyncList[0], Is.EqualTo(listValue1));
+            Assert.That(ServerComponent.guild.name, Is.EqualTo(guild.name));
+            Assert.That(ServerComponent.target, Is.EqualTo(ServerExtraIdentity));
+            Assert.That(ServerComponent.MySyncList.Count, Is.EqualTo(1));
+            Assert.That(ServerComponent.MySyncList[0], Is.EqualTo(listValue1));
 
             Assert.That(ObserverComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(ObserverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
+            Assert.That(ObserverComponent.target, Is.EqualTo(_remoteClients[1].Get(ServerExtraIdentity)));
             Assert.That(ObserverComponent.MySyncList.Count, Is.EqualTo(1));
             Assert.That(ObserverComponent.MySyncList[0], Is.EqualTo(listValue1));
 
@@ -307,11 +307,11 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(OwnerComponent.MySyncList[0], Is.EqualTo(listValue1));
             Assert.That(OwnerComponent.MySyncList[1], Is.EqualTo(listValue2));
 
-            Assert.That(serverComponent.guild.name, Is.EqualTo(guild2.name));
-            Assert.That(serverComponent.target, Is.Null);
-            Assert.That(serverComponent.MySyncList.Count, Is.EqualTo(2));
-            Assert.That(serverComponent.MySyncList[0], Is.EqualTo(listValue1));
-            Assert.That(serverComponent.MySyncList[1], Is.EqualTo(listValue2));
+            Assert.That(ServerComponent.guild.name, Is.EqualTo(guild2.name));
+            Assert.That(ServerComponent.target, Is.Null);
+            Assert.That(ServerComponent.MySyncList.Count, Is.EqualTo(2));
+            Assert.That(ServerComponent.MySyncList[0], Is.EqualTo(listValue1));
+            Assert.That(ServerComponent.MySyncList[1], Is.EqualTo(listValue2));
 
             Assert.That(ObserverComponent.guild.name, Is.EqualTo(guild2.name));
             Assert.That(ObserverComponent.target, Is.Null);
@@ -329,9 +329,9 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(OwnerComponent.target, Is.Null);
             Assert.That(OwnerComponent.MySyncList.Count, Is.Zero);
 
-            Assert.That(serverComponent.guild.name, Is.EqualTo(guild2.name));
-            Assert.That(serverComponent.target, Is.Null);
-            Assert.That(serverComponent.MySyncList.Count, Is.Zero);
+            Assert.That(ServerComponent.guild.name, Is.EqualTo(guild2.name));
+            Assert.That(ServerComponent.target, Is.Null);
+            Assert.That(ServerComponent.MySyncList.Count, Is.Zero);
 
             Assert.That(ObserverComponent.guild.name, Is.EqualTo(guild2.name));
             Assert.That(ObserverComponent.target, Is.Null);
@@ -344,9 +344,9 @@ namespace Mirage.Tests.Runtime.Syncing
             SetDirection(SyncFrom.Server | SyncFrom.Owner, SyncTo.Server | SyncTo.Owner);
 
             OwnerComponent.guild = guild;
-            serverComponent.target = ServerExtraIdentity;
+            ServerComponent.target = ServerExtraIdentity;
 
-            serverComponent.MySyncList.Add(listValue1);
+            ServerComponent.MySyncList.Add(listValue1);
             OwnerComponent.MySyncList.Add(listValue2);
 
             // wait for sync
@@ -359,11 +359,11 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(OwnerComponent.MySyncList[0], Is.EqualTo(listValue1));
             Assert.That(OwnerComponent.MySyncList[1], Is.EqualTo(listValue2));
 
-            Assert.That(serverComponent.guild.name, Is.EqualTo(guild.name));
-            Assert.That(serverComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
-            Assert.That(serverComponent.MySyncList.Count, Is.EqualTo(2));
-            Assert.That(serverComponent.MySyncList[0], Is.EqualTo(listValue1));
-            Assert.That(serverComponent.MySyncList[1], Is.EqualTo(listValue2));
+            Assert.That(ServerComponent.guild.name, Is.EqualTo(guild.name));
+            Assert.That(ServerComponent.target, Is.EqualTo(ServerExtraIdentity));
+            Assert.That(ServerComponent.MySyncList.Count, Is.EqualTo(2));
+            Assert.That(ServerComponent.MySyncList[0], Is.EqualTo(listValue1));
+            Assert.That(ServerComponent.MySyncList[1], Is.EqualTo(listValue2));
 
             Assert.That(ObserverComponent.guild.name, Is.Null.Or.Empty);
             Assert.That(ObserverComponent.target, Is.Null);
@@ -375,7 +375,7 @@ namespace Mirage.Tests.Runtime.Syncing
         {
             SetDirection(SyncFrom.Server | SyncFrom.Owner, SyncTo.Server | SyncTo.Owner);
 
-            serverComponent.MySyncList.Add(listValue1);
+            ServerComponent.MySyncList.Add(listValue1);
             OwnerComponent.MySyncList.Add(listValue2);
 
             // wait for sync
@@ -386,9 +386,9 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(OwnerComponent.MySyncList[0], Is.EqualTo(listValue1));
             Assert.That(OwnerComponent.MySyncList[1], Is.EqualTo(listValue2));
 
-            Assert.That(serverComponent.MySyncList.Count, Is.EqualTo(2));
-            Assert.That(serverComponent.MySyncList[0], Is.EqualTo(listValue1));
-            Assert.That(serverComponent.MySyncList[1], Is.EqualTo(listValue2));
+            Assert.That(ServerComponent.MySyncList.Count, Is.EqualTo(2));
+            Assert.That(ServerComponent.MySyncList[0], Is.EqualTo(listValue1));
+            Assert.That(ServerComponent.MySyncList[1], Is.EqualTo(listValue2));
 
             Assert.That(ObserverComponent.MySyncList.Count, Is.Zero);
         }
