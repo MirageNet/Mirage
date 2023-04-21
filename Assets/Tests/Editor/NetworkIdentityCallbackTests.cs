@@ -9,122 +9,118 @@ using UnityEngine;
 using UnityEngine.Events;
 using static Mirage.Tests.LocalConnections;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.NetworkIdentityCallbacks
 {
+    internal class CheckObserverExceptionNetworkBehaviour : NetworkVisibility
+    {
+        public int called;
+        public INetworkPlayer valuePassed;
+        public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
+        public override bool OnCheckObserver(INetworkPlayer player)
+        {
+            ++called;
+            valuePassed = player;
+            throw new Exception("some exception");
+        }
+    }
+
+    internal class CheckObserverTrueNetworkBehaviour : NetworkVisibility
+    {
+        public int called;
+        public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
+        public override bool OnCheckObserver(INetworkPlayer player)
+        {
+            ++called;
+            return true;
+        }
+    }
+
+    internal class CheckObserverFalseNetworkBehaviour : NetworkVisibility
+    {
+        public int called;
+        public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
+        public override bool OnCheckObserver(INetworkPlayer player)
+        {
+            ++called;
+            return false;
+        }
+    }
+
+    internal class SerializeTest1NetworkBehaviour : NetworkBehaviour
+    {
+        public int value;
+        public override bool OnSerialize(NetworkWriter writer, bool initialState)
+        {
+            writer.WriteInt32(value);
+            return true;
+        }
+        public override void OnDeserialize(NetworkReader reader, bool initialState)
+        {
+            value = reader.ReadInt32();
+        }
+    }
+
+    internal class SerializeTest2NetworkBehaviour : NetworkBehaviour
+    {
+        public string value;
+        public override bool OnSerialize(NetworkWriter writer, bool initialState)
+        {
+            writer.WriteString(value);
+            return true;
+        }
+        public override void OnDeserialize(NetworkReader reader, bool initialState)
+        {
+            value = reader.ReadString();
+        }
+    }
+
+    internal class SerializeExceptionNetworkBehaviour : NetworkBehaviour
+    {
+        public const string MESSAGE = "some unique exception";
+        public override bool OnSerialize(NetworkWriter writer, bool initialState)
+        {
+            throw new Exception(MESSAGE);
+        }
+        public override void OnDeserialize(NetworkReader reader, bool initialState)
+        {
+            throw new Exception(MESSAGE);
+        }
+    }
+
+    internal class SerializeMismatchNetworkBehaviour : NetworkBehaviour
+    {
+        public int value;
+        public override bool OnSerialize(NetworkWriter writer, bool initialState)
+        {
+            writer.WriteInt32(value);
+            // one too many
+            writer.WriteInt32(value);
+            return true;
+        }
+        public override void OnDeserialize(NetworkReader reader, bool initialState)
+        {
+            value = reader.ReadInt32();
+        }
+    }
+
+    internal class RebuildObserversNetworkBehaviour : NetworkVisibility
+    {
+        public INetworkPlayer observer;
+        public override bool OnCheckObserver(INetworkPlayer player) { return true; }
+        public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
+        {
+            observers.Add(observer);
+        }
+    }
+
+    internal class RebuildEmptyObserversNetworkBehaviour : NetworkVisibility
+    {
+        public override bool OnCheckObserver(INetworkPlayer player) { return true; }
+        public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
+    }
+
     public class NetworkIdentityCallbackTests : ClientServerSetup_EditorModeTest<MockComponent>
     {
-        #region test components
-
-        private class CheckObserverExceptionNetworkBehaviour : NetworkVisibility
-        {
-            public int called;
-            public INetworkPlayer valuePassed;
-            public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
-            public override bool OnCheckObserver(INetworkPlayer player)
-            {
-                ++called;
-                valuePassed = player;
-                throw new Exception("some exception");
-            }
-        }
-
-        private class CheckObserverTrueNetworkBehaviour : NetworkVisibility
-        {
-            public int called;
-            public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
-            public override bool OnCheckObserver(INetworkPlayer player)
-            {
-                ++called;
-                return true;
-            }
-        }
-
-        private class CheckObserverFalseNetworkBehaviour : NetworkVisibility
-        {
-            public int called;
-            public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
-            public override bool OnCheckObserver(INetworkPlayer player)
-            {
-                ++called;
-                return false;
-            }
-        }
-
-        private class SerializeTest1NetworkBehaviour : NetworkBehaviour
-        {
-            public int value;
-            public override bool OnSerialize(NetworkWriter writer, bool initialState)
-            {
-                writer.WriteInt32(value);
-                return true;
-            }
-            public override void OnDeserialize(NetworkReader reader, bool initialState)
-            {
-                value = reader.ReadInt32();
-            }
-        }
-
-        private class SerializeTest2NetworkBehaviour : NetworkBehaviour
-        {
-            public string value;
-            public override bool OnSerialize(NetworkWriter writer, bool initialState)
-            {
-                writer.WriteString(value);
-                return true;
-            }
-            public override void OnDeserialize(NetworkReader reader, bool initialState)
-            {
-                value = reader.ReadString();
-            }
-        }
-
-        private class SerializeExceptionNetworkBehaviour : NetworkBehaviour
-        {
-            public const string MESSAGE = "some unique exception";
-            public override bool OnSerialize(NetworkWriter writer, bool initialState)
-            {
-                throw new Exception(MESSAGE);
-            }
-            public override void OnDeserialize(NetworkReader reader, bool initialState)
-            {
-                throw new Exception(MESSAGE);
-            }
-        }
-
-        private class SerializeMismatchNetworkBehaviour : NetworkBehaviour
-        {
-            public int value;
-            public override bool OnSerialize(NetworkWriter writer, bool initialState)
-            {
-                writer.WriteInt32(value);
-                // one too many
-                writer.WriteInt32(value);
-                return true;
-            }
-            public override void OnDeserialize(NetworkReader reader, bool initialState)
-            {
-                value = reader.ReadInt32();
-            }
-        }
-
-        private class RebuildObserversNetworkBehaviour : NetworkVisibility
-        {
-            public INetworkPlayer observer;
-            public override bool OnCheckObserver(INetworkPlayer player) { return true; }
-            public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
-            {
-                observers.Add(observer);
-            }
-        }
-
-        private class RebuildEmptyObserversNetworkBehaviour : NetworkVisibility
-        {
-            public override bool OnCheckObserver(INetworkPlayer player) { return true; }
-            public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
-        }
-
-        #endregion
-
         private GameObject gameObject;
         private NetworkIdentity identity;
         private INetworkPlayer player1;
