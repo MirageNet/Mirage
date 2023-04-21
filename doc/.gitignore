@@ -5,3 +5,4 @@ build
 .env
 .idea/*
 /docs/reference/
+/api/*
