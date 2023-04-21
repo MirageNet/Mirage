@@ -1,142 +1,39 @@
-using System;
 using Cysharp.Threading.Tasks;
-using Mirage.SocketLayer;
-using NUnit.Framework;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.BaseSetups
 {
-    public class HostSetupBase<T> : TestBase where T : NetworkBehaviour
+    public class HostSetup_Base : ServerSetup_Base
     {
-        protected GameObject networkManagerGo;
-        protected NetworkManager manager;
-        protected NetworkServer server;
-        protected NetworkClient client;
-        protected ServerObjectManager serverObjectManager;
-        protected ClientObjectManager clientObjectManager;
+        protected new HostInstance _serverInstance => (HostInstance)base._serverInstance;
+        protected override bool HostMode => true;
 
-        protected NetworkIdentity playerPrefab;
-        protected GameObject playerGO;
-        protected NetworkIdentity playerIdentity;
-        protected T playerComponent;
-
-        protected MessageHandler ClientMessageHandler => client.MessageHandler;
-        protected MessageHandler ServerMessageHandler => server.MessageHandler;
-
-        protected virtual bool AutoStartServer => true;
-        protected virtual Config ServerConfig => null;
-        protected virtual Config ClientConfig => null;
-
-        /// <summary>
-        /// called before Start() after Server/Client GameObject have been setup
-        /// </summary>
-        public virtual void ExtraSetup() { }
-        /// <summary>
-        /// Called after test of setup
-        /// </summary>
-        /// <returns></returns>
-        public virtual UniTask LateSetup() => UniTask.CompletedTask;
-
-        public async UniTask HostSetUp()
+        protected override async UniTask ExtraSetup()
         {
-            Console.WriteLine($"[MirageTest] UnitySetUp class:{TestContext.CurrentContext.Test.ClassName} method:{TestContext.CurrentContext.Test.MethodName}");
-
-            networkManagerGo = new GameObject();
-
-            networkManagerGo.AddComponent<TestSocketFactory>();
-            serverObjectManager = networkManagerGo.AddComponent<ServerObjectManager>();
-            clientObjectManager = networkManagerGo.AddComponent<ClientObjectManager>();
-            manager = networkManagerGo.AddComponent<NetworkManager>();
-            server = networkManagerGo.AddComponent<NetworkServer>();
-            client = networkManagerGo.AddComponent<NetworkClient>();
-            manager.Client = networkManagerGo.GetComponent<NetworkClient>();
-            manager.Server = networkManagerGo.GetComponent<NetworkServer>();
-
-            if (ServerConfig != null) server.PeerConfig = ServerConfig;
-            if (ClientConfig != null) client.PeerConfig = ClientConfig;
-
-            serverObjectManager.Server = server;
-            clientObjectManager.Client = client;
-
-            ExtraSetup();
-
-            // wait for all Start() methods to get invoked
-            await UniTask.DelayFrame(2);
-
-            if (AutoStartServer)
-            {
-                await StartHost();
-
-                playerPrefab = CreateBehaviour<T>(true).Identity;
-                playerPrefab.name = "player (unspawned)";
-                playerPrefab.gameObject.AddComponent<Rigidbody>();// not sure why we add RB, but it was here previously so keeping it in
-
-                // DontDestroyOnLoad so that "prefab" wont be destroyed by scene loading
-                // also means that NetworkScenePostProcess will skip this unspawned object
-                playerPrefab.PrefabHash = Guid.NewGuid().GetHashCode();
-                Object.DontDestroyOnLoad(playerPrefab);
-
-
-                clientObjectManager.RegisterPrefab(playerPrefab);
-
-                playerGO = InstantiateForTest(playerPrefab.gameObject);
-                playerIdentity = playerGO.GetComponent<NetworkIdentity>();
-                playerComponent = playerGO.GetComponent<T>();
-
-                serverObjectManager.AddCharacter(server.LocalPlayer, playerGO);
-
-                // wait for client to spawn it
-                await AsyncUtil.WaitUntilWithTimeout(() => client.Player.HasCharacter);
-            }
-
-            await LateSetup();
+            await SpawnCharacter(_serverInstance);
         }
 
-        protected async UniTask StartHost()
+        // host properties to make it easier to use in tests
+        protected NetworkClient client => _serverInstance.Client;
+        protected ClientObjectManager clientObjectManager => _serverInstance.ClientObjectManager;
+        protected MessageHandler ClientMessageHandler => _serverInstance.Client.MessageHandler;
+
+        protected GameObject hostPlayerGO => _serverInstance.HostPlayer.GameObject;
+        protected NetworkIdentity hostIdentity => _serverInstance.HostPlayer.Identity;
+        protected INetworkPlayer hostServerPlayer => _serverInstance.HostPlayer.Player;
+        protected INetworkPlayer hostClientPlayer => _serverInstance.Client.Player;
+    }
+
+    public class HostSetup_Base<T> : HostSetup_Base where T : NetworkBehaviour
+    {
+        protected override void ExtraPrefabSetup(NetworkIdentity prefab)
         {
-            var completionSource = new UniTaskCompletionSource();
-
-            void Started()
-            {
-                completionSource.TrySetResult();
-            }
-
-            server.Started.AddListener(Started);
-            // now start the host
-            manager.Server.StartServer(client);
-
-            await completionSource.Task;
+            prefab.gameObject.AddComponent<T>();
         }
 
-        public virtual void ExtraTearDown() { }
-        public virtual UniTask ExtraTearDownAsync() => UniTask.CompletedTask;
+        protected T ServerComponent(int i) => ServerGameObject(i).GetComponent<T>();
 
-        public async UniTask HostTearDown()
-        {
-            Object.Destroy(playerGO);
-
-            // check active, it might have been stopped by tests
-            if (server.Active) server.Stop();
-
-            await UniTask.Delay(1);
-            Object.Destroy(networkManagerGo);
-
-            TearDownTestObjects();
-
-            ExtraTearDown();
-            await ExtraTearDownAsync();
-
-            Console.WriteLine($"[MirageTest] UnityTearDown class:{TestContext.CurrentContext.Test.ClassName} method:{TestContext.CurrentContext.Test.MethodName}");
-        }
-
-        public void DoUpdate(int updateCount = 1)
-        {
-            for (var i = 0; i < updateCount; i++)
-            {
-                server.Update();
-                client.Update();
-            }
-        }
+        // host properties to make it easier to use in tests
+        protected T hostComponent => ServerComponent(0);
     }
 }

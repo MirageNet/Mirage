@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine.TestTools;
+using Mirage.Tests.BaseSetups;
 
 namespace Mirage.Tests.EnterRuntime
 {

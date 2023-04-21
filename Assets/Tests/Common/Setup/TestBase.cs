@@ -16,7 +16,16 @@ namespace Mirage.Tests
         {
             foreach (var obj in toDestroy)
             {
-                if (obj != null)
+                if (obj == null)
+                    continue;
+
+                // obj could be any Unity object: GO, SO, comp, etc.
+                // if it is comp we want to destroy its gameobject instead of just the comp, this lets us add NetworkIdentities to list
+                if (obj is Component comp)
+                {
+                    Object.DestroyImmediate(comp.gameObject);
+                }
+                else
                 {
                     Object.DestroyImmediate(obj);
                 }

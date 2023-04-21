@@ -12,7 +12,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             // Should have connected
             Assert.That(clientPlayer, Is.Not.Null);
-            Assert.That(serverPlayer, Is.Not.Null);
+            Assert.That(ServerPlayer(0), Is.Not.Null);
         }
 
         public override void ExtraSetup()

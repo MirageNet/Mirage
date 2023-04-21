@@ -1,6 +1,7 @@
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using UnityEngine.TestTools;
+using Mirage.Tests.BaseSetups;
 
 namespace Mirage.Tests.Runtime.Host
 {
