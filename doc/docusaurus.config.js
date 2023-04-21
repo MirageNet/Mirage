@@ -15,9 +15,8 @@ const githubUrl = `https://github.com/${orgName}/${repoName}`;
 const config = {
   title: "Mirage Networking",
   tagline: "Easy to use high performance Network library for Unity",
-  url: `https://${orgName}.github.io/`,
+  url: `https://${orgName}.github.io`,
   baseUrl: `/${repoName}/`,
-  trailingSlash: false,
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
