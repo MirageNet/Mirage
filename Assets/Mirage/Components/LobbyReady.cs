@@ -2,42 +2,81 @@ using System.Collections.Generic;
 using Mirage.Logging;
 using UnityEngine;
 
-namespace Mirage
+namespace Mirage.Components
 {
     public class LobbyReady : MonoBehaviour
     {
-        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkServer));
+        private static readonly ILogger logger = LogFactory.GetLogger<LobbyReady>();
+        private static readonly List<INetworkPlayer> sendCache = new List<INetworkPlayer>();
 
-        public List<ObjectReady> ObjectReadyList = new List<ObjectReady>();
+        public NetworkServer Server;
+        public Dictionary<NetworkIdentity, ReadyCheck> Players = new Dictionary<NetworkIdentity, ReadyCheck>();
 
-        // just a cached memory area where we can collect connections
-        // for broadcasting messages
-        private static readonly List<INetworkPlayer> playerCache = new List<INetworkPlayer>();
-
-        public void SetAllClientsNotReady()
+        private void Start()
         {
-            foreach (var obj in ObjectReadyList)
+            Server.Started.AddListener(OnServerStarted);
+        }
+
+        private void OnServerStarted()
+        {
+            Server.World.AddAndInvokeOnSpawn(OnSpawn);
+            Server.World.onUnspawn += OnUnspawn;
+        }
+
+        private void OnSpawn(NetworkIdentity obj)
+        {
+            if (obj.TryGetComponent<ReadyCheck>(out var readyCheck))
             {
-                obj.SetClientNotReady();
+                Players.Add(obj, readyCheck);
             }
         }
 
-        public void SendToReady<T>(NetworkIdentity identity, T msg, bool includeOwner = true, Channel channelId = Channel.Reliable)
+        private void OnUnspawn(NetworkIdentity obj)
         {
-            if (logger.LogEnabled()) logger.Log("Server.SendToReady msgType:" + typeof(T));
+            Players.Remove(obj);
+        }
 
-            playerCache.Clear();
-
-            foreach (var objectReady in ObjectReadyList)
+        public void SetAllClientsNotReady()
+        {
+            foreach (var obj in Players.Values)
             {
-                var isOwner = objectReady.Identity == identity;
-                if ((!isOwner || includeOwner) && objectReady.IsReady)
+                obj.SetReady(false);
+            }
+        }
+
+        /// <summary>
+        /// Send a message to players that are ready on check, or not ready if <paramref name="sendToReady"/> fakse
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="msg"></param>
+        /// <param name="sendToReady">Use to send message no not ready players instead, not this doesn't check server for players with out character, only players with PlayerReadyCheck on their character</param>
+        /// <param name="exclude">Add Identity to exclude here, useful when you want to send to all players except the owner</param>
+        /// <param name="channelId"></param>
+        public void SendToReady<T>(T msg, bool sendToReady = true, NetworkIdentity exclude = null, Channel channelId = Channel.Reliable)
+        {
+            if (logger.LogEnabled()) logger.Log("LobbyReady.SendToReady msgType:" + typeof(T));
+
+            sendCache.Clear();
+
+            foreach (var kvp in Players)
+            {
+                var identity = kvp.Key;
+                var readyCheck = kvp.Value;
+
+                if (identity == exclude)
+                    continue;
+                if (identity.Owner == null)
+                    continue;
+
+                // check if IsReady is matching sendToReady
+                // if both are false we also want to send, eg sending too all not ready
+                if (readyCheck.IsReady == sendToReady)
                 {
-                    playerCache.Add(objectReady.Identity.Owner);
+                    sendCache.Add(identity.Owner);
                 }
             }
 
-            NetworkServer.SendToMany(playerCache, msg, channelId);
+            NetworkServer.SendToMany(sendCache, msg, channelId);
         }
     }
 }
