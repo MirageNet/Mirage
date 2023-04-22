@@ -20,8 +20,9 @@ namespace Mirage.Weaver
             writer = null;
         }
 
-        static bool _checkDirectory = false;
-        static void CheckDirectory()
+        private static bool _checkDirectory = false;
+
+        private static void CheckDirectory()
         {
             if (_checkDirectory)
                 return;
@@ -59,6 +60,7 @@ namespace Mirage.Weaver
             stopwatch = Stopwatch.StartNew();
 
             WriteLine($"Weave Started - {name}");
+            WriteLine($"Time: {DateTime.Now}");
 #if WEAVER_DEBUG_LOGS
             WriteLine($"Debug logs enabled");
 #else
@@ -69,11 +71,10 @@ namespace Mirage.Weaver
         [Conditional("WEAVER_DEBUG_TIMER")]
         private void WriteLine(string msg)
         {
-            var fullMsg = $"[WeaverDiagnostics] {msg}";
-            Console.WriteLine(fullMsg);
+            Console.WriteLine($"[WeaverDiagnostics] {msg}");
             if (writeToFile)
             {
-                writer.WriteLine(fullMsg);
+                writer.WriteLine(msg);
             }
         }
 
