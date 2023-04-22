@@ -299,6 +299,18 @@ namespace Mirage.Weaver
             return defaultValue;
         }
 
+        public static void AddField<T>(this CustomAttribute ca, ModuleDefinition module, string field, T value)
+        {
+            if (ca.Fields.Any(x => x.Name == field))
+                throw new ArgumentException($"Field with name '{field}' already exists. AddField should only be used to add a new field");
+
+            var fieldType = module.ImportReference<T>();
+            var argValue = new CustomAttributeArgument(fieldType, value);
+            var newField = new CustomAttributeNamedArgument(field, argValue);
+
+            ca.Fields.Add(newField);
+        }
+
         /// <summary>
         /// Imports a field and makes it a member of its orignal type.
         /// <para>This is needed if orignal type is a generic instance, this will ensure that it stays a member of that instance, eg MyMessage{int}.Value</para>

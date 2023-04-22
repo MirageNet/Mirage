@@ -29,6 +29,10 @@ namespace Mirage
         /// What type of look Mirage should look for
         /// </summary>
         public SyncHookType hookType = SyncHookType.Automatic;
+
+        // set by weaver
+        internal string NetworkGet;
+        internal string NetworkSet;
     }
 
     public enum SyncHookType

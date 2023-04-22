@@ -11,6 +11,8 @@ namespace Mirage.Weaver.SyncVars
         public readonly FoundNetworkBehaviour Behaviour;
         public readonly FieldDefinition FieldDefinition;
         public readonly int DirtyIndex;
+        public CustomAttribute Attribute;
+
         public long DirtyBit => 1L << DirtyIndex;
 
         /// <summary>
@@ -25,6 +27,8 @@ namespace Mirage.Weaver.SyncVars
             Behaviour = behaviour;
             FieldDefinition = fieldDefinition;
             DirtyIndex = dirtyIndex;
+
+            Attribute = fieldDefinition.GetCustomAttribute<SyncVarAttribute>();
         }
 
         public ValueSerializer ValueSerializer { get; private set; }
@@ -91,9 +95,9 @@ namespace Mirage.Weaver.SyncVars
             Hook = hook;
             HasHook = hook != null;
 
-            InitialOnly = GetInitialOnly(FieldDefinition);
+            InitialOnly = GetInitialOnly();
 
-            InvokeHookOnServer = GetFireOnServer(FieldDefinition);
+            InvokeHookOnServer = GetFireOnServer();
 
             ValueSerializer = ValueSerializerFinder.GetSerializer(this, writers, readers);
 
@@ -101,16 +105,14 @@ namespace Mirage.Weaver.SyncVars
                 throw new HookMethodException("'invokeHookOnServer' is set to true but no hook was implemented. Please implement hook or set 'invokeHookOnServer' back to false or remove for default false.", FieldDefinition);
         }
 
-        private static bool GetInitialOnly(FieldDefinition fieldDefinition)
+        private bool GetInitialOnly()
         {
-            var attr = fieldDefinition.GetCustomAttribute<SyncVarAttribute>();
-            return attr.GetField(nameof(SyncVarAttribute.initialOnly), false);
+            return Attribute.GetField(nameof(SyncVarAttribute.initialOnly), false);
         }
 
-        private static bool GetFireOnServer(FieldDefinition fieldDefinition)
+        private bool GetFireOnServer()
         {
-            var attr = fieldDefinition.GetCustomAttribute<SyncVarAttribute>();
-            return attr.GetField(nameof(SyncVarAttribute.invokeHookOnServer), false);
+            return Attribute.GetField(nameof(SyncVarAttribute.invokeHookOnServer), false);
         }
     }
 }

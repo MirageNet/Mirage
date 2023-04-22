@@ -1,71 +1,49 @@
-using System.Collections.Generic;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver
 {
-    // todo add docs for what this type does
     public class PropertySiteProcessor
     {
-        // setter functions that replace [SyncVar] member variable references. dict<field, replacement>
-        public Dictionary<FieldReference, MethodDefinition> Setters = new Dictionary<FieldReference, MethodDefinition>(new FieldReferenceComparator());
-        // getter functions that replace [SyncVar] member variable references. dict<field, replacement>
-        public Dictionary<FieldReference, MethodDefinition> Getters = new Dictionary<FieldReference, MethodDefinition>(new FieldReferenceComparator());
+        private ModuleDefinition _module;
 
-        public void Process(ModuleDefinition moduleDef)
+        public PropertySiteProcessor(ModuleDefinition module)
+        {
+            _module = module;
+        }
+
+        private bool TryGetMethodFromAttribute(FieldReference field, string attributeFieldName, out MethodReference methodReference)
+        {
+            methodReference = null;
+
+            var fieldDef = field.Resolve();
+            if (!fieldDef.TryGetCustomAttribute<SyncVarAttribute>(out var attribute))
+                // not syncvar
+                return false;
+
+            var setter = attribute.GetField<string>(attributeFieldName, null);
+            if (string.IsNullOrEmpty(setter))
+                // no setter
+                return false;
+
+            // we might be in another asmdef
+            // find setter
+            var type = fieldDef.DeclaringType;
+            var method = type.GetMethod(setter);
+            methodReference = _module.ImportReference(method);
+            return true;
+        }
+
+        public void Process()
         {
             // replace all field access with property access for syncvars
-            CodePass.ForEachInstruction(moduleDef, WeavedMethods, ProcessInstruction);
+            CodePass.ForEachInstruction(_module, WeavedMethods, ProcessInstruction);
         }
 
         private static bool WeavedMethods(MethodDefinition md) =>
                         md.Name != ".cctor" &&
                         md.Name != NetworkBehaviourProcessor.ProcessedFunctionName &&
                         !md.IsConstructor;
-
-        // replaces syncvar write access with the NetworkXYZ.get property calls
-        private void ProcessInstructionSetterField(Instruction i, FieldReference opField)
-        {
-            // does it set a field that we replaced?
-            if (Setters.TryGetValue(opField, out var replacement))
-            {
-                if (opField.DeclaringType.IsGenericInstance || opField.DeclaringType.HasGenericParameters) // We're calling to a generic class
-                {
-                    var newField = i.Operand as FieldReference;
-                    var genericType = (GenericInstanceType)newField.DeclaringType;
-                    i.OpCode = OpCodes.Callvirt;
-                    i.Operand = replacement.MakeHostInstanceGeneric(genericType);
-                }
-                else
-                {
-                    //replace with property
-                    i.OpCode = OpCodes.Call;
-                    i.Operand = replacement;
-                }
-            }
-        }
-
-        // replaces syncvar read access with the NetworkXYZ.get property calls
-        private void ProcessInstructionGetterField(Instruction i, FieldReference opField)
-        {
-            // does it set a field that we replaced?
-            if (Getters.TryGetValue(opField, out var replacement))
-            {
-                if (opField.DeclaringType.IsGenericInstance || opField.DeclaringType.HasGenericParameters) // We're calling to a generic class
-                {
-                    var newField = i.Operand as FieldReference;
-                    var genericType = (GenericInstanceType)newField.DeclaringType;
-                    i.OpCode = OpCodes.Callvirt;
-                    i.Operand = replacement.MakeHostInstanceGeneric(genericType);
-                }
-                else
-                {
-                    //replace with property
-                    i.OpCode = OpCodes.Call;
-                    i.Operand = replacement;
-                }
-            }
-        }
 
         private Instruction ProcessInstruction(MethodDefinition md, Instruction instr, SequencePoint sequencePoint)
         {
@@ -109,37 +87,73 @@ namespace Mirage.Weaver
             return instr;
         }
 
+        private void ProcessInstructionSetterField(Instruction i, FieldReference opField)
+        {
+            if (!TryGetMethodFromAttribute(opField, nameof(SyncVarAttribute.NetworkSet), out var replacement))
+                return;
+
+            if (opField.DeclaringType.IsGenericInstance || opField.DeclaringType.HasGenericParameters) // We're calling to a generic class
+            {
+                var newField = i.Operand as FieldReference;
+                var genericType = (GenericInstanceType)newField.DeclaringType;
+                i.OpCode = OpCodes.Callvirt;
+                i.Operand = replacement.MakeHostInstanceGeneric(genericType);
+            }
+            else
+            {
+                //replace with property
+                i.OpCode = OpCodes.Call;
+                i.Operand = replacement;
+            }
+        }
+
+        private void ProcessInstructionGetterField(Instruction i, FieldReference opField)
+        {
+            if (!TryGetMethodFromAttribute(opField, nameof(SyncVarAttribute.NetworkGet), out var replacement))
+                return;
+
+            if (opField.DeclaringType.IsGenericInstance || opField.DeclaringType.HasGenericParameters) // We're calling to a generic class
+            {
+                var newField = i.Operand as FieldReference;
+                var genericType = (GenericInstanceType)newField.DeclaringType;
+                i.OpCode = OpCodes.Callvirt;
+                i.Operand = replacement.MakeHostInstanceGeneric(genericType);
+            }
+            else
+            {
+                //replace with property
+                i.OpCode = OpCodes.Call;
+                i.Operand = replacement;
+            }
+        }
+
         private Instruction ProcessInstructionLoadAddress(MethodDefinition md, Instruction instr, FieldReference opField)
         {
-            // does it set a field that we replaced?
-            if (Setters.TryGetValue(opField, out var replacement))
-            {
-                // we have a replacement for this property
-                // is the next instruction a initobj?
-                var nextInstr = instr.Next;
+            if (!TryGetMethodFromAttribute(opField, nameof(SyncVarAttribute.NetworkSet), out var replacement))
+                return instr;
 
-                if (nextInstr.OpCode == OpCodes.Initobj)
-                {
-                    // we need to replace this code with:
-                    //     var tmp = new MyStruct();
-                    //     this.set_Networkxxxx(tmp);
-                    var worker = md.Body.GetILProcessor();
-                    var tmpVariable = md.AddLocal(opField.FieldType);
+            // we have a replacement for this property
+            // is the next instruction a initobj?
+            var nextInstr = instr.Next;
+            if (nextInstr.OpCode != OpCodes.Initobj)
+                return instr;
 
-                    worker.InsertBefore(instr, worker.Create(OpCodes.Ldloca, tmpVariable));
-                    worker.InsertBefore(instr, worker.Create(OpCodes.Initobj, opField.FieldType));
-                    worker.InsertBefore(instr, worker.Create(OpCodes.Ldloc, tmpVariable));
-                    var newInstr = worker.Create(OpCodes.Call, replacement);
-                    worker.InsertBefore(instr, newInstr);
+            // we need to replace this code with:
+            //     var tmp = new MyStruct();
+            //     this.set_Networkxxxx(tmp);
+            var worker = md.Body.GetILProcessor();
+            var tmpVariable = md.AddLocal(opField.FieldType);
 
-                    worker.Remove(instr);
-                    worker.Remove(nextInstr);
+            worker.InsertBefore(instr, worker.Create(OpCodes.Ldloca, tmpVariable));
+            worker.InsertBefore(instr, worker.Create(OpCodes.Initobj, opField.FieldType));
+            worker.InsertBefore(instr, worker.Create(OpCodes.Ldloc, tmpVariable));
+            var newInstr = worker.Create(OpCodes.Call, replacement);
+            worker.InsertBefore(instr, newInstr);
 
-                    return newInstr;
-                }
-            }
+            worker.Remove(instr);
+            worker.Remove(nextInstr);
 
-            return instr;
+            return newInstr;
         }
     }
 }

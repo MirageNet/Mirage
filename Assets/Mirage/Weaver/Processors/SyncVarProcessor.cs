@@ -6,7 +6,6 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
-using PropertyAttributes = Mono.Cecil.PropertyAttributes;
 
 namespace Mirage.Weaver
 {
@@ -15,6 +14,9 @@ namespace Mirage.Weaver
     /// </summary>
     public class SyncVarProcessor
     {
+        private const string GetNetworkName = "GetNetwork__";
+        private const string SetNetworkName = "SetNetwork__";
+
         private readonly ModuleDefinition module;
         private readonly Readers readers;
         private readonly Writers writers;
@@ -106,7 +108,6 @@ namespace Mirage.Weaver
 
             var fd = syncVar.FieldDefinition;
 
-            var originalName = fd.Name;
             Weaver.DebugLog(fd.DeclaringType, $"Sync Var {fd.Name} {fd.FieldType}");
 
             var get = GenerateSyncVarGetter(syncVar);
@@ -114,34 +115,26 @@ namespace Mirage.Weaver
                 ? GenerateSyncVarSetterInitialOnly(syncVar)
                 : GenerateSyncVarSetter(syncVar);
 
-            //NOTE: is property even needed? Could just use a setter function?
-            //create the property
-            var propertyDefinition = new PropertyDefinition("Network" + originalName, PropertyAttributes.None, syncVar.OriginalType)
-            {
-                GetMethod = get,
-                SetMethod = set
-            };
 
-            propertyDefinition.DeclaringType = fd.DeclaringType;
-            //add the methods and property to the type.
-            fd.DeclaringType.Properties.Add(propertyDefinition);
-            propertySiteProcessor.Setters[fd] = set;
+            syncVar.Attribute.AddField(module, nameof(SyncVarAttribute.NetworkSet), set.Name);
 
             if (syncVar.IsWrapped)
-            {
-                propertySiteProcessor.Getters[fd] = get;
-            }
+                syncVar.Attribute.AddField(module, nameof(SyncVarAttribute.NetworkGet), get.Name);
         }
 
         private MethodDefinition GenerateSyncVarGetter(FoundSyncVar syncVar)
         {
+            // dont need getter for non-wrapped field
+            if (!syncVar.IsWrapped)
+                return null;
+
             var fd = syncVar.FieldDefinition;
             var originalType = syncVar.OriginalType;
             var originalName = syncVar.OriginalName;
 
             //Create the get method
             var get = fd.DeclaringType.AddMethod(
-                    "get_Network" + originalName, MethodAttributes.Public |
+                    GetNetworkName + originalName, MethodAttributes.Public |
                     MethodAttributes.SpecialName |
                     MethodAttributes.HideBySig,
                     originalType);
@@ -164,7 +157,7 @@ namespace Mirage.Weaver
             var originalName = syncVar.OriginalName;
 
             //Create the set method
-            var set = fd.DeclaringType.AddMethod("set_Network" + originalName, MethodAttributes.Public |
+            var set = fd.DeclaringType.AddMethod(SetNetworkName + originalName, MethodAttributes.Public |
                     MethodAttributes.SpecialName |
                     MethodAttributes.HideBySig);
             var valueParam = set.AddParam(originalType, "value");
@@ -184,7 +177,7 @@ namespace Mirage.Weaver
             var originalName = syncVar.OriginalName;
 
             //Create the set method
-            var set = fd.DeclaringType.AddMethod("set_Network" + originalName, MethodAttributes.Public |
+            var set = fd.DeclaringType.AddMethod(SetNetworkName + originalName, MethodAttributes.Public |
                     MethodAttributes.SpecialName |
                     MethodAttributes.HideBySig);
             var valueParam = set.AddParam(originalType, "value");
