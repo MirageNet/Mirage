@@ -17,7 +17,7 @@ namespace Mirage.Tests.Runtime.Syncing
         protected readonly MirageNetworkReader _reader = new MirageNetworkReader();
 
         /// <summary>Object on server that client0 owns</summary>
-        protected T ServerComponent => ServerComponent(0);
+        protected new T ServerComponent => ServerComponent(0);
         /// <summary>Object on client0 that client0 owns</summary>
         protected T OwnerComponent => ClientComponent(0);
         /// <summary>Object on client1 that client0 owns</summary>

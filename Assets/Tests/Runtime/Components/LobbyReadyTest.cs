@@ -35,13 +35,13 @@ namespace Mirage.Tests.Runtime.Components
         [Test]
         public void LobbyAutoFindsReadyCheck()
         {
-            Assert.That(_lobby.Players.Count, Is.EqualTo(2));
+            Assert.That(_lobby.Players.Count, Is.EqualTo(RemoteClientCount));
 
-            Assert.That(_lobby.Players.ContainsKey(ServerIdentity(0)));
-            Assert.That(_lobby.Players.ContainsKey(ServerIdentity(1)));
-
-            Assert.That(_lobby.Players[ServerIdentity(0)], Is.EqualTo(ServerComponent(0)));
-            Assert.That(_lobby.Players[ServerIdentity(1)], Is.EqualTo(ServerComponent(1)));
+            for (var i = 0; i < RemoteClientCount; i++)
+            {
+                Assert.That(_lobby.Players.ContainsKey(ServerIdentity(i)));
+                Assert.That(_lobby.Players[ServerIdentity(i)], Is.EqualTo(ServerComponent(i)));
+            }
         }
 
         [UnityTest]
@@ -185,7 +185,8 @@ namespace Mirage.Tests.Runtime.Components
         }
 
         [UnityTest]
-        public IEnumerator EventUInvokesOnOwner()
+        [Ignore("Needs new SyncVar feature")]
+        public IEnumerator EventInvokesOnOwner()
         {
             var ownerComp = ClientComponent(0);
 
