@@ -20,6 +20,9 @@ namespace Mirage
         /// <summary>
         ///     If true this syncvar hook will also fire on the server side.
         /// </summary>
+        // todo add test to make sure this runs on owner client
+        // public bool invokeHookOnSender;
+        // [System.Obsolete("Use invokeHookOnSender instead", false)]
         public bool invokeHookOnServer;
 
         /// <summary>
