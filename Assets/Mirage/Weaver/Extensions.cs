@@ -123,7 +123,8 @@ namespace Mirage.Weaver
             throw new ArgumentException($"Invalid enum {td.FullName}");
         }
 
-        public static bool ImplementsInterface<TInterface>(this TypeDefinition td)
+        public static bool Implements<TInterface>(this TypeReference tr) => tr.Resolve().Implements<TInterface>();
+        public static bool Implements<TInterface>(this TypeDefinition td)
         {
             if (td == null)
                 return false;

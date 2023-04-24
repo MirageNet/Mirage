@@ -41,7 +41,7 @@ namespace Mirage.Weaver
                     continue;
                 }
 
-                if (tf.ImplementsInterface<ISyncObject>())
+                if (tf.Implements<ISyncObject>())
                 {
                     if (fd.IsStatic)
                     {
@@ -106,7 +106,7 @@ namespace Mirage.Weaver
                     return false;
                 }
 
-                return typeRef.Resolve().ImplementsInterface<ISyncObject>();
+                return typeRef.Resolve().Implements<ISyncObject>();
             }
             catch
             {

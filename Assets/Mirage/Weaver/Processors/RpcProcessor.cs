@@ -28,16 +28,10 @@ namespace Mirage.Weaver
         /// </summary>
         protected abstract Type AttributeType { get; }
 
-        // helper functions to check if the method has a NetworkPlayer parameter
-        protected static bool HasNetworkPlayerParameter(MethodDefinition md)
+        protected static bool HasFirstParameter<T>(MethodDefinition md)
         {
             return md.Parameters.Count > 0 &&
-                   IsNetworkPlayer(md.Parameters[0].ParameterType);
-        }
-
-        protected static bool IsNetworkPlayer(TypeReference type)
-        {
-            return type.Resolve().ImplementsInterface<INetworkPlayer>();
+                   md.Parameters[0].ParameterType.Implements<T>();
         }
 
         /// <summary>
@@ -82,7 +76,7 @@ namespace Mirage.Weaver
             var error = false;
             for (var i = 0; i < method.Parameters.Count; i++)
             {
-                if (IsNetworkPlayer(method.Parameters[i].ParameterType))
+                if (method.Parameters[i].ParameterType.Is<INetworkPlayer>())
                     continue;
 
                 try
@@ -135,13 +129,13 @@ namespace Mirage.Weaver
         private static bool ClientRpcWithTarget(MethodDefinition method, RemoteCallType callType)
         {
             return (callType == RemoteCallType.ClientRpc)
-                && HasNetworkPlayerParameter(method);
+                && HasFirstParameter<INetworkPlayer>(method);
         }
 
         private void WriteArgument(ILProcessor worker, VariableDefinition writer, ParameterDefinition param, ValueSerializer serializer)
         {
             // dont write anything for INetworkPlayer, it is either target or sender
-            if (IsNetworkPlayer(param.ParameterType))
+            if (param.ParameterType.Is<INetworkPlayer>())
                 return;
 
             serializer.AppendWriteParameter(module, worker, writer, param);
@@ -166,7 +160,7 @@ namespace Mirage.Weaver
 
         private void ReadArgument(ILProcessor worker, ParameterDefinition readerParameter, ParameterDefinition senderParameter, ParameterDefinition param, ValueSerializer serializer)
         {
-            if (IsNetworkPlayer(param.ParameterType))
+            if (param.ParameterType.Is<INetworkPlayer>())
             {
                 if (senderParameter != null)
                 {
@@ -259,7 +253,7 @@ namespace Mirage.Weaver
                 throw new RpcException($"{method.Name} cannot have out parameters", method);
             }
 
-            if (IsNetworkPlayer(param.ParameterType))
+            if (param.ParameterType.Is<INetworkPlayer>())
             {
                 if (callType == RemoteCallType.ClientRpc && firstParam)
                 {
@@ -375,7 +369,7 @@ namespace Mirage.Weaver
 
                 instruction.Operand = generatedMethod.Module.ImportReference(userCodeReplacement);
 
-                Weaver.DebugLog(type, $"Replacing call to '{calledMethod.FullName}' with '{userCodeReplacement.FullName}' inside '{ generatedMethod.FullName}'");
+                Weaver.DebugLog(type, $"Replacing call to '{calledMethod.FullName}' with '{userCodeReplacement.FullName}' inside '{generatedMethod.FullName}'");
             }
         }
 
