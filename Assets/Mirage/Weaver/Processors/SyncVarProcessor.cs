@@ -14,8 +14,8 @@ namespace Mirage.Weaver
     /// </summary>
     public class SyncVarProcessor
     {
-        private const string GetNetworkName = "GetNetwork__";
-        private const string SetNetworkName = "SetNetwork__";
+        public const string GetNetworkName = "GetNetwork__";
+        public const string SetNetworkName = "SetNetwork__";
 
         private readonly ModuleDefinition module;
         private readonly Readers readers;
@@ -189,14 +189,14 @@ namespace Mirage.Weaver
             var endOfMethod = worker.Create(OpCodes.Nop);
 
             // this
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            //worker.Append(worker.Create(OpCodes.Ldarg_0));
             // new value to set
             worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
             // reference to field to set
             // make generic version of SetSyncVar with field type
             WriteLoadField(worker, syncVar);
 
-            var syncVarEqual = module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
+            var syncVarEqual = module.ImportReference(() => NetworkBehaviour.SyncVarEqual<object>(default, default));
             var syncVarEqualGm = new GenericInstanceMethod(syncVarEqual.GetElementMethod());
             syncVarEqualGm.GenericArguments.Add(originalType);
             worker.Append(worker.Create(OpCodes.Call, syncVarEqualGm));
@@ -646,13 +646,13 @@ namespace Mirage.Weaver
                 var syncVarEqualLabel = worker.Create(OpCodes.Nop);
 
                 // 'this.' for 'this.SyncVarEqual'
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                //worker.Append(worker.Create(OpCodes.Ldarg_0));
                 // 'oldValue'
                 worker.Append(worker.Create(OpCodes.Ldloc, oldValue));
                 // 'newValue'
                 WriteLoadField(worker, syncVar);
                 // call the function
-                var syncVarEqual = module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
+                var syncVarEqual = module.ImportReference(() => NetworkBehaviour.SyncVarEqual<object>(default, default));
                 var syncVarEqualGm = new GenericInstanceMethod(syncVarEqual.GetElementMethod());
                 syncVarEqualGm.GenericArguments.Add(originalType);
                 worker.Append(worker.Create(OpCodes.Call, syncVarEqualGm));

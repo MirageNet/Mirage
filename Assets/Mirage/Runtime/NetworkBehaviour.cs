@@ -255,7 +255,7 @@ namespace Mirage
             }
         }
 
-        protected internal bool SyncVarEqual<T>(T value, T fieldValue)
+        public static bool SyncVarEqual<T>(T value, T fieldValue)
         {
             // newly initialized or changed value?
             return EqualityComparer<T>.Default.Equals(value, fieldValue);

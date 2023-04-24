@@ -12,16 +12,31 @@ namespace Mirage.Weaver
     // https://github.com/Unity-Technologies/com.unity.netcode.gameobjects/blob/472d51b34520e8fb6f0aa43fd56d162c3029e0b0/com.unity.netcode.gameobjects/Editor/CodeGen/PostProcessorAssemblyResolver.cs
     internal class PostProcessorAssemblyResolver : IAssemblyResolver
     {
+        internal int CacheHits;
+        internal int CacheMisses;
+        internal int CacheNew;
+        internal int CacheSize => _assemblyCache.Count;
+
         private readonly string[] _assemblyReferences;
         private readonly string[] _assemblyReferencesFileName;
-        private readonly Dictionary<string, AssemblyDefinition> _assemblyCache = new Dictionary<string, AssemblyDefinition>();
         private readonly ICompiledAssembly _compiledAssembly;
         private AssemblyDefinition _selfAssembly;
+        private static readonly Dictionary<string, Cache> _assemblyCache = new Dictionary<string, Cache>();
+        private static object _lock = new object();
+
+        private struct Cache
+        {
+            public AssemblyDefinition Assembly;
+            public DateTime WriteTime;
+        }
 
         public PostProcessorAssemblyResolver(ICompiledAssembly compiledAssembly)
         {
+            Console.WriteLine($"[Weaver.PostProcessorAssemblyResolver] Created, static Cache:{_assemblyCache.Count}");
             _compiledAssembly = compiledAssembly;
             _assemblyReferences = compiledAssembly.References;
+
+            //Console.WriteLine($"[Weaver References]\n - {string.Join("\n- ", _assemblyReferences)}");
             // cache paths here so we dont need to call it each time we resolve
             _assemblyReferencesFileName = _assemblyReferences.Select(r => Path.GetFileName(r)).ToArray();
         }
@@ -40,23 +55,75 @@ namespace Mirage.Weaver
 
         public AssemblyDefinition Resolve(AssemblyNameReference name) => Resolve(name, new ReaderParameters(ReadingMode.Deferred));
 
+        public static void Log(string msg)
+        {
+            Console.WriteLine(msg);
+
+            for (var i = 0; i < 10; i++)
+            {
+                try
+                {
+                    File.AppendAllText("./WeaverResolver.log", msg);
+                    return;
+                }
+                catch (System.IO.IOException)
+                {
+                    Thread.Sleep(10);
+                }
+            }
+        }
+
         public AssemblyDefinition Resolve(AssemblyNameReference name, ReaderParameters parameters)
         {
-            lock (_assemblyCache)
+            if (name.Name == _compiledAssembly.Name)
+                return _selfAssembly;
+
+            if (!TryFindFile(name, out var inName))
+                return null;
+
+            string beePath, libName, fileName;
+            if (FixBeePath(inName, out beePath))
             {
-                if (name.Name == _compiledAssembly.Name)
-                    return _selfAssembly;
+                libName = Path.Combine("Library/ScriptAssemblies", Path.GetFileName(inName));
+            }
+            else
+            {
+                beePath = inName;
+                libName = inName;
+            }
 
-                var fileName = FindFile(name);
-                if (fileName == null)
-                    return null;
+            fileName = inName;
 
+
+            lock (_lock)
+            {
                 var lastWriteTime = File.GetLastWriteTime(fileName);
+                bool miss;
+                if (_assemblyCache.TryGetValue(fileName, out var result))
+                {
+                    if (result.WriteTime == lastWriteTime)
+                    {
+                        CacheHits++;
+                        return result.Assembly;
+                    }
+                    CacheMisses++;
+                    miss = true;
+                }
+                else
+                {
+                    CacheNew++;
+                    miss = false;
 
-                var cacheKey = fileName + lastWriteTime;
+                }
+                var inWriteTime = File.GetLastWriteTime(inName);
+                var postWriteTime = File.GetLastWriteTime(beePath);
+                var libTime = File.GetLastWriteTime(libName);
 
-                if (_assemblyCache.TryGetValue(cacheKey, out var result))
-                    return result;
+                if (beePath != inName)
+                {
+                    var missText = miss ? "MISS" : "NEW";
+                    Log($"[WeaverDebug3] {missText} {_selfAssembly?.Name?.ToString()}\nFile:{inWriteTime:hh:mm:ss.fff} {inName} \nPost:{postWriteTime:hh:mm:ss.fff} {beePath} \nLib :{libTime:hh:mm:ss.fff} {libName}\n\n\n");
+                }
 
                 parameters.AssemblyResolver = this;
 
@@ -67,12 +134,40 @@ namespace Mirage.Weaver
                     parameters.SymbolStream = MemoryStreamFor(pdb);
 
                 var assemblyDefinition = AssemblyDefinition.ReadAssembly(ms, parameters);
-                _assemblyCache.Add(cacheKey, assemblyDefinition);
+                _assemblyCache[fileName] = new Cache { Assembly = assemblyDefinition, WriteTime = lastWriteTime };
                 return assemblyDefinition;
             }
         }
 
-        private string FindFile(AssemblyNameReference name)
+        private bool FixBeePath(string fullpath, out string postFile)
+        {
+            postFile = null;
+            // if path is in bee folder we need to replace it with the post-processed one, or it wont we can't find referecnes/etc
+
+            if (!fullpath.StartsWith("Library/Bee/artifacts/"))
+                return false;
+            // Library/Bee/artifacts/1900b0aEDbg.dag/Mirage.Components.dll
+            // Library/Bee/artifacts/1900b0aEDbg.dag/post-processed/Mirage.Components.dll
+
+            // we need to get the directory, then append "post-processed" folder, then filename
+            var dir = Path.GetDirectoryName(fullpath);
+            var fileName = Path.GetFileName(fullpath);
+
+            postFile = Path.Combine(dir, "post-processed", fileName);
+
+            //var lastWriteTime = File.GetLastWriteTime(fullpath);
+            //var postWriteTime = File.GetLastWriteTime(postFile);
+            //var libTime = File.GetLastWriteTime(Path.Combine("Library\\ScriptAssemblies", fileName));
+            //Console.WriteLine($"[WeaverDebug3] {fileName}\nFile:{lastWriteTime:mm:ss.fff}\nPost:{postWriteTime:mm:ss.fff}\nLib:{libTime:mm:ss.fff}");
+
+            // check it exists just incase
+            if (File.Exists(postFile))
+                return true;
+            else
+                return false;
+        }
+
+        private bool TryFindFile(AssemblyNameReference name, out string filePath)
         {
             // This method is called a lot, avoid linq
 
@@ -84,7 +179,10 @@ namespace Mirage.Weaver
                 // if filename matches, return full path
                 var fileName = _assemblyReferencesFileName[i];
                 if (fileName == dllName || fileName == exeName)
-                    return _assemblyReferences[i];
+                {
+                    filePath = _assemblyReferences[i];
+                    return true;
+                }
             }
 
             // second pass (only run if first fails), 
@@ -101,10 +199,15 @@ namespace Mirage.Weaver
             {
                 var candidate = Path.Combine(parentDir, name.Name + ".dll");
                 if (File.Exists(candidate))
-                    return candidate;
+                {
+                    filePath = candidate;
+                    return true;
+                }
             }
 
-            return null;
+            Console.WriteLine($"[WeaverResolve] Failed to resolve:{name.Name}");
+            filePath = null;
+            return false;
         }
 
         private static MemoryStream MemoryStreamFor(string fileName)

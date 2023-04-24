@@ -75,7 +75,7 @@ namespace Mirage.Weaver
                 {
                     SequencePoint sequencePoint;
                     (sequencePoint, sequencePointIndex) = GetSequencePoint(sequencePoints, sequencePointIndex, instr);
-                    instr = processor(md, instr, sequencePoint);
+                    instr = processor.Invoke(md, instr, sequencePoint);
                     instr = instr.Next;
                 }
             }

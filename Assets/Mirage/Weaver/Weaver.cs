@@ -24,6 +24,7 @@ namespace Mirage.Weaver
         private Writers writers;
         private PropertySiteProcessor propertySiteProcessor;
         private WeaverDiagnosticsTimer timer;
+        private PostProcessorAssemblyResolver assemblyResolver;
 
         private AssemblyDefinition CurrentAssembly { get; set; }
 
@@ -60,7 +61,7 @@ namespace Mirage.Weaver
                 var module = CurrentAssembly.MainModule;
                 readers = new Readers(module, logger);
                 writers = new Writers(module, logger);
-                propertySiteProcessor = new PropertySiteProcessor(module);
+                propertySiteProcessor = new PropertySiteProcessor(module, logger);
                 var rwProcessor = new ReaderWriterProcessor(module, readers, writers, logger);
 
                 var modified = false;
@@ -100,6 +101,8 @@ namespace Mirage.Weaver
                     }
                 }
 
+                Console.WriteLine($"[Weaver.assemblyResolver] Hits:{assemblyResolver.CacheHits} Misses:{assemblyResolver.CacheMisses} Size:{assemblyResolver.CacheSize} new:{assemblyResolver.CacheNew}");
+
                 return CurrentAssembly;
             }
             catch (Exception e)
@@ -117,9 +120,9 @@ namespace Mirage.Weaver
             }
         }
 
-        public static AssemblyDefinition AssemblyDefinitionFor(ICompiledAssembly compiledAssembly)
+        public AssemblyDefinition AssemblyDefinitionFor(ICompiledAssembly compiledAssembly)
         {
-            var assemblyResolver = new PostProcessorAssemblyResolver(compiledAssembly);
+            assemblyResolver = new PostProcessorAssemblyResolver(compiledAssembly);
             var readerParameters = new ReaderParameters
             {
                 SymbolStream = new MemoryStream(compiledAssembly.InMemoryAssembly.PdbData),
