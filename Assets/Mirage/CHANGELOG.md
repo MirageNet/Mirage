@@ -1,3 +1,23 @@
+# [133.0.0](https://github.com/MirageNet/Mirage/compare/v132.0.3...v133.0.0) (2023-04-24)
+
+
+### Features
+
+* refactoring LobbyReady to use new features ([b9e13e3](https://github.com/MirageNet/Mirage/commit/b9e13e36060bcb696c0b3a70ab99c592a66454c3))
+
+
+### BREAKING CHANGES
+
+* LobbyReady and ReadyCheck components changed
+
+fix: using Start instead so Server can be added by test
+
+test: trying to fix lobby test
+
+fix: fixing lobby ready
+
+setting syncvar in another asm doesn't work all the time. Unity ILPP is weird
+
 ## [132.0.3](https://github.com/MirageNet/Mirage/compare/v132.0.2...v132.0.3) (2023-04-14)
 
 
