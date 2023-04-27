@@ -141,39 +141,10 @@ namespace Mirage
         /// <param name="prefabHash"></param>
         /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
         /// <returns></returns>
-        public void ReplaceCharacter(INetworkPlayer player, GameObject character, int prefabHash, bool keepAuthority = false)
-        {
-            var identity = character.GetNetworkIdentity();
-            ReplaceCharacter(player, identity, prefabHash, keepAuthority);
-        }
-
-        /// <summary>
-        /// This replaces the player object for a connection with a different player object. The old player object is not destroyed.
-        /// <para>If a connection already has a player object, this can be used to replace that object with a different player object. This does NOT change the ready state of the connection, so it can safely be used while changing scenes.</para>
-        /// </summary>
-        /// <param name="player">Connection which is adding the player.</param>
-        /// <param name="character">Player object spawned for the player.</param>
-        /// <param name="prefabHash"></param>
-        /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
-        /// <returns></returns>
         public void ReplaceCharacter(INetworkPlayer player, NetworkIdentity character, int prefabHash, bool keepAuthority = false)
         {
             character.PrefabHash = prefabHash;
             ReplaceCharacter(player, character, keepAuthority);
-        }
-
-        /// <summary>
-        /// This replaces the player object for a connection with a different player object. The old player object is not destroyed.
-        /// <para>If a connection already has a player object, this can be used to replace that object with a different player object. This does NOT change the ready state of the connection, so it can safely be used while changing scenes.</para>
-        /// </summary>
-        /// <param name="player">Connection which is adding the player.</param>
-        /// <param name="character">Player object spawned for the player.</param>
-        /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
-        /// <returns></returns>
-        public void ReplaceCharacter(INetworkPlayer player, GameObject character, bool keepAuthority = false)
-        {
-            var identity = character.GetNetworkIdentity();
-            ReplaceCharacter(player, identity, keepAuthority);
         }
 
         /// <summary>
@@ -236,39 +207,10 @@ namespace Mirage
         /// <param name="character">The Network Object to add to the Player. Can be spawned or unspawned. Calling this method will respawn it.</param>
         /// <param name="prefabHash">New prefab hash to give to the player, used for dynamically creating objects at runtime.</param>
         /// <exception cref="ArgumentException">throw when the player already has a character</exception>
-        public void AddCharacter(INetworkPlayer player, GameObject character, int prefabHash)
-        {
-            var identity = character.GetNetworkIdentity();
-            AddCharacter(player, identity, prefabHash);
-        }
-
-        /// <summary>
-        /// <para>When <see cref="AddCharacterMessage"/> is received from a player, the server calls this to associate the character GameObject with the NetworkPlayer.</para>
-        /// <para>When a character is added for a player the object is automatically spawned, so you do not need to call ServerObjectManager.Spawn for that object.</para>
-        /// <para>This function is used for adding a character, not replacing. If there is already a character then use <see cref="ReplaceCharacter"/> instead.</para>
-        /// </summary>
-        /// <param name="player">the Player to add the character to</param>
-        /// <param name="character">The Network Object to add to the Player. Can be spawned or unspawned. Calling this method will respawn it.</param>
-        /// <param name="prefabHash">New prefab hash to give to the player, used for dynamically creating objects at runtime.</param>
-        /// <exception cref="ArgumentException">throw when the player already has a character</exception>
         public void AddCharacter(INetworkPlayer player, NetworkIdentity character, int prefabHash)
         {
             character.PrefabHash = prefabHash;
             AddCharacter(player, character);
-        }
-
-        /// <summary>
-        /// <para>When <see cref="AddCharacterMessage"/> is received from a player, the server calls this to associate the character GameObject with the NetworkPlayer.</para>
-        /// <para>When a character is added for a player the object is automatically spawned, so you do not need to call ServerObjectManager.Spawn for that object.</para>
-        /// <para>This function is used for adding a character, not replacing. If there is already a character then use <see cref="ReplaceCharacter"/> instead.</para>
-        /// </summary>
-        /// <param name="player">the Player to add the character to</param>
-        /// <param name="character">The Network Object to add to the Player. Can be spawned or unspawned. Calling this method will respawn it.</param>
-        /// <exception cref="ArgumentException">throw when the player already has a character</exception>
-        public void AddCharacter(INetworkPlayer player, GameObject character)
-        {
-            var identity = character.GetNetworkIdentity();
-            AddCharacter(player, identity);
         }
 
         /// <summary>
@@ -446,49 +388,6 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Spawns the <paramref name="identity"/> and settings its owner to the player that owns <paramref name="ownerObject"/>
-        /// </summary>
-        /// <param name="ownerObject">An object owned by a player</param>
-        public void Spawn(GameObject obj, GameObject ownerObject)
-        {
-            var ownerIdentity = ownerObject.GetNetworkIdentity();
-
-            if (ownerIdentity.Owner == null)
-            {
-                throw new InvalidOperationException("Player object is not a player in the connection");
-            }
-
-            Spawn(obj, ownerIdentity.Owner);
-        }
-
-        /// <summary>
-        /// Assigns <paramref name="prefabHash"/> to the <paramref name="obj"/> and then spawns it with <paramref name="owner"/>
-        /// <para>
-        ///     <see cref="NetworkIdentity.PrefabHash"/> can only be set on an identity if the current value is Empty
-        /// </para>
-        /// <para>
-        ///     This method is useful if you are creating network objects at runtime and both server and client know what <see cref="Guid"/> to set on an object
-        /// </para>
-        /// </summary>
-        /// <param name="obj">The object to spawn.</param>
-        /// <param name="prefabHash">The prefabHash of the object to spawn. Used for custom spawn handlers.</param>
-        /// <param name="owner">The connection that has authority over the object</param>
-        public void Spawn(GameObject obj, int prefabHash, INetworkPlayer owner = null)
-        {
-            var identity = obj.GetNetworkIdentity();
-            Spawn(identity, prefabHash, owner);
-        }
-
-        /// <summary>
-        /// Spawns the <paramref name="identity"/> and settings its owner to <paramref name="owner"/>
-        /// </summary>
-        public void Spawn(GameObject obj, INetworkPlayer owner = null)
-        {
-            var identity = obj.GetNetworkIdentity();
-            Spawn(identity, owner);
-        }
-
-        /// <summary>
         /// Assigns <paramref name="prefabHash"/> to the <paramref name="identity"/> and then spawns it with <paramref name="owner"/>
         /// <para>
         ///     <see cref="NetworkIdentity.PrefabHash"/> can only be set on an identity if the current value is Empty
@@ -512,15 +411,19 @@ namespace Mirage
         /// <summary>
         /// Spawns the <paramref name="identity"/> and keeping owner as <see cref="NetworkIdentity.Owner"/>
         /// </summary>
-        public void Spawn(NetworkIdentity identity)
+        public void Spawn(NetworkIdentity identity, INetworkPlayer owner)
         {
-            Spawn(identity, identity.Owner);
+            // check first before setting owner
+            ThrowIfPrefab(identity);
+
+            identity.Owner = owner;
+            Spawn(identity);
         }
 
         /// <summary>
         /// Spawns the <paramref name="identity"/> and assigns <paramref name="owner"/> to be it's owner
         /// </summary>
-        public void Spawn(NetworkIdentity identity, INetworkPlayer owner)
+        public void Spawn(NetworkIdentity identity)
         {
             if (!Server || !Server.Active)
             {
@@ -529,13 +432,12 @@ namespace Mirage
 
             ThrowIfPrefab(identity.gameObject);
 
-            identity.Owner = owner;
 
             identity.SetServerValues(Server, this);
 
             // special case to make sure hasAuthority is set
             // on start server in host mode
-            if (owner == Server.LocalPlayer)
+            if (identity.Owner == Server.LocalPlayer)
                 identity.HasAuthority = true;
 
             if (!identity.IsSpawned)
@@ -737,7 +639,7 @@ namespace Mirage
                 {
                     if (logger.LogEnabled()) logger.Log($"SpawnObjects sceneId:{identity.SceneId:X} name:{identity.gameObject.name}");
 
-                    Spawn(identity.gameObject);
+                    Spawn(identity);
                 }
             }
         }
@@ -797,23 +699,22 @@ namespace Mirage
         public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter, HashSet<NetworkIdentity> skip)
         {
             // todo Call player.RemoveAllVisibleObjects() first so that it will send spawn message for objects destroyed in scene change
-            if (logger.LogEnabled()) logger.Log("SetClientReadyInternal for conn:" + player);
 
-            // client is ready to start spawning objects
-            if (ignoreHasCharacter || player.HasCharacter)
-                SpawnVisibleObjectInternal(player, skip);
-        }
-
-        private void SpawnVisibleObjectInternal(INetworkPlayer player, HashSet<NetworkIdentity> skip)
-        {
-            if (logger.LogEnabled()) logger.Log($"Checking Observers on {Server.World.SpawnedIdentities.Count} objects for player: {player}");
+            if (!ignoreHasCharacter && !player.HasCharacter)
+            {
+                if (logger.LogEnabled()) logger.Log($"SpawnVisibleObjects: not spawning objects for {player} because it does not have a character");
+                return;
+            }
 
             if (!player.SceneIsReady)
             {
                 // client needs to finish loading scene before we can spawn objects
                 // otherwise it would not find scene objects.
+                if (logger.LogEnabled()) logger.Log($"SpawnVisibleObjects: not spawning objects for {player} because scene not ready");
                 return;
             }
+
+            if (logger.LogEnabled()) logger.Log($"SpawnVisibleObjects: Checking Observers on {Server.World.SpawnedIdentities.Count} objects for player: {player}");
 
             // add connection to each nearby NetworkIdentity's observers, which
             // internally sends a spawn message for each one to the connection.
@@ -836,7 +737,6 @@ namespace Mirage
                 }
             }
         }
-
 
         private sealed class NetworkIdentityComparer : IComparer<NetworkIdentity>
         {
