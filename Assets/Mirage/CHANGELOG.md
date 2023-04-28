@@ -1,3 +1,22 @@
+# [134.0.0](https://github.com/MirageNet/Mirage/compare/v133.0.0...v134.0.0) (2023-04-28)
+
+
+### Code Refactoring
+
+* removing NumberOfPlayers ([cafbe50](https://github.com/MirageNet/Mirage/commit/cafbe50a591a464acb30f4a59037f1e28bdb553e))
+* removing Obsolete functions ([a3932f2](https://github.com/MirageNet/Mirage/commit/a3932f241ee5129efe4ec9d677f9c622a68ebccf))
+
+
+### Features
+
+* adding SpawnInstantiate helper methods ([58f14cd](https://github.com/MirageNet/Mirage/commit/58f14cd43b33dc0e812863fcf274dc98d1105d22))
+
+
+### BREAKING CHANGES
+
+* removing Obsolete functions, see commit for details
+* NumberOfPlayers removed
+
 # [133.0.0](https://github.com/MirageNet/Mirage/compare/v132.0.3...v133.0.0) (2023-04-24)
 
 
