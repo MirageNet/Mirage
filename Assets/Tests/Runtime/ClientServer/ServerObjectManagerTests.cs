@@ -24,8 +24,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
     }
 
-    [TestFixture]
-    public class ServerObjectManagerTests : ClientServerSetup<MockComponent>
+    public class ServerObjectManagerTests : ClientServerSetup
     {
         private void AssertNoIdentityMessage(InvalidOperationException ex, string name)
         {

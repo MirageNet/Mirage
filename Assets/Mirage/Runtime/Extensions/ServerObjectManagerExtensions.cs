@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mirage
@@ -108,6 +107,39 @@ namespace Mirage
         {
             var identity = obj.GetNetworkIdentity();
             som.Spawn(identity, owner);
+        }
+
+
+        /// <summary>
+        /// Instantiate a prefab an then Spawns it with ServerObjectManager
+        /// </summary>
+        /// <param name="prefab"></param>
+        /// <param name="prefabHash"></param>
+        /// <param name="owner"></param>
+        public static GameObject SpawnInstantiate(this ServerObjectManager som, GameObject prefab, int? prefabHash = null, INetworkPlayer owner = null)
+        {
+            var clone = GameObject.Instantiate(prefab);
+            if (prefabHash.HasValue)
+                som.Spawn(clone, prefabHash.Value, owner);
+            else
+                som.Spawn(clone, owner);
+            return clone;
+        }
+
+        /// <summary>
+        /// Instantiate a prefab an then Spawns it with ServerObjectManager
+        /// </summary>
+        /// <param name="prefab"></param>
+        /// <param name="prefabHash"></param>
+        /// <param name="owner"></param>
+        public static NetworkIdentity SpawnInstantiate(this ServerObjectManager som, NetworkIdentity prefab, int? prefabHash = null, INetworkPlayer owner = null)
+        {
+            var clone = GameObject.Instantiate(prefab);
+            if (prefabHash.HasValue)
+                som.Spawn(clone, prefabHash.Value, owner);
+            else
+                som.Spawn(clone, owner);
+            return clone;
         }
     }
 }
