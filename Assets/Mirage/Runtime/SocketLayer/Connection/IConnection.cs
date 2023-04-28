@@ -1,5 +1,3 @@
-using System;
-
 namespace Mirage.SocketLayer
 {
     /// <summary>
@@ -26,33 +24,17 @@ namespace Mirage.SocketLayer
 
         void Disconnect();
 
-        INotifyToken SendNotify(byte[] packet);
         INotifyToken SendNotify(byte[] packet, int offset, int length);
-        INotifyToken SendNotify(ArraySegment<byte> packet);
 
-        void SendNotify(byte[] packet, INotifyCallBack callBacks);
         void SendNotify(byte[] packet, int offset, int length, INotifyCallBack callBacks);
-        void SendNotify(ArraySegment<byte> packet, INotifyCallBack callBacks);
 
-        /// <summary>
-        /// single message, batched by AckSystem
-        /// </summary>
-        /// <param name="message"></param>
-        void SendReliable(byte[] message);
         /// <summary>
         /// single message, batched by AckSystem
         /// </summary>
         /// <param name="message"></param>
         void SendReliable(byte[] message, int offset, int length);
-        /// <summary>
-        /// single message, batched by AckSystem
-        /// </summary>
-        /// <param name="message"></param>
-        void SendReliable(ArraySegment<byte> message);
 
-        void SendUnreliable(byte[] packet);
         void SendUnreliable(byte[] packet, int offset, int length);
-        void SendUnreliable(ArraySegment<byte> packet);
 
         /// <summary>
         /// Forces the connection to send any batched message immediately to the socket
