@@ -72,7 +72,7 @@ namespace Mirage
         /// <summary>
         /// Event fires after the Client has disconnected from its Server and Cleanup has been called.
         /// </summary>
-        public IAddLateEvent<ClientStoppedReason> Disconnected => _disconnected;
+        public IAddLateEvent<ClientStoppedReason, ClientStopReasonGroup> Disconnected => _disconnected;
 
         /// <summary>
         /// The NetworkConnection object this client is using.
@@ -181,7 +181,7 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log($"Failed to connect to {conn.EndPoint} with reason {reason}");
             Player?.MarkAsDisconnected();
-            _disconnected?.Invoke(reason.ToClientStoppedReason());
+            _disconnected?.Invoke(reason.ToClientStoppedReason(), ClientStopReasonGroup.ConnectingFailed);
             Cleanup();
         }
 
@@ -189,14 +189,14 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log($"Disconnected from {conn.EndPoint} with reason {reason}");
             Player?.MarkAsDisconnected();
-            _disconnected?.Invoke(reason.ToClientStoppedReason());
+            _disconnected?.Invoke(reason.ToClientStoppedReason(), ClientStopReasonGroup.Disconnected);
             Cleanup();
         }
 
         private void OnHostDisconnected()
         {
             Player?.MarkAsDisconnected();
-            _disconnected?.Invoke(ClientStoppedReason.HostModeStopped);
+            _disconnected?.Invoke(ClientStoppedReason.HostModeStopped, ClientStopReasonGroup.Disconnected);
         }
 
         internal void ConnectHost(NetworkServer server, IDataHandler serverDataHandler)

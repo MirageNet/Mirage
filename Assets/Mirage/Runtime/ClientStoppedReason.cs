@@ -3,6 +3,13 @@ using Mirage.SocketLayer;
 
 namespace Mirage
 {
+    [Serializable]
+    public enum ClientStopReasonGroup
+    {
+        ConnectingFailed,
+        Disconnected,
+        HostMode,
+    }
     /// <summary>
     /// Reason why Client was stopped or disconnected
     /// </summary>

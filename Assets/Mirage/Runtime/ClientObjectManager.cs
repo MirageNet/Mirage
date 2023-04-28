@@ -132,7 +132,7 @@ namespace Mirage
             }
         }
 
-        private void OnClientDisconnected(ClientStoppedReason reason)
+        private void OnClientDisconnected(ClientStoppedReason reason, ClientStopReasonGroup group)
         {
             ClearSpawners();
             DestroyAllClientObjects();
