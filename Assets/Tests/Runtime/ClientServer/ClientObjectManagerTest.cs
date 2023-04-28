@@ -34,9 +34,9 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             await UniTask.Delay(1);
 
-            var result = clientObjectManager.GetPrefab(hash);
+            var handler = clientObjectManager.GetSpawnHandler(hash);
 
-            Assert.That(result, Is.SameAs(identity));
+            Assert.That(handler.Prefab, Is.SameAs(identity));
         });
 
         [Test]
@@ -254,7 +254,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             var exception = Assert.Throws<ArgumentException>(() =>
             {
-                var result = clientObjectManager.GetPrefab(0);
+                var handler = clientObjectManager.GetSpawnHandler(0);
             });
 
             var expected = new ArgumentException("prefabHash is zero", "prefabHash");
@@ -267,7 +267,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             var prefabHash = NewUniqueHash();
             var exception = Assert.Throws<SpawnObjectException>(() =>
             {
-                var result = clientObjectManager.GetPrefab(prefabHash);
+                var handler = clientObjectManager.GetSpawnHandler(prefabHash);
             });
 
             Assert.That(exception, Has.Message.EqualTo($"No prefab for {prefabHash:X}. did you forget to add it to the ClientObjectManager?"));

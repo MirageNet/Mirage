@@ -1,27 +1,5 @@
 using System;
 
-namespace Mirage.Serialization.Internal.Codegen
-{
-    /// <summary>
-    /// Used by weaver
-    /// <para>
-    /// Weavers Adds to types that have readers generared for them. Checked by other asmdefs so they dont generate their own readers
-    /// </para>
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method)]
-    [System.Obsolete("broken in unity2021")]
-    public sealed class WeaverReaderGeneratedAttribute : Attribute { }
-
-    /// <summary>
-    /// Used by weaver
-    /// <para>
-    /// Weavers Adds to types that have writers generared for them. Checked by other asmdefs so they dont generate their own writers
-    /// </para>
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method)]
-    [System.Obsolete("broken in unity2021")]
-    public sealed class WeaverWriterGeneratedAttribute : Attribute { }
-}
 namespace Mirage.Serialization
 {
     // weaver doesn't need constructor parameters to be used, so we can have constructor without fields/properties

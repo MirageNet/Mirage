@@ -14,8 +14,6 @@ namespace Mirage.Weaver
         public Readers(ModuleDefinition module, IWeaverLogger logger) : base(module, logger) { }
 
         protected override string FunctionTypeLog => "read function";
-        [System.Obsolete("broken in unity2021", true)]
-        protected override Type GeneratedAttribute => typeof(Mirage.Serialization.Internal.Codegen.WeaverReaderGeneratedAttribute);
         protected override Expression<Action> ArrayExpression => () => CollectionExtensions.ReadArray<byte>(default);
         protected override Expression<Action> ListExpression => () => CollectionExtensions.ReadList<byte>(default);
         protected override Expression<Action> SegmentExpression => () => CollectionExtensions.ReadArraySegment<byte>(default);

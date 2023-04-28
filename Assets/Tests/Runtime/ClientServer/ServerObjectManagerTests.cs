@@ -118,7 +118,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             sceneObject.SetSceneId(42);
 
             Debug.Assert(!sceneObject.IsSpawned, "Identity should be unspawned for this test");
-            serverObjectManager.SpawnObjects();
+            serverObjectManager.SpawnSceneObjects();
             Assert.That(sceneObject.NetId, Is.Not.Zero);
         }
 
@@ -129,7 +129,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             sceneObject.SetSceneId(0);
 
             Debug.Assert(!sceneObject.IsSpawned, "Identity should be unspawned for this test");
-            serverObjectManager.SpawnObjects();
+            serverObjectManager.SpawnSceneObjects();
             Assert.That(sceneObject.NetId, Is.Zero);
         }
 
@@ -375,7 +375,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             var exception = Assert.Throws<InvalidOperationException>(() =>
             {
-                serverObjectManager.SpawnObjects();
+                serverObjectManager.SpawnSceneObjects();
             });
 
             Assert.That(exception, Has.Message.EqualTo("Server was not active"));

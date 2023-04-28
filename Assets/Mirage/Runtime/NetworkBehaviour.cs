@@ -285,17 +285,6 @@ namespace Mirage
             _syncVarDirtyBits &= ~bitMask;
         }
 
-
-        /// <summary>
-        /// This clears all the dirty bits that were set on this script by SetDirtyBits();
-        /// <para>This is automatically invoked when an update is sent for this object, but can be called manually as well.</para>
-        /// </summary>
-        [System.Obsolete("Use ClearShouldSync instead", true)] // renamed because ClearAllDirtyBits name is misleading because it also sets time
-        public void ClearAllDirtyBits(float now)
-        {
-            ClearShouldSync(now);
-        }
-
         public void ClearDirtyBits()
         {
             _syncVarDirtyBits = 0L;
@@ -349,16 +338,6 @@ namespace Mirage
         {
             return SyncVarDirtyBits != 0L || AnySyncObjectDirty;
         }
-
-        // old version of ShouldSync, name isn't great so use 
-        [System.Obsolete("Use ShouldSync instead", true)]
-        public bool IsDirty(float time) => ShouldSync(time);
-
-        // true if this component has data that has not been
-        // synchronized.  Note that it may not synchronize
-        // right away because of syncInterval
-        [System.Obsolete("Use AnyDirtyBits instead", true)] // duplicate method
-        public bool StillDirty() => AnyDirtyBits();
 
         /// <summary>
         /// Virtual function to override to send custom serialization data. The corresponding function to send serialization data is OnDeserialize().

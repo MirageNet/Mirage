@@ -110,13 +110,6 @@ namespace Mirage.Serialization
 
         /// <summary>
         /// unpack a message we received
-        /// <para>Use <see cref="Unpack{T}(byte[], IObjectLocator)"/> Instead to if you need to read NetworkIdentities</para>
-        /// </summary>
-        [System.Obsolete("Use Unpack(byte[], IObjectLocator) instead")]
-        public static T Unpack<T>(byte[] data) => Unpack<T>(data, null);
-
-        /// <summary>
-        /// unpack a message we received
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="data"></param>

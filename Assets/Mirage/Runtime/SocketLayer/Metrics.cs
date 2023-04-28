@@ -5,8 +5,6 @@ namespace Mirage.SocketLayer
         public readonly Sequencer Sequencer;
         public readonly Frame[] buffer;
         public uint tick;
-        [System.Obsolete("Frame is now a struct, use buffer and tick instead if you need to set data")]
-        public Frame Current => buffer[tick];
 
         public Metrics(int bitSize = 10)
         {

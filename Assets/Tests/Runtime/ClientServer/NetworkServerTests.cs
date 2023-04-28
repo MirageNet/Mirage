@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
@@ -13,7 +14,7 @@ namespace Mirage.Tests.Runtime.ClientServer
     {
         private WovenTestMessage message;
 
-        protected async override UniTask ExtraSetup() 
+        protected override async UniTask ExtraSetup()
         {
             await base.ExtraSetup();
             message = new WovenTestMessage
@@ -127,7 +128,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void NumPlayersTest()
         {
-            Assert.That(server.NumberOfPlayers, Is.EqualTo(1));
+            Assert.That(server.Players.Count(x => x.HasCharacter), Is.EqualTo(1));
         }
 
         [Test]

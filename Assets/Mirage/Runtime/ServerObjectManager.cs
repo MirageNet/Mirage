@@ -613,9 +613,6 @@ namespace Mirage
             return identity.IsSceneObject;
         }
 
-        [System.Obsolete("Renamed to SpawnSceneObjects")]
-        public void SpawnObjects() => SpawnSceneObjects();
-
         /// <summary>
         /// This causes NetworkIdentity objects in a scene to be spawned on a server.
         /// <para>

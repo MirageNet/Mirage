@@ -233,23 +233,6 @@ namespace Mirage
             }
         }
 
-        /// <summary>
-        /// Find the registered prefab for this asset id.
-        /// Useful for debuggers
-        /// </summary>
-        /// <param name="prefabHash">asset id of the prefab</param>
-        /// <returns>true if prefab was registered</returns>
-        /// <exception cref="ArgumentException">Thrown when <paramref name="prefabHash"/> is 0</exception>
-        /// <exception cref="SpawnObjectException">Thrown prefab </exception>
-        [System.Obsolete("use GetSpawnHandler instead")]
-        public NetworkIdentity GetPrefab(int prefabHash)
-        {
-            var handler = GetSpawnHandler(prefabHash);
-            if (handler.Prefab == null)
-                ThrowMissingHandler(prefabHash);
-
-            return handler.Prefab;
-        }
 
         /// <summary>
         /// Find the registered or dynamic handler for <paramref name="prefabHash"/>
