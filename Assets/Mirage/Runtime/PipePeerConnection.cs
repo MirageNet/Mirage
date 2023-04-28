@@ -82,7 +82,7 @@ namespace Mirage
 
             receive(packet, offset, length);
 
-            return new PipeNotifyToken();
+            return AutoCompleteToken.Instance;
         }
         public INotifyToken SendNotify(ArraySegment<byte> packet) => SendNotify(packet.Array, packet.Offset, packet.Count);
         public INotifyToken SendNotify(byte[] packet) => SendNotify(packet, 0, packet.Length);
@@ -133,35 +133,6 @@ namespace Mirage
             {
                 // never need copy of pipeendpoint
                 throw new NotSupportedException();
-            }
-        }
-
-        /// <summary>
-        /// Token that invokes <see cref="INotifyToken.Delivered"/> immediately
-        /// </summary>
-        public struct PipeNotifyToken : INotifyToken
-        {
-            public event Action Delivered
-            {
-                add
-                {
-                    value.Invoke();
-                }
-                remove
-                {
-                    // nothing
-                }
-            }
-            public event Action Lost
-            {
-                add
-                {
-                    // nothing
-                }
-                remove
-                {
-                    // nothing
-                }
             }
         }
     }
