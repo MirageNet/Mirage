@@ -2,7 +2,7 @@
 
 :::info
 See the API reference for more details
-[ReadCheck](/docs/reference/Mirage.Components/ReadCheck)
+[ReadCheck](/docs/reference/Mirage.Components/ReadyCheck)
 [LobbyReady](/docs/reference/Mirage.Components/LobbyReady)
 :::
 
