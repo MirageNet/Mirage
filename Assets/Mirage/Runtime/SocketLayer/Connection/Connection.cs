@@ -1,69 +1,9 @@
 using System;
+using Mirage.SocketLayer.ConnectionTrackers;
 using UnityEngine;
 
 namespace Mirage.SocketLayer
 {
-    /// <summary>
-    /// Connection for <see cref="Peer"/>
-    /// </summary>
-    public interface IConnection
-    {
-        IEndPoint EndPoint { get; }
-        ConnectionState State { get; }
-
-        void Disconnect();
-
-        INotifyToken SendNotify(byte[] packet);
-        INotifyToken SendNotify(byte[] packet, int offset, int length);
-        INotifyToken SendNotify(ArraySegment<byte> packet);
-
-        void SendNotify(byte[] packet, INotifyCallBack callBacks);
-        void SendNotify(byte[] packet, int offset, int length, INotifyCallBack callBacks);
-        void SendNotify(ArraySegment<byte> packet, INotifyCallBack callBacks);
-
-        /// <summary>
-        /// single message, batched by AckSystem
-        /// </summary>
-        /// <param name="message"></param>
-        void SendReliable(byte[] message);
-        /// <summary>
-        /// single message, batched by AckSystem
-        /// </summary>
-        /// <param name="message"></param>
-        void SendReliable(byte[] message, int offset, int length);
-        /// <summary>
-        /// single message, batched by AckSystem
-        /// </summary>
-        /// <param name="message"></param>
-        void SendReliable(ArraySegment<byte> message);
-
-        void SendUnreliable(byte[] packet);
-        void SendUnreliable(byte[] packet, int offset, int length);
-        void SendUnreliable(ArraySegment<byte> packet);
-
-        /// <summary>
-        /// Forces the connection to send any batched message immediately to the socket
-        /// <para>
-        /// Note: this will only send the packet to the socket. Some sockets may not send on main thread so might not send immediately
-        /// </para>
-        /// </summary>
-        void FlushBatch();
-    }
-
-    /// <summary>
-    /// A connection that can send data directly to sockets
-    /// <para>Only things inside socket layer should be sending raw packets. Others should use the methods inside <see cref="Connection"/></para>
-    /// </summary>
-    internal interface IRawConnection
-    {
-        /// <summary>
-        /// Sends directly to socket without adding header
-        /// <para>packet given to this function as assumed to already have a header</para>
-        /// </summary>
-        /// <param name="packet">header and messages</param>
-        void SendRaw(byte[] packet, int length);
-    }
-
     /// <summary>
     /// Objects that represends a connection to/from a server/client. Holds state that is needed to update, send, and receive data
     /// </summary>
@@ -71,6 +11,7 @@ namespace Mirage.SocketLayer
     {
         private readonly ILogger _logger;
 
+        private readonly Config _config;
         private readonly Peer _peer;
         public readonly IEndPoint EndPoint;
         private readonly IDataHandler _dataHandler;
@@ -121,6 +62,7 @@ namespace Mirage.SocketLayer
         internal Connection(Peer peer, IEndPoint endPoint, IDataHandler dataHandler, Config config, int maxPacketSize, Time time, Pool<ByteBuffer> bufferPool, ILogger logger, Metrics metrics)
         {
             _peer = peer;
+            _config = config;
             _logger = logger;
 
             EndPoint = endPoint ?? throw new ArgumentNullException(nameof(endPoint));
@@ -464,106 +406,5 @@ namespace Mirage.SocketLayer
             }
         }
 
-        private class ConnectingTracker
-        {
-            private readonly Config _config;
-            private readonly Time _time;
-            private float _lastAttempt = float.MinValue;
-            private int _attemptCount = 0;
-
-            public ConnectingTracker(Config config, Time time)
-            {
-                _config = config;
-                _time = time;
-            }
-
-            public bool TimeAttempt()
-            {
-                return _lastAttempt + _config.ConnectAttemptInterval < _time.Now;
-            }
-
-            public bool MaxAttempts()
-            {
-                return _attemptCount >= _config.MaxConnectAttempts;
-            }
-
-            public void OnAttempt()
-            {
-                _attemptCount++;
-                _lastAttempt = _time.Now;
-            }
-        }
-
-        private class TimeoutTracker
-        {
-            private float _lastRecvTime = float.MinValue;
-            private readonly Config _config;
-            private readonly Time _time;
-
-            public TimeoutTracker(Config config, Time time)
-            {
-                _config = config;
-                _time = time ?? throw new ArgumentNullException(nameof(time));
-            }
-
-            public bool TimeToDisconnect()
-            {
-                return _lastRecvTime + _config.TimeoutDuration < _time.Now;
-            }
-
-            public void SetReceiveTime()
-            {
-                _lastRecvTime = _time.Now;
-            }
-        }
-
-        private class KeepAliveTracker
-        {
-            private float _lastSendTime = float.MinValue;
-            private readonly Config _config;
-            private readonly Time _time;
-
-            public KeepAliveTracker(Config config, Time time)
-            {
-                _config = config;
-                _time = time ?? throw new ArgumentNullException(nameof(time));
-            }
-
-
-            public bool TimeToSend()
-            {
-                return _lastSendTime + _config.KeepAliveInterval < _time.Now;
-            }
-
-            public void SetSendTime()
-            {
-                _lastSendTime = _time.Now;
-            }
-        }
-
-        private class DisconnectedTracker
-        {
-            private bool _isDisonnected;
-            private float _disconnectTime;
-            private readonly Config _config;
-            private readonly Time _time;
-
-            public DisconnectedTracker(Config config, Time time)
-            {
-                _config = config;
-                _time = time ?? throw new ArgumentNullException(nameof(time));
-            }
-
-            public void OnDisconnect()
-            {
-                _disconnectTime = _time.Now + _config.DisconnectDuration;
-                _isDisonnected = true;
-            }
-
-            public bool TimeToRemove()
-            {
-                return _isDisonnected && _disconnectTime < _time.Now;
-            }
-        }
     }
 }
