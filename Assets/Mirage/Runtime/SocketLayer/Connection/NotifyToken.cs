@@ -11,7 +11,6 @@ namespace Mirage.SocketLayer
         event Action Lost;
     }
 
-
     /// <summary>
     /// Object returned from <see cref="AckSystem.SendNotify"/> with events for when packet is Lost or Delivered
     /// </summary>
@@ -39,26 +38,38 @@ namespace Mirage.SocketLayer
         }
     }
 
-    public static class INotifyCallBackExtensions
-    {
-        public static void Notify(this INotifyCallBack callBack, bool delivered)
-        {
-            if (delivered)
-                callBack.OnDelivered();
-            else
-                callBack.OnLost();
-        }
-    }
-
     /// <summary>
-    /// Can be passed into <see cref="AckSystem.SendNotify(byte[], int, int, INotifyCallBack)"/> and methods will be invoked when notify is delivered or lost
-    /// <para>
-    /// See the Notify Example on how to use this interface
-    /// </para>
+    /// Token that invokes <see cref="INotifyToken.Delivered"/> immediately
     /// </summary>
-    public interface INotifyCallBack
+    public class AutoCompleteToken : INotifyToken
     {
-        void OnDelivered();
-        void OnLost();
+        /// <summary>
+        /// this token just invokes event instantly, so only needs 1 instance to exist
+        /// </summary>
+        public static AutoCompleteToken Instance = new AutoCompleteToken();
+        protected AutoCompleteToken() { }
+
+        public event Action Delivered
+        {
+            add
+            {
+                value.Invoke();
+            }
+            remove
+            {
+                // nothing
+            }
+        }
+        public event Action Lost
+        {
+            add
+            {
+                // nothing
+            }
+            remove
+            {
+                // nothing
+            }
+        }
     }
 }
