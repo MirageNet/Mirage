@@ -30,7 +30,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void EventCalledWhenIdentityChanged()
         {
-            NetworkIdentity character = CreateNetworkIdentity();
+            var character = CreateNetworkIdentity();
 
             var action = Substitute.For<Action<NetworkIdentity>>();
             player.OnIdentityChanged += action;
@@ -46,7 +46,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void EventNotCalledWhenIdentityIsSame()
         {
-            NetworkIdentity character = CreateNetworkIdentity();
+            var character = CreateNetworkIdentity();
 
             var action = Substitute.For<Action<NetworkIdentity>>();
             player.OnIdentityChanged += action;
@@ -68,7 +68,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void HasCharacterReturnsTrueIfIdentityIsSet()
         {
-            NetworkIdentity character = CreateNetworkIdentity();
+            var character = CreateNetworkIdentity();
 
             player.Identity = character;
 
@@ -84,15 +84,51 @@ namespace Mirage.Tests.Runtime
         [TestCase(Channel.Unreliable)]
         public void SendCallsSendOnConnection(Channel channel)
         {
-            var message = new byte[] { 0, 1, 2 };
-            player.Send(new ArraySegment<byte>(message), channel);
+            var messageBytes = new byte[] { 0, 1, 2, 3, 4 };
+            const int offset = 1;
+            const int length = 3;
+
+            var message = new ArraySegment<byte>(messageBytes, offset, length);
+
+
+            // set up DO assert
             if (channel == Channel.Reliable)
             {
-                connection.Received(1).SendReliable(Arg.Is<ArraySegment<byte>>(arg => arg.SequenceEqual(message)));
+                connection
+                    .When(x => x.SendReliable(Arg.Any<byte[]>(), Arg.Any<int>(), length))
+                    .Do(AssertIsSame(message));
             }
             else if (channel == Channel.Unreliable)
             {
-                connection.Received(1).SendUnreliable(Arg.Is<ArraySegment<byte>>(arg => arg.SequenceEqual(message)));
+                connection
+                    .When(x => x.SendUnreliable(Arg.Any<byte[]>(), Arg.Any<int>(), length))
+                    .Do(AssertIsSame(message));
+            }
+
+            // send the message via player
+            player.Send(message, channel);
+
+            // expect to see received
+            if (channel == Channel.Reliable)
+            {
+                connection.Received(1).SendReliable(Arg.Any<byte[]>(), Arg.Any<int>(), length);
+            }
+            else if (channel == Channel.Unreliable)
+            {
+                connection.Received(1).SendUnreliable(Arg.Any<byte[]>(), Arg.Any<int>(), length);
+            }
+
+            static Action<NSubstitute.Core.CallInfo> AssertIsSame(ArraySegment<byte> message)
+            {
+                return (callInfo) =>
+                {
+                    var arrayArg = callInfo.ArgAt<byte[]>(0);
+                    var offsetArg = callInfo.ArgAt<int>(1);
+                    var lengthArg = callInfo.ArgAt<int>(2);
+
+                    var seg = new ArraySegment<byte>(arrayArg, offsetArg, lengthArg);
+                    Assert.That(seg.SequenceEqual(message));
+                };
             }
         }
 
@@ -108,16 +144,16 @@ namespace Mirage.Tests.Runtime
         {
             player.Disconnect();
             player.Send(new ArraySegment<byte>(new byte[] { 0, 1, 2 }));
-            connection.DidNotReceive().SendReliable(Arg.Any<byte[]>());
-            connection.DidNotReceive().SendUnreliable(Arg.Any<byte[]>());
+            connection.DidNotReceive().SendReliable(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>());
+            connection.DidNotReceive().SendUnreliable(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>());
         }
         [Test]
         public void MarkAsDisconnectedStopsMessagesBeingSentToConnection()
         {
             player.MarkAsDisconnected();
             player.Send(new ArraySegment<byte>(new byte[] { 0, 1, 2 }));
-            connection.DidNotReceive().SendReliable(Arg.Any<byte[]>());
-            connection.DidNotReceive().SendUnreliable(Arg.Any<byte[]>());
+            connection.DidNotReceive().SendReliable(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>());
+            connection.DidNotReceive().SendUnreliable(Arg.Any<byte[]>(), Arg.Any<int>(), Arg.Any<int>());
         }
     }
 }

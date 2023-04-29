@@ -27,11 +27,19 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         }
 
         [Test]
-        public void ConnectShouldReturnANewConnection()
+        [TestCase(true)]
+        [TestCase(false)]
+        public void ConnectShouldReturnANewConnection(bool disableReliable)
         {
+            config.DisableReliableLayer = disableReliable;
+
             var endPoint = TestEndPoint.CreateSubstitute();
             var conn = peer.Connect(endPoint);
-            Assert.That(conn, Is.TypeOf<Connection>(), "returned type should be connection");
+            if (disableReliable)
+                Assert.That(conn, Is.TypeOf<NoReliableConnection>(), "returned type should be connection");
+            else
+                Assert.That(conn, Is.TypeOf<ReliableConnection>(), "returned type should be connection");
+
             Assert.That(conn.State, Is.EqualTo(ConnectionState.Connecting), "new connection should be connecting");
         }
 
@@ -53,7 +61,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             // wait enough time so that  would have been called
             // make sure to call update so events are invoked
             // 0.5 little extra to be sure
-            var end = time.Now + config.MaxConnectAttempts * config.ConnectAttemptInterval + 0.5f;
+            var end = time.Now + (config.MaxConnectAttempts * config.ConnectAttemptInterval) + 0.5f;
             float nextSendCheck = 0;
             var sendCount = 0;
             while (end > time.Now)
@@ -61,7 +69,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 peer.UpdateTest();
                 if (nextSendCheck < time.Now)
                 {
-                    nextSendCheck = time.Now + config.ConnectAttemptInterval * 1.1f;
+                    nextSendCheck = time.Now + (config.ConnectAttemptInterval * 1.1f);
                     sendCount++;
 
                     // check send
@@ -92,7 +100,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             // wait enough time so that  would have been called
             // make sure to call update so events are invoked
             // 0.5 little extra to be sure
-            var end = time.Now + config.MaxConnectAttempts * config.ConnectAttemptInterval + 0.5f;
+            var end = time.Now + (config.MaxConnectAttempts * config.ConnectAttemptInterval) + 0.5f;
             while (end > time.Now)
             {
                 peer.UpdateTest();
@@ -134,7 +142,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             // make sure to call update so events are invoked
             var start = UnityEngine.Time.time;
             // 0.5 little extra to be sure
-            var maxTime = config.MaxConnectAttempts * config.ConnectAttemptInterval + 0.5f;
+            var maxTime = (config.MaxConnectAttempts * config.ConnectAttemptInterval) + 0.5f;
             while (start + maxTime < UnityEngine.Time.time)
             {
                 peer.UpdateTest();
