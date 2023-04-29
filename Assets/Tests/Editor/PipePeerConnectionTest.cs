@@ -184,7 +184,7 @@ namespace Mirage.Tests
         public void NotifyTokenShouldInvokeHandlerImmediately()
         {
             var token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
-            Assert.That(token, Is.TypeOf<PipePeerConnection.PipeNotifyToken>());
+            Assert.That(token, Is.TypeOf<AutoCompleteToken>());
 
             var invoked = 0;
             token.Delivered += () => invoked++;
@@ -195,7 +195,7 @@ namespace Mirage.Tests
         public void NotifyTokenShouldNotSavePreviousHandler()
         {
             var token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
-            Assert.That(token, Is.TypeOf<PipePeerConnection.PipeNotifyToken>());
+            Assert.That(token, Is.TypeOf<AutoCompleteToken>());
 
             var invoked1 = 0;
             token.Delivered += () => invoked1++;
@@ -211,7 +211,7 @@ namespace Mirage.Tests
         public void NotifyTokenRemoveDeliveredHandlerDoesNothing()
         {
             var token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
-            Assert.That(token, Is.TypeOf<PipePeerConnection.PipeNotifyToken>());
+            Assert.That(token, Is.TypeOf<AutoCompleteToken>());
 
             var invoked1 = 0;
             token.Delivered -= () => invoked1++;
@@ -222,7 +222,7 @@ namespace Mirage.Tests
         public void NotifyTokenAddLostHandlerDoesNothing()
         {
             var token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
-            Assert.That(token, Is.TypeOf<PipePeerConnection.PipeNotifyToken>());
+            Assert.That(token, Is.TypeOf<AutoCompleteToken>());
 
             var invoked1 = 0;
             token.Lost += () => invoked1++;
@@ -233,7 +233,7 @@ namespace Mirage.Tests
         public void NotifyTokenRemoveLostHandlerDoesNothing()
         {
             var token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
-            Assert.That(token, Is.TypeOf<PipePeerConnection.PipeNotifyToken>());
+            Assert.That(token, Is.TypeOf<AutoCompleteToken>());
 
             var invoked1 = 0;
             token.Lost -= () => invoked1++;
