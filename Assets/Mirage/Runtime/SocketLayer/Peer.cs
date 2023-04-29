@@ -154,18 +154,6 @@ namespace Mirage.SocketLayer
             }
         }
 
-        internal void SendUnreliable(Connection connection, byte[] packet, int offset, int length)
-        {
-            using (var buffer = _bufferPool.Take())
-            {
-                Buffer.BlockCopy(packet, offset, buffer.array, 1, length);
-                // set header
-                buffer.array[0] = (byte)PacketType.Unreliable;
-
-                Send(connection, buffer.array, length + 1);
-            }
-        }
-
         internal void SendCommandUnconnected(IEndPoint endPoint, Commands command, byte? extra = null)
         {
             using (var buffer = _bufferPool.Take())
@@ -435,7 +423,17 @@ namespace Mirage.SocketLayer
             // this is so that we can re-use the endpoint (reduces alloc) for receive and not worry about changing internal data needed for each connection
             var endPoint = newEndPoint?.CreateCopy();
 
-            var connection = new Connection(this, endPoint, _dataHandler, _config, _maxPacketSize, _time, _bufferPool, _logger, _metrics);
+            Connection connection;
+            if (_config.DisableReliableLayer)
+            {
+                connection = new NoReliableConnection(this, endPoint, _dataHandler, _config, _maxPacketSize, _time, _logger, _metrics);
+            }
+            else
+            {
+                connection = new ReliableConnection(this, endPoint, _dataHandler, _config, _maxPacketSize, _time, _bufferPool, _logger, _metrics);
+            }
+
+
             connection.SetReceiveTime();
             _connections.Add(endPoint, connection);
             return connection;
