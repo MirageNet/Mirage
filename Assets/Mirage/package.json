@@ -1,7 +1,7 @@
 {
     "name": "com.miragenet.mirage",
     "displayName": "Mirage",
-    "version": "134.0.0",
+    "version": "135.0.0",
     "unity": "2020.3",
     "description": "Mirage is a high level Networking API for Unity, supporting different low level Transports.",
     "author": "Mirage",

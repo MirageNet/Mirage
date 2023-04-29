@@ -1,3 +1,15 @@
+# [135.0.0](https://github.com/MirageNet/Mirage/compare/v134.0.0...v135.0.0) (2023-04-29)
+
+
+### Code Refactoring
+
+* making add remove connections private ([0cac9a3](https://github.com/MirageNet/Mirage/commit/0cac9a36af183af9c0820e8d5a1592d1b8c01906))
+
+
+### BREAKING CHANGES
+
+* NetworkServer methods AddConnection and RemoveConnection are no longer public
+
 # [134.0.0](https://github.com/MirageNet/Mirage/compare/v133.0.0...v134.0.0) (2023-04-28)
 
 
