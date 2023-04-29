@@ -66,6 +66,16 @@ namespace Mirage
             RegisterHandler<T>((_, value) => handler.Invoke(value));
         }
 
+        public void RegisterHandler<T>(MessageDelegateAsync<T> handler)
+        {
+            RegisterHandler<T>((_, value) => handler.Invoke(value).Forget());
+        }
+
+        public void RegisterHandler<T>(MessageDelegateWithPlayerAsync<T> handler)
+        {
+            RegisterHandler<T>((player, value) => handler.Invoke(player, value).Forget());
+        }
+
         /// <summary>
         /// Unregister a handler for a particular message type.
         /// <para>Note: Messages dont need to be unregister when server or client stops as MessageHandler will be re-created next time server or client starts</para>
