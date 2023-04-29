@@ -381,7 +381,7 @@ namespace Mirage
         /// <para>This connection will use the callbacks registered with the server.</para>
         /// </summary>
         /// <param name="player">Network connection to add.</param>
-        public void AddConnection(INetworkPlayer player)
+        private void AddConnection(INetworkPlayer player)
         {
             if (!Players.Contains(player))
             {
@@ -393,7 +393,7 @@ namespace Mirage
         /// This removes an external connection.
         /// </summary>
         /// <param name="connectionId">The id of the connection to remove.</param>
-        public void RemoveConnection(INetworkPlayer player)
+        private void RemoveConnection(INetworkPlayer player)
         {
             _connections.Remove(player.Connection);
         }
