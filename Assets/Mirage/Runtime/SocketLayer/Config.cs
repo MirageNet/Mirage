@@ -7,6 +7,7 @@ namespace Mirage.SocketLayer
         /// <summary>
         /// Max concurrent connections server will accept
         /// </summary>
+        // todo remove replace with "stop connections" instead. add some high level feature (maybe net authenticator?)
         public int MaxConnections = 100;
         #endregion
 
@@ -97,6 +98,11 @@ namespace Mirage.SocketLayer
         /// <para>max value is 255</para>
         /// </summary>
         public int MaxReliableFragments = 5;
+
+        /// <summary>
+        /// Enable if the Socket you are using has its own Reliable layer. For example using Websocket, which is TCP.
+        /// </summary>
+        public bool DisableReliableLayer = false;
         #endregion
     }
 }
