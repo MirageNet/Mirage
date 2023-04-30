@@ -29,7 +29,12 @@ namespace Mirage.SocketLayer
 
 
         public override void SendUnreliable(byte[] packet, int offset, int length) => SendReliable(packet, offset, length);
-        public override void SendNotify(byte[] packet, int offset, int length, INotifyCallBack callBacks) => SendReliable(packet, offset, length);
+        public override void SendNotify(byte[] packet, int offset, int length, INotifyCallBack callBacks)
+        {
+            SendReliable(packet, offset, length);
+            callBacks.OnDelivered();
+        }
+
         public override INotifyToken SendNotify(byte[] packet, int offset, int length)
         {
             SendReliable(packet, offset, length);
@@ -75,7 +80,7 @@ namespace Mirage.SocketLayer
 
         private void AddToBatch(byte[] message, int offset, int length)
         {
-            ByteUtils.WriteUShort(_nextBatch, ref _batchLength, (ushort)length);
+            ByteUtils.WriteUShort(_nextBatch, ref _batchLength, checked((ushort)length));
             Buffer.BlockCopy(message, offset, _nextBatch, _batchLength, length);
             _batchLength += length;
         }
