@@ -1,3 +1,16 @@
+# [135.1.0](https://github.com/MirageNet/Mirage/compare/v135.0.0...v135.1.0) (2023-04-30)
+
+
+### Bug Fixes
+
+* fixing SendNotify deliver ([3f9ceb9](https://github.com/MirageNet/Mirage/commit/3f9ceb9ac83917515b43518d7eac9f1d15c1bb30))
+
+
+### Features
+
+* adding option to disable reliable layer ([6618b5d](https://github.com/MirageNet/Mirage/commit/6618b5d233804a4742b122f2c98c7ab9e9807915))
+* adding option to use UniTaskVoid for message handlers ([64b9cc7](https://github.com/MirageNet/Mirage/commit/64b9cc70083e48a3fd4684f9453aa1e6053d28e7))
+
 # [135.0.0](https://github.com/MirageNet/Mirage/compare/v134.0.0...v135.0.0) (2023-04-29)
 
 
