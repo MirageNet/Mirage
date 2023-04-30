@@ -66,7 +66,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         public ILogger logger;
         public Peer peer;
 
-        public PeerInstance(Config config = null, ISocket socket = null)
+        public PeerInstance(Config config = null, ISocket socket = null, int? maxPacketSize = null)
         {
             this.socket = socket ?? Substitute.For<ISocket>();
             dataHandler = Substitute.For<IDataHandler>();
@@ -79,7 +79,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 ConnectAttemptInterval = 0.2f,
             };
             logger = LogFactory.GetLogger<PeerInstance>();
-            peer = new Peer(this.socket, PeerTestBase.MAX_PACKET_SIZE, dataHandler, this.config, logger);
+            peer = new Peer(this.socket, maxPacketSize ?? PeerTestBase.MAX_PACKET_SIZE, dataHandler, this.config, logger);
         }
     }
 
