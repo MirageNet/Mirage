@@ -16,6 +16,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         private byte[] _buffer;
         private Config _config;
         private PeerInstance _peerInstance;
+        private Pool<ByteBuffer> _bufferPool;
         private readonly Random rand = new Random();
         private byte[] _sentArray;
 
@@ -29,6 +30,8 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 DisableReliableLayer = true,
             };
             _peerInstance = new PeerInstance(_config, maxPacketSize: MAX_PACKET_SIZE);
+            _bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, MAX_PACKET_SIZE, 0, 100);
+
             _connection = _peerInstance.peer.Connect(Substitute.For<IEndPoint>());
 
             _buffer = new byte[MAX_PACKET_SIZE - 1];
@@ -69,8 +72,10 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
         }
 
-        private void AssertSentPacket(int totalLength, IEnumerable<int> messageLengths)
+        private void AssertSentPacket(IEnumerable<int> messageLengths)
         {
+            var totalLength = 1 + (2 * messageLengths.Count()) + messageLengths.Sum();
+
             // only 1 at any length
             Socket.Received(1).Send(Arg.Any<IEndPoint>(), Arg.Any<byte[]>(), Arg.Any<int>());
             // but also check we received length
@@ -117,18 +122,15 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             };
             var overBatch = 11;
 
-            var total = 1;
             foreach (var length in lessThanBatchLengths)
             {
-                // will write length+2
-                total += 2 + length;
                 _connection.SendReliable(_buffer, 0, length);
                 Socket.DidNotReceive().Send(Arg.Any<IEndPoint>(), Arg.Any<byte[]>(), Arg.Any<int>());
             }
 
             // should be 97 in buffer now => 1+(length+2)*3
             _connection.SendReliable(_buffer, 0, overBatch);
-            AssertSentPacket(total, lessThanBatchLengths);
+            AssertSentPacket(lessThanBatchLengths);
         }
 
         [Test]
@@ -152,7 +154,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 {
                     _connection.SendReliable(_buffer, 0, length);
                     // was over max, so should have sent
-                    AssertSentPacket(total, currentBatch);
+                    AssertSentPacket(currentBatch);
 
                     currentBatch.Clear();
                     // new batch
@@ -178,17 +180,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 20, 40
             };
 
-            var total = 1;
             foreach (var length in lessThanBatchLengths)
             {
-                // will write length+2
-                total += 2 + length;
                 _connection.SendReliable(_buffer, 0, length);
                 Socket.DidNotReceive().Send(Arg.Any<IEndPoint>(), Arg.Any<byte[]>(), Arg.Any<int>());
             }
 
             _connection.FlushBatch();
-            AssertSentPacket(total, lessThanBatchLengths);
+            AssertSentPacket(lessThanBatchLengths);
         }
 
         [Test]
@@ -202,15 +201,86 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
 
         [Test]
-        public void SendingToOtherChannelsUsesReliable()
+        public void UnbatchesMessageOnReceive()
         {
-            throw new System.NotImplementedException();
+            var receive = _bufferPool.Take();
+            receive.array[0] = (byte)PacketType.Reliable;
+            var offset = 1;
+            AddMessage(receive.array, ref offset, 10);
+            AddMessage(receive.array, ref offset, 30);
+            AddMessage(receive.array, ref offset, 20);
+
+            var segments = new List<ArraySegment<byte>>();
+            _peerInstance.dataHandler
+                .When(x => x.ReceiveMessage(_connection, Arg.Any<ArraySegment<byte>>()))
+                .Do(x => segments.Add(x.ArgAt<ArraySegment<byte>>(1)));
+            ((NoReliableConnection)_connection).ReceiveReliablePacket(new Packet(receive, offset));
+            _peerInstance.dataHandler.Received(3).ReceiveMessage(_connection, Arg.Any<ArraySegment<byte>>());
+
+
+            Assert.That(segments[0].Count, Is.EqualTo(10));
+            Assert.That(segments[1].Count, Is.EqualTo(30));
+            Assert.That(segments[2].Count, Is.EqualTo(20));
+            Assert.That(segments[0].SequenceEqual(new ArraySegment<byte>(_buffer, 0, 10)));
+            Assert.That(segments[1].SequenceEqual(new ArraySegment<byte>(_buffer, 0, 30)));
+            Assert.That(segments[2].SequenceEqual(new ArraySegment<byte>(_buffer, 0, 20)));
+        }
+
+        private void AddMessage(byte[] receive, ref int offset, int size)
+        {
+            ByteUtils.WriteUShort(receive, ref offset, (ushort)size);
+            Buffer.BlockCopy(_buffer, 0, receive, offset, size);
+            offset += size;
         }
 
         [Test]
-        public void UnbatchesMessageOnReceive()
+        public void SendingToUnreliableUsesReliable()
         {
-            throw new System.NotImplementedException();
+            var counts = new List<int>() { 10, 20 };
+            _connection.SendUnreliable(_buffer, 0, counts[0]);
+            _connection.SendUnreliable(_buffer, 0, counts[1]);
+            _connection.FlushBatch();
+
+            AssertSentPacket(counts);
+        }
+
+        [Test]
+        public void SendingToNotifyUsesReliable()
+        {
+            var counts = new List<int>() { 10, 20 };
+            _connection.SendNotify(_buffer, 0, counts[0]);
+            _connection.SendNotify(_buffer, 0, counts[1]);
+            _connection.FlushBatch();
+
+            AssertSentPacket(counts);
+        }
+        [Test]
+        public void SendingToNotifyTokenUsesReliable()
+        {
+            var token = Substitute.For<INotifyCallBack>();
+            var counts = new List<int>() { 10, 20 };
+            _connection.SendNotify(_buffer, 0, counts[0], token);
+            _connection.SendNotify(_buffer, 0, counts[1], token);
+            _connection.FlushBatch();
+
+            AssertSentPacket(counts);
+        }
+
+        [Test]
+        public void NotifyOnDeliveredInvoke()
+        {
+            var counts = new List<int>() { 10, 20 };
+            var token = _connection.SendNotify(_buffer, 0, counts[0]);
+            Assert.That(token, Is.TypeOf<AutoCompleteToken>());
+        }
+
+        [Test]
+        public void NotifyTokenOnDeliveredInvoke()
+        {
+            var token = Substitute.For<INotifyCallBack>();
+            var counts = new List<int>() { 10, 20 };
+            _connection.SendNotify(_buffer, 0, counts[0], token);
+            token.Received(1).OnDelivered();
         }
     }
 }
