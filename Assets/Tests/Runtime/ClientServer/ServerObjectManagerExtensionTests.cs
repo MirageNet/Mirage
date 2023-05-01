@@ -1,4 +1,4 @@
-﻿using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -50,6 +50,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.That(clone.PrefabHash, Is.EqualTo(hash));
         }
 
+        [Test]
         public void SpawnInstantiate_GO(
             [Values(true, false)] bool setOwner,
             [Values(true, false)] bool setHash)
