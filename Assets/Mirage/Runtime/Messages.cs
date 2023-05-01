@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 namespace Mirage
 {
-
     #region Public System Messages
 
     /// <summary>
@@ -103,24 +103,90 @@ namespace Mirage
         /// <para>If sceneId != 0 then it is used instead of prefabHash</para>
         /// </summary>
         public int? PrefabHash;
+
         /// <summary>
-        /// Local position
+        /// Spawn values to set after spawning object, values based on <see cref="NetworkIdentity.TransformSpawnSettings"/>
         /// </summary>
-        public Vector3? position;
-        /// <summary>
-        /// Local rotation
-        /// </summary>
-        public Quaternion? rotation;
-        /// <summary>
-        /// Local scale
-        /// </summary>
-        public Vector3? scale;
+        public SpawnValues SpawnValues;
+
         /// <summary>
         /// The serialized component data
         /// <remark>ArraySegment to avoid unnecessary allocations</remark>
         /// </summary>
         public ArraySegment<byte> Payload;
+
+        public override string ToString()
+        {
+            string spawnIDStr;
+            if (SceneId.HasValue)
+                spawnIDStr = $"SceneId:{SceneId.Value}";
+            else if (PrefabHash.HasValue)
+                spawnIDStr = $"PrefabHash:{PrefabHash.Value}";
+            else
+                spawnIDStr = $"SpawnId:Error";
+
+            string authStr;
+            if (IsLocalPlayer)
+                authStr = "LocalPlayer";
+            else if (IsOwner)
+                authStr = "Owner";
+            else
+                authStr = "Remote";
+
+
+            return $"SpawnMessage[NetId:{NetId},{spawnIDStr},Authority:{authStr},{SpawnValues},Payload:{Payload.Count}bytes]";
+
+        }
     }
+
+    public struct SpawnValues
+    {
+        public Vector3? Position;
+        public Quaternion? Rotation;
+        public Vector3? Scale;
+        public string Name;
+        public bool? SelfActive;
+
+        [ThreadStatic]
+        private static StringBuilder builder;
+
+        public override string ToString()
+        {
+            if (builder == null)
+                builder = new StringBuilder();
+            else
+                builder.Clear();
+
+            builder.Append("SpawnValues(");
+            var first = true;
+
+            if (Position.HasValue)
+                Append(ref first, $"Position={Position.Value}");
+
+            if (Rotation.HasValue)
+                Append(ref first, $"Rotation={Rotation.Value}");
+
+            if (Scale.HasValue)
+                Append(ref first, $"Scale={Scale.Value}");
+
+            if (!string.IsNullOrEmpty(Name))
+                Append(ref first, $"Name={Name}");
+
+            if (SelfActive.HasValue)
+                Append(ref first, $"SelfActive={SelfActive.Value}");
+
+            builder.Append(")");
+            return builder.ToString();
+        }
+
+        private static void Append(ref bool first, string value)
+        {
+            if (!first) builder.Append(", ");
+            first = false;
+            builder.Append(value);
+        }
+    }
+
 
     [NetworkMessage]
     public struct RemoveAuthorityMessage

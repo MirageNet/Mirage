@@ -104,7 +104,7 @@ namespace Mirage
     {
         private static readonly ILogger logger = LogFactory.GetLogger<NetworkIdentity>();
 
-        public TransformSpawnSettings SpawnSettings = new TransformSpawnSettings(true, true, true);
+        public TransformSpawnSettings SpawnSettings = TransformSpawnSettings.Default;
 
         [NonSerialized]
         private NetworkBehaviour[] _networkBehavioursCache;
@@ -884,12 +884,15 @@ namespace Mirage
 
         internal void SetClientValues(ClientObjectManager clientObjectManager, SpawnMessage msg)
         {
-            if (msg.position.HasValue) transform.localPosition = msg.position.Value;
-            if (msg.rotation.HasValue) transform.localRotation = msg.rotation.Value;
-            if (msg.scale.HasValue) transform.localScale = msg.scale.Value;
+            var spawnValues = msg.SpawnValues;
+            if (spawnValues.Position.HasValue) transform.localPosition = spawnValues.Position.Value;
+            if (spawnValues.Rotation.HasValue) transform.localRotation = spawnValues.Rotation.Value;
+            if (spawnValues.Scale.HasValue) transform.localScale = spawnValues.Scale.Value;
+            if (!string.IsNullOrEmpty(spawnValues.Name)) gameObject.name = spawnValues.Name;
+            if (spawnValues.SelfActive.HasValue) gameObject.SetActive(spawnValues.SelfActive.Value);
 
-            NetId = msg.netId;
-            HasAuthority = msg.isOwner;
+            NetId = msg.NetId;
+            HasAuthority = msg.IsOwner;
             ClientObjectManager = clientObjectManager;
             Client = ClientObjectManager.Client;
 
@@ -1206,13 +1209,30 @@ namespace Mirage
             public bool SendPosition;
             public bool SendRotation;
             public bool SendScale;
+            public bool SendName;
+            public bool SendGameObjectActive;
 
-            public TransformSpawnSettings(bool sendPosition, bool sendRotation, bool sendScale)
+            public TransformSpawnSettings(bool sendPosition, bool sendRotation, bool sendScale, bool sendName, bool sendActive) : this()
+            {
+                SendPosition = sendPosition;
+                SendRotation = sendRotation;
+                SendScale = sendScale;
+                SendName = sendName;
+                SendGameObjectActive = sendActive;
+            }
+            public TransformSpawnSettings(bool sendPosition, bool sendRotation, bool sendScale) : this()
             {
                 SendPosition = sendPosition;
                 SendRotation = sendRotation;
                 SendScale = sendScale;
             }
+
+            public static TransformSpawnSettings Default => new TransformSpawnSettings(
+                sendPosition: true,
+                sendRotation: true,
+                sendScale: true,
+                sendName: false,
+                sendActive: false);
         }
     }
 }

@@ -133,22 +133,31 @@ namespace Mirage.Tests.Runtime.Serialization
                 IsOwner = true,
                 SceneId = testSceneId,
                 PrefabHash = Guid.NewGuid().GetHashCode(),
+                SpawnValues = new SpawnValues
+                {
+                    Position = Vector3.one,
+                    Rotation = Quaternion.identity,
+                    SelfActive = true,
+                },
+                Payload = new ArraySegment<byte>(new byte[] { 0x01, 0x02 })
             };
             var arr = MessagePacker.Pack(message);
             var fresh = MessagePacker.Unpack<SpawnMessage>(arr, null);
-            Assert.That(fresh.netId, Is.EqualTo(message.netId));
-            Assert.That(fresh.isLocalPlayer, Is.EqualTo(message.isLocalPlayer));
-            Assert.That(fresh.isOwner, Is.EqualTo(message.isOwner));
-            Assert.That(fresh.sceneId, Is.EqualTo(message.sceneId));
-            Assert.That(fresh.prefabHash, Is.EqualTo(message.prefabHash));
-            Assert.That(fresh.position, Is.EqualTo(message.position));
-            Assert.That(fresh.rotation, Is.EqualTo(message.rotation));
-            Assert.That(fresh.scale, Is.EqualTo(message.scale));
-            Assert.That(fresh.payload.Count, Is.EqualTo(message.payload.Count));
+            Assert.That(fresh.NetId, Is.EqualTo(message.NetId));
+            Assert.That(fresh.IsLocalPlayer, Is.EqualTo(message.IsLocalPlayer));
+            Assert.That(fresh.IsOwner, Is.EqualTo(message.IsOwner));
+            Assert.That(fresh.SceneId, Is.EqualTo(message.SceneId));
+            Assert.That(fresh.PrefabHash, Is.EqualTo(message.PrefabHash));
+            Assert.That(fresh.SpawnValues.Position, Is.EqualTo(message.SpawnValues.Position));
+            Assert.That(fresh.SpawnValues.Rotation, Is.EqualTo(message.SpawnValues.Rotation));
+            Assert.That(fresh.SpawnValues.Scale, Is.EqualTo(message.SpawnValues.Scale));
+            Assert.That(fresh.SpawnValues.Name, Is.EqualTo(message.SpawnValues.Name));
+            Assert.That(fresh.SpawnValues.SelfActive, Is.EqualTo(message.SpawnValues.SelfActive));
+            Assert.That(fresh.Payload.Count, Is.EqualTo(message.Payload.Count));
 
-            for (var i = 0; i < fresh.payload.Count; ++i)
-                Assert.That(fresh.payload.Array[fresh.payload.Offset + i],
-                    Is.EqualTo(message.payload.Array[message.payload.Offset + i]));
+            for (var i = 0; i < fresh.Payload.Count; ++i)
+                Assert.That(fresh.Payload.Array[fresh.Payload.Offset + i],
+                    Is.EqualTo(message.Payload.Array[message.Payload.Offset + i]));
         }
 
         [Test]

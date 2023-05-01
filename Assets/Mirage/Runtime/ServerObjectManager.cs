@@ -478,14 +478,27 @@ namespace Mirage
                     Payload = payload,
                 };
 
-                // values in msg are nullable, so by default they are null
-                // only set those values if the identity's settings say to send them
-                if (identity.SpawnSettings.SendPosition) msg.position = identity.transform.localPosition;
-                if (identity.SpawnSettings.SendRotation) msg.rotation = identity.transform.localRotation;
-                if (identity.SpawnSettings.SendScale) msg.scale = identity.transform.localScale;
+                msg.SpawnValues = CreateSpawnValues(identity);
+
 
                 player.Send(msg);
             }
+        }
+
+        private SpawnValues CreateSpawnValues(NetworkIdentity identity)
+        {
+            var settings = identity.SpawnSettings;
+            SpawnValues values = default;
+
+            // values in msg are nullable, so by default they are null
+            // only set those values if the identity's settings say to send them
+            if (settings.SendPosition) values.Position = identity.transform.localPosition;
+            if (settings.SendRotation) values.Rotation = identity.transform.localRotation;
+            if (settings.SendScale) values.Scale = identity.transform.localScale;
+            if (settings.SendName) values.Name = identity.name;
+            if (settings.SendGameObjectActive) values.SelfActive = identity.gameObject.activeSelf;
+
+            return values;
         }
 
         internal void SendRemoveAuthorityMessage(NetworkIdentity identity, INetworkPlayer previousOwner)
