@@ -533,11 +533,6 @@ namespace Mirage
             if (msg.PrefabHash.HasValue)
                 identity.PrefabHash = msg.PrefabHash.Value;
 
-            if (!identity.gameObject.activeSelf)
-            {
-                identity.gameObject.SetActive(true);
-            }
-
             identity.SetClientValues(this, msg);
 
             if (msg.IsLocalPlayer)

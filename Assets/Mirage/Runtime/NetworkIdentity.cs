@@ -1230,9 +1230,9 @@ namespace Mirage
             public static TransformSpawnSettings Default => new TransformSpawnSettings(
                 sendPosition: true,
                 sendRotation: true,
-                sendScale: true,
+                sendScale: false,
                 sendName: false,
-                sendActive: false);
+                sendActive: true);
         }
     }
 }
