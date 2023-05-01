@@ -1,3 +1,32 @@
+# [136.0.0](https://github.com/MirageNet/Mirage/compare/v135.1.0...v136.0.0) (2023-05-01)
+
+
+### Bug Fixes
+
+* fixing typo for Spawn settings ([2d8a35a](https://github.com/MirageNet/Mirage/commit/2d8a35a6ad418bb2edb48a834e341feaeddb4c0e))
+
+
+### Code Refactoring
+
+* adding headers to Character spawner fields ([3ed2134](https://github.com/MirageNet/Mirage/commit/3ed2134771e53e98fa377ef12c4ff4ceeabc87d3))
+* Changing default spawn settings ([89564f4](https://github.com/MirageNet/Mirage/commit/89564f49c8df7a937369925b66c5ec9f1c08b749))
+* moving Spawn Settings too its own file ([5bdc7a3](https://github.com/MirageNet/Mirage/commit/5bdc7a3f1bf0f47f25d08b49c323160629f7897d))
+
+
+### Features
+
+* adding Name and GameObjectActive to Spawn settings ([fd12390](https://github.com/MirageNet/Mirage/commit/fd123909c0b00f084f40e80fb1f4aa57de5284c3))
+* adding option to always enable client object ([686a904](https://github.com/MirageNet/Mirage/commit/686a9048cc4f27cf7e96ba18f4c6d3bcb6910c69))
+* adding option to disable Setting name by CharacterSpawner ([796a7bd](https://github.com/MirageNet/Mirage/commit/796a7bd9344e98e1e537a10e41f9c834e916e5a0))
+
+
+### BREAKING CHANGES
+
+* NetworkIdentity.TransformSpawnSettings moved to NetworkSpawnSettings
+* Spawning a prefab will no longer automatically enable it. Spawn settings must have SendGameObjectActive set to true and object on server to be enabled as well
+* SpawnMessage now has SpawnValues struct to store values in. SpawnMessage also has new ToString message
+* removing FormerlySerializedAs from CharacterSpawner
+
 # [135.1.0](https://github.com/MirageNet/Mirage/compare/v135.0.0...v135.1.0) (2023-04-30)
 
 
