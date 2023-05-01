@@ -18,7 +18,7 @@ namespace Mirage
             SendRotation = sendRotation;
             SendScale = sendScale;
             SendName = sendName;
-            SendActive = sendActive
+            SendActive = sendActive;
         }
         public NetworkSpawnSettings(bool sendPosition, bool sendRotation, bool sendScale) : this()
         {
