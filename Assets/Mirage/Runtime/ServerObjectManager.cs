@@ -496,7 +496,15 @@ namespace Mirage
             if (settings.SendRotation) values.Rotation = identity.transform.localRotation;
             if (settings.SendScale) values.Scale = identity.transform.localScale;
             if (settings.SendName) values.Name = identity.name;
-            if (settings.SendGameObjectActive) values.SelfActive = identity.gameObject.activeSelf;
+            switch (settings.SendActive)
+            {
+                case SyncActiveOption.SyncWithServer:
+                    values.SelfActive = identity.gameObject.activeSelf;
+                    break;
+                case SyncActiveOption.ForceEnable:
+                    values.SelfActive = true;
+                    break;
+            }
 
             return values;
         }
