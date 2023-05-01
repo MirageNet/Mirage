@@ -170,9 +170,39 @@ namespace Mirage
 
             // just clear list, connections will be disconnected when peer is closed
             _connections.Clear();
+            LocalClient = null;
             LocalPlayer = null;
 
-            Cleanup();
+            if (authenticator != null)
+            {
+                authenticator.OnServerAuthenticated -= OnAuthenticated;
+                Connected.RemoveListener(authenticator.ServerAuthenticate);
+            }
+            else
+            {
+                // if no authenticator, consider every connection as authenticated
+                Connected.RemoveListener(OnAuthenticated);
+            }
+
+            _stopped?.Invoke();
+            Active = false;
+
+            _started.Reset();
+            _onStartHost.Reset();
+            _onStopHost.Reset();
+            _stopped.Reset();
+
+            World = null;
+            SyncVarSender = null;
+
+            if (_peer != null)
+            {
+                //remove handlers first to stop loop
+                _peer.OnConnected -= Peer_OnConnected;
+                _peer.OnDisconnected -= Peer_OnDisconnected;
+                _peer.Close();
+                _peer = null;
+            }
 
             // remove listen when server is stopped so that we can cleanup correctly 
             Application.quitting -= Stop;
@@ -337,44 +367,6 @@ namespace Mirage
             }
         }
 
-        /// <summary>
-        /// cleanup resources so that we can start again
-        /// </summary>
-        private void Cleanup()
-        {
-            if (authenticator != null)
-            {
-                authenticator.OnServerAuthenticated -= OnAuthenticated;
-                Connected.RemoveListener(authenticator.ServerAuthenticate);
-            }
-            else
-            {
-                // if no authenticator, consider every connection as authenticated
-                Connected.RemoveListener(OnAuthenticated);
-            }
-
-            _stopped?.Invoke();
-            Active = false;
-
-            _started.Reset();
-            _onStartHost.Reset();
-            _onStopHost.Reset();
-            _stopped.Reset();
-
-            World = null;
-            SyncVarSender = null;
-
-            Application.quitting -= Stop;
-
-            if (_peer != null)
-            {
-                //remove handlers first to stop loop
-                _peer.OnConnected -= Peer_OnConnected;
-                _peer.OnDisconnected -= Peer_OnDisconnected;
-                _peer.Close();
-                _peer = null;
-            }
-        }
 
         /// <summary>
         /// <para>This accepts a network connection and adds it to the server.</para>
