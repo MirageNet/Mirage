@@ -105,7 +105,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.uint_7
             client.MessageHandler.RegisterHandler<RpcMessage>((player, msg) =>
             {
                 // store value in variable because assert will throw and be catch by message wrapper
-                payloadSize = msg.payload.Count;
+                payloadSize = msg.Payload.Count;
                 clientObjectManager.OnRpcMessage(msg);
             });
 

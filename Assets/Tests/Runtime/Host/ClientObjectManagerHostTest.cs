@@ -124,7 +124,7 @@ namespace Mirage.Tests.Runtime.Host
             LogAssert.Expect(LogType.Assert, "UnSpawn should not be called in host mode");
             clientObjectManager.OnObjectDestroy(new ObjectDestroyMessage
             {
-                netId = hostIdentity.NetId
+                NetId = hostIdentity.NetId
             });
         }
 
@@ -138,7 +138,7 @@ namespace Mirage.Tests.Runtime.Host
             var sceneId = 10ul;
             clientObjectManager.spawnableObjects.Add(sceneId, identity);
 
-            var result = clientObjectManager.SpawnSceneObject(new SpawnMessage { sceneId = sceneId, prefabHash = hash });
+            var result = clientObjectManager.SpawnSceneObject(new SpawnMessage { SceneId = sceneId, PrefabHash = hash });
 
             Assert.That(result, Is.SameAs(identity));
         }

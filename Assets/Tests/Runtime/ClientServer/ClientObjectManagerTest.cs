@@ -21,7 +21,7 @@ namespace Mirage.Tests.Runtime.ClientServer
                 clientObjectManager.OnSpawn(msg);
             });
 
-            Assert.That(ex.Message, Is.EqualTo($"Empty prefabHash and sceneId for netId: {msg.netId}"));
+            Assert.That(ex.Message, Is.EqualTo($"Empty prefabHash and sceneId for netId: {msg.NetId}"));
         }
 
         [UnityTest]
@@ -294,10 +294,10 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             var msg = new SpawnMessage
             {
-                netId = NET_ID,
-                prefabHash = identity.PrefabHash,
-                payload = new ArraySegment<byte>(new byte[0]),
-                position = pos,
+                NetId = NET_ID,
+                PrefabHash = identity.PrefabHash,
+                Payload = new ArraySegment<byte>(new byte[0]),
+                SpawnValues = new SpawnValues { Position = pos, }
             };
 
             clientObjectManager.OnSpawn(msg);
@@ -459,7 +459,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             clientObjectManager.OnObjectHide(new ObjectHideMessage
             {
-                netId = clientIdentity.NetId
+                NetId = clientIdentity.NetId
             });
 
             await AsyncUtil.WaitUntilWithTimeout(() => clientIdentity == null);
@@ -472,7 +472,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             clientObjectManager.OnObjectDestroy(new ObjectDestroyMessage
             {
-                netId = clientIdentity.NetId
+                NetId = clientIdentity.NetId
             });
 
             await AsyncUtil.WaitUntilWithTimeout(() => clientIdentity == null);
@@ -490,7 +490,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             var sceneId = 10ul;
             clientObjectManager.spawnableObjects.Add(sceneId, identity);
 
-            var result = clientObjectManager.SpawnSceneObject(new SpawnMessage { sceneId = sceneId, prefabHash = hash });
+            var result = clientObjectManager.SpawnSceneObject(new SpawnMessage { SceneId = sceneId, PrefabHash = hash });
 
             Assert.That(result, Is.SameAs(identity));
         }

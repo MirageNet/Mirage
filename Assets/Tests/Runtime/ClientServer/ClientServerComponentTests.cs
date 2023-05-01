@@ -143,7 +143,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             clientObjectManager.OnObjectDestroy(new ObjectDestroyMessage
             {
-                netId = identity.NetId
+                NetId = identity.NetId
             });
             unspawnDelegate.Received().Invoke(Arg.Any<NetworkIdentity>());
         });

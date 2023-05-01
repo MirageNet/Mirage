@@ -23,7 +23,7 @@ namespace Mirage.Tests.Runtime.Host
 
             serverObjectManager.HideToPlayer(identity, player);
 
-            player.Received().Send(Arg.Is<ObjectHideMessage>(msg => msg.netId == identity.NetId));
+            player.Received().Send(Arg.Is<ObjectHideMessage>(msg => msg.NetId == identity.NetId));
         }
 
         [Test]

@@ -42,8 +42,8 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(observersWritten, Is.EqualTo(0));
             var msg = new UpdateVarsMessage
             {
-                netId = target.NetId,
-                payload = _ownerWriter.ToArraySegment()
+                NetId = target.NetId,
+                Payload = _ownerWriter.ToArraySegment()
             };
 
             _observersWriter.Reset();

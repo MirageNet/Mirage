@@ -116,7 +116,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.MyEnumByte_4_64
             client.MessageHandler.RegisterHandler<RpcMessage>((player, msg) =>
             {
                 // store value in variable because assert will throw and be catch by message wrapper
-                payloadSize = msg.payload.Count;
+                payloadSize = msg.Payload.Count;
                 clientObjectManager.OnRpcMessage(msg);
             });
 
