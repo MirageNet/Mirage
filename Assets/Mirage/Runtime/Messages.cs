@@ -38,46 +38,43 @@ namespace Mirage
     [NetworkMessage]
     public struct ServerRpcMessage
     {
-        public uint netId;
-        public int componentIndex;
-        public int functionIndex;
+        public uint NetId;
+        public int ComponentIndex;
+        public int FunctionIndex;
 
         // the parameters for the Cmd function
         // -> ArraySegment to avoid unnecessary allocations
-        public ArraySegment<byte> payload;
+        public ArraySegment<byte> Payload;
     }
 
     [NetworkMessage]
     public struct ServerRpcWithReplyMessage
     {
-        public uint netId;
-        public int componentIndex;
-        public int functionIndex;
+        public uint NetId;
+        public int ComponentIndex;
+        public int FunctionIndex;
 
         // if the server Rpc can return values
         // this then a ServerRpcReply will be sent with this id
-        public int replyId;
-        // the parameters for the Cmd function
-        // -> ArraySegment to avoid unnecessary allocations
-        public ArraySegment<byte> payload;
+        public int ReplyId;
+
+        public ArraySegment<byte> Payload;
     }
 
     [NetworkMessage]
     public struct ServerRpcReply
     {
-        public int replyId;
-        public ArraySegment<byte> payload;
+        public int ReplyId;
+        public ArraySegment<byte> Payload;
     }
 
     [NetworkMessage]
     public struct RpcMessage
     {
-        public uint netId;
-        public int componentIndex;
-        public int functionIndex;
-        // the parameters for the Cmd function
-        // -> ArraySegment to avoid unnecessary allocations
-        public ArraySegment<byte> payload;
+        public uint NetId;
+        public int ComponentIndex;
+        public int FunctionIndex;
+        public ArraySegment<byte> Payload;
     }
     #endregion
 
@@ -88,24 +85,24 @@ namespace Mirage
         /// <summary>
         /// netId of new or existing object
         /// </summary>
-        public uint netId;
+        public uint NetId;
         /// <summary>
         /// Is the spawning object the local player. Sets ClientScene.localPlayer
         /// </summary>
-        public bool isLocalPlayer;
+        public bool IsLocalPlayer;
         /// <summary>
         /// Sets hasAuthority on the spawned object
         /// </summary>
-        public bool isOwner;
+        public bool IsOwner;
         /// <summary>
         /// The id of the scene object to spawn
         /// </summary>
-        public ulong? sceneId;
+        public ulong? SceneId;
         /// <summary>
         /// The id of the prefab to spawn
         /// <para>If sceneId != 0 then it is used instead of prefabHash</para>
         /// </summary>
-        public int? prefabHash;
+        public int? PrefabHash;
         /// <summary>
         /// Local position
         /// </summary>
@@ -122,40 +119,38 @@ namespace Mirage
         /// The serialized component data
         /// <remark>ArraySegment to avoid unnecessary allocations</remark>
         /// </summary>
-        public ArraySegment<byte> payload;
+        public ArraySegment<byte> Payload;
     }
 
     [NetworkMessage]
     public struct RemoveAuthorityMessage
     {
-        public uint netId;
+        public uint NetId;
     }
 
     [NetworkMessage]
     public struct RemoveCharacterMessage
     {
-        public bool keepAuthority;
+        public bool KeepAuthority;
     }
 
     [NetworkMessage]
     public struct ObjectDestroyMessage
     {
-        public uint netId;
+        public uint NetId;
     }
 
     [NetworkMessage]
     public struct ObjectHideMessage
     {
-        public uint netId;
+        public uint NetId;
     }
 
     [NetworkMessage]
     public struct UpdateVarsMessage
     {
-        public uint netId;
-        // the serialized component data
-        // -> ArraySegment to avoid unnecessary allocations
-        public ArraySegment<byte> payload;
+        public uint NetId;
+        public ArraySegment<byte> Payload;
     }
 
     // A client sends this message to the server
@@ -163,7 +158,7 @@ namespace Mirage
     [NetworkMessage]
     public struct NetworkPingMessage
     {
-        public double clientTime;
+        public double ClientTime;
     }
 
     // The server responds with this message
@@ -171,8 +166,8 @@ namespace Mirage
     [NetworkMessage]
     public struct NetworkPongMessage
     {
-        public double clientTime;
-        public double serverTime;
+        public double ClientTime;
+        public double ServerTime;
     }
     #endregion
 }

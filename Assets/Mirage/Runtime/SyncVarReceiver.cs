@@ -46,21 +46,21 @@ namespace Mirage
 
         private void OnUpdateVarsMessage(INetworkPlayer sender, UpdateVarsMessage msg)
         {
-            if (logger.LogEnabled()) logger.Log("SyncVarReceiver.OnUpdateVarsMessage " + msg.netId);
+            if (logger.LogEnabled()) logger.Log("SyncVarReceiver.OnUpdateVarsMessage " + msg.NetId);
 
-            if (_objectLocator.TryGetIdentity(msg.netId, out var localObject))
+            if (_objectLocator.TryGetIdentity(msg.NetId, out var localObject))
             {
                 // dont throw in Validate
                 // owner or settings might have changed since client sent it
                 if (!ValidateReceive(sender, localObject))
                     return;
 
-                using (var networkReader = NetworkReaderPool.GetReader(msg.payload, _objectLocator))
+                using (var networkReader = NetworkReaderPool.GetReader(msg.Payload, _objectLocator))
                     localObject.OnDeserializeAll(networkReader, false);
             }
             else
             {
-                if (logger.WarnEnabled()) logger.LogWarning("Did not find target for sync message for " + msg.netId + " . Note: this can be completely normal because UDP messages may arrive out of order, so this message might have arrived after a Destroy message.");
+                if (logger.WarnEnabled()) logger.LogWarning("Did not find target for sync message for " + msg.NetId + " . Note: this can be completely normal because UDP messages may arrive out of order, so this message might have arrived after a Destroy message.");
             }
         }
 

@@ -15,10 +15,10 @@ namespace Mirage.RemoteCalls
 
             var message = new ServerRpcMessage
             {
-                netId = behaviour.NetId,
-                componentIndex = behaviour.ComponentIndex,
-                functionIndex = index,
-                payload = writer.ToArraySegment()
+                NetId = behaviour.NetId,
+                ComponentIndex = behaviour.ComponentIndex,
+                FunctionIndex = index,
+                Payload = writer.ToArraySegment()
             };
 
             behaviour.Client.Send(message, channelId);
@@ -29,15 +29,15 @@ namespace Mirage.RemoteCalls
             Validate(behaviour, index, requireAuthority);
             var message = new ServerRpcWithReplyMessage
             {
-                netId = behaviour.NetId,
-                componentIndex = behaviour.ComponentIndex,
-                functionIndex = index,
-                payload = writer.ToArraySegment()
+                NetId = behaviour.NetId,
+                ComponentIndex = behaviour.ComponentIndex,
+                FunctionIndex = index,
+                Payload = writer.ToArraySegment()
             };
 
             (var task, var id) = behaviour.ClientObjectManager.CreateReplyTask<T>();
 
-            message.replyId = id;
+            message.ReplyId = id;
 
             behaviour.Client.Send(message, channelId);
 

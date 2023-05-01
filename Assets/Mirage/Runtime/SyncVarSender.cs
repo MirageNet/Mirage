@@ -79,7 +79,7 @@ namespace Mirage
                 {
                     var varsMessage = new UpdateVarsMessage
                     {
-                        netId = identity.NetId
+                        NetId = identity.NetId
                     };
 
                     // send ownerWriter to owner
@@ -96,7 +96,7 @@ namespace Mirage
                     // (only if we serialized anything for observers)
                     if (observersWritten > 0)
                     {
-                        varsMessage.payload = observersWriter.ToArraySegment();
+                        varsMessage.Payload = observersWriter.ToArraySegment();
                         identity.SendToRemoteObservers(varsMessage, false);
                     }
 
@@ -133,7 +133,7 @@ namespace Mirage
             // check player is ready
             if (player != null && player.SceneIsReady)
             {
-                varsMessage.payload = ownerWriter.ToArraySegment();
+                varsMessage.Payload = ownerWriter.ToArraySegment();
                 player.Send(varsMessage);
             }
         }

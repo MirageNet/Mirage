@@ -58,7 +58,7 @@ namespace Mirage
             {
                 var pingMessage = new NetworkPingMessage
                 {
-                    clientTime = LocalTime()
+                    ClientTime = LocalTime()
                 };
                 client.Send(pingMessage, Channel.Unreliable);
                 _lastPingTime = UnityEngine.Time.time;
@@ -74,8 +74,8 @@ namespace Mirage
 
             var pongMsg = new NetworkPongMessage
             {
-                clientTime = msg.clientTime,
-                serverTime = LocalTime()
+                ClientTime = msg.ClientTime,
+                ServerTime = LocalTime()
             };
 
             player.Send(pongMsg, Channel.Unreliable);
@@ -89,16 +89,16 @@ namespace Mirage
             var now = LocalTime();
 
             // how long did this message take to come back
-            var newRtt = now - msg.clientTime;
+            var newRtt = now - msg.ClientTime;
             _rtt.Add(newRtt);
 
             // the difference in time between the client and the server
             // but subtract half of the rtt to compensate for latency
             // half of rtt is the best approximation we have
-            var newOffset = now - (newRtt * 0.5f) - msg.serverTime;
+            var newOffset = now - (newRtt * 0.5f) - msg.ServerTime;
 
-            var newOffsetMin = now - newRtt - msg.serverTime;
-            var newOffsetMax = now - msg.serverTime;
+            var newOffsetMin = now - newRtt - msg.ServerTime;
+            var newOffsetMax = now - msg.ServerTime;
             _offsetMin = Math.Max(_offsetMin, newOffsetMin);
             _offsetMax = Math.Min(_offsetMax, newOffsetMax);
 

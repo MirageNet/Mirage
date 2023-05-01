@@ -49,10 +49,10 @@ namespace Mirage.RemoteCalls
 
             var message = new RpcMessage
             {
-                netId = behaviour.NetId,
-                componentIndex = behaviour.ComponentIndex,
-                functionIndex = index,
-                payload = writer.ToArraySegment()
+                NetId = behaviour.NetId,
+                ComponentIndex = behaviour.ComponentIndex,
+                FunctionIndex = index,
+                Payload = writer.ToArraySegment()
             };
             return message;
         }

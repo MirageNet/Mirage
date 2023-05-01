@@ -45,8 +45,8 @@ namespace Mirage.RemoteCalls
                     writer.Write(result);
                     var serverRpcReply = new ServerRpcReply
                     {
-                        replyId = replyId,
-                        payload = writer.ToArraySegment()
+                        ReplyId = replyId,
+                        Payload = writer.ToArraySegment()
                     };
 
                     senderPlayer.Send(serverRpcReply);

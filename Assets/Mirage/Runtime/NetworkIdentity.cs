@@ -865,8 +865,8 @@ namespace Mirage
         {
             var varsMessage = new UpdateVarsMessage
             {
-                netId = NetId,
-                payload = writer.ToArraySegment(),
+                NetId = NetId,
+                Payload = writer.ToArraySegment(),
             };
 
             SendToRemoteObservers(varsMessage, includeOwner: false);

@@ -289,7 +289,7 @@ namespace Mirage
             if (visiblity is NetworkVisibility networkVisibility)
                 networkVisibility.InvokeVisibilityChanged(player, false);
 
-            player.Send(new ObjectHideMessage { netId = identity.NetId });
+            player.Send(new ObjectHideMessage { NetId = identity.NetId });
         }
 
         /// <summary>
@@ -310,7 +310,7 @@ namespace Mirage
                 identity.Owner = null;
             }
 
-            player.Send(new RemoveCharacterMessage { keepAuthority = keepAuthority });
+            player.Send(new RemoveCharacterMessage { KeepAuthority = keepAuthority });
         }
 
         /// <summary>
@@ -344,12 +344,12 @@ namespace Mirage
         /// <param name="msg"></param>
         private void OnServerRpcWithReplyMessage(INetworkPlayer player, ServerRpcWithReplyMessage msg)
         {
-            OnServerRpc(player, msg.netId, msg.componentIndex, msg.functionIndex, msg.payload, msg.replyId);
+            OnServerRpc(player, msg.NetId, msg.ComponentIndex, msg.FunctionIndex, msg.Payload, msg.ReplyId);
         }
 
         private void OnServerRpcMessage(INetworkPlayer player, ServerRpcMessage msg)
         {
-            OnServerRpc(player, msg.netId, msg.componentIndex, msg.functionIndex, msg.payload, default);
+            OnServerRpc(player, msg.NetId, msg.ComponentIndex, msg.FunctionIndex, msg.Payload, default);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -470,12 +470,12 @@ namespace Mirage
                 var sceneId = identity.IsSceneObject ? identity.SceneId : default(ulong?);
                 var msg = new SpawnMessage
                 {
-                    netId = identity.NetId,
-                    isLocalPlayer = player.Identity == identity,
-                    isOwner = isOwner,
-                    sceneId = sceneId,
-                    prefabHash = prefabHash,
-                    payload = payload,
+                    NetId = identity.NetId,
+                    IsLocalPlayer = player.Identity == identity,
+                    IsOwner = isOwner,
+                    SceneId = sceneId,
+                    PrefabHash = prefabHash,
+                    Payload = payload,
                 };
 
                 // values in msg are nullable, so by default they are null
@@ -494,7 +494,7 @@ namespace Mirage
 
             previousOwner.Send(new RemoveAuthorityMessage
             {
-                netId = identity.NetId,
+                NetId = identity.NetId,
             });
         }
 
@@ -574,7 +574,7 @@ namespace Mirage
             Server.World.RemoveIdentity(identity);
             identity.Owner?.RemoveOwnedObject(identity);
 
-            identity.SendToRemoteObservers(new ObjectDestroyMessage { netId = identity.NetId });
+            identity.SendToRemoteObservers(new ObjectDestroyMessage { NetId = identity.NetId });
 
             identity.ClearObservers();
             if (Server.LocalClientActive)
