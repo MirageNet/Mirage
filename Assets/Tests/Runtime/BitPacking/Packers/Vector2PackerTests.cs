@@ -47,7 +47,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
         }
 
-        private static IEnumerable<TestCaseData> UnpacksToSaveValueCases()
+        private static IEnumerable<TestCaseData> UnpacksToSameValueCases()
         {
             yield return new TestCaseData(Vector2.one * 100, Vector2.one * 0.1f);
             yield return new TestCaseData(Vector2.one * 200, Vector2.one * 0.1f);
@@ -57,9 +57,9 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         }
 
         [Test]
-        [TestCaseSource(nameof(UnpacksToSaveValueCases))]
+        [TestCaseSource(nameof(UnpacksToSameValueCases))]
         [Repeat(100)]
-        public void UnpacksToSaveValue(Vector2 max, Vector2 precision)
+        public void UnpacksToSameValue(Vector2 max, Vector2 precision)
         {
             var packer = new Vector2Packer(max, precision);
             var expected = new Vector2(
@@ -75,7 +75,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         }
 
         [Test]
-        [TestCaseSource(nameof(UnpacksToSaveValueCases))]
+        [TestCaseSource(nameof(UnpacksToSameValueCases))]
         public void ZeroUnpacksAsZero(Vector2 max, Vector2 precision)
         {
             var packer = new Vector2Packer(max, precision);
