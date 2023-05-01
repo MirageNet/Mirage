@@ -33,6 +33,8 @@ namespace Mirage
         /// </summary>
         public bool AutoSpawn = true;
 
+        [Tooltip("Should the characters gameObject name be set when it is spawned")]
+        public bool SetName = true;
         public int startPositionIndex;
 
         /// <summary>
@@ -162,7 +164,8 @@ namespace Mirage
                 ? Instantiate(PlayerPrefab, startPos.position, startPos.rotation)
                 : Instantiate(PlayerPrefab);
 
-            SetCharacterName(player, character);
+            if (SetName)
+                SetCharacterName(player, character);
             ServerObjectManager.AddCharacter(player, character.gameObject);
         }
 
