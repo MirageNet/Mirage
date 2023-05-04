@@ -1,3 +1,10 @@
+# [136.1.0](https://github.com/MirageNet/Mirage/compare/v136.0.0...v136.1.0) (2023-05-04)
+
+
+### Features
+
+* components to sync if gameObject is active ([873db7f](https://github.com/MirageNet/Mirage/commit/873db7f5cad0be4521179cdedf32570daef37f0c))
+
 # [136.0.0](https://github.com/MirageNet/Mirage/compare/v135.1.0...v136.0.0) (2023-05-01)
 
 
