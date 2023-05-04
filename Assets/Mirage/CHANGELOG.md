@@ -1,3 +1,10 @@
+# [136.2.0](https://github.com/MirageNet/Mirage/compare/v136.1.0...v136.2.0) (2023-05-04)
+
+
+### Features
+
+* adding helper function to get AuthenticationData as a type ([a2d7382](https://github.com/MirageNet/Mirage/commit/a2d738205240302ea49f38806360450113f39f64))
+
 # [136.1.0](https://github.com/MirageNet/Mirage/compare/v136.0.0...v136.1.0) (2023-05-04)
 
 
