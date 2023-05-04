@@ -116,6 +116,13 @@ namespace Mirage
         /// </summary>
         object AuthenticationData { get; set; }
     }
+    public static class AuthenticatedObjectExtensions
+    {
+        public static T GetAuthenticationData<T>(this IAuthenticatedObject player)
+        {
+            return (T)player.AuthenticationData;
+        }
+    }
 
     public interface ISceneLoader
     {
