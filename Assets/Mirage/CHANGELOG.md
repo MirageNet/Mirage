@@ -1,3 +1,10 @@
+## [137.0.1](https://github.com/MirageNet/Mirage/compare/v137.0.0...v137.0.1) (2023-05-05)
+
+
+### Bug Fixes
+
+* fixing message size being too small with DisableReliableLayer ([50b4093](https://github.com/MirageNet/Mirage/commit/50b40937c76e327d9104ccc1aaf21602d5ec72ab))
+
 # [137.0.0](https://github.com/MirageNet/Mirage/compare/v136.2.0...v137.0.0) (2023-05-05)
 
 
