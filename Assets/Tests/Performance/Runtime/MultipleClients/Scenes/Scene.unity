@@ -225,6 +225,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1193428351}
+  - component: {fileID: 1193428349}
   - component: {fileID: 1193428348}
   - component: {fileID: 1193428352}
   - component: {fileID: 1193428353}
@@ -255,6 +256,7 @@ MonoBehaviour:
   RunInBackground: 1
   Listening: 1
   SocketFactory: {fileID: 1193428350}
+  ObjectManager: {fileID: 1193428353}
   authenticator: {fileID: 0}
   _started:
     _event:
@@ -281,6 +283,25 @@ MonoBehaviour:
     _event:
       m_PersistentCalls:
         m_Calls: []
+  ManualUpdate: 0
+--- !u!114 &1193428349
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1193428347}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8aab4c8111b7c411b9b92cf3dbc5bd4e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Server: {fileID: 1193428348}
+  Client: {fileID: 0}
+  NetworkSceneManager: {fileID: 0}
+  ServerObjectManager: {fileID: 1193428353}
+  ClientObjectManager: {fileID: 1193428352}
+  ValidateReferences: 1
 --- !u!114 &1193428350
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -323,9 +344,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2cbc85c1c2f1c249bbe95ae110bbcde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Client: {fileID: 0}
-  NetworkSceneManager: {fileID: 0}
   spawnPrefabs: []
+  NetworkPrefabs: {fileID: 0}
 --- !u!114 &1193428353
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -338,8 +358,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b750203ddb2d9f84abd799a5c2c32cb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Server: {fileID: 1193428348}
-  NetworkSceneManager: {fileID: 0}
+  OnlySpawnOnAuthenticated: 0
 --- !u!1 &1615514841
 GameObject:
   m_ObjectHideFlags: 0
