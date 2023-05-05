@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Mirage
 {
@@ -18,17 +17,15 @@ namespace Mirage
     [DisallowMultipleComponent]
     public class NetworkManager : MonoBehaviour
     {
-        [FormerlySerializedAs("server")]
         public NetworkServer Server;
-        [FormerlySerializedAs("client")]
         public NetworkClient Client;
-        [FormerlySerializedAs("sceneManager")]
-        [FormerlySerializedAs("SceneManager")]
         public NetworkSceneManager NetworkSceneManager;
-        [FormerlySerializedAs("serverObjectManager")]
         public ServerObjectManager ServerObjectManager;
-        [FormerlySerializedAs("clientObjectManager")]
         public ClientObjectManager ClientObjectManager;
+
+        [Tooltip("Will setup referecnes to automatically")]
+        public bool ValidateReferences = true;
+
 
         /// <summary>
         /// True if the server or client is started and running
@@ -51,6 +48,58 @@ namespace Mirage
                     return NetworkManagerMode.Server;
                 else
                     return NetworkManagerMode.Client;
+            }
+        }
+
+
+        private void OnValidate()
+        {
+            if (!ValidateReferences)
+                return;
+
+            FindIfNull(ref Server);
+            FindIfNull(ref Client);
+            FindIfNull(ref NetworkSceneManager);
+            FindIfNull(ref ServerObjectManager);
+            FindIfNull(ref ClientObjectManager);
+
+            if (Server != null)
+            {
+                SetIfNull(ref Server.ObjectManager, ServerObjectManager);
+            }
+
+            if (Client != null)
+            {
+                SetIfNull(ref Client.ObjectManager, ClientObjectManager);
+            }
+
+            if (NetworkSceneManager != null)
+            {
+                SetIfNull(ref NetworkSceneManager.Server, Server);
+                SetIfNull(ref NetworkSceneManager.Client, Client);
+                SetIfNull(ref NetworkSceneManager.ServerObjectManager, ServerObjectManager);
+                SetIfNull(ref NetworkSceneManager.ClientObjectManager, ClientObjectManager);
+            }
+        }
+
+        private void FindIfNull<T>(ref T field) where T : class
+        {
+            if (field == null && gameObject.TryGetComponent<T>(out var value))
+            {
+#if UNITY_EDITOR
+                UnityEditor.Undo.RecordObject(this, "Setting Referecne on NetworkManager");
+#endif
+                field = value;
+            }
+        }
+        private void SetIfNull<T>(ref T field, T value) where T : class
+        {
+            if (field == null && value != null)
+            {
+#if UNITY_EDITOR
+                UnityEditor.Undo.RecordObject(this, "Setting Referecne on NetworkManager");
+#endif
+                field = value;
             }
         }
     }
