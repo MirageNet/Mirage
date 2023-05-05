@@ -28,45 +28,38 @@ namespace Mirage
         /// <returns></returns>
         public static GameObject CreateNetworkManager<T>() where T : SocketFactory
         {
-            var components = new Type[]
-            {
-                typeof(NetworkManager),
-                typeof(NetworkServer),
-                typeof(NetworkClient),
-                typeof(NetworkSceneManager),
-                typeof(ServerObjectManager),
-                typeof(ClientObjectManager),
-                typeof(CharacterSpawner),
-                typeof(T),
-                typeof(LogSettings)
-            };
-            var go = new GameObject("NetworkManager", components);
+            var managerGo = new GameObject("NetworkManager", typeof(NetworkManager), typeof(LogSettings));
+            var serverGo = AddChild(managerGo, "Server", typeof(NetworkServer), typeof(ServerObjectManager));
+            var clientGo = AddChild(managerGo, "Client", typeof(NetworkClient), typeof(ClientObjectManager));
+            var authGo = AddChild(managerGo, "Authentication");
+            var sceneGo = AddChild(managerGo, "Scene", typeof(NetworkSceneManager));
+            var characterGo = AddChild(managerGo, "Character", typeof(CharacterSpawner));
+            var socketGo = AddChild(managerGo, "Socket", typeof(T));
 
-            var socketFactory = go.GetComponent<T>();
-            var nsm = go.GetComponent<NetworkSceneManager>();
+            var nsm = sceneGo.GetComponent<NetworkSceneManager>();
 
-            var networkClient = go.GetComponent<NetworkClient>();
-            networkClient.SocketFactory = socketFactory;
+            var networkClient = clientGo.GetComponent<NetworkClient>();
+            networkClient.SocketFactory = socketGo.GetComponent<T>();
 
-            var networkServer = go.GetComponent<NetworkServer>();
-            networkServer.SocketFactory = socketFactory;
+            var networkServer = serverGo.GetComponent<NetworkServer>();
+            networkServer.SocketFactory = socketGo.GetComponent<T>();
 
-            var serverObjectManager = go.GetComponent<ServerObjectManager>();
+            var serverObjectManager = serverGo.GetComponent<ServerObjectManager>();
             serverObjectManager.Server = networkServer;
             nsm.ServerObjectManager = serverObjectManager;
 
-            var clientObjectManager = go.GetComponent<ClientObjectManager>();
+            var clientObjectManager = serverGo.GetComponent<ClientObjectManager>();
             clientObjectManager.Client = networkClient;
             clientObjectManager.NetworkSceneManager = nsm;
 
-            var networkManager = go.GetComponent<NetworkManager>();
+            var networkManager = managerGo.GetComponent<NetworkManager>();
             networkManager.Client = networkClient;
             networkManager.Server = networkServer;
             networkManager.ServerObjectManager = serverObjectManager;
             networkManager.ClientObjectManager = clientObjectManager;
             networkManager.NetworkSceneManager = nsm;
 
-            var playerSpawner = go.GetComponent<CharacterSpawner>();
+            var playerSpawner = characterGo.GetComponent<CharacterSpawner>();
             playerSpawner.Client = networkClient;
             playerSpawner.Server = networkServer;
             playerSpawner.SceneManager = nsm;
@@ -75,7 +68,14 @@ namespace Mirage
 
             nsm.Client = networkClient;
             nsm.Server = networkServer;
-            return go;
+            return managerGo;
+        }
+
+        private static GameObject AddChild(GameObject parent, string name, params Type[] types)
+        {
+            var serverGo = new GameObject(name, types);
+            serverGo.transform.parent = parent.transform;
+            return serverGo;
         }
 
         /// <summary>
