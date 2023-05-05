@@ -110,14 +110,6 @@ namespace Mirage
             }
         }
 
-        private void StartedHost()
-        {
-            if (TryGetComponent(out ClientObjectManager clientObjectManager))
-            {
-                clientObjectManager._serverObjectManager = this;
-            }
-        }
-
         /// <summary>
         /// This replaces the player object for a connection with a different player object. The old player object is not destroyed.
         /// <para>If a connection already has a player object, this can be used to replace that object with a different player object. This does NOT change the ready state of the connection, so it can safely be used while changing scenes.</para>

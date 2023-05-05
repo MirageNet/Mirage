@@ -50,6 +50,7 @@ namespace Mirage
 
         [Tooltip("Creates Socket for Peer to use")]
         public SocketFactory SocketFactory;
+
         public ServerObjectManager ObjectManager;
 
         private Peer _peer;

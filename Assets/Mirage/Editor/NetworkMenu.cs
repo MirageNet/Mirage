@@ -43,7 +43,6 @@ namespace Mirage
             var go = new GameObject("NetworkManager", components);
 
             var socketFactory = go.GetComponent<T>();
-            var nsm = go.GetComponent<NetworkSceneManager>();
 
             var networkClient = go.GetComponent<NetworkClient>();
             networkClient.SocketFactory = socketFactory;
@@ -53,11 +52,15 @@ namespace Mirage
 
             var serverObjectManager = go.GetComponent<ServerObjectManager>();
             networkServer.ObjectManager = serverObjectManager;
-            nsm.ServerObjectManager = serverObjectManager;
 
             var clientObjectManager = go.GetComponent<ClientObjectManager>();
-            clientObjectManager.Client = networkClient;
-            clientObjectManager.NetworkSceneManager = nsm;
+            networkClient.ObjectManager = clientObjectManager;
+
+            var nsm = go.GetComponent<NetworkSceneManager>();
+            nsm.Server = networkServer;
+            nsm.Client = networkClient;
+            nsm.ServerObjectManager = serverObjectManager;
+            nsm.ClientObjectManager = clientObjectManager;
 
             var networkManager = go.GetComponent<NetworkManager>();
             networkManager.Client = networkClient;

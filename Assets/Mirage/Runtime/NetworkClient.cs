@@ -30,6 +30,7 @@ namespace Mirage
         public int MetricsSize = 10;
         public Metrics Metrics { get; private set; }
 
+
         /// <summary>
         /// Config for peer, if not set will use default settings
         /// </summary>
@@ -37,6 +38,8 @@ namespace Mirage
 
         [Tooltip("Creates Socket for Peer to use")]
         public SocketFactory SocketFactory;
+
+        public ClientObjectManager ObjectManager;
 
         public bool DisconnectOnException = true;
 
@@ -153,7 +156,9 @@ namespace Mirage
 
             RegisterMessageHandlers();
             InitializeAuthEvents();
+
             // invoke started event after everything is set up, but before peer has connected
+            ObjectManager.ClientStarted(this);
             _started.Invoke();
         }
 
@@ -221,6 +226,7 @@ namespace Mirage
             RegisterHostHandlers();
             InitializeAuthEvents();
             // invoke started event after everything is set up, but before peer has connected
+            ObjectManager.ClientStarted(this);
             _started.Invoke();
 
             // we need add server connection to server's dictionary first

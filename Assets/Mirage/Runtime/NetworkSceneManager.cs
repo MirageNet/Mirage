@@ -29,6 +29,7 @@ namespace Mirage
         public NetworkClient Client;
         public NetworkServer Server;
         public ServerObjectManager ServerObjectManager;
+        public ClientObjectManager ClientObjectManager;
 
         [Tooltip("Should server send all additive scenes to new clients when they join?")]
         public bool SendAdditiveScenesOnAuthenticate = true;
@@ -283,6 +284,8 @@ namespace Mirage
                 SetSceneIsReady();
 
             //Call event once all scene related actions (sub-scenes and ready) are done.
+            Client.World.RemoveDestroyedObjects();
+            ClientObjectManager.PrepareToSpawnSceneObjects();
             OnClientFinishedSceneChange?.Invoke(scene, sceneOperation);
         }
 
