@@ -178,6 +178,8 @@ MonoBehaviour:
     SendPosition: 1
     SendRotation: 1
     SendScale: 1
+    SendName: 0
+    SendActive: 2
   _sceneId: 1361368467
   ServerObjectManager: {fileID: 0}
   ClientObjectManager: {fileID: 0}
@@ -258,6 +260,8 @@ MonoBehaviour:
     SendPosition: 1
     SendRotation: 1
     SendScale: 1
+    SendName: 0
+    SendActive: 2
   _sceneId: 2716062224
   ServerObjectManager: {fileID: 0}
   ClientObjectManager: {fileID: 0}
@@ -369,8 +373,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2cbc85c1c2f1c249bbe95ae110bbcde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Client: {fileID: 867700738}
-  NetworkSceneManager: {fileID: 0}
   spawnPrefabs: []
   NetworkPrefabs: {fileID: 11400000, guid: 5f42811a00bdba748acbfa19596f2eab, type: 2}
 --- !u!114 &867700736
@@ -385,8 +387,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b750203ddb2d9f84abd799a5c2c32cb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Server: {fileID: 867700739}
-  NetworkSceneManager: {fileID: 0}
   OnlySpawnOnAuthenticated: 0
 --- !u!114 &867700738
 MonoBehaviour:
@@ -403,6 +403,7 @@ MonoBehaviour:
   EnablePeerMetrics: 0
   MetricsSize: 10
   SocketFactory: {fileID: 867700733}
+  ObjectManager: {fileID: 867700735}
   DisconnectOnException: 1
   RunInBackground: 1
   authenticator: {fileID: 0}
@@ -442,6 +443,7 @@ MonoBehaviour:
   RunInBackground: 1
   Listening: 1
   SocketFactory: {fileID: 867700733}
+  ObjectManager: {fileID: 867700736}
   authenticator: {fileID: 0}
   _started:
     _event:
@@ -486,6 +488,7 @@ MonoBehaviour:
   NetworkSceneManager: {fileID: 0}
   ServerObjectManager: {fileID: 867700736}
   ClientObjectManager: {fileID: 867700735}
+  ValidateReferences: 1
 --- !u!4 &867700741
 Transform:
   m_ObjectHideFlags: 0
@@ -564,8 +567,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2cbc85c1c2f1c249bbe95ae110bbcde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Client: {fileID: 1379043725}
-  NetworkSceneManager: {fileID: 0}
   spawnPrefabs: []
   NetworkPrefabs: {fileID: 11400000, guid: 1bcfe5bd7a8b63444872185467b1c7a8, type: 2}
 --- !u!114 &1379043723
@@ -580,8 +581,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b750203ddb2d9f84abd799a5c2c32cb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Server: {fileID: 1379043726}
-  NetworkSceneManager: {fileID: 0}
   OnlySpawnOnAuthenticated: 0
 --- !u!114 &1379043725
 MonoBehaviour:
@@ -598,6 +597,7 @@ MonoBehaviour:
   EnablePeerMetrics: 0
   MetricsSize: 10
   SocketFactory: {fileID: 1379043720}
+  ObjectManager: {fileID: 1379043722}
   DisconnectOnException: 1
   RunInBackground: 1
   authenticator: {fileID: 0}
@@ -637,6 +637,7 @@ MonoBehaviour:
   RunInBackground: 1
   Listening: 1
   SocketFactory: {fileID: 1379043720}
+  ObjectManager: {fileID: 1379043723}
   authenticator: {fileID: 0}
   _started:
     _event:
@@ -681,6 +682,7 @@ MonoBehaviour:
   NetworkSceneManager: {fileID: 0}
   ServerObjectManager: {fileID: 1379043723}
   ClientObjectManager: {fileID: 1379043722}
+  ValidateReferences: 1
 --- !u!4 &1379043728
 Transform:
   m_ObjectHideFlags: 0

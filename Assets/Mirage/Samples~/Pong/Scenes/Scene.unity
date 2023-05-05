@@ -43,7 +43,7 @@ RenderSettings:
 --- !u!157 &4
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 11
+  serializedVersion: 12
   m_GIWorkflowMode: 0
   m_GISettings:
     serializedVersion: 2
@@ -98,7 +98,8 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 0
+  m_LightingSettings: {fileID: 4890085278179872738, guid: 6d14ef00f894c814ebf735c27ca01284,
+    type: 2}
 --- !u!196 &5
 NavMeshSettings:
   serializedVersion: 2
@@ -118,6 +119,8 @@ NavMeshSettings:
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
+    maxJobWorkers: 0
+    preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
@@ -153,6 +156,7 @@ SpriteRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -265,6 +269,7 @@ SpriteRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -411,7 +416,7 @@ Camera:
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
-  m_HDR: 0
+  m_HDR: 1
   m_AllowMSAA: 1
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
@@ -465,6 +470,7 @@ SpriteRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -573,6 +579,7 @@ SpriteRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -711,6 +718,7 @@ SpriteRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -871,11 +879,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2cbc85c1c2f1c249bbe95ae110bbcde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Client: {fileID: 1886246554}
-  NetworkSceneManager: {fileID: 1886246556}
   spawnPrefabs:
   - {fileID: 114290021321007948, guid: 5f7a7f34494ed40268eff49dbf9168bf, type: 3}
   - {fileID: 114104497298166850, guid: b1651eaf8c7564a1c86031dfbb8a7b28, type: 3}
+  NetworkPrefabs: {fileID: 0}
 --- !u!114 &1886246552
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -893,6 +900,7 @@ MonoBehaviour:
   NetworkSceneManager: {fileID: 1886246556}
   ServerObjectManager: {fileID: 1886246558}
   ClientObjectManager: {fileID: 1886246551}
+  ValidateReferences: 1
 --- !u!114 &1886246553
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -913,6 +921,7 @@ MonoBehaviour:
   PlayerPrefab: {fileID: 114104497298166850, guid: b1651eaf8c7564a1c86031dfbb8a7b28,
     type: 3}
   AutoSpawn: 1
+  SetName: 1
   startPositionIndex: 0
   startPositions: []
   playerSpawnMethod: 0
@@ -934,7 +943,9 @@ MonoBehaviour:
   EnablePeerMetrics: 0
   MetricsSize: 10
   SocketFactory: {fileID: 1886246557}
+  ObjectManager: {fileID: 1886246551}
   DisconnectOnException: 1
+  RunInBackground: 1
   authenticator: {fileID: 0}
   _started:
     _event:
@@ -952,6 +963,7 @@ MonoBehaviour:
     _event:
       m_PersistentCalls:
         m_Calls: []
+  ManualUpdate: 0
 --- !u!114 &1886246555
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -968,8 +980,10 @@ MonoBehaviour:
   MetricsSize: 10
   MaxConnections: 4
   DisconnectOnException: 1
+  RunInBackground: 1
   Listening: 1
   SocketFactory: {fileID: 1886246557}
+  ObjectManager: {fileID: 1886246558}
   authenticator: {fileID: 0}
   _started:
     _event:
@@ -996,6 +1010,7 @@ MonoBehaviour:
     _event:
       m_PersistentCalls:
         m_Calls: []
+  ManualUpdate: 0
 --- !u!114 &1886246556
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1010,6 +1025,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Client: {fileID: 1886246554}
   Server: {fileID: 1886246555}
+  ServerObjectManager: {fileID: 1886246558}
+  ClientObjectManager: {fileID: 1886246551}
+  SendAdditiveScenesOnAuthenticate: 1
   DontDestroy: 1
   _onClientStartedSceneChange:
     m_PersistentCalls:
@@ -1054,8 +1072,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b750203ddb2d9f84abd799a5c2c32cb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Server: {fileID: 1886246555}
-  NetworkSceneManager: {fileID: 1886246556}
+  OnlySpawnOnAuthenticated: 0
 --- !u!1 &70109839852233236
 GameObject:
   m_ObjectHideFlags: 0
@@ -1134,6 +1151,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1175,6 +1193,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1203,6 +1222,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -1233,6 +1253,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 7627036908406526150}
+        m_TargetAssemblyTypeName: 
         m_MethodName: StopButtonHandler
         m_Mode: 1
         m_Arguments:
@@ -1345,6 +1366,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0.078431375}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1419,6 +1441,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 0.5}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1452,6 +1475,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1557,6 +1581,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1585,6 +1610,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -1615,6 +1641,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 7627036908406526150}
+        m_TargetAssemblyTypeName: 
         m_MethodName: StartClientButtonHandler
         m_Mode: 1
         m_Arguments:
@@ -1678,6 +1705,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1746,6 +1774,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1843,6 +1872,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1892,6 +1922,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -1935,6 +1966,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 7627036908406526150}
+        m_TargetAssemblyTypeName: 
         m_MethodName: OnNetworkAddressInputUpdate
         m_Mode: 1
         m_Arguments:
@@ -1952,6 +1984,7 @@ MonoBehaviour:
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
+  m_ShouldActivateOnSelect: 1
 --- !u!114 &476531300097362040
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1966,6 +1999,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -1996,6 +2030,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 7627036908406526150}
+        m_TargetAssemblyTypeName: 
         m_MethodName: StartHostButtonHandler
         m_Mode: 1
         m_Arguments:
@@ -2068,6 +2103,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2124,6 +2160,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2152,6 +2189,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -2182,6 +2220,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 7627036908406526150}
+        m_TargetAssemblyTypeName: 
         m_MethodName: StartServerOnlyButtonHandler
         m_Mode: 1
         m_Arguments:
@@ -2311,6 +2350,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2389,6 +2429,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2611,3 +2652,4 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
+  m_PresetInfoIsWorld: 0

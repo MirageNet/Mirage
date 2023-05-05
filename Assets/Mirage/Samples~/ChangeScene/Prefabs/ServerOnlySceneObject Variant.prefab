@@ -92,10 +92,15 @@ PrefabInstance:
       propertyPath: serverOnly
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1818873914431344371, guid: 685b07ee95b6b6b4db30b2440e670157,
+        type: 3}
+      propertyPath: _prefabHash
+      value: -192834059
+      objectReference: {fileID: 0}
     - target: {fileID: 1818873914431344372, guid: 685b07ee95b6b6b4db30b2440e670157,
         type: 3}
       propertyPath: m_Name
-      value: ServerOnlySceneObject
+      value: ServerOnlySceneObject Variant
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 685b07ee95b6b6b4db30b2440e670157, type: 3}
