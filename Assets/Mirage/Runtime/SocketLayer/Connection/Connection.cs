@@ -217,5 +217,7 @@ namespace Mirage.SocketLayer
                 _dataHandler.ReceiveMessage(this, message);
             }
         }
+
+        internal abstract bool IsValidSize(Packet packet);
     }
 }

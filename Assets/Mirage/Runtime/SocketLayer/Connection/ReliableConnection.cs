@@ -190,5 +190,42 @@ namespace Mirage.SocketLayer
         {
             _ackSystem.Update();
         }
+
+        internal override bool IsValidSize(Packet packet)
+        {
+            const int minPacketSize = 1;
+
+            var length = packet.Length;
+            if (length < minPacketSize)
+                return false;
+
+            // Min size of message given to Mirage
+            const int minMessageSize = 2;
+
+            const int minCommandSize = 2;
+            const int minUnreliableSize = 1 + minMessageSize;
+
+            switch (packet.Type)
+            {
+                case PacketType.Command:
+                    return length >= minCommandSize;
+
+                case PacketType.Unreliable:
+                    return length >= minUnreliableSize;
+
+                case PacketType.Notify:
+                    return length >= AckSystem.NOTIFY_HEADER_SIZE + minMessageSize;
+                case PacketType.Reliable:
+                    return length >= AckSystem.MIN_RELIABLE_HEADER_SIZE + minMessageSize;
+                case PacketType.ReliableFragment:
+                    return length >= AckSystem.MIN_RELIABLE_FRAGMENT_HEADER_SIZE + 1;
+                case PacketType.Ack:
+                    return length >= AckSystem.ACK_HEADER_SIZE;
+
+                default:
+                case PacketType.KeepAlive:
+                    return true;
+            }
+        }
     }
 }

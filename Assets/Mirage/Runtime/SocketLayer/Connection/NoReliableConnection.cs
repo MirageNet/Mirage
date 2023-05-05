@@ -14,7 +14,6 @@ namespace Mirage.SocketLayer
         private byte[] _nextBatch;
         private int _batchLength;
 
-
         internal NoReliableConnection(Peer peer, IEndPoint endPoint, IDataHandler dataHandler, Config config, int maxPacketSize, Time time, ILogger logger, Metrics metrics)
             : base(peer, endPoint, dataHandler, config, maxPacketSize, time, logger, metrics)
         {
@@ -100,6 +99,42 @@ namespace Mirage.SocketLayer
             if (_batchLength > 1)
             {
                 SendBatch();
+            }
+        }
+
+        internal override bool IsValidSize(Packet packet)
+        {
+            const int minPacketSize = 1;
+
+            var length = packet.Length;
+            if (length < minPacketSize)
+                return false;
+
+            // Min size of message given to Mirage
+            const int minMessageSize = 2;
+
+            const int minCommandSize = 2;
+            // 1 msgType + 2 msgSize + 2 MirageMsg
+            const int minSize = 1 + 2 + minMessageSize;
+
+            switch (packet.Type)
+            {
+                case PacketType.Command:
+                    return length >= minCommandSize;
+
+                case PacketType.Reliable:
+                    return length >= minSize;
+
+                case PacketType.Ack:
+                case PacketType.ReliableFragment:
+                case PacketType.Notify:
+                case PacketType.Unreliable:
+                    // none of these are expected when using NoReliableConnetion
+                    return false;
+
+                default:
+                case PacketType.KeepAlive:
+                    return true;
             }
         }
     }

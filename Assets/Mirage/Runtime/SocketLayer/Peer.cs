@@ -271,11 +271,11 @@ namespace Mirage.SocketLayer
         private void HandleMessage(Connection connection, Packet packet)
         {
             // ingore message of invalid size
-            if (!packet.IsValidSize())
+            if (!connection.IsValidSize(packet))
             {
                 if (_logger.Enabled(LogType.Log))
                 {
-                    _logger.Log($"Receive from {connection} was too small");
+                    _logger.Log($"Receive from {connection} was too small type:{packet.Type}, size:{packet.Length}");
                 }
                 return;
             }
