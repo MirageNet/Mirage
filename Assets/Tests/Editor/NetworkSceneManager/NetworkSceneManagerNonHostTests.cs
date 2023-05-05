@@ -33,7 +33,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             clientSceneManager.Client = client;
 
             serverSceneManager.ServerObjectManager = serverObjectManager;
-            clientObjectManager.NetworkSceneManager = clientSceneManager;
+            clientSceneManager.ClientObjectManager = clientObjectManager;
 
             Debug.Assert(SceneManager.sceneCount == 1, "scene count should be 1 at start of NetworkSceneManager Test");
 

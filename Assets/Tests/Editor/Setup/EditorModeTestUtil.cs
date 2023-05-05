@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -25,8 +25,7 @@ namespace Mirage.Tests.EnterRuntime
 
             Debug.Log("Starting Setup after EnterPlayMode");
             var runner = new Runner();
-            var task = setup.Invoke();
-            runner.RunTask(task).Forget();
+            runner.RunTask(setup).Forget();
             while (!runner.SetupComplete)
             {
                 if (runner.Exception != null)
@@ -41,8 +40,7 @@ namespace Mirage.Tests.EnterRuntime
         {
             Debug.Log("Starting TearDown before ExitPlayMode");
             var runner = new Runner();
-            var task = teardown.Invoke();
-            runner.RunTask(task).Forget();
+            runner.RunTask(teardown).Forget();
             while (!runner.SetupComplete)
             {
                 if (runner.Exception != null)
@@ -61,10 +59,11 @@ namespace Mirage.Tests.EnterRuntime
             public bool SetupComplete;
             public Exception Exception;
 
-            public async UniTaskVoid RunTask(UniTask task)
+            public async UniTaskVoid RunTask(Func<UniTask> getTask)
             {
                 try
                 {
+                    var task = getTask.Invoke();
                     await task;
                 }
                 catch (Exception ex)

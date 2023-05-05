@@ -25,7 +25,7 @@ namespace Mirage.Tests
             Client.SocketFactory = socketFactory;
 
             ClientObjectManager = GameObject.GetComponent<ClientObjectManager>();
-            ClientObjectManager.Client = Client;
+            Client.ObjectManager = ClientObjectManager;
         }
 
         public void SetupCharacter()

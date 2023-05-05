@@ -32,7 +32,7 @@ namespace Mirage.Tests.Runtime
 
             server = serverGO.GetComponent<NetworkServer>();
             serverObjectManager = serverGO.GetComponent<ServerObjectManager>();
-            serverObjectManager.Server = server;
+             server.ObjectManager = serverObjectManager;
 
             character1 = new GameObject("TestCharacter1", typeof(NetworkIdentity), typeof(NetworkMatchChecker));
             character2 = new GameObject("TestCharacter2", typeof(NetworkIdentity), typeof(NetworkMatchChecker));

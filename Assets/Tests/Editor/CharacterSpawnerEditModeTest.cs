@@ -31,9 +31,9 @@ namespace Mirage.Tests
             spawner.SceneManager = sceneManager;
             sceneManager.Client = client;
             sceneManager.Server = server;
-            serverObjectManager.Server = server;
-            clientObjectManager.Client = client;
-            clientObjectManager.NetworkSceneManager = sceneManager;
+            server.ObjectManager = serverObjectManager;
+            client.ObjectManager = clientObjectManager;
+            sceneManager.ClientObjectManager = clientObjectManager;
             spawner.Client = client;
             spawner.Server = server;
             spawner.ServerObjectManager = serverObjectManager;

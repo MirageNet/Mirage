@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using UnityEngine;
 
 namespace Mirage.Tests
@@ -16,7 +16,7 @@ namespace Mirage.Tests
             networkServerGameObject = CreateGameObject();
             server = networkServerGameObject.AddComponent<NetworkServer>();
             serverObjectManager = networkServerGameObject.AddComponent<ServerObjectManager>();
-            serverObjectManager.Server = server;
+            server.ObjectManager = serverObjectManager;
             networkServerGameObject.AddComponent<NetworkClient>();
 
             identity = CreateNetworkIdentity();

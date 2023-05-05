@@ -14,7 +14,7 @@ namespace Mirage.Tests
         {
             Client = GameObject.AddComponent<NetworkClient>();
             ClientObjectManager = GameObject.AddComponent<ClientObjectManager>();
-            ClientObjectManager.Client = Client;
+            Client.ObjectManager = ClientObjectManager;
         }
 
         public override void StartServer()

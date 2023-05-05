@@ -38,7 +38,7 @@ namespace Mirage.Tests
             Server.SocketFactory = SocketFactory;
 
             ServerObjectManager = GameObject.GetComponent<ServerObjectManager>();
-            ServerObjectManager.Server = Server;
+            Server.ObjectManager = ServerObjectManager;
         }
 
         public virtual void StartServer()

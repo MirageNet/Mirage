@@ -85,8 +85,7 @@ namespace Mirage.Tests.Performance.Runtime
             var clientGo = new GameObject($"Client {i}", typeof(NetworkClient), typeof(ClientObjectManager));
             var client = clientGo.GetComponent<NetworkClient>();
             var objectManager = clientGo.GetComponent<ClientObjectManager>();
-            objectManager.Client = client;
-            objectManager.Start();
+            client.ObjectManager = objectManager;
             client.SocketFactory = socketFactory;
 
             objectManager.RegisterPrefab(MonsterPrefab);
