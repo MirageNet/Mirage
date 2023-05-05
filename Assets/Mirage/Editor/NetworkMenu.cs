@@ -52,7 +52,7 @@ namespace Mirage
             networkServer.SocketFactory = socketFactory;
 
             var serverObjectManager = go.GetComponent<ServerObjectManager>();
-            serverObjectManager.Server = networkServer;
+            networkServer.ObjectManager = serverObjectManager;
             nsm.ServerObjectManager = serverObjectManager;
 
             var clientObjectManager = go.GetComponent<ClientObjectManager>();

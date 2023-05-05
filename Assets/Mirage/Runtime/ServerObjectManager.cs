@@ -28,8 +28,8 @@ namespace Mirage
         /// </summary>
         private static HashSet<NetworkIdentity> _setCache = new HashSet<NetworkIdentity>();
 
-        public NetworkServer Server;
-        private bool _hasSetup;
+        private NetworkServer _server;
+        public NetworkServer Server => _server;
 
         [Header("Authentication")]
         [Tooltip("Will only send spawn message to Players who are Authenticated. Checks the Player.IsAuthenticated property")]
@@ -42,57 +42,43 @@ namespace Mirage
 
         public INetworkVisibility DefaultVisibility { get; private set; }
 
-        public void Setup()
+        internal void ServerStarted(NetworkServer server)
         {
-            if (_hasSetup)
-                return;
+            if (_server != null && _server != server)
+                throw new InvalidOperationException($"ServerObjectManager already in use by another NetworkServer, current:{_server}, new:{server}");
 
-            if (Server == null)
-                throw new InvalidOperationException("Server reference is null");
+            _server = server;
+            _server.Stopped.AddListener(OnServerStopped);
 
-            _hasSetup = true;
-
-            Server.Started.AddListener(OnServerStarted);
-            Server.OnStartHost.AddListener(StartedHost);
-            Server.Stopped.AddListener(OnServerStopped);
-        }
-
-        private void Start()
-        {
-            if (Server != null)
-                Setup();
-        }
-
-        internal void RegisterMessageHandlers()
-        {
-            Server.MessageHandler.RegisterHandler<ServerRpcMessage>(OnServerRpcMessage);
-            Server.MessageHandler.RegisterHandler<ServerRpcWithReplyMessage>(OnServerRpcWithReplyMessage);
-        }
-
-        private void OnServerStarted()
-        {
             DefaultVisibility = new AlwaysVisible(this);
-            RegisterMessageHandlers();
+
+            _server.MessageHandler.RegisterHandler<ServerRpcMessage>(OnServerRpcMessage);
+            _server.MessageHandler.RegisterHandler<ServerRpcWithReplyMessage>(OnServerRpcWithReplyMessage);
+
             SpawnOrActivate();
         }
 
         private void OnServerStopped()
         {
             // todo dont send messages on server stop, only reset NI
-            foreach (var obj in Server.World.SpawnedIdentities.Reverse())
+            foreach (var obj in _server.World.SpawnedIdentities.Reverse())
             {
                 // Unspawn all, but only destroy non-scene objects on server
                 DestroyObject(obj, !obj.IsSceneObject);
             }
 
-            Server.World.ClearSpawnedObjects();
+            _server.World.ClearSpawnedObjects();
             // reset so ids stay small in each session
             _nextNetworkId = 1;
+
+            // clear server after stopping
+            _server.Stopped.RemoveListener(OnServerStopped);
+            _server = null;
         }
 
         internal void SpawnOrActivate()
         {
-            if (!Server || !Server.Active)
+            if (!_server || !_server.Active)
             {
                 logger.LogWarning("SpawnOrActivate called when server was not active");
                 return;
@@ -101,7 +87,7 @@ namespace Mirage
             SpawnSceneObjects();
 
             // host mode?
-            if (Server.LocalClientActive)
+            if (_server.LocalClientActive)
             {
                 StartHostClientObjects();
             }
@@ -113,7 +99,7 @@ namespace Mirage
         // todo can this function be removed? do we only need to run it when host connects?
         private void StartHostClientObjects()
         {
-            foreach (var identity in Server.World.SpawnedIdentities)
+            foreach (var identity in _server.World.SpawnedIdentities)
             {
                 if (!identity.IsClient)
                 {
@@ -177,10 +163,10 @@ namespace Mirage
             identity.SetClientOwner(player);
 
             // special case,  we are in host mode,  set hasAuthority to true so that all overrides see it
-            if (player == Server.LocalPlayer)
+            if (player == _server.LocalPlayer)
             {
                 identity.HasAuthority = true;
-                Server.LocalClient.Player.Identity = identity;
+                _server.LocalClient.Player.Identity = identity;
             }
 
             // add connection to observers AFTER the playerController was set.
@@ -233,16 +219,16 @@ namespace Mirage
             // because the observers will be rebuilt only if we have a controller
             player.Identity = identity;
 
-            identity.SetServerValues(Server, this);
+            identity.SetServerValues(_server, this);
 
             // Set the connection on the NetworkIdentity on the server, NetworkIdentity.SetLocalPlayer is not called on the server (it is on clients)
             identity.SetClientOwner(player);
 
             // special case, we are in host mode, set hasAuthority to true so that all overrides see it
-            if (player == Server.LocalPlayer)
+            if (player == _server.LocalPlayer)
             {
                 identity.HasAuthority = true;
-                Server.LocalClient.Player.Identity = identity;
+                _server.LocalClient.Player.Identity = identity;
             }
 
             // spawn any new visible scene objects
@@ -355,7 +341,7 @@ namespace Mirage
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void OnServerRpc(INetworkPlayer player, uint netId, int componentIndex, int functionIndex, ArraySegment<byte> payload, int replyId)
         {
-            if (!Server.World.TryGetIdentity(netId, out var identity))
+            if (!_server.World.TryGetIdentity(netId, out var identity))
             {
                 if (logger.WarnEnabled()) logger.LogWarning($"Spawned object not found when handling ServerRpc message [netId={netId}]");
                 return;
@@ -381,7 +367,7 @@ namespace Mirage
 
             if (logger.LogEnabled()) logger.Log($"OnServerRpcMessage for netId={netId} conn={player}");
 
-            using (var reader = NetworkReaderPool.GetReader(payload, Server.World))
+            using (var reader = NetworkReaderPool.GetReader(payload, _server.World))
             {
                 remoteCall.Invoke(reader, behaviour, player, replyId);
             }
@@ -425,7 +411,7 @@ namespace Mirage
         /// </summary>
         public void Spawn(NetworkIdentity identity)
         {
-            if (!Server || !Server.Active)
+            if (!_server || !_server.Active)
             {
                 throw new InvalidOperationException("NetworkServer is not active. Cannot spawn objects without an active server.");
             }
@@ -433,11 +419,11 @@ namespace Mirage
             ThrowIfPrefab(identity.gameObject);
 
 
-            identity.SetServerValues(Server, this);
+            identity.SetServerValues(_server, this);
 
             // special case to make sure hasAuthority is set
             // on start server in host mode
-            if (identity.Owner == Server.LocalPlayer)
+            if (identity.Owner == _server.LocalPlayer)
                 identity.HasAuthority = true;
 
             if (!identity.IsSpawned)
@@ -445,7 +431,7 @@ namespace Mirage
                 // the object has not been spawned yet
                 identity.NetId = GetNextNetworkId();
                 identity.StartServer();
-                Server.World.AddIdentity(identity.NetId, identity);
+                _server.World.AddIdentity(identity.NetId, identity);
             }
 
             if (logger.LogEnabled()) logger.Log($"SpawnObject NetId:{identity.NetId} PrefabHash:{identity.PrefabHash:X}");
@@ -592,13 +578,13 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("DestroyObject instance:" + identity.NetId);
 
-            Server.World.RemoveIdentity(identity);
+            _server.World.RemoveIdentity(identity);
             identity.Owner?.RemoveOwnedObject(identity);
 
             identity.SendToRemoteObservers(new ObjectDestroyMessage { NetId = identity.NetId });
 
             identity.ClearObservers();
-            if (Server.LocalClientActive)
+            if (_server.LocalClientActive)
             {
                 // see ClientObjectManager.UnSpawn for comments
                 if (identity.HasAuthority)
@@ -645,7 +631,7 @@ namespace Mirage
         public void SpawnSceneObjects()
         {
             // only if server active
-            if (!Server || !Server.Active)
+            if (!_server || !_server.Active)
                 throw new InvalidOperationException("Server was not active");
 
             var identities = Resources.FindObjectsOfTypeAll<NetworkIdentity>();
@@ -732,11 +718,11 @@ namespace Mirage
                 return;
             }
 
-            if (logger.LogEnabled()) logger.Log($"SpawnVisibleObjects: Checking Observers on {Server.World.SpawnedIdentities.Count} objects for player: {player}");
+            if (logger.LogEnabled()) logger.Log($"SpawnVisibleObjects: Checking Observers on {_server.World.SpawnedIdentities.Count} objects for player: {player}");
 
             // add connection to each nearby NetworkIdentity's observers, which
             // internally sends a spawn message for each one to the connection.
-            foreach (var identity in Server.World.SpawnedIdentities)
+            foreach (var identity in _server.World.SpawnedIdentities)
             {
                 // allow for skips so that addChatacter doesn't send 2 spawn message for existing object
                 if (skip != null && skip.Contains(identity))
