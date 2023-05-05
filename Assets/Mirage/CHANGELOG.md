@@ -1,3 +1,23 @@
+# [137.0.0](https://github.com/MirageNet/Mirage/compare/v136.2.0...v137.0.0) (2023-05-05)
+
+
+### Bug Fixes
+
+* adding OnValidate to NetworkManager ([5a54b3a](https://github.com/MirageNet/Mirage/commit/5a54b3ae4b068b7df3d965e350cde26c85000b03))
+* fixing null ref when ObjectManager not set ([7333749](https://github.com/MirageNet/Mirage/commit/7333749f95177f43346f0119f3ed022f8d7d941f))
+* fixing race condition with ServerObjectManager ([f2d2cf3](https://github.com/MirageNet/Mirage/commit/f2d2cf33df07f09e52ede16194d1ab17ee4253b7))
+
+
+### Code Refactoring
+
+* changing clientObjectManager to be used by other classes ([2a69409](https://github.com/MirageNet/Mirage/commit/2a69409d326129f88b51e4775027a425f5b17bee))
+
+
+### BREAKING CHANGES
+
+* NetworkClient and NetworkSceneManager now need a reference to ClientObjectManager
+* NetworkServer now need a reference to ServerObjectManager
+
 # [136.2.0](https://github.com/MirageNet/Mirage/compare/v136.1.0...v136.2.0) (2023-05-04)
 
 
