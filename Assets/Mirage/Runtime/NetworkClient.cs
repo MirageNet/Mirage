@@ -158,7 +158,8 @@ namespace Mirage
             InitializeAuthEvents();
 
             // invoke started event after everything is set up, but before peer has connected
-            ObjectManager.ClientStarted(this);
+            if (ObjectManager != null)
+                ObjectManager.ClientStarted(this);
             _started.Invoke();
         }
 
@@ -226,7 +227,8 @@ namespace Mirage
             RegisterHostHandlers();
             InitializeAuthEvents();
             // invoke started event after everything is set up, but before peer has connected
-            ObjectManager.ClientStarted(this);
+            if (ObjectManager != null)
+                ObjectManager.ClientStarted(this);
             _started.Invoke();
 
             // we need add server connection to server's dictionary first

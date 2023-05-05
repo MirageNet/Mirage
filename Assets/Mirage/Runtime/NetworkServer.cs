@@ -285,7 +285,8 @@ namespace Mirage
             Active = true;
             // make sure to call ServerObjectManager start before started event
             // this is too stop any race conditions where other scripts add their started event before SOM is setup
-            ObjectManager?.ServerStarted(this);
+            if (ObjectManager != null)
+                ObjectManager.ServerStarted(this);
             _started?.Invoke();
 
             if (LocalClient != null)
