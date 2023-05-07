@@ -23,7 +23,7 @@ namespace Mirage.Tests.Runtime.ClientServer.PeerUseTest
         }
 
         [UnityTest]
-        public IEnumerator DisconnectEventWhenClientDisconnects()
+        public IEnumerator CanReceiveMessage()
         {
             const string msg = "hello world";
 
@@ -41,6 +41,23 @@ namespace Mirage.Tests.Runtime.ClientServer.PeerUseTest
             Assert.That(receieved[0], Is.EqualTo(msg));
         }
 
+        [UnityTest]
+        public IEnumerator CanReceiveSmallMessage()
+        {
+            var count = 0;
+            server.MessageHandler.RegisterHandler<SmallMessage>(x => count++);
+
+            client.Send(new SmallMessage { });
+            yield return null;
+            yield return null;
+
+            Assert.That(count, Is.EqualTo(1));
+        }
+
+        [NetworkMessage]
+        public struct SmallMessage
+        {
+        }
 
         [NetworkMessage]
         public struct MyMessage
