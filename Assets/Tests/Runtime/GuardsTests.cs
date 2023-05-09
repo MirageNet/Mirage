@@ -272,7 +272,8 @@ namespace Mirage.Tests.Runtime.GuardTests
                 clientComponent.CallServerFunction_Ref(ref outValue);
             });
             Assert.That(clientComponent.Calls, Is.Empty);
-            Assert.That(outValue, Is.EqualTo(default(int)));
+            // ref should not be changed
+            Assert.That(outValue, Is.EqualTo(startValue));
         }
 
         [Test]
@@ -281,6 +282,7 @@ namespace Mirage.Tests.Runtime.GuardTests
             var outValue = 2;
             var startValue = outValue;
             clientComponent.CallServerCallbackFunction_Ref(ref outValue);
+            Assert.That(clientComponent.Calls, Is.Empty);
             // ref should not be changed
             Assert.That(outValue, Is.EqualTo(startValue));// same ref
         }
