@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace Mirage.Tests.Runtime
+namespace Mirage.Tests.Runtime.GuardTests
 {
     public class ExampleGuards : NetworkBehaviour
     {
@@ -118,6 +118,23 @@ namespace Mirage.Tests.Runtime
             Calls.Add(nameof(CallServerCallbackFunction_OutExampleGuards));
             exampleGuards = null;
         }
+
+        [Server(error = false)]
+        public void CallServerCallbackFunction_Generic(out List<int> outValue)
+        {
+            Calls.Add(nameof(CallServerCallbackFunction_Out));
+            outValue = new List<int>();
+        }
+        [Server(error = false)]
+        public void CallServerCallbackFunction_GenericStruct<T>(out GenericStruct<T> outValue)
+        {
+            Calls.Add(nameof(CallServerCallbackFunction_Out));
+            outValue = new GenericStruct<T> { Value = default };
+        }
+    }
+    public struct GenericStruct<T>
+    {
+        public T Value;
     }
 
     public class GuardsTests : ClientServerSetup<ExampleGuards>
@@ -205,7 +222,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void CannotCallServerCallbackFunctionAsClient_Out()
         {
-            int outValue = default;
+            int outValue;
             clientComponent.CallServerCallbackFunction_Out(out outValue);
             Assert.That(clientComponent.Calls, Is.Empty);
             Assert.That(outValue, Is.EqualTo(default(int)));
@@ -253,6 +270,21 @@ namespace Mirage.Tests.Runtime
             clientComponent.CallServerCallbackFunction_OutExampleGuards(out exampleGuards);
             Assert.That(clientComponent.Calls, Is.Empty);
             Assert.That(exampleGuards, Is.EqualTo(default(ExampleGuards)));
+        }
+        [Test]
+        public void CannotCallServerCallbackFunctionAsClient_Generic()
+        {
+            clientComponent.CallServerCallbackFunction_Generic(out var outValue);
+            Assert.That(clientComponent.Calls, Is.Empty);
+            Assert.That(outValue, Is.EqualTo(default(List<int>)));
+        }
+        [Test]
+        public void CannotCallServerCallbackFunctionAsClient_GenericStruct()
+        {
+            GenericStruct<int> outValue;
+            clientComponent.CallServerCallbackFunction_GenericStruct<int>(out outValue);
+            Assert.That(clientComponent.Calls, Is.Empty);
+            Assert.That(outValue, Is.EqualTo(default(GenericStruct<int>)));
         }
 
         [Test]
