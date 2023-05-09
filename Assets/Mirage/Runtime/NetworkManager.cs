@@ -23,7 +23,7 @@ namespace Mirage
         public ServerObjectManager ServerObjectManager;
         public ClientObjectManager ClientObjectManager;
 
-        [Tooltip("Will setup referecnes to automatically")]
+        [Tooltip("Will setup reference automatically")]
         public bool ValidateReferences = true;
 
 
@@ -34,7 +34,7 @@ namespace Mirage
         public bool IsNetworkActive => Server.Active || Client.Active;
 
         /// <summary>
-        /// helper enum to know if we started the networkmanager as server/client/host.
+        /// helper enum to know if we started the NetworkManager as server/client/host.
         /// </summary>
         public NetworkManagerMode NetworkMode
         {
@@ -87,7 +87,7 @@ namespace Mirage
             if (field == null && gameObject.TryGetComponent<T>(out var value))
             {
 #if UNITY_EDITOR
-                UnityEditor.Undo.RecordObject(this, "Setting Referecne on NetworkManager");
+                UnityEditor.Undo.RecordObject(this, "Setting Reference on NetworkManager");
 #endif
                 field = value;
             }
@@ -97,7 +97,7 @@ namespace Mirage
             if (field == null && value != null)
             {
 #if UNITY_EDITOR
-                UnityEditor.Undo.RecordObject(this, "Setting Referecne on NetworkManager");
+                UnityEditor.Undo.RecordObject(this, "Setting Reference on NetworkManager");
 #endif
                 field = value;
             }

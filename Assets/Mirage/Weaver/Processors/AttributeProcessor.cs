@@ -180,7 +180,7 @@ namespace Mirage.Weaver
 
                 // need to use ElementType not GetElementType()
                 //   GetElementType() will get the element type of the inner elementType
-                //   which will return wrong type for arrays and genercs
+                //   which will return wrong type for arrays and generics
                 var outType = byRefType.ElementType;
 
                 worker.InsertBefore(top, worker.Create(OpCodes.Ldarg, index + offset));
