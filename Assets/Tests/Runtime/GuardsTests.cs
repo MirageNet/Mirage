@@ -5,9 +5,9 @@ namespace Mirage.Tests.Runtime.GuardTests
 {
     public class ExampleGuards : NetworkBehaviour
     {
-        public int RETURN_VALUE = 10;
-        public int OUT_VALUE_1 = 20;
-        public int OUT_VALUE_2 = 20;
+        public const int RETURN_VALUE = 10;
+        public const int OUT_VALUE_1 = 20;
+        public const int OUT_VALUE_2 = 20;
 
         // Define a list to keep track of all method calls
         public readonly List<string> Calls = new List<string>();
@@ -90,6 +90,34 @@ namespace Mirage.Tests.Runtime.GuardTests
         }
 
         [Server]
+        public void CallServerFunction_Ref(ref int outValue)
+        {
+            Calls.Add(nameof(CallServerFunction_Ref));
+            outValue = OUT_VALUE_1;
+        }
+
+        [Server(error = false)]
+        public void CallServerCallbackFunction_Ref(ref int outValue)
+        {
+            Calls.Add(nameof(CallServerCallbackFunction_Ref));
+            outValue = OUT_VALUE_1;
+        }
+
+        [Server]
+        public void CallServerFunction_RefArray(ref int[] outValue)
+        {
+            Calls.Add(nameof(CallServerFunction_RefArray));
+            outValue = new int[1] { OUT_VALUE_1 };
+        }
+
+        [Server(error = false)]
+        public void CallServerCallbackFunction_RefArray(ref int[] outValue)
+        {
+            Calls.Add(nameof(CallServerCallbackFunction_RefArray));
+            outValue = new int[1] { OUT_VALUE_1 };
+        }
+
+        [Server]
         public void CallServerFunction_Out2(out int outValue1, out int outValue2)
         {
             Calls.Add(nameof(CallServerFunction_Out2));
@@ -122,14 +150,20 @@ namespace Mirage.Tests.Runtime.GuardTests
         [Server(error = false)]
         public void CallServerCallbackFunction_Generic(out List<int> outValue)
         {
-            Calls.Add(nameof(CallServerCallbackFunction_Out));
+            Calls.Add(nameof(CallServerCallbackFunction_Generic));
             outValue = new List<int>();
         }
         [Server(error = false)]
-        public void CallServerCallbackFunction_GenericStruct<T>(out GenericStruct<T> outValue)
+        public void CallServerCallbackFunction_Array(out int[] outValue)
         {
-            Calls.Add(nameof(CallServerCallbackFunction_Out));
-            outValue = new GenericStruct<T> { Value = default };
+            Calls.Add(nameof(CallServerCallbackFunction_Array));
+            outValue = new int[10];
+        }
+        [Server(error = false)]
+        public void CallServerCallbackFunction_GenericStruct<T>(out GenericStruct<T> outValue, T value)
+        {
+            Calls.Add(nameof(CallServerCallbackFunction_GenericStruct));
+            outValue = new GenericStruct<T> { Value = value };
         }
     }
     public struct GenericStruct<T>
@@ -229,6 +263,55 @@ namespace Mirage.Tests.Runtime.GuardTests
         }
 
         [Test]
+        public void CannotCallServerFunctionAsClient_Ref()
+        {
+            var outValue = 2;
+            var startValue = outValue;
+            Assert.Throws<MethodInvocationException>(() =>
+            {
+                clientComponent.CallServerFunction_Ref(ref outValue);
+            });
+            Assert.That(clientComponent.Calls, Is.Empty);
+            Assert.That(outValue, Is.EqualTo(default(int)));
+        }
+
+        [Test]
+        public void CannotCallServerCallbackFunctionAsClient_Ref()
+        {
+            var outValue = 2;
+            var startValue = outValue;
+            clientComponent.CallServerCallbackFunction_Ref(ref outValue);
+            // ref should not be changed
+            Assert.That(outValue, Is.EqualTo(startValue));// same ref
+        }
+
+        [Test]
+        public void CannotCallServerFunctionAsClient_RefArray()
+        {
+            var outValue = new int[2];
+            var startValue = outValue;
+            Assert.Throws<MethodInvocationException>(() =>
+            {
+                clientComponent.CallServerFunction_RefArray(ref outValue);
+            });
+            Assert.That(clientComponent.Calls, Is.Empty);
+            // ref should not be changed
+            Assert.That(outValue, Is.EqualTo(startValue));// same ref
+        }
+
+        [Test]
+        public void CannotCallServerCallbackFunctionAsClient_RefArray()
+        {
+            var outValue = new int[2];
+            var startValue = outValue;
+
+            clientComponent.CallServerCallbackFunction_RefArray(ref outValue);
+            // ref should not be changed
+            Assert.That(outValue, Is.EqualTo(startValue));// same ref
+            Assert.That(outValue, Has.Length.EqualTo(2));
+        }
+
+        [Test]
         public void CannotCallServerFunctionAsClient_Out2()
         {
             int outValue1 = default, outValue2 = default;
@@ -276,13 +359,20 @@ namespace Mirage.Tests.Runtime.GuardTests
         {
             clientComponent.CallServerCallbackFunction_Generic(out var outValue);
             Assert.That(clientComponent.Calls, Is.Empty);
-            Assert.That(outValue, Is.EqualTo(default(List<int>)));
+            Assert.That(outValue, Is.EqualTo(null));
+        }
+        [Test]
+        public void CannotCallServerCallbackFunctionAsClient_Array()
+        {
+            clientComponent.CallServerCallbackFunction_Array(out var outValue);
+            Assert.That(clientComponent.Calls, Is.Empty);
+            Assert.That(outValue, Is.EqualTo(null));
         }
         [Test]
         public void CannotCallServerCallbackFunctionAsClient_GenericStruct()
         {
             GenericStruct<int> outValue;
-            clientComponent.CallServerCallbackFunction_GenericStruct<int>(out outValue);
+            clientComponent.CallServerCallbackFunction_GenericStruct<int>(out outValue, ExampleGuards.OUT_VALUE_1);
             Assert.That(clientComponent.Calls, Is.Empty);
             Assert.That(outValue, Is.EqualTo(default(GenericStruct<int>)));
         }

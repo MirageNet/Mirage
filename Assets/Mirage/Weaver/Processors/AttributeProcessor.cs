@@ -155,30 +155,36 @@ namespace Mirage.Weaver
                 worker.InsertBefore(top, worker.Create(OpCodes.Newobj, () => new MethodInvocationException("")));
                 worker.InsertBefore(top, worker.Create(OpCodes.Throw));
             }
-            InjectGuardParameters(md, worker, top);
-            InjectGuardReturnValue(md, worker, top);
-            worker.InsertBefore(top, worker.Create(OpCodes.Ret));
+            else
+            {
+                // dont need to set param or return if we throw
+                InjectGuardParameters(md, worker, top);
+                InjectGuardReturnValue(md, worker, top);
+                worker.InsertBefore(top, worker.Create(OpCodes.Ret));
+            }
         }
 
-        // this is required to early-out from a function with "ref" or "out" parameters
+        // this is required to early-out from a function with "out" parameters
         private static void InjectGuardParameters(MethodDefinition md, ILProcessor worker, Instruction top)
         {
             var offset = md.Resolve().IsStatic ? 0 : 1;
             for (var index = 0; index < md.Parameters.Count; index++)
             {
                 var param = md.Parameters[index];
-                if (param.IsOut)
-                {
-                    var elementType = param.ParameterType.GetElementType();
+                // IsOut will be TRUE for `out` but FALSE for `ref`
+                // this is what we want, because we dont want to set `ref` values
+                if (!param.IsOut)
+                    continue;
 
-                    var elementLocal = md.AddLocal(elementType);
+                var byRefType = (Mono.Cecil.ByReferenceType)param.ParameterType;
 
-                    worker.InsertBefore(top, worker.Create(OpCodes.Ldarg, index + offset));
-                    worker.InsertBefore(top, worker.Create(OpCodes.Ldloca, elementLocal));
-                    worker.InsertBefore(top, worker.Create(OpCodes.Initobj, elementType));
-                    worker.InsertBefore(top, worker.Create(OpCodes.Ldloc, elementLocal));
-                    worker.InsertBefore(top, worker.Create(OpCodes.Stobj, elementType));
-                }
+                // need to use ElementType not GetElementType()
+                //   GetElementType() will get the element type of the inner elementType
+                //   which will return wrong type for arrays and genercs
+                var outType = byRefType.ElementType;
+
+                worker.InsertBefore(top, worker.Create(OpCodes.Ldarg, index + offset));
+                worker.InsertBefore(top, worker.Create(OpCodes.Initobj, outType));
             }
         }
 
