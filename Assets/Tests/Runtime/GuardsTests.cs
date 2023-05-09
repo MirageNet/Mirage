@@ -1,83 +1,141 @@
-using Mirage.Tests.Runtime.ClientServer;
+using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace Mirage.Tests.Runtime
 {
     public class ExampleGuards : NetworkBehaviour
     {
-        public bool serverFunctionCalled;
-        public bool serverCallbackFunctionCalled;
-        public bool clientFunctionCalled;
-        public bool clientCallbackFunctionCalled;
-        public bool hasAuthorityCalled;
-        public bool hasAuthorityNoErrorCalled;
-        public bool localPlayerCalled;
-        public bool localPlayerNoErrorCalled;
+        public int RETURN_VALUE = 10;
+        public int OUT_VALUE_1 = 20;
+        public int OUT_VALUE_2 = 20;
+
+        // Define a list to keep track of all method calls
+        public readonly List<string> Calls = new List<string>();
 
         [Server]
         public void CallServerFunction()
         {
-            serverFunctionCalled = true;
+            Calls.Add(nameof(CallServerFunction));
         }
 
         [Server(error = false)]
         public void CallServerCallbackFunction()
         {
-            serverCallbackFunctionCalled = true;
+            Calls.Add(nameof(CallServerCallbackFunction));
         }
 
         [Client]
         public void CallClientFunction()
         {
-            clientFunctionCalled = true;
+            Calls.Add(nameof(CallClientFunction));
         }
 
         [Client(error = false)]
         public void CallClientCallbackFunction()
         {
-            clientCallbackFunctionCalled = true;
+            Calls.Add(nameof(CallClientCallbackFunction));
         }
 
         [HasAuthority]
         public void CallAuthorityFunction()
         {
-            hasAuthorityCalled = true;
+            Calls.Add(nameof(CallAuthorityFunction));
         }
 
         [HasAuthority(error = false)]
         public void CallAuthorityNoErrorFunction()
         {
-            hasAuthorityNoErrorCalled = true;
+            Calls.Add(nameof(CallAuthorityNoErrorFunction));
         }
 
         [LocalPlayer]
         public void CallLocalPlayer()
         {
-            localPlayerCalled = true;
+            Calls.Add(nameof(CallLocalPlayer));
         }
 
         [LocalPlayer(error = false)]
         public void CallLocalPlayerNoError()
         {
-            localPlayerNoErrorCalled = true;
+            Calls.Add(nameof(CallLocalPlayerNoError));
+        }
+
+
+        [Server]
+        public int CallServerFunction_Return()
+        {
+            Calls.Add(nameof(CallServerFunction_Return));
+            return RETURN_VALUE;
+        }
+
+        [Server(error = false)]
+        public int CallServerCallbackFunction_Return()
+        {
+            Calls.Add(nameof(CallServerCallbackFunction_Return));
+            return RETURN_VALUE;
+        }
+
+        [Server]
+        public void CallServerFunction_Out(out int outValue)
+        {
+            Calls.Add(nameof(CallServerFunction_Out));
+            outValue = OUT_VALUE_1;
+        }
+
+        [Server(error = false)]
+        public void CallServerCallbackFunction_Out(out int outValue)
+        {
+            Calls.Add(nameof(CallServerCallbackFunction_Out));
+            outValue = OUT_VALUE_1;
+        }
+
+        [Server]
+        public void CallServerFunction_Out2(out int outValue1, out int outValue2)
+        {
+            Calls.Add(nameof(CallServerFunction_Out2));
+            outValue1 = OUT_VALUE_1;
+            outValue2 = OUT_VALUE_2;
+        }
+
+        [Server(error = false)]
+        public void CallServerCallbackFunction_Out2(out int outValue1, out int outValue2)
+        {
+            Calls.Add(nameof(CallServerCallbackFunction_Out2));
+            outValue1 = OUT_VALUE_1;
+            outValue2 = OUT_VALUE_2;
+        }
+
+        [Server]
+        public void CallServerFunction_OutExampleGuards(out ExampleGuards exampleGuards)
+        {
+            Calls.Add(nameof(CallServerFunction_OutExampleGuards));
+            exampleGuards = this;
+        }
+
+        [Server(error = false)]
+        public void CallServerCallbackFunction_OutExampleGuards(out ExampleGuards exampleGuards)
+        {
+            Calls.Add(nameof(CallServerCallbackFunction_OutExampleGuards));
+            exampleGuards = null;
         }
     }
 
     public class GuardsTests : ClientServerSetup<ExampleGuards>
     {
-
         [Test]
         public void CanCallServerFunctionAsServer()
         {
             serverComponent.CallServerFunction();
-            Assert.That(serverComponent.serverFunctionCalled, Is.True);
+            Assert.That(serverComponent.Calls, Has.Count.EqualTo(1));
+            Assert.That(serverComponent.Calls, Does.Contain(nameof(ExampleGuards.CallServerFunction)));
         }
 
         [Test]
         public void CanCallServerFunctionCallbackAsServer()
         {
             serverComponent.CallServerCallbackFunction();
-            Assert.That(serverComponent.serverCallbackFunctionCalled, Is.True);
+            Assert.That(serverComponent.Calls, Has.Count.EqualTo(1));
+            Assert.That(serverComponent.Calls, Does.Contain(nameof(ExampleGuards.CallServerCallbackFunction)));
         }
 
         [Test]
@@ -93,7 +151,7 @@ namespace Mirage.Tests.Runtime
         public void CannotCallClientCallbackFunctionAsServer()
         {
             serverComponent.CallClientCallbackFunction();
-            Assert.That(serverComponent.clientCallbackFunctionCalled, Is.False);
+            Assert.That(serverComponent.Calls, Is.Empty);
         }
 
         [Test]
@@ -103,47 +161,132 @@ namespace Mirage.Tests.Runtime
             {
                 clientComponent.CallServerFunction();
             });
+            Assert.That(clientComponent.Calls, Is.Empty);
         }
 
         [Test]
         public void CannotCallServerFunctionCallbackAsClient()
         {
             clientComponent.CallServerCallbackFunction();
-            Assert.That(clientComponent.serverCallbackFunctionCalled, Is.False);
+            Assert.That(clientComponent.Calls, Is.Empty);
+        }
+
+
+        [Test]
+        public void CannotCallServerFunctionAsClient_Return()
+        {
+            Assert.Throws<MethodInvocationException>(() =>
+            {
+                clientComponent.CallServerFunction_Return();
+            });
+            Assert.That(clientComponent.Calls, Is.Empty);
+        }
+
+        [Test]
+        public void CannotCallServerCallbackFunctionAsClient_Return()
+        {
+            var returnValue = clientComponent.CallServerCallbackFunction_Return();
+            Assert.That(clientComponent.Calls, Is.Empty);
+            Assert.That(returnValue, Is.EqualTo(default(int)));
+        }
+
+        [Test]
+        public void CannotCallServerFunctionAsClient_Out()
+        {
+            int outValue = default;
+            Assert.Throws<MethodInvocationException>(() =>
+            {
+                clientComponent.CallServerFunction_Out(out outValue);
+            });
+            Assert.That(clientComponent.Calls, Is.Empty);
+            Assert.That(outValue, Is.EqualTo(default(int)));
+        }
+
+        [Test]
+        public void CannotCallServerCallbackFunctionAsClient_Out()
+        {
+            int outValue = default;
+            clientComponent.CallServerCallbackFunction_Out(out outValue);
+            Assert.That(clientComponent.Calls, Is.Empty);
+            Assert.That(outValue, Is.EqualTo(default(int)));
+        }
+
+        [Test]
+        public void CannotCallServerFunctionAsClient_Out2()
+        {
+            int outValue1 = default, outValue2 = default;
+            Assert.Throws<MethodInvocationException>(() =>
+            {
+                clientComponent.CallServerFunction_Out2(out outValue1, out outValue2);
+            });
+            Assert.That(clientComponent.Calls, Is.Empty);
+            Assert.That(outValue1, Is.EqualTo(default(int)));
+            Assert.That(outValue2, Is.EqualTo(default(int)));
+        }
+
+        [Test]
+        public void CannotCallServerCallbackFunctionAsClient_Out2()
+        {
+            int outValue1, outValue2;
+            clientComponent.CallServerCallbackFunction_Out2(out outValue1, out outValue2);
+            Assert.That(clientComponent.Calls, Is.Empty);
+            Assert.That(outValue1, Is.EqualTo(default(int)));
+            Assert.That(outValue2, Is.EqualTo(default(int)));
+        }
+
+        [Test]
+        public void CannotCallServerFunctionAsClient_OutExampleGuards()
+        {
+            ExampleGuards exampleGuards = default;
+            Assert.Throws<MethodInvocationException>(() =>
+            {
+                clientComponent.CallServerFunction_OutExampleGuards(out exampleGuards);
+            });
+            Assert.That(clientComponent.Calls, Is.Empty);
+            Assert.That(exampleGuards, Is.EqualTo(default(ExampleGuards)));
+        }
+
+        [Test]
+        public void CannotCallServerCallbackFunctionAsClient_OutExampleGuards()
+        {
+            ExampleGuards exampleGuards;
+            clientComponent.CallServerCallbackFunction_OutExampleGuards(out exampleGuards);
+            Assert.That(clientComponent.Calls, Is.Empty);
+            Assert.That(exampleGuards, Is.EqualTo(default(ExampleGuards)));
         }
 
         [Test]
         public void CanCallClientFunctionAsClient()
         {
             clientComponent.CallClientFunction();
-            Assert.That(clientComponent.clientFunctionCalled, Is.True);
+            Assert.That(clientComponent.Calls, Does.Contain(nameof(ExampleGuards.CallClientFunction)));
         }
 
         [Test]
         public void CanCallClientCallbackFunctionAsClient()
         {
             clientComponent.CallClientCallbackFunction();
-            Assert.That(clientComponent.clientCallbackFunctionCalled, Is.True);
+            Assert.That(clientComponent.Calls, Does.Contain(nameof(ExampleGuards.CallClientCallbackFunction)));
         }
 
         [Test]
         public void CanCallHasAuthorityFunctionAsClient()
         {
             clientComponent.CallAuthorityFunction();
-            Assert.That(clientComponent.hasAuthorityCalled, Is.True);
+            Assert.That(clientComponent.Calls, Does.Contain(nameof(ExampleGuards.CallAuthorityFunction)));
         }
 
         [Test]
         public void CanCallHasAuthorityCallbackFunctionAsClient()
         {
             clientComponent.CallAuthorityNoErrorFunction();
-            Assert.That(clientComponent.hasAuthorityNoErrorCalled, Is.True);
+            Assert.That(clientComponent.Calls, Does.Contain(nameof(ExampleGuards.CallAuthorityNoErrorFunction)));
         }
 
         [Test]
         public void GuardHasAuthorityError()
         {
-            ExampleGuards guardedComponent = CreateBehaviour<ExampleGuards>();
+            var guardedComponent = CreateBehaviour<ExampleGuards>();
             Assert.Throws<MethodInvocationException>(() =>
             {
                 guardedComponent.CallAuthorityFunction();
@@ -153,29 +296,29 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void GuardHasAuthorityNoError()
         {
-            ExampleGuards guardedComponent = CreateBehaviour<ExampleGuards>();
+            var guardedComponent = CreateBehaviour<ExampleGuards>();
             guardedComponent.CallAuthorityNoErrorFunction();
-            Assert.That(guardedComponent.hasAuthorityNoErrorCalled, Is.False);
+            Assert.That(guardedComponent.Calls, Does.Not.Contain(nameof(ExampleGuards.CallAuthorityNoErrorFunction)));
         }
 
         [Test]
         public void CanCallLocalPlayer()
         {
             clientComponent.CallLocalPlayer();
-            Assert.That(clientComponent.localPlayerCalled, Is.True);
+            Assert.That(clientComponent.Calls, Does.Contain(nameof(ExampleGuards.CallLocalPlayer)));
         }
 
         [Test]
         public void CanCallLocalPlayerNoError()
         {
             clientComponent.CallLocalPlayerNoError();
-            Assert.That(clientComponent.localPlayerNoErrorCalled, Is.True);
+            Assert.That(clientComponent.Calls, Does.Contain(nameof(ExampleGuards.CallLocalPlayerNoError)));
         }
 
         [Test]
         public void GuardLocalPlayer()
         {
-            ExampleGuards guardedComponent = CreateBehaviour<ExampleGuards>();
+            var guardedComponent = CreateBehaviour<ExampleGuards>();
 
             Assert.Throws<MethodInvocationException>(() =>
             {
@@ -187,10 +330,11 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void GuardLocalPlayerNoError()
         {
-            ExampleGuards guardedComponent = CreateBehaviour<ExampleGuards>();
+            var guardedComponent = CreateBehaviour<ExampleGuards>();
 
             guardedComponent.CallLocalPlayerNoError();
-            Assert.That(guardedComponent.localPlayerNoErrorCalled, Is.False);
+            Assert.That(guardedComponent.Calls, Does.Not.Contain(nameof(ExampleGuards.CallLocalPlayerNoError)));
         }
+
     }
 }
