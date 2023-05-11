@@ -27,14 +27,19 @@ namespace Mirage
     /// </summary>
     public interface IMessageReceiver
     {
-        void RegisterHandler<T>(MessageDelegateWithPlayer<T> handler);
-
-        void RegisterHandler<T>(MessageDelegate<T> handler);
-
+        /// <summary>
+        /// Registers a handler for a network message that has INetworkPlayer and <typeparamref name="T"/> Message parameters
+        /// <para>
+        /// When network message are sent, the first 2 bytes are the Id for the type <typeparamref name="T"/>.
+        /// When message is received the <paramref name="handler"/> with the matching Id is found and invoked
+        /// </para>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="handler"></param>
+        /// <param name="allowUn authenticated">set this to true to allow message to be invoked before player is authenticated</param>
+        void RegisterHandler<T>(MessageDelegateWithPlayer<T> handler, bool allowUnauthenticated);
         void UnregisterHandler<T>();
-
         void ClearHandlers();
-
         void HandleMessage(INetworkPlayer player, ArraySegment<byte> packet);
     }
 
