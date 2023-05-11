@@ -296,6 +296,7 @@ namespace Mirage
                 _onStartHost?.Invoke();
 
                 localClient.ConnectHost(this, dataHandler);
+                Connected?.Invoke(LocalPlayer);
                 if (logger.LogEnabled()) logger.Log("NetworkServer StartHost");
             }
         }
@@ -352,7 +353,7 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log($"Server accepted client: {player}");
 
             // add connection
-            AddConnection(player);
+            _connections[player.Connection] = player;
 
             // let everyone know we just accepted a connection
             Connected?.Invoke(player);
@@ -370,20 +371,6 @@ namespace Mirage
             {
                 // todo remove or replace with assert
                 if (logger.WarnEnabled()) logger.LogWarning($"No handler found for disconnected client {conn}");
-            }
-        }
-
-
-        /// <summary>
-        /// <para>This accepts a network connection and adds it to the server.</para>
-        /// <para>This connection will use the callbacks registered with the server.</para>
-        /// </summary>
-        /// <param name="player">Network connection to add.</param>
-        private void AddConnection(INetworkPlayer player)
-        {
-            if (!Players.Contains(player))
-            {
-                _connections.Add(player.Connection, player);
             }
         }
 
@@ -413,22 +400,9 @@ namespace Mirage
 
             if (logger.LogEnabled()) logger.Log($"Server accepted local client connection: {player}");
 
-            // add the connection for this local player.
-            AddConnection(player);
+            _connections[player.Connection] = player;
         }
 
-        /// <summary>
-        /// Invokes the Connected event using the local player
-        /// <para>this should be done after the clients version has been invoked</para>
-        /// </summary>
-        internal void InvokeLocalConnected()
-        {
-            if (LocalPlayer == null)
-            {
-                throw new InvalidOperationException("Local connection does not exist");
-            }
-            Connected?.Invoke(LocalPlayer);
-        }
 
         /// <summary>
         /// Send a message to all connected clients.

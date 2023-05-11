@@ -237,7 +237,6 @@ namespace Mirage
 
             server.AddLocalConnection(this, serverConn);
             Peer_OnConnected(clientConn);
-            server.InvokeLocalConnected();
         }
 
         private void InitializeAuthEvents()
