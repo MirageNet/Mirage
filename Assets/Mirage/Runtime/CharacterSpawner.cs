@@ -6,7 +6,6 @@ using UnityEngine.SceneManagement;
 
 namespace Mirage
 {
-
     /// <summary>
     /// Spawns a player as soon as the connection is authenticated
     /// </summary>
@@ -162,7 +161,7 @@ namespace Mirage
 
             if (SetName)
                 SetCharacterName(player, character);
-            ServerObjectManager.AddCharacter(player, character.gameObject);
+            ServerObjectManager.AddCharacter(player, character);
         }
 
         protected virtual void SetCharacterName(INetworkPlayer player, NetworkIdentity character)
