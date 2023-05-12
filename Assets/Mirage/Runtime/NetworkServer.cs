@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Cysharp.Threading.Tasks;
+using Mirage.Authentication;
 using Mirage.Events;
 using Mirage.Logging;
 using Mirage.Serialization;
@@ -56,7 +57,7 @@ namespace Mirage
         private Peer _peer;
 
         [Tooltip("Authentication component attached to this object")]
-        public NetworkAuthenticator authenticator;
+        public AuthenticatorSettings Authenticator;
 
         [Header("Events")]
         [SerializeField] private AddLateEvent _started = new AddLateEvent();
@@ -175,17 +176,6 @@ namespace Mirage
             LocalClient = null;
             LocalPlayer = null;
 
-            if (authenticator != null)
-            {
-                authenticator.OnServerAuthenticated -= OnAuthenticated;
-                Connected.RemoveListener(authenticator.ServerAuthenticate);
-            }
-            else
-            {
-                // if no authenticator, consider every connection as authenticated
-                Connected.RemoveListener(OnAuthenticated);
-            }
-
             _stopped?.Invoke();
             Active = false;
 
@@ -238,7 +228,6 @@ namespace Mirage
             // create after MessageHandler, SyncVarReceiver uses it 
             _syncVarReceiver = new SyncVarReceiver(this, World);
 
-
             var dataHandler = new DataHandler(MessageHandler, _connections);
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
 
@@ -281,7 +270,10 @@ namespace Mirage
                 if (logger.LogEnabled()) logger.Log("Server started, but not listening for connections: Attempts to connect to this instance will fail!");
             }
 
-            InitializeAuthEvents();
+
+            if (Authenticator != null)
+                Authenticator.Setup(this);
+
             Active = true;
             // make sure to call ServerObjectManager start before started event
             // this is too stop any race conditions where other scripts add their started event before SOM is setup
@@ -312,22 +304,6 @@ namespace Mirage
                 SocketFactory = GetComponent<SocketFactory>();
             if (SocketFactory == null)
                 throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for {nameof(NetworkServer)}");
-        }
-
-        private void InitializeAuthEvents()
-        {
-            if (authenticator != null)
-            {
-                authenticator.OnServerAuthenticated += OnAuthenticated;
-                authenticator.ServerSetup(this);
-
-                Connected.AddListener(authenticator.ServerAuthenticate);
-            }
-            else
-            {
-                // if no authenticator, consider every connection as authenticated
-                Connected.AddListener(OnAuthenticated);
-            }
         }
 
         internal void Update()
@@ -395,6 +371,7 @@ namespace Mirage
             }
 
             var player = new NetworkPlayer(connection);
+            player.Authentication = new PlayerAuthentication(null, null);
             LocalPlayer = player;
             LocalClient = client;
 
@@ -542,13 +519,6 @@ namespace Mirage
 
             if (player == LocalPlayer)
                 LocalPlayer = null;
-        }
-
-        internal void OnAuthenticated(INetworkPlayer player)
-        {
-            if (logger.LogEnabled()) logger.Log("Server authenticate client:" + player);
-
-            Authenticated?.Invoke(player);
         }
 
         /// <summary>

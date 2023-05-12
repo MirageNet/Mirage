@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Mirage.Authentication;
 using Mirage.Logging;
 using Mirage.Serialization;
 using Mirage.SocketLayer;
@@ -45,15 +46,9 @@ namespace Mirage
         private NetworkIdentity _identity;
 
         /// <summary>
-        /// Marks if this player has been accepted by a <see cref="NetworkAuthenticator"/>
+        /// Authentication information for this NetworkPlayer
         /// </summary>
-        public bool IsAuthenticated { get; set; }
-
-        /// <summary>
-        /// General purpose object to hold authentication data, character selection, tokens, etc.
-        /// associated with the connection for reference after Authentication completes.
-        /// </summary>
-        public object AuthenticationData { get; set; }
+        public PlayerAuthentication Authentication { get; internal set; }
 
         /// <summary>
         /// Flag that tells us if the scene has fully loaded in for player.
