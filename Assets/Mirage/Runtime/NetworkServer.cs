@@ -270,7 +270,6 @@ namespace Mirage
                 if (logger.LogEnabled()) logger.Log("Server started, but not listening for connections: Attempts to connect to this instance will fail!");
             }
 
-
             if (Authenticator != null)
                 Authenticator.Setup(this);
 
@@ -289,6 +288,7 @@ namespace Mirage
 
                 localClient.ConnectHost(this, dataHandler);
                 Connected?.Invoke(LocalPlayer);
+                AuthenticationSuccess((NetworkPlayer)LocalPlayer, AuthenticationResult.LocalPlayerSuccess);
                 if (logger.LogEnabled()) logger.Log("NetworkServer StartHost");
             }
         }
@@ -325,14 +325,48 @@ namespace Mirage
         private void Peer_OnConnected(IConnection conn)
         {
             var player = new NetworkPlayer(conn);
-
-            if (logger.LogEnabled()) logger.Log($"Server accepted client: {player}");
+            if (logger.LogEnabled()) logger.Log($"Server new player {player}");
 
             // add connection
             _connections[player.Connection] = player;
 
             // let everyone know we just accepted a connection
             Connected?.Invoke(player);
+
+            // authenticate player
+            if (Authenticator != null)
+                OnAuthenticateAsync(player).Forget();
+            else
+                AuthenticationSuccess(player, AuthenticationResult.NoAuthenticatorSuccess);
+        }
+
+        private async UniTaskVoid OnAuthenticateAsync(NetworkPlayer player)
+        {
+            if (logger.LogEnabled()) logger.Log($"Server starting to authenticate {player}");
+
+            var result = await Authenticator.ServerAuthenticate(player);
+
+            // process results
+            if (result.Success)
+            {
+                if (logger.LogEnabled()) logger.Log($"Server authentication success {player}, reason:{result.Reason}");
+
+                AuthenticationSuccess(player, result);
+            }
+            else
+            {
+                if (logger.LogEnabled()) logger.Log($"Server authentication failed for {player}");
+                // todo use reason
+                player.Disconnect();
+            }
+        }
+
+        private void AuthenticationSuccess(NetworkPlayer player, AuthenticationResult result)
+        {
+            player.Authentication = new PlayerAuthentication(result.Authenticator, result.Data);
+
+            // add connection
+            Authenticated?.Invoke(player);
         }
 
         private void Peer_OnDisconnected(IConnection conn, DisconnectReason reason)
@@ -371,7 +405,6 @@ namespace Mirage
             }
 
             var player = new NetworkPlayer(connection);
-            player.Authentication = new PlayerAuthentication(null, null);
             LocalPlayer = player;
             LocalClient = client;
 
