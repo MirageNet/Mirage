@@ -1,7 +1,8 @@
 {
     "name": "Mirage.Authenticators",
     "references": [
-        "Mirage"
+        "Mirage",
+        "UniTask"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],
