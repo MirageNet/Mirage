@@ -87,6 +87,10 @@ namespace Mirage
         /// </remarks>
         public void Disconnect()
         {
+            // dont need to call disconnect twice, so just return
+            if (_isDisconnected)
+                return;
+
             _connection.Disconnect();
             _isDisconnected = true;
         }
