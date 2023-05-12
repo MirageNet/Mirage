@@ -288,7 +288,7 @@ namespace Mirage
 
                 localClient.ConnectHost(this, dataHandler);
                 Connected?.Invoke(LocalPlayer);
-                AuthenticationSuccess((NetworkPlayer)LocalPlayer, AuthenticationResult.LocalPlayerSuccess);
+                AuthenticationSuccess((NetworkPlayer)LocalPlayer, AuthenticationResult.CreateSuccess("Host player"));
                 if (logger.LogEnabled()) logger.Log("NetworkServer StartHost");
             }
         }
@@ -337,25 +337,20 @@ namespace Mirage
             if (Authenticator != null)
                 OnAuthenticateAsync(player).Forget();
             else
-                AuthenticationSuccess(player, AuthenticationResult.NoAuthenticatorSuccess);
+                AuthenticationSuccess(player, AuthenticationResult.CreateSuccess("No Authenticators"));
         }
 
         private async UniTaskVoid OnAuthenticateAsync(NetworkPlayer player)
         {
-            if (logger.LogEnabled()) logger.Log($"Server starting to authenticate {player}");
-
             var result = await Authenticator.ServerAuthenticate(player);
 
             // process results
             if (result.Success)
             {
-                if (logger.LogEnabled()) logger.Log($"Server authentication success {player}, reason:{result.Reason}");
-
                 AuthenticationSuccess(player, result);
             }
             else
             {
-                if (logger.LogEnabled()) logger.Log($"Server authentication failed for {player}");
                 // todo use reason
                 player.Disconnect();
             }
