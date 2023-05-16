@@ -155,7 +155,7 @@ namespace Mirage
             identity.SetClientOwner(player);
 
             // special case,  we are in host mode,  set hasAuthority to true so that all overrides see it
-            if (player == _server.LocalPlayer)
+            if (_server.LocalPlayer != null && player == _server.LocalPlayer)
             {
                 identity.HasAuthority = true;
                 _server.LocalClient.Player.Identity = identity;
@@ -217,7 +217,7 @@ namespace Mirage
             identity.SetClientOwner(player);
 
             // special case, we are in host mode, set hasAuthority to true so that all overrides see it
-            if (player == _server.LocalPlayer)
+            if (_server.LocalPlayer != null && player == _server.LocalPlayer)
             {
                 identity.HasAuthority = true;
                 _server.LocalClient.Player.Identity = identity;
@@ -415,7 +415,9 @@ namespace Mirage
 
             // special case to make sure hasAuthority is set
             // on start server in host mode
-            if (identity.Owner == _server.LocalPlayer)
+            // note: we need != null here, HasAuthority should never be null on server
+            //       this is so that logic in syncvar sender works correctly
+            if (_server.LocalPlayer != null && identity.Owner == _server.LocalPlayer)
                 identity.HasAuthority = true;
 
             if (!identity.IsSpawned)
