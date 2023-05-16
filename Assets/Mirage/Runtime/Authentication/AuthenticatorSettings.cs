@@ -62,7 +62,8 @@ namespace Mirage.Authentication
             if (logger.LogEnabled())
             {
                 var successText = result.Success ? "success" : "failed";
-                logger.Log($"Server authentication {successText} {player}, Reason:{result.Reason}, Authenticator:{result.Authenticator}");
+                var authenticatorName = result.Authenticator?.AuthenticatorName ?? "Null";
+                logger.Log($"Server authentication {successText} {player}, Reason:{result.Reason}, Authenticator:{authenticatorName}");
             }
 
             return result;

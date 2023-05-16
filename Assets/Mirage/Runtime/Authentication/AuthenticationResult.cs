@@ -1,13 +1,13 @@
-﻿namespace Mirage.Authentication
+namespace Mirage.Authentication
 {
     public struct AuthenticationResult
     {
         public bool Success;
 
         /// <summary>
-        /// Whitch Authenticator gave success 
+        /// Which Authenticator gave success 
         /// </summary>
-        public NetworkAuthenticatorBase Authenticator;
+        public INetworkAuthenticator Authenticator;
 
         /// <summary>
         /// Auth data from Success, will be set on INetworkPlayer
@@ -27,7 +27,7 @@
                 Reason = reason,
             };
         }
-        public static AuthenticationResult CreateSuccess(string reason, NetworkAuthenticatorBase authenticator, object data)
+        public static AuthenticationResult CreateSuccess(string reason, INetworkAuthenticator authenticator, object data)
         {
             return new AuthenticationResult
             {
@@ -43,6 +43,15 @@
             {
                 Success = false,
                 Reason = reason,
+            };
+        }
+        public static AuthenticationResult CreateFail(string reason, INetworkAuthenticator authenticator)
+        {
+            return new AuthenticationResult
+            {
+                Success = false,
+                Reason = reason,
+                Authenticator = authenticator,
             };
         }
     }
