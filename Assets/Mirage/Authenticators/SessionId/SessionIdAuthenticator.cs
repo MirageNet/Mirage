@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
 using Mirage.Authentication;
 using UnityEngine;
 
@@ -50,21 +48,6 @@ namespace Mirage.Authenticators.SessionId
             else
             {
                 return AuthenticationResult.CreateFail("No session ID found");
-            }
-        }
-
-        protected override SessionKeyMessage CreateAuthentication()
-        {
-            if (ClientIdStore.TryGetSession(out var session))
-            {
-                return new SessionKeyMessage
-                {
-                    SessionKey = new ArraySegment<byte>(session.Key),
-                };
-            }
-            else
-            {
-                throw new InvalidOperationException("No Session, make sure to check session exists before calling SendAuthentication");
             }
         }
 
@@ -120,145 +103,6 @@ namespace Mirage.Authenticators.SessionId
                     return hash;
                 }
             }
-        }
-    }
-
-    /// <summary>
-    /// Creates a session to be used by <see cref="SessionIdAuthenticator"/>
-    /// </summary>
-    public class CreateSession : MonoBehaviour
-    {
-        public NetworkServer Server;
-        public NetworkClient Client;
-        public SessionIdAuthenticator Authenticator;
-
-        [Tooltip("Is the player required to be authenticated by another Authenticator before starting Session")]
-        public bool RequestAuthenticated = true;
-
-        public void Start()
-        {
-            Client.Authenticated.AddListener(ClientAuthenticated);
-            Client.Connected.AddListener(ClientConnected);
-        }
-
-        private void ClientConnected(INetworkPlayer player)
-        {
-            if (Authenticator.ClientIdStore.TryGetSession(out var session))
-            {
-                // if before timeout, then use it to authenticate
-                if (DateTime.Now < session.Timeout)
-                    SendAuthentication(session);
-            }
-        }
-
-        private void SendAuthentication(ClientSession session)
-        {
-            var msg = new SessionKeyMessage
-            {
-                SessionKey = new ArraySegment<byte>(session.Key)
-            };
-            Authenticator.SendAuthentication(Client, msg);
-        }
-
-        private void ClientAuthenticated(INetworkPlayer player)
-        {
-            if (existingSession == null) { }
-
-
-        }
-
-        public struct RequestSession
-        {
-            public bool RefreshExisting;
-        }
-
-
-
-        private void ClientSaveToken(INetworkPlayer player, IdMessage message)
-        {
-            var array = message.SessionId.ToArray();
-            Debug.Assert(array.Length == SessionIDLength, "Server send unexpected session id length. This could mean that server was re-build but client was not");
-            ClientIdStore.SetSessionId(array);
-        }
-        private void Reconnect(INetworkPlayer player, IdMessage message)
-        {
-            if (!_sessions.TryGetValue(player, out var sessionData))
-            {
-                player.Send<SessionRejected>();
-                return;
-            }
-
-            if (!CompareSessionId(sessionData.SessionId, message.SessionId))
-            {
-                player.Send<SessionRejected>();
-                return;
-            }
-
-            player.Send<SessionAccepted>();
-            ServerAccept(player);
-        }
-
-        private bool CompareSessionId(byte[] sessionId, ArraySegment<byte> segment)
-        {
-            // Check if the lengths are equal
-            if (sessionId.Length != segment.Count)
-            {
-                return false;
-            }
-
-            // Compare the bytes
-            var array = segment.Array;
-            var offset = segment.Offset;
-            for (var i = 0; i < sessionId.Length; i++)
-            {
-                if (sessionId[i] != array[offset + i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private void AssignNewSession(INetworkPlayer player, RequestNewIDMessage message)
-        {
-            var sessionId = GenerateSessionId();
-
-            var sessionData = new SessionData
-            {
-                SessionId = sessionId,
-                Timeout = DateTime.Now.AddMinutes(TimeoutMinutes)
-            };
-
-            _sessions[player] = sessionData;
-
-            player.Send(new IdMessage { SessionId = new ArraySegment<byte>(sessionId) });
-            ServerAccept(player);
-        }
-
-        private byte[] GenerateSessionId()
-        {
-            // Generate a random value
-            var value = new byte[SessionIDLength];
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(value);
-            }
-
-            return value;
-        }
-
-        public override void ServerAuthenticate(INetworkPlayer player)
-        {
-            // nothing, wait for message
-        }
-        public override void ClientAuthenticate(INetworkPlayer player)
-        {
-            var sessionId = ClientIdStore.GetSessionId();
-            if (sessionId == null)
-                player.Send<RequestNewIDMessage>();
-            else
-                player.Send(new IdMessage { SessionId = new ArraySegment<byte>(sessionId) });
         }
     }
 }
