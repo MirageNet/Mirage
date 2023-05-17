@@ -49,6 +49,10 @@ namespace Mirage
         /// Authentication information for this NetworkPlayer
         /// </summary>
         public PlayerAuthentication Authentication { get; internal set; }
+        /// <summary>
+        /// Helper methods to check if Authentication is set
+        /// </summary>
+        public bool IsAuthenticated => Authentication != null;
 
         /// <summary>
         /// Flag that tells us if the scene has fully loaded in for player.

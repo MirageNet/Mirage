@@ -59,6 +59,8 @@ namespace Mirage.Authentication
 
             var result = await RunServerAuthenticate(player);
 
+            player.Send(new AuthSuccessMessage { AuthenticatorName = result.Authenticator.AuthenticatorName });
+
             if (logger.LogEnabled())
             {
                 var successText = result.Success ? "success" : "failed";

@@ -1,4 +1,7 @@
 using System;
+using System.Linq;
+using Cysharp.Threading.Tasks;
+using Mirage.Authentication;
 using Mirage.Events;
 using Mirage.Logging;
 using Mirage.Serialization;
@@ -49,7 +52,7 @@ namespace Mirage
         private Peer _peer;
 
         [Tooltip("Authentication component attached to this object")]
-        public NetworkAuthenticator authenticator;
+        public AuthenticatorSettings Authenticator;
 
         [Header("Events")]
         [SerializeField] private AddLateEvent _started = new AddLateEvent();
@@ -155,7 +158,8 @@ namespace Mirage
             dataHandler.SetConnection(connection, Player);
 
             RegisterMessageHandlers();
-            InitializeAuthEvents();
+            if (Authenticator != null)
+                AuthenticateAsync().Forget();
 
             // invoke started event after everything is set up, but before peer has connected
             if (ObjectManager != null)
@@ -225,7 +229,7 @@ namespace Mirage
             Player = new NetworkPlayer(clientConn);
             dataHandler.SetConnection(clientConn, Player);
             RegisterHostHandlers();
-            InitializeAuthEvents();
+
             // invoke started event after everything is set up, but before peer has connected
             if (ObjectManager != null)
                 ObjectManager.ClientStarted(this);
@@ -237,27 +241,23 @@ namespace Mirage
 
             server.AddLocalConnection(this, serverConn);
             Peer_OnConnected(clientConn);
+
+            if (logger.LogEnabled()) logger.Log($"Authentication Skipped because host player");
+            ((NetworkPlayer)Player).Authentication = new PlayerAuthentication(null, null);
+            _authenticated.Invoke(Player);
         }
 
-        private void InitializeAuthEvents()
+        private async UniTask AuthenticateAsync()
         {
-            if (authenticator != null)
-            {
-                authenticator.OnClientAuthenticated += OnAuthenticated;
-                authenticator.ClientSetup(this);
+            var waiter = new MessageWaiter<AuthSuccessMessage>(MessageHandler, allowUnauthenticated: true);
+            var (sender, message) = await waiter.WaitAsync();
 
-                Connected.AddListener(authenticator.ClientAuthenticate);
-            }
-            else
-            {
-                // if no authenticator, consider connection as authenticated
-                Connected.AddListener(OnAuthenticated);
-            }
-        }
+            Debug.Assert(sender == Player);
+            if (logger.LogEnabled()) logger.Log($"Authentication successful with {message.AuthenticatorName}");
 
-        internal void OnAuthenticated(INetworkPlayer player)
-        {
-            _authenticated.Invoke(player);
+            var authenticator = Authenticator.Authenticators.FirstOrDefault(x => x.AuthenticatorName == message.AuthenticatorName);
+            ((NetworkPlayer)Player).Authentication = new PlayerAuthentication(authenticator, null);
+            _authenticated.Invoke(Player);
         }
 
         private void OnDestroy()
@@ -368,17 +368,6 @@ namespace Mirage
             IsLocalClient = false;
 
             _connectState = ConnectState.Disconnected;
-
-            if (authenticator != null)
-            {
-                authenticator.OnClientAuthenticated -= OnAuthenticated;
-                Connected.RemoveListener(authenticator.ClientAuthenticate);
-            }
-            else
-            {
-                // if no authenticator, consider connection as authenticated
-                Connected.RemoveListener(OnAuthenticated);
-            }
 
             Player = null;
             _connected.Reset();
