@@ -84,7 +84,7 @@ namespace Mirage.Authentication
 
                 if (isTimeout)
                 {
-                    return new AuthenticationResult { Success = false, Reason = "Timeout" };
+                    return AuthenticationResult.CreateFail("Timeout");
                 }
 
                 return result;
@@ -92,7 +92,7 @@ namespace Mirage.Authentication
             catch (Exception e)
             {
                 logger.LogException(e);
-                return new AuthenticationResult { Success = false, Reason = $"Exception {e.GetType()}" };
+                return AuthenticationResult.CreateFail($"Exception {e.GetType()}");
             }
             finally
             {
