@@ -101,6 +101,10 @@ namespace Mirage
             if (identity.HasAuthority)
                 return true;
 
+            // no owner, then use ObserverWriter
+            if (identity.Owner == null)
+                return true;
+
             return false;
         }
 
