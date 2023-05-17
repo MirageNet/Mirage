@@ -1,3 +1,11 @@
+## [137.0.3](https://github.com/MirageNet/Mirage/compare/v137.0.2...v137.0.3) (2023-05-17)
+
+
+### Bug Fixes
+
+* fixing serialize writing to owner writer when no owner ([c6f203f](https://github.com/MirageNet/Mirage/commit/c6f203f137c6d39fce578c39212c5c0309aa4c70))
+* fixing server setting HasAuthority to true ([a6fa26d](https://github.com/MirageNet/Mirage/commit/a6fa26d07542be950e1df7403066654d4ab3f61b))
+
 ## [137.0.2](https://github.com/MirageNet/Mirage/compare/v137.0.1...v137.0.2) (2023-05-09)
 
 
