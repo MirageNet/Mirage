@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using Mirage.Authentication;
 
 namespace Mirage.Authenticators
@@ -8,22 +7,28 @@ namespace Mirage.Authenticators
         public string serverCode;
 
         // called on server to validate
-        public override UniTask<AuthenticationResult> Authenticate(JoinMessage message)
+        protected override AuthenticationResult Authenticate(JoinMessage message)
         {
-            AuthenticationResult result = default;
-            result.Success = serverCode == message.serverCode;
-            return UniTask.FromResult(result);
+            if (serverCode == message.serverCode)
+            {
+                return AuthenticationResult.CreateSuccess(this, null);
+            }
+            else
+            {
+                return AuthenticationResult.CreateFail("Server code invalid", this);
+            }
         }
 
         // called on client to create message to send to server
-        public override UniTask<JoinMessage> CreateAuthentication()
+        public void SendCode(NetworkClient client, string serverCode = null)
         {
-            var msg = new JoinMessage
+            var message = new JoinMessage
             {
-                serverCode = serverCode,
+                // use the argument or field if null
+                serverCode = serverCode ?? this.serverCode
             };
 
-            return UniTask.FromResult(msg);
+            SendAuthentication(client, message);
         }
 
         [NetworkMessage]
