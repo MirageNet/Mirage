@@ -12,6 +12,14 @@ namespace Mirage.Authenticators.SessionId
     {
         public DateTime Timeout;
         public byte[] Key;
+
+
+        public bool NeedsRefreshing(TimeSpan tillRefresh)
+        {
+            var timeRemining = DateTime.Now - Timeout;
+
+            return timeRemining < tillRefresh;
+        }
     }
 
     internal class DefaultSessionIdStore : ISessionIdStore

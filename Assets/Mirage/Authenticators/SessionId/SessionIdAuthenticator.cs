@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using Mirage.Authentication;
 using UnityEngine;
 
@@ -11,6 +12,16 @@ namespace Mirage.Authenticators.SessionId
         public int SessionIDLength = 32;
         [Tooltip("How long ID is valid for, in minutes. 1440 => 1 day")]
         public int TimeoutMinutes = 1440;
+        private RNGCryptoServiceProvider _rng;
+
+        private void Awake()
+        {
+            _rng = new RNGCryptoServiceProvider();
+        }
+        private void OnDestroy()
+        {
+            _rng.Dispose();
+        }
 
         /// <summary>
         /// Set on client to save key somewhere. For example as a cookie on webgl
@@ -51,28 +62,62 @@ namespace Mirage.Authenticators.SessionId
             }
         }
 
-        internal struct SessionKey : IEquatable<SessionKey>
+        public ArraySegment<byte> CreateOrRefreshSession(INetworkPlayer player)
         {
-            private ArraySegment<byte> _id;
-            private int _hash;
+            SessionData session;
+            // get existing session
+            if (_playerKeys.TryGetValue(player, out var oldKey))
+            {
+                session = _sessions[oldKey];
+                _sessions.Remove(oldKey);
+            }
+            // or create new
+            else
+            {
+                session = new SessionData();
+                session.PlayerAuthentication = player.Authentication;
+            }
+
+            // create new key
+            var key = GenerateSessionKey();
+            // set new timeout
+            session.Timeout = DateTime.Now.AddMinutes(TimeoutMinutes);
+
+            // set lookup with new key
+            _sessions[key] = session;
+            _playerKeys[player] = key;
+            return key.Buffer;
+        }
+
+        private SessionKey GenerateSessionKey()
+        {
+            var key = new byte[SessionIDLength];
+            _rng.GetBytes(key);
+            return new SessionKey(key);
+        }
+
+        private struct SessionKey : IEquatable<SessionKey>
+        {
+            public ArraySegment<byte> Buffer { get; }
+            private readonly int _hash;
 
             public SessionKey(byte[] array) : this(new ArraySegment<byte>(array)) { }
             public SessionKey(ArraySegment<byte> bytes)
             {
-                _id = bytes;
+                Buffer = bytes;
                 _hash = CalculateHash(bytes);
             }
 
             public bool Equals(SessionKey other)
             {
-                var count = _id.Count;
-                if (count != other._id.Count)
+                var count = Buffer.Count;
+                if (count != other.Buffer.Count)
                     return false;
 
-                var array1 = _id.Array;
-                var offset1 = _id.Offset;
-                var array2 = other._id.Array;
-                var offset2 = other._id.Offset;
+                var array1 = Buffer.Array;
+                var offset1 = Buffer.Offset;
+                var array2 = other.Buffer.Array;
+                var offset2 = other.Buffer.Offset;
 
                 for (var i = 0; i < count; i++)
                 {

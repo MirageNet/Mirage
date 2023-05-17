@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Linq;
 using UnityEngine;
 
 namespace Mirage.Authenticators.SessionId
@@ -19,6 +20,13 @@ namespace Mirage.Authenticators.SessionId
         {
             Client.Connected.AddListener(ClientConnected);
             Client.Authenticated.AddListener(ClientAuthenticated);
+
+            Server.Started.AddListener(ServerStarted);
+        }
+
+        private void ServerStarted()
+        {
+            Server.MessageHandler.RegisterHandler<RequestSessionMessage>(HandleRequestSession);
         }
 
         private void ClientConnected(INetworkPlayer player)
@@ -42,19 +50,56 @@ namespace Mirage.Authenticators.SessionId
 
         private void ClientAuthenticated(INetworkPlayer player)
         {
-            // check if we have session ID, otherwise request one here
+            if (!Authenticator.ClientIdStore.TryGetSession(out _))
+            {
+                RequestSession();
+            }
         }
 
-        public struct RequestSession
+        private void RequestSession()
         {
-            public bool RefreshExisting;
+            var waiter = new MessageWaiter<SessionKeyMessage>(Client.MessageHandler, allowUnauthenticated: false);
+
+            Client.Send(new RequestSessionMessage { });
+
+            waiter.Callback((player, msg) =>
+            {
+                // copy to new array, because ArraySegment will be reused aft
+                var key = msg.SessionKey.ToArray();
+                var session = new ClientSession
+                {
+                    Key = key,
+                    Timeout = DateTime.Now.AddMinutes(Authenticator.TimeoutMinutes),
+                };
+
+                Authenticator.ClientIdStore.StoreSession(session);
+            });
         }
 
+        public void HandleRequestSession(INetworkPlayer player, RequestSessionMessage message)
+        {
+            var sessionKey = Authenticator.CreateOrRefreshSession(player);
+            player.Send(new SessionKeyMessage { SessionKey = sessionKey });
+        }
 
-        // Add code to do the following:
-        // - use existing token too authenticate when reconnecting
-        // - get session token after authenticate (if client doesn't have one)
-        // - refresh token if only 1/2 time is remaining
-        // - store token in ClientIdStore
+        private void Update()
+        {
+            CheckRefresh();
+        }
+
+        private void CheckRefresh()
+        {
+            if (Client == null || !Client.Active)
+                return;
+
+            if (!Authenticator.ClientIdStore.TryGetSession(out var session))
+                return;
+
+            var tillRefresh = TimeSpan.FromMinutes(Authenticator.TimeoutMinutes / 2);
+            if (session.NeedsRefreshing(tillRefresh))
+            {
+                RequestSession();
+            }
+        }
     }
 }
