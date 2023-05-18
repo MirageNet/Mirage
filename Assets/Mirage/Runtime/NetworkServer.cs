@@ -358,7 +358,7 @@ namespace Mirage
 
         private void AuthenticationSuccess(NetworkPlayer player, AuthenticationResult result)
         {
-            player.Send(new AuthSuccessMessage { AuthenticatorName = result.Authenticator.AuthenticatorName });
+            player.Send(new AuthSuccessMessage { AuthenticatorName = result.Authenticator?.AuthenticatorName });
 
             player.Authentication = new PlayerAuthentication(result.Authenticator, result.Data);
 

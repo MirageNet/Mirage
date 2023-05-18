@@ -160,6 +160,8 @@ namespace Mirage
             RegisterMessageHandlers();
             if (Authenticator != null)
                 AuthenticateAsync().Forget();
+            else
+                AuthenticationSuccess(null);
 
             // invoke started event after everything is set up, but before peer has connected
             if (ObjectManager != null)
@@ -243,22 +245,29 @@ namespace Mirage
             Peer_OnConnected(clientConn);
 
             if (logger.LogEnabled()) logger.Log($"Authentication Skipped because host player");
-            ((NetworkPlayer)Player).Authentication = new PlayerAuthentication(null, null);
-            _authenticated.Invoke(Player);
+            AuthenticationSuccess(null);
         }
 
         private async UniTask AuthenticateAsync()
         {
-            var waiter = new MessageWaiter<AuthSuccessMessage>(MessageHandler, allowUnauthenticated: true);
-            var (sender, message) = await waiter.WaitAsync();
+            var waiter = new MessageWaiter<AuthSuccessMessage>(Player, MessageHandler, allowUnauthenticated: true);
+            var (disconnected, message) = await waiter.WaitAsync();
 
-            Debug.Assert(sender == Player);
+            if (disconnected)
+                return;
+
             if (logger.LogEnabled()) logger.Log($"Authentication successful with {message.AuthenticatorName}");
 
             var authenticator = Authenticator.Authenticators.FirstOrDefault(x => x.AuthenticatorName == message.AuthenticatorName);
+            AuthenticationSuccess(authenticator);
+        }
+
+        private void AuthenticationSuccess(INetworkAuthenticator authenticator)
+        {
             ((NetworkPlayer)Player).Authentication = new PlayerAuthentication(authenticator, null);
             _authenticated.Invoke(Player);
         }
+
 
         private void OnDestroy()
         {
