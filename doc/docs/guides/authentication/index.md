@@ -1,10 +1,12 @@
 # Authentication
 
-Add `AuthenticatorSettings` too your `NetworkManager`, and assign reference to `NetworkServer`.
-
-[image of Settings]
+Add `AuthenticatorSettings` too your `NetworkManager`, and assign reference to `NetworkServer` and `NetworkClient`.
 
 AuthenticatorSettings will let you configure the Timeout and which Authenticators are available.
+
+![inspector settings](./AuthenticatorSettings.png)
+
+![inspector assign reference](./SettingsReference.png)
 
 ### Server side
 
