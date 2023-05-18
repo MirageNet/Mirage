@@ -20,11 +20,13 @@ namespace Mirage.Snippets.Authentication
         // token used to validate user
         public string token;
     }
-    // CodeEmbed-End:  auth-message
+    // CodeEmbed-End: auth-message
 
     // CodeEmbed-Start: authenticator
-    public class CustomAuthenticator : NetworkAuthenticatorBase<CustomAuthMessage>
+    // CodeEmbed-Start: authenticator-def
+    public class CustomAuthenticator : NetworkAuthenticator<CustomAuthMessage>
     {
+        // CodeEmbed-End: authenticator-def
         protected override async UniTask<AuthenticationResult> AuthenticateAsync(CustomAuthMessage msg)
         {
             // check user sent token, if they didn't then return fail
