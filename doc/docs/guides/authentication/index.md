@@ -1,28 +1,65 @@
+---
+sidebar_position: 1
+---
 # Authentication
 
-Add `AuthenticatorSettings` too your `NetworkManager`, and assign reference to `NetworkServer` and `NetworkClient`.
+For some games you may want to limit who can join or uniquely identity a user in order to save stats or communicate with friends. Authentication is checking if a user is valid and is who they say they are. There are several methods available, some examples include:
+- Ask the user for username and password
+- Use a third party OAuth2 or OpenID identity provider, such as Facebook, Twitter, Google
+- Use a third party service such as PlayFab, GameLift or Steam
+- Use the device id, very popular method in mobile
+- Use Google Play in Android
+- Use Game Center in IOS
+- Use a web service in your website
 
-AuthenticatorSettings will let you configure the Timeout and which Authenticators are available.
 
-![inspector settings](./AuthenticatorSettings.png)
+## Encryption Notice
 
-![inspector assign reference](./SettingsReference.png)
+By default Mirage is not encrypted, so if you want to do authentication through Mirage, we highly recommend you use a transport that supports encryption.
 
-### Server side
+## Basic Authenticator
 
-The list of authenticators on the server is which ones the client can use to. The client can use any of them to become authenticated.
+[Basic Authenticator](/docs/components/authenticators/basic-authenticator)  
 
-You can find out which one the player used by checking `NetworkPlayer.Authentication.Authenticator`
+Mirage includes a Basic Authenticator in the `Mirage/Authenticators` folder which just uses a simple password. This will only allow people with the password to join the server. For example, a password on a hosted game so that only friends can join.
 
-### Client side
 
-On the client you need to tell the authenticator to send a message to the server, this is because most authenticators will need extra information, like player login information. 
+## Custom Authenticators
 
-The exception to this is authenticator which are able to automatically find that information themselves and send it to server. One example for this is `SessionIdAuthenticator` which will use a session token given by the server to automatically reconnect. It is best to only use 1 authenticator like this because the server will only process 1 authentication per player.
+To Create a custom authenticator implement the `NetworkAuthenticator` abstract class and override the `ServerAuthenticated` and `ClientAuthenticated` methods.
 
-#### Session Id Authenticator
+After authenticating a player call either `ServerAccept`, `ServerReject`, `ClientAccept` or `ClientReject` depending if running on Server or Client and if you it was successful or not.
 
-`SessionIdAuthenticator` will only send a message to server when it has a session Id is valid. session id is only valid for a set amount of time, this can be set in the inspector and defaults to 1 day (1440 minutes).
+Calling the `Accept` method will cause mirage to invoke the `OnServerAuthenticated` or `OnClientAuthenticated` events. Subscribe to OnServerAuthenticated and OnClientAuthenticated events if you wish to perform additional steps after authentication.
 
-<!-- If you want to use Session ID without any additional Authenticator you will have to check the "Allow Unauthenticated" -->
+Calling the `Reject` method will cause the player to be disconnected after a short delay.
 
+When Rejecting, It is a good idea to send a message to the client to tell them that authentication failed, for example: "Server password invalid" or "Login failed".
+
+
+## Check if a player is authenticated
+
+After a player has been accepted `IsAuthenticated` will be set to true. The bool can be used alongside `AuthenticationData` to check if a user is allowed to do certain actions.
+
+
+## Storing Authentication data
+
+The `NetworkPlayer` object has an `AuthenticationData` property that can be used to store any data related to authentication, such as account id, tokens, or players username. 
+
+This property is of type `object` so can be set to any object and can be cast back to that object when you need to read the data.
+
+```cs
+if (player.IsAuthenticated)
+{
+    var loginData = (MyLogInData)player.AuthenticationData;
+    var username = loginData.Username;
+    // do something with username :)
+}
+```
+
+
+Now that you have the foundation of a custom Authenticator component, the rest is up to you. You can exchange any number of custom messages between the server and client as necessary to complete your authentication process before approving the client.
+
+Authentication can also be extended to character selection and customization, just by crafting additional messages and exchanging them with the client before completing the authentication process.  This means this process takes place before the client player actually enters the game or changes to the Online scene.
+
+If you write a good authenticator, consider sharing it with other users or contributing it to the Mirage project.
