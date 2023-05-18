@@ -10,20 +10,20 @@ namespace Mirage
     public class MessageWaiter<T>
     {
         private bool _received;
-        private INetworkPlayer _sender;
         private T _message;
+        private NetworkClient _client;
         private MessageHandler _messageHandler;
         private MessageDelegateWithPlayer<T> callback;
 
-        public MessageWaiter(MessageHandler messageHandler, bool allowUnauthenticated = false)
+        public MessageWaiter(NetworkClient client, bool allowUnauthenticated = false)
         {
-            _messageHandler = messageHandler ?? throw new ArgumentNullException(nameof(messageHandler));
+            _client = client ?? throw new ArgumentNullException(nameof(client));
+            _messageHandler = _client.MessageHandler;
             _messageHandler.RegisterHandler<T>(HandleMessage, allowUnauthenticated);
         }
 
         private void HandleMessage(INetworkPlayer player, T message)
         {
-            _sender = player;
             _message = message;
             _received = true;
 
@@ -31,10 +31,10 @@ namespace Mirage
             callback?.Invoke(player, message);
         }
 
-        public async UniTask<(INetworkPlayer sender, T message)> WaitAsync()
+        public async UniTask<(bool disconnected, T message)> WaitAsync()
         {
-            await UniTask.WaitUntil(() => _received);
-            return (_sender, _message);
+            await UniTask.WaitUntil(() => _received || _client.IsConnected);
+            return (!_received, _message);
         }
 
         /// <summary>
