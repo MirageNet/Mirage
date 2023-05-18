@@ -12,9 +12,6 @@ namespace Mirage.Tests.Runtime.Authentication
         private readonly bool _addAuthenticator;
         private readonly bool _hostRequireAuth;
 
-        protected int serverAuthCalled;
-        protected int clientAuthCalled;
-
         protected List<INetworkPlayer> _serverAuthCalls;
         protected List<INetworkPlayer> _clientAuthCalls;
         protected MockAuthenticator _auth;
@@ -41,11 +38,11 @@ namespace Mirage.Tests.Runtime.Authentication
             }
 
             // reset fields
-            serverAuthCalled = 0;
-            clientAuthCalled = 0;
+            _serverAuthCalls = new List<INetworkPlayer>();
+            _clientAuthCalls = new List<INetworkPlayer>();
 
-            server.Authenticated.AddListener(_ => serverAuthCalled++);
-            client.Authenticated.AddListener(_ => clientAuthCalled++);
+            server.Authenticated.AddListener(p => _serverAuthCalls.Add(p));
+            client.Authenticated.AddListener(p => _clientAuthCalls.Add(p));
         }
     }
     public class NoAuthenticatorHostMode : AuthenticatorHostModeBase
