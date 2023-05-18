@@ -12,15 +12,14 @@ namespace Mirage.Authentication
 
     public abstract class NetworkAuthenticatorBase : MonoBehaviour, INetworkAuthenticator
     {
+        public virtual string AuthenticatorName => GetType().Name;
+
         internal abstract void Setup(MessageHandler messageHandler, Action<INetworkPlayer, AuthenticationResult> afterAuth);
-        public abstract string AuthenticatorName { get; }
     }
 
     public abstract class NetworkAuthenticatorBase<T> : NetworkAuthenticatorBase, INetworkAuthenticator
     {
         private Action<INetworkPlayer, AuthenticationResult> _afterAuth;
-
-        public override string AuthenticatorName => GetType().Name;
 
         internal sealed override void Setup(MessageHandler messageHandler, Action<INetworkPlayer, AuthenticationResult> afterAuth)
         {
