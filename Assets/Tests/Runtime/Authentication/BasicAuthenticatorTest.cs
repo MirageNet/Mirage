@@ -1,7 +1,7 @@
 using Mirage.Authenticators;
 using NUnit.Framework;
 
-namespace Mirage.Tests.Runtime.ClientServer.Authenticators
+namespace Mirage.Tests.Runtime.Authentication
 {
     public class BasicAuthenticatorTest : AuthenticatorTestSetup<BasicAuthenticator>
     {
@@ -26,8 +26,8 @@ namespace Mirage.Tests.Runtime.ClientServer.Authenticators
             Assert.That(ServerPlayer(0), Is.Not.Null);
 
             Assert.That(clientPlayer.IsAuthenticated, Is.True);
-            Assert.That(serverPlayer.Authentication, Is.Not.Null);
-            Assert.That(serverPlayer.Authentication.Authenticator, Is.TypeOf<BasicAuthenticator>());
+            Assert.That(clientPlayer.Authentication, Is.Not.Null);
+            Assert.That(clientPlayer.Authentication.Authenticator, Is.TypeOf<BasicAuthenticator>());
 
             Assert.That(serverPlayer.IsAuthenticated, Is.True);
             Assert.That(serverPlayer.Authentication, Is.Not.Null);

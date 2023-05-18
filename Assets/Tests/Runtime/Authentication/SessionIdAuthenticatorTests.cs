@@ -4,7 +4,8 @@ using Mirage.Authenticators.SessionId;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
-namespace Mirage.Tests.Runtime.ClientServer.Authenticators
+
+namespace Mirage.Tests.Runtime.Authentication
 {
     public class SessionIdAuthenticatorTests : ClientServerSetup
     {

@@ -1,10 +1,10 @@
-﻿using Mirage.Authentication;
+using Mirage.Authentication;
 
-namespace Mirage.Tests.Runtime.ClientServer
+namespace Mirage.Tests.Runtime.Authentication
 {
-    public class MockAuthenticator : NetworkAuthenticator<MockAuthenticator.MockMesasge>
+    public class MockAuthenticator : NetworkAuthenticator<MockAuthenticator.MockMessage>
     {
-        protected override AuthenticationResult Authenticate(MockMesasge message)
+        protected override AuthenticationResult Authenticate(MockMessage message)
         {
             return AuthenticationResult.CreateSuccess(this, new MockData { });
         }
@@ -15,7 +15,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [NetworkMessage]
-        public struct MockMesasge
+        public struct MockMessage
         {
 
         }

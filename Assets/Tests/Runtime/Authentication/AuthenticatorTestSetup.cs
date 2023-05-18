@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Mirage.Authentication;
 
-namespace Mirage.Tests.Runtime.ClientServer
+namespace Mirage.Tests.Runtime.Authentication
 {
     public abstract class AuthenticatorTestSetup<T> : ClientServerSetup where T : NetworkAuthenticator
     {
@@ -10,8 +10,9 @@ namespace Mirage.Tests.Runtime.ClientServer
         protected AuthenticatorSettings _clientSettings;
         protected T _clientAuthenticator;
 
-        private readonly List<INetworkPlayer> _serverAuthCalls = new List<INetworkPlayer>();
-        private readonly List<INetworkPlayer> _clientAuthCalls = new List<INetworkPlayer>();
+        protected List<INetworkPlayer> _serverAuthCalls;
+        protected List<INetworkPlayer> _clientAuthCalls;
+
 
         protected override void ExtraServerSetup()
         {
@@ -22,6 +23,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             _serverSettings.Authenticators.Add(_serverAuthenticator);
 
             server.Authenticator = _serverSettings;
+            _serverAuthCalls = new List<INetworkPlayer>();
             server.Authenticated.AddListener(p => _serverAuthCalls.Add(p));
         }
         protected override void ExtraClientSetup(IClientInstance instance)
@@ -34,6 +36,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             _clientSettings.Authenticators.Add(_clientAuthenticator);
 
             client.Authenticator = _clientSettings;
+            _clientAuthCalls = new List<INetworkPlayer>();
             client.Authenticated.AddListener(p => _clientAuthCalls.Add(p));
         }
     }

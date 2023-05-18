@@ -4,7 +4,7 @@ using NSubstitute;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Runtime.ClientServer
+namespace Mirage.Tests.Runtime.Authentication
 {
     public class NetworkAuthenticatorTest : AuthenticatorTestSetup<MockAuthenticator>
     {
@@ -47,40 +47,31 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.That(result.Reason, Is.EqualTo("Timeout"));
         });
 
-        [Test]
-        public void ShouldWaitForSendAuth()
+
+        [UnityTest]
+        public IEnumerator ShouldWaitForSendAuth()
         {
+            Assert.That(_serverAuthCalls, Is.Empty);
+            Assert.That(_clientAuthCalls, Is.Empty);
 
-            Assert.That()
+            _clientAuthenticator.SendAuthentication(client, new MockAuthenticator.MockMessage());
 
+            yield return null;
+            yield return null;
 
-            _clientAuthenticator.SendAuthentication(client, new MockAuthenticator.MockMesasge());
+            Assert.That(_serverAuthCalls, Has.Count.EqualTo(1));
+            Assert.That(_serverAuthCalls[0], Is.EqualTo(serverPlayer));
+            Assert.That(_clientAuthCalls, Has.Count.EqualTo(1));
+            Assert.That(_clientAuthCalls[0], Is.EqualTo(clientPlayer));
 
-            clientMockMethod.Received().Invoke(Arg.Any<INetworkPlayer>());
-        }
+            Assert.That(clientPlayer.IsAuthenticated, Is.True);
+            Assert.That(clientPlayer.Authentication, Is.Not.Null);
+            Assert.That(clientPlayer.Authentication.Authenticator, Is.TypeOf<MockAuthenticator>());
 
-        [Test]
-        public void ClientOnValidateTest()
-        {
-            Assert.That(client.authenticator, Is.EqualTo(_clientSettings));
-        }
-
-        [Test]
-        public void ServerOnValidateTest()
-        {
-            Assert.That(server.authenticator, Is.EqualTo(_serverSettings));
-        }
-
-        [Test]
-        public void NetworkClientCallsAuthenticator()
-        {
-            clientMockMethod.Received().Invoke(Arg.Any<INetworkPlayer>());
-        }
-
-        [Test]
-        public void NetworkServerCallsAuthenticator()
-        {
-            clientMockMethod.Received().Invoke(Arg.Any<INetworkPlayer>());
+            Assert.That(serverPlayer.IsAuthenticated, Is.True);
+            Assert.That(serverPlayer.Authentication, Is.Not.Null);
+            Assert.That(serverPlayer.Authentication.Authenticator, Is.TypeOf<MockAuthenticator>());
+            Assert.That(serverPlayer.Authentication.Data, Is.TypeOf<MockAuthenticator.MockData>());
         }
     }
 }
