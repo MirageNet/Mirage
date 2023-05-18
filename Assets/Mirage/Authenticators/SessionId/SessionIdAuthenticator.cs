@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Mirage.Authenticators.SessionId
 {
-    public class SessionIdAuthenticator : NetworkAuthenticatorBase<SessionKeyMessage>
+    public class SessionIdAuthenticator : NetworkAuthenticator<SessionKeyMessage>
     {
         [Tooltip("how many bytes to use for session ID")]
         public int SessionIDLength = 32;

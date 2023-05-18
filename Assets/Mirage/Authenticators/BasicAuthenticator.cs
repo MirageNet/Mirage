@@ -2,14 +2,14 @@ using Mirage.Authentication;
 
 namespace Mirage.Authenticators
 {
-    public class BasicAuthenticator : NetworkAuthenticatorBase<BasicAuthenticator.JoinMessage>
+    public class BasicAuthenticator : NetworkAuthenticator<BasicAuthenticator.JoinMessage>
     {
-        public string serverCode;
+        public string ServerCode;
 
         // called on server to validate
         protected override AuthenticationResult Authenticate(JoinMessage message)
         {
-            if (serverCode == message.serverCode)
+            if (ServerCode == message.ServerCode)
             {
                 return AuthenticationResult.CreateSuccess(this, null);
             }
@@ -25,7 +25,7 @@ namespace Mirage.Authenticators
             var message = new JoinMessage
             {
                 // use the argument or field if null
-                serverCode = serverCode ?? this.serverCode
+                ServerCode = serverCode ?? ServerCode
             };
 
             SendAuthentication(client, message);
@@ -34,7 +34,7 @@ namespace Mirage.Authenticators
         [NetworkMessage]
         public struct JoinMessage
         {
-            public string serverCode;
+            public string ServerCode;
         }
     }
 }

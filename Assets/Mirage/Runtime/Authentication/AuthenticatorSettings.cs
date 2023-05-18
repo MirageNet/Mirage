@@ -11,8 +11,12 @@ namespace Mirage.Authentication
         private static readonly ILogger logger = LogFactory.GetLogger<AuthenticatorSettings>();
 
         public int TimeoutSeconds = 60;
+
+        [Tooltip("Should the host player authenticate? If this is false then they will be marked as Authenticated automatically without going through a NetworkAuthenticator")]
+        public bool RequireHostToAuthenticate;
+
         [Tooltip("List of Authenticators allowed, User can use any of them")]
-        public NetworkAuthenticatorBase[] Authenticators = new NetworkAuthenticatorBase[0];
+        public List<NetworkAuthenticator> Authenticators = new List<NetworkAuthenticator>();
 
         private readonly Dictionary<INetworkPlayer, UniTaskCompletionSource<AuthenticationResult>> _pending = new Dictionary<INetworkPlayer, UniTaskCompletionSource<AuthenticationResult>>();
 
@@ -74,7 +78,7 @@ namespace Mirage.Authentication
         private async UniTask<AuthenticationResult> RunServerAuthenticate(INetworkPlayer player)
         {
             var taskCompletion = new UniTaskCompletionSource<AuthenticationResult>();
-            _pending[player] = taskCompletion;
+            _pending.Add(player, taskCompletion);
 
             try
             {

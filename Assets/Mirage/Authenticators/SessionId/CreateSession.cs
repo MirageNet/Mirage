@@ -13,9 +13,6 @@ namespace Mirage.Authenticators.SessionId
         public NetworkClient Client;
         public SessionIdAuthenticator Authenticator;
 
-        [Tooltip("Is the player required to be authenticated by another Authenticator before starting Session")]
-        public bool RequestAuthenticated = true;
-
         public void Start()
         {
             Client.Connected.AddListener(ClientConnected);
