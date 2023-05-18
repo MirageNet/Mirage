@@ -52,7 +52,6 @@ namespace Mirage.Authenticators.SessionId
                     return AuthenticationResult.CreateFail("Session has timed out");
                 }
 
-
                 return AuthenticationResult.CreateSuccess("Valid Session", this, sessionData);
 
             }

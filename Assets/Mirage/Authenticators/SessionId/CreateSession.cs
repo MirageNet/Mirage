@@ -12,13 +12,20 @@ namespace Mirage.Authenticators.SessionId
         public NetworkServer Server;
         public NetworkClient Client;
         public SessionIdAuthenticator Authenticator;
+        public bool AutoRefreshSession = true;
 
         public void Start()
         {
-            Client.Connected.AddListener(ClientConnected);
-            Client.Authenticated.AddListener(ClientAuthenticated);
+            if (Client != null)
+            {
+                Client.Connected.AddListener(ClientConnected);
+                Client.Authenticated.AddListener(ClientAuthenticated);
+            }
 
-            Server.Started.AddListener(ServerStarted);
+            if (Server != null)
+            {
+                Server.Started.AddListener(ServerStarted);
+            }
         }
 
         private void ServerStarted()
@@ -55,11 +62,11 @@ namespace Mirage.Authenticators.SessionId
 
         private void RequestSession()
         {
-            var waiter = new MessageWaiter<SessionKeyMessage>(Client.MessageHandler, allowUnauthenticated: false);
+            var waiter = new MessageWaiter<SessionKeyMessage>(Client, allowUnauthenticated: false);
 
             Client.Send(new RequestSessionMessage { });
 
-            waiter.Callback((player, msg) =>
+            waiter.Callback((_, msg) =>
             {
                 // copy to new array, because ArraySegment will be reused aft
                 var key = msg.SessionKey.ToArray();
@@ -81,7 +88,8 @@ namespace Mirage.Authenticators.SessionId
 
         private void Update()
         {
-            CheckRefresh();
+            if (AutoRefreshSession)
+                CheckRefresh();
         }
 
         private void CheckRefresh()

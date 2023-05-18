@@ -250,7 +250,7 @@ namespace Mirage
 
         private async UniTask AuthenticateAsync()
         {
-            var waiter = new MessageWaiter<AuthSuccessMessage>(Player, MessageHandler, allowUnauthenticated: true);
+            var waiter = new MessageWaiter<AuthSuccessMessage>(this, allowUnauthenticated: true);
             var (disconnected, message) = await waiter.WaitAsync();
 
             if (disconnected)

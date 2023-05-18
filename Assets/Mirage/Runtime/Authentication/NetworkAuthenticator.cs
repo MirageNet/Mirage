@@ -42,7 +42,7 @@ namespace Mirage.Authentication
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        protected virtual UniTask<AuthenticationResult> AuthenticateAsync(T message)
+        protected internal virtual UniTask<AuthenticationResult> AuthenticateAsync(T message)
         {
             return UniTask.FromResult(Authenticate(message));
         }
