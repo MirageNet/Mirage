@@ -55,7 +55,7 @@ namespace Mirage.Tests.Runtime.Authentication
             base.ExtraClientSetup(instance);
             var client = instance.Client;
 
-            Setup(clientGo, ref _clientSettings, ref _clientAuthenticator, ref _clientMockAuthenticator);
+            Setup(instance.GameObject, ref _clientSettings, ref _clientAuthenticator, ref _clientMockAuthenticator);
 
             client.Authenticator = _clientSettings;
             client.Authenticated.AddListener(p => _clientAuthCalls.Add(p));

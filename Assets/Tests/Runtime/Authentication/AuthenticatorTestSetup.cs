@@ -31,8 +31,8 @@ namespace Mirage.Tests.Runtime.Authentication
             base.ExtraClientSetup(instance);
             var client = instance.Client;
 
-            _clientSettings = clientGo.AddComponent<AuthenticatorSettings>();
-            _clientAuthenticator = clientGo.AddComponent<T>();
+            _clientSettings = instance.GameObject.AddComponent<AuthenticatorSettings>();
+            _clientAuthenticator = instance.GameObject.AddComponent<T>();
             _clientSettings.Authenticators.Add(_clientAuthenticator);
 
             client.Authenticator = _clientSettings;
