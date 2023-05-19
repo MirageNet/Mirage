@@ -184,7 +184,9 @@ namespace Mirage
 
         private void Peer_OnConnected(IConnection conn)
         {
-            World.Time.UpdateClient(this);
+            if (!IsLocalClient)
+                World.Time.UpdateClient(this);
+
             _connectState = ConnectState.Connected;
             _connected.Invoke(Player);
         }
@@ -230,7 +232,6 @@ namespace Mirage
             IsLocalClient = true;
             Player = new NetworkPlayer(clientConn);
             dataHandler.SetConnection(clientConn, Player);
-            RegisterHostHandlers();
 
             // invoke started event after everything is set up, but before peer has connected
             if (ObjectManager != null)
@@ -356,14 +357,9 @@ namespace Mirage
             _peer?.UpdateSent();
         }
 
-        internal void RegisterHostHandlers()
-        {
-            MessageHandler.RegisterHandler<NetworkPongMessage>(msg => { });
-        }
-
         internal void RegisterMessageHandlers()
         {
-            MessageHandler.RegisterHandler<NetworkPongMessage>(World.Time.OnClientPong);
+            MessageHandler.RegisterHandler<NetworkPongMessage>(World.Time.OnClientPong, allowUnauthenticated: true);
         }
 
         /// <summary>

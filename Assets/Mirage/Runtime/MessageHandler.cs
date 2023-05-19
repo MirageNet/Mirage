@@ -29,7 +29,7 @@ namespace Mirage
                 logger.Log($"RegisterHandler replacing {msgType}");
 
             var del = MessageWrapper(handler);
-            _messageHandlers[msgType] = new Handler(del, false);
+            _messageHandlers[msgType] = new Handler(del, allowUnauthenticated);
         }
 
         private static NetworkMessageDelegate MessageWrapper<T>(MessageDelegateWithPlayer<T> handler)

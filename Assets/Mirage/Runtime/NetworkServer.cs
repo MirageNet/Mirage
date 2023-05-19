@@ -223,7 +223,7 @@ namespace Mirage
 
             LocalClient = localClient;
             MessageHandler = new MessageHandler(World, DisconnectOnException);
-            MessageHandler.RegisterHandler<NetworkPingMessage>(World.Time.OnServerPing);
+            MessageHandler.RegisterHandler<NetworkPingMessage>(World.Time.OnServerPing, allowUnauthenticated: true);
 
             // create after MessageHandler, SyncVarReceiver uses it 
             _syncVarReceiver = new SyncVarReceiver(this, World);
@@ -347,6 +347,10 @@ namespace Mirage
             // process results
             if (result.Success)
             {
+                // send message to let client know
+                // do this outside of AuthenticationSuccess because or host/no auth client already knows it is successful
+                player.Send(new AuthSuccessMessage { AuthenticatorName = result.Authenticator?.AuthenticatorName });
+
                 AuthenticationSuccess(player, result);
             }
             else
@@ -358,8 +362,6 @@ namespace Mirage
 
         private void AuthenticationSuccess(NetworkPlayer player, AuthenticationResult result)
         {
-            player.Send(new AuthSuccessMessage { AuthenticatorName = result.Authenticator?.AuthenticatorName });
-
             player.Authentication = new PlayerAuthentication(result.Authenticator, result.Data);
 
             // add connection
