@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using Mirage.Logging;
 using UnityEngine;
 
 using Object = UnityEngine.Object;
@@ -123,6 +125,36 @@ namespace Mirage.Tests
                 go.SetActive(false);
             toDestroy.Add(go);
             return go;
+        }
+
+        /// <summary>
+        /// Replaces the default log handler with one that prepends the frame count 
+        /// </summary>
+        public void ReplaceLogHandler()
+        {
+            LogFactory.ReplaceLogHandler(new FrameNumberLogHandler());
+        }
+
+        private class FrameNumberLogHandler : ILogHandler
+        {
+            public void LogException(Exception exception, UnityEngine.Object context)
+            {
+                Debug.unityLogger.LogException(exception, context);
+            }
+
+            public void LogFormat(LogType logType, UnityEngine.Object context, string format, params object[] args)
+            {
+                int frame;
+                try
+                {
+                    frame = Time.frameCount;
+                }
+                catch
+                {
+                    frame = 0;
+                }
+                Debug.unityLogger.LogFormat(logType, context, $"{frame}: {format}", args);
+            }
         }
     }
 }

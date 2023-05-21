@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Mirage.SocketLayer;
 using UnityEngine;
 
@@ -76,6 +77,16 @@ namespace Mirage.Tests
             return found;
         }
 
+        public void AddNewPlayer()
+        {
+            var player = GetNewPlayer();
+            _ = GetOrAddLocalPlayer(player);
+        }
+        public void SpawnCharacterForNew(NetworkIdentity prefab)
+        {
+            var player = GetNewPlayer();
+            SpawnCharacter(player, prefab);
+        }
         public void SpawnCharacter(INetworkPlayer player, NetworkIdentity prefab)
         {
             var identity = Object.Instantiate(prefab);
@@ -85,17 +96,21 @@ namespace Mirage.Tests
             identity.gameObject.SetActive(true);
             ServerObjectManager.AddCharacter(player, identity);
 
-            AddToPlayerList(player, new LocalPlayerObject
-            {
-                Player = player,
-                Identity = identity,
-                GameObject = identity.gameObject,
-            });
+            var localPlayer = GetOrAddLocallayer(player);
+            Debug.Assert(localPlayer.Identity == null, "adding character when exisitng player already had one");
+            localPlayer.Identity = identity;
+            localPlayer.GameObject = identity.gameObject;
         }
 
-        protected virtual void AddToPlayerList(INetworkPlayer player, LocalPlayerObject localPlayerObject)
+        protected virtual LocalPlayerObject GetOrAddLocalPlayer(INetworkPlayer player)
         {
-            _players.Add(localPlayerObject);
+            var existing = _players.FirstOrDefault(x => x.Player == player);
+            if (existing == null)
+            {
+                existing = new LocalPlayerObject(player);
+                _players.Add(existing);
+            }
+            return existing;
         }
 
 
@@ -104,9 +119,14 @@ namespace Mirage.Tests
         /// </summary>
         public class LocalPlayerObject
         {
-            public INetworkPlayer Player;
+            public readonly INetworkPlayer Player;
             public GameObject GameObject;
             public NetworkIdentity Identity;
+
+            public LocalPlayerObject(INetworkPlayer player)
+            {
+                Player = player;
+            }
         }
     }
 }

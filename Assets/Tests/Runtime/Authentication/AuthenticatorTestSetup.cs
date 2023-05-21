@@ -13,6 +13,7 @@ namespace Mirage.Tests.Runtime.Authentication
         protected List<INetworkPlayer> _serverAuthCalls;
         protected List<INetworkPlayer> _clientAuthCalls;
 
+        protected override bool SpawnCharacterOnConnect => false;
 
         protected override void ExtraServerSetup()
         {

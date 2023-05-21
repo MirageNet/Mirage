@@ -16,6 +16,8 @@ namespace Mirage.Tests.Runtime.Authentication
         protected List<INetworkPlayer> _clientAuthCalls;
         protected MockAuthenticator _auth;
 
+        protected override bool SpawnCharacterOnConnect => false;
+
         public AuthenticatorHostModeBase(bool addAuthenticator, bool hostRequireAuth)
         {
             _addAuthenticator = addAuthenticator;

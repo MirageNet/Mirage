@@ -22,15 +22,18 @@ namespace Mirage.Tests
             Server.StartServer(Client);
         }
 
-        protected override void AddToPlayerList(INetworkPlayer player, LocalPlayerObject localPlayerObject)
+        protected override LocalPlayerObject GetOrAddLocalPlayer(INetworkPlayer player)
         {
             if (player == Server.LocalPlayer)
             {
-                HostPlayer = localPlayerObject;
+                if (HostPlayer == null)
+                    HostPlayer = new LocalPlayerObject(player);
+
+                return HostPlayer;
             }
             else
             {
-                base.AddToPlayerList(player, localPlayerObject);
+                return base.GetOrAddLocallayer(player);
             }
         }
     }

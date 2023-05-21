@@ -28,10 +28,13 @@ namespace Mirage.Tests
             Client.ObjectManager = ClientObjectManager;
         }
 
+        public void SetupNoCharacter()
+        {
+            player = Client.Player;
+        }
+
         public void SetupCharacter()
         {
-            // get the connections so that we can spawn players
-            player = Client.Player;
             identity = player.Identity;
             character = identity.gameObject;
             character.name = "player (client)";

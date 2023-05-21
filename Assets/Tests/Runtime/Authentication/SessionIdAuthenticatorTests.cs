@@ -25,6 +25,8 @@ namespace Mirage.Tests.Runtime.Authentication
         protected List<INetworkPlayer> _serverAuthCalls;
         protected List<INetworkPlayer> _clientAuthCalls;
 
+        protected override bool SpawnCharacterOnConnect => false;
+
         private static void Setup(GameObject go, ref AuthenticatorSettings settings, ref SessionIdAuthenticator sessionId, ref MockAuthenticator mock)
         {
             settings = go.AddComponent<AuthenticatorSettings>();
