@@ -14,12 +14,14 @@ namespace Mirage.Tests.Runtime.Authentication
         protected List<INetworkPlayer> _clientAuthCalls;
 
         protected override bool SpawnCharacterOnConnect => false;
+        protected virtual int AuthenticatorTimeoutSeconds => 5;
 
         protected override void ExtraServerSetup()
         {
             base.ExtraServerSetup();
 
             _serverSettings = serverGo.AddComponent<AuthenticatorSettings>();
+            _serverSettings.TimeoutSeconds = AuthenticatorTimeoutSeconds;
             _serverAuthenticator = serverGo.AddComponent<T>();
             _serverSettings.Authenticators.Add(_serverAuthenticator);
 
@@ -33,6 +35,7 @@ namespace Mirage.Tests.Runtime.Authentication
             var client = instance.Client;
 
             _clientSettings = instance.GameObject.AddComponent<AuthenticatorSettings>();
+            _clientSettings.TimeoutSeconds = AuthenticatorTimeoutSeconds;
             _clientAuthenticator = instance.GameObject.AddComponent<T>();
             _clientSettings.Authenticators.Add(_clientAuthenticator);
 

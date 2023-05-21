@@ -102,7 +102,7 @@ namespace Mirage.Authentication
             }
         }
 
-        private void AfterAuth(INetworkPlayer player, AuthenticationResult result)
+        internal void AfterAuth(INetworkPlayer player, AuthenticationResult result)
         {
             if (_pending.TryGetValue(player, out var taskCompletion))
             {
