@@ -8,7 +8,7 @@ namespace Mirage
 {
     public class MessageHandler : IMessageReceiver
     {
-        private static readonly ILogger logger = LogFactory.GetLogger(typeof(MessageHandler));
+        private static readonly ILogger logger = LogFactory.GetLogger<MessageHandler>();
 
         private readonly bool _disconnectOnException;
         private readonly IObjectLocator _objectLocator;
@@ -37,6 +37,8 @@ namespace Mirage
             void AdapterFunction(INetworkPlayer player, NetworkReader reader)
             {
                 var message = NetworkDiagnostics.ReadWithDiagnostics<T>(reader);
+
+                if (logger.LogEnabled()) logger.Log($"Receiving {typeof(T)} from {player}");
 
                 handler.Invoke(player, message);
             }
