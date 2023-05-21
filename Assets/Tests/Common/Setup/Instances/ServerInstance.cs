@@ -96,7 +96,7 @@ namespace Mirage.Tests
             identity.gameObject.SetActive(true);
             ServerObjectManager.AddCharacter(player, identity);
 
-            var localPlayer = GetOrAddLocallayer(player);
+            var localPlayer = GetOrAddLocalPlayer(player);
             Debug.Assert(localPlayer.Identity == null, "adding character when exisitng player already had one");
             localPlayer.Identity = identity;
             localPlayer.GameObject = identity.gameObject;

@@ -33,7 +33,7 @@ namespace Mirage.Tests
             }
             else
             {
-                return base.GetOrAddLocallayer(player);
+                return base.GetOrAddLocalPlayer(player);
             }
         }
     }
