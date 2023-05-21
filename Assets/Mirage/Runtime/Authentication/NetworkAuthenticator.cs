@@ -23,7 +23,7 @@ namespace Mirage.Authentication
 
         internal sealed override void Setup(MessageHandler messageHandler, Action<INetworkPlayer, AuthenticationResult> afterAuth)
         {
-            messageHandler.RegisterHandler<T>(HandleAuth);
+            messageHandler.RegisterHandler<T>(HandleAuth, allowUnauthenticated: true);
             _afterAuth = afterAuth;
         }
 
