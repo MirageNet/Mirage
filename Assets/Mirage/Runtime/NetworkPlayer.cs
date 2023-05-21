@@ -165,6 +165,7 @@ namespace Mirage
 
                 var segment = writer.ToArraySegment();
                 NetworkDiagnostics.OnSend(message, segment.Count, 1);
+                if (logger.LogEnabled()) logger.Log($"Sending {typeof(T)} to {this} channel:{channelId}");
                 Send(segment, channelId);
             }
         }
