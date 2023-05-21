@@ -61,17 +61,21 @@ namespace Mirage.Tests.Runtime.Authentication
 
             Assert.That(_serverAuthCalls, Has.Count.EqualTo(1));
             Assert.That(_serverAuthCalls[0], Is.EqualTo(serverPlayer));
+
+            Assert.That(serverPlayer.IsAuthenticated, Is.True);
+            Assert.That(serverPlayer.Authentication, Is.Not.Null);
+            Assert.That(serverPlayer.Authentication.Authenticator, Is.TypeOf<MockAuthenticator>());
+            Assert.That(serverPlayer.Authentication.Data, Is.TypeOf<MockAuthenticator.MockData>());
+
+            // client needs extra frame to receive message from server
+            yield return null;
+
             Assert.That(_clientAuthCalls, Has.Count.EqualTo(1));
             Assert.That(_clientAuthCalls[0], Is.EqualTo(clientPlayer));
 
             Assert.That(clientPlayer.IsAuthenticated, Is.True);
             Assert.That(clientPlayer.Authentication, Is.Not.Null);
             Assert.That(clientPlayer.Authentication.Authenticator, Is.TypeOf<MockAuthenticator>());
-
-            Assert.That(serverPlayer.IsAuthenticated, Is.True);
-            Assert.That(serverPlayer.Authentication, Is.Not.Null);
-            Assert.That(serverPlayer.Authentication.Authenticator, Is.TypeOf<MockAuthenticator>());
-            Assert.That(serverPlayer.Authentication.Data, Is.TypeOf<MockAuthenticator.MockData>());
         }
     }
 }

@@ -172,20 +172,23 @@ namespace Mirage.Tests.Runtime.Authentication
             yield return null;
             yield return null;
 
-
             Assert.That(_serverAuthCalls, Has.Count.EqualTo(1));
             Assert.That(_serverAuthCalls[0], Is.EqualTo(serverPlayer));
+
+            Assert.That(serverPlayer.IsAuthenticated, Is.True);
+            Assert.That(serverPlayer.Authentication, Is.Not.Null);
+            Assert.That(serverPlayer.Authentication.Authenticator, Is.TypeOf<SessionIdAuthenticator>());
+            Assert.That(serverPlayer.Authentication.Data, Is.TypeOf<SessionData>());
+
+            // client needs extra frame to receive message from server
+            yield return null;
+
             Assert.That(_clientAuthCalls, Has.Count.EqualTo(1));
             Assert.That(_clientAuthCalls[0], Is.EqualTo(client.Player));
 
             Assert.That(client.Player.IsAuthenticated, Is.True);
             Assert.That(client.Player.Authentication, Is.Not.Null);
             Assert.That(client.Player.Authentication.Authenticator, Is.TypeOf<SessionIdAuthenticator>());
-
-            Assert.That(serverPlayer.IsAuthenticated, Is.True);
-            Assert.That(serverPlayer.Authentication, Is.Not.Null);
-            Assert.That(serverPlayer.Authentication.Authenticator, Is.TypeOf<SessionIdAuthenticator>());
-            Assert.That(serverPlayer.Authentication.Data, Is.TypeOf<SessionData>());
         }
 
         [UnityTest]
