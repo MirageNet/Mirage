@@ -35,6 +35,7 @@ namespace Mirage.Tests
 
         public void SetupCharacter()
         {
+            player = Client.Player;
             identity = player.Identity;
             character = identity.gameObject;
             character.name = "player (client)";
