@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using Cysharp.Threading.Tasks;
 using Mirage.Authentication;
 using Mirage.Events;
 using Mirage.Logging;
@@ -248,19 +247,22 @@ namespace Mirage
         private void Authenticate()
         {
             if (Authenticator != null)
-                AuthenticateAsync().Forget();
+            {
+                var waiter = new MessageWaiter<AuthSuccessMessage>(this, allowUnauthenticated: true);
+                // DONT use async here
+                // we need to invoke set data and invoke _authenticated right away
+                // this is because messages received after AuthSuccessMessage (from server) assume the client is now authenticated
+                // but if we use async, we wont set Authentication until next update, causing message to be received or dropped (or kicked from Unauthenticated)
+                waiter.Callback(AuthenticationSuccessCallback);
+            }
             else
+            {
                 AuthenticationSuccess(null);
+            }
         }
 
-        private async UniTask AuthenticateAsync()
+        private void AuthenticationSuccessCallback(INetworkPlayer _, AuthSuccessMessage message)
         {
-            var waiter = new MessageWaiter<AuthSuccessMessage>(this, allowUnauthenticated: true);
-            var (disconnected, message) = await waiter.WaitAsync();
-
-            if (disconnected)
-                return;
-
             if (logger.LogEnabled()) logger.Log($"Authentication successful with {message.AuthenticatorName}");
 
             var authenticator = Authenticator.Authenticators.FirstOrDefault(x => x.AuthenticatorName == message.AuthenticatorName);
