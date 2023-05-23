@@ -1263,5 +1263,57 @@ namespace Mirage.Tests.Runtime.Serialization
             });
             Assert.That(e.Message, Is.EqualTo($"Can't read {count} elements because it would read past the end of the stream."));
         }
+
+
+        [Test]
+        public void DoesNotWriteProtectedField()
+        {
+            var inValue = new _ClassWithProtected()
+            {
+                Field1 = 10,
+                Field2 = 20,
+                Field3 = 30,
+                Field4 = 40,
+            };
+
+            Assert.DoesNotThrow(() =>
+            {
+                MessagePacker.Pack(new _MessageWithProtected { Field = inValue }, writer);
+            });
+            writer.Reset();
+
+            writer.Write(new _MessageWithProtected { Field = inValue });
+            // use generic writer
+            //writer.Write();
+            reader.Reset(writer.ToArraySegment());
+            var outValue = reader.Read<_MessageWithProtected>().Field;
+
+            Assert.That(outValue, Is.Not.Null);
+            Assert.That(outValue.Field1, Is.EqualTo(10));
+            Assert.That(outValue.Field2, Is.EqualTo(default(int)));
+            Assert.That(outValue.Field3, Is.EqualTo(default(int)));
+            Assert.That(outValue.Field4, Is.EqualTo(default(int)));
+        }
+    }
+
+    [NetworkMessage]
+    public class _ClassWithProtected
+    {
+        // should serialize
+        public int Field1;
+
+        // should NOT serialize
+        protected int _field2;
+        private int _field3;
+        internal int Field4;
+
+        // accessors for test
+        public int Field2 { get => _field2; set => _field2 = value; }
+        public int Field3 { get => _field3; set => _field3 = value; }
+    }
+
+    public struct _MessageWithProtected
+    {
+        public _ClassWithProtected Field;
     }
 }

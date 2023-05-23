@@ -177,7 +177,17 @@ namespace Mirage.Weaver
             {
                 foreach (var field in typeDefinition.Fields.ToArray())
                 {
-                    if (field.IsStatic || field.IsPrivate)
+                    if (field.IsStatic)
+                        continue;
+
+                    // dont get private or protected fields
+                    if (field.IsPrivate || field.IsFamily)
+                        continue;
+
+                    // also ignore internal fields
+                    // we dont want to create different writers for this type if they are in current dll or another dll
+                    // so we have to ignore internal in all cases
+                    if (field.IsAssembly)
                         continue;
 
                     if (field.IsNotSerialized)
