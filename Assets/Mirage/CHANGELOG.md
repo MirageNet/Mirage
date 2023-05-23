@@ -1,3 +1,20 @@
+# [138.0.0](https://github.com/MirageNet/Mirage/compare/v137.0.3...v138.0.0) (2023-05-23)
+
+
+### Bug Fixes
+
+* stopping protected fields from being written by weaver ([9e2d74a](https://github.com/MirageNet/Mirage/commit/9e2d74a48505ae9d096086febcdfac1c67ee947f)), closes [/github.com/MirrorNetworking/Mirror/issues/3485#issuecomment-1559005650](https://github.com//github.com/MirrorNetworking/Mirror/issues/3485/issues/issuecomment-1559005650)
+
+
+### Features
+
+* making NetworkManagerGUI automatically find NetworkManager when added ([c600b4c](https://github.com/MirageNet/Mirage/commit/c600b4c644c1440eb5be0f4fa820791003696901))
+
+
+### BREAKING CHANGES
+
+* internal fields are not longer automatically written by Weaver generated functions
+
 ## [137.0.3](https://github.com/MirageNet/Mirage/compare/v137.0.2...v137.0.3) (2023-05-17)
 
 
