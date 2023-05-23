@@ -24,6 +24,12 @@ namespace Mirage
         [Tooltip("Select where you want the NetworkManagerGUI elements to be located on the screen.")]
         public TextAnchor GUIAnchor = TextAnchor.UpperLeft;
 
+        private void Reset()
+        {
+            // try to automatically add NetworkManager when this component is added
+            NetworkManager = GetComponent<NetworkManager>();
+        }
+
         private void Awake()
         {
             // Coburn, 2023-02-02: 
