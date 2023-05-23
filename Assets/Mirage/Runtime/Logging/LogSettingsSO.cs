@@ -55,7 +55,7 @@ namespace Mirage.Logging
                 _fullNameCache = CreateFullName(Name, Namespace);
             }
 
-            private static (string name, string @namespace) GetNameAndNameSpaceFromFullname(string fullname)
+            public static (string name, string @namespace) GetNameAndNameSpaceFromFullname(string fullname)
             {
                 // NOTE we need to be able to recreate fullname from name/namespace
                 // so we cant always just use empty string for no namespace
