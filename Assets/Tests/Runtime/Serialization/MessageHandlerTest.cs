@@ -20,7 +20,8 @@ namespace Mirage.Tests.Runtime
         {
             connection = Substitute.For<SocketLayer.IConnection>();
             player = new NetworkPlayer(connection);
-            player.Authentication = new Mirage.Authentication.PlayerAuthentication(null, null);
+            var newAuthh = new Mirage.Authentication.PlayerAuthentication(null, null);
+            player.SetAuthentication(newAuthh, true);
 
             // reader with some random data
             reader = new NetworkReader();
@@ -37,7 +38,7 @@ namespace Mirage.Tests.Runtime
             messageHandler.RegisterHandler<SceneReadyMessage>(_ => { invoked++; }, allowUnauthenticated: true);
 
             // clear authentication (setup adds it)
-            player.Authentication = null;
+            player.SetAuthentication(null, true);
 
             // then check message is still invoked
             var messageId = MessagePacker.GetId<SceneReadyMessage>();
@@ -65,8 +66,7 @@ namespace Mirage.Tests.Runtime
             messageHandler.RegisterHandler<SceneReadyMessage>(_ => { invoked++; }, allowUnauthenticated: false);
 
             // clear authentication (setup adds it)
-            player.Authentication = null;
-
+            player.SetAuthentication(null, true);
 
             ExpectLog(() =>
             {

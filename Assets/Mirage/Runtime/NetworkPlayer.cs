@@ -48,7 +48,20 @@ namespace Mirage
         /// <summary>
         /// Authentication information for this NetworkPlayer
         /// </summary>
-        public PlayerAuthentication Authentication { get; internal set; }
+        public PlayerAuthentication Authentication { get; private set; }
+
+        public void SetAuthentication(PlayerAuthentication authentication, bool allowReplace)
+        {
+            if (Authentication == null || allowReplace)
+            {
+                Authentication = authentication;
+            }
+            else
+            {
+                throw new InvalidOperationException("Can't set Authentication because it is already set");
+            }
+        }
+
         /// <summary>
         /// Helper methods to check if Authentication is set
         /// </summary>

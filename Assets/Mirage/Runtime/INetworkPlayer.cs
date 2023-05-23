@@ -105,6 +105,7 @@ namespace Mirage
         SocketLayer.IEndPoint Address { get; }
         SocketLayer.IConnection Connection { get; }
         PlayerAuthentication Authentication { get; }
+        void SetAuthentication(PlayerAuthentication authentication, bool allowReplace = false);
         bool IsAuthenticated { get; }
 
         void Disconnect();

@@ -158,10 +158,8 @@ namespace Mirage
             dataHandler.SetConnection(connection, Player);
 
             RegisterMessageHandlers();
-            if (Authenticator != null)
-                AuthenticateAsync().Forget();
-            else
-                AuthenticationSuccess(null);
+
+            Authenticate();
 
             // invoke started event after everything is set up, but before peer has connected
             if (ObjectManager != null)
@@ -244,9 +242,15 @@ namespace Mirage
 
             server.AddLocalConnection(this, serverConn);
             Peer_OnConnected(clientConn);
+            Authenticate();
+        }
 
-            if (logger.LogEnabled()) logger.Log($"Authentication Skipped because host player");
-            AuthenticationSuccess(null);
+        private void Authenticate()
+        {
+            if (Authenticator != null)
+                AuthenticateAsync().Forget();
+            else
+                AuthenticationSuccess(null);
         }
 
         private async UniTask AuthenticateAsync()
@@ -265,7 +269,7 @@ namespace Mirage
 
         private void AuthenticationSuccess(INetworkAuthenticator authenticator)
         {
-            ((NetworkPlayer)Player).Authentication = new PlayerAuthentication(authenticator, null);
+            Player.SetAuthentication(new PlayerAuthentication(authenticator, null));
             _authenticated.Invoke(Player);
         }
 

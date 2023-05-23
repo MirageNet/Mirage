@@ -59,6 +59,9 @@ namespace Mirage.Authentication
 
         public async UniTask<AuthenticationResult> ServerAuthenticate(INetworkPlayer player)
         {
+            if (SkipHost(player))
+                return AuthenticationResult.CreateSuccess("Host player");
+
             if (logger.LogEnabled()) logger.Log($"Server authentication started {player}");
 
             var result = await RunServerAuthenticate(player);
@@ -71,6 +74,17 @@ namespace Mirage.Authentication
             }
 
             return result;
+        }
+
+        private bool SkipHost(INetworkPlayer player)
+        {
+            var isHost = player == _server.LocalPlayer;
+
+            if (!isHost)
+                return false;
+
+            var skip = !RequireHostToAuthenticate;
+            return skip;
         }
 
         private async UniTask<AuthenticationResult> RunServerAuthenticate(INetworkPlayer player)

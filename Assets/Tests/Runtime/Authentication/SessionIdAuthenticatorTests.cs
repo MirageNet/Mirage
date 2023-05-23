@@ -102,7 +102,7 @@ namespace Mirage.Tests.Runtime.Authentication
             // set existing data
             var netPlayer = (NetworkPlayer)serverPlayer;
             var mockAuth = new PlayerAuthentication(_serverMockAuthenticator, new MockAuthenticator.MockData());
-            netPlayer.Authentication = mockAuth;
+            netPlayer.SetAuthentication(mockAuth, true);
 
             // request key for player
             // this should save auth data in session data
