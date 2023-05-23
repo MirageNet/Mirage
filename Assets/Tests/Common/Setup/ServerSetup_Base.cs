@@ -164,29 +164,29 @@ namespace Mirage.Tests.BaseSetups
             // wait for new connections
             await AsyncUtil.WaitUntilWithTimeout(() => server.Players.Count > serverStartCount);
 
-            if (spawnCharacter)
-            {
-                await SpawnCharacter(instance);
-                instance.SetupCharacter();
-            }
-            else
-            {
-                _serverInstance.AddNewPlayer();
-                instance.SetupNoCharacter();
-            }
+            await SetupPlayer(instance, spawnCharacter);
 
             _remoteClients.Add(instance);
             ExtraClientLateSetup(instance);
         }
 
         // used by host and client
-        protected async UniTask SpawnCharacter(IClientInstance instance)
+        protected async UniTask SetupPlayer(IClientInstance instance, bool spawnCharacter)
         {
-            instance.ClientObjectManager.RegisterPrefab(_characterPrefab);
+            if (spawnCharacter)
+            {
+                instance.ClientObjectManager.RegisterPrefab(_characterPrefab);
 
-            _serverInstance.SpawnCharacterForNew(_characterPrefab);
-            // wait for client to spawn it
-            await AsyncUtil.WaitUntilWithTimeout(() => instance.Client.Player.HasCharacter);
+                _serverInstance.SpawnCharacterForNew(_characterPrefab);
+                // wait for client to spawn it
+                await AsyncUtil.WaitUntilWithTimeout(() => instance.Client.Player.HasCharacter);
+            }
+            else
+            {
+                _serverInstance.AddNewPlayer();
+            }
+
+            instance.SetupPlayer(spawnCharacter);
         }
 
         public virtual void ExtraTearDown() { }

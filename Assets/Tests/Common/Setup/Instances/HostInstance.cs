@@ -8,6 +8,9 @@ namespace Mirage.Tests
         public NetworkClient Client { get; }
         public ClientObjectManager ClientObjectManager { get; }
 
+        /// <summary>
+        /// Player on server side, for host
+        /// </summary>
         public LocalPlayerObject HostPlayer { get; private set; }
 
         public HostInstance(Config serverConfig) : base(serverConfig)
@@ -35,6 +38,14 @@ namespace Mirage.Tests
             {
                 return base.GetOrAddLocalPlayer(player);
             }
+        }
+
+        void IClientInstance.SetupPlayer(bool withCharacter)
+        {
+            // host needs to do nothing with setup
+
+            // this is used to set the gameobject and Identity on client,
+            // but for host they are the same objects are server
         }
     }
 }
