@@ -35,7 +35,7 @@ When a prefab is saved its `PrefabHash` field will be automatically set. If you 
 int coinHash = "MyCoin".GetStableHashCode();
 
 // register handlers using hash
-ClientObjectManager.RegisterSpawnHandler(creatureHash, SpawnCoin, UnSpawnCoin);
+ClientObjectManager.RegisterSpawnHandler(coinHash, SpawnCoin, UnSpawnCoin);
 ```
 
 :::note
