@@ -49,6 +49,7 @@ namespace Mirage.Tests.Runtime.Authentication
             _serverCreateSession = serverGo.AddComponent<CreateSession>();
             _serverCreateSession.Authenticator = _serverAuthenticator;
 
+            _serverAuthCalls = new List<INetworkPlayer>();
             server.Authenticated.AddListener(p => _serverAuthCalls.Add(p));
         }
 
@@ -60,6 +61,7 @@ namespace Mirage.Tests.Runtime.Authentication
             Setup(instance.GameObject, ref _clientSettings, ref _clientAuthenticator, ref _clientMockAuthenticator);
 
             client.Authenticator = _clientSettings;
+            _clientAuthCalls = new List<INetworkPlayer>();
             client.Authenticated.AddListener(p => _clientAuthCalls.Add(p));
         }
 
@@ -80,7 +82,7 @@ namespace Mirage.Tests.Runtime.Authentication
             var key = _serverAuthenticator.CreateOrRefreshSession(serverPlayer);
 
             Assert.That(key.Count, Is.EqualTo(_serverAuthenticator.SessionIDLength));
-            Assert.That(key.Where(x => x != 0), Is.GreaterThan(1), "atleast 1 non-zero. Just to make sure it didn't return empty array");
+            Assert.That(key.Count(x => x != 0), Is.GreaterThan(1), "atleast 1 non-zero. Just to make sure it didn't return empty array");
         }
 
         [UnityTest]
@@ -131,11 +133,10 @@ namespace Mirage.Tests.Runtime.Authentication
         [UnityTest]
         public IEnumerator ReturnFailWhenKeyIsNull() => UniTask.ToCoroutine(async () =>
         {
-            var key = _serverAuthenticator.CreateOrRefreshSession(serverPlayer);
             var result = await _serverAuthenticator.AuthenticateAsync(new SessionKeyMessage { SessionKey = default });
 
-            Assert.That(key.Count, Is.EqualTo(_serverAuthenticator.SessionIDLength));
-            Assert.That(key.Where(x => x != 0), Is.GreaterThan(1), "atleast 1 non-zero. Just to make sure it didn't return empty array");
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Reason, Is.EqualTo("No key"));
         });
 
         [UnityTest]
@@ -144,9 +145,8 @@ namespace Mirage.Tests.Runtime.Authentication
             var key = new ArraySegment<byte>(new byte[_serverAuthenticator.SessionIDLength]);
             var result = await _serverAuthenticator.AuthenticateAsync(new SessionKeyMessage { SessionKey = key });
 
-
-            Assert.That(key.Count, Is.EqualTo(_serverAuthenticator.SessionIDLength));
-            Assert.That(key.Where(x => x != 0), Is.GreaterThan(1), "atleast 1 non-zero. Just to make sure it didn't return empty array");
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Reason, Is.EqualTo("No session ID found"));
         });
 
         [UnityTest]

@@ -42,23 +42,21 @@ namespace Mirage.Authenticators.SessionId
 
         protected override AuthenticationResult Authenticate(SessionKeyMessage message)
         {
+            if (message.SessionKey.Count == 0)
+                return AuthenticationResult.CreateFail("No key");
+
             var key = new SessionKey(message.SessionKey);
-            if (_sessions.TryGetValue(key, out var sessionData))
-            {
-                // check timeout
-                if (DateTime.Now > sessionData.Timeout)
-                {
-                    _sessions.Remove(key);
-                    return AuthenticationResult.CreateFail("Session has timed out");
-                }
-
-                return AuthenticationResult.CreateSuccess("Valid Session", this, sessionData);
-
-            }
-            else
-            {
+            if (!_sessions.TryGetValue(key, out var sessionData))
                 return AuthenticationResult.CreateFail("No session ID found");
+
+            // check timeout
+            if (DateTime.Now > sessionData.Timeout)
+            {
+                _sessions.Remove(key);
+                return AuthenticationResult.CreateFail("Session has timed out");
             }
+
+            return AuthenticationResult.CreateSuccess("Valid Session", this, sessionData);
         }
 
         public ArraySegment<byte> CreateOrRefreshSession(INetworkPlayer player)
