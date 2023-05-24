@@ -23,13 +23,18 @@ namespace Mirage
 
         public void RegisterHandler<T>(MessageDelegateWithPlayer<T> handler, bool allowUnauthenticated)
         {
-            var msgType = MessagePacker.GetId<T>();
+            var msgId = MessagePacker.GetId<T>();
 
-            if (logger.LogEnabled() && _messageHandlers.ContainsKey(msgType))
-                logger.Log($"RegisterHandler replacing {msgType}");
+            if (logger.LogEnabled())
+            {
+                if (_messageHandlers.ContainsKey(msgId))
+                    logger.Log($"Replacing handler for id:{msgId} type:{typeof(T)}");
+                else
+                    logger.Log($"New handler for id:{msgId} type:{typeof(T)}");
+            }
 
             var del = MessageWrapper(handler);
-            _messageHandlers[msgType] = new Handler(del, false);
+            _messageHandlers[msgId] = new Handler(del, allowUnauthenticated);
         }
 
         private static NetworkMessageDelegate MessageWrapper<T>(MessageDelegateWithPlayer<T> handler)
