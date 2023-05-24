@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 using Mirage.Tests;
 using NSubstitute;
 using NUnit.Framework;
@@ -61,7 +62,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void CloseShouldThrowIfNoActive()
         {
-            LogAssert.Expect(LogType.Warning, "Peer is not active");
+            LogAssert.Expect(LogType.Warning, new Regex("Peer is not active$"));
             peer.Close();
             LogAssert.NoUnexpectedReceived();
         }

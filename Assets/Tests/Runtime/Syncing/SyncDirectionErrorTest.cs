@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Text.RegularExpressions;
 using Mirage.Serialization;
 using NUnit.Framework;
 using UnityEngine;
@@ -27,7 +28,7 @@ namespace Mirage.Tests.Runtime.Syncing
 
             SendSyncVars(clientExtraIdentity);
 
-            LogAssert.Expect(LogType.Warning, $"UpdateVarsMessage for object without authority [netId={ServerExtraComponent.NetId}]");
+            LogAssert.Expect(LogType.Warning, new Regex(@$"UpdateVarsMessage for object without authority \[netId={ServerExtraComponent.NetId}\]"));
             // should not throw, but should give warning
             var msgType = MessagePacker.UnpackId(_reader);
             server.MessageHandler.InvokeHandler(ServerPlayer(0), msgType, _reader);
