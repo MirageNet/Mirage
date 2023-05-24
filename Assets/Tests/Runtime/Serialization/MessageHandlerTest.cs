@@ -20,6 +20,9 @@ namespace Mirage.Tests.Runtime
         {
             connection = Substitute.For<SocketLayer.IConnection>();
             player = new NetworkPlayer(connection);
+            var newAuthh = new Mirage.Authentication.PlayerAuthentication(null, null);
+            player.SetAuthentication(newAuthh, true);
+
             // reader with some random data
             reader = new NetworkReader();
             reader.Reset(new byte[] { 1, 2, 3, 4 });
@@ -29,16 +32,53 @@ namespace Mirage.Tests.Runtime
 
 
         [Test]
-        public void InvokesMessageHandler()
+        public void InvokesMessageHandler_allowUnauthenticated()
         {
             var invoked = 0;
-            messageHandler.RegisterHandler<SceneReadyMessage>(_ => { invoked++; });
+            messageHandler.RegisterHandler<SceneReadyMessage>(_ => { invoked++; }, allowUnauthenticated: true);
+
+            // clear authentication (setup adds it)
+            player.SetAuthentication(null, true);
+
+            // then check message is still invoked
+            var messageId = MessagePacker.GetId<SceneReadyMessage>();
+            messageHandler.InvokeHandler(player, messageId, reader);
+
+            Assert.That(invoked, Is.EqualTo(1), "Should have been invoked");
+        }
+
+        [Test]
+        public void InvokesMessageHandler_WhenAuthenticated()
+        {
+            var invoked = 0;
+            messageHandler.RegisterHandler<SceneReadyMessage>(_ => { invoked++; }, allowUnauthenticated: false);
 
             var messageId = MessagePacker.GetId<SceneReadyMessage>();
             messageHandler.InvokeHandler(player, messageId, reader);
 
             Assert.That(invoked, Is.EqualTo(1), "Should have been invoked");
         }
+
+        [Test]
+        public void DoesNotInvokesMessageHandler_WhenNotAuthenticated()
+        {
+            var invoked = 0;
+            messageHandler.RegisterHandler<SceneReadyMessage>(_ => { invoked++; }, allowUnauthenticated: false);
+
+            // clear authentication (setup adds it)
+            player.SetAuthentication(null, true);
+
+            ExpectLog(() =>
+            {
+                var messageId = MessagePacker.GetId<SceneReadyMessage>();
+                messageHandler.InvokeHandler(player, messageId, reader);
+            }
+            , LogType.Error, $"Disconnecting Unauthenticated player");
+
+            Assert.That(invoked, Is.EqualTo(0), "Should not have been invoked");
+            connection.Received(1).Disconnect();
+        }
+
 
         [Test]
         [TestCase(true)]

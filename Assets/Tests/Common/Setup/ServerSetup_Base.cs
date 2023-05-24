@@ -37,6 +37,7 @@ namespace Mirage.Tests.BaseSetups
 
         protected virtual bool HostMode => false;
         protected virtual bool StartServer => true;
+        protected virtual bool SpawnCharacterOnConnect => true;
         protected virtual Config ServerConfig => null;
         protected virtual Config ClientConfig => null;
 
@@ -143,7 +144,7 @@ namespace Mirage.Tests.BaseSetups
         public async UniTask<ClientInstance> AddClient()
         {
             var instance = CreateClientInstance();
-            await AddClient(instance);
+            await AddClient(instance, SpawnCharacterOnConnect);
             return instance;
         }
 
@@ -152,7 +153,7 @@ namespace Mirage.Tests.BaseSetups
         /// </summary>
         /// <param name="instance"></param>
         /// <returns></returns>
-        public async UniTask AddClient(ClientInstance instance)
+        public async UniTask AddClient(ClientInstance instance, bool spawnCharacter)
         {
             if (_remoteClients.Contains(instance))
                 throw new ArgumentException("instance already added");
@@ -163,23 +164,29 @@ namespace Mirage.Tests.BaseSetups
             // wait for new connections
             await AsyncUtil.WaitUntilWithTimeout(() => server.Players.Count > serverStartCount);
 
-            await SpawnCharacter(instance);
-            instance.SetupCharacter();
+            await SetupPlayer(instance, spawnCharacter);
 
             _remoteClients.Add(instance);
             ExtraClientLateSetup(instance);
         }
 
         // used by host and client
-        protected async UniTask SpawnCharacter(IClientInstance instance)
+        protected async UniTask SetupPlayer(IClientInstance instance, bool spawnCharacter)
         {
-            var serverPlayer = _serverInstance.GetNewPlayer();
+            if (spawnCharacter)
+            {
+                instance.ClientObjectManager.RegisterPrefab(_characterPrefab);
 
-            instance.ClientObjectManager.RegisterPrefab(_characterPrefab);
+                _serverInstance.SpawnCharacterForNew(_characterPrefab);
+                // wait for client to spawn it
+                await AsyncUtil.WaitUntilWithTimeout(() => instance.Client.Player.HasCharacter);
+            }
+            else
+            {
+                _serverInstance.AddNewPlayer();
+            }
 
-            _serverInstance.SpawnCharacter(serverPlayer, _characterPrefab);
-            // wait for client to spawn it
-            await AsyncUtil.WaitUntilWithTimeout(() => instance.Client.Player.HasCharacter);
+            instance.SetupPlayer(spawnCharacter);
         }
 
         public virtual void ExtraTearDown() { }

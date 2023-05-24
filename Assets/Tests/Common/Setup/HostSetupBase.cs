@@ -12,7 +12,7 @@ namespace Mirage.Tests.BaseSetups
         {
             // dont spawn character if server is no auto started
             if (StartServer)
-                await SpawnCharacter(_serverInstance);
+                await SetupPlayer(_serverInstance, SpawnCharacterOnConnect);
         }
 
         // host properties to make it easier to use in tests

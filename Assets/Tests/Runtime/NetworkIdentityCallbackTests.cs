@@ -36,7 +36,6 @@ namespace Mirage.Tests.Runtime
             player2 = Substitute.For<INetworkPlayer>();
         }
 
-
         [Test]
         public void AlwaysVisibleAddsAllReadyPlayers()
         {
@@ -49,7 +48,7 @@ namespace Mirage.Tests.Runtime
 
             // add a host connection
             server.AddLocalConnection(client, Substitute.For<SocketLayer.IConnection>());
-            server.InvokeLocalConnected();
+            server.Connected.Invoke(server.LocalPlayer);
             server.LocalPlayer.SceneIsReady = true;
 
             // call OnStartServer so that observers dict is created
