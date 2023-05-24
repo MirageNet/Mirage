@@ -149,7 +149,7 @@ namespace Mirage
             {
                 // we know msgType is found (because we have hanlder), so we dont need if check for tryGet
                 MessagePacker.MessageTypes.TryGetValue(msgType, out var type);
-                logger.Log($"Message {type} received from {player}, but player not Authenticated so handler will not be invoked");
+                logger.Log($"Unauthenticated Message {type} received from {player}, player is not Authenticated so handler will not be invoked");
             }
 
             logger.LogError("Disconnecting Unauthenticated player");
