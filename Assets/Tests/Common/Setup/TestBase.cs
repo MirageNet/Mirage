@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using Mirage.Logging;
+using NUnit.Framework;
 using UnityEngine;
 
 using Object = UnityEngine.Object;
@@ -7,6 +9,16 @@ namespace Mirage.Tests
 {
     public abstract class TestBase
     {
+        protected static readonly ILogger logger = LogFactory.GetLogger("Tests");
+
+        [OneTimeSetUp]
+        public void AddTestLogger()
+        {
+            ReplaceLogHandler(true, MirageLogHandler.TimePrefix.DateTimeMilliSeconds);
+            Console.WriteLine($"[[AddTestLogger]] {GetType().FullName}");
+        }
+
+
         protected List<Object> toDestroy = new List<Object>();
 
         /// <summary>
@@ -123,6 +135,23 @@ namespace Mirage.Tests
                 go.SetActive(false);
             toDestroy.Add(go);
             return go;
+        }
+
+        /// <summary>
+        /// Replaces the default log handler with one that prepends the frame count 
+        /// </summary>
+        public void ReplaceLogHandler(bool addLabel, MirageLogHandler.TimePrefix timePrefix)
+        {
+            var settings = new MirageLogHandler.Settings(timePrefix, coloredLabel: !Application.isBatchMode, addLabel);
+
+            if (addLabel)
+            {
+                LogFactory.ReplaceLogHandler((fullName) => new MirageLogHandler(settings, fullName));
+            }
+            else
+            {
+                LogFactory.ReplaceLogHandler(new MirageLogHandler(settings));
+            }
         }
     }
 }
