@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Mirage.Logging;
+using NUnit.Framework;
 using UnityEngine;
 
 using Object = UnityEngine.Object;
@@ -9,6 +10,16 @@ namespace Mirage.Tests
 {
     public abstract class TestBase
     {
+        protected static readonly ILogger logger = LogFactory.GetLogger("Tests");
+
+        [OneTimeSetUp]
+        public void AddTestLogger()
+        {
+            ReplaceLogHandler(true, MirageLogHandler.TimePrefix.DateTimeMilliSeconds);
+            Console.WriteLine($"[[AddTestLogger]] {GetType().FullName}");
+        }
+
+
         protected List<Object> toDestroy = new List<Object>();
 
         /// <summary>
@@ -130,30 +141,17 @@ namespace Mirage.Tests
         /// <summary>
         /// Replaces the default log handler with one that prepends the frame count 
         /// </summary>
-        public void ReplaceLogHandler()
+        public void ReplaceLogHandler(bool addLabel, MirageLogHandler.TimePrefix timePrefix)
         {
-            LogFactory.ReplaceLogHandler(new FrameNumberLogHandler());
-        }
+            var settings = new MirageLogHandler.Settings(timePrefix, coloredLabel: !Application.isBatchMode, addLabel);
 
-        private class FrameNumberLogHandler : ILogHandler
-        {
-            public void LogException(Exception exception, UnityEngine.Object context)
+            if (addLabel)
             {
-                Debug.unityLogger.LogException(exception, context);
+                LogFactory.ReplaceLogHandler((fullName) => new MirageLogHandler(settings, fullName));
             }
-
-            public void LogFormat(LogType logType, UnityEngine.Object context, string format, params object[] args)
+            else
             {
-                int frame;
-                try
-                {
-                    frame = Time.frameCount;
-                }
-                catch
-                {
-                    frame = 0;
-                }
-                Debug.unityLogger.LogFormat(logType, context, $"{frame}: {format}", args);
+                LogFactory.ReplaceLogHandler(new MirageLogHandler(settings));
             }
         }
     }
