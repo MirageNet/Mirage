@@ -4,10 +4,10 @@ These core components are included in Mirage:
 
 -   [Network Animator](/docs/components/network-animator)  
     The Network Animator component allows you to synchronize animation states for networked objects. It synchronizes state and parameters from an Animator Controller.
-    
--   [Network Authenticator](/docs/components/authenticators/)  
-    Network Authenticators facilitate the integration of user accounts and credentials into your application.
 
+-   [Network Authenticator](/docs/guides/authentication/)  
+    A list of built-in Authenticator can be found on the authentication page
+    
 -   [Network Discovery](/docs/components/network-discovery)  
     Network Discovery uses a UDP broadcast on the LAN enabling clients to find the running server and connect to it.
 
