@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Text.RegularExpressions;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine;
@@ -121,7 +122,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void UnSpawnShouldAssertIfCalledInHostMode()
         {
-            LogAssert.Expect(LogType.Assert, "UnSpawn should not be called in host mode");
+            LogAssert.Expect(LogType.Assert, new Regex("UnSpawn should not be called in host mode$"));
             clientObjectManager.OnObjectDestroy(new ObjectDestroyMessage
             {
                 NetId = hostIdentity.NetId
