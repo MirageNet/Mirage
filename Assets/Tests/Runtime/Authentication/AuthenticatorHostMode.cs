@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Mirage.Authentication;
 using Mirage.Tests.Runtime.Host;
 using NUnit.Framework;
@@ -47,6 +48,7 @@ namespace Mirage.Tests.Runtime.Authentication
             client.Authenticated.AddListener(p => _clientAuthCalls.Add(p));
         }
     }
+
     public class NoAuthenticatorHostMode : AuthenticatorHostModeBase
     {
         public NoAuthenticatorHostMode() : base(false, false)
@@ -70,6 +72,48 @@ namespace Mirage.Tests.Runtime.Authentication
             Assert.That(hostServerPlayer.Authentication.Authenticator, Is.Null);
             Assert.That(hostServerPlayer.Authentication.Data, Is.Null);
         }
+    }
+
+    public class AuthenticatorHost_NoAutoStart : AuthenticatorHostModeBase
+    {
+        // dont auto start, we need to add events first
+        protected override bool StartServer => false;
+
+        public AuthenticatorHost_NoAutoStart() : base(false, false)
+        {
+        }
+
+        [UnityTest]
+        public IEnumerator BothShouldBeAuthenticatedBeforeEventIsCalled() => UniTask.ToCoroutine(async () =>
+        {
+            var serverAuthCalled = 0;
+            var clientAuthCalled = 0;
+            // need both server and client players to be marked as authenticated before events are invoked
+            // this is because message are invoked instantly in host mode,
+            // because of this players need to be marked as authenticated to avoid "Disconnecting Unauthenticated player" error
+            server.Authenticated.AddListener((player) =>
+            {
+                logger.Log("Server Authenticated");
+                // check both server and client player are authed
+                Assert.That(client.Player.IsAuthenticated, Is.True);
+                Assert.That(server.LocalPlayer.IsAuthenticated, Is.True);
+                serverAuthCalled++;
+            });
+            client.Authenticated.AddListener((player) =>
+            {
+                logger.Log("Client Authenticated");
+                Assert.That(client.Player.IsAuthenticated, Is.True);
+                Assert.That(server.LocalPlayer.IsAuthenticated, Is.True);
+                clientAuthCalled++;
+            });
+
+            _serverInstance.StartServer();
+
+            await AsyncUtil.WaitUntilWithTimeout(() => serverAuthCalled > 0 && clientAuthCalled > 0);
+
+            Assert.That(serverAuthCalled, Is.EqualTo(1));
+            Assert.That(clientAuthCalled, Is.EqualTo(1));
+        });
     }
     public class AuthenticatorHost_NotRequired : AuthenticatorHostModeBase
     {
@@ -95,6 +139,7 @@ namespace Mirage.Tests.Runtime.Authentication
             Assert.That(hostServerPlayer.Authentication.Data, Is.Null);
         }
     }
+
     public class AuthenticatorHost_HostRequired : AuthenticatorHostModeBase
     {
         public AuthenticatorHost_HostRequired() : base(true, hostRequireAuth: true)

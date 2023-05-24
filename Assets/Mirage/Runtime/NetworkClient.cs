@@ -246,31 +246,35 @@ namespace Mirage
 
         private void Authenticate()
         {
-            if (Authenticator != null)
-            {
-                var waiter = new MessageWaiter<AuthSuccessMessage>(this, allowUnauthenticated: true);
-                // DONT use async here
-                // we need to invoke set data and invoke _authenticated right away
-                // this is because messages received after AuthSuccessMessage (from server) assume the client is now authenticated
-                // but if we use async, we wont set Authentication until next update, causing message to be received or dropped (or kicked from Unauthenticated)
-                waiter.Callback(AuthenticationSuccessCallback);
-            }
-            else
-            {
-                AuthenticationSuccess(null);
-            }
+            // client wants to wait for auth message even if there is no Authenticators
+            // this makes host setup easier,
+            // rather than doing checks and making sure functions are ivnoked in correct order
+            // we can just use the same logic as normal clients
+            // this will cause both server and client to call SetAuthentication first,
+            // and then invoke Authenticated after
+
+            var waiter = new MessageWaiter<AuthSuccessMessage>(this, allowUnauthenticated: true);
+            // DONT use async here
+            // we need to invoke set data and invoke _authenticated right away
+            // this is because messages received after AuthSuccessMessage (from server) assume the client is now authenticated
+            // but if we use async, we wont set Authentication until next update, causing message to be received or dropped (or kicked from Unauthenticated)
+            waiter.Callback(AuthenticationSuccessCallback);
         }
 
         private void AuthenticationSuccessCallback(INetworkPlayer _, AuthSuccessMessage message)
         {
             if (logger.LogEnabled()) logger.Log($"Authentication successful with {message.AuthenticatorName}");
 
-            var authenticator = Authenticator.Authenticators.FirstOrDefault(x => x.AuthenticatorName == message.AuthenticatorName);
-            AuthenticationSuccess(authenticator);
-        }
+            INetworkAuthenticator authenticator = null;
+            // only need to check if server sent its name
+            if (!string.IsNullOrEmpty(message.AuthenticatorName))
+            {
+                if (Authenticator == null)
+                    throw new InvalidOperationException("Authenticator set on server but not client");
 
-        private void AuthenticationSuccess(INetworkAuthenticator authenticator)
-        {
+                authenticator = Authenticator.Authenticators.FirstOrDefault(x => x.AuthenticatorName == message.AuthenticatorName);
+            }
+
             Player.SetAuthentication(new PlayerAuthentication(authenticator, null));
             _authenticated.Invoke(Player);
         }

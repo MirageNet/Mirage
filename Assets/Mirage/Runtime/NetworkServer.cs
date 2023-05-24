@@ -353,10 +353,6 @@ namespace Mirage
             // process results
             if (result.Success)
             {
-                // send message to let client know
-                // do this outside of AuthenticationSuccess because or host/no auth client already knows it is successful
-                player.Send(new AuthSuccessMessage { AuthenticatorName = result.Authenticator?.AuthenticatorName });
-
                 AuthenticationSuccess(player, result);
             }
             else
@@ -369,6 +365,12 @@ namespace Mirage
         private void AuthenticationSuccess(INetworkPlayer player, AuthenticationResult result)
         {
             player.SetAuthentication(new PlayerAuthentication(result.Authenticator, result.Data));
+
+            // send message to let client know
+            //     we want to send this even if host, or no Authenticators
+            //     this makes host logic a lot easier,
+            //     because we need to call SetAuthentication on both server/client before Authenticated
+            player.Send(new AuthSuccessMessage { AuthenticatorName = result.Authenticator?.AuthenticatorName });
 
             // add connection
             Authenticated?.Invoke(player);
