@@ -2,12 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using Mirage.Authentication;
+using Mirage.Logging;
 using UnityEngine;
 
 namespace Mirage.Authenticators.SessionId
 {
     public class SessionIdAuthenticator : NetworkAuthenticator<SessionKeyMessage>
     {
+        public const string NO_KEY_ERROR = "Empty key from client";
+        public const string NOT_FOUND_ERROR = "No session found";
+        private static readonly ILogger logger = LogFactory.GetLogger<SessionIdAuthenticator>();
+
         [Tooltip("how many bytes to use for session ID")]
         public int SessionIDLength = 32;
         [Tooltip("How long ID is valid for, in minutes. 1440 => 1 day")]
@@ -43,11 +48,11 @@ namespace Mirage.Authenticators.SessionId
         protected override AuthenticationResult Authenticate(SessionKeyMessage message)
         {
             if (message.SessionKey.Count == 0)
-                return AuthenticationResult.CreateFail("No key");
+                return AuthenticationResult.CreateFail(NO_KEY_ERROR);
 
             var key = new SessionKey(message.SessionKey);
             if (!_sessions.TryGetValue(key, out var sessionData))
-                return AuthenticationResult.CreateFail("No session ID found");
+                return AuthenticationResult.CreateFail(NOT_FOUND_ERROR);
 
             // check timeout
             if (DateTime.Now > sessionData.Timeout)
@@ -65,12 +70,14 @@ namespace Mirage.Authenticators.SessionId
             // get existing session
             if (_playerKeys.TryGetValue(player, out var oldKey))
             {
+                if (logger.LogEnabled()) logger.Log($"Refreshing session for {player}");
                 session = _sessions[oldKey];
                 _sessions.Remove(oldKey);
             }
             // or create new
             else
             {
+                if (logger.LogEnabled()) logger.Log($"Creating new session for {player}");
                 session = new SessionData();
                 session.PlayerAuthentication = player.Authentication;
             }
@@ -93,7 +100,7 @@ namespace Mirage.Authenticators.SessionId
             return new SessionKey(key);
         }
 
-        private struct SessionKey : IEquatable<SessionKey>
+        internal struct SessionKey : IEquatable<SessionKey>
         {
             public ArraySegment<byte> Buffer { get; }
             private readonly int _hash;
@@ -138,9 +145,9 @@ namespace Mirage.Authenticators.SessionId
                 unchecked
                 {
                     var hash = StringHash.EmptyString;
-                    for (var i = offset; i < count; i++)
+                    for (var i = 0; i < count; i++)
                     {
-                        hash = (hash * 31) + array[i];
+                        hash = (hash * 31) + array[i + offset];
                     }
                     return hash;
                 }

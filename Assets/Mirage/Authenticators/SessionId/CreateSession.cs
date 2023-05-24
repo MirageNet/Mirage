@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Mirage.Logging;
 using UnityEngine;
 
 namespace Mirage.Authenticators.SessionId
@@ -9,10 +10,13 @@ namespace Mirage.Authenticators.SessionId
     /// </summary>
     public class CreateSession : MonoBehaviour
     {
+        private static readonly ILogger logger = LogFactory.GetLogger<CreateSession>();
+
         public NetworkServer Server;
         public NetworkClient Client;
         public SessionIdAuthenticator Authenticator;
         public bool AutoRefreshSession = true;
+        private bool _sentRefresh = false;
 
         public void Start()
         {
@@ -39,7 +43,10 @@ namespace Mirage.Authenticators.SessionId
             {
                 // if before timeout, then use it to authenticate
                 if (DateTime.Now < session.Timeout)
+                {
+                    if (logger.LogEnabled()) logger.Log("Client connected, Sending Session Authentication automatically");
                     SendAuthentication(session);
+                }
             }
         }
 
@@ -56,6 +63,7 @@ namespace Mirage.Authenticators.SessionId
         {
             if (!Authenticator.ClientIdStore.TryGetSession(out _))
             {
+                if (logger.LogEnabled()) logger.Log("Client authenicated but didn't have session, Requesting Session now");
                 RequestSession();
             }
         }
@@ -66,6 +74,7 @@ namespace Mirage.Authenticators.SessionId
 
             Client.Send(new RequestSessionMessage { });
 
+            _sentRefresh = true;
             waiter.Callback((_, msg) =>
             {
                 // copy to new array, because ArraySegment will be reused aft
@@ -77,11 +86,13 @@ namespace Mirage.Authenticators.SessionId
                 };
 
                 Authenticator.ClientIdStore.StoreSession(session);
+                _sentRefresh = false;
             });
         }
 
-        public void HandleRequestSession(INetworkPlayer player, RequestSessionMessage message)
+        private void HandleRequestSession(INetworkPlayer player, RequestSessionMessage message)
         {
+            if (logger.LogEnabled()) logger.Log($"{player} requested new session token");
             var sessionKey = Authenticator.CreateOrRefreshSession(player);
             player.Send(new SessionKeyMessage { SessionKey = sessionKey });
         }
@@ -94,17 +105,30 @@ namespace Mirage.Authenticators.SessionId
 
         private void CheckRefresh()
         {
+            // sent message and waiting for reply from server
+            if (_sentRefresh)
+                return;
+
             if (Client == null || !Client.Active)
                 return;
 
             if (!Authenticator.ClientIdStore.TryGetSession(out var session))
                 return;
 
-            var tillRefresh = TimeSpan.FromMinutes(Authenticator.TimeoutMinutes / 2);
-            if (session.NeedsRefreshing(tillRefresh))
+            if (ShouldRefresh(Authenticator.TimeoutMinutes, session.Timeout))
             {
+                if (logger.LogEnabled()) logger.Log("Refreshing token before timeout, Requesting Session now");
+
                 RequestSession();
             }
+        }
+
+        private static bool ShouldRefresh(int timeoutMinutes, DateTime sessionTimeout)
+        {
+            var halfTotalTimeout = timeoutMinutes / 2.0;
+            var timeRemaining = sessionTimeout - DateTime.Now;
+
+            return timeRemaining.TotalMinutes <= halfTotalTimeout;
         }
     }
 }
