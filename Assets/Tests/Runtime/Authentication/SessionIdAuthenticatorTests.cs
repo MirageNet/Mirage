@@ -5,6 +5,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Mirage.Authentication;
 using Mirage.Authenticators.SessionId;
+using Mirage.Logging;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -47,6 +48,7 @@ namespace Mirage.Tests.Runtime.Authentication
 
             // we always want to add CreateSession to server to listen for messages
             _serverCreateSession = serverGo.AddComponent<CreateSession>();
+            _serverCreateSession.Server = server;
             _serverCreateSession.Authenticator = _serverAuthenticator;
 
             _serverAuthCalls = new List<INetworkPlayer>();
@@ -136,7 +138,7 @@ namespace Mirage.Tests.Runtime.Authentication
             var result = await _serverAuthenticator.AuthenticateAsync(new SessionKeyMessage { SessionKey = default });
 
             Assert.That(result.Success, Is.False);
-            Assert.That(result.Reason, Is.EqualTo("No key"));
+            Assert.That(result.Reason, Is.EqualTo(SessionIdAuthenticator.NO_KEY_ERROR));
         });
 
         [UnityTest]
@@ -146,7 +148,7 @@ namespace Mirage.Tests.Runtime.Authentication
             var result = await _serverAuthenticator.AuthenticateAsync(new SessionKeyMessage { SessionKey = key });
 
             Assert.That(result.Success, Is.False);
-            Assert.That(result.Reason, Is.EqualTo("No session ID found"));
+            Assert.That(result.Reason, Is.EqualTo(SessionIdAuthenticator.NOT_FOUND_ERROR));
         });
 
         [UnityTest]
@@ -154,7 +156,11 @@ namespace Mirage.Tests.Runtime.Authentication
         {
             // get key and store key
             var key = _serverAuthenticator.CreateOrRefreshSession(serverPlayer);
-            _clientAuthenticator.ClientIdStore.StoreSession(new ClientSession { Key = key.ToArray(), Timeout = DateTime.Now.AddMinutes(1000) });
+            _clientAuthenticator.ClientIdStore.StoreSession(new ClientSession
+            {
+                Key = key.ToArray(),
+                Timeout = DateTime.Now.AddMinutes(_serverAuthenticator.TimeoutMinutes)
+            });
 
             // add CreateSession
             var createSession = clientGo.AddComponent<CreateSession>();
@@ -169,6 +175,9 @@ namespace Mirage.Tests.Runtime.Authentication
             Assert.That(clientPlayer.IsAuthenticated, Is.False);
 
             // wait for start and messages
+            yield return null;
+            yield return null;
+            yield return null;
             yield return null;
             yield return null;
 
@@ -260,18 +269,27 @@ namespace Mirage.Tests.Runtime.Authentication
             // auth using mock
             _clientMockAuthenticator.SendAuthentication(client, new MockAuthenticator.MockMessage());
 
+            if (logger.LogEnabled()) logger.Log("Waiting 4...");
             yield return null;
             yield return null;
             // wait 2 more frames for CreateSession to request key
             yield return null;
             yield return null;
+            if (logger.LogEnabled()) logger.Log("done waiting");
+
+
             Assert.That(_clientAuthenticator.ClientIdStore.TryGetSession(out var session1), Is.True);
 
             // change timeout
             session1.Timeout = DateTime.Now;
 
+            if (logger.LogEnabled()) logger.Log("Waiting 4...");
             yield return null;
             yield return null;
+            // wait 2 more frames for CreateSession to request key
+            yield return null;
+            yield return null;
+            if (logger.LogEnabled()) logger.Log("done waiting");
 
             Assert.That(_clientAuthenticator.ClientIdStore.TryGetSession(out var session2), Is.True);
             Assert.That(session2, Is.Not.EqualTo(session1));
