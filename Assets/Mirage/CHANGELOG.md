@@ -1,3 +1,30 @@
+# [139.0.0](https://github.com/MirageNet/Mirage/compare/v138.0.0...v139.0.0) (2023-05-24)
+
+
+### Bug Fixes
+
+* avoiding disconnect being called twice ([ce36e58](https://github.com/MirageNet/Mirage/commit/ce36e5839779eaf140bb68ea27aaf5bbd0e0af05))
+
+
+* feat!: new authentication ([b9b490f](https://github.com/MirageNet/Mirage/commit/b9b490fe9eaba47376fed369c08610ed724f4f1b))
+
+
+### Features
+
+* adding flag to set if message is only allowed if authenticated ([d710f45](https://github.com/MirageNet/Mirage/commit/d710f455b134eee157d013cddc89a73d949ce24c))
+* adding log for receiving message ([e73c9d5](https://github.com/MirageNet/Mirage/commit/e73c9d5fe7779b0367274da98d264ceac3c6d39a))
+* adding log handler that adds label and color to messages ([bb26471](https://github.com/MirageNet/Mirage/commit/bb264718a97a50a68aa3aeda99612d2cb1de6238))
+* adding send log to network player ([af7104c](https://github.com/MirageNet/Mirage/commit/af7104c434e8153825d24562a5ffee86e99a45a1))
+* adding session authenticator ([ae1ef69](https://github.com/MirageNet/Mirage/commit/ae1ef69ec7ceba406df1ccaf9cb9989c58b58996))
+* improving log for RegisterHandler ([c6d4efd](https://github.com/MirageNet/Mirage/commit/c6d4efdf1a7b103e7b593971b74f6be8dd645b8b))
+* updating Authenticators ([b355604](https://github.com/MirageNet/Mirage/commit/b35560496a85974f3fd068d4c48b290082a4bc96))
+
+
+### BREAKING CHANGES
+
+* complete NetworkAuthenticator rework see docs for changes
+* by default message will disconnect player if unauthenticated. Use allowUnauthenticated flag to avoid this
+
 # [138.0.0](https://github.com/MirageNet/Mirage/compare/v137.0.3...v138.0.0) (2023-05-23)
 
 
