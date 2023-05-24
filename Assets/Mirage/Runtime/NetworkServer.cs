@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Cysharp.Threading.Tasks;
+using Mirage.Authentication;
 using Mirage.Events;
 using Mirage.Logging;
 using Mirage.Serialization;
@@ -56,7 +57,7 @@ namespace Mirage
         private Peer _peer;
 
         [Tooltip("Authentication component attached to this object")]
-        public NetworkAuthenticator authenticator;
+        public AuthenticatorSettings Authenticator;
 
         [Header("Events")]
         [SerializeField] private AddLateEvent _started = new AddLateEvent();
@@ -175,17 +176,6 @@ namespace Mirage
             LocalClient = null;
             LocalPlayer = null;
 
-            if (authenticator != null)
-            {
-                authenticator.OnServerAuthenticated -= OnAuthenticated;
-                Connected.RemoveListener(authenticator.ServerAuthenticate);
-            }
-            else
-            {
-                // if no authenticator, consider every connection as authenticated
-                Connected.RemoveListener(OnAuthenticated);
-            }
-
             _stopped?.Invoke();
             Active = false;
 
@@ -233,11 +223,10 @@ namespace Mirage
 
             LocalClient = localClient;
             MessageHandler = new MessageHandler(World, DisconnectOnException);
-            MessageHandler.RegisterHandler<NetworkPingMessage>(World.Time.OnServerPing);
+            MessageHandler.RegisterHandler<NetworkPingMessage>(World.Time.OnServerPing, allowUnauthenticated: true);
 
             // create after MessageHandler, SyncVarReceiver uses it 
             _syncVarReceiver = new SyncVarReceiver(this, World);
-
 
             var dataHandler = new DataHandler(MessageHandler, _connections);
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
@@ -281,7 +270,9 @@ namespace Mirage
                 if (logger.LogEnabled()) logger.Log("Server started, but not listening for connections: Attempts to connect to this instance will fail!");
             }
 
-            InitializeAuthEvents();
+            if (Authenticator != null)
+                Authenticator.Setup(this);
+
             Active = true;
             // make sure to call ServerObjectManager start before started event
             // this is too stop any race conditions where other scripts add their started event before SOM is setup
@@ -297,7 +288,9 @@ namespace Mirage
 
                 localClient.ConnectHost(this, dataHandler);
                 Connected?.Invoke(LocalPlayer);
+
                 if (logger.LogEnabled()) logger.Log("NetworkServer StartHost");
+                Authenticate(LocalPlayer);
             }
         }
 
@@ -312,22 +305,6 @@ namespace Mirage
                 SocketFactory = GetComponent<SocketFactory>();
             if (SocketFactory == null)
                 throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for {nameof(NetworkServer)}");
-        }
-
-        private void InitializeAuthEvents()
-        {
-            if (authenticator != null)
-            {
-                authenticator.OnServerAuthenticated += OnAuthenticated;
-                authenticator.ServerSetup(this);
-
-                Connected.AddListener(authenticator.ServerAuthenticate);
-            }
-            else
-            {
-                // if no authenticator, consider every connection as authenticated
-                Connected.AddListener(OnAuthenticated);
-            }
         }
 
         internal void Update()
@@ -349,14 +326,54 @@ namespace Mirage
         private void Peer_OnConnected(IConnection conn)
         {
             var player = new NetworkPlayer(conn);
-
-            if (logger.LogEnabled()) logger.Log($"Server accepted client: {player}");
+            if (logger.LogEnabled()) logger.Log($"Server new player {player}");
 
             // add connection
             _connections[player.Connection] = player;
 
             // let everyone know we just accepted a connection
             Connected?.Invoke(player);
+
+            Authenticate(player);
+        }
+
+        private void Authenticate(INetworkPlayer player)
+        {
+            // authenticate player
+            if (Authenticator != null)
+                AuthenticateAsync(player).Forget();
+            else
+                AuthenticationSuccess(player, AuthenticationResult.CreateSuccess("No Authenticators"));
+        }
+
+        private async UniTaskVoid AuthenticateAsync(INetworkPlayer player)
+        {
+            var result = await Authenticator.ServerAuthenticate(player);
+
+            // process results
+            if (result.Success)
+            {
+                AuthenticationSuccess(player, result);
+            }
+            else
+            {
+                // todo use reason
+                player.Disconnect();
+            }
+        }
+
+        private void AuthenticationSuccess(INetworkPlayer player, AuthenticationResult result)
+        {
+            player.SetAuthentication(new PlayerAuthentication(result.Authenticator, result.Data));
+
+            // send message to let client know
+            //     we want to send this even if host, or no Authenticators
+            //     this makes host logic a lot easier,
+            //     because we need to call SetAuthentication on both server/client before Authenticated
+            player.Send(new AuthSuccessMessage { AuthenticatorName = result.Authenticator?.AuthenticatorName });
+
+            // add connection
+            Authenticated?.Invoke(player);
         }
 
         private void Peer_OnDisconnected(IConnection conn, DisconnectReason reason)
@@ -542,13 +559,6 @@ namespace Mirage
 
             if (player == LocalPlayer)
                 LocalPlayer = null;
-        }
-
-        internal void OnAuthenticated(INetworkPlayer player)
-        {
-            if (logger.LogEnabled()) logger.Log("Server authenticate client:" + player);
-
-            Authenticated?.Invoke(player);
         }
 
         /// <summary>

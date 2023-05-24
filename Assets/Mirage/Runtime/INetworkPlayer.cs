@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Mirage.Authentication;
 using Mirage.SocketLayer;
 
 namespace Mirage
@@ -99,34 +100,16 @@ namespace Mirage
     /// An object owned by a player that can: send/receive messages, have network visibility, be an object owner, authenticated permissions, and load scenes.
     /// May be from the server to client or from client to server
     /// </summary>
-    public interface INetworkPlayer : IMessageSender, IVisibilityTracker, IObjectOwner, IAuthenticatedObject, ISceneLoader
+    public interface INetworkPlayer : IMessageSender, IVisibilityTracker, IObjectOwner, ISceneLoader
     {
         SocketLayer.IEndPoint Address { get; }
         SocketLayer.IConnection Connection { get; }
+        PlayerAuthentication Authentication { get; }
+        void SetAuthentication(PlayerAuthentication authentication, bool allowReplace = false);
+        bool IsAuthenticated { get; }
 
         void Disconnect();
         void MarkAsDisconnected();
-    }
-
-    public interface IAuthenticatedObject
-    {
-        /// <summary>
-        /// Marks if this player has been accepted by a <see cref="NetworkAuthenticator"/>
-        /// </summary>
-        bool IsAuthenticated { get; set; }
-
-        /// <summary>
-        /// General purpose object to hold authentication data, character selection, tokens, etc.
-        /// associated with the connection for reference after Authentication completes.
-        /// </summary>
-        object AuthenticationData { get; set; }
-    }
-    public static class AuthenticatedObjectExtensions
-    {
-        public static T GetAuthenticationData<T>(this IAuthenticatedObject player)
-        {
-            return (T)player.AuthenticationData;
-        }
     }
 
     public interface ISceneLoader
