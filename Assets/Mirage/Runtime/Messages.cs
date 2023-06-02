@@ -15,9 +15,6 @@ namespace Mirage
     public struct SceneNotReadyMessage { }
 
     [NetworkMessage]
-    public struct AddCharacterMessage { }
-
-    [NetworkMessage]
     public struct SceneMessage
     {
         public string MainActivateScene;

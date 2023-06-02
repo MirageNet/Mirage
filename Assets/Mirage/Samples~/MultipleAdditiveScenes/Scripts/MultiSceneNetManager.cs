@@ -46,7 +46,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
         {
             yield return new WaitForSeconds(.5f);
 
-            NetworkSceneManager.ServerLoadSceneAdditively(gameScene, Server.Players);
+            ((NetworkSceneManager)NetworkSceneManager).ServerLoadSceneAdditively(gameScene, Server.Players);
 
             var playerScore = player.Identity.GetComponent<PlayerScore>();
             playerScore.playerNumber = playerId;

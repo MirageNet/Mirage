@@ -33,8 +33,9 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator DontAutoSpawnTest() => UniTask.ToCoroutine(async () =>
         {
+            Assert.Fail();
             var invokeAddPlayerMessage = false;
-            ServerMessageHandler.RegisterHandler<AddCharacterMessage>(msg => invokeAddPlayerMessage = true);
+            //ServerMessageHandler.RegisterHandler<AddCharacterMessage>(msg => invokeAddPlayerMessage = true);
 
             sceneManager.ServerLoadSceneNormal(TestScenes.Path);
             // wait for messages to be processed
@@ -47,15 +48,16 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator ManualSpawnTest() => UniTask.ToCoroutine(async () =>
         {
-            var invokeAddPlayerMessage = false;
-            ServerMessageHandler.RegisterHandler<AddCharacterMessage>(msg => invokeAddPlayerMessage = true);
+            Assert.Fail();
+            //var invokeAddPlayerMessage = false;
+            //ServerMessageHandler.RegisterHandler<AddCharacterMessage>(msg => invokeAddPlayerMessage = true);
 
-            spawner.RequestServerSpawnPlayer();
+            //spawner.RequestServerSpawnPlayer();
 
             // wait for messages to be processed
             await UniTask.Yield();
 
-            Assert.That(invokeAddPlayerMessage, Is.True);
+            //Assert.That(invokeAddPlayerMessage, Is.True);
         });
     }
 }

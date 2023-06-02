@@ -125,9 +125,11 @@ namespace Mirage.Tests
         {
             spawner.ClientObjectManager = null;
 
+            Assert.Fail();
             Assert.Throws<InvalidOperationException>(() =>
             {
-                spawner.OnClientConnected(null);
+
+                //spawner.OnClientConnected(null);
             });
         }
     }

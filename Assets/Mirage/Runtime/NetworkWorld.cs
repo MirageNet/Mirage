@@ -107,7 +107,7 @@ namespace Mirage
             }
         }
 
-        internal void RemoveDestroyedObjects()
+        public void RemoveDestroyedObjects()
         {
             if (logger.LogEnabled()) logger.Log($"Removing destroyed objects");
             var removalCollection = new List<NetworkIdentity>(SpawnedIdentities);

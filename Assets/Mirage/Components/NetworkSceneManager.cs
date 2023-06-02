@@ -18,7 +18,7 @@ namespace Mirage
     /// </summary>
     [AddComponentMenu("Network/NetworkSceneManager")]
     [DisallowMultipleComponent]
-    public class NetworkSceneManager : MonoBehaviour
+    public class NetworkSceneManager : MonoBehaviour, INetworkSceneManager
     {
         #region Fields
 
@@ -610,7 +610,7 @@ namespace Mirage
 
             // clean up and invoke server functions before user events
             Server.World.RemoveDestroyedObjects();
-            ServerObjectManager.SpawnOrActivate();
+            ServerObjectManager.SpawnSceneObjects();
 
             OnServerFinishedSceneChange?.Invoke(scene, operation);
         }

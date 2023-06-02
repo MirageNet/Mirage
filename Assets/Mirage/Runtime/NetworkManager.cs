@@ -12,6 +12,32 @@ namespace Mirage
         Host = Server | Client
     }
 
+    public interface INetworkSceneManager
+    {
+
+    }
+
+#if UNITY_EDITOR
+    [UnityEditor.CustomPropertyDrawer(typeof(NetworkSceneManagerWrapper))]
+    public class NetworkSceneManagerWrapperDrawer : UnityEditor.PropertyDrawer
+    {
+        public override void OnGUI(Rect position, UnityEditor.SerializedProperty property, GUIContent label)
+        {
+            var inner = property.FindPropertyRelative(nameof(NetworkSceneManagerWrapper.UnityObject));
+            inner.objectReferenceValue = UnityEditor.EditorGUI.ObjectField(position, label, inner.objectReferenceValue, typeof(INetworkSceneManager), true);
+        }
+    }
+#endif
+
+
+    [System.Serializable]
+    public class NetworkSceneManagerWrapper
+    {
+        public UnityEngine.Object UnityObject;
+
+        public INetworkSceneManager Value => UnityObject as INetworkSceneManager;
+    }
+
     [AddComponentMenu("Network/NetworkManager")]
     [HelpURL("https://miragenet.github.io/Mirage/docs/guides/callbacks/network-manager")]
     [DisallowMultipleComponent]
@@ -19,10 +45,18 @@ namespace Mirage
     {
         public NetworkServer Server;
         public NetworkClient Client;
-        public NetworkSceneManager NetworkSceneManager;
         public ServerObjectManager ServerObjectManager;
         public ClientObjectManager ClientObjectManager;
+        [SerializeField] private NetworkSceneManagerWrapper _networkSceneManagerWrapper;
+        [SerializeField] private INetworkSceneManager NetworkSceneManagerField;
 
+        [SerializeReference] private INetworkSceneManager NetworkSceneManagerRef;
+
+        public INetworkSceneManager NetworkSceneManager
+        {
+            get => _networkSceneManagerWrapper.Value;
+            set => _networkSceneManagerWrapper.UnityObject = value as UnityEngine.Object;
+        }
         [Tooltip("Will setup reference automatically")]
         public bool ValidateReferences = true;
 
@@ -59,7 +93,6 @@ namespace Mirage
 
             FindIfNull(ref Server);
             FindIfNull(ref Client);
-            FindIfNull(ref NetworkSceneManager);
             FindIfNull(ref ServerObjectManager);
             FindIfNull(ref ClientObjectManager);
 
@@ -73,13 +106,13 @@ namespace Mirage
                 SetIfNull(ref Client.ObjectManager, ClientObjectManager);
             }
 
-            if (NetworkSceneManager != null)
-            {
-                SetIfNull(ref NetworkSceneManager.Server, Server);
-                SetIfNull(ref NetworkSceneManager.Client, Client);
-                SetIfNull(ref NetworkSceneManager.ServerObjectManager, ServerObjectManager);
-                SetIfNull(ref NetworkSceneManager.ClientObjectManager, ClientObjectManager);
-            }
+            //if (NetworkSceneManager != null)
+            //{
+            //    SetIfNull(ref NetworkSceneManager.Server, Server);
+            //    SetIfNull(ref NetworkSceneManager.Client, Client);
+            //    SetIfNull(ref NetworkSceneManager.ServerObjectManager, ServerObjectManager);
+            //    SetIfNull(ref NetworkSceneManager.ClientObjectManager, ClientObjectManager);
+            //}
         }
 
         private void FindIfNull<T>(ref T field) where T : class

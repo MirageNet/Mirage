@@ -49,7 +49,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
             Assert.Throws<FormatException>(() =>
             {
-                _ = MessagePacker.Unpack<AddCharacterMessage>(data, null);
+                _ = MessagePacker.Unpack<SpawnMessage>(data, null);
             });
         }
 

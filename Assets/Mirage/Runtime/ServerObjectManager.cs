@@ -55,7 +55,7 @@ namespace Mirage
             _server.MessageHandler.RegisterHandler<ServerRpcMessage>(OnServerRpcMessage);
             _server.MessageHandler.RegisterHandler<ServerRpcWithReplyMessage>(OnServerRpcWithReplyMessage);
 
-            SpawnOrActivate();
+            SpawnSceneObjects();
         }
 
         private void OnServerStopped()
@@ -76,39 +76,6 @@ namespace Mirage
             _server = null;
         }
 
-        internal void SpawnOrActivate()
-        {
-            if (!_server || !_server.Active)
-            {
-                logger.LogWarning("SpawnOrActivate called when server was not active");
-                return;
-            }
-
-            SpawnSceneObjects();
-
-            // host mode?
-            if (_server.LocalClientActive)
-            {
-                StartHostClientObjects();
-            }
-        }
-
-        /// <summary>
-        /// Loops spawned collection for NetworkIdentities that are not IsClient and calls StartClient().
-        /// </summary>
-        // todo can this function be removed? do we only need to run it when host connects?
-        private void StartHostClientObjects()
-        {
-            foreach (var identity in _server.World.SpawnedIdentities)
-            {
-                if (!identity.IsClient)
-                {
-                    if (logger.LogEnabled()) logger.Log("ActivateHostScene " + identity.NetId + " " + identity);
-
-                    identity.StartClient();
-                }
-            }
-        }
 
         /// <summary>
         /// This replaces the player object for a connection with a different player object. The old player object is not destroyed.

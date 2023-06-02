@@ -92,11 +92,6 @@ namespace Mirage.Tests.Runtime.Serialization
             TestSerializeDeserialize(new SceneReadyMessage());
         }
 
-        [Test]
-        public void AddPlayerMessageTest()
-        {
-            TestSerializeDeserialize(new AddCharacterMessage());
-        }
 
         [Test]
         public void RpcMessageTest()
