@@ -135,6 +135,7 @@ namespace Mirage
         public bool Active { get; private set; }
 
         public NetworkWorld World { get; private set; }
+        // todo move syncVarsender, it doesn't need to be a public fields on network server any more
         public SyncVarSender SyncVarSender { get; private set; }
 
         private SyncVarReceiver _syncVarReceiver;
