@@ -32,7 +32,7 @@ namespace Mirage.Tests.Runtime
 
             server = serverGO.GetComponent<NetworkServer>();
             serverObjectManager = serverGO.GetComponent<ServerObjectManager>();
-             server.ObjectManager = serverObjectManager;
+            server.ObjectManager = serverObjectManager;
 
             character1 = new GameObject("TestCharacter1", typeof(NetworkIdentity), typeof(NetworkMatchChecker));
             character2 = new GameObject("TestCharacter2", typeof(NetworkIdentity), typeof(NetworkMatchChecker));
@@ -70,7 +70,7 @@ namespace Mirage.Tests.Runtime
             {
                 Identity = character.GetComponent<NetworkIdentity>()
             };
-            player.Identity.Owner = player;
+            player.Identity.SetOwner(player);
             player.SceneIsReady = true;
             return player;
         }

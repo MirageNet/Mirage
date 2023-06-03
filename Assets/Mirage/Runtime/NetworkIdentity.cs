@@ -221,32 +221,33 @@ namespace Mirage
         /// The INetworkPlayer associated with this <see cref="NetworkIdentity">NetworkIdentity</see>. This property is only valid on server
         /// <para>Use it to return details such as the connection&apos;s identity, IP address and ready status.</para>
         /// </summary>
-        public INetworkPlayer Owner
+        public INetworkPlayer Owner => _owner;
+
+        internal void SetOwner(INetworkPlayer player)
         {
-            get => _owner;
+            // do nothing if value is the same
+            if (_owner == player)
+                return;
 
-            internal set
+            // if owner is already set, then we can only set it to null
+            if (_owner != null && player != null)
+                throw new InvalidOperationException($"Object '{this}' (NetID {NetId}) already has an owner. Please call RemoveClientAuthority() first.");
+
+            if (_owner != null)
             {
-                // do nothing if value is the same
-                if (_owner == value)
-                    return;
-
-                if (_owner != null)
-                {
-                    // invoke OnAuthority for remove owner and then again if there is new owner
-                    // world can be null if owner is set before object is spawned
-                    World?.InvokeOnAuthorityChanged(this, false, _owner);
-                    _owner.RemoveOwnedObject(this);
-                }
-
-                _owner = value;
-                _owner?.AddOwnedObject(this);
-                _onOwnerChanged.Invoke(_owner);
-
-                // only invoke again if new owner is not null
-                if (_owner != null)
-                    World?.InvokeOnAuthorityChanged(this, true, _owner);
+                // invoke OnAuthority for remove owner and then again if there is new owner
+                // world can be null if owner is set before object is spawned
+                World?.InvokeOnAuthorityChanged(this, false, _owner);
+                _owner.RemoveOwnedObject(this);
             }
+
+            _owner = player;
+            _owner?.AddOwnedObject(this);
+            _onOwnerChanged.Invoke(_owner);
+
+            // only invoke again if new owner is not null
+            if (_owner != null)
+                World?.InvokeOnAuthorityChanged(this, true, _owner);
         }
 
         /// <summary>
@@ -464,22 +465,6 @@ namespace Mirage
         /// </summary>
         /// <remarks>Can be used as hook to save player information</remarks>
         public IAddLateEvent OnStopServer => _onStopServer;
-
-        /// <summary>
-        /// used when adding players
-        /// </summary>
-        /// <param name="player"></param>
-        internal void SetClientOwner(INetworkPlayer player)
-        {
-            // do nothing if it already has an owner
-            if (Owner != null && player != Owner)
-            {
-                throw new InvalidOperationException($"Object '{this}' (NetID {NetId}) already has an owner. Please call RemoveClientAuthority() first.");
-            }
-
-            // otherwise set the owner connection
-            Owner = player;
-        }
 
         /// <summary>
         /// this is used when a connection is destroyed, since the "observers" property is read-only
@@ -1047,7 +1032,7 @@ namespace Mirage
                 throw new InvalidOperationException($"Cannot assign a new owner to '{gameObject}' as it already has an owner. Please call RemoveClientAuthority() first.");
             }
 
-            SetClientOwner(player);
+            SetOwner(player);
 
             // The client will match to the existing object
             // update all variables and assign authority
@@ -1078,7 +1063,7 @@ namespace Mirage
             {
                 var previousOwner = Owner;
 
-                Owner = null;
+                SetOwner(null);
 
                 // we DONT need to resynchronize the entire object
                 // so only send a message telling client that it no longer has authority
@@ -1105,7 +1090,7 @@ namespace Mirage
             Client = null;
             ServerObjectManager = null;
             ClientObjectManager = null;
-            Owner = null;
+            _owner = null;
             _networkBehavioursCache = null;
 
             ClearObservers();

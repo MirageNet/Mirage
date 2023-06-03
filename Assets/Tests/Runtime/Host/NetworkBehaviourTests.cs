@@ -1,7 +1,6 @@
 using Mirage.Collections;
+using NSubstitute;
 using NUnit.Framework;
-
-using static Mirage.Tests.LocalConnections;
 
 namespace Mirage.Tests.Runtime.Host
 {
@@ -131,8 +130,12 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void HasIdentitysOwner()
         {
-            (_, hostIdentity.Owner) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
-            Assert.That(hostComponent.Owner, Is.EqualTo(hostIdentity.Owner));
+            var player = Substitute.For<INetworkPlayer>();
+            // need to clear old player first
+            hostIdentity.SetOwner(null);
+            hostIdentity.SetOwner(player);
+            Assert.That(hostIdentity.Owner, Is.EqualTo(player));
+            Assert.That(hostComponent.Owner, Is.EqualTo(player));
         }
 
         [Test]

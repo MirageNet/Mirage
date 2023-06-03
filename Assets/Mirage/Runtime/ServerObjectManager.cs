@@ -152,7 +152,7 @@ namespace Mirage
             player.Identity = identity;
 
             // Set the connection on the NetworkIdentity on the server, NetworkIdentity.SetLocalPlayer is not called on the server (it is on clients)
-            identity.SetClientOwner(player);
+            identity.SetOwner(player);
 
             // special case,  we are in host mode,  set hasAuthority to true so that all overrides see it
             if (_server.LocalPlayer != null && player == _server.LocalPlayer)
@@ -214,7 +214,7 @@ namespace Mirage
             identity.SetServerValues(_server, this);
 
             // Set the connection on the NetworkIdentity on the server, NetworkIdentity.SetLocalPlayer is not called on the server (it is on clients)
-            identity.SetClientOwner(player);
+            identity.SetOwner(player);
 
             // special case, we are in host mode, set hasAuthority to true so that all overrides see it
             if (_server.LocalPlayer != null && player == _server.LocalPlayer)
@@ -285,7 +285,7 @@ namespace Mirage
             if (!keepAuthority)
             {
                 logger.Assert(identity.Owner == player, "Owner should be player that is being removed");
-                identity.Owner = null;
+                identity.SetOwner(null);
             }
 
             player.Send(new RemoveCharacterMessage { KeepAuthority = keepAuthority });
@@ -394,7 +394,7 @@ namespace Mirage
             // check first before setting owner
             ThrowIfPrefab(identity);
 
-            identity.Owner = owner;
+            identity.SetOwner(owner);
             Spawn(identity);
         }
 

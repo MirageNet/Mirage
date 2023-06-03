@@ -73,7 +73,7 @@ namespace Mirage.Tests.Runtime
             // add own player connection
             (var serverPlayer, var _) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
             serverPlayer.SceneIsReady = true;
-            identity.Owner = serverPlayer;
+            identity.SetOwner(serverPlayer);
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();

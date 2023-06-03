@@ -8,7 +8,6 @@ using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Events;
-using static Mirage.Tests.LocalConnections;
 
 namespace Mirage.Tests.NetworkIdentityCallbacks
 {
@@ -199,28 +198,26 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
         [Test]
         public void SetClientOwner()
         {
-            // SetClientOwner
-            (_, var original) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
-            identity.SetClientOwner(original);
-            Assert.That(identity.Owner, Is.EqualTo(original));
+            var player = Substitute.For<INetworkPlayer>();
+            identity.SetOwner(player);
+            Assert.That(identity.Owner, Is.EqualTo(player));
         }
 
         [Test]
         public void SetOverrideClientOwner()
         {
-            // SetClientOwner
-            (_, var original) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
-            identity.SetClientOwner(original);
+            var player1 = Substitute.For<INetworkPlayer>();
+            identity.SetOwner(player1);
 
             // setting it when it's already set shouldn't overwrite the original
-            (_, var overwrite) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
+            var player2 = Substitute.For<INetworkPlayer>();
             // will log a warning
             Assert.Throws<InvalidOperationException>(() =>
             {
-                identity.SetClientOwner(overwrite);
+                identity.SetOwner(player2);
             });
 
-            Assert.That(identity.Owner, Is.EqualTo(original));
+            Assert.That(identity.Owner, Is.EqualTo(player1));
         }
 
         [Test]
@@ -598,7 +595,7 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
         {
             // creates .observers and generates a netId
             identity.StartServer();
-            identity.Owner = player1;
+            identity.SetOwner(player1);
             identity.observers.Add(player1);
 
             // mark for reset and reset
@@ -650,11 +647,11 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
             gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
 
             // add own player connection that isn't ready
-            (_, var connection) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
+            var player = Substitute.For<INetworkPlayer>();
             // set not ready (ready is default true now)
-            connection.SceneIsReady = false;
+            player.SceneIsReady = false;
 
-            identity.Owner = connection;
+            identity.SetOwner(player);
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
