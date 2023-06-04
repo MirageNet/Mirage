@@ -1,3 +1,15 @@
+# [140.0.0](https://github.com/MirageNet/Mirage/compare/v139.0.0...v140.0.0) (2023-06-04)
+
+
+### Features
+
+* updating syncLists to use new SyncDirection ([f6f78a8](https://github.com/MirageNet/Mirage/commit/f6f78a8e642d72df17de5a85b204dbbc45b9ffe2))
+
+
+### BREAKING CHANGES
+
+* SyncObjects now need to implement SetShouldSyncFrom
+
 # [139.0.0](https://github.com/MirageNet/Mirage/compare/v138.0.0...v139.0.0) (2023-05-24)
 
 
