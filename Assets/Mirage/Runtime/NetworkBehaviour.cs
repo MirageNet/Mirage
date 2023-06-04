@@ -251,7 +251,25 @@ namespace Mirage
             if (SyncSettings.ShouldSyncFrom(Identity))
             {
                 _anySyncObjectDirty = true;
-                Server.SyncVarSender.AddDirtyObject(Identity);
+                Identity.SyncVarSender.AddDirtyObject(Identity);
+            }
+        }
+
+        /// <summary>
+        /// Call this after updating SyncSettings to update all SyncObjects
+        /// <para>
+        /// This only needs to be called manually if updating syncSettings at runtime.
+        /// Mirage will automatically call this after serializing or deserializing with initialState
+        /// </para>
+        /// </summary>
+        public void UpdateSyncObjectShouldSync()
+        {
+            var shouldSync = SyncSettings.ShouldSyncFrom(Identity);
+
+            if (logger.LogEnabled()) logger.Log($"Settings SyncObject sync on to {shouldSync} for {this}");
+            for (var i = 0; i < syncObjects.Count; i++)
+            {
+                syncObjects[i].SetShouldSyncFrom(shouldSync);
             }
         }
 
@@ -428,7 +446,10 @@ namespace Mirage
 
             if (initialState)
             {
-                return SerializeObjectsAll(writer);
+                var written = SerializeObjectsAll(writer);
+                // after initial we need to set up objects for syncDirection
+                UpdateSyncObjectShouldSync();
+                return written;
             }
             else
             {
@@ -474,6 +495,7 @@ namespace Mirage
             if (initialState)
             {
                 DeSerializeObjectsAll(reader);
+                UpdateSyncObjectShouldSync();
             }
             else
             {

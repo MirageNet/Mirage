@@ -243,6 +243,11 @@ namespace Mirage
 
             _owner = player;
             _owner?.AddOwnedObject(this);
+
+            // if authority changes, we need to check if we are still allowed to sync to/from this instance
+            foreach (var comp in NetworkBehaviours)
+                comp.UpdateSyncObjectShouldSync();
+                
             _onOwnerChanged.Invoke(_owner);
 
             // only invoke again if new owner is not null
@@ -557,6 +562,10 @@ namespace Mirage
 
         internal void NotifyAuthority()
         {
+            // if authority changes, we need to check if we are still allowed to sync to/from this instance
+            foreach (var comp in NetworkBehaviours)
+                comp.UpdateSyncObjectShouldSync();
+
             if (!_hadAuthority && HasAuthority)
                 CallStartAuthority();
             if (_hadAuthority && !HasAuthority)

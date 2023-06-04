@@ -213,15 +213,27 @@ namespace Mirage.Tests.Runtime
         }
 
         [Test]
-        public void ReadOnlyTest()
+        [TestCase(true)]
+        [TestCase(false)]
+        public void ReadOnlyTest(bool shouldSync)
         {
-            Assert.That(serverSyncStack.IsReadOnly, Is.False);
-            Assert.That(clientSyncStack.IsReadOnly, Is.True);
+            var asObject = (ISyncObject)serverSyncStack;
+            asObject.SetShouldSyncFrom(shouldSync);
+            Assert.That(serverSyncStack.IsReadOnly, Is.EqualTo(!shouldSync));
+
+            serverSyncStack.Reset();
+            Assert.That(serverSyncStack.IsReadOnly, Is.EqualTo(false));
         }
+
         [Test]
         public void WritingToReadOnlyThrows()
         {
-            Assert.Throws<InvalidOperationException>(() => { clientSyncStack.Push("fail"); });
+            var asObject = (ISyncObject)serverSyncStack;
+            asObject.SetShouldSyncFrom(false);
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                serverSyncStack.Push("fail");
+            });
         }
 
         [Test]

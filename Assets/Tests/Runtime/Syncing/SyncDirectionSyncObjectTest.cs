@@ -98,7 +98,6 @@ namespace Mirage.Tests.Runtime.Syncing
     }
 
 
-    [Ignore("needs extra changes, not supported yet")]
     public class SyncDirectionObjectFromOwner : SyncDirectionTestBase<MockPlayerWithList>
     {
         private const int listValue = 5;
@@ -151,7 +150,6 @@ namespace Mirage.Tests.Runtime.Syncing
         }
     }
 
-    [Ignore("needs extra changes, not supported yet")]
     public class SyncDirectionObjectFromServerAndOwner : SyncDirectionTestBase<MockPlayerWithList>
     {
         private const int listValue1 = 5;
@@ -247,12 +245,11 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(OwnerComponent.guild.name, Is.EqualTo(guild2.name));
             Assert.That(OwnerComponent.target, Is.Null);
             Assert.That(OwnerComponent.MySyncList.Count, Is.EqualTo(1));
-            Assert.That(OwnerComponent.MySyncList[0], Is.EqualTo(listValue1));
+            Assert.That(OwnerComponent.MySyncList[0], Is.EqualTo(listValue2));
 
             Assert.That(ServerComponent.guild.name, Is.EqualTo(guild2.name));
             // target should not be changed
             Assert.That(ServerComponent.target, Is.EqualTo(ServerExtraIdentity));
-            Assert.That(ServerComponent.MySyncList.Count, Is.EqualTo(1));
             Assert.That(ServerComponent.MySyncList.Count, Is.EqualTo(2));
             Assert.That(ServerComponent.MySyncList[0], Is.EqualTo(listValue1));
             Assert.That(ServerComponent.MySyncList[1], Is.EqualTo(listValue2));
@@ -267,7 +264,6 @@ namespace Mirage.Tests.Runtime.Syncing
         [UnityTest]
         public IEnumerator ToServerOwnerAndObservers()
         {
-            Assert.Fail();
             SetDirection(SyncFrom.Server | SyncFrom.Owner, SyncTo.Server | SyncTo.Owner | SyncTo.ObserversOnly);
 
             ServerComponent.guild = guild;
@@ -295,7 +291,8 @@ namespace Mirage.Tests.Runtime.Syncing
 
             OwnerComponent.guild = guild2;
             OwnerComponent.target = null;
-            OwnerComponent.MySyncList.Clear();
+            OwnerComponent.MySyncList.Add(listValue2);
+
 
             // wait for sync
             yield return null;
@@ -356,8 +353,10 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(OwnerComponent.guild.name, Is.EqualTo(guild.name));
             Assert.That(OwnerComponent.target.NetId, Is.EqualTo(ServerExtraIdentity.NetId));
             Assert.That(OwnerComponent.MySyncList.Count, Is.EqualTo(2));
-            Assert.That(OwnerComponent.MySyncList[0], Is.EqualTo(listValue1));
-            Assert.That(OwnerComponent.MySyncList[1], Is.EqualTo(listValue2));
+            // owner added 2 first, then received 1 from server
+            // this could lead to desync, but that is a risk of using by sync directions 
+            Assert.That(OwnerComponent.MySyncList[0], Is.EqualTo(listValue2));
+            Assert.That(OwnerComponent.MySyncList[1], Is.EqualTo(listValue1));
 
             Assert.That(ServerComponent.guild.name, Is.EqualTo(guild.name));
             Assert.That(ServerComponent.target, Is.EqualTo(ServerExtraIdentity));
@@ -383,8 +382,10 @@ namespace Mirage.Tests.Runtime.Syncing
             yield return null;
 
             Assert.That(OwnerComponent.MySyncList.Count, Is.EqualTo(2));
-            Assert.That(OwnerComponent.MySyncList[0], Is.EqualTo(listValue1));
-            Assert.That(OwnerComponent.MySyncList[1], Is.EqualTo(listValue2));
+            // owner added 2 first, then received 1 from server
+            // this could lead to desync, but that is a risk of using by sync directions
+            Assert.That(OwnerComponent.MySyncList[0], Is.EqualTo(listValue2));
+            Assert.That(OwnerComponent.MySyncList[1], Is.EqualTo(listValue1));
 
             Assert.That(ServerComponent.MySyncList.Count, Is.EqualTo(2));
             Assert.That(ServerComponent.MySyncList[0], Is.EqualTo(listValue1));

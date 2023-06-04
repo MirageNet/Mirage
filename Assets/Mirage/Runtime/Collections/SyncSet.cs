@@ -11,6 +11,7 @@ namespace Mirage.Collections
 
         public int Count => objects.Count;
         public bool IsReadOnly { get; private set; }
+        void ISyncObject.SetShouldSyncFrom(bool shouldSync) => IsReadOnly = !shouldSync;
 
         internal int ChangeCount => _changes.Count;
 
@@ -142,9 +143,6 @@ namespace Mirage.Collections
 
         public void OnDeserializeAll(NetworkReader reader)
         {
-            // This list can now only be modified by synchronization
-            IsReadOnly = true;
-
             // if init,  write the full list content
             var count = (int)reader.ReadPackedUInt32();
 
@@ -168,8 +166,6 @@ namespace Mirage.Collections
 
         public void OnDeserializeDelta(NetworkReader reader)
         {
-            // This list can now only be modified by synchronization
-            IsReadOnly = true;
             var raiseOnChange = false;
 
             var changesCount = (int)reader.ReadPackedUInt32();

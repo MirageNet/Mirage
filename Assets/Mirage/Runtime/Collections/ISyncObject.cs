@@ -21,6 +21,8 @@ namespace Mirage.Collections
         /// </summary>
         bool IsDirty { get; }
 
+        void SetShouldSyncFrom(bool shouldSync);
+
         /// <summary>
         /// Discard all the queued changes
         /// <para>Consider the object fully synchronized with clients</para>
