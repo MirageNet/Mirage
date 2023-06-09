@@ -1,3 +1,10 @@
+# [140.1.0](https://github.com/MirageNet/Mirage/compare/v140.0.0...v140.1.0) (2023-06-09)
+
+
+### Features
+
+* adding syncvar hook with 0 args ([d17576a](https://github.com/MirageNet/Mirage/commit/d17576a6e6168fd2fcfcc7e8963231d11124b879))
+
 # [140.0.0](https://github.com/MirageNet/Mirage/compare/v139.0.0...v140.0.0) (2023-06-04)
 
 
