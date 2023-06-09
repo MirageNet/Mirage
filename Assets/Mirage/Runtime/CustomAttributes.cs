@@ -39,6 +39,11 @@ namespace Mirage
         Automatic = 0,
 
         /// <summary>
+        /// Hook with signature <c>void hookName()</c>
+        /// </summary>
+        MethodWith0Arg,
+
+        /// <summary>
         /// Hook with signature <c>void hookName(T newValue)</c>
         /// </summary>
         MethodWith1Arg,
@@ -47,6 +52,11 @@ namespace Mirage
         /// Hook with signature <c>void hookName(T oldValue, T newValue)</c>
         /// </summary>
         MethodWith2Arg,
+
+        /// <summary>
+        /// Hook with signature <c>event Action hookName;</c>
+        /// </summary>
+        EventWith0Arg,
 
         /// <summary>
         /// Hook with signature <c>event Action{T} hookName;</c>

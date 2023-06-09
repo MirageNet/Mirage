@@ -8,17 +8,18 @@ namespace Mirage.Weaver.SyncVars
     {
         public readonly MethodDefinition Method;
         public readonly EventDefinition Event;
-        public readonly SyncHookType hookType;
+        public readonly int ArgCount;
 
-        public SyncVarHook(MethodDefinition method, SyncHookType hookType)
+
+        public SyncVarHook(MethodDefinition method, int argCount)
         {
             Method = method;
-            this.hookType = hookType;
+            ArgCount = argCount;
         }
-        public SyncVarHook(EventDefinition @event, SyncHookType hookType)
+        public SyncVarHook(EventDefinition @event, int argCount)
         {
             Event = @event;
-            this.hookType = hookType;
+            ArgCount = argCount;
         }
 
     }
@@ -54,14 +55,14 @@ namespace Mirage.Weaver.SyncVars
                 default:
                 case SyncHookType.Automatic:
                     return FindAutomatic(syncVar, hookFunctionName, originalType);
+                case SyncHookType.MethodWith0Arg:
                 case SyncHookType.MethodWith1Arg:
-                    return FindMethod1Arg(syncVar, hookFunctionName, originalType);
                 case SyncHookType.MethodWith2Arg:
-                    return FindMethod2Arg(syncVar, hookFunctionName, originalType);
+                    return FindMethod(syncVar, originalType, hookFunctionName, ArgCountFromType(hookType));
+                case SyncHookType.EventWith0Arg:
                 case SyncHookType.EventWith1Arg:
-                    return FindEvent1Arg(syncVar, hookFunctionName, originalType);
                 case SyncHookType.EventWith2Arg:
-                    return FindEvent2Arg(syncVar, hookFunctionName, originalType);
+                    return FindEvent(syncVar, originalType, hookFunctionName, ArgCountFromType(hookType));
             }
         }
 
@@ -69,10 +70,12 @@ namespace Mirage.Weaver.SyncVars
         {
             SyncVarHook foundHook = null;
 
-            CheckHook(syncVar, hookFunctionName, ref foundHook, FindMethod1Arg(syncVar, hookFunctionName, originalType));
-            CheckHook(syncVar, hookFunctionName, ref foundHook, FindMethod2Arg(syncVar, hookFunctionName, originalType));
-            CheckHook(syncVar, hookFunctionName, ref foundHook, FindEvent1Arg(syncVar, hookFunctionName, originalType));
-            CheckHook(syncVar, hookFunctionName, ref foundHook, FindEvent2Arg(syncVar, hookFunctionName, originalType));
+            for (var i = 0; i < 3; i++)
+            {
+                CheckHook(syncVar, hookFunctionName, ref foundHook, FindMethod(syncVar, originalType, hookFunctionName, i));
+            }
+            // we want to pass null for arg count here, because we are ok with any arg count
+            CheckHook(syncVar, hookFunctionName, ref foundHook, FindEvent(syncVar, originalType, hookFunctionName, null));
 
             return foundHook;
         }
@@ -93,17 +96,7 @@ namespace Mirage.Weaver.SyncVars
             }
         }
 
-        private static SyncVarHook FindMethod1Arg(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType)
-        {
-            return ValidateMethod(syncVar, hookFunctionName, originalType, 1);
-        }
-
-        private static SyncVarHook FindMethod2Arg(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType)
-        {
-            return ValidateMethod(syncVar, hookFunctionName, originalType, 2);
-        }
-
-        private static SyncVarHook ValidateMethod(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType, int argCount)
+        private static SyncVarHook FindMethod(FieldDefinition syncVar, TypeReference originalType, string hookFunctionName, int argCount)
         {
             var methods = syncVar.DeclaringType.GetMethods(hookFunctionName);
             var methodsWithParams = methods.Where(m => m.Parameters.Count == argCount).ToArray();
@@ -117,7 +110,7 @@ namespace Mirage.Weaver.SyncVars
             {
                 if (MatchesParameters(method, originalType, argCount))
                 {
-                    return new SyncVarHook(method, argCount == 1 ? SyncHookType.MethodWith1Arg : SyncHookType.MethodWith2Arg);
+                    return new SyncVarHook(method, argCount);
                 }
             }
 
@@ -125,17 +118,7 @@ namespace Mirage.Weaver.SyncVars
             throw new HookMethodException($"Wrong type for Parameter in hook for '{syncVar.Name}', hook name '{hookFunctionName}'.", syncVar, methods.First());
         }
 
-        private static SyncVarHook FindEvent1Arg(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType)
-        {
-            return ValidateEvent(syncVar, originalType, hookFunctionName, 1);
-        }
-
-        private static SyncVarHook FindEvent2Arg(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType)
-        {
-            return ValidateEvent(syncVar, originalType, hookFunctionName, 2);
-        }
-
-        private static SyncVarHook ValidateEvent(FieldDefinition syncVar, TypeReference originalType, string hookFunctionName, int argCount)
+        private static SyncVarHook FindEvent(FieldDefinition syncVar, TypeReference originalType, string hookFunctionName, int? argCount)
         {
             // we can't have 2 events/fields with same name, so using `First` is ok here
             var @event = syncVar.DeclaringType.Events.FirstOrDefault(x => x.Name == hookFunctionName);
@@ -145,38 +128,48 @@ namespace Mirage.Weaver.SyncVars
             var eventType = @event.EventType;
             if (!eventType.FullName.Contains("System.Action"))
             {
-                ThrowWrongHookType(syncVar, @event, eventType);
+                ThrowWrongHookType(syncVar, @event, eventType, "Not System.Action");
             }
 
+            // if it is not generic, then it has no args
             if (!eventType.IsGenericInstance)
             {
-                ThrowWrongHookType(syncVar, @event, eventType);
+                // first check if we are expecting 0 args
+                if (argCount.HasValue && argCount.Value != 0)
+                    ThrowWrongHookType(syncVar, @event, eventType, "Generic mismatch");
+
+                // the return 0 arg hook as ok
+                return new SyncVarHook(@event, 0);
             }
 
+            // this point on, we know it is generic
             var genericEvent = (GenericInstanceType)eventType;
             var args = genericEvent.GenericArguments;
-            if (args.Count != argCount)
-            {
-                // ok to not have matching count
-                // we could be hookType.Automatic and looking for 1 arg, when there is event with 2 args
-                return null;
-            }
 
-            if (MatchesParameters(genericEvent, originalType, argCount))
+            // check arg count
+            if (argCount.HasValue)
             {
-                return new SyncVarHook(@event, argCount == 1 ? SyncHookType.EventWith1Arg : SyncHookType.EventWith2Arg);
+                if (args.Count != argCount)
+                    ThrowWrongHookType(syncVar, @event, eventType, "Arg mismatch");
             }
             else
             {
-                ThrowWrongHookType(syncVar, @event, eventType);
+                if (args.Count > 2)
+                    ThrowWrongHookType(syncVar, @event, eventType, "Too many args");
             }
 
-            throw new InvalidOperationException("Code should never reach even, should return or throw ealier");
+            // check param types
+            if (!MatchesParameters(genericEvent, originalType, args.Count))
+            {
+                ThrowWrongHookType(syncVar, @event, eventType, "Param mismatch");
+            }
+
+            return new SyncVarHook(@event, args.Count);
         }
 
-        private static void ThrowWrongHookType(FieldDefinition syncVar, EventDefinition @event, TypeReference eventType)
+        private static void ThrowWrongHookType(FieldDefinition syncVar, EventDefinition @event, TypeReference eventType, string extra)
         {
-            throw new HookMethodException($"Hook Event for '{syncVar.Name}' needs to be type 'System.Action<,>' but was '{eventType.FullName}' instead", @event);
+            throw new HookMethodException($"Hook Event for '{syncVar.Name}' needs to be type 'System.Action<,>' but was '{eventType.FullName}' instead, Error Type: {extra}", @event);
         }
 
         private static bool MatchesParameters(GenericInstanceType genericEvent, TypeReference originalType, int count)
@@ -201,6 +194,39 @@ namespace Mirage.Weaver.SyncVars
                     return false;
             }
             return true;
+        }
+
+        private static SyncHookType TypeFromArgCount(bool method, int argCount)
+        {
+            switch (argCount)
+            {
+                case 0:
+                    return method ? SyncHookType.MethodWith0Arg : SyncHookType.EventWith0Arg;
+                case 1:
+                    return method ? SyncHookType.MethodWith1Arg : SyncHookType.EventWith1Arg;
+                case 2:
+                    return method ? SyncHookType.MethodWith2Arg : SyncHookType.EventWith2Arg;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(argCount), argCount, null);
+            }
+        }
+
+        private static int ArgCountFromType(SyncHookType hookType)
+        {
+            switch (hookType)
+            {
+                case SyncHookType.MethodWith0Arg:
+                case SyncHookType.EventWith0Arg:
+                    return 0;
+                case SyncHookType.MethodWith1Arg:
+                case SyncHookType.EventWith1Arg:
+                    return 1;
+                case SyncHookType.MethodWith2Arg:
+                case SyncHookType.EventWith2Arg:
+                    return 2;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(hookType), hookType, null);
+            }
         }
     }
 }

@@ -348,22 +348,20 @@ namespace Mirage.Weaver
         private void WriteCallHook(ILProcessor worker, SyncVarHook hook, VariableDefinition oldValue, FoundSyncVar syncVarField)
         {
             if (hook.Method != null)
-                WriteCallHookMethod(worker, hook.Method, hook.hookType, oldValue, syncVarField);
+                WriteCallHookMethod(worker, hook.Method, hook.ArgCount, oldValue, syncVarField);
             if (hook.Event != null)
-                WriteCallHookEvent(worker, hook.Event, hook.hookType, oldValue, syncVarField);
+                WriteCallHookEvent(worker, hook.Event, hook.ArgCount, oldValue, syncVarField);
         }
 
-        private void WriteCallHookMethod(ILProcessor worker, MethodDefinition hookMethod, SyncHookType hookType, VariableDefinition oldValue, FoundSyncVar syncVarField)
+        private void WriteCallHookMethod(ILProcessor worker, MethodDefinition hookMethod, int argCount, VariableDefinition oldValue, FoundSyncVar syncVarField)
         {
-            if (hookType != SyncHookType.MethodWith1Arg && hookType != SyncHookType.MethodWith2Arg)
-                throw new ArgumentException($"hook type should be method, but was {hookType}", nameof(hookType));
-
             WriteStartFunctionCall();
 
             // write args
-            if (hookType == SyncHookType.MethodWith2Arg)
+            if (argCount >= 2)
                 WriteOldValue();
-            WriteNewValue();
+            if (argCount >= 1)
+                WriteNewValue();
 
             WriteEndFunctionCall();
 
@@ -419,22 +417,33 @@ namespace Mirage.Weaver
             }
         }
 
-        private void WriteCallHookEvent(ILProcessor worker, EventDefinition @event, SyncHookType hookType, VariableDefinition oldValue, FoundSyncVar syncVarField)
+        private void WriteCallHookEvent(ILProcessor worker, EventDefinition @event, int argCount, VariableDefinition oldValue, FoundSyncVar syncVarField)
         {
-            if (hookType != SyncHookType.EventWith1Arg && hookType != SyncHookType.EventWith2Arg)
-                throw new ArgumentException($"hook type should be event, but was {hookType}", nameof(hookType));
-
             // get backing field for event, and sure it is generic instance (eg MyType<T>.myEvent
             var eventField = @event.DeclaringType.GetField(@event.Name).MakeHostGenericIfNeeded();
 
             // get action type with number of args
-            var actionType = hookType == SyncHookType.EventWith1Arg
-                ? typeof(Action<>)
-                : typeof(Action<,>);
+            Type actionType;
+            switch (argCount)
+            {
+                case 0:
+                    actionType = typeof(Action);
+                    break;
+                case 1:
+                    actionType = typeof(Action<>);
+                    break;
+                case 2:
+                    actionType = typeof(Action<,>);
+                    break;
+                default:
+                    throw new ArgumentException("SyncVarHook can only have 0, 1 or 2 arguments");
+
+            }
 
             // get Invoke method and make it correct type
-            var invokeNonGeneric = module.ImportReference(actionType.GetMethod("Invoke"));
-            var invoke = invokeNonGeneric.MakeHostInstanceGeneric((GenericInstanceType)@event.EventType);
+            var invoke = module.ImportReference(actionType.GetMethod("Invoke"));
+            if (@event.EventType.IsGenericInstance)
+                invoke = invoke.MakeHostInstanceGeneric((GenericInstanceType)@event.EventType);
 
             var nopEvent = worker.Create(OpCodes.Nop);
             var nopEnd = worker.Create(OpCodes.Nop);
@@ -454,9 +463,10 @@ namespace Mirage.Weaver
             // **call invoke**
             worker.Append(nopEvent);
 
-            if (hookType == SyncHookType.EventWith2Arg)
+            if (argCount >= 2)
                 WriteOldValue();
-            WriteNewValue();
+            if (argCount >= 1)
+                WriteNewValue();
 
             worker.Append(worker.Create(OpCodes.Call, invoke));
 
