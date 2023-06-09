@@ -1,9 +1,9 @@
 using Mirage;
 using System;
 
-namespace SyncVarHookTests.ErrorWhenNotGenericAction
+namespace SyncVarHookTests.SuccessGenericAction
 {
-    class ErrorWhenNotGenericAction : NetworkBehaviour
+    class SuccessGenericAction : NetworkBehaviour
     {
         [SyncVar(hook = nameof(OnChangeHealth))]
         int health;

@@ -169,7 +169,7 @@ namespace Mirage.Weaver.SyncVars
 
         private static void ThrowWrongHookType(FieldDefinition syncVar, EventDefinition @event, TypeReference eventType, string extra)
         {
-            throw new HookMethodException($"Hook Event for '{syncVar.Name}' needs to be type 'System.Action<,>' but was '{eventType.FullName}' instead, Error Type: {extra}", @event);
+            throw new HookMethodException($"Hook Event for '{syncVar.Name}' is invalid '{eventType.FullName}', Error Type: {extra}", @event);
         }
 
         private static bool MatchesParameters(GenericInstanceType genericEvent, TypeReference originalType, int count)

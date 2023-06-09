@@ -7,11 +7,6 @@ namespace SyncVarHookTests.ErrorWhenNoHookWithCorrectParametersFound
         [SyncVar(hook = nameof(onChangeHealth))]
         int health;
 
-        void onChangeHealth()
-        {
-
-        }
-
         void onChangeHealth(int someOtherValue, int moreValue, bool anotherValue)
         {
 

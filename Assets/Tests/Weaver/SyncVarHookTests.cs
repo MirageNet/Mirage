@@ -92,21 +92,20 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void ErrorWhenHookNotAction()
         {
-            HasError($"Hook Event for 'health' needs to be type 'System.Action<,>' but was 'SyncVarHookTests.ErrorWhenHookNotAction.DoStuff' instead",
+            HasError("Hook Event for 'health' is invalid 'SyncVarHookTests.ErrorWhenHookNotAction.DoStuff', Error Type: Not System.Action",
                 $"SyncVarHookTests.ErrorWhenHookNotAction.DoStuff {TypeName()}::OnChangeHealth");
         }
 
-        [Test]
-        public void ErrorWhenNotGenericAction()
+        [Test, BatchSafe(BatchType.Success)]
+        public void SuccessGenericAction()
         {
-            HasError($"Hook Event for 'health' needs to be type 'System.Action<,>' but was 'System.Action' instead",
-                $"System.Action {TypeName()}::OnChangeHealth");
+            IsSuccess();
         }
 
         [Test]
         public void ErrorWhenEventArgsAreWrong()
         {
-            HasError($"Hook Event for 'health' needs to be type 'System.Action<,>' but was 'System.Action`2<System.Int32,System.Single>' instead",
+            HasError("Hook Event for 'health' is invalid 'System.Action`2<System.Int32,System.Single>', Error Type: Param mismatch",
                 $"System.Action`2<System.Int32,System.Single> {TypeName()}::OnChangeHealth");
         }
 
@@ -214,8 +213,8 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void ExplicitEvent1NotFound()
         {
-            HasError("Could not find hook for 'health', hook name 'onChangeHealth', hook type EventWith1Arg. See SyncHookType for valid signatures",
-                 $"System.Int32 {TypeName()}::health");
+            HasError("Hook Event for 'health' is invalid 'System.Action`2<System.Int32,System.Int32>', Error Type: Arg mismatch",
+                 $"System.Action`2<System.Int32,System.Int32> {TypeName()}::onChangeHealth");
         }
 
         [Test]
