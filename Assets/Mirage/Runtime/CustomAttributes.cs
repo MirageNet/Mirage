@@ -18,12 +18,17 @@ namespace Mirage
         public bool initialOnly;
 
         /// <summary>
-        ///     If true this syncvar hook will also fire on the server side.
+        /// If true this syncvar hook will also fire on the server side.
         /// </summary>
         // todo add test to make sure this runs on owner client
         // public bool invokeHookOnSender;
         // [System.Obsolete("Use invokeHookOnSender instead", false)]
         public bool invokeHookOnServer;
+
+        /// <summary>
+        /// If true this syncvar hook will also fire the owner when it is sending data
+        /// </summary>
+        public bool invokeHookOnOwner;
 
         /// <summary>
         /// What type of look Mirage should look for

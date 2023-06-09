@@ -185,7 +185,6 @@ namespace Mirage.Tests.Runtime.Components
         }
 
         [UnityTest]
-        [Ignore("Needs new SyncVar feature")]
         public IEnumerator EventInvokesOnOwner()
         {
             var ownerComp = ClientComponent(0);

@@ -226,20 +226,34 @@ namespace Mirage.Weaver
             if (syncVar.HasHook)
             {
                 //if (base.isLocalClient && !getSyncVarHookGuard(dirtyBit))
-                var label = worker.Create(OpCodes.Nop);
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
-                // if invokeOnServer, then `IsServer` will also cover the Host case too so we dont need to use an OR here
-                if (syncVar.InvokeHookOnServer)
-                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsServer));
-                else
-                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsLocalClient));
+                var afterIf = worker.Create(OpCodes.Nop);
+                var startIf = worker.Create(OpCodes.Nop);
 
-                worker.Append(worker.Create(OpCodes.Brfalse, label));
+                // check if there is guard
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldc_I8, syncVar.DirtyBit));
                 worker.Append(worker.Create<NetworkBehaviour>(OpCodes.Call, nb => nb.GetSyncVarHookGuard(default)));
-                worker.Append(worker.Create(OpCodes.Brtrue, label));
+                worker.Append(worker.Create(OpCodes.Brtrue, afterIf));
 
+                if (syncVar.InvokeHookOnOwner)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldarg_0));
+                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.HasAuthority));
+                    // if true, go to start of if
+                    // this will act as an OR for the IsServer check
+                    worker.Append(worker.Create(OpCodes.Brtrue, startIf));
+                }
+
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                if (syncVar.InvokeHookOnServer)
+                    // if invokeOnServer, then `IsServer` will also cover the Host case too so we dont need to use an OR here
+                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsServer));
+                else
+                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsLocalClient));
+                worker.Append(worker.Create(OpCodes.Brfalse, afterIf));
+
+
+                worker.Append(startIf);
                 // setSyncVarHookGuard(dirtyBit, true)
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldc_I8, syncVar.DirtyBit));
@@ -257,7 +271,7 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Ldc_I4_0));
                 worker.Append(worker.Create<NetworkBehaviour>(OpCodes.Call, nb => nb.SetSyncVarHookGuard(default, default)));
 
-                worker.Append(label);
+                worker.Append(afterIf);
             }
 
             worker.Append(endOfMethod);
@@ -660,7 +674,18 @@ namespace Mirage.Weaver
                 // didn't change from the default values on the client.
 
                 // Generates: if (!SyncVarEqual)
-                var syncVarEqualLabel = worker.Create(OpCodes.Nop);
+                var endHookInvoke = worker.Create(OpCodes.Nop);
+
+                // if not invoke on server, then we need to add a if (!isServer) check
+                // this is because onDeserialize can be called on server when syncdirection is from Owner
+                if (!syncVar.InvokeHookOnServer)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldarg_0));
+                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsServer));
+                    // if true, go to start of if
+                    // this will act as an OR for the IsServer check
+                    worker.Append(worker.Create(OpCodes.Brtrue, endHookInvoke));
+                }
 
                 // 'this.' for 'this.SyncVarEqual'
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
@@ -673,14 +698,14 @@ namespace Mirage.Weaver
                 var syncVarEqualGm = new GenericInstanceMethod(syncVarEqual.GetElementMethod());
                 syncVarEqualGm.GenericArguments.Add(originalType);
                 worker.Append(worker.Create(OpCodes.Call, syncVarEqualGm));
-                worker.Append(worker.Create(OpCodes.Brtrue, syncVarEqualLabel));
+                worker.Append(worker.Create(OpCodes.Brtrue, endHookInvoke));
 
                 // call the hook
                 // Generates: OnValueChanged(oldValue, this.syncVar)
                 WriteCallHookMethodUsingField(worker, syncVar.Hook, oldValue, syncVar);
 
                 // Generates: end if (!SyncVarEqual)
-                worker.Append(syncVarEqualLabel);
+                worker.Append(endHookInvoke);
             }
 
         }

@@ -12,7 +12,7 @@ namespace Mirage.Components
     {
         public event Action<bool> OnReadyChanged;
 
-        [SyncVar(hook = nameof(OnReadyChanged), invokeHookOnServer = true)]
+        [SyncVar(hook = nameof(OnReadyChanged), invokeHookOnServer = true, invokeHookOnOwner = true)]
         private bool _isReady;
 
         public bool IsReady => _isReady;
