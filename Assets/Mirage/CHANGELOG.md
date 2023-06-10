@@ -1,3 +1,10 @@
+# [140.2.0](https://github.com/MirageNet/Mirage/compare/v140.1.0...v140.2.0) (2023-06-10)
+
+
+### Features
+
+* option to invoke hook on owner when they are sending syncvar ([36c1b37](https://github.com/MirageNet/Mirage/commit/36c1b373711349fdd9533c8f59a02fc6c2615d5b))
+
 # [140.1.0](https://github.com/MirageNet/Mirage/compare/v140.0.0...v140.1.0) (2023-06-09)
 
 
