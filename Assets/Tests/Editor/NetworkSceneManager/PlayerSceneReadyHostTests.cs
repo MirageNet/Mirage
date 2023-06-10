@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Runtime.Host
 {
-    public class PlayerSceneReadyHostTests : HostSetupWithSceneManager<MockComponent>
+    public class PlayerSceneReadyHostTests : HostSetupWithSceneManager<EmptyBehaviour>
     {
         [Test]
         public void NetworkPlayerStartsReady()

@@ -15,7 +15,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 {
     [TestFixture]
     [Category("LoadsScene")]
-    public class NetworkSceneManagerNonHostTests : ClientServerSetup_EditorModeTest<MockComponent>
+    public class NetworkSceneManagerNonHostTests : ClientServerSetup_EditorModeTest
     {
         protected NetworkSceneManager serverSceneManager;
         protected NetworkSceneManager clientSceneManager;

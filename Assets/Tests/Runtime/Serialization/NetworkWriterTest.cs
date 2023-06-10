@@ -1007,7 +1007,7 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void WriteNetworkBehaviorNotNull()
         {
-            var mock = CreateBehaviour<MockComponent>();
+            var mock = CreateBehaviour<MockRpcComponent>();
             // init lazy props
             _ = mock.Identity.NetworkBehaviours;
             mock.Identity.NetId = 1;
@@ -1017,7 +1017,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.WriteNetworkBehaviour(mock);
 
             reader.Reset(writer.ToArraySegment());
-            var behaviour = reader.ReadNetworkBehaviour<MockComponent>();
+            var behaviour = reader.ReadNetworkBehaviour<MockRpcComponent>();
 
             Assert.That(behaviour == mock);
             Assert.That(writer.ByteLength, Is.EqualTo(reader.BytePosition));
@@ -1027,23 +1027,23 @@ namespace Mirage.Tests.Runtime.Serialization
         [NetworkMessage]
         private struct _BehaviourArrayWriter
         {
-            public MockComponent[] mockComponents;
+            public MockRpcComponent[] mockComponents;
         }
         [Test]
         public void WriteNetworkBehaviorArray()
         {
-            var mock = CreateBehaviour<MockComponent>();
+            var mock = CreateBehaviour<MockRpcComponent>();
             // init lazy props
             _ = mock.Identity.NetworkBehaviours;
             mock.Identity.NetId = 1;
             // returns found id
             reader.ObjectLocator.TryGetIdentity(1, out var _).Returns(x => { x[1] = mock.Identity; return true; });
 
-            var mockArray = new MockComponent[] { mock };
+            var mockArray = new MockRpcComponent[] { mock };
             writer.Write(mockArray);
 
             reader.Reset(writer.ToArraySegment());
-            var readArray = reader.Read<MockComponent[]>();
+            var readArray = reader.Read<MockRpcComponent[]>();
 
             Assert.That(mockArray.Length == mockArray.Length);
             Assert.That(mockArray[0] == mockArray[0]);
@@ -1054,7 +1054,7 @@ namespace Mirage.Tests.Runtime.Serialization
         public void WriteNetworkBehaviorDestroyed()
         {
             // setup
-            var mock = CreateBehaviour<MockComponent>();
+            var mock = CreateBehaviour<MockRpcComponent>();
             // init lazy props
             _ = mock.Identity.NetworkBehaviours;
             mock.Identity.NetId = 1;
@@ -1064,7 +1064,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.WriteNetworkBehaviour(mock);
 
             reader.Reset(writer.ToArraySegment());
-            var behaviour = reader.ReadNetworkBehaviour<MockComponent>();
+            var behaviour = reader.ReadNetworkBehaviour<MockRpcComponent>();
 
             Assert.That(behaviour, Is.Null);
             // make sure read same as written (including compIndex for non-0 netid

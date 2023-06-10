@@ -10,7 +10,7 @@ using Object = UnityEngine.Object;
 namespace Mirage.Tests.Runtime.ClientServer
 {
     [TestFixture]
-    public class ClientObjectManagerTest : ClientServerSetup<MockComponent>
+    public class ClientObjectManagerTest : ClientServerSetup
     {
         [Test]
         public void OnSpawnAssetSceneIDFailureExceptionTest()
@@ -240,7 +240,6 @@ namespace Mirage.Tests.Runtime.ClientServer
         private NetworkIdentity TestSpawnDelegateWithMock(SpawnMessage msg)
         {
             var identity = CreateNetworkIdentity();
-            identity.gameObject.AddComponent<MockComponent>();
             return identity;
         }
 

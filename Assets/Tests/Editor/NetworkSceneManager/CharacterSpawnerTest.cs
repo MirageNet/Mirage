@@ -6,7 +6,7 @@ using UnityEngine.TestTools;
 namespace Mirage.Tests.Runtime.Host
 {
     [Category("LoadsScene")]
-    public class CharacterSpawnerTest : HostSetupWithSceneManager<MockComponent>
+    public class CharacterSpawnerTest : HostSetupWithSceneManager<EmptyBehaviour>
     {
         private CharacterSpawner spawner;
 

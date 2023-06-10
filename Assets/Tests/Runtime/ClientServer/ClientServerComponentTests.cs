@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 
 namespace Mirage.Tests.Runtime.ClientServer
 {
-    public class ClientServerComponentTests : ClientServerSetup<MockComponent>
+    public class ClientServerComponentTests : ClientServerSetup<MockRpcComponent>
     {
         [Test]
         public void CheckNotHost()

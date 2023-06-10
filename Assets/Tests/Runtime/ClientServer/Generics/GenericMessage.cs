@@ -10,7 +10,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         public T Value;
     }
 
-    public class GenericMessages : ClientServerSetup<MockComponent>
+    public class GenericMessages : ClientServerSetup
     {
         [Test]
         public void CanReadWrite()

@@ -58,7 +58,7 @@ namespace Mirage.Tests.Runtime.Syncing
         {
             var prefab = CreateNetworkIdentity();
             prefab.gameObject.SetActive(false);
-            prefab.gameObject.AddComponent<MockComponent>();
+            prefab.gameObject.AddComponent<MockRpcComponent>();
             prefab.gameObject.AddComponent<MockPlayer>();
             prefab.gameObject.AddComponent<MockPlayerWithList>();
             prefab.PrefabHash = 520;
@@ -66,7 +66,7 @@ namespace Mirage.Tests.Runtime.Syncing
             var serverIdentity = InstantiateForTest(prefab);
             serverIdentity.gameObject.SetActive(true);
 
-            var serverComp1 = serverIdentity.GetComponent<MockComponent>();
+            var serverComp1 = serverIdentity.GetComponent<MockRpcComponent>();
             var serverComp2 = serverIdentity.GetComponent<MockPlayer>();
             var serverComp3 = serverIdentity.GetComponent<MockPlayerWithList>();
 

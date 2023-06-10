@@ -10,7 +10,7 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.ClientServer
 {
-    public class NetworkServerTests : ClientServerSetup<MockComponent>
+    public class NetworkServerTests : ClientServerSetup
     {
         private WovenTestMessage message;
 

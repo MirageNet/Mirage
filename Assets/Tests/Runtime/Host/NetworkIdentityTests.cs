@@ -10,7 +10,7 @@ using InvalidOperationException = System.InvalidOperationException;
 
 namespace Mirage.Tests.Runtime.Host
 {
-    public class NetworkIdentityTests : HostSetup<MockComponent>
+    public class NetworkIdentityTests : HostSetup
     {
         private GameObject gameObject;
         private NetworkIdentity testIdentity;
@@ -213,7 +213,7 @@ namespace Mirage.Tests.Runtime.Host
         });
     }
 
-    public class NetworkIdentityStartedTests : HostSetup<MockComponent>
+    public class NetworkIdentityStartedTests : HostSetup
     {
         private NetworkIdentity testIdentity;
 

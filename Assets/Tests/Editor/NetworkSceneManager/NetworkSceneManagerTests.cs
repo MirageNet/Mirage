@@ -17,15 +17,13 @@ using UnityEditor.SceneManagement;
 namespace Mirage.Tests.Runtime.Host
 {
     [Category("LoadsScene")]
-    public class NetworkSceneManagerTests : HostSetupWithSceneManager<MockComponent>
+    public class NetworkSceneManagerTests : HostSetupWithSceneManager<EmptyBehaviour>
     {
         private UnityAction<Scene, SceneOperation> _onServerFinishedSceneChange;
 
-        protected async override UniTask ExtraSetup() 
+        protected override async UniTask ExtraSetup()
         {
             await base.ExtraSetup();
-            // call base for SceneManager Setup
-            base.ExtraSetup();
 
             _onServerFinishedSceneChange = Substitute.For<UnityAction<Scene, SceneOperation>>();
             sceneManager.OnServerFinishedSceneChange.AddListener(_onServerFinishedSceneChange);

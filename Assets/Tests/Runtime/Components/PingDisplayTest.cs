@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Mirage.Tests.Runtime.Components
 {
-    public class PingDisplayTest : HostSetup<MockComponent>
+    public class PingDisplayTest : HostSetup
     {
         [Test]
         public void PingDisplayTextLabelNullReferencesUpdateTest()

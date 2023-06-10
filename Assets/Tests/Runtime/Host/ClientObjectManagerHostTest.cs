@@ -10,7 +10,7 @@ using Object = UnityEngine.Object;
 namespace Mirage.Tests.Runtime.Host
 {
     [TestFixture]
-    public class ClientObjectManagerHostTest : HostSetup<MockComponent>
+    public class ClientObjectManagerHostTest : HostSetup
     {
         [UnityTest]
         public IEnumerator GetPrefabTest() => UniTask.ToCoroutine(async () =>

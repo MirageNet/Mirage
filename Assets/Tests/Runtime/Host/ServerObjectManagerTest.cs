@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 namespace Mirage.Tests.Runtime.Host
 {
     [TestFixture]
-    public class ServerObjectManagerHostTest : HostSetup<MockComponent>
+    public class ServerObjectManagerHostTest : HostSetup
     {
         [Test]
         public void HideForPlayerTest()

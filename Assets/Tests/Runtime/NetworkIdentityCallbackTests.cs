@@ -7,7 +7,7 @@ using static Mirage.Tests.LocalConnections;
 
 namespace Mirage.Tests.Runtime
 {
-    public class NetworkIdentityCallbackTests : ClientServerSetup<MockComponent>
+    public class NetworkIdentityCallbackTests : ClientServerSetup
     {
         #region test components
         private class RebuildEmptyObserversNetworkBehaviour : NetworkVisibility

@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Mirage.Tests.Runtime.Host
 {
     [TestFixture]
-    public class NetworkServerTest : HostSetup<MockComponent>
+    public class NetworkServerTest : HostSetup
     {
         private readonly List<INetworkPlayer> serverConnectedCalls = new List<INetworkPlayer>();
         private readonly List<INetworkPlayer> clientConnectedCalls = new List<INetworkPlayer>();

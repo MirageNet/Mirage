@@ -119,7 +119,7 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
         public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
     }
 
-    public class NetworkIdentityCallbackTests : ClientServerSetup_EditorModeTest<MockComponent>
+    public class NetworkIdentityCallbackTests : ClientServerSetup_EditorModeTest
     {
         private GameObject gameObject;
         private NetworkIdentity identity;

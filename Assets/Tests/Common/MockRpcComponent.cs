@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Mirage.Tests.Runtime
 {
-    public class MockComponent : NetworkBehaviour
+    public class MockRpcComponent : NetworkBehaviour
     {
         public List<(int arg1, string arg2)> Server2ArgsCalls = new List<(int arg1, string arg2)>();
         public List<(int arg1, INetworkPlayer sender)> ServerWithSenderCalls = new List<(int arg1, INetworkPlayer sender)>();

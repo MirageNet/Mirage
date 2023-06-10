@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Host
 {
-    public class HostComponentTests : HostSetupWithSceneManager<MockComponent>
+    public class HostComponentTests : HostSetupWithSceneManager<MockRpcComponent>
     {
         [UnityTest]
         public IEnumerator ServerRpc()

@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Host
 {
-    public class HostNetworkIdentityAuthorityTests : HostSetup<MockComponent>
+    public class HostNetworkIdentityAuthorityTests : HostSetup
     {
         private NetworkIdentity hostIdentity2;
         private NetworkWorld HostWorld => server.World;
@@ -15,7 +15,7 @@ namespace Mirage.Tests.Runtime.Host
 
         protected override UniTask LateSetup()
         {
-            hostIdentity2 = CreateBehaviour<MockComponent>().GetComponent<NetworkIdentity>();
+            hostIdentity2 = CreateNetworkIdentity();
             serverObjectManager.Spawn(hostIdentity2);
 
             return UniTask.CompletedTask;

@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Runtime.ClientServer
 {
-    public class NetworkIdentityTests : ClientServerSetup<MockComponent>
+    public class NetworkIdentityTests : ClientServerSetup
     {
         [Test]
         public void IsServer()

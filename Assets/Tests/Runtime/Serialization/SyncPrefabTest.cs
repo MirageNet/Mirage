@@ -143,7 +143,7 @@ namespace Mirage.Tests.Runtime.Serialization
         }
     }
 
-    public class SyncPrefabTestWithCOM : ClientServerSetup<MockComponent>
+    public class SyncPrefabTestWithCOM : ClientServerSetup
     {
         private readonly NetworkWriter writer = new NetworkWriter(1300);
         private readonly MirageNetworkReader reader = new MirageNetworkReader();

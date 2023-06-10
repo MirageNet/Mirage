@@ -6,7 +6,7 @@ using UnityEngine.TestTools;
 namespace Mirage.Tests.Runtime.Host
 {
     [TestFixture]
-    public class NetworkClientTest : HostSetup<MockComponent>
+    public class NetworkClientTest : HostSetup
     {
         [Test]
         public void IsConnectedTest()

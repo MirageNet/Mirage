@@ -2,7 +2,7 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Runtime.ClientServer
 {
-    public class NetworkIdentityMessageTest : ClientServerSetup<MockComponent>
+    public class NetworkIdentityMessageTest : ClientServerSetup
     {
         [NetworkMessage]
         public struct MyMessage

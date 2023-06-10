@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Runtime.Host
 {
-    public class GameobjectExtensionTests : HostSetup<MockComponent>
+    public class GameobjectExtensionTests : HostSetup
     {
         [Test]
         public void GetNetworkIdentity()

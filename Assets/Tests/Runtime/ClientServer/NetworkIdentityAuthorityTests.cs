@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.ClientServer
 {
-    public class NetworkIdentityAuthorityTests : ClientServerSetup<MockComponent>
+    public class NetworkIdentityAuthorityTests : ClientServerSetup
     {
         private NetworkIdentity serverIdentity2;
         private NetworkIdentity clientIdentity2;

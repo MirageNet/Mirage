@@ -5,7 +5,7 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Host
 {
-    public class NetworkServerMaxConnectionTests : HostSetup<MockComponent>
+    public class NetworkServerMaxConnectionTests : HostSetup
     {
         protected override Config ServerConfig => new Config
         {
