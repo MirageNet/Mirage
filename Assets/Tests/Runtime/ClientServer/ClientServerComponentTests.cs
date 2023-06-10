@@ -21,81 +21,93 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [UnityTest]
-        public IEnumerator ServerRpc() => UniTask.ToCoroutine(async () =>
+        public IEnumerator ServerRpc()
         {
-            clientComponent.Send2Args(1, "hello");
+            clientComponent.Server2Args(1, "hello");
 
-            await AsyncUtil.WaitUntilWithTimeout(() => serverComponent.cmdArg1 != 0);
+            yield return null;
+            yield return null;
 
-            Assert.That(serverComponent.cmdArg1, Is.EqualTo(1));
-            Assert.That(serverComponent.cmdArg2, Is.EqualTo("hello"));
-        });
+            Assert.That(serverComponent.Server2ArgsCalls.Count, Is.EqualTo(1));
+            Assert.That(serverComponent.Server2ArgsCalls[0].arg1, Is.EqualTo(1));
+            Assert.That(serverComponent.Server2ArgsCalls[0].arg2, Is.EqualTo("hello"));
+        }
 
         [UnityTest]
-        public IEnumerator ServerRpcWithSenderOnClient() => UniTask.ToCoroutine(async () =>
+        public IEnumerator ServerRpcWithSenderOnClient()
         {
-            clientComponent.SendWithSender(1);
+            clientComponent.ServerWithSender(1);
 
-            await AsyncUtil.WaitUntilWithTimeout(() => serverComponent.cmdArg1 != 0);
+            yield return null;
+            yield return null;
 
-            Assert.That(serverComponent.cmdArg1, Is.EqualTo(1));
-            Assert.That(serverComponent.cmdSender, Is.EqualTo(serverPlayer), "ServerRpc called on client will have client's player (server version)");
-        });
+            Assert.That(serverComponent.ServerWithSenderCalls.Count, Is.EqualTo(1));
+            Assert.That(serverComponent.ServerWithSenderCalls[0].arg1, Is.EqualTo(1));
+            Assert.That(serverComponent.ServerWithSenderCalls[0].sender, Is.EqualTo(serverPlayer));
+        }
 
         [Test]
         public void ServerRpcWithSenderOnServer()
         {
             var exception = Assert.Throws<InvalidOperationException>(() =>
             {
-                serverComponent.SendWithSender(1);
+                serverComponent.ServerWithSender(1);
             });
 
             Assert.That(exception, Has.Message.EqualTo("Server RPC can only be called when client is active"));
         }
 
         [UnityTest]
-        public IEnumerator ServerRpcWithNetworkIdentity() => UniTask.ToCoroutine(async () =>
+        public IEnumerator ServerRpcWithNetworkIdentity()
         {
-            clientComponent.CmdNetworkIdentity(clientIdentity);
+            clientComponent.ServerWithNI(clientIdentity);
 
-            await AsyncUtil.WaitUntilWithTimeout(() => serverComponent.cmdNi != null);
+            yield return null;
+            yield return null;
 
-            Assert.That(serverComponent.cmdNi, Is.SameAs(serverIdentity));
-        });
+            Assert.That(serverComponent.ServerWithNICalls.Count, Is.EqualTo(1));
+            Assert.That(serverComponent.ServerWithNICalls[0], Is.SameAs(serverIdentity));
+        }
 
         [UnityTest]
-        public IEnumerator ClientRpc() => UniTask.ToCoroutine(async () =>
+        public IEnumerator ClientRpc()
         {
-            serverComponent.RpcTest(1, "hello");
-            // process spawn message from server
-            await AsyncUtil.WaitUntilWithTimeout(() => clientComponent.rpcArg1 != 0);
+            serverComponent.Client2Args(1, "hello");
 
-            Assert.That(clientComponent.rpcArg1, Is.EqualTo(1));
-            Assert.That(clientComponent.rpcArg2, Is.EqualTo("hello"));
-        });
+            yield return null;
+            yield return null;
+
+            Assert.That(clientComponent.Client2ArgsCalls.Count, Is.EqualTo(1));
+            Assert.That(clientComponent.Client2ArgsCalls[0].arg1, Is.EqualTo(1));
+            Assert.That(clientComponent.Client2ArgsCalls[0].arg2, Is.EqualTo("hello"));
+        }
 
         [UnityTest]
-        public IEnumerator ClientConnRpc() => UniTask.ToCoroutine(async () =>
+        public IEnumerator ClientConnRpc()
         {
-            serverComponent.ClientConnRpcTest(serverPlayer, 1, "hello");
-            // process spawn message from server
-            await AsyncUtil.WaitUntilWithTimeout(() => clientComponent.targetRpcArg1 != 0);
+            serverComponent.ClientTarget(serverPlayer, 1, "hello");
 
-            Assert.That(clientComponent.targetRpcPlayer, Is.EqualTo(clientPlayer));
-            Assert.That(clientComponent.targetRpcArg1, Is.EqualTo(1));
-            Assert.That(clientComponent.targetRpcArg2, Is.EqualTo("hello"));
-        });
+            yield return null;
+            yield return null;
+
+            Assert.That(clientComponent.ClientTargetCalls.Count, Is.EqualTo(1));
+            Assert.That(clientComponent.ClientTargetCalls[0].player, Is.EqualTo(clientPlayer));
+            Assert.That(clientComponent.ClientTargetCalls[0].arg1, Is.EqualTo(1));
+            Assert.That(clientComponent.ClientTargetCalls[0].arg2, Is.EqualTo("hello"));
+        }
 
         [UnityTest]
-        public IEnumerator ClientOwnerRpc() => UniTask.ToCoroutine(async () =>
+        public IEnumerator ClientOwnerRpc()
         {
-            serverComponent.RpcOwnerTest(1, "hello");
-            // process spawn message from server
-            await AsyncUtil.WaitUntilWithTimeout(() => clientComponent.rpcOwnerArg1 != 0);
+            serverComponent.ClientOwner(1, "hello");
 
-            Assert.That(clientComponent.rpcOwnerArg1, Is.EqualTo(1));
-            Assert.That(clientComponent.rpcOwnerArg2, Is.EqualTo("hello"));
-        });
+            yield return null;
+            yield return null;
+
+            Assert.That(clientComponent.ClientOwnerCalls.Count, Is.EqualTo(1));
+            Assert.That(clientComponent.ClientOwnerCalls[0].arg1, Is.EqualTo(1));
+            Assert.That(clientComponent.ClientOwnerCalls[0].arg2, Is.EqualTo("hello"));
+        }
 
         [UnityTest]
         public IEnumerator OnSpawnSpawnHandlerTest() => UniTask.ToCoroutine(async () =>

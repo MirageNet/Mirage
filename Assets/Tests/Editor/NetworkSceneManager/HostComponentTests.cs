@@ -13,73 +13,79 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator ServerRpc()
         {
-            base.hostComponent.Send2Args(1, "hello");
+            hostComponent.Server2Args(1, "hello");
 
             yield return null;
             yield return null;
 
-            Assert.That(hostComponent.cmdArg1, Is.EqualTo(1));
-            Assert.That(hostComponent.cmdArg2, Is.EqualTo("hello"));
+            Assert.That(hostComponent.Server2ArgsCalls.Count, Is.EqualTo(1));
+            Assert.That(hostComponent.Server2ArgsCalls[0].arg1, Is.EqualTo(1));
+            Assert.That(hostComponent.Server2ArgsCalls[0].arg2, Is.EqualTo("hello"));
         }
 
         [UnityTest]
         public IEnumerator ServerRpcWithSender()
         {
-            base.hostComponent.SendWithSender(1);
+            hostComponent.ServerWithSender(1);
 
             yield return null;
             yield return null;
 
-            Assert.That(hostComponent.cmdArg1, Is.EqualTo(1));
-            Assert.That(hostComponent.cmdSender, Is.EqualTo(server.LocalPlayer), "Server Rpc call on host will have localplayer (server version) as sender");
+            Assert.That(hostComponent.ServerWithSenderCalls.Count, Is.EqualTo(1));
+            Assert.That(hostComponent.ServerWithSenderCalls[0].arg1, Is.EqualTo(1));
+            Assert.That(hostComponent.ServerWithSenderCalls[0].sender, Is.EqualTo(server.LocalPlayer), "Server RPC call on host will have local player (server version) as sender");
         }
 
         [UnityTest]
         public IEnumerator ServerRpcWithNetworkIdentity()
         {
-            hostComponent.CmdNetworkIdentity(hostIdentity);
+            hostComponent.ServerWithNI(hostIdentity);
 
             yield return null;
             yield return null;
 
-            Assert.That(hostComponent.cmdNi, Is.SameAs(hostIdentity));
+            Assert.That(hostComponent.ServerWithNICalls.Count, Is.EqualTo(1));
+            Assert.That(hostComponent.ServerWithNICalls[0], Is.SameAs(hostIdentity));
         }
 
         [UnityTest]
         public IEnumerator ClientRpc()
         {
-            base.hostComponent.RpcTest(1, "hello");
+            hostComponent.Client2Args(1, "hello");
             // process spawn message from server
             yield return null;
             yield return null;
 
-            Assert.That(hostComponent.rpcArg1, Is.EqualTo(1));
-            Assert.That(hostComponent.rpcArg2, Is.EqualTo("hello"));
+            Assert.That(hostComponent.Client2ArgsCalls.Count, Is.EqualTo(1));
+            Assert.That(hostComponent.Client2ArgsCalls[0].arg1, Is.EqualTo(1));
+            Assert.That(hostComponent.Client2ArgsCalls[0].arg2, Is.EqualTo("hello"));
         }
 
         [UnityTest]
         public IEnumerator ClientConnRpc()
         {
-            hostComponent.ClientConnRpcTest(server.LocalPlayer, 1, "hello");
+            hostComponent.ClientTarget(server.LocalPlayer, 1, "hello");
             // process spawn message from server
             yield return null;
             yield return null;
 
-            Assert.That(hostComponent.targetRpcPlayer, Is.EqualTo(client.Player));
-            Assert.That(hostComponent.targetRpcArg1, Is.EqualTo(1));
-            Assert.That(hostComponent.targetRpcArg2, Is.EqualTo("hello"));
+            Assert.That(hostComponent.ClientTargetCalls.Count, Is.EqualTo(1));
+            Assert.That(hostComponent.ClientTargetCalls[0].player, Is.EqualTo(client.Player));
+            Assert.That(hostComponent.ClientTargetCalls[0].arg1, Is.EqualTo(1));
+            Assert.That(hostComponent.ClientTargetCalls[0].arg2, Is.EqualTo("hello"));
         }
 
         [UnityTest]
         public IEnumerator ClientOwnerRpc()
         {
-            base.hostComponent.RpcOwnerTest(1, "hello");
+            hostComponent.ClientOwner(1, "hello");
             // process spawn message from server
             yield return null;
             yield return null;
 
-            Assert.That(hostComponent.rpcOwnerArg1, Is.EqualTo(1));
-            Assert.That(hostComponent.rpcOwnerArg2, Is.EqualTo("hello"));
+            Assert.That(hostComponent.ClientOwnerCalls.Count, Is.EqualTo(1));
+            Assert.That(hostComponent.ClientOwnerCalls[0].arg1, Is.EqualTo(1));
+            Assert.That(hostComponent.ClientOwnerCalls[0].arg2, Is.EqualTo("hello"));
         }
 
         [Test]

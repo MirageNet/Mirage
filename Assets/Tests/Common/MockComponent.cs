@@ -1,64 +1,50 @@
+using System.Collections.Generic;
+
 namespace Mirage.Tests.Runtime
 {
     public class MockComponent : NetworkBehaviour
     {
-        public int cmdArg1;
-        public string cmdArg2;
+        public List<(int arg1, string arg2)> Server2ArgsCalls = new List<(int arg1, string arg2)>();
+        public List<(int arg1, INetworkPlayer sender)> ServerWithSenderCalls = new List<(int arg1, INetworkPlayer sender)>();
+        public List<NetworkIdentity> ServerWithNICalls = new List<NetworkIdentity>();
+        public List<(int arg1, string arg2)> Client2ArgsCalls = new List<(int arg1, string arg2)>();
+        public List<(INetworkPlayer player, int arg1, string arg2)> ClientTargetCalls = new List<(INetworkPlayer player, int arg1, string arg2)>();
+        public List<(int arg1, string arg2)> ClientOwnerCalls = new List<(int arg1, string arg2)>();
 
         [ServerRpc]
-        public void Send2Args(int arg1, string arg2)
+        public void Server2Args(int arg1, string arg2)
         {
-            cmdArg1 = arg1;
-            cmdArg2 = arg2;
+            Server2ArgsCalls.Add((arg1, arg2));
         }
-
-
-        public INetworkPlayer cmdSender;
-        [ServerRpc]
-        public void SendWithSender(int arg1, INetworkPlayer sender = null)
-        {
-            cmdArg1 = arg1;
-            cmdSender = sender;
-        }
-
-        public NetworkIdentity cmdNi;
 
         [ServerRpc]
-        public void CmdNetworkIdentity(NetworkIdentity ni)
+        public void ServerWithSender(int arg1, INetworkPlayer sender = null)
         {
-            cmdNi = ni;
+            ServerWithSenderCalls.Add((arg1, sender));
         }
 
-        public int rpcArg1;
-        public string rpcArg2;
+        [ServerRpc]
+        public void ServerWithNI(NetworkIdentity ni)
+        {
+            ServerWithNICalls.Add(ni);
+        }
 
         [ClientRpc]
-        public void RpcTest(int arg1, string arg2)
+        public void Client2Args(int arg1, string arg2)
         {
-            rpcArg1 = arg1;
-            rpcArg2 = arg2;
+            Client2ArgsCalls.Add((arg1, arg2));
         }
 
-        public int targetRpcArg1;
-        public string targetRpcArg2;
-        public INetworkPlayer targetRpcPlayer;
-
-        [ClientRpc(target = Mirage.RpcTarget.Player)]
-        public void ClientConnRpcTest(INetworkPlayer player, int arg1, string arg2)
+        [ClientRpc(target = RpcTarget.Player)]
+        public void ClientTarget(INetworkPlayer player, int arg1, string arg2)
         {
-            targetRpcPlayer = player;
-            targetRpcArg1 = arg1;
-            targetRpcArg2 = arg2;
+            ClientTargetCalls.Add((player, arg1, arg2));
         }
 
-        public int rpcOwnerArg1;
-        public string rpcOwnerArg2;
-
-        [ClientRpc(target = Mirage.RpcTarget.Owner)]
-        public void RpcOwnerTest(int arg1, string arg2)
+        [ClientRpc(target = RpcTarget.Owner)]
+        public void ClientOwner(int arg1, string arg2)
         {
-            rpcOwnerArg1 = arg1;
-            rpcOwnerArg2 = arg2;
+            ClientOwnerCalls.Add((arg1, arg2));
         }
     }
 }
