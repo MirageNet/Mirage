@@ -85,7 +85,7 @@ namespace Mirage.Weaver
 
         private void RegisterSyncObjects(TypeDefinition netBehaviourSubclass)
         {
-            Weaver.DebugLog(netBehaviourSubclass, "  GenerateConstants ");
+            Weaver.DebugLog(netBehaviourSubclass, "GenerateConstants ");
 
             netBehaviourSubclass.AddToConstructor(logger, (worker) =>
             {

@@ -512,7 +512,7 @@ namespace Mirage.Weaver
 
         private void GenerateSerialization()
         {
-            Weaver.DebugLog(behaviour.TypeDefinition, "  GenerateSerialization");
+            Weaver.DebugLog(behaviour.TypeDefinition, "GenerateSerialization");
 
             // dont create if there are no syncvars
             if (behaviour.SyncVars.Count == 0)
@@ -566,7 +566,7 @@ namespace Mirage.Weaver
 
         private void GenerateDeserialization()
         {
-            Weaver.DebugLog(behaviour.TypeDefinition, "  GenerateDeSerialization");
+            Weaver.DebugLog(behaviour.TypeDefinition, "GenerateDeSerialization");
 
             // dont create if there are no syncvars
             if (behaviour.SyncVars.Count == 0)

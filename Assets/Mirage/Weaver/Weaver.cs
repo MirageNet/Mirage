@@ -30,7 +30,7 @@ namespace Mirage.Weaver
         [Conditional("WEAVER_DEBUG_LOGS")]
         public static void DebugLog(TypeDefinition td, string message)
         {
-            Console.WriteLine($"Weaver[{td.Name}]{message}");
+            Console.WriteLine($"Weaver[{td.Name}] {message}");
         }
 
         private static void Log(string msg)
