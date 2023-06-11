@@ -514,25 +514,23 @@ namespace Mirage.Weaver
         {
             Weaver.DebugLog(behaviour.TypeDefinition, "  GenerateSerialization");
 
-            // Dont create method if users has manually overridden it
-            if (behaviour.HasManualSerializeOverride())
-                return;
-
             // dont create if there are no syncvars
             if (behaviour.SyncVars.Count == 0)
                 return;
 
             var helper = new SerializeHelper(module, behaviour);
-            var worker = helper.AddMethod();
 
-            helper.AddLocals();
-            helper.WriteBaseCall();
+            // Dont create method if users has manually overridden it
+            if (helper.HasManualOverride())
+                return;
+
+            helper.AddMethod();
 
             helper.WriteIfInitial(() =>
             {
                 foreach (var syncVar in behaviour.SyncVars)
                 {
-                    WriteFromField(worker, helper.WriterParameter, syncVar);
+                    WriteFromField(helper.Worker, helper.WriterParameter, syncVar);
                 }
             });
 
@@ -550,7 +548,7 @@ namespace Mirage.Weaver
                 helper.WriteIfSyncVarDirty(syncVar, () =>
                 {
                     // Generates a call to the writer for that field
-                    WriteFromField(worker, helper.WriterParameter, syncVar);
+                    WriteFromField(helper.Worker, helper.WriterParameter, syncVar);
                 });
             }
 
@@ -570,20 +568,17 @@ namespace Mirage.Weaver
         {
             Weaver.DebugLog(behaviour.TypeDefinition, "  GenerateDeSerialization");
 
-            // Dont create method if users has manually overridden it
-            if (behaviour.HasManualDeserializeOverride())
-                return;
-
             // dont create if there are no syncvars
             if (behaviour.SyncVars.Count == 0)
                 return;
 
-
             var helper = new DeserializeHelper(module, behaviour);
-            var worker = helper.AddMethod();
 
-            helper.AddLocals();
-            helper.WriteBaseCall();
+            // Dont create method if users has manually overridden it
+            if (helper.HasManualOverride())
+                return;
+
+            helper.AddMethod();
 
             helper.WriteIfInitial(() =>
             {
@@ -593,13 +588,13 @@ namespace Mirage.Weaver
                 {
                     var syncVar = behaviour.SyncVars[i];
                     // StartHook create old value local variable,
-                    oldValues[i] = StartHook(worker, helper.Method, syncVar, syncVar.OriginalType);
-                    ReadToField(worker, helper.ReaderParameter, syncVar);
+                    oldValues[i] = StartHook(helper.Worker, helper.Method, syncVar, syncVar.OriginalType);
+                    ReadToField(helper.Worker, helper.ReaderParameter, syncVar);
                 }
                 for (var i = 0; i < behaviour.SyncVars.Count; i++)
                 {
                     var syncVar = behaviour.SyncVars[i];
-                    EndHook(worker, syncVar, syncVar.OriginalType, oldValues[i]);
+                    EndHook(helper.Worker, syncVar, syncVar.OriginalType, oldValues[i]);
                 }
             });
 
@@ -613,14 +608,14 @@ namespace Mirage.Weaver
 
                 helper.WriteIfSyncVarDirty(syncVar, () =>
                 {
-                    var oldValue = StartHook(worker, helper.Method, syncVar, syncVar.OriginalType);
+                    var oldValue = StartHook(helper.Worker, helper.Method, syncVar, syncVar.OriginalType);
                     // read value and store in syncvar BEFORE calling the hook
-                    ReadToField(worker, helper.ReaderParameter, syncVar);
-                    EndHook(worker, syncVar, syncVar.OriginalType, oldValue);
+                    ReadToField(helper.Worker, helper.ReaderParameter, syncVar);
+                    EndHook(helper.Worker, syncVar, syncVar.OriginalType, oldValue);
                 });
             }
 
-            worker.Append(worker.Create(OpCodes.Ret));
+            helper.Worker.Emit(OpCodes.Ret);
         }
 
         /// <summary>

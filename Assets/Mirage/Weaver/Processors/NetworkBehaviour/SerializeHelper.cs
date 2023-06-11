@@ -3,94 +3,68 @@ using Mirage.Serialization;
 using Mirage.Weaver.SyncVars;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using MethodAttributes = Mono.Cecil.MethodAttributes;
 
 namespace Mirage.Weaver.NetworkBehaviours
 {
-    internal class SerializeHelper
+    internal class SerializeHelper : BaseMethodHelper
     {
-        public const string MethodName = nameof(NetworkBehaviour.SerializeSyncVars);
-        private readonly ModuleDefinition module;
-        private readonly FoundNetworkBehaviour behaviour;
-        private ILProcessor worker;
+        private FoundNetworkBehaviour _behaviour;
 
-        public MethodDefinition Method { get; private set; }
         public ParameterDefinition WriterParameter { get; private set; }
         public ParameterDefinition InitializeParameter { get; private set; }
         public VariableDefinition DirtyLocal { get; private set; }
         public VariableDefinition DirtyBitsLocal { get; private set; }
 
-        public SerializeHelper(ModuleDefinition module, FoundNetworkBehaviour behaviour)
+        public SerializeHelper(ModuleDefinition module, FoundNetworkBehaviour behaviour) : base(module, behaviour.TypeDefinition)
         {
-            this.module = module;
-            this.behaviour = behaviour;
+            _behaviour = behaviour;
         }
 
-        /// <summary>
-        /// Adds Serialize method to current type
-        /// </summary>
-        /// <returns></returns>
-        public ILProcessor AddMethod()
-        {
-            Method = behaviour.TypeDefinition.AddMethod(MethodName,
-                    MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig,
-                    module.ImportReference<bool>());
+        public override string MethodName => nameof(NetworkBehaviour.SerializeSyncVars);
+        protected override Type ReturnValue => typeof(bool);
 
+        protected override void AddParameters()
+        {
             WriterParameter = Method.AddParam<NetworkWriter>("writer");
             InitializeParameter = Method.AddParam<bool>("initialize");
-            Method.Body.InitLocals = true;
-            worker = Method.Body.GetILProcessor();
-            return worker;
         }
 
-        public void AddLocals()
+        protected override void AddLocals()
         {
             DirtyLocal = Method.AddLocal<bool>();
             DirtyBitsLocal = Method.AddLocal<ulong>();
 
             // store dirty bit in local variable to avoid calling property multiple times
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.SyncVarDirtyBits));
-            worker.Append(worker.Create(OpCodes.Stloc, DirtyBitsLocal));
+            Worker.Append(Worker.Create(OpCodes.Ldarg_0));
+            Worker.Append(Worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.SyncVarDirtyBits));
+            Worker.Append(Worker.Create(OpCodes.Stloc, DirtyBitsLocal));
         }
 
-        public void WriteBaseCall()
+        protected override void WriteBaseCall()
         {
-            // dirty = base.Serialize(...)
-
-            var baseSerialize = behaviour.TypeDefinition.BaseType.GetMethodInBaseType(MethodName);
-            if (baseSerialize != null)
-            {
-                // base
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
-                // writer
-                worker.Append(worker.Create(OpCodes.Ldarg, WriterParameter));
-                // inital?
-                worker.Append(worker.Create(OpCodes.Ldarg, InitializeParameter));
-                worker.Append(worker.Create(OpCodes.Call, module.ImportReference(baseSerialize)));
-                // store to variable
-                worker.Append(worker.Create(OpCodes.Stloc, DirtyLocal));
-            }
+            base.WriteBaseCall();
+            // we also need to store return value for Serialize
+            Worker.Append(Worker.Create(OpCodes.Stloc, DirtyLocal));
         }
 
         public void WriteIfInitial(Action Body)
         {
             // Generates: if (initial)
-            var endIfLabel = worker.Create(OpCodes.Nop);
+            var endIfLabel = Worker.Create(OpCodes.Nop);
             // initial
-            worker.Append(worker.Create(OpCodes.Ldarg, InitializeParameter));
-            worker.Append(worker.Create(OpCodes.Brfalse, endIfLabel));
+            Worker.Append(Worker.Create(OpCodes.Ldarg, InitializeParameter));
+            Worker.Append(Worker.Create(OpCodes.Brfalse, endIfLabel));
 
             // body
             Body.Invoke();
             // always return true if initial
 
             // Generates: return true
-            worker.Append(worker.Create(OpCodes.Ldc_I4_1));
-            worker.Append(worker.Create(OpCodes.Ret));
+            Worker.Append(Worker.Create(OpCodes.Ldc_I4_1));
+            Worker.Append(Worker.Create(OpCodes.Ret));
 
             // Generates: end if (initial)
-            worker.Append(endIfLabel);
+            Worker.Append(endIfLabel);
         }
 
         /// <summary>
@@ -99,29 +73,29 @@ namespace Mirage.Weaver.NetworkBehaviours
         /// </summary>
         public void WriteDirtyBitMask()
         {
-            var writeBitsMethod = module.ImportReference(WriterParameter.ParameterType.Resolve().GetMethod(nameof(NetworkWriter.Write)));
+            var writeBitsMethod = _module.ImportReference(WriterParameter.ParameterType.Resolve().GetMethod(nameof(NetworkWriter.Write)));
 
             // Generates: writer.Write(dirtyBits >> b, n)
             // where b is syncvars in base, n is syncvars in this
 
             // load writer
-            worker.Append(worker.Create(OpCodes.Ldarg, WriterParameter));
+            Worker.Append(Worker.Create(OpCodes.Ldarg, WriterParameter));
             // load dirty bits
-            worker.Append(worker.Create(OpCodes.Ldloc, DirtyBitsLocal));
+            Worker.Append(Worker.Create(OpCodes.Ldloc, DirtyBitsLocal));
 
             // shift if there are syncvars in base class
-            var syncVarInBase = behaviour.syncVarCounter.GetInBase();
+            var syncVarInBase = _behaviour.syncVarCounter.GetInBase();
             if (syncVarInBase > 0)
             {
                 // load inBaseCount
-                worker.Append(worker.Create(OpCodes.Ldc_I4, syncVarInBase));
+                Worker.Append(Worker.Create(OpCodes.Ldc_I4, syncVarInBase));
                 // right shift, dirtyBits >> inBaseCount
-                worker.Append(worker.Create(OpCodes.Shr));
+                Worker.Append(Worker.Create(OpCodes.Shr));
             }
             // load syncVarCount
-            worker.Append(worker.Create(OpCodes.Ldc_I4, behaviour.SyncVars.Count));
+            Worker.Append(Worker.Create(OpCodes.Ldc_I4, _behaviour.SyncVars.Count));
             // call Write
-            worker.Append(worker.Create(OpCodes.Call, writeBitsMethod));
+            Worker.Append(Worker.Create(OpCodes.Call, writeBitsMethod));
         }
 
 
@@ -133,33 +107,33 @@ namespace Mirage.Weaver.NetworkBehaviours
         /// <param name="falseLabel"></param>
         public void WriteIfSyncVarDirty(FoundSyncVar syncvar, Action Body)
         {
-            var endIfLabel = worker.Create(OpCodes.Nop);
+            var endIfLabel = Worker.Create(OpCodes.Nop);
             // load dirtyBit
             // load syncvarIndex
             // AND operation
 
             // if zero, jump to label
 
-            worker.Append(worker.Create(OpCodes.Ldloc, DirtyBitsLocal));
-            worker.Append(worker.Create(OpCodes.Ldc_I8, syncvar.DirtyBit));
-            worker.Append(worker.Create(OpCodes.And));
-            worker.Append(worker.Create(OpCodes.Brfalse, endIfLabel));
+            Worker.Append(Worker.Create(OpCodes.Ldloc, DirtyBitsLocal));
+            Worker.Append(Worker.Create(OpCodes.Ldc_I8, syncvar.DirtyBit));
+            Worker.Append(Worker.Create(OpCodes.And));
+            Worker.Append(Worker.Create(OpCodes.Brfalse, endIfLabel));
 
             Body.Invoke();
 
             // say that this NB is dirty
-            worker.Append(worker.Create(OpCodes.Ldc_I4_1));
+            Worker.Append(Worker.Create(OpCodes.Ldc_I4_1));
             // set dirtyLocal to true
-            worker.Append(worker.Create(OpCodes.Stloc, DirtyLocal));
+            Worker.Append(Worker.Create(OpCodes.Stloc, DirtyLocal));
 
-            worker.Append(endIfLabel);
+            Worker.Append(endIfLabel);
         }
 
 
         public void WriteReturnDirty()
         {
-            worker.Append(worker.Create(OpCodes.Ldloc, DirtyLocal));
-            worker.Append(worker.Create(OpCodes.Ret));
+            Worker.Append(Worker.Create(OpCodes.Ldloc, DirtyLocal));
+            Worker.Append(Worker.Create(OpCodes.Ret));
         }
     }
 }
