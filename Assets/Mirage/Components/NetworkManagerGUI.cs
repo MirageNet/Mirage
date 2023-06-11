@@ -237,5 +237,21 @@ namespace Mirage
         private const int WINDOW_ID = 0;
         private const int WINDOW_HEIGHT = 240;
         private const int WINDOW_BUTTON_HEIGHT = 30;
+
+        internal void DrawNetworkManagerWindow (int id)
+        {
+            // If the server is active...
+            if (!NetworkManager.Server.Active && !NetworkManager.Client.Active)
+            {
+                DrawIdleControls();
+                // DrawIdleControls(GetRectFromAnchor(GUIAnchor, 71));
+
+                // StartButtons(GetRectFromAnchor(GUIAnchor, 71));
+            }
+            else
+            {
+                //StatusLabels(GetRectFromAnchor(GUIAnchor, 100));
+            }
+        }
     }
 }
