@@ -253,5 +253,37 @@ namespace Mirage
                 //StatusLabels(GetRectFromAnchor(GUIAnchor, 100));
             }
         }
+
+        /// <summary>
+        /// This draws the idle controls. Idle in the sense that
+        /// neither the Server or Client is running.
+        /// </summary>
+        internal void DrawIdleControls()
+        {
+            // Begin the idle controls.
+            GUILayout.BeginVertical(GUILayout.ExpandHeight(true));
+
+#if !UNITY_WEBGL
+            // Server mode controls (not available on WebGL).
+            GUILayout.Label("Server Mode");
+            GUILayout.Button("Server Only", GUILayout.Height(WINDOW_BUTTON_HEIGHT));
+            GUILayout.Button("Host Mode (Server + Client)", GUILayout.Height(WINDOW_BUTTON_HEIGHT));
+#endif
+
+            // Client mode
+            GUILayout.Label("Client Mode");
+            
+            NetworkAddress = GUILayout.TextField(NetworkAddress);
+            GUILayout.Button("Connect", GUILayout.Height(WINDOW_BUTTON_HEIGHT));
+
+            // Spacer?
+            GUILayout.FlexibleSpace();
+            // Misc stuff label
+            GUILayout.Label($"Mirage Networking v{Version.Current}\n" +
+                $"Unity v{Application.unityVersion}");
+
+            // Done!
+            GUILayout.EndVertical();
+        }
     }
 }
