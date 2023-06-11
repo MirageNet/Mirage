@@ -216,18 +216,38 @@ namespace Mirage
             }
         }
 
+        internal void CheckNetworkManagerReference()
+        {
+            if (NetworkManager == null)
+            {
+                throw new NullReferenceException("NetworkManager reference is NULL. Fix it, then try again.");
+            }
+        }
+
+        /// <summary>
+        /// Called when user clicks the Host button. It starts Host (Server + Client) mode.
+        /// </summary>
         private void ClickHost()
         {
+            CheckNetworkManagerReference();
             NetworkManager.Server.StartServer(NetworkManager.Client);
         }
 
+        /// <summary>
+        /// Called when user clicks Start Server button. Starts only the server, no server-mode client.
+        /// </summary>
         private void ClickServerOnly()
         {
+            CheckNetworkManagerReference();
             NetworkManager.Server.StartServer();
         }
 
+        /// <summary>
+        /// Called when the user clicks Connect. It connects to the server.
+        /// </summary>
         private void ClickClient()
         {
+            CheckNetworkManagerReference();
             NetworkManager.Client.Connect(NetworkAddress);
         }
 
