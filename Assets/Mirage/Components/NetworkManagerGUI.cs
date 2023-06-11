@@ -286,5 +286,15 @@ namespace Mirage
             // Done!
             GUILayout.EndVertical();
         }
+
+        /// <summary>
+        /// Draws controls and labels to give information about
+        /// the server instance that's running.
+        /// </summary>
+        internal void DrawServerControls()
+        {
+            GUILayout.BeginVertical(GUILayout.ExpandHeight(true));
+            GUILayout.EndVertical();
+        }
     }
 }
