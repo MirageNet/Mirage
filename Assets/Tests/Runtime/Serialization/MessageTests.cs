@@ -17,7 +17,6 @@ namespace Mirage.Tests.Runtime.Serialization
             var message = new ServerRpcMessage
             {
                 NetId = 42,
-                ComponentIndex = 4,
                 FunctionIndex = 2,
                 Payload = new ArraySegment<byte>(new byte[] { 0x01, 0x02 })
             };
@@ -26,7 +25,6 @@ namespace Mirage.Tests.Runtime.Serialization
             // deserialize the same data - do we get the same result?
             var fresh = MessagePacker.Unpack<ServerRpcMessage>(arr, null);
             Assert.That(fresh.NetId, Is.EqualTo(message.NetId));
-            Assert.That(fresh.ComponentIndex, Is.EqualTo(message.ComponentIndex));
             Assert.That(fresh.FunctionIndex, Is.EqualTo(message.FunctionIndex));
             Assert.That(fresh.Payload, Has.Count.EqualTo(message.Payload.Count));
             for (var i = 0; i < fresh.Payload.Count; ++i)
@@ -105,14 +103,12 @@ namespace Mirage.Tests.Runtime.Serialization
             var message = new RpcMessage
             {
                 NetId = 42,
-                ComponentIndex = 4,
                 FunctionIndex = 3,
                 Payload = new ArraySegment<byte>(new byte[] { 0x01, 0x02 })
             };
             var arr = MessagePacker.Pack(message);
             var fresh = MessagePacker.Unpack<RpcMessage>(arr, null);
             Assert.That(fresh.NetId, Is.EqualTo(message.NetId));
-            Assert.That(fresh.ComponentIndex, Is.EqualTo(message.ComponentIndex));
             Assert.That(fresh.FunctionIndex, Is.EqualTo(message.FunctionIndex));
             Assert.That(fresh.Payload.Count, Is.EqualTo(message.Payload.Count));
             for (var i = 0; i < fresh.Payload.Count; ++i)

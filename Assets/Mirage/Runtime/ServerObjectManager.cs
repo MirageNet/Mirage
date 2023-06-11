@@ -322,16 +322,16 @@ namespace Mirage
         /// <param name="msg"></param>
         private void OnServerRpcWithReplyMessage(INetworkPlayer player, ServerRpcWithReplyMessage msg)
         {
-            OnServerRpc(player, msg.NetId, msg.ComponentIndex, msg.FunctionIndex, msg.Payload, msg.ReplyId);
+            OnServerRpc(player, msg.NetId, msg.FunctionIndex, msg.Payload, msg.ReplyId);
         }
 
         private void OnServerRpcMessage(INetworkPlayer player, ServerRpcMessage msg)
         {
-            OnServerRpc(player, msg.NetId, msg.ComponentIndex, msg.FunctionIndex, msg.Payload, default);
+            OnServerRpc(player, msg.NetId, msg.FunctionIndex, msg.Payload, default);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void OnServerRpc(INetworkPlayer player, uint netId, int componentIndex, int functionIndex, ArraySegment<byte> payload, int replyId)
+        private void OnServerRpc(INetworkPlayer player, uint netId, int functionIndex, ArraySegment<byte> payload, int replyId)
         {
             if (!_server.World.TryGetIdentity(netId, out var identity))
             {
@@ -339,9 +339,7 @@ namespace Mirage
                 return;
             }
 
-            var behaviour = identity.NetworkBehaviours[componentIndex];
-
-            var remoteCall = behaviour.RemoteCallCollection.Get(functionIndex);
+            var remoteCall = identity.RemoteCallCollection.GetAbsolute(functionIndex);
 
             if (remoteCall.InvokeType != RpcInvokeType.ServerRpc)
             {
@@ -361,7 +359,7 @@ namespace Mirage
 
             using (var reader = NetworkReaderPool.GetReader(payload, _server.World))
             {
-                remoteCall.Invoke(reader, behaviour, player, replyId);
+                remoteCall.Invoke(reader, player, replyId);
             }
         }
 

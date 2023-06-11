@@ -16,7 +16,6 @@ namespace Mirage.RemoteCalls
             var message = new ServerRpcMessage
             {
                 NetId = behaviour.NetId,
-                ComponentIndex = behaviour.ComponentIndex,
                 FunctionIndex = index,
                 Payload = writer.ToArraySegment()
             };
@@ -30,7 +29,6 @@ namespace Mirage.RemoteCalls
             var message = new ServerRpcWithReplyMessage
             {
                 NetId = behaviour.NetId,
-                ComponentIndex = behaviour.ComponentIndex,
                 FunctionIndex = index,
                 Payload = writer.ToArraySegment()
             };
@@ -46,17 +44,18 @@ namespace Mirage.RemoteCalls
 
         private static void Validate(NetworkBehaviour behaviour, int index, bool requireAuthority)
         {
-            var rpc = behaviour.RemoteCallCollection.Get(index);
             var client = behaviour.Client;
 
             if (client == null || !client.Active)
             {
+                var rpc = behaviour.Identity.RemoteCallCollection.GetRelative(behaviour, index);
                 throw new InvalidOperationException($"ServerRpc Function {rpc} called on server without an active client.");
             }
 
             // if authority is required, then client must have authority to send
             if (requireAuthority && !behaviour.HasAuthority)
             {
+                var rpc = behaviour.Identity.RemoteCallCollection.GetRelative(behaviour, index);
                 throw new InvalidOperationException($"Trying to send ServerRpc for object without authority. {rpc}");
             }
 

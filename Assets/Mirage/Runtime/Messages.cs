@@ -39,7 +39,6 @@ namespace Mirage
     public struct ServerRpcMessage
     {
         public uint NetId;
-        public int ComponentIndex;
         public int FunctionIndex;
 
         // the parameters for the Cmd function
@@ -51,7 +50,6 @@ namespace Mirage
     public struct ServerRpcWithReplyMessage
     {
         public uint NetId;
-        public int ComponentIndex;
         public int FunctionIndex;
 
         // if the server Rpc can return values
@@ -72,7 +70,6 @@ namespace Mirage
     public struct RpcMessage
     {
         public uint NetId;
-        public int ComponentIndex;
         public int FunctionIndex;
         public ArraySegment<byte> Payload;
     }

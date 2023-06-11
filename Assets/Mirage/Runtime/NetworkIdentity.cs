@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Mirage.Events;
 using Mirage.Logging;
+using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -247,7 +248,7 @@ namespace Mirage
             // if authority changes, we need to check if we are still allowed to sync to/from this instance
             foreach (var comp in NetworkBehaviours)
                 comp.UpdateSyncObjectShouldSync();
-                
+
             _onOwnerChanged.Invoke(_owner);
 
             // only invoke again if new owner is not null
@@ -1195,6 +1196,31 @@ namespace Mirage
         public override string ToString()
         {
             return $"Identity[{NetId}, {name}]";
+        }
+
+
+        // todo update comment
+        /// <summary>
+        /// Collection that holds information about all RPC in this networkbehaviour (including derived classes)
+        /// <para>Can be used to get RPC name from its index</para>
+        /// <para>NOTE: Weaver uses this collection to add rpcs, If adding your own rpc do at your own risk</para>
+        /// </summary>
+        [NonSerialized]
+        private RemoteCallCollection _remoteCallCollection;
+        internal RemoteCallCollection RemoteCallCollection
+        {
+            get
+            {
+                if (_remoteCallCollection == null)
+                {
+                    // we shoulld be save to lazy init
+                    // we only need to register RPCs when we receive them
+                    // when sending the index is baked in by weaver
+                    _remoteCallCollection = new RemoteCallCollection();
+                    _remoteCallCollection.RegisterAll(NetworkBehaviours);
+                }
+                return _remoteCallCollection;
+            }
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Mirage.Weaver.NetworkBehaviours
         }
 
         /// <summary>
-        /// Adds Serialize method to current type
+        /// Adds method to current type
         /// </summary>
         /// <returns></returns>
         public void AddMethod()

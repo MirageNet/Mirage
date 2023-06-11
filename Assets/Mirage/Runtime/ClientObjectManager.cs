@@ -708,9 +708,7 @@ namespace Mirage
                 return;
             }
 
-            var behaviour = identity.NetworkBehaviours[msg.ComponentIndex];
-
-            var remoteCall = behaviour.RemoteCallCollection.Get(msg.FunctionIndex);
+            var remoteCall = identity.RemoteCallCollection.GetAbsolute(msg.FunctionIndex);
 
             if (remoteCall.InvokeType != RpcInvokeType.ClientRpc)
             {
@@ -719,7 +717,7 @@ namespace Mirage
 
             using (var reader = NetworkReaderPool.GetReader(msg.Payload, _client.World))
             {
-                remoteCall.Invoke(reader, behaviour, null, 0);
+                remoteCall.Invoke(reader, null, 0);
             }
         }
 

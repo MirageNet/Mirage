@@ -43,25 +43,23 @@ namespace Mirage.RemoteCalls
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static RpcMessage CreateMessage(NetworkBehaviour behaviour, int index, NetworkWriter writer)
         {
-            var rpc = behaviour.RemoteCallCollection.Get(index);
-
-            Validate(behaviour, rpc);
+            Validate(behaviour, index);
 
             var message = new RpcMessage
             {
                 NetId = behaviour.NetId,
-                ComponentIndex = behaviour.ComponentIndex,
                 FunctionIndex = index,
                 Payload = writer.ToArraySegment()
             };
             return message;
         }
 
-        private static void Validate(NetworkBehaviour behaviour, RemoteCall rpc)
+        private static void Validate(NetworkBehaviour behaviour, int index)
         {
             var server = behaviour.Server;
             if (server == null || !server.Active)
             {
+                var rpc = behaviour.Identity.RemoteCallCollection.GetRelative(behaviour, index);
                 throw new InvalidOperationException($"RPC Function {rpc} called when server is not active.");
             }
         }
