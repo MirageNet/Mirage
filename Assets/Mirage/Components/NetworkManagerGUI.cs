@@ -63,6 +63,11 @@ namespace Mirage
                 return;
             }
 
+            // Draw the window on the screen.
+            GUIUtility.ScaleAroundPivot(Vector2.one * Scale, GetPivotFromAnchor(GUIAnchor));
+            GUI.Window(WINDOW_ID, GetRectFromAnchor(GUIAnchor, WINDOW_HEIGHT), DrawNetworkManagerWindow, "Mirage Networking");
+
+            /*
             GUIUtility.ScaleAroundPivot(Vector2.one * Scale, GetPivotFromAnchor(GUIAnchor));
 
             if (!NetworkManager.Server.Active && !NetworkManager.Client.Active)
