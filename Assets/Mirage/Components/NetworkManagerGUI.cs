@@ -78,6 +78,7 @@ namespace Mirage
             {
                 StatusLabels(GetRectFromAnchor(GUIAnchor, 100));
             }
+            */
         }
 
         private void StartButtons(Rect position)
