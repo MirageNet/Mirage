@@ -1,9 +1,5 @@
 using System;
-// #if !UNITY_WEBGL
-// This is needed if we want to show the port
-// and we're using the UDP SocketLayer.
-// using Mirage.Sockets.Udp;
-// #endif
+using Mirage.SocketLayer;
 using UnityEngine;
 
 namespace Mirage
@@ -28,10 +24,6 @@ namespace Mirage
 
         [Tooltip("Select where you want the NetworkManagerGUI elements to be located on the screen.")]
         public TextAnchor GUIAnchor = TextAnchor.UpperLeft;
-
-// #if !UNITY_WEBGL
-//      private UdpSocketFactory udpSocketFactory;
-// #endif
 
         private void Reset()
         {
@@ -72,108 +64,18 @@ namespace Mirage
                 return;
             }
 
-// #if !UNITY_WEBGL
-            // This will only be called one time.
-            // TODO: Maybe remove this weird jank - maybe talk to James about a more elegant solution.
-            // if (udpSocketFactory == null)
-            // {
-            //  if (NetworkManager.Server.SocketFactory is UdpSocketFactory)
-            //  {
-            //      udpSocketFactory = NetworkManager.Server.SocketFactory as UdpSocketFactory;
-            //  }
-            // }
-// #endif
-
             // Draw the window on the screen.
             GUIUtility.ScaleAroundPivot(Vector2.one * Scale, GetPivotFromAnchor(GUIAnchor));
             GUI.Window(WINDOW_ID, GetRectFromAnchor(GUIAnchor, WINDOW_HEIGHT), DrawNetworkManagerWindow, "Mirage Networking");
         }
 
-        private void StartButtons(Rect position)
-        {
-            GUILayout.BeginArea(position);
 
-            // Coburn, 2023-02-02, possible TODO: Remove the server buttons for WebGL since it can't be used as server
-            if (Application.platform == RuntimePlatform.WebGLPlayer)
-            {
-                GUILayout.Box("WebGL cannot host");
-            }
-            else
-            {
-                if (GUILayout.Button("Host (Server + Client)"))
-                {
-                    ClickHost();
-                }
-            }
-
-            GUILayout.BeginHorizontal();
-
-            if (GUILayout.Button("Client"))
-            {
-                ClickClient();
-            }
-            NetworkAddress = GUILayout.TextField(NetworkAddress);
-
-            GUILayout.EndHorizontal();
-
-            if (Application.platform == RuntimePlatform.WebGLPlayer)
-            {
-                GUILayout.Box("WebGL cannot be a server");
-            }
-            else
-            {
-                if (GUILayout.Button("Server Only"))
-                {
-                    ClickServerOnly();
-                }
-            }
-
-            GUILayout.EndArea();
-        }
-
-        private void StatusLabels(Rect position)
-        {
-            GUILayout.BeginArea(position);
-
-            if (NetworkManager.Server.Active)
-            {
-                GUILayout.Label("Server: active");
-                GUILayout.Label($"Socket: {NetworkManager.Server.SocketFactory.GetType().Name}");
-
-                if (NetworkManager.Client.IsConnected)
-                {
-                    if (GUILayout.Button("Stop Host"))
-                    {
-                        NetworkManager.Server.Stop();
-                    }
-                }
-                else
-                {
-                    if (GUILayout.Button("Stop Server"))
-                    {
-                        NetworkManager.Server.Stop();
-                    }
-                }
-            }
-
-            if (NetworkManager.Client.IsConnected)
-            {
-                GUILayout.Label($"Client: address={NetworkAddress}");
-
-                if (GUILayout.Button("Stop Client"))
-                {
-                    NetworkManager.Client.Disconnect();
-                }
-            }
-            else if (NetworkManager.Client.Active)
-            {
-                GUILayout.Label($"Connecting to {NetworkAddress}...");
-                //TODO: Implement cancel button when it's possible.
-            }
-
-            GUILayout.EndArea();
-        }
-
+        /// <summary>
+        /// Returns a Rect from the anchored position.
+        /// </summary>
+        /// <param name="anchor">Which part of the screen is this located?</param>
+        /// <param name="height">How tall the Rect will be</param>
+        /// <returns></returns>
         private static Rect GetRectFromAnchor(TextAnchor anchor, int height)
         {
             switch (anchor)
@@ -199,6 +101,11 @@ namespace Mirage
             }
         }
 
+        /// <summary>
+        /// Gets a Pivot from the Anchored position.
+        /// </summary>
+        /// <param name="anchor">Which part of the screen is this located?</param>
+        /// <returns>Vector2 with the pivot X and Y.</returns>
         private static Vector2 GetPivotFromAnchor(TextAnchor anchor)
         {
             switch (anchor)
@@ -224,6 +131,10 @@ namespace Mirage
             }
         }
 
+        /// <summary>
+        /// Simply throws an exception if the NetworkManager reference was null.
+        /// </summary>
+        /// <exception cref="NullReferenceException"></exception>
         internal void CheckNetworkManagerReference()
         {
             if (NetworkManager == null)
@@ -259,27 +170,26 @@ namespace Mirage
             NetworkManager.Client.Connect(NetworkAddress);
         }
 
-        private const int WIDTH = 200;
-        private const int PADDING_X = 10;
-        private const int PADDING_Y = 10;
-
-        private const int WINDOW_ID = 0;
-        private const int WINDOW_HEIGHT = 240;
-        private const int WINDOW_BUTTON_HEIGHT = 30;
-
+        /// <summary>
+        /// Draws the NetworkManager control window.
+        /// </summary>
+        /// <param name="id">Parameter reference passed from GUI.DrawWindow(int)</param>
         internal void DrawNetworkManagerWindow(int id)
         {
             // If the server is active...
-            if (!NetworkManager.Server.Active && !NetworkManager.Client.Active)
+            if (NetworkManager.Server.Active)
             {
-                DrawIdleControls();
-                // DrawIdleControls(GetRectFromAnchor(GUIAnchor, 71));
-
-                // StartButtons(GetRectFromAnchor(GUIAnchor, 71));
+                DrawServerControls();
+            }
+            else if (NetworkManager.Client.Active)
+            {
+                // The client is active.
+                DrawClientControls();
             }
             else
             {
-                //StatusLabels(GetRectFromAnchor(GUIAnchor, 100));
+                // Nothing is active.
+                DrawIdleControls();
             }
         }
 
@@ -308,8 +218,8 @@ namespace Mirage
 #endif
             // Client mode
             GUILayout.Label("Client Mode");
-
             NetworkAddress = GUILayout.TextField(NetworkAddress);
+
             if (GUILayout.Button("Connect", GUILayout.Height(WINDOW_BUTTON_HEIGHT)))
             {
                 ClickClient();
@@ -318,11 +228,9 @@ namespace Mirage
             // Spacer
             GUILayout.FlexibleSpace();
 
-            // Misc stuff label
+            // Versioning
             GUILayout.Label($"Mirage Networking v{Version.Current}\n" +
                 $"Unity v{Application.unityVersion}");
-
-            // Done!
             GUILayout.EndVertical();
         }
 
@@ -336,27 +244,73 @@ namespace Mirage
             GUILayout.Label("Server is active.");
 
             if (NetworkManager.Client.IsConnected)
-            {
-                GUILayout.Label("Host Mode is active.");
+                GUILayout.Label("Host mode is active.");
 
-                if (GUILayout.Button("Stop Host Client", GUILayout.Height(WINDOW_BUTTON_HEIGHT)))
-                {
-                    NetworkManager.Server.Stop();
-                }
-            }
-
-            if (GUILayout.Button("Stop Server", GUILayout.Height(WINDOW_BUTTON_HEIGHT)))
+            if (GUILayout.Button(NetworkManager.Client.IsConnected ? "Stop Host Mode" : "Stop Server", GUILayout.Height(WINDOW_BUTTON_HEIGHT)))
             {
                 NetworkManager.Server.Stop();
             }
 
-            if (NetworkManager.Server.SocketFactory is UdpSocketFactory)
-                GUILayout.Label($"Listen Port: {NetworkManager.Server.SocketFactory}");
+            // Additional texts.
+            if (NetworkManager.Server.SocketFactory is IHasAddress hasAddress)
+                GUILayout.Label($"Listen Address: {hasAddress.Address}");
+
+            if (NetworkManager.Server.SocketFactory is IHasPort hasPort)
+                GUILayout.Label($"Listen Port: {hasPort.Port}");
 
             GUILayout.Label($"Backend: {NetworkManager.Server.SocketFactory.GetType().Name}");
 
-
             GUILayout.EndVertical();
         }
+
+        /// <summary>
+        /// Draws controls and labels to give information about the client instance
+        /// that's running.
+        /// </summary>
+        internal void DrawClientControls()
+        {
+            double latency;
+
+            GUILayout.BeginVertical();
+
+            GUILayout.Label("Client mode is active.");
+
+            if (NetworkManager.Client.IsConnected)
+            {
+                latency = NetworkManager.Client.World.Time.Rtt;
+
+                if (GUILayout.Button("Stop Client", GUILayout.Height(WINDOW_BUTTON_HEIGHT)))
+                {
+                    NetworkManager.Client.Disconnect();
+                }                
+
+                if (NetworkManager.Client.SocketFactory is IHasAddress hasAddress)
+                    GUILayout.Label($"Server: {hasAddress.Address}");
+
+                if (NetworkManager.Client.SocketFactory is IHasPort hasPort)
+                    GUILayout.Label($"Port: {hasPort.Port}");
+
+                // Round this to an integer as something like 7.0101025 ms looks incredibly odd.
+                // We have to cast down to a float because Unity RoundToInt doesn't allow double -> int
+                GUILayout.Label($"Latency: {Mathf.RoundToInt((float)(latency * 1000))} ms");
+            }
+            else
+            {
+                // No controls, just say we're connecting.
+                GUILayout.Label($"Connecting to '{NetworkAddress}'.");
+            }
+
+            GUILayout.Label($"Backend: {NetworkManager.Client.SocketFactory.GetType().Name}");
+            GUILayout.EndVertical();
+        }
+
+        // Constants.
+        private const int WIDTH = 200;
+        private const int PADDING_X = 10;
+        private const int PADDING_Y = 10;
+
+        private const int WINDOW_ID = 0;
+        private const int WINDOW_HEIGHT = 240;
+        private const int WINDOW_BUTTON_HEIGHT = 30;
     }
 }
