@@ -289,21 +289,32 @@ namespace Mirage
             // Begin the idle controls.
             GUILayout.BeginVertical(GUILayout.ExpandHeight(true));
 
-#if !UNITY_WEBGL
             // Server mode controls (not available on WebGL).
+#if !UNITY_WEBGL            
             GUILayout.Label("Server Mode");
-            GUILayout.Button("Server Only", GUILayout.Height(WINDOW_BUTTON_HEIGHT));
-            GUILayout.Button("Host Mode (Server + Client)", GUILayout.Height(WINDOW_BUTTON_HEIGHT));
-#endif
 
+            if (GUILayout.Button("Server Only", GUILayout.Height(WINDOW_BUTTON_HEIGHT)))
+            {
+                ClickServerOnly();
+            }
+
+            if (GUILayout.Button("Host Mode (Server + Client)", GUILayout.Height(WINDOW_BUTTON_HEIGHT)))
+            {
+                ClickHost();
+            }
+#endif
             // Client mode
             GUILayout.Label("Client Mode");
-            
-            NetworkAddress = GUILayout.TextField(NetworkAddress);
-            GUILayout.Button("Connect", GUILayout.Height(WINDOW_BUTTON_HEIGHT));
 
-            // Spacer?
+            NetworkAddress = GUILayout.TextField(NetworkAddress);
+            if (GUILayout.Button("Connect", GUILayout.Height(WINDOW_BUTTON_HEIGHT)))
+            {
+                ClickClient();
+            }
+
+            // Spacer
             GUILayout.FlexibleSpace();
+
             // Misc stuff label
             GUILayout.Label($"Mirage Networking v{Version.Current}\n" +
                 $"Unity v{Application.unityVersion}");
@@ -319,6 +330,29 @@ namespace Mirage
         internal void DrawServerControls()
         {
             GUILayout.BeginVertical(GUILayout.ExpandHeight(true));
+            GUILayout.Label("Server is active.");
+
+            if (NetworkManager.Client.IsConnected)
+            {
+                GUILayout.Label("Host Mode is active.");
+
+                if (GUILayout.Button("Stop Host Client", GUILayout.Height(WINDOW_BUTTON_HEIGHT)))
+                {
+                    NetworkManager.Server.Stop();
+                }
+            }
+
+            if (GUILayout.Button("Stop Server", GUILayout.Height(WINDOW_BUTTON_HEIGHT)))
+            {
+                NetworkManager.Server.Stop();
+            }
+
+            if (NetworkManager.Server.SocketFactory is UdpSocketFactory)
+                GUILayout.Label($"Listen Port: {NetworkManager.Server.SocketFactory}");
+
+            GUILayout.Label($"Backend: {NetworkManager.Server.SocketFactory.GetType().Name}");
+
+
             GUILayout.EndVertical();
         }
     }
