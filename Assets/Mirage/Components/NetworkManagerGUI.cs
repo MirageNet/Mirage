@@ -233,5 +233,9 @@ namespace Mirage
         private const int WIDTH = 200;
         private const int PADDING_X = 10;
         private const int PADDING_Y = 10;
+
+        private const int WINDOW_ID = 0;
+        private const int WINDOW_HEIGHT = 240;
+        private const int WINDOW_BUTTON_HEIGHT = 30;
     }
 }
