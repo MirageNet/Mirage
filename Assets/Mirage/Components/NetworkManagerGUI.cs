@@ -32,7 +32,6 @@ namespace Mirage
 
         private void Awake()
         {
-            // Coburn, 2023-02-02: 
             // If automatic configuration of NetworkManager is enabled, then attempt to grab the
             // NetworkManager that this script is attached to.
             if (AutoConfigureNetworkManager)
@@ -57,9 +56,8 @@ namespace Mirage
 
         private void OnGUI()
         {
-            // Coburn, 2023-02-02: Apparently NMGUI can/may lose reference to NetworkManager for reasons unknown
-            // (maybe due to being in and out of DDOL and scene changes?). To prevent a NRE being spewed every OnGUI
-            // update, short-circuit here to prevent log spam.
+            // Depending how the scene is set up, references can be broken. If the NM reference is null/missing, then
+            // short-circuit here to prevent log spam.
             if (NetworkManager == null)
             {
                 return;
