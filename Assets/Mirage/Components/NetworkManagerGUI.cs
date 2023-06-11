@@ -1,4 +1,9 @@
 using System;
+#if !UNITY_WEBGL
+// This is needed if we want to show the port
+// and we're using the UDP SocketLayer.
+using Mirage.Sockets.Udp;
+#endif
 using UnityEngine;
 
 namespace Mirage
