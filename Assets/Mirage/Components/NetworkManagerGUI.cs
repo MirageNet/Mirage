@@ -1,9 +1,9 @@
 using System;
-#if !UNITY_WEBGL
+// #if !UNITY_WEBGL
 // This is needed if we want to show the port
 // and we're using the UDP SocketLayer.
-using Mirage.Sockets.Udp;
-#endif
+// using Mirage.Sockets.Udp;
+// #endif
 using UnityEngine;
 
 namespace Mirage
@@ -28,6 +28,10 @@ namespace Mirage
 
         [Tooltip("Select where you want the NetworkManagerGUI elements to be located on the screen.")]
         public TextAnchor GUIAnchor = TextAnchor.UpperLeft;
+
+// #if !UNITY_WEBGL
+//      private UdpSocketFactory udpSocketFactory;
+// #endif
 
         private void Reset()
         {
@@ -68,22 +72,21 @@ namespace Mirage
                 return;
             }
 
+// #if !UNITY_WEBGL
+            // This will only be called one time.
+            // TODO: Maybe remove this weird jank - maybe talk to James about a more elegant solution.
+            // if (udpSocketFactory == null)
+            // {
+            //  if (NetworkManager.Server.SocketFactory is UdpSocketFactory)
+            //  {
+            //      udpSocketFactory = NetworkManager.Server.SocketFactory as UdpSocketFactory;
+            //  }
+            // }
+// #endif
+
             // Draw the window on the screen.
             GUIUtility.ScaleAroundPivot(Vector2.one * Scale, GetPivotFromAnchor(GUIAnchor));
             GUI.Window(WINDOW_ID, GetRectFromAnchor(GUIAnchor, WINDOW_HEIGHT), DrawNetworkManagerWindow, "Mirage Networking");
-
-            /*
-            GUIUtility.ScaleAroundPivot(Vector2.one * Scale, GetPivotFromAnchor(GUIAnchor));
-
-            if (!NetworkManager.Server.Active && !NetworkManager.Client.Active)
-            {
-                StartButtons(GetRectFromAnchor(GUIAnchor, 71));
-            }
-            else
-            {
-                StatusLabels(GetRectFromAnchor(GUIAnchor, 100));
-            }
-            */
         }
 
         private void StartButtons(Rect position)
