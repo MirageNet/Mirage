@@ -282,7 +282,7 @@ namespace Mirage
                 if (GUILayout.Button("Stop Client", GUILayout.Height(WINDOW_BUTTON_HEIGHT)))
                 {
                     NetworkManager.Client.Disconnect();
-                }                
+                }
 
                 if (NetworkManager.Client.SocketFactory is IHasAddress hasAddress)
                     GUILayout.Label($"Server: {hasAddress.Address}");
