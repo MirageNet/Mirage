@@ -44,6 +44,8 @@ namespace Mirage
         public ClientObjectManager ObjectManager;
 
         public bool DisconnectOnException = true;
+        [Tooltip("Should the message handler rethrow the exception after logging. This should only be used when deubgging as it may stop other Mirage functions from running after messages handling")]
+        public bool RethrowException = false;
 
         [Tooltip("If true will set Application.runInBackground")]
         public bool RunInBackground = true;
@@ -134,7 +136,7 @@ namespace Mirage
 
             var socket = SocketFactory.CreateClientSocket();
             var maxPacketSize = SocketFactory.MaxPacketSize;
-            MessageHandler = new MessageHandler(World, DisconnectOnException);
+            MessageHandler = new MessageHandler(World, DisconnectOnException, RethrowException);
             var dataHandler = new DataHandler(MessageHandler);
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
 
@@ -221,7 +223,7 @@ namespace Mirage
             World = server.World;
 
             // create local connection objects and connect them
-            MessageHandler = new MessageHandler(World, DisconnectOnException);
+            MessageHandler = new MessageHandler(World, DisconnectOnException, RethrowException);
             var dataHandler = new DataHandler(MessageHandler);
             (var clientConn, var serverConn) = PipePeerConnection.Create(dataHandler, serverDataHandler, OnHostDisconnected, null);
 

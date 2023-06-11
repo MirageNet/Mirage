@@ -11,14 +11,16 @@ namespace Mirage
         private static readonly ILogger logger = LogFactory.GetLogger<MessageHandler>();
 
         private readonly bool _disconnectOnException;
+        private readonly bool _rethrowException = false;
         private readonly IObjectLocator _objectLocator;
 
         internal readonly Dictionary<int, Handler> _messageHandlers = new Dictionary<int, Handler>();
 
-        public MessageHandler(IObjectLocator objectLocator, bool disconnectOnException)
+        public MessageHandler(IObjectLocator objectLocator, bool disconnectOnException, bool rethrowException = false)
         {
             _disconnectOnException = disconnectOnException;
             _objectLocator = objectLocator;
+            _rethrowException = rethrowException;
         }
 
         public void RegisterHandler<T>(MessageDelegateWithPlayer<T> handler, bool allowUnauthenticated)
@@ -93,6 +95,10 @@ namespace Mirage
                 catch (Exception e)
                 {
                     LogAndCheckDisconnect(player, e);
+
+                    if (_rethrowException)
+                        // note, dont add Exception here, otherwise strack trace will be overritten
+                        throw;
                 }
             }
         }

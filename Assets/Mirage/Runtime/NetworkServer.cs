@@ -42,6 +42,8 @@ namespace Mirage
         public int MaxConnections = 4;
 
         public bool DisconnectOnException = true;
+        [Tooltip("Should the message handler rethrow the exception after logging. This should only be used when deubgging as it may stop other Mirage functions from running after messages handling")]
+        public bool RethrowException = false;
 
         [Tooltip("If true will set Application.runInBackground")]
         public bool RunInBackground = true;
@@ -223,7 +225,7 @@ namespace Mirage
             SyncVarSender = new SyncVarSender();
 
             LocalClient = localClient;
-            MessageHandler = new MessageHandler(World, DisconnectOnException);
+            MessageHandler = new MessageHandler(World, DisconnectOnException, RethrowException);
             MessageHandler.RegisterHandler<NetworkPingMessage>(World.Time.OnServerPing, allowUnauthenticated: true);
 
             // create after MessageHandler, SyncVarReceiver uses it 

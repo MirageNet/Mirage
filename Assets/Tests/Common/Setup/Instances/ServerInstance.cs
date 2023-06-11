@@ -34,6 +34,7 @@ namespace Mirage.Tests
         {
             GameObject = new GameObject("server", typeof(ServerObjectManager), typeof(NetworkServer));
             Server = GameObject.GetComponent<NetworkServer>();
+            Server.RethrowException = true;
             if (config != null) Server.PeerConfig = config;
             SocketFactory = GameObject.AddComponent<TestSocketFactory>();
             Server.SocketFactory = SocketFactory;

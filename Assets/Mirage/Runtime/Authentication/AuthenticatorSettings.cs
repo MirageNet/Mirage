@@ -33,7 +33,7 @@ namespace Mirage.Authentication
 
             // message handler used just for Auth message
             // this is needed because message are wrapped inside AuthMessage
-            _authHandler = new MessageHandler(null, true);
+            _authHandler = new MessageHandler(null, true, _server.RethrowException);
 
             server.Disconnected.AddListener(ServerDisconnected);
 
