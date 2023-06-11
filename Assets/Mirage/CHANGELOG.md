@@ -1,3 +1,15 @@
+# [140.3.0](https://github.com/MirageNet/Mirage/compare/v140.2.0...v140.3.0) (2023-06-11)
+
+
+### Features
+
+* adding option to rethrow exception throw message handler ([15f27a4](https://github.com/MirageNet/Mirage/commit/15f27a4b6931fb5c87af0d8cdf2f5d66bd5ebf56))
+
+
+### Performance Improvements
+
+* moving RPC collection to NetworkIdentity ([773910c](https://github.com/MirageNet/Mirage/commit/773910cd31f0f034ede9930470262307c935ba5e))
+
 # [140.2.0](https://github.com/MirageNet/Mirage/compare/v140.1.0...v140.2.0) (2023-06-10)
 
 
