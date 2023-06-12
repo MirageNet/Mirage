@@ -542,6 +542,9 @@ namespace Mirage
         protected internal virtual int GetRpcCount() => 0;
         // overridden by weaver
         protected internal virtual void RegisterRpc(RemoteCallCollection collection) { }
+
+        void ICanHaveRpc.RegisterRpc(RemoteCallCollection collection) => RegisterRpc(collection);
+        int ICanHaveRpc.GetRpcCount() => GetRpcCount();
         #endregion
 
         public struct Id : IEquatable<Id>
