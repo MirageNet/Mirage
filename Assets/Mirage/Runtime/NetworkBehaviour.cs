@@ -20,7 +20,7 @@ namespace Mirage
     /// </remarks>
     [AddComponentMenu("")]
     [HelpURL("https://miragenet.github.io/Mirage/docs/guides/game-objects/network-behaviour")]
-    public abstract class NetworkBehaviour : MonoBehaviour
+    public abstract class NetworkBehaviour : MonoBehaviour, INetworkBehaviour, ICanHaveRpc
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkBehaviour));
 
@@ -160,6 +160,8 @@ namespace Mirage
         /// </remarks>
         private static List<NetworkIdentity> networkIdentityGetComponentCacheList = new List<NetworkIdentity>(1);
 #endif
+
+        INetworkIdentity INetworkBehaviour.Identity => Identity;
 
         /// <summary>
         /// Returns the NetworkIdentity of this object

@@ -85,13 +85,13 @@ namespace Mirage.RemoteCalls
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetIndexOffset(NetworkBehaviour behaviour)
+        public int GetIndexOffset(INetworkBehaviour behaviour)
         {
             return IndexOffset[behaviour.ComponentIndex];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public RemoteCall GetRelative(NetworkBehaviour behaviour, int index)
+        public RemoteCall GetRelative(INetworkBehaviour behaviour, int index)
         {
             return RemoteCalls[GetIndexOffset(behaviour) + index];
         }

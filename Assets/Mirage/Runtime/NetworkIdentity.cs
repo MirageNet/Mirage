@@ -101,7 +101,7 @@ namespace Mirage
     [DisallowMultipleComponent]
     [AddComponentMenu("Network/NetworkIdentity")]
     [HelpURL("https://miragenet.github.io/Mirage/docs/components/network-identity")]
-    public sealed class NetworkIdentity : MonoBehaviour
+    public sealed class NetworkIdentity : MonoBehaviour, INetworkIdentity
     {
         private static readonly ILogger logger = LogFactory.GetLogger<NetworkIdentity>();
 
@@ -1189,5 +1189,10 @@ namespace Mirage
                 return _remoteCallCollection;
             }
         }
+
+        RemoteCallCollection INetworkIdentity.RemoteCallCollection => RemoteCallCollection;
+        ServerObjectManager INetworkIdentity.ServerObjectManager => ServerObjectManager;
+        ClientObjectManager INetworkIdentity.ClientObjectManager => ClientObjectManager;
+        HashSet<INetworkPlayer> INetworkIdentity.Observers => observers;
     }
 }

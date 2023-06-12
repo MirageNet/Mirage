@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using Mirage.Authentication;
 using Mirage.Events;
 using Mirage.Logging;
+using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using Mirage.SocketLayer;
 using UnityEngine;
@@ -475,9 +476,9 @@ namespace Mirage
             }
         }
 
-        public void SendToObservers<T>(NetworkIdentity identity, T msg, bool excludeLocalPlayer, bool excludeOwner, Channel channelId = Channel.Reliable)
+        public void SendToObservers<T>(INetworkIdentity identity, T msg, bool excludeLocalPlayer, bool excludeOwner, Channel channelId = Channel.Reliable)
         {
-            var observers = identity.observers;
+            var observers = identity.Observers;
             if (observers.Count == 0)
                 return;
 
@@ -584,7 +585,7 @@ namespace Mirage
         /// <param name="msg">The message to deliver to clients.</param>
         /// <param name="includeOwner">Should the owner should receive this message too?</param>
         /// <param name="channelId">The transport channel that should be used to deliver the message. Default is the Reliable channel.</param>
-        internal static void SendToRemoteObservers<T>(this NetworkIdentity identity, T msg, bool includeOwner = true, Channel channelId = Channel.Reliable)
+        internal static void SendToRemoteObservers<T>(this INetworkIdentity identity, T msg, bool includeOwner = true, Channel channelId = Channel.Reliable)
         {
             identity.Server.SendToObservers(identity, msg, excludeLocalPlayer: true, excludeOwner: !includeOwner, channelId: channelId);
         }
