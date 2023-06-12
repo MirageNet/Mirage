@@ -11,7 +11,7 @@ namespace Mirage.Serialization
     public static class NetworkReaderPool
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkReaderPool));
-        private static Pool<PooledNetworkReader> pool = new Pool<PooledNetworkReader>(PooledNetworkReader.CreateNew, 0, 5, 100, logger);
+        private static Pool<PooledNetworkReader> pool = new Pool<PooledNetworkReader>(PooledNetworkReader.CreateNew, 5, 100, logger);
 
         public static void Configure(int startPoolSize = 5, int maxPoolSize = 100)
         {
@@ -21,7 +21,7 @@ namespace Mirage.Serialization
             }
             else
             {
-                pool = new Pool<PooledNetworkReader>(PooledNetworkReader.CreateNew, 0, startPoolSize, maxPoolSize, logger);
+                pool = new Pool<PooledNetworkReader>(PooledNetworkReader.CreateNew, startPoolSize, maxPoolSize, logger);
             }
         }
 
@@ -89,7 +89,7 @@ namespace Mirage.Serialization
             _pool = pool ?? throw new ArgumentNullException(nameof(pool));
         }
 
-        public static PooledNetworkReader CreateNew(int _, Pool<PooledNetworkReader> pool)
+        public static PooledNetworkReader CreateNew(Pool<PooledNetworkReader> pool)
         {
             return new PooledNetworkReader(pool);
         }

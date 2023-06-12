@@ -81,7 +81,7 @@ namespace Mirage.SocketLayer
             _connection = connection;
             _time = time;
             _bufferPool = bufferPool;
-            _reliablePool = new Pool<ReliablePacket>(ReliablePacket.CreateNew, default, 0, config.MaxReliablePacketsInSendBufferPerConnection);
+            _reliablePool = new Pool<ReliablePacket>(ReliablePacket.CreateNew, 0, config.MaxReliablePacketsInSendBufferPerConnection);
             _metrics = metrics;
 
             _ackTimeout = config.TimeBeforeEmptyAck;
@@ -759,7 +759,7 @@ namespace Mirage.SocketLayer
                 return false;
             }
 
-            public static ReliablePacket CreateNew(int size, Pool<ReliablePacket> pool)
+            public static ReliablePacket CreateNew(Pool<ReliablePacket> pool)
             {
                 return new ReliablePacket(pool);
             }
