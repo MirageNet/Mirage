@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using Mirage.Serialization;
@@ -83,16 +84,19 @@ namespace Mirage.RemoteCalls
             Register(index, name, cmdRequireAuthority, RpcInvokeType.ServerRpc, behaviour, CmdWrapper);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetIndexOffset(NetworkBehaviour behaviour)
         {
             return IndexOffset[behaviour.ComponentIndex];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public RemoteCall GetRelative(NetworkBehaviour behaviour, int index)
         {
             return RemoteCalls[GetIndexOffset(behaviour) + index];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public RemoteCall GetAbsolute(int index)
         {
             return RemoteCalls[index];

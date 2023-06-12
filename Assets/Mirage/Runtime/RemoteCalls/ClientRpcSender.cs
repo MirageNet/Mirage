@@ -11,8 +11,9 @@ namespace Mirage.RemoteCalls
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientRpcSender));
 
-        public static void Send(NetworkBehaviour behaviour, int index, NetworkWriter writer, Channel channelId, bool excludeOwner)
+        public static void Send(NetworkBehaviour behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, bool excludeOwner)
         {
+            var index = behaviour.Identity.RemoteCallCollection.GetIndexOffset(behaviour) + relativeIndex;
             var message = CreateMessage(behaviour, index, writer);
 
             // The public facing parameter is excludeOwner in [ClientRpc]
@@ -21,8 +22,9 @@ namespace Mirage.RemoteCalls
             behaviour.Identity.SendToRemoteObservers(message, includeOwner, channelId);
         }
 
-        public static void SendTarget(NetworkBehaviour behaviour, int index, NetworkWriter writer, Channel channelId, INetworkPlayer player)
+        public static void SendTarget(NetworkBehaviour behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, INetworkPlayer player)
         {
+            var index = behaviour.Identity.RemoteCallCollection.GetIndexOffset(behaviour) + relativeIndex;
             var message = CreateMessage(behaviour, index, writer);
 
             // player parameter is optional. use owner if null
