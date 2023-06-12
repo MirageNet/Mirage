@@ -1,3 +1,18 @@
+# [141.0.0](https://github.com/MirageNet/Mirage/compare/v140.3.0...v141.0.0) (2023-06-12)
+
+
+* feat!: adding extra SendTo functions on NetworkServer ([c5ba561](https://github.com/MirageNet/Mirage/commit/c5ba5617aa53c723d168bf48581d285aebd1474a))
+
+
+### Features
+
+* adding overload to create pools without requiring buffer size ([9842b40](https://github.com/MirageNet/Mirage/commit/9842b406232df6f1d997d4225465ea7c5b3a0389))
+
+
+### BREAKING CHANGES
+
+* Server.SendToMany functions reworked
+
 # [140.3.0](https://github.com/MirageNet/Mirage/compare/v140.2.0...v140.3.0) (2023-06-11)
 
 
