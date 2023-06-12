@@ -6,7 +6,7 @@ namespace Mirage
     /// Adds collection to list with option to skip 1 or 2 items
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public static class ListHelper
+    internal static class ListHelper
     {
         /// <summary>
         /// Use this too avoid allocation of IEnumerator
