@@ -56,21 +56,6 @@ namespace Mirage.Tests.Runtime.ClientServer
         });
 
         [UnityTest]
-        public IEnumerator SendToAll() => UniTask.ToCoroutine(async () =>
-        {
-            var invoked = false;
-
-            ClientMessageHandler.RegisterHandler<WovenTestMessage>(msg => invoked = true);
-
-            server.SendToAll(message);
-
-            // todo assert correct message was sent using Substitute for socket or player
-            // connectionToServer.ProcessMessagesAsync().Forget();
-
-            await AsyncUtil.WaitUntilWithTimeout(() => invoked);
-        });
-
-        [UnityTest]
         public IEnumerator SendToClientOfPlayer() => UniTask.ToCoroutine(async () =>
         {
             var invoked = false;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
 using Mirage.Authentication;
 using Mirage.Events;
@@ -426,12 +427,7 @@ namespace Mirage
         public void SendToAll<T>(T msg, bool excludeLocalPlayer, Channel channelId = Channel.Reliable)
         {
             var enumerator = _connections.Values.GetEnumerator();
-
-            using (var list = AutoPool<List<INetworkPlayer>>.Take())
-            {
-                ListHelper.AddToList(list, enumerator, excludeLocalPlayer ? LocalPlayer : null);
-                NetworkServer.SendToMany(list, msg, channelId);
-            }
+            SendToMany(enumerator, msg, excludeLocalPlayer, channelId);
         }
 
         public void SendToMany<T>(IReadOnlyList<INetworkPlayer> players, T msg, bool excludeLocalPlayer, Channel channelId = Channel.Reliable)
@@ -446,7 +442,7 @@ namespace Mirage
             }
             else
             {
-                // we are not removing any objects from the list, so we can skip the sendCache
+                // we are not removing any objects from the list, so we can skip the AddToList
                 NetworkServer.SendToMany(players, msg, channelId);
             }
         }
@@ -469,7 +465,8 @@ namespace Mirage
         /// <summary>
         /// use to avoid allocation of IEnumerator
         /// </summary>
-        public void SendToMany<T, TEnumerator>(TEnumerator playerEnumerator, T msg, bool excludeLocalPlayer, Channel channelId = Channel.Reliable) where TEnumerator : struct, IEnumerator<INetworkPlayer>
+        public void SendToMany<T, TEnumerator>(TEnumerator playerEnumerator, T msg, bool excludeLocalPlayer, Channel channelId = Channel.Reliable)
+            where TEnumerator : struct, IEnumerator<INetworkPlayer>
         {
             using (var list = AutoPool<List<INetworkPlayer>>.Take())
             {
@@ -484,9 +481,9 @@ namespace Mirage
             if (observers.Count == 0)
                 return;
 
-            var enumerator = observers.GetEnumerator();
             using (var list = AutoPool<List<INetworkPlayer>>.Take())
             {
+                var enumerator = observers.GetEnumerator();
                 ListHelper.AddToList(list, enumerator, excludeLocalPlayer ? LocalPlayer : null, excludeOwner ? identity.Owner : null);
                 NetworkServer.SendToMany(list, msg, channelId);
             }
@@ -496,7 +493,15 @@ namespace Mirage
         /// Sends to list of players.
         /// <para>All other SendTo... functions call this, it dooes not do any extra checks, just serializes message if not empty, then sends it</para>
         /// </summary>
-        public static void SendToMany<T>(List<INetworkPlayer> players, T msg, Channel channelId = Channel.Reliable) => SendToMany((IReadOnlyList<INetworkPlayer>)players, msg, channelId);
+        // need explicity List function here, so that implicit casts to List from wrapper works
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SendToMany<T>(List<INetworkPlayer> players, T msg, Channel channelId = Channel.Reliable)
+            => SendToMany((IReadOnlyList<INetworkPlayer>)players, msg, channelId);
+
+        /// <summary>
+        /// Sends to list of players.
+        /// <para>All other SendTo... functions call this, it dooes not do any extra checks, just serializes message if not empty, then sends it</para>
+        /// </summary>
         public static void SendToMany<T>(IReadOnlyList<INetworkPlayer> players, T msg, Channel channelId = Channel.Reliable)
         {
             // avoid serializing when list is empty
