@@ -1,3 +1,10 @@
+## [141.0.1](https://github.com/MirageNet/Mirage/compare/v141.0.0...v141.0.1) (2023-06-12)
+
+
+### Bug Fixes
+
+* fixing RPC with multiple components ([2ae9ddc](https://github.com/MirageNet/Mirage/commit/2ae9ddc00fb008d969e5f3c1172f182049152fd4))
+
 # [141.0.0](https://github.com/MirageNet/Mirage/compare/v140.3.0...v141.0.0) (2023-06-12)
 
 
