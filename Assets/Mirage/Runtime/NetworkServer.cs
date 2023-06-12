@@ -510,6 +510,8 @@ namespace Mirage
 
             using (var writer = NetworkWriterPool.GetWriter())
             {
+                if (logger.LogEnabled()) logger.Log($"Sending {typeof(T)} to {players.Count} players, channel:{channelId}");
+
                 // pack message into byte[] once
                 MessagePacker.Pack(msg, writer);
                 var segment = writer.ToArraySegment();
