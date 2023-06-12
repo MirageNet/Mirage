@@ -79,8 +79,9 @@ namespace Mirage.Examples.MultipleAdditiveScenes
         /// </summary>
         public void OnStopServer()
         {
-            // note: if in host mode you may not want to send SceneMessage to host player. In that case use NetworkServer.SendToManyExcept instead
-            Server.SendToAll(new SceneMessage { MainActivateScene = gameScene, SceneOperation = SceneOperation.UnloadAdditive });
+            // note: if in host mode you may not want to send SceneMessage to host player. In that case use the excludeLocalPlayer flag
+            var msg = new SceneMessage { MainActivateScene = gameScene, SceneOperation = SceneOperation.UnloadAdditive };
+            Server.SendToAll(msg, excludeLocalPlayer: true);
             StartCoroutine(UnloadSubScenes());
         }
 
