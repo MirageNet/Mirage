@@ -1,3 +1,10 @@
+## [141.0.2](https://github.com/MirageNet/Mirage/compare/v141.0.1...v141.0.2) (2023-06-13)
+
+
+### Bug Fixes
+
+* fixing scene objects not being removed from NetworkWorld ([546dd3c](https://github.com/MirageNet/Mirage/commit/546dd3c0f1b025d76e5ccc2deb8790025b6a5dbe))
+
 ## [141.0.1](https://github.com/MirageNet/Mirage/compare/v141.0.0...v141.0.1) (2023-06-12)
 
 
