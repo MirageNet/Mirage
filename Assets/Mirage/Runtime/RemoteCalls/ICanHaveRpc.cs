@@ -10,12 +10,19 @@ namespace Mirage.RemoteCalls
     }
 
     /// <summary>
-    /// Classes that implement this can contain RPC functions
+    /// Used by Weaver to know when to generate code for a NetworkBehaviour
     /// </summary>
-    public interface ICanHaveRpc : INetworkBehaviour
+    public interface IGeneratRpc
     {
         void RegisterRpc(RemoteCallCollection collection);
         int GetRpcCount();
+    }
+
+    /// <summary>
+    /// Classes that implement this can contain RPC functions
+    /// </summary>
+    public interface ICanHaveRpc : IGeneratRpc, INetworkBehaviour
+    {
     }
 
     public interface INetworkIdentity

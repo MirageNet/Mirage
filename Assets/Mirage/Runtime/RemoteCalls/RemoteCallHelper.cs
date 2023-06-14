@@ -17,7 +17,7 @@ namespace Mirage.RemoteCalls
         public int[] IndexOffset;
         public RemoteCall[] RemoteCalls;
 
-        public unsafe void RegisterAll(NetworkBehaviour[] behaviours)
+        public unsafe void RegisterAll<T>(T[] behaviours) where T : IGeneratRpc
         {
             var behaviourCount = behaviours.Length;
             var totalCount = 0;

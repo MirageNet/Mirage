@@ -1,17 +1,31 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using Mirage.Serialization;
 using UnityEngine;
 
 namespace Mirage.RemoteCalls
 {
-    public static class ClientRpcSender
+    public interface IClientRpcSender
+    {
+        public abstract void Send(ICanHaveRpc behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, bool excludeOwner);
+        public abstract void SendTarget(ICanHaveRpc behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, INetworkPlayer player);
+        public abstract bool ShouldInvokeLocally(NetworkBehaviour behaviour, RpcTarget target, INetworkPlayer player);
+    }
+    public interface IServerRpcSender
+    {
+        public abstract void Send(ICanHaveRpc behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, bool requireAuthority);
+        public abstract UniTask<T> SendWithReturn<T>(ICanHaveRpc behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, bool requireAuthority);
+        public abstract bool ShouldInvokeLocally(NetworkBehaviour behaviour, bool requireAuthority);
+    }
+
+    public class ClientRpcSender : IClientRpcSender
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientRpcSender));
 
-        public static void Send(ICanHaveRpc behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, bool excludeOwner)
+        public void Send(ICanHaveRpc behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, bool excludeOwner)
         {
             var identity = behaviour.Identity;
             var index = behaviour.Identity.RemoteCallCollection.GetIndexOffset(behaviour) + relativeIndex;
@@ -22,10 +36,10 @@ namespace Mirage.RemoteCalls
             // The public facing parameter is excludeOwner in [ClientRpc]
             // so we negate it here to logically align with SendToReady.
             var includeOwner = !excludeOwner;
-            identity.SendToRemoteObservers(identity, includeOwner, channelId);
+            identity.SendToRemoteObservers(message, includeOwner, channelId);
         }
 
-        public static void SendTarget(ICanHaveRpc behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, INetworkPlayer player)
+        public void SendTarget(ICanHaveRpc behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, INetworkPlayer player)
         {
             var identity = behaviour.Identity;
             var index = behaviour.Identity.RemoteCallCollection.GetIndexOffset(behaviour) + relativeIndex;
@@ -79,7 +93,7 @@ namespace Mirage.RemoteCalls
         /// <param name="target"></param>
         /// <param name="player">player used for RpcTarget.Player</param>
         /// <returns></returns>
-        public static bool ShouldInvokeLocally(NetworkBehaviour behaviour, RpcTarget target, INetworkPlayer player)
+        public bool ShouldInvokeLocally(NetworkBehaviour behaviour, RpcTarget target, INetworkPlayer player)
         {
             // not server? error
             if (!behaviour.IsServer)
