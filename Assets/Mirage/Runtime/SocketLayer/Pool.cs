@@ -11,15 +11,15 @@ namespace Mirage.SocketLayer
     public class Pool<T> where T : class
     {
         private const int POOL_EMPTY = -1;
-        private int _maxPoolSize;
-        private readonly int _bufferSize;
-        private readonly ILogger _logger;
-        public delegate T CreateNewItem(int bufferSize, Pool<T> pool);
 
+        private readonly ILogger _logger;
         private readonly CreateNewItem _createNew;
+        private readonly int _bufferSize;
         private T[] _pool;
+        private int _maxPoolSize;
         private int _next = -1;
         private int _created = 0;
+
         private OverMaxLog _overMaxLog = new OverMaxLog();
 
         /// <summary>
@@ -46,7 +46,17 @@ namespace Mirage.SocketLayer
         }
 
         /// <summary>
-        /// 
+        /// Creates pool, that does not require Buffer size
+        /// </summary>
+        /// <param name="bufferSize">size of each buffer</param>
+        /// <param name="startPoolSize">how many buffers to create at start</param>
+        /// <param name="maxPoolSize">max number of buffers in pool</param>
+        /// <param name="logger"></param>
+        public Pool(CreateNewItemNoCount createNew, int startPoolSize, int maxPoolSize, ILogger logger = null)
+            : this((_, p) => createNew.Invoke(p), default, startPoolSize, maxPoolSize, logger) { }
+
+        /// <summary>
+        /// Creates pool where buffer size will be passed to items when created them
         /// </summary>
         /// <param name="bufferSize">size of each buffer</param>
         /// <param name="startPoolSize">how many buffers to create at start</param>
@@ -67,6 +77,7 @@ namespace Mirage.SocketLayer
                 Put(CreateNewBuffer());
             }
         }
+
 
         private T CreateNewBuffer()
         {
@@ -106,6 +117,9 @@ namespace Mirage.SocketLayer
                 _created--;
             }
         }
+
+        public delegate T CreateNewItemNoCount(Pool<T> pool);
+        public delegate T CreateNewItem(int bufferSize, Pool<T> pool);
 
         private struct OverMaxLog
         {

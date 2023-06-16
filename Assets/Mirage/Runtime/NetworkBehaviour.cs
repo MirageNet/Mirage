@@ -536,23 +536,10 @@ namespace Mirage
         }
 
         #region RPC
-        // todo move this to NetworkIdentity to optimize (add a registermethod on NB that NI will call)
-
-        // overriden by weaver
+        // overridden by weaver
         protected internal virtual int GetRpcCount() => 0;
-
-        /// <summary>
-        /// Collection that holds information about all RPC in this networkbehaviour (including derived classes)
-        /// <para>Can be used to get RPC name from its index</para>
-        /// <para>NOTE: Weaver uses this collection to add rpcs, If adding your own rpc do at your own risk</para>
-        /// </summary>
-        [NonSerialized]
-        public readonly RemoteCallCollection RemoteCallCollection;
-
-        protected NetworkBehaviour()
-        {
-            RemoteCallCollection = new RemoteCallCollection(this);
-        }
+        // overridden by weaver
+        protected internal virtual void RegisterRpc(RemoteCallCollection collection) { }
         #endregion
 
         public struct Id : IEquatable<Id>

@@ -48,11 +48,9 @@ namespace Mirage.Snippets.SendNetworkMessages
                 lives = lives
             };
 
-            Server.SendToAll(msg);
+            // also send to host player so we can update ui
+            Server.SendToAll(msg, excludeLocalPlayer: false);
         }
-
     }
-
-
     // CodeEmbed-End: send-score
 }

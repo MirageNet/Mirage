@@ -21,6 +21,7 @@ namespace Mirage.Tests
         {
             GameObject = new GameObject("client_" + nameSuffix, typeof(ClientObjectManager), typeof(NetworkClient));
             Client = GameObject.GetComponent<NetworkClient>();
+            Client.RethrowException = true;
             if (config != null) Client.PeerConfig = config;
             Client.SocketFactory = socketFactory;
 

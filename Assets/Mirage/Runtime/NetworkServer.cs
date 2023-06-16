@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
 using Mirage.Authentication;
 using Mirage.Events;
@@ -42,6 +43,8 @@ namespace Mirage
         public int MaxConnections = 4;
 
         public bool DisconnectOnException = true;
+        [Tooltip("Should the message handler rethrow the exception after logging. This should only be used when deubgging as it may stop other Mirage functions from running after messages handling")]
+        public bool RethrowException = false;
 
         [Tooltip("If true will set Application.runInBackground")]
         public bool RunInBackground = true;
@@ -223,7 +226,7 @@ namespace Mirage
             SyncVarSender = new SyncVarSender();
 
             LocalClient = localClient;
-            MessageHandler = new MessageHandler(World, DisconnectOnException);
+            MessageHandler = new MessageHandler(World, DisconnectOnException, RethrowException);
             MessageHandler.RegisterHandler<NetworkPingMessage>(World.Time.OnServerPing, allowUnauthenticated: true);
 
             // create after MessageHandler, SyncVarReceiver uses it 
@@ -421,79 +424,94 @@ namespace Mirage
             _connections[player.Connection] = player;
         }
 
-
-        /// <summary>
-        /// Send a message to all connected clients.
-        /// </summary>
-        /// <typeparam name="T">Message type</typeparam>
-        /// <param name="msg">Message</param>
-        /// <param name="channelId">Transport channel to use</param>
-        public void SendToAll<T>(T msg, Channel channelId = Channel.Reliable)
+        public void SendToAll<T>(T msg, bool excludeLocalPlayer, Channel channelId = Channel.Reliable)
         {
-            if (logger.LogEnabled()) logger.Log("Server.SendToAll id:" + typeof(T));
-
-            using (var writer = NetworkWriterPool.GetWriter())
-            {
-                // pack message into byte[] once
-                MessagePacker.Pack(msg, writer);
-                var segment = writer.ToArraySegment();
-                var count = 0;
-
-                // using SendToMany (with IEnumerable) will cause Enumerator to be boxed and create GC/alloc
-                // instead we can use while loop and MoveNext to avoid boxing
-                var enumerator = _connections.Values.GetEnumerator();
-                while (enumerator.MoveNext())
-                {
-                    var player = enumerator.Current;
-                    player.Send(segment, channelId);
-                    count++;
-                }
-                enumerator.Dispose();
-
-                NetworkDiagnostics.OnSend(msg, segment.Count, count);
-            }
+            var enumerator = _connections.Values.GetEnumerator();
+            SendToMany(enumerator, msg, excludeLocalPlayer, channelId);
         }
 
+        public void SendToMany<T>(IReadOnlyList<INetworkPlayer> players, T msg, bool excludeLocalPlayer, Channel channelId = Channel.Reliable)
+        {
+            if (excludeLocalPlayer)
+            {
+                using (var list = AutoPool<List<INetworkPlayer>>.Take())
+                {
+                    ListHelper.AddToList(list, players, LocalPlayer);
+                    NetworkServer.SendToMany(list, msg, channelId);
+                }
+            }
+            else
+            {
+                // we are not removing any objects from the list, so we can skip the AddToList
+                NetworkServer.SendToMany(players, msg, channelId);
+            }
+        }
         /// <summary>
-        /// Sends a message to many connections
-        /// <para>WARNING: using this method <b>may</b> cause Enumerator to be boxed creating GC/alloc. Use <see cref="SendToMany{T}(IReadOnlyList{INetworkPlayer}, T, int)"/> version where possible</para>
+        /// Warning: this will allocate, Use <see cref="SendToMany{T}(IReadOnlyList{INetworkPlayer}, T, bool, Channel)"/> or <see cref="SendToMany{T, TEnumerator}(TEnumerator, T, bool, Channel)"/> instead
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="players"></param>
         /// <param name="msg"></param>
+        /// <param name="excludeLocalPlayer"></param>
         /// <param name="channelId"></param>
-        public static void SendToMany<T>(IEnumerable<INetworkPlayer> players, T msg, Channel channelId = Channel.Reliable)
+        public void SendToMany<T>(IEnumerable<INetworkPlayer> players, T msg, bool excludeLocalPlayer, Channel channelId = Channel.Reliable)
         {
-            using (var writer = NetworkWriterPool.GetWriter())
+            using (var list = AutoPool<List<INetworkPlayer>>.Take())
             {
-                // pack message into byte[] once
-                MessagePacker.Pack(msg, writer);
-                var segment = writer.ToArraySegment();
-                var count = 0;
+                ListHelper.AddToList(list, players, excludeLocalPlayer ? LocalPlayer : null);
+                NetworkServer.SendToMany(list, msg, channelId);
+            }
+        }
+        /// <summary>
+        /// use to avoid allocation of IEnumerator
+        /// </summary>
+        public void SendToMany<T, TEnumerator>(TEnumerator playerEnumerator, T msg, bool excludeLocalPlayer, Channel channelId = Channel.Reliable)
+            where TEnumerator : struct, IEnumerator<INetworkPlayer>
+        {
+            using (var list = AutoPool<List<INetworkPlayer>>.Take())
+            {
+                ListHelper.AddToList(list, playerEnumerator, excludeLocalPlayer ? LocalPlayer : null);
+                NetworkServer.SendToMany(list, msg, channelId);
+            }
+        }
 
-                foreach (var player in players)
-                {
-                    player.Send(segment, channelId);
-                    count++;
-                }
+        public void SendToObservers<T>(NetworkIdentity identity, T msg, bool excludeLocalPlayer, bool excludeOwner, Channel channelId = Channel.Reliable)
+        {
+            var observers = identity.observers;
+            if (observers.Count == 0)
+                return;
 
-                NetworkDiagnostics.OnSend(msg, segment.Count, count);
+            using (var list = AutoPool<List<INetworkPlayer>>.Take())
+            {
+                var enumerator = observers.GetEnumerator();
+                ListHelper.AddToList(list, enumerator, excludeLocalPlayer ? LocalPlayer : null, excludeOwner ? identity.Owner : null);
+                NetworkServer.SendToMany(list, msg, channelId);
             }
         }
 
         /// <summary>
-        /// Sends a message to many connections
-        /// <para>
-        /// Same as <see cref="SendToMany{T}(IEnumerable{INetworkPlayer}, T, int)"/> but uses for loop to avoid allocations
-        /// </para>
+        /// Sends to list of players.
+        /// <para>All other SendTo... functions call this, it dooes not do any extra checks, just serializes message if not empty, then sends it</para>
         /// </summary>
-        /// <remarks>
-        /// Using list in foreach loop causes Unity's mono version to box the struct which causes allocations, <see href="https://docs.unity3d.com/2019.4/Documentation/Manual/BestPracticeUnderstandingPerformanceInUnity4-1.html">Understanding the managed heap</see>
-        /// </remarks>
+        // need explicity List function here, so that implicit casts to List from wrapper works
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SendToMany<T>(List<INetworkPlayer> players, T msg, Channel channelId = Channel.Reliable)
+            => SendToMany((IReadOnlyList<INetworkPlayer>)players, msg, channelId);
+
+        /// <summary>
+        /// Sends to list of players.
+        /// <para>All other SendTo... functions call this, it dooes not do any extra checks, just serializes message if not empty, then sends it</para>
+        /// </summary>
         public static void SendToMany<T>(IReadOnlyList<INetworkPlayer> players, T msg, Channel channelId = Channel.Reliable)
         {
+            // avoid serializing when list is empty
+            if (players.Count == 0)
+                return;
+
             using (var writer = NetworkWriterPool.GetWriter())
             {
+                if (logger.LogEnabled()) logger.Log($"Sending {typeof(T)} to {players.Count} players, channel:{channelId}");
+
                 // pack message into byte[] once
                 MessagePacker.Pack(msg, writer);
                 var segment = writer.ToArraySegment();
@@ -502,40 +520,6 @@ namespace Mirage
                 for (var i = 0; i < count; i++)
                 {
                     players[i].Send(segment, channelId);
-                }
-
-                NetworkDiagnostics.OnSend(msg, segment.Count, count);
-            }
-        }
-
-        /// <summary>
-        /// Sends a message to many connections, expect <paramref name="excluded"/>.
-        /// <para>
-        /// This can be useful if you want to send to a observers of an object expect the owner. Or if you want to send to all expect the local host player.
-        /// </para>
-        /// <para>WARNING: using this method <b>may</b> cause Enumerator to be boxed creating GC/alloc. Use <see cref="SendToMany{T}(IReadOnlyList{INetworkPlayer}, T, int)"/> version where possible</para>
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="players"></param>
-        /// <param name="excluded">player to exclude, Can be null</param>
-        /// <param name="msg"></param>
-        /// <param name="channelId"></param>
-        public static void SendToManyExcept<T>(IEnumerable<INetworkPlayer> players, INetworkPlayer excluded, T msg, Channel channelId = Channel.Reliable)
-        {
-            using (var writer = NetworkWriterPool.GetWriter())
-            {
-                // pack message into byte[] once
-                MessagePacker.Pack(msg, writer);
-                var segment = writer.ToArraySegment();
-                var count = 0;
-
-                foreach (var player in players)
-                {
-                    if (player == excluded)
-                        continue;
-
-                    player.Send(segment, channelId);
-                    count++;
                 }
 
                 NetworkDiagnostics.OnSend(msg, segment.Count, count);
@@ -588,6 +572,21 @@ namespace Mirage
                     if (logger.WarnEnabled()) logger.LogWarning($"No player found for message received from client {connection}");
                 }
             }
+        }
+    }
+
+    public static class NetworkExtensions
+    {
+        /// <summary>
+        /// Send a message to all the remote observers
+        /// </summary>
+        /// <typeparam name="T">The message type to dispatch.</typeparam>
+        /// <param name="msg">The message to deliver to clients.</param>
+        /// <param name="includeOwner">Should the owner should receive this message too?</param>
+        /// <param name="channelId">The transport channel that should be used to deliver the message. Default is the Reliable channel.</param>
+        internal static void SendToRemoteObservers<T>(this NetworkIdentity identity, T msg, bool includeOwner = true, Channel channelId = Channel.Reliable)
+        {
+            identity.Server.SendToObservers(identity, msg, excludeLocalPlayer: true, excludeOwner: !includeOwner, channelId: channelId);
         }
     }
 }

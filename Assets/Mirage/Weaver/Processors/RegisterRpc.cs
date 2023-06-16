@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Cysharp.Threading.Tasks;
 using Mirage.RemoteCalls;
 using Mono.Cecil;
@@ -95,39 +94,27 @@ namespace Mirage.Weaver
             var skeleton = rpcMethod.skeleton;
             var name = HumanReadableName(rpcMethod.stub);
             var index = rpcMethod.Index;
-            var module = rpcMethod.stub.Module;
 
-            var collectionFieldInfo = typeof(NetworkBehaviour).GetField(nameof(NetworkBehaviour.RemoteCallCollection), BindingFlags.Public | BindingFlags.Instance);
-            var collectionField = module.ImportReference(collectionFieldInfo);
-
-            // arg0 is remote collection
-            // this.remoteCallCollection
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldfld, collectionField));
-
-            // arg1 is rpc index
+            // write collection.Register(index, name, invokerType, cmdRequireAuthority,...
+            // arg1 is rpc collection
+            worker.Append(worker.Create(OpCodes.Ldarg_1));
             worker.Append(worker.Create(OpCodes.Ldc_I4, index));
-
-            // typeof()
-            var netBehaviourSubclass = skeleton.DeclaringType.ConvertToGenericIfNeeded();
-            worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass));
-            worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
-
             worker.Append(worker.Create(OpCodes.Ldstr, name));
-
+            worker.Append(worker.Create(requireAuthority.OpCode_Ldc()));
             // RegisterRequest has no type, it is always serverRpc, so dont need to include arg
             if (invokeType.HasValue)
-            {
                 worker.Append(worker.Create(OpCodes.Ldc_I4, (int)invokeType.Value));
-            }
 
-            // new delegate
+            // write behaviour
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+
+            // create delegate as last arg
             worker.Append(worker.Create(OpCodes.Ldnull));
             worker.Append(worker.Create(OpCodes.Ldftn, skeleton.MakeHostInstanceSelfGeneric()));
             var @delegate = CreateRpcDelegate(skeleton);
             worker.Append(worker.Create(OpCodes.Newobj, @delegate));
 
-            worker.Append(worker.Create(requireAuthority.OpCode_Ldc()));
+            // invoke register
             worker.Append(worker.Create(OpCodes.Call, registerMethod));
         }
 

@@ -413,6 +413,9 @@ namespace Mirage
 
         private void UnSpawn(NetworkIdentity identity)
         {
+            // have to store netid, so we can remove it from world, this is because NetworkReset will clear it
+            var netId = identity.NetId;
+
             logger.Assert(!_client.IsLocalClient, "UnSpawn should not be called in host mode");
             // it is useful to remove authority when destroying the object
             // this can be useful to clean up stuff after a local player is destroyed
@@ -437,7 +440,7 @@ namespace Mirage
                 spawnableObjects[identity.SceneId] = identity;
             }
 
-            _client.World.RemoveIdentity(identity);
+            _client.World.RemoveIdentity(netId);
         }
 
         /// <summary>
@@ -708,9 +711,7 @@ namespace Mirage
                 return;
             }
 
-            var behaviour = identity.NetworkBehaviours[msg.ComponentIndex];
-
-            var remoteCall = behaviour.RemoteCallCollection.Get(msg.FunctionIndex);
+            var remoteCall = identity.RemoteCallCollection.GetAbsolute(msg.FunctionIndex);
 
             if (remoteCall.InvokeType != RpcInvokeType.ClientRpc)
             {
@@ -719,7 +720,7 @@ namespace Mirage
 
             using (var reader = NetworkReaderPool.GetReader(msg.Payload, _client.World))
             {
-                remoteCall.Invoke(reader, behaviour, null, 0);
+                remoteCall.Invoke(reader, null, 0);
             }
         }
 

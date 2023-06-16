@@ -404,7 +404,7 @@ namespace Mirage
 
             var message = new SceneMessage { MainActivateScene = scenePath, SceneOperation = sceneOperation };
             // send to players, excluding host
-            NetworkServer.SendToManyExcept(players, excluded: Server.LocalPlayer, message);
+            Server.SendToMany(players, message, excludeLocalPlayer: true);
         }
 
         /// <summary>
@@ -606,7 +606,9 @@ namespace Mirage
         {
             logger.Log(" [NetworkSceneManager] - OnServerSceneChanged");
 
-            Server.SendToAll(new SceneReadyMessage());
+            // todo this might cause issues if only some players are loading scene
+            // send to all, excluding host
+            Server.SendToAll(new SceneReadyMessage(), excludeLocalPlayer: true);
 
             // clean up and invoke server functions before user events
             Server.World.RemoveDestroyedObjects();

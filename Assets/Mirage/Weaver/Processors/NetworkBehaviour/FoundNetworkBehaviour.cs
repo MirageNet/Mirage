@@ -32,14 +32,5 @@ namespace Mirage.Weaver.NetworkBehaviours
         {
             syncVarCounter.Set(SyncVars.Count);
         }
-
-        public bool HasManualSerializeOverride()
-        {
-            return TypeDefinition.GetMethod(SerializeHelper.MethodName) != null;
-        }
-        public bool HasManualDeserializeOverride()
-        {
-            return TypeDefinition.GetMethod(DeserializeHelper.MethodName) != null;
-        }
     }
 }

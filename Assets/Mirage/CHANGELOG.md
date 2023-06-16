@@ -1,3 +1,44 @@
+## [141.0.2](https://github.com/MirageNet/Mirage/compare/v141.0.1...v141.0.2) (2023-06-13)
+
+
+### Bug Fixes
+
+* fixing scene objects not being removed from NetworkWorld ([546dd3c](https://github.com/MirageNet/Mirage/commit/546dd3c0f1b025d76e5ccc2deb8790025b6a5dbe))
+
+## [141.0.1](https://github.com/MirageNet/Mirage/compare/v141.0.0...v141.0.1) (2023-06-12)
+
+
+### Bug Fixes
+
+* fixing RPC with multiple components ([2ae9ddc](https://github.com/MirageNet/Mirage/commit/2ae9ddc00fb008d969e5f3c1172f182049152fd4))
+
+# [141.0.0](https://github.com/MirageNet/Mirage/compare/v140.3.0...v141.0.0) (2023-06-12)
+
+
+* feat!: adding extra SendTo functions on NetworkServer ([c5ba561](https://github.com/MirageNet/Mirage/commit/c5ba5617aa53c723d168bf48581d285aebd1474a))
+
+
+### Features
+
+* adding overload to create pools without requiring buffer size ([9842b40](https://github.com/MirageNet/Mirage/commit/9842b406232df6f1d997d4225465ea7c5b3a0389))
+
+
+### BREAKING CHANGES
+
+* Server.SendToMany functions reworked
+
+# [140.3.0](https://github.com/MirageNet/Mirage/compare/v140.2.0...v140.3.0) (2023-06-11)
+
+
+### Features
+
+* adding option to rethrow exception throw message handler ([15f27a4](https://github.com/MirageNet/Mirage/commit/15f27a4b6931fb5c87af0d8cdf2f5d66bd5ebf56))
+
+
+### Performance Improvements
+
+* moving RPC collection to NetworkIdentity ([773910c](https://github.com/MirageNet/Mirage/commit/773910cd31f0f034ede9930470262307c935ba5e))
+
 # [140.2.0](https://github.com/MirageNet/Mirage/compare/v140.1.0...v140.2.0) (2023-06-10)
 
 

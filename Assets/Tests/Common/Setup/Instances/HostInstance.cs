@@ -16,6 +16,7 @@ namespace Mirage.Tests
         public HostInstance(Config serverConfig) : base(serverConfig)
         {
             Client = GameObject.AddComponent<NetworkClient>();
+            Client.RethrowException = true;
             ClientObjectManager = GameObject.AddComponent<ClientObjectManager>();
             Client.ObjectManager = ClientObjectManager;
         }

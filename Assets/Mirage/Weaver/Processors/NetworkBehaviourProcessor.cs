@@ -91,13 +91,24 @@ namespace Mirage.Weaver
 
         private void RegisterRpcs(List<RpcMethod> rpcs)
         {
+            Weaver.DebugLog(netBehaviourSubclass, "Set const RPC Count");
             SetRpcCount(rpcs.Count);
-            Weaver.DebugLog(netBehaviourSubclass, "  GenerateConstants ");
 
-            netBehaviourSubclass.AddToConstructor(logger, (worker) =>
-            {
-                RegisterRpc.RegisterAll(worker, rpcs);
-            });
+            // if there are no rpcs then we dont need to override method
+            if (rpcs.Count == 0)
+                return;
+
+            Weaver.DebugLog(netBehaviourSubclass, "Override RegisterRPC");
+
+            var helper = new RegisterRpcHelper(netBehaviourSubclass.Module, netBehaviourSubclass);
+            if (helper.HasManualOverride())
+                throw new RpcException($"{helper.MethodName} should not have a manual override", helper.GetManualOverride());
+
+            helper.AddMethod();
+
+            RegisterRpc.RegisterAll(helper.Worker, rpcs);
+
+            helper.Worker.Emit(OpCodes.Ret);
         }
 
         private void SetRpcCount(int count)

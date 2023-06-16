@@ -11,8 +11,9 @@ namespace Mirage.RemoteCalls
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientRpcSender));
 
-        public static void Send(NetworkBehaviour behaviour, int index, NetworkWriter writer, Channel channelId, bool excludeOwner)
+        public static void Send(NetworkBehaviour behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, bool excludeOwner)
         {
+            var index = behaviour.Identity.RemoteCallCollection.GetIndexOffset(behaviour) + relativeIndex;
             var message = CreateMessage(behaviour, index, writer);
 
             // The public facing parameter is excludeOwner in [ClientRpc]
@@ -21,8 +22,9 @@ namespace Mirage.RemoteCalls
             behaviour.Identity.SendToRemoteObservers(message, includeOwner, channelId);
         }
 
-        public static void SendTarget(NetworkBehaviour behaviour, int index, NetworkWriter writer, Channel channelId, INetworkPlayer player)
+        public static void SendTarget(NetworkBehaviour behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, INetworkPlayer player)
         {
+            var index = behaviour.Identity.RemoteCallCollection.GetIndexOffset(behaviour) + relativeIndex;
             var message = CreateMessage(behaviour, index, writer);
 
             // player parameter is optional. use owner if null
@@ -43,25 +45,23 @@ namespace Mirage.RemoteCalls
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static RpcMessage CreateMessage(NetworkBehaviour behaviour, int index, NetworkWriter writer)
         {
-            var rpc = behaviour.RemoteCallCollection.Get(index);
-
-            Validate(behaviour, rpc);
+            Validate(behaviour, index);
 
             var message = new RpcMessage
             {
                 NetId = behaviour.NetId,
-                ComponentIndex = behaviour.ComponentIndex,
                 FunctionIndex = index,
                 Payload = writer.ToArraySegment()
             };
             return message;
         }
 
-        private static void Validate(NetworkBehaviour behaviour, RemoteCall rpc)
+        private static void Validate(NetworkBehaviour behaviour, int index)
         {
             var server = behaviour.Server;
             if (server == null || !server.Active)
             {
+                var rpc = behaviour.Identity.RemoteCallCollection.GetRelative(behaviour, index);
                 throw new InvalidOperationException($"RPC Function {rpc} called when server is not active.");
             }
         }
