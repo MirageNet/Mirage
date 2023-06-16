@@ -430,6 +430,38 @@ namespace Mirage.Collections
             }
         }
 
+        /// <summary>
+        /// Can be used to set item dirty manually.
+        /// <para>should be used with classes to avoid having to clear field first</para>
+        /// <para>Will invoke OnSet</para>
+        /// </summary>
+        /// <param name="item"></param>
+        /// <exception cref="ArgumentException">Throws when item is not found in this synclist</exception>"
+        public void SetItemDirty(T item)
+        {
+            var index = IndexOf(item);
+            if (index >= 0)
+            {
+                SetItemDirtyAt(index);
+            }
+            else
+            {
+                throw new ArgumentException("Item could not be found in list");
+            }
+        }
+
+        /// <summary>
+        /// Can be used to set item dirty manually.
+        /// <para>should be used with classes to avoid having to clear field first</para>
+        /// </summary>
+        /// <param name="item"></param>
+        public void SetItemDirtyAt(int index)
+        {
+            // need to also call OnSet, so that it matches what happens on client side. See other uses of Op_Set
+            OnSet?.Invoke(index, _objects[index], _objects[index]);
+            AddOperation(Operation.OP_SET, index, _objects[index]);
+        }
+
         public Enumerator GetEnumerator() => new Enumerator(this);
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => new Enumerator(this);
