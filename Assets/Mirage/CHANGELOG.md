@@ -1,3 +1,10 @@
+# [141.1.0](https://github.com/MirageNet/Mirage/compare/v141.0.2...v141.1.0) (2023-06-16)
+
+
+### Features
+
+* **NetworkManagerGUI:** overhaul the debug controls ([#1149](https://github.com/MirageNet/Mirage/issues/1149)) ([8b97f36](https://github.com/MirageNet/Mirage/commit/8b97f36399a8c1e1165e47011f9334df3bdcf28b))
+
 ## [141.0.2](https://github.com/MirageNet/Mirage/compare/v141.0.1...v141.0.2) (2023-06-13)
 
 
