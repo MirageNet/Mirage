@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections;
+using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
@@ -87,7 +88,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.int_N21
             {
                 // store value in variable because assert will throw and be catch by message wrapper
                 payloadSize = msg.Payload.Count;
-                clientObjectManager.OnRpcMessage(msg);
+                clientObjectManager._rpcHandler.OnRpcMessage(player, msg);
             });
 
             serverComponent.RpcSomeFunction(value);
