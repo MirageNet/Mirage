@@ -10,11 +10,14 @@ using UnityEngine;
 
 namespace Mirage
 {
+
     [AddComponentMenu("Network/ClientObjectManager")]
     [DisallowMultipleComponent]
     public class ClientObjectManager : MonoBehaviour
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientObjectManager));
+
+        internal RpcHandler _rpcHandler;
 
         private NetworkClient _client;
         public NetworkClient Client => _client;
@@ -91,8 +94,6 @@ namespace Mirage
             _client.MessageHandler.RegisterHandler<SpawnMessage>(OnHostClientSpawn);
             _client.MessageHandler.RegisterHandler<RemoveAuthorityMessage>(OnRemoveAuthority);
             _client.MessageHandler.RegisterHandler<RemoveCharacterMessage>(OnRemoveCharacter);
-            _client.MessageHandler.RegisterHandler<ServerRpcReply>(msg => { });
-            _client.MessageHandler.RegisterHandler<RpcMessage>(msg => { });
         }
 
         internal void RegisterMessageHandlers()
@@ -102,8 +103,7 @@ namespace Mirage
             _client.MessageHandler.RegisterHandler<SpawnMessage>(OnSpawn);
             _client.MessageHandler.RegisterHandler<RemoveAuthorityMessage>(OnRemoveAuthority);
             _client.MessageHandler.RegisterHandler<RemoveCharacterMessage>(OnRemoveCharacter);
-            _client.MessageHandler.RegisterHandler<ServerRpcReply>(OnServerRpcReply);
-            _client.MessageHandler.RegisterHandler<RpcMessage>(OnRpcMessage);
+            _rpcHandler = new RpcHandler(_client.MessageHandler, _client.World, RpcInvokeType.ClientRpc);
         }
 
         private bool ConsiderForSpawning(NetworkIdentity identity)
@@ -701,29 +701,6 @@ namespace Mirage
             }
         }
 
-        internal void OnRpcMessage(RpcMessage msg)
-        {
-            if (logger.LogEnabled()) logger.Log($"ClientScene.OnRPCMessage index:{msg.FunctionIndex} netId:{msg.NetId}");
-
-            if (!_client.World.TryGetIdentity(msg.NetId, out var identity))
-            {
-                if (logger.WarnEnabled()) logger.LogWarning($"Spawned object not found when handling ClientRpc message [netId={msg.NetId}]");
-                return;
-            }
-
-            var remoteCall = identity.RemoteCallCollection.GetAbsolute(msg.FunctionIndex);
-
-            if (remoteCall.InvokeType != RpcInvokeType.ClientRpc)
-            {
-                throw new MethodInvocationException($"Invalid RPC call with index {msg.FunctionIndex}");
-            }
-
-            using (var reader = NetworkReaderPool.GetReader(msg.Payload, _client.World))
-            {
-                remoteCall.Invoke(reader, null, 0);
-            }
-        }
-
         private void CheckForLocalPlayer(NetworkIdentity identity)
         {
             if (identity && identity == _client.Player?.Identity)
@@ -734,46 +711,6 @@ namespace Mirage
                 if (logger.LogEnabled()) logger.Log("ClientScene.OnOwnerMessage - player=" + identity.name);
             }
         }
-
-        private void OnServerRpcReply(INetworkPlayer player, ServerRpcReply reply)
-        {
-            // find the callback that was waiting for this and invoke it.
-            if (_callbacks.TryGetValue(reply.ReplyId, out var action))
-            {
-                _callbacks.Remove(_replyId);
-                using (var reader = NetworkReaderPool.GetReader(reply.Payload, _client.World))
-                {
-                    action.Invoke(reader);
-                }
-            }
-            else
-            {
-                throw new MethodAccessException("Received reply but no handler was registered");
-            }
-        }
-
-        private readonly Dictionary<int, Action<NetworkReader>> _callbacks = new Dictionary<int, Action<NetworkReader>>();
-        private int _replyId;
-
-        /// <summary>
-        /// Creates a task that waits for a reply from the server
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns>the task that will be completed when the result is in, and the id to use in the request</returns>
-        internal (UniTask<T> task, int replyId) CreateReplyTask<T>()
-        {
-            var newReplyId = _replyId++;
-            var completionSource = AutoResetUniTaskCompletionSource<T>.Create();
-            void Callback(NetworkReader reader)
-            {
-                var result = reader.Read<T>();
-                completionSource.TrySetResult(result);
-            }
-
-            _callbacks.Add(newReplyId, Callback);
-            return (completionSource.Task, newReplyId);
-        }
-
 
 
 

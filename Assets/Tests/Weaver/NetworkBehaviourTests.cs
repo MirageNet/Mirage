@@ -51,7 +51,7 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void NetworkBehaviourCmdVoidReturn()
         {
-            HasError("Use UniTask<System.Int32> to return values from [ServerRpc]",
+            HasError("Use UniTask<System.Int32> to return values from [ClientRpc] or [ServerRpc]",
                 "System.Int32 NetworkBehaviourTests.NetworkBehaviourCmdVoidReturn.NetworkBehaviourCmdVoidReturn::CmdCantHaveNonVoidReturn()");
         }
 
@@ -78,7 +78,7 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void NetworkBehaviourClientRpcVoidReturn()
         {
-            HasError("[ClientRpc] must return void",
+            HasError("[ClientRpc] must return void when target is Observers. To return values change target to Player or Owner",
                 "System.Int32 NetworkBehaviourTests.NetworkBehaviourClientRpcVoidReturn.NetworkBehaviourClientRpcVoidReturn::RpcCantHaveNonVoidReturn()");
         }
 

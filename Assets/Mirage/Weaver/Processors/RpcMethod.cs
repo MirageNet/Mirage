@@ -10,6 +10,8 @@ namespace Mirage.Weaver
         public MethodDefinition skeleton;
         /// <summary>Hash given to method in order to call it over the network. Should be unqiue.</summary>
         public int Index;
+
+        public ReturnType ReturnType;
     }
 
     public class ServerRpcMethod : RpcMethod

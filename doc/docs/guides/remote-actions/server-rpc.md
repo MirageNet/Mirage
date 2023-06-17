@@ -51,32 +51,7 @@ Be careful of sending ServerRpcs from the client every frame! This can cause a l
 ServerRpcs can return values. It can take a long time for the server to reply, so they must return a UniTask which the client can await.
 To return a value, add a return value using `UniTask<MyReturnType>` where `MyReturnType` is any [supported Mirage type](/docs/guides/serialization/data-types). In the server, you can make your method async,  or you can use `UniTask.FromResult(myResult);`. For example:
 
-```cs
-public class Shop: NetworkBehavior {
-
-    [ServerRpc]
-    public UniTask<int> GetPrice(string item) 
-    {
-        switch (item) 
-        {
-             case "turnip":
-                 return UniTask.FromResult(10);
-             case "apple":
-                return UniTask.FromResult(3);
-             default:
-                return UniTask.FromResult(int.MaxValue);
-        }
-    }
-
-    [Client]
-    public async UniTaskVoid DisplayTurnipPrice() 
-    {
-        // Call the RPC and wait for the response without blocking the main thread
-        int price = await GetPrice("turnip");
-        Debug.Log($"Turnips price {price}");
-    }
-}
-```
+{{{ Path:'Snippets/RpcReply.cs' Name:'server-rpc-reply' }}}
 
 ### ServerRpc and Authority
 

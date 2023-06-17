@@ -1,4 +1,5 @@
 using System;
+using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using NUnit.Framework;
 using UnityEngine;
@@ -14,7 +15,7 @@ namespace Mirage.Tests.Runtime.Serialization
         public void ServerRpcMessageTest()
         {
             // try setting value with constructor
-            var message = new ServerRpcMessage
+            var message = new RpcMessage
             {
                 NetId = 42,
                 FunctionIndex = 2,
@@ -23,7 +24,7 @@ namespace Mirage.Tests.Runtime.Serialization
             var arr = MessagePacker.Pack(message);
 
             // deserialize the same data - do we get the same result?
-            var fresh = MessagePacker.Unpack<ServerRpcMessage>(arr, null);
+            var fresh = MessagePacker.Unpack<RpcMessage>(arr, null);
             Assert.That(fresh.NetId, Is.EqualTo(message.NetId));
             Assert.That(fresh.FunctionIndex, Is.EqualTo(message.FunctionIndex));
             Assert.That(fresh.Payload, Has.Count.EqualTo(message.Payload.Count));

@@ -12,6 +12,12 @@ namespace Mirage.Weaver
         ClientRpc
     }
 
+    public enum ReturnType
+    {
+        Void,
+        UniTask,
+    }
+
     /// <summary>
     /// processes SyncVars, Cmds, Rpcs, etc. of NetworkBehaviours
     /// </summary>

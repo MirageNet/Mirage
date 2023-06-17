@@ -6,7 +6,6 @@ using Mirage.Serialization;
 using Mirage.Weaver.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using MethodAttributes = Mono.Cecil.MethodAttributes;
 
 namespace Mirage.Weaver
 {
@@ -47,7 +46,7 @@ namespace Mirage.Weaver
         /// }
         /// </code>
         /// </remarks>
-        private MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute serverRpcAttr, int rpcIndex, ValueSerializer[] paramSerializers)
+        private MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute serverRpcAttr, int rpcIndex, ValueSerializer[] paramSerializers, ReturnType returnType)
         {
             var channel = serverRpcAttr.GetField(nameof(ServerRpcAttribute.channel), 0);
             var requireAuthority = serverRpcAttr.GetField(nameof(ServerRpcAttribute.requireAuthority), true);
@@ -72,18 +71,20 @@ namespace Mirage.Weaver
             WriteArguments(worker, md, writer, paramSerializers, RemoteCallType.ServerRpc);
 
             var cmdName = md.FullName;
-            var sendMethod = GetSendMethod(md, worker);
+            var sendMethod = GetSendMethod(md, returnType);
 
             // ServerRpcSender.Send(this, 12345, writer, channel, requireAuthority)
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Ldc_I4, rpcIndex));
             worker.Append(worker.Create(OpCodes.Ldloc, writer));
-            worker.Append(worker.Create(OpCodes.Ldc_I4, channel));
+            // reply values always have reliable chnnael, so "SendWithReturn" does not take a channel parameter
+            if (returnType == ReturnType.Void)
+                worker.Append(worker.Create(OpCodes.Ldc_I4, channel));
             worker.Append(worker.Create(requireAuthority.OpCode_Ldc()));
+
             worker.Append(worker.Create(OpCodes.Call, sendMethod));
 
             NetworkWriterHelper.CallRelease(module, worker, writer);
-
             worker.Append(worker.Create(OpCodes.Ret));
 
             return cmd;
@@ -114,9 +115,9 @@ namespace Mirage.Weaver
             });
         }
 
-        private MethodReference GetSendMethod(MethodDefinition md, ILProcessor worker)
+        private MethodReference GetSendMethod(MethodDefinition md, ReturnType returnType)
         {
-            if (md.ReturnType.Is(typeof(void)))
+            if (returnType == ReturnType.Void)
             {
                 var sendMethod = md.Module.ImportReference(() => ServerRpcSender.Send(default, default, default, default, default));
                 return sendMethod;
@@ -127,84 +128,37 @@ namespace Mirage.Weaver
                 var sendMethod = typeof(ServerRpcSender).GetMethods(BindingFlags.Public | BindingFlags.Static).First(m => m.Name == nameof(ServerRpcSender.SendWithReturn));
                 var sendRef = md.Module.ImportReference(sendMethod);
 
-                var returnType = md.ReturnType as GenericInstanceType;
+                var genericReturnType = md.ReturnType as GenericInstanceType;
 
                 var genericMethod = new GenericInstanceMethod(sendRef);
-                genericMethod.GenericArguments.Add(returnType.GenericArguments[0]);
+                genericMethod.GenericArguments.Add(genericReturnType.GenericArguments[0]);
 
                 return genericMethod;
             }
         }
 
-        /// <summary>
-        /// Generates a skeleton for a ServerRpc
-        /// </summary>
-        /// <param name="td"></param>
-        /// <param name="method"></param>
-        /// <param name="userCodeFunc"></param>
-        /// <returns>The newly created skeleton method</returns>
-        /// <remarks>
-        /// Generates code like this:
-        /// <code>
-        /// protected static void Skeleton_MyServerRpc(NetworkBehaviour obj, NetworkReader reader, NetworkConnection senderConnection)
-        /// {
-        ///     if (!obj.Identity.server.active)
-        ///     {
-        ///         return;
-        ///     }
-        ///     ((ShipControl) obj).UserCode_Thrust(reader.ReadSingle(), (int) reader.ReadPackedUInt32());
-        /// }
-        /// </code>
-        /// </remarks>
-        private MethodDefinition GenerateSkeleton(MethodDefinition method, MethodDefinition userCodeFunc, ValueSerializer[] paramSerializers)
-        {
-            var newName = SkeletonMethodName(method);
-            var cmd = method.DeclaringType.AddMethod(newName,
-                MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.Static,
-                userCodeFunc.ReturnType);
-
-            _ = cmd.AddParam<NetworkBehaviour>("behaviour");
-            var readerParameter = cmd.AddParam<NetworkReader>("reader");
-            var senderParameter = cmd.AddParam<INetworkPlayer>("senderConnection");
-            _ = cmd.AddParam<int>("replyId");
-
-
-            var worker = cmd.Body.GetILProcessor();
-
-            // load `behaviour.`
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Castclass, method.DeclaringType.MakeSelfGeneric()));
-
-            // read and load args
-            ReadArguments(method, worker, readerParameter, senderParameter, false, paramSerializers);
-
-            // invoke actual ServerRpc function
-            worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc.MakeHostInstanceSelfGeneric()));
-            worker.Append(worker.Create(OpCodes.Ret));
-
-            return cmd;
-        }
-
         public ServerRpcMethod ProcessRpc(MethodDefinition md, CustomAttribute serverRpcAttr, int rpcIndex)
         {
-            ValidateMethod(md, RemoteCallType.ServerRpc);
+            ValidateMethod(md);
             ValidateParameters(md, RemoteCallType.ServerRpc);
-            ValidateReturnType(md, RemoteCallType.ServerRpc);
+            var returnType = ValidateReturnType(md, RemoteCallType.ServerRpc, default);
 
             // default vaue true for requireAuthority, or someone could force call these on server
             var requireAuthority = serverRpcAttr.GetField(nameof(ServerRpcAttribute.requireAuthority), true);
 
             var paramSerializers = GetValueSerializers(md);
 
-            var userCodeFunc = GenerateStub(md, serverRpcAttr, rpcIndex, paramSerializers);
+            var userCodeFunc = GenerateStub(md, serverRpcAttr, rpcIndex, paramSerializers, returnType);
 
-            var skeletonFunc = GenerateSkeleton(md, userCodeFunc, paramSerializers);
+            var skeletonFunc = GenerateSkeleton(md, userCodeFunc, clientRpcAttr: null, paramSerializers);
+
             return new ServerRpcMethod
             {
                 Index = rpcIndex,
                 stub = md,
                 requireAuthority = requireAuthority,
-                skeleton = skeletonFunc
+                skeleton = skeletonFunc,
+                ReturnType = returnType,
             };
         }
 

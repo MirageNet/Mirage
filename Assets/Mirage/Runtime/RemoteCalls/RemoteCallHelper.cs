@@ -56,7 +56,7 @@ namespace Mirage.RemoteCalls
             }
         }
 
-        public void RegisterRequest<T>(int index, string name, bool cmdRequireAuthority, NetworkBehaviour behaviour, RequestDelegate<T> func)
+        public void RegisterRequest<T>(int index, string name, bool cmdRequireAuthority, RpcInvokeType invokerType, NetworkBehaviour behaviour, RequestDelegate<T> func)
         {
             async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
             {
@@ -66,7 +66,7 @@ namespace Mirage.RemoteCalls
                 using (var writer = NetworkWriterPool.GetWriter())
                 {
                     writer.Write(result);
-                    var serverRpcReply = new ServerRpcReply
+                    var serverRpcReply = new RpcReply
                     {
                         ReplyId = replyId,
                         Payload = writer.ToArraySegment()
@@ -81,7 +81,7 @@ namespace Mirage.RemoteCalls
                 Wrapper(obj, reader, senderPlayer, replyId).Forget();
             }
 
-            Register(index, name, cmdRequireAuthority, RpcInvokeType.ServerRpc, behaviour, CmdWrapper);
+            Register(index, name, cmdRequireAuthority, invokerType, behaviour, CmdWrapper);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

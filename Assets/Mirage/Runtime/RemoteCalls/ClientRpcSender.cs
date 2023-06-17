@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using Mirage.Serialization;
 using UnityEngine;
@@ -14,6 +15,8 @@ namespace Mirage.RemoteCalls
         public static void Send(NetworkBehaviour behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, bool excludeOwner)
         {
             var index = behaviour.Identity.RemoteCallCollection.GetIndexOffset(behaviour) + relativeIndex;
+            Validate(behaviour, index);
+
             var message = CreateMessage(behaviour, index, writer);
 
             // The public facing parameter is excludeOwner in [ClientRpc]
@@ -25,28 +28,53 @@ namespace Mirage.RemoteCalls
         public static void SendTarget(NetworkBehaviour behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, INetworkPlayer player)
         {
             var index = behaviour.Identity.RemoteCallCollection.GetIndexOffset(behaviour) + relativeIndex;
+            Validate(behaviour, index);
+
             var message = CreateMessage(behaviour, index, writer);
 
+            player = GetTarget(behaviour, player);
+
+            player.Send(message, channelId);
+        }
+
+        public static UniTask<T> SendTargetWithReturn<T>(NetworkBehaviour behaviour, int relativeIndex, NetworkWriter writer, INetworkPlayer player)
+        {
+            var index = behaviour.Identity.RemoteCallCollection.GetIndexOffset(behaviour) + relativeIndex;
+            Validate(behaviour, index);
+
+            (var task, var id) = behaviour.ServerObjectManager._rpcHandler.CreateReplyTask<T>();
+            var message = new RpcWithReplyMessage
+            {
+                NetId = behaviour.NetId,
+                FunctionIndex = index,
+                ReplyId = id,
+                Payload = writer.ToArraySegment()
+            };
+
+            player = GetTarget(behaviour, player);
+
+            // reply rpcs are always reliable
+            player.Send(message, Channel.Reliable);
+
+            return task;
+        }
+
+        private static INetworkPlayer GetTarget(NetworkBehaviour behaviour, INetworkPlayer player)
+        {
             // player parameter is optional. use owner if null
             if (player == null)
-            {
                 player = behaviour.Owner;
-            }
 
             // if still null throw to give useful error
             if (player == null)
-            {
                 throw new InvalidOperationException("Player target was null for Rpc");
-            }
 
-            player.Send(message, channelId);
+            return player;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static RpcMessage CreateMessage(NetworkBehaviour behaviour, int index, NetworkWriter writer)
         {
-            Validate(behaviour, index);
-
             var message = new RpcMessage
             {
                 NetId = behaviour.NetId,

@@ -16,11 +16,11 @@ namespace Mirage.Weaver
             {
                 if (rpc is ServerRpcMethod serverRpc)
                 {
-                    RegisterServerRpc(worker, serverRpc);
+                    CallRegister(worker, rpc, RpcInvokeType.ServerRpc, serverRpc.requireAuthority);
                 }
                 else if (rpc is ClientRpcMethod clientRpc)
                 {
-                    RegisterClientRpc(worker, clientRpc);
+                    CallRegister(worker, rpc, RpcInvokeType.ClientRpc, false);
                 }
             }
         }
@@ -33,35 +33,20 @@ namespace Mirage.Weaver
             return $"{typeName}.{methodName}";
         }
 
-        private static void RegisterServerRpc(ILProcessor worker, ServerRpcMethod rpc)
-        {
-            var skeleton = rpc.skeleton;
-            var requireAuthority = rpc.requireAuthority;
-
-            var registerMethod = GetRegisterMethod(skeleton);
-            var invokeType = GetServerInvokeType(rpc);
-            CallRegister(worker, rpc, invokeType, registerMethod, requireAuthority);
-        }
-
-        private static RpcInvokeType? GetServerInvokeType(ServerRpcMethod rpcMethod)
-        {
-            var func = rpcMethod.skeleton;
-            if (func.ReturnType.Is(typeof(void)))
-                return RpcInvokeType.ServerRpc;
-            else
-                // Request RPC dont need type, so pass nullable so opcode is exlcuded from register
-                return default(RpcInvokeType?);
-        }
-
         /// <summary>
         /// Gets normal or Unitask register method
         /// </summary>
-        private static MethodReference GetRegisterMethod(MethodDefinition func)
+        private static MethodReference GetRegisterMethod(RpcMethod rpcMethod)
         {
-            if (func.ReturnType.Is(typeof(void)))
-                return func.Module.ImportReference((RemoteCallCollection c) => c.Register(default, default, default, default, default, default));
+            var skeleton = rpcMethod.skeleton;
+            if (rpcMethod.ReturnType == ReturnType.Void)
+            {
+                return skeleton.Module.ImportReference((RemoteCallCollection c) => c.Register(default, default, default, default, default, default));
+            }
             else
-                return CreateGenericRequestDelegate(func);
+            {
+                return CreateGenericRequestDelegate(skeleton);
+            }
         }
 
         private static MethodReference CreateGenericRequestDelegate(MethodDefinition func)
@@ -70,27 +55,18 @@ namespace Mirage.Weaver
 
             var returnType = taskReturnType.GenericArguments[0];
 
-            var genericRegisterMethod = func.Module.ImportReference((RemoteCallCollection c) => c.RegisterRequest<object>(default, default, default, default, default)) as GenericInstanceMethod;
+            var genericRegisterMethod = func.Module.ImportReference((RemoteCallCollection c) => c.RegisterRequest<object>(default, default, default, default, default, default)) as GenericInstanceMethod;
 
             var registerInstance = new GenericInstanceMethod(genericRegisterMethod.ElementMethod);
             registerInstance.GenericArguments.Add(returnType);
             return registerInstance;
         }
 
-        /// <summary>
-        /// This generates code like:
-        /// NetworkBehaviour.RegisterServerRpcDelegate(base.GetType(), "CmdThrust", new NetworkBehaviour.CmdDelegate(ShipControl.InvokeCmdCmdThrust));
-        /// </summary>
-        /// <param name="worker"></param>
-        /// <param name="rpc"></param>
-        private static void RegisterClientRpc(ILProcessor worker, ClientRpcMethod rpc)
-        {
-            var registerMethod = GetRegisterMethod(rpc.skeleton);
-            CallRegister(worker, rpc, RpcInvokeType.ClientRpc, registerMethod, false);
-        }
 
-        private static void CallRegister(ILProcessor worker, RpcMethod rpcMethod, RpcInvokeType? invokeType, MethodReference registerMethod, bool requireAuthority)
+        private static void CallRegister(ILProcessor worker, RpcMethod rpcMethod, RpcInvokeType invokeType, bool requireAuthority)
         {
+            var registerMethod = GetRegisterMethod(rpcMethod);
+
             var skeleton = rpcMethod.skeleton;
             var name = HumanReadableName(rpcMethod.stub);
             var index = rpcMethod.Index;
@@ -101,9 +77,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldc_I4, index));
             worker.Append(worker.Create(OpCodes.Ldstr, name));
             worker.Append(worker.Create(requireAuthority.OpCode_Ldc()));
-            // RegisterRequest has no type, it is always serverRpc, so dont need to include arg
-            if (invokeType.HasValue)
-                worker.Append(worker.Create(OpCodes.Ldc_I4, (int)invokeType.Value));
+            worker.Append(worker.Create(OpCodes.Ldc_I4, (int)invokeType));
 
             // write behaviour
             worker.Append(worker.Create(OpCodes.Ldarg_0));

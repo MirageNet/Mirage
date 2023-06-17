@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Mirage.Serialization;
 using Mirage.Weaver.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -51,6 +52,74 @@ namespace Mirage.Weaver
         {
             // append fullName hash to end to support overloads, but keep "md.Name" so it is human readable when debugging
             return $"UserCode_{method.Name}_{GetStableHash(method)}";
+        }
+
+
+        /// <summary>
+        /// Generates a skeleton for a ServerRpc
+        /// </summary>
+        /// <param name="td"></param>
+        /// <param name="method"></param>
+        /// <param name="userCodeFunc"></param>
+        /// <returns>The newly created skeleton method</returns>
+        /// <remarks>
+        /// Generates code like this:
+        /// <code>
+        /// protected static void Skeleton_MyServerRpc(NetworkBehaviour obj, NetworkReader reader, NetworkConnection senderConnection)
+        /// {
+        ///     if (!obj.Identity.server.active)
+        ///     {
+        ///         return;
+        ///     }
+        ///     ((ShipControl) obj).UserCode_Thrust(reader.ReadSingle(), (int) reader.ReadPackedUInt32());
+        /// }
+        /// </code>
+        /// </remarks>
+        protected MethodDefinition GenerateSkeleton(MethodDefinition method, MethodDefinition userCodeFunc, CustomAttribute clientRpcAttr, ValueSerializer[] paramSerializers)
+        {
+            var newName = SkeletonMethodName(method);
+            var rpc = method.DeclaringType.AddMethod(newName,
+                MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.Static,
+                userCodeFunc.ReturnType);
+
+            _ = rpc.AddParam<NetworkBehaviour>("behaviour");
+            var readerParameter = rpc.AddParam<NetworkReader>("reader");
+            var senderParameter = rpc.AddParam<INetworkPlayer>("senderConnection");
+            _ = rpc.AddParam<int>("replyId");
+
+
+            var worker = rpc.Body.GetILProcessor();
+
+            // load `behaviour.`
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(worker.Create(OpCodes.Castclass, method.DeclaringType.MakeSelfGeneric()));
+
+            var hasNetworkConnection = false;
+            // serverRpc will not pass in this attribute, it has nothing extra to do
+            if (clientRpcAttr != null)
+            {
+                // NetworkConnection parameter is only required for RpcTarget.Player
+                var target = clientRpcAttr.GetField(nameof(ClientRpcAttribute.target), RpcTarget.Observers);
+                hasNetworkConnection = target == RpcTarget.Player && HasFirstParameter<INetworkPlayer>(method);
+
+                if (hasNetworkConnection)
+                {
+                    // this is called in the skeleton (the client)
+                    // the client should just get the connection to the server and pass that in
+                    worker.Append(worker.Create(OpCodes.Ldarg_0));
+                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Client));
+                    worker.Append(worker.Create(OpCodes.Callvirt, (NetworkClient nb) => nb.Player));
+                }
+            }
+
+            // read and load args
+            ReadArguments(method, worker, readerParameter, senderParameter, hasNetworkConnection, paramSerializers);
+
+            // invoke actual ServerRpc function
+            worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc.MakeHostInstanceSelfGeneric()));
+            worker.Append(worker.Create(OpCodes.Ret));
+
+            return rpc;
         }
 
         /// <summary>
@@ -181,7 +250,7 @@ namespace Mirage.Weaver
         /// check if a method is valid for rpc
         /// </summary>
         /// <exception cref="RpcException">Throws when method is invalid</exception>
-        protected void ValidateMethod(MethodDefinition method, RemoteCallType callType)
+        protected void ValidateMethod(MethodDefinition method)
         {
             if (method.IsAbstract)
             {
@@ -217,29 +286,27 @@ namespace Mirage.Weaver
             }
         }
 
+
         /// <summary>
         /// checks if return type if valid for rpc
         /// </summary>
         /// <exception cref="RpcException">Throws when parameter are invalid</exception>
-        protected void ValidateReturnType(MethodDefinition md, RemoteCallType callType)
+        protected ReturnType ValidateReturnType(MethodDefinition md, RemoteCallType callType, RpcTarget rpcTarget)
         {
+            // void is allowed
             var returnType = md.ReturnType;
             if (returnType.Is(typeof(void)))
-                return;
+                return ReturnType.Void;
 
-            // only ServerRpc allow UniTask
-            if (callType == RemoteCallType.ServerRpc)
-            {
-                var unitaskType = typeof(UniTask<int>).GetGenericTypeDefinition();
-                if (returnType.Is(unitaskType))
-                    return;
-            }
+            if (callType == RemoteCallType.ClientRpc && rpcTarget == RpcTarget.Observers)
+                throw new RpcException($"[ClientRpc] must return void when target is Observers. To return values change target to Player or Owner", md);
 
+            // UniTask is allowed
+            var unitaskType = typeof(UniTask<int>).GetGenericTypeDefinition();
+            if (returnType.Is(unitaskType))
+                return ReturnType.UniTask;
 
-            if (callType == RemoteCallType.ServerRpc)
-                throw new RpcException($"Use UniTask<{md.ReturnType}> to return values from [ServerRpc]", md);
-            else
-                throw new RpcException($"[ClientRpc] must return void", md);
+            throw new RpcException($"Use UniTask<{md.ReturnType}> to return values from [ClientRpc] or [ServerRpc]", md);
         }
 
         /// <summary>

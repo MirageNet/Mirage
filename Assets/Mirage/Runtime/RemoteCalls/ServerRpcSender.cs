@@ -14,7 +14,7 @@ namespace Mirage.RemoteCalls
             var index = behaviour.Identity.RemoteCallCollection.GetIndexOffset(behaviour) + relativeIndex;
             Validate(behaviour, index, requireAuthority);
 
-            var message = new ServerRpcMessage
+            var message = new RpcMessage
             {
                 NetId = behaviour.NetId,
                 FunctionIndex = index,
@@ -24,22 +24,23 @@ namespace Mirage.RemoteCalls
             behaviour.Client.Send(message, channelId);
         }
 
-        public static UniTask<T> SendWithReturn<T>(NetworkBehaviour behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, bool requireAuthority)
+        public static UniTask<T> SendWithReturn<T>(NetworkBehaviour behaviour, int relativeIndex, NetworkWriter writer, bool requireAuthority)
         {
             var index = behaviour.Identity.RemoteCallCollection.GetIndexOffset(behaviour) + relativeIndex;
             Validate(behaviour, index, requireAuthority);
-            var message = new ServerRpcWithReplyMessage
+            var message = new RpcWithReplyMessage
             {
                 NetId = behaviour.NetId,
                 FunctionIndex = index,
                 Payload = writer.ToArraySegment()
             };
 
-            (var task, var id) = behaviour.ClientObjectManager.CreateReplyTask<T>();
+            (var task, var id) = behaviour.ClientObjectManager._rpcHandler.CreateReplyTask<T>();
 
             message.ReplyId = id;
 
-            behaviour.Client.Send(message, channelId);
+            // reply rpcs are always reliable
+            behaviour.Client.Send(message, Channel.Reliable);
 
             return task;
         }

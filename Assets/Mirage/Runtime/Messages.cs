@@ -5,8 +5,6 @@ using UnityEngine;
 
 namespace Mirage
 {
-    #region Public System Messages
-
     /// <summary>
     /// Sent to client to mark their scene as not ready
     /// <para>Client can sent <see cref="SceneReadyMessage"/> once its scene is ready again</para>
@@ -32,50 +30,7 @@ namespace Mirage
     [NetworkMessage]
     public struct SceneReadyMessage { }
 
-    #endregion
 
-    #region System Messages required for code gen path
-    [NetworkMessage]
-    public struct ServerRpcMessage
-    {
-        public uint NetId;
-        public int FunctionIndex;
-
-        // the parameters for the Cmd function
-        // -> ArraySegment to avoid unnecessary allocations
-        public ArraySegment<byte> Payload;
-    }
-
-    [NetworkMessage]
-    public struct ServerRpcWithReplyMessage
-    {
-        public uint NetId;
-        public int FunctionIndex;
-
-        // if the server Rpc can return values
-        // this then a ServerRpcReply will be sent with this id
-        public int ReplyId;
-
-        public ArraySegment<byte> Payload;
-    }
-
-    [NetworkMessage]
-    public struct ServerRpcReply
-    {
-        public int ReplyId;
-        public ArraySegment<byte> Payload;
-    }
-
-    [NetworkMessage]
-    public struct RpcMessage
-    {
-        public uint NetId;
-        public int FunctionIndex;
-        public ArraySegment<byte> Payload;
-    }
-    #endregion
-
-    #region Internal System Messages
     [NetworkMessage]
     public struct SpawnMessage
     {
@@ -130,9 +85,7 @@ namespace Mirage
             else
                 authStr = "Remote";
 
-
             return $"SpawnMessage[NetId:{NetId},{spawnIDStr},Authority:{authStr},{SpawnValues},Payload:{Payload.Count}bytes]";
-
         }
     }
 
@@ -232,5 +185,4 @@ namespace Mirage
         public double ClientTime;
         public double ServerTime;
     }
-    #endregion
 }

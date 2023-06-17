@@ -57,6 +57,14 @@ You may want to exclude the owner client when calling a ClientRpc. This is done 
 
 RPC can be sent using either the Reliable or Unreliable channels. `[ClientRpc(channel = Channel.Reliable)]`
 
+### Returning values
+
+ClientRpcs can return values only if RpcTarget is `Player` or `Owner`. It can take a long time for the client to reply, so they must return a UniTask which the server can await.
+
+To return a value, add a return value using `UniTask<MyReturnType>` where `MyReturnType` is any [supported Mirage type](/docs/guides/serialization/data-types). In the client, you can make your method async,  or you can use `UniTask.FromResult(myResult);`. For example:
+
+{{{ Path:'Snippets/RpcReply.cs' Name:'client-rpc-reply' }}}
+
 # Examples 
 
 ``` cs
