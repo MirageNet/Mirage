@@ -3,7 +3,7 @@ using System.Collections;
 using NSubstitute;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Runtime.ClientServer.RpcTests
+namespace Mirage.Tests.Runtime.RpcTests
 {
     // normal and rpc method in same class
     public class CallToNonRpcOverLoad_behaviour : NetworkBehaviour

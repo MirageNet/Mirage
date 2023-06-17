@@ -6,7 +6,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Runtime.ClientServer.RpcTests
+namespace Mirage.Tests.Runtime.RpcTests
 {
     public interface IRpcUsageBehaviour
     {
@@ -281,7 +281,7 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             });
 
             // should be full message (see in client) because server is not active
-            Assert.That(exception, Has.Message.EqualTo("Trying to send ServerRpc for object without authority. Mirage.Tests.Runtime.ClientServer.RpcTests.RpcUsageBehaviour_RequireAuthority.RpcRequireAuthority"));
+            Assert.That(exception, Has.Message.EqualTo("Trying to send ServerRpc for object without authority. Mirage.Tests.Runtime.RpcTests.RpcUsageBehaviour_RequireAuthority.RpcRequireAuthority"));
 
             // ensure that none were called, even if exception was throw
             yield return null;

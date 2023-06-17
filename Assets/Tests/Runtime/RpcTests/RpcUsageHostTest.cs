@@ -1,13 +1,13 @@
 using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
-using Mirage.Tests.Runtime.ClientServer.RpcTests;
+using Mirage.Tests.Runtime.Host;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Runtime.Host.RpcTests
+namespace Mirage.Tests.Runtime.RpcTests
 {
     public abstract class RpcUsageHostTestBase<T> : HostSetup<T> where T : NetworkBehaviour
     {
@@ -245,7 +245,7 @@ namespace Mirage.Tests.Runtime.Host.RpcTests
         }
     }
 
-    public class RpcUsageClientServerTest_RequireAuthority : RpcUsageHostTestBase<RpcUsageBehaviour_RequireAuthority>
+    public class RpcUsageHostTest_RequireAuthority : RpcUsageHostTestBase<RpcUsageBehaviour_RequireAuthority>
     {
         [UnityTest]
         public IEnumerator CalledWhenCalledWithAuthority()
@@ -291,7 +291,7 @@ namespace Mirage.Tests.Runtime.Host.RpcTests
         }
     }
 
-    public class RpcUsageClientServerTest_IgnoreAuthority : RpcUsageHostTestBase<RpcUsageBehaviour_IgnoreAuthority>
+    public class RpcUsageHostTest_IgnoreAuthority : RpcUsageHostTestBase<RpcUsageBehaviour_IgnoreAuthority>
     {
         [UnityTest]
         public IEnumerator CalledWhenCalledWithAuthority()

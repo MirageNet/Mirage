@@ -4,7 +4,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Runtime.ClientServer
+namespace Mirage.Tests.Runtime.RpcTests
 {
     public class ReturnRpcComponent_int : NetworkBehaviour
     {

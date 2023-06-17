@@ -3,7 +3,7 @@ using System.Collections;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Runtime.ClientServer.RpcTests
+namespace Mirage.Tests.Runtime.RpcTests
 {
     public class ClientServerRPCTests : ClientServerSetup<MockRpcComponent>
     {

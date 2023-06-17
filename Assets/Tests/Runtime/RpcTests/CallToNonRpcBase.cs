@@ -3,9 +3,9 @@ using System.Collections;
 using NSubstitute;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Runtime.ClientServer.RpcTests
+namespace Mirage.Tests.Runtime.RpcTests
 {
-    public class CallToRpcBase_behaviour : CallToRpcBase_base
+    public class CallToNonRpcBase_behaviour : CallToNonRpcBase_base
     {
         public event Action<int> clientRpcCalled;
         public event Action<int> serverRpcCalled;
@@ -15,40 +15,34 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         {
             clientRpcCalled?.Invoke(arg1);
 
-            // should call base user code, not generated rpc
+            // should call normal base method, no swapping to rpc (that doesn't exist)
             base.MyRpc(arg1);
         }
 
         [ServerRpc(requireAuthority = false)]
-        public override void MyRpc(int arg1, INetworkPlayer sender)
+        public void MyRpc(int arg1, INetworkPlayer sender)
         {
             serverRpcCalled?.Invoke(arg1);
 
-            // should call base user code, not generated rpc
-            base.MyRpc(arg1, sender);
+            // should call normal base method, no swapping to rpc (that doesn't exist)
+            base.MyRpc(arg1);
         }
     }
 
-    public class CallToRpcBase_base : NetworkBehaviour
+    public class CallToNonRpcBase_base : NetworkBehaviour
     {
-        public event Action<int> baseClientRpcCalled;
-        public event Action<int> baseServerRpcCalled;
+        public event Action<int> baseCalled;
 
-        [ClientRpc]
+        // not an rpc, override is, so it should just be called normally on receiver
         public virtual void MyRpc(int arg1)
         {
-            baseClientRpcCalled?.Invoke(arg1);
-        }
-
-        [ServerRpc(requireAuthority = false)]
-        public virtual void MyRpc(int arg1, INetworkPlayer sender)
-        {
-            baseServerRpcCalled?.Invoke(arg1);
+            baseCalled?.Invoke(arg1);
         }
     }
 
-    public class CallToRpcBase : ClientServerSetup<CallToRpcBase_behaviour>
+    public class CallToNonRpcBase : ClientServerSetup<CallToNonRpcBase_behaviour>
     {
+
         [UnityTest]
         public IEnumerator CanCallServerRpc()
         {
@@ -56,7 +50,7 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             var sub = Substitute.For<Action<int>>();
             var baseSub = Substitute.For<Action<int>>();
             serverComponent.serverRpcCalled += sub;
-            serverComponent.baseServerRpcCalled += baseSub;
+            serverComponent.baseCalled += baseSub;
             clientComponent.MyRpc(num, default(INetworkPlayer));
 
             yield return null;
@@ -73,7 +67,7 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             var sub = Substitute.For<Action<int>>();
             var baseSub = Substitute.For<Action<int>>();
             clientComponent.clientRpcCalled += sub;
-            clientComponent.baseClientRpcCalled += baseSub;
+            clientComponent.baseCalled += baseSub;
             serverComponent.MyRpc(num);
 
             yield return null;
