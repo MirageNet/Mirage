@@ -1,3 +1,10 @@
+# [141.2.0](https://github.com/MirageNet/Mirage/compare/v141.1.0...v141.2.0) (2023-06-17)
+
+
+### Features
+
+* adding syncList methods to set an index as dirty ([4dfe8df](https://github.com/MirageNet/Mirage/commit/4dfe8df162cba4bdeb6c1331afba81d5065c5cf0))
+
 # [141.1.0](https://github.com/MirageNet/Mirage/compare/v141.0.2...v141.1.0) (2023-06-16)
 
 
