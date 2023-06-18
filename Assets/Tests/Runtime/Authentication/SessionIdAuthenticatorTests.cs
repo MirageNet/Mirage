@@ -91,7 +91,7 @@ namespace Mirage.Tests.Runtime.Authentication
         public IEnumerator ReturnSuccessWhenGivenKey() => UniTask.ToCoroutine(async () =>
         {
             var key = _serverAuthenticator.CreateOrRefreshSession(serverPlayer);
-            var result = await _serverAuthenticator.AuthenticateAsync(new SessionKeyMessage { SessionKey = key });
+            var result = await _serverAuthenticator.AuthenticateAsync(null, new SessionKeyMessage { SessionKey = key });
 
             Assert.That(result.Success, Is.True);
             Assert.That(result.Authenticator, Is.TypeOf<SessionIdAuthenticator>());
@@ -109,7 +109,7 @@ namespace Mirage.Tests.Runtime.Authentication
             // request key for player
             // this should save auth data in session data
             var key = _serverAuthenticator.CreateOrRefreshSession(serverPlayer);
-            var result = await _serverAuthenticator.AuthenticateAsync(new SessionKeyMessage { SessionKey = key });
+            var result = await _serverAuthenticator.AuthenticateAsync(null, new SessionKeyMessage { SessionKey = key });
 
             Assert.That(result.Data, Is.TypeOf<SessionData>());
             var sessionData = (SessionData)result.Data;
@@ -135,7 +135,7 @@ namespace Mirage.Tests.Runtime.Authentication
         [UnityTest]
         public IEnumerator ReturnFailWhenKeyIsNull() => UniTask.ToCoroutine(async () =>
         {
-            var result = await _serverAuthenticator.AuthenticateAsync(new SessionKeyMessage { SessionKey = default });
+            var result = await _serverAuthenticator.AuthenticateAsync(null, new SessionKeyMessage { SessionKey = default });
 
             Assert.That(result.Success, Is.False);
             Assert.That(result.Reason, Is.EqualTo(SessionIdAuthenticator.NO_KEY_ERROR));
@@ -145,7 +145,7 @@ namespace Mirage.Tests.Runtime.Authentication
         public IEnumerator ReturnFailWhenKeyIsNotFound() => UniTask.ToCoroutine(async () =>
         {
             var key = new ArraySegment<byte>(new byte[_serverAuthenticator.SessionIDLength]);
-            var result = await _serverAuthenticator.AuthenticateAsync(new SessionKeyMessage { SessionKey = key });
+            var result = await _serverAuthenticator.AuthenticateAsync(null, new SessionKeyMessage { SessionKey = key });
 
             Assert.That(result.Success, Is.False);
             Assert.That(result.Reason, Is.EqualTo(SessionIdAuthenticator.NOT_FOUND_ERROR));

@@ -29,7 +29,7 @@ namespace Mirage.Authentication
 
         private async UniTaskVoid HandleAuth(INetworkPlayer player, T msg)
         {
-            var result = await AuthenticateAsync(msg);
+            var result = await AuthenticateAsync(player, msg);
             _afterAuth.Invoke(player, result);
         }
 
@@ -40,11 +40,12 @@ namespace Mirage.Authentication
         /// By default the async version just call the normal version.
         /// </para>
         /// </summary>
+        /// <param name="player">player that send message</param>
         /// <param name="message"></param>
         /// <returns></returns>
-        protected internal virtual UniTask<AuthenticationResult> AuthenticateAsync(T message)
+        protected internal virtual UniTask<AuthenticationResult> AuthenticateAsync(INetworkPlayer player, T message)
         {
-            return UniTask.FromResult(Authenticate(message));
+            return UniTask.FromResult(Authenticate(player, message));
         }
 
         /// <summary>
@@ -56,7 +57,7 @@ namespace Mirage.Authentication
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        protected virtual AuthenticationResult Authenticate(T message) => throw new NotImplementedException("You must Implement Authenticate or AuthenticateAsync");
+        protected virtual AuthenticationResult Authenticate(INetworkPlayer player, T message) => throw new NotImplementedException("You must Implement Authenticate or AuthenticateAsync");
 
         /// <summary>
         /// Sends Authentication from client

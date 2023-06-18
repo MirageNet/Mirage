@@ -27,7 +27,7 @@ namespace Mirage.Snippets.Authentication
     public class CustomAuthenticator : NetworkAuthenticator<CustomAuthMessage>
     {
         // CodeEmbed-End: authenticator-def
-        protected override async UniTask<AuthenticationResult> AuthenticateAsync(CustomAuthMessage msg)
+        protected override async UniTask<AuthenticationResult> AuthenticateAsync(INetworkPlayer player, CustomAuthMessage msg)
         {
             // check user sent token, if they didn't then return fail
             if (string.IsNullOrEmpty(msg.token))

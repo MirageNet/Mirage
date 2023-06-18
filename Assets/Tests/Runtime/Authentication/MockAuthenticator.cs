@@ -7,7 +7,7 @@ namespace Mirage.Tests.Runtime.Authentication
         public bool Success = true;
         public string FailReason = "Succcess is false";
 
-        protected override AuthenticationResult Authenticate(MockMessage message)
+        protected override AuthenticationResult Authenticate(INetworkPlayer player, MockMessage message)
         {
             if (Success)
                 return AuthenticationResult.CreateSuccess(this, new MockData { });

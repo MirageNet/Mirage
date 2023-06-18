@@ -45,7 +45,7 @@ namespace Mirage.Authenticators.SessionId
         /// </summary>
         private readonly Dictionary<INetworkPlayer, SessionKey> _playerKeys = new Dictionary<INetworkPlayer, SessionKey>();
 
-        protected override AuthenticationResult Authenticate(SessionKeyMessage message)
+        protected override AuthenticationResult Authenticate(INetworkPlayer player, SessionKeyMessage message)
         {
             if (message.SessionKey.Count == 0)
                 return AuthenticationResult.CreateFail(NO_KEY_ERROR);
