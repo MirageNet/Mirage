@@ -1,3 +1,15 @@
+# [143.0.0](https://github.com/MirageNet/Mirage/compare/v142.0.0...v143.0.0) (2023-06-18)
+
+
+### Features
+
+* adding INetworkPlayer to Authenticate ([ba54dd2](https://github.com/MirageNet/Mirage/commit/ba54dd27ab5da796a2f3d39e6fc891abffeec4fd))
+
+
+### BREAKING CHANGES
+
+* Authenticate overrides now require INetworkPlayer argument
+
 # [142.0.0](https://github.com/MirageNet/Mirage/compare/v141.2.0...v142.0.0) (2023-06-17)
 
 
