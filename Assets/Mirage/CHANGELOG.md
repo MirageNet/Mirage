@@ -1,3 +1,10 @@
+# [143.2.0](https://github.com/MirageNet/Mirage/compare/v143.1.0...v143.2.0) (2023-06-19)
+
+
+### Features
+
+* adding script that will make sure object is always visible ([0b763cf](https://github.com/MirageNet/Mirage/commit/0b763cf6209f2570750140795171549ab6781a16))
+
 # [143.1.0](https://github.com/MirageNet/Mirage/compare/v143.0.0...v143.1.0) (2023-06-19)
 
 
