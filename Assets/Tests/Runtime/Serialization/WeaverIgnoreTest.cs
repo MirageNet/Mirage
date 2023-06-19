@@ -31,7 +31,6 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(copy.second, Is.EqualTo(data.second));
             reader.Dispose();
         }
-
     }
     public struct MyCustomType
     {

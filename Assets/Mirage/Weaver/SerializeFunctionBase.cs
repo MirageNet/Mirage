@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq.Expressions;
+using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -93,7 +94,7 @@ namespace Mirage.Weaver
         public MethodReference GetFunction_Throws(TypeReference typeReference)
         {
             // if is <T> then  just return generic write./read with T as the generic argument
-            if (typeReference.IsGenericParameter)
+            if (typeReference.IsGenericParameter || HasAsGenericAttribute(typeReference))
             {
                 return CreateGenericFunction(typeReference);
             }
@@ -117,7 +118,10 @@ namespace Mirage.Weaver
             }
         }
 
-
+        private bool HasAsGenericAttribute(TypeReference typeReference)
+        {
+            return typeReference.Resolve().HasCustomAttribute<WeaverWriteAsGenericAttribute>();
+        }
 
         private MethodReference GenerateFunction(TypeReference typeReference)
         {

@@ -12,8 +12,22 @@ namespace Mirage.Serialization
     public sealed class WeaverIgnoreAttribute : Attribute { }
 
     /// <summary>
+    /// Tells Weaver to serialize a type as generic instead of creating a custom functions.
+    /// <para>
+    /// Use this when you have created and assigned your own Read/Write functions 
+    /// or when you can't use extension methods for types and need to manually assign them.
+    /// </para>
+    /// <para>
+    /// This will cause Weaver to use the <see cref="Writer{T}.Write"/> and <see cref="Reader{T}.Read"/> generic functions instead of creating new ones.
+    /// You must set these functions manually when using this attribute.
+    /// </para>
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Interface)]
+    public sealed class WeaverWriteAsGenericAttribute : Attribute { }
+
+    /// <summary>
     /// Tells weaver how many bits to sue for field
-    /// <para>Only works with interager fields (byte, int, ulong, enums etc)</para>
+    /// <para>Only works with integer fields (byte, int, ulong, enums etc)</para>
     /// <para>
     /// NOTE: bits are truncated when using this, so signed values will lose their sign. Use <see cref="ZigZagEncodeAttribute"/> as well if value might be negative
     /// </para>
@@ -39,7 +53,7 @@ namespace Mirage.Serialization
     }
 
     /// <summary>
-    /// Used along size <see cref="BitCountAttribute"/> to encodes a interager value using <see cref="ZigZag"/> so that both positive and negative values can be sent
+    /// Used along size <see cref="BitCountAttribute"/> to encodes a integer value using <see cref="ZigZag"/> so that both positive and negative values can be sent
     /// <para>Also See: <see href="https://miragenet.github.io/Mirage/docs/guides/bit-packing/bit-count-from-rangel">Bit Packing Documentation</see></para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
@@ -56,7 +70,7 @@ namespace Mirage.Serialization
     public class FloatPackAttribute : Attribute
     {
         /// <param name="max">Max value of the float</param>
-        /// <param name="precision">Smallest possible value of the field. Real precision woll be caculated using bitcount but will always be lower than this parameter</param>
+        /// <param name="precision">Smallest possible value of the field. Real precision will be calculated using bitcount but will always be lower than this parameter</param>
         public FloatPackAttribute(float max, float precision) { }
 
         /// <param name="max">Max value of the float</param>
@@ -99,7 +113,7 @@ namespace Mirage.Serialization
     /// <summary>
     /// Tells weaver the max range for small, medium and large values.
     /// <para>Allows small values to be sent using less bits</para>
-    /// <para>Only works with interager fields (byte, int, ulong, enums etc)</para>
+    /// <para>Only works with integer fields (byte, int, ulong, enums etc)</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
     public class VarIntAttribute : Attribute
@@ -113,7 +127,7 @@ namespace Mirage.Serialization
     /// <summary>
     /// Tells weaver the block size to use for packing int values
     /// <para>Allows small values to be sent using less bits</para>
-    /// <para>Only works with interager fields (byte, int, ulong, enums etc)</para>
+    /// <para>Only works with integer fields (byte, int, ulong, enums etc)</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
     public class VarIntBlocksAttribute : Attribute
