@@ -1,3 +1,10 @@
+# [143.1.0](https://github.com/MirageNet/Mirage/compare/v143.0.0...v143.1.0) (2023-06-19)
+
+
+### Features
+
+* adding attribute that instructs Weaver to write a type as generic ([1b1e4e6](https://github.com/MirageNet/Mirage/commit/1b1e4e6de6e7a0137e1796eccf2d92059c512d88))
+
 # [143.0.0](https://github.com/MirageNet/Mirage/compare/v142.0.0...v143.0.0) (2023-06-18)
 
 
