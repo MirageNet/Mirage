@@ -296,6 +296,7 @@ namespace Mirage
 
         private string FindChangeLog()
         {
+#if UNITY_2021_3_OR_NEWER
             var miragePackage = PackageInfo.GetAllRegisteredPackages()
                 .Where(x => x.name == miragePackageName)
                 .FirstOrDefault();
@@ -307,7 +308,10 @@ namespace Mirage
             }
             // otherwise gets the asset path of this file, and then find changelog relative to that
             else
-
+#endif
+            // note: for unity 2020 or earlier
+            //       we just return this path, because GetAllRegisteredPackages doesn't exist
+            //       make sure that the "else" is inside the #if so this is valid c#
             {
                 return AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject(this)) + "/../../../CHANGELOG.md";
             }
