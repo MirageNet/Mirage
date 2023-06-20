@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Mirage.Logging;
@@ -9,6 +10,7 @@ using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.UIElements;
+using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 /**
  * Docs used:
@@ -67,12 +69,6 @@ namespace Mirage
         private const string firstTimeMirageKey = "MirageWelcome";
         private const string miragePackageName = "com.miragenet.mirage";
         private const int _numberOfChangeLogs = 3;
-
-        /// <summary>
-        ///     Hard coded for source code version. If package version is found, this will
-        ///     be set later on to package version. through checking for packages anyways.
-        /// </summary>
-        private string changeLogPath;
 
         private static string GetVersion()
         {
@@ -143,8 +139,6 @@ namespace Mirage
         //the code to handle display and button clicking
         private void OnEnable()
         {
-            changeLogPath = AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject(this)) + "/../../../CHANGELOG.md";
-
             //Load the UI
             //Each editor window contains a root VisualElement object
             var root = rootVisualElement;
@@ -181,6 +175,7 @@ namespace Mirage
 
             #endregion
         }
+
 
         private void OnDisable()
         {
@@ -264,6 +259,8 @@ namespace Mirage
 
             var currentChangeLogs = 0;
 
+            var changeLogPath = FindChangeLog();
+            Debug.Log(changeLogPath);
             using (var reader = new StreamReader(changeLogPath))
             {
                 string line;
@@ -295,6 +292,29 @@ namespace Mirage
             }
 
             return content;
+        }
+
+        private string FindChangeLog()
+        {
+#if UNITY_2021_3_OR_NEWER
+            var miragePackage = PackageInfo.GetAllRegisteredPackages()
+                .Where(x => x.name == miragePackageName)
+                .FirstOrDefault();
+
+            // if we are installed via package, then use that
+            if (miragePackage != null)
+            {
+                return miragePackage.assetPath + "/CHANGELOG.md";
+            }
+            // otherwise gets the asset path of this file, and then find changelog relative to that
+            else
+#endif
+            // note: for unity 2020 or earlier
+            //       we just return this path, because GetAllRegisteredPackages doesn't exist
+            //       make sure that the "else" is inside the #if so this is valid c#
+            {
+                return AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject(this)) + "/../../../CHANGELOG.md";
+            }
         }
 
         //draw the parsed information
@@ -333,7 +353,7 @@ namespace Mirage
                     if (!firstTitle) { builder.Append("\n"); }
 
 #if UNITY_2021_2_OR_NEWER
-                    string subTitle = $"<b>{item.Substring(4)}</b>";
+                    var subTitle = $"<b>{item.Substring(4)}</b>";
 #else
                     var subTitle = item.Substring(4);
 #endif
@@ -509,7 +529,7 @@ namespace Mirage
 
                     break;
                 case StatusCode.Failure:
-                    if (logger.ErrorEnabled()) logger.LogError($"There was an issue finding packages. \n Error Code: {searchRequest.Error.errorCode }\n Error Message: {searchRequest.Error.message}");
+                    if (logger.ErrorEnabled()) logger.LogError($"There was an issue finding packages. \n Error Code: {searchRequest.Error.errorCode}\n Error Message: {searchRequest.Error.message}");
                     break;
             }
         }
