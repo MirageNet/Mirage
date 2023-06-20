@@ -300,7 +300,8 @@ namespace Mirage
             var miragePackage = all.Where(x => x.name == miragePackageName).FirstOrDefault();
             if (miragePackage != null)
             {
-                return miragePackage.changelogUrl;
+                Debug.Log(miragePackage.assetPath);
+                return miragePackage.assetPath + "/CHANGELOG.md";
             }
             else
             {
