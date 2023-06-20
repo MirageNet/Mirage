@@ -89,8 +89,19 @@ namespace Mirage.Authentication
 
         private async UniTask<AuthenticationResult> RunServerAuthenticate(INetworkPlayer player)
         {
-            var taskCompletion = new UniTaskCompletionSource<AuthenticationResult>();
-            _pending.Add(player, taskCompletion);
+            UniTaskCompletionSource<AuthenticationResult> taskCompletion;
+            // host player should be added by PreAddHostPlayer, so we just get item
+            if (player == _server.LocalPlayer)
+            {
+                taskCompletion = _pending[player];
+            }
+            // remote player should add new token here
+            else
+            {
+                taskCompletion = new UniTaskCompletionSource<AuthenticationResult>();
+                _pending.Add(player, taskCompletion);
+            }
+
 
             try
             {
@@ -126,6 +137,19 @@ namespace Mirage.Authentication
             {
                 logger.LogError("Received AfterAuth Callback from player that was not in pending authentication");
             }
+        }
+
+        internal void PreAddHostPlayer(INetworkPlayer player)
+        {
+            // dont add if host dont require auth
+            if (!RequireHostToAuthenticate)
+                return;
+
+            // host player is a special case, they are added early
+            // otherwise Client.Connected can't be used to send auth message
+            // because that is called before RunServerAuthenticate is called.
+            var taskCompletion = new UniTaskCompletionSource<AuthenticationResult>();
+            _pending.Add(player, taskCompletion);
         }
     }
 }

@@ -422,6 +422,11 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log($"Server accepted local client connection: {player}");
 
             _connections[player.Connection] = player;
+
+            if (Authenticator != null)
+                // we need to add host player to auth early, so that Client.Connected, can be used to send auth message
+                // if we want for server to add it then we will be too late 
+                Authenticator.PreAddHostPlayer(player);
         }
 
         public void SendToAll<T>(T msg, bool excludeLocalPlayer, Channel channelId = Channel.Reliable)

@@ -177,4 +177,50 @@ namespace Mirage.Tests.Runtime.Authentication
 
         }
     }
+
+    public class AuthenticatorHost_HostRequired_ClientConnect : AuthenticatorHostModeBase
+    {
+        public AuthenticatorHost_HostRequired_ClientConnect() : base(true, hostRequireAuth: true)
+        {
+        }
+
+        protected override void ExtraClientSetup(IClientInstance instance)
+        {
+            base.ExtraClientSetup(instance);
+
+            instance.Client.Connected.AddListener(ClientConnected);
+        }
+
+        private void ClientConnected(INetworkPlayer arg0)
+        {
+            // check that we can send auth when client connects
+            _auth.SendAuthentication(client, new MockAuthenticator.MockMessage { });
+        }
+
+        [UnityTest]
+        public IEnumerator AuthenticatesFromMessageSentInConnected()
+        {
+            yield return null;
+            yield return null;
+
+            Assert.That(_serverAuthCalls, Has.Count.EqualTo(1));
+            Assert.That(_serverAuthCalls[0], Is.EqualTo(server.LocalPlayer));
+
+            Assert.That(server.LocalPlayer.IsAuthenticated, Is.True);
+            Assert.That(server.LocalPlayer.Authentication, Is.Not.Null);
+            Assert.That(server.LocalPlayer.Authentication.Authenticator, Is.TypeOf<MockAuthenticator>());
+            Assert.That(server.LocalPlayer.Authentication.Data, Is.TypeOf<MockAuthenticator.MockData>());
+
+            // client needs extra frame to receive message from server
+            yield return null;
+
+            Assert.That(_clientAuthCalls, Has.Count.EqualTo(1));
+            Assert.That(_clientAuthCalls[0], Is.EqualTo(client.Player));
+
+            Assert.That(client.Player.IsAuthenticated, Is.True);
+            Assert.That(client.Player.Authentication, Is.Not.Null);
+            Assert.That(client.Player.Authentication.Authenticator, Is.TypeOf<MockAuthenticator>());
+
+        }
+    }
 }
