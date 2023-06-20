@@ -1,3 +1,10 @@
+## [143.2.1](https://github.com/MirageNet/Mirage/compare/v143.2.0...v143.2.1) (2023-06-20)
+
+
+### Bug Fixes
+
+* fixing path of change log ([#1150](https://github.com/MirageNet/Mirage/issues/1150)) ([7716809](https://github.com/MirageNet/Mirage/commit/77168097c755d4d3778b87822464b042305d03eb))
+
 # [143.2.0](https://github.com/MirageNet/Mirage/compare/v143.1.0...v143.2.0) (2023-06-19)
 
 
