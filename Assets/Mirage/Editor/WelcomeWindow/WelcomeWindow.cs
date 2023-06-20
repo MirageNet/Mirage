@@ -296,14 +296,18 @@ namespace Mirage
 
         private string FindChangeLog()
         {
-            var all = PackageInfo.GetAllRegisteredPackages();
-            var miragePackage = all.Where(x => x.name == miragePackageName).FirstOrDefault();
+            var miragePackage = PackageInfo.GetAllRegisteredPackages()
+                .Where(x => x.name == miragePackageName)
+                .FirstOrDefault();
+
+            // if we are installed via package, then use that
             if (miragePackage != null)
             {
-                Debug.Log(miragePackage.assetPath);
                 return miragePackage.assetPath + "/CHANGELOG.md";
             }
+            // otherwise gets the asset path of this file, and then find changelog relative to that
             else
+
             {
                 return AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject(this)) + "/../../../CHANGELOG.md";
             }
