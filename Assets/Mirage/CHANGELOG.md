@@ -1,3 +1,10 @@
+## [143.2.2](https://github.com/MirageNet/Mirage/compare/v143.2.1...v143.2.2) (2023-06-21)
+
+
+### Bug Fixes
+
+* fixing host authentication using Connected event ([6bb6bed](https://github.com/MirageNet/Mirage/commit/6bb6bed48d7facf5683c501df364c0d0f39ce4e1))
+
 ## [143.2.1](https://github.com/MirageNet/Mirage/compare/v143.2.0...v143.2.1) (2023-06-20)
 
 
