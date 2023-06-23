@@ -822,7 +822,7 @@ namespace Mirage
                     SceneLoadingAsyncOperationInfo.allowSceneActivation = false;
                 }
 
-                await SceneLoadingAsyncOperationInfo;
+                await SceneLoadingAsyncOperationInfo.ToUniTask();
                 AssertSceneIsActive(scenePath);
 
                 CompleteLoadingScene(SceneManager.GetActiveScene(), SceneOperation.Normal);
@@ -848,7 +848,7 @@ namespace Mirage
                 ? SceneManager.LoadSceneAsync(scenePath, sceneLoadParameters.Value)
                 : SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Additive);
 
-            await SceneLoadingAsyncOperationInfo;
+            await SceneLoadingAsyncOperationInfo.ToUniTask();
 
             var scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
 
@@ -871,7 +871,7 @@ namespace Mirage
             var scene = SceneManager.GetSceneByPath(scenePath);
             if (scene.IsValid())
             {
-                await SceneManager.UnloadSceneAsync(scenePath, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
+                await SceneManager.UnloadSceneAsync(scenePath, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects).ToUniTask();
 
                 CompleteLoadingScene(scene, SceneOperation.UnloadAdditive);
             }
@@ -890,7 +890,7 @@ namespace Mirage
             // Ensure additive scene is actually loaded
             if (scene.IsValid())
             {
-                await SceneManager.UnloadSceneAsync(scene, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
+                await SceneManager.UnloadSceneAsync(scene, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects).ToUniTask();
 
                 CompleteLoadingScene(scene, SceneOperation.UnloadAdditive);
             }
