@@ -1,3 +1,10 @@
+## [143.2.3](https://github.com/MirageNet/Mirage/compare/v143.2.2...v143.2.3) (2023-06-23)
+
+
+### Bug Fixes
+
+* use of await AsyncOperation in unity 2023 ([#1151](https://github.com/MirageNet/Mirage/issues/1151)) ([5af1435](https://github.com/MirageNet/Mirage/commit/5af14359f07f50c848fc784c201ac86ca43a0262))
+
 ## [143.2.2](https://github.com/MirageNet/Mirage/compare/v143.2.1...v143.2.2) (2023-06-21)
 
 
