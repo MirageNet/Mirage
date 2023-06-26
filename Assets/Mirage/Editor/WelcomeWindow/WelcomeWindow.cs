@@ -260,7 +260,6 @@ namespace Mirage
             var currentChangeLogs = 0;
 
             var changeLogPath = FindChangeLog();
-            Debug.Log(changeLogPath);
             using (var reader = new StreamReader(changeLogPath))
             {
                 string line;
