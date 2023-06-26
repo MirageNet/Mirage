@@ -28,32 +28,11 @@ namespace Mirage
             }
 
             // Create the sync lists editor.
-            var syncLists = _drawer.CreateDefaultSyncLists();
+            var syncLists = _syncListDrawer.Create();
             if (syncLists != null)
             {
                 root.Add(syncLists);
             }
-
-            return root;
-        }
-    }
-
-    public partial class NetworkBehaviourInspectorDrawer
-    {
-        public VisualElement CreateDefaultSyncLists()
-        {
-            return _syncListDrawer?.Create();
-        }
-
-        public static VisualElement CreateHeader(string text)
-        {
-            var root = new VisualElement();
-            root.AddToClassList("unity-decorator-drawers-container");
-
-            var label = new Label(text);
-            label.AddToClassList("unity-header-drawer__label");
-
-            root.Add(label);
 
             return root;
         }
@@ -67,12 +46,25 @@ namespace Mirage
 
             var root = new VisualElement();
 
-            root.Add(NetworkBehaviourInspectorDrawer.CreateHeader("Sync Lists"));
+            root.Add(CreateHeader("Sync Lists"));
 
             foreach (var syncListField in _syncListFields)
             {
                 root.Add(CreateSyncList(syncListField));
             }
+
+            return root;
+        }
+
+        public static VisualElement CreateHeader(string text)
+        {
+            var root = new VisualElement();
+            root.AddToClassList("unity-decorator-drawers-container");
+
+            var label = new Label(text);
+            label.AddToClassList("unity-header-drawer__label");
+
+            root.Add(label);
 
             return root;
         }
