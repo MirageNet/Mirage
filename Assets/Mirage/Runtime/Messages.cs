@@ -73,7 +73,7 @@ namespace Mirage
             if (SceneId.HasValue)
                 spawnIDStr = $"SceneId:{SceneId.Value}";
             else if (PrefabHash.HasValue)
-                spawnIDStr = $"PrefabHash:{PrefabHash.Value}";
+                spawnIDStr = $"PrefabHash:{PrefabHash.Value:X}";
             else
                 spawnIDStr = $"SpawnId:Error";
 
