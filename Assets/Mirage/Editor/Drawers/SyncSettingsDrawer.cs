@@ -17,7 +17,7 @@ namespace Mirage
             foreach (var target in targets)
             {
                 Debug.Assert(target is NetworkBehaviour);
-                var syncAny = NetworkBehaviourInspectorDrawer.SyncsAnything(target);
+                var syncAny = InspectorHelper.SyncsAnything(target);
                 if (syncAny)
                     return false;
             }

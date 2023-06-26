@@ -73,5 +73,43 @@ namespace Mirage
         {
             return field.IsPublic || HasShowInInspector(field);
         }
+
+        /// <summary>
+        /// does this type sync anything? otherwise we don't need to show syncInterval
+        /// </summary>
+        /// <param name="scriptClass"></param>
+        /// <returns></returns>
+        public static bool SyncsAnything(UnityEngine.Object target)
+        {
+            var scriptClass = target.GetType();
+
+            // check for all SyncVar fields, they don't have to be visible
+            foreach (var field in GetAllFields(scriptClass, typeof(NetworkBehaviour)))
+            {
+                if (field.IsSyncVar())
+                {
+                    return true;
+                }
+            }
+
+            // has OnSerialize that is not in NetworkBehaviour?
+            // then it either has a syncvar or custom OnSerialize. either way
+            // this means we have something to sync.
+            var method = scriptClass.GetMethod("OnSerialize");
+            if (method != null && method.DeclaringType != typeof(NetworkBehaviour))
+            {
+                return true;
+            }
+
+            // SyncObjects are serialized in NetworkBehaviour.OnSerialize, which
+            // is always there even if we don't use SyncObjects. so we need to
+            // search for SyncObjects manually.
+            // Any SyncObject should be added to syncObjects when unity creates an
+            // object so we can cheeck length of list so see if sync objects exists
+            var syncObjectsField = scriptClass.GetField("syncObjects", BindingFlags.NonPublic | BindingFlags.Instance);
+            var syncObjects = (List<ISyncObject>)syncObjectsField.GetValue(target);
+
+            return syncObjects.Count > 0;
+        }
     }
 }
