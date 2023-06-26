@@ -1,3 +1,22 @@
+# [144.0.0](https://github.com/MirageNet/Mirage/compare/v143.2.3...v144.0.0) (2023-06-26)
+
+
+### Bug Fixes
+
+* adding check to SyncObjects to make sure they are IEnumerable before drawing them as list. ([907d8ce](https://github.com/MirageNet/Mirage/commit/907d8cece89774cba21511478e4c675e6f60d49e))
+* logging prefab hash as hex ([8289f20](https://github.com/MirageNet/Mirage/commit/8289f2074c2681a4cefaad8001b8f59c94970d4c))
+* removing debug log from welcomewindow ([3be3f42](https://github.com/MirageNet/Mirage/commit/3be3f423689c91e9fd75b1fd62db5bc84c42c9ee))
+
+
+### Code Refactoring
+
+* moving SyncsAnything to InspectorHelper ([f3755d9](https://github.com/MirageNet/Mirage/commit/f3755d9b296b11e96a206ed01c1bfb4644cbcf7f))
+
+
+### BREAKING CHANGES
+
+* SyncsAnything for editor scripts moved to InspectorHelper
+
 ## [143.2.3](https://github.com/MirageNet/Mirage/compare/v143.2.2...v143.2.3) (2023-06-23)
 
 
