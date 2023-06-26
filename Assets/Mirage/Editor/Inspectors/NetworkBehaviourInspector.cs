@@ -53,7 +53,10 @@ namespace Mirage
             {
                 if (field.IsSyncObject() && field.IsVisibleSyncObject())
                 {
-                    _syncListFields.Add(new SyncListField(field));
+                    var fieldValue = field.GetValue(_targetObject);
+                    // only draw SyncObjects that are IEnumerable
+                    if (fieldValue is IEnumerable)
+                        _syncListFields.Add(new SyncListField(field));
                 }
             }
         }
@@ -74,31 +77,25 @@ namespace Mirage
         private void DrawSyncList(SyncListField syncListField)
         {
             syncListField.visible = EditorGUILayout.Foldout(syncListField.visible, syncListField.label, true);
-            if (syncListField.visible)
+            if (!syncListField.visible)
+                return;
+
+            EditorGUILayout.BeginVertical("OL box");
+            syncListField.UpdateItems(_targetObject);
+            var count = syncListField.items.Count;
+            for (var i = 0; i < count; i++)
             {
-                EditorGUILayout.BeginVertical("OL box");
-                var count = 0;
-                var fieldValue = syncListField.field.GetValue(_targetObject);
-                if (fieldValue is IEnumerable synclist)
-                {
-                    var index = 0;
-                    foreach (var item in synclist)
-                    {
-                        var itemValue = item != null ? item.ToString() : "NULL";
-                        var itemLabel = "Element " + index;
-                        EditorGUILayout.LabelField(itemLabel, itemValue);
-
-                        index++;
-                        count++;
-                    }
-                }
-
-                if (count == 0)
-                {
-                    EditorGUILayout.LabelField("List is empty");
-                }
-                EditorGUILayout.EndVertical();
+                var item = syncListField.items[i];
+                var itemValue = item != null ? item.ToString() : "NULL";
+                var itemLabel = "Element " + i;
+                EditorGUILayout.LabelField(itemLabel, itemValue);
             }
+
+            if (count == 0)
+            {
+                EditorGUILayout.LabelField("List is empty");
+            }
+            EditorGUILayout.EndVertical();
         }
 
         private class SyncListField
