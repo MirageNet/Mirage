@@ -134,6 +134,9 @@ GameObject:
   - component: {fileID: 142526697}
   - component: {fileID: 142526696}
   - component: {fileID: 142526695}
+  - component: {fileID: 142526700}
+  - component: {fileID: 142526699}
+  - component: {fileID: 142526698}
   m_Layer: 0
   m_Name: Test Object
   m_TagString: Untagged
@@ -227,6 +230,59 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &142526698
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142526694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1430ce0655c523d4d83995ac8823f263, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SyncSettings:
+    From: 2
+    To: 3
+    Timing: 0
+    Interval: 0.1
+  Number: 0
+  Str: 
+--- !u!114 &142526699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142526694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df79416581154e04983f66f0a4591088, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SyncSettings:
+    From: 2
+    To: 3
+    Timing: 0
+    Interval: 0.1
+--- !u!114 &142526700
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142526694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e51d1096eecd3d4cabe6e5c33e03e5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SyncSettings:
+    From: 2
+    To: 3
+    Timing: 0
+    Interval: 0.1
 --- !u!1 &289798011
 GameObject:
   m_ObjectHideFlags: 0
@@ -405,8 +461,9 @@ MonoBehaviour:
   SocketFactory: {fileID: 867700733}
   ObjectManager: {fileID: 867700735}
   DisconnectOnException: 1
+  RethrowException: 0
   RunInBackground: 1
-  authenticator: {fileID: 0}
+  Authenticator: {fileID: 0}
   _started:
     _event:
       m_PersistentCalls:
@@ -440,11 +497,12 @@ MonoBehaviour:
   MetricsSize: 10
   MaxConnections: 4
   DisconnectOnException: 1
+  RethrowException: 0
   RunInBackground: 1
   Listening: 1
   SocketFactory: {fileID: 867700733}
   ObjectManager: {fileID: 867700736}
-  authenticator: {fileID: 0}
+  Authenticator: {fileID: 0}
   _started:
     _event:
       m_PersistentCalls:
@@ -599,8 +657,9 @@ MonoBehaviour:
   SocketFactory: {fileID: 1379043720}
   ObjectManager: {fileID: 1379043722}
   DisconnectOnException: 1
+  RethrowException: 0
   RunInBackground: 1
-  authenticator: {fileID: 0}
+  Authenticator: {fileID: 0}
   _started:
     _event:
       m_PersistentCalls:
@@ -634,11 +693,12 @@ MonoBehaviour:
   MetricsSize: 10
   MaxConnections: 4
   DisconnectOnException: 1
+  RethrowException: 0
   RunInBackground: 1
   Listening: 1
   SocketFactory: {fileID: 1379043720}
   ObjectManager: {fileID: 1379043723}
-  authenticator: {fileID: 0}
+  Authenticator: {fileID: 0}
   _started:
     _event:
       m_PersistentCalls:
