@@ -13,6 +13,7 @@ namespace Mirage.Collections
         public int Count => _objects.Count;
         public bool IsReadOnly { get; private set; }
         void ISyncObject.SetShouldSyncFrom(bool shouldSync) => IsReadOnly = !shouldSync;
+        void ISyncObject.SetNetworkBehaviour(NetworkBehaviour networkBehaviour) { }
 
         /// <summary>
         /// Raised when an element is added to the list.

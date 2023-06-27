@@ -137,6 +137,11 @@ namespace Mirage
         }
 
         /// <summary>
+        /// flag to see if SetNetworkBehaviour has been called
+        /// </summary>
+        private bool _syncObjectsInitialized;
+
+        /// <summary>
         /// objects that can synchronize themselves, such as synclists
         /// </summary>
         protected readonly List<ISyncObject> syncObjects = new List<ISyncObject>();
@@ -235,6 +240,21 @@ namespace Mirage
 #endif
 
             return identity;
+        }
+
+        /// <summary>
+        /// calls SetNetworkBehaviour on each SyncObject, but only once
+        /// </summary>
+        internal void InitializeSyncObjects()
+        {
+            if (_syncObjectsInitialized)
+                return;
+
+            _syncObjectsInitialized = true;
+
+            // find all the ISyncObjects in this behaviour
+            foreach (var syncObject in syncObjects)
+                syncObject.SetNetworkBehaviour(this);
         }
 
         // this gets called in the constructor by the weaver

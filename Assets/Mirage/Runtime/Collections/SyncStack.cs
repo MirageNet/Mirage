@@ -8,11 +8,11 @@ namespace Mirage.Collections
     public class SyncStack<T> : IReadOnlyCollection<T>, IEnumerable<T>, ISyncObject
     {
         private readonly Stack<T> _objects;
-        private readonly IEqualityComparer<T> _comparer;
 
         public int Count => _objects.Count;
         public bool IsReadOnly { get; private set; }
         void ISyncObject.SetShouldSyncFrom(bool shouldSync) => IsReadOnly = !shouldSync;
+        void ISyncObject.SetNetworkBehaviour(NetworkBehaviour networkBehaviour) { }
 
         /// <summary>
         /// Raised when an element is added to the list.
@@ -61,19 +61,13 @@ namespace Mirage.Collections
 
         internal int ChangeCount => _changes.Count;
 
-        public SyncStack() : this(EqualityComparer<T>.Default)
+        public SyncStack()
         {
-        }
-
-        public SyncStack(IEqualityComparer<T> comparer)
-        {
-            _comparer = comparer ?? EqualityComparer<T>.Default;
             _objects = new Stack<T>();
         }
 
-        public SyncStack(Stack<T> objects, IEqualityComparer<T> comparer = null)
+        public SyncStack(Stack<T> objects)
         {
-            _comparer = comparer ?? EqualityComparer<T>.Default;
             _objects = objects;
         }
 

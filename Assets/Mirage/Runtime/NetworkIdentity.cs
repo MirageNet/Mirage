@@ -874,6 +874,9 @@ namespace Mirage
             World = networkServer.World;
             SyncVarSender = networkServer.SyncVarSender;
             Client = networkServer.LocalClient;
+
+            foreach (var behaviour in NetworkBehaviours)
+                behaviour.InitializeSyncObjects();
         }
 
         internal void SetClientValues(ClientObjectManager clientObjectManager, SpawnMessage msg)
@@ -895,6 +898,9 @@ namespace Mirage
                 World = Client.World;
                 SyncVarSender = Client.SyncVarSender;
             }
+
+            foreach (var behaviour in NetworkBehaviours)
+                behaviour.InitializeSyncObjects();
         }
 
         /// <summary>

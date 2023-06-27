@@ -11,8 +11,9 @@ namespace Mirage.Collections
     {
         /// <summary>
         /// Raised after the list has been updated
-        /// <para><b>Server:</b> This will invoke for every change</para>
-        /// <para><b>Client:</b> This will invoke after OnDeserialize</para>
+        /// <para><b>Sender:</b> This will invoke for every change</para>
+        /// <para><b>Receiver:</b> This will invoke after OnDeserialize</para>
+        /// <para>note: by default the Server will be the sender, but that can be changed with syncDirection</para>
         /// </summary>
         event Action OnChange;
 
@@ -21,6 +22,10 @@ namespace Mirage.Collections
         /// </summary>
         bool IsDirty { get; }
 
+        /// <summary>
+        /// Are we sending or receiving data from this instance. This is used to determine if we should throw if a change is made on the wrong instance
+        /// </summary>
+        /// <param name="shouldSync"></param>
         void SetShouldSyncFrom(bool shouldSync);
 
         /// <summary>
@@ -57,5 +62,13 @@ namespace Mirage.Collections
         /// Resets the SyncObject so that it can be re-used
         /// </summary>
         void Reset();
+
+        /// <summary>
+        /// Sets the NetworkBehaviour that owns this SyncObject
+        /// <para>This can be used by custom syncObjects to listen to events on NetworkBehaviour</para>
+        /// <para>This will only be called once, the first time the object is spawned (similar to unity's awake call)</para>
+        /// </summary>
+        /// <param name="networkBehaviour"></param>
+        void SetNetworkBehaviour(NetworkBehaviour networkBehaviour);
     }
 }
