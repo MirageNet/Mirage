@@ -1,3 +1,15 @@
+# [145.0.0](https://github.com/MirageNet/Mirage/compare/v144.0.0...v145.0.0) (2023-06-27)
+
+
+### Features
+
+* adding function to SyncObjects so that they can use the NetworkBehaviour that are a part of ([b6f3526](https://github.com/MirageNet/Mirage/commit/b6f35264d282ebacbc6d24e54808872cebc50c4a))
+
+
+### BREAKING CHANGES
+
+* ISyncObject now needs to implement the SetNetworkBehaviour function
+
 # [144.0.0](https://github.com/MirageNet/Mirage/compare/v143.2.3...v144.0.0) (2023-06-26)
 
 
