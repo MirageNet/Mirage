@@ -1,3 +1,10 @@
+## [145.0.1](https://github.com/MirageNet/Mirage/compare/v145.0.0...v145.0.1) (2023-06-29)
+
+
+### Bug Fixes
+
+* logging for notify send ([929686c](https://github.com/MirageNet/Mirage/commit/929686c9f6718ffffcd2fc2317c64874749a4e87))
+
 # [145.0.0](https://github.com/MirageNet/Mirage/compare/v144.0.0...v145.0.0) (2023-06-27)
 
 
