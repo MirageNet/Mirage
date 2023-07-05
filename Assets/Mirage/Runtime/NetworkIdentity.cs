@@ -1186,7 +1186,7 @@ namespace Mirage
             {
                 if (_remoteCallCollection == null)
                 {
-                    // we shoulld be save to lazy init
+                    // we should be save to lazy init
                     // we only need to register RPCs when we receive them
                     // when sending the index is baked in by weaver
                     _remoteCallCollection = new RemoteCallCollection();
