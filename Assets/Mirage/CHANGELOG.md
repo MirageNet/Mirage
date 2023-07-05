@@ -1,3 +1,11 @@
+## [145.0.2](https://github.com/MirageNet/Mirage/compare/v145.0.1...v145.0.2) (2023-07-05)
+
+
+### Bug Fixes
+
+* calling NetworkReset with custom unspawn handlers ([94a9199](https://github.com/MirageNet/Mirage/commit/94a919970b8ec33f5b5c59aaa708dce75bfafdbb))
+* checking if scene object before destroying owned object ([d6ced44](https://github.com/MirageNet/Mirage/commit/d6ced44793d4704dde51bf7f585fb8eacf70a42b))
+
 ## [145.0.1](https://github.com/MirageNet/Mirage/compare/v145.0.0...v145.0.1) (2023-06-29)
 
 
