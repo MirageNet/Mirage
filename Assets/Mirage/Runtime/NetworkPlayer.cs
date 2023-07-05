@@ -298,20 +298,26 @@ namespace Mirage
                 if (netIdentity == Identity)
                     continue;
 
-                if (netIdentity != null && netIdentity.ServerObjectManager != null)
-                {
-                    // use SOM on object we are destroying, it should be set if object is spawned,
-                    // we can't use Identity.ServerObjectManager because if Identity is null we wont have a SOM
-                    netIdentity.ServerObjectManager.Destroy(netIdentity);
-                }
+                TryDestroy(netIdentity);
             }
 
-            if (Identity != null && Identity.ServerObjectManager != null)
-                // Destroy the connections own identity.
-                Identity.ServerObjectManager.Destroy(Identity.gameObject);
+            // Destroy the connections own identity.
+            TryDestroy(Identity);
 
             // clear the hashset because we destroyed them all
             _ownedObjects.Clear();
+        }
+
+        private static void TryDestroy(NetworkIdentity identity)
+        {
+            if (identity != null && identity.ServerObjectManager != null)
+            {
+                // use SOM on object we are destroying, it should be set if object is spawned,
+                //     previous this used the SOM from the player's character,
+                //     we can't use that because if Identity is null we wont have a SOM
+                // make sure to check sceneObject, we dont want to destory server's copy of a Scene object
+                identity.ServerObjectManager.Destroy(identity, destroyServerObject: !identity.IsSceneObject);
+            }
         }
     }
 }
