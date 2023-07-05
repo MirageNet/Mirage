@@ -428,6 +428,9 @@ namespace Mirage
             if (_handlers.TryGetValue(identity.PrefabHash, out var handler) && handler.UnspawnHandler != null)
             {
                 handler.UnspawnHandler.Invoke(identity);
+                // need to call reset incase user puts object in pool and wants to re-use it later
+                // it needs to be dont after the handler so user still has access to network fields while cleaning it up
+                identity.NetworkReset();
             }
             else if (!identity.IsSceneObject)
             {
