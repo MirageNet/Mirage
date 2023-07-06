@@ -10,7 +10,6 @@ using UnityEngine;
 
 namespace Mirage
 {
-
     [AddComponentMenu("Network/ClientObjectManager")]
     [DisallowMultipleComponent]
     public class ClientObjectManager : MonoBehaviour
@@ -540,6 +539,9 @@ namespace Mirage
             // should never happen, Spawn methods above should throw instead
             Debug.Assert(spawnedIdentity != null);
 
+            if (spawnedIdentity.NetId != 0 && spawnedIdentity.NetId != msg.NetId)
+                logger.LogWarning($"Spawn Identity already had a netId but SpawnMessage has a differnet NetId. Current Id={spawnedIdentity.NetId}, SpawnMessag Id={msg.NetId}");
+
             ApplySpawnPayload(spawnedIdentity, msg);
 
             // add after applying payload, but only if it is new object
@@ -587,7 +589,7 @@ namespace Mirage
                 return obj;
             }
 
-            // checked/used else where
+            // double check async handler is null
             Debug.Assert(handler.HandlerAsync == null);
 
             var prefab = handler.Prefab;
