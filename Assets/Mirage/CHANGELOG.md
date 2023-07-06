@@ -1,3 +1,10 @@
+## [145.0.3](https://github.com/MirageNet/Mirage/compare/v145.0.2...v145.0.3) (2023-07-06)
+
+
+### Bug Fixes
+
+* adding warning if spawned Identity already has netid ([22478f4](https://github.com/MirageNet/Mirage/commit/22478f4b7b5b6f665a73ac97b0864fb621759f98))
+
 ## [145.0.2](https://github.com/MirageNet/Mirage/compare/v145.0.1...v145.0.2) (2023-07-05)
 
 
