@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -18,12 +19,24 @@ namespace Mirage.Logging
 
         public static ILogger GetLogger<T>(LogType defaultLogLevel = LogType.Warning)
         {
-            return GetLogger(typeof(T).FullName, defaultLogLevel);
+            return GetLogger(typeof(T), defaultLogLevel);
         }
 
         public static ILogger GetLogger(System.Type type, LogType defaultLogLevel = LogType.Warning)
         {
-            return GetLogger(type.FullName, defaultLogLevel);
+            // Full name for generic type is messy, instead
+            if (type.IsGenericType && !type.IsGenericTypeDefinition)
+            {
+                var genericArgs = string.Join(",", type.GetGenericArguments().Select(x => x.Name));
+                // remove `1 from end of name
+                var name = type.Name.Substring(0, type.Name.IndexOf('`'));
+
+                return GetLogger($"{type.Namespace}.{name}<{genericArgs}>", defaultLogLevel);
+            }
+            else
+            {
+                return GetLogger(type.FullName, defaultLogLevel);
+            }
         }
 
         public static ILogger GetLogger(string loggerName, LogType defaultLogLevel = LogType.Warning)
