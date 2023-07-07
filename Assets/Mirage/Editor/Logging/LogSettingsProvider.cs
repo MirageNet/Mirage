@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Mirage.Logging;
 using UnityEditor;
+using UnityEditor.UIElements;
+using UnityEngine.UIElements;
 
 namespace Mirage.EditorScripts.Logging
 {
@@ -16,7 +18,7 @@ namespace Mirage.EditorScripts.Logging
             return new LogSettingsProvider("Mirage/Logging", SettingsScope.Project) { label = "Logging" };
         }
 
-        public override void OnGUI(string searchContext)
+        public override void OnActivate(string searchContext, VisualElement rootElement)
         {
             // look for existing settings first
             if (settings == null)
@@ -25,13 +27,52 @@ namespace Mirage.EditorScripts.Logging
             }
 
             // then draw field
-            settings = (LogSettingsSO)EditorGUILayout.ObjectField("Settings", settings, typeof(LogSettingsSO), false);
+            var objectField = new ObjectField();
+            objectField.objectType = typeof(LogSettingsSO);
+            objectField.value = settings;
+            objectField.RegisterValueChangedCallback(e =>
+            {
+                settings = (LogSettingsSO)e.newValue;
+                UpdateUI(rootElement);
+            });
 
-            // then draw rest of ui
-            if (settings == null)
-                settings = LogLevelsGUI.DrawCreateNewButton();
+            rootElement.Add(objectField);
+
+            var inner = new VisualElement();
+            rootElement.Add(inner);
+            UpdateUI(inner);
+        }
+
+        private void UpdateUI(VisualElement rootElement)
+        {
+            rootElement.Clear();
+
+            if (settings != null)
+            {
+                var element = LogLevelsGUI_UIElements.Create(settings);
+                rootElement.Add(element);
+            }
             else
-                LogLevelsGUI.DrawSettings(settings);
+            {
+                var createNewButton = DrawCreateNewButton();
+                rootElement.Add(createNewButton);
+            }
+        }
+
+        public static VisualElement DrawCreateNewButton()
+        {
+            var container = new VisualElement();
+
+            var button = new Button(() =>
+            {
+                var newSettings = ScriptableObjectUtility.CreateAsset<LogSettingsSO>(nameof(LogSettingsSO), "Assets");
+                newSettings.SaveFromLogFactory();
+            });
+
+            button.text = "Create New Settings";
+            container.Add(button);
+
+            return container;
         }
     }
 }
