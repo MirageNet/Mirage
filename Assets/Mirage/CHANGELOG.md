@@ -1,3 +1,10 @@
+## [145.0.4](https://github.com/MirageNet/Mirage/compare/v145.0.3...v145.0.4) (2023-07-07)
+
+
+### Bug Fixes
+
+* Cleaning up name used for generic types ([d846f13](https://github.com/MirageNet/Mirage/commit/d846f137651a5375eb77042b6f81426e695fd562))
+
 ## [145.0.3](https://github.com/MirageNet/Mirage/compare/v145.0.2...v145.0.3) (2023-07-06)
 
 
