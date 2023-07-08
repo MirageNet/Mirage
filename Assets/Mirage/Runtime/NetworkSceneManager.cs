@@ -17,6 +17,7 @@ namespace Mirage
     /// <para>when a client connect NetworkSceneManager will send a message telling the new client to load the scene that is active on the server</para>
     /// </summary>
     [AddComponentMenu("Network/NetworkSceneManager")]
+    [HelpURL("https://miragenet.github.io/Mirage/docs/components/network-scene-manager")]
     [DisallowMultipleComponent]
     public class NetworkSceneManager : MonoBehaviour
     {
