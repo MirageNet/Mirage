@@ -22,6 +22,7 @@ namespace Mirage
     /// <para><see cref="NetworkClient">NetworkClient</see> has an internal update function where it handles events from the transport layer. This includes asynchronous connect events, disconnect events and incoming data from a server.</para>
     /// </summary>
     [AddComponentMenu("Network/NetworkClient")]
+    [HelpURL("https://miragenet.github.io/Mirage/docs/reference/Mirage/NetworkClient")]
     [DisallowMultipleComponent]
     public class NetworkClient : MonoBehaviour, IMessageSender
     {
