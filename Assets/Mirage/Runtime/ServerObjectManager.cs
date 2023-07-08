@@ -18,6 +18,7 @@ namespace Mirage
     /// Spawned objects are removed automatically when they are destroyed, or than they can be removed from the spawned set by calling ServerObjectManager.UnSpawn() - this does not destroy the object.</para>
     /// </remarks>
     [AddComponentMenu("Network/ServerObjectManager")]
+    [HelpURL("https://miragenet.github.io/Mirage/docs/reference/Mirage/ServerObjectManager")]
     [DisallowMultipleComponent]
     public class ServerObjectManager : MonoBehaviour
     {
