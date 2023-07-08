@@ -17,7 +17,7 @@ The time is a double and should never be cast to a float. Casting this down to a
 
 -   after 1 day, the accuracy goes down to 8 ms
 -   after 10 days, the accuracy is 62 ms
--   after 30 days, the accuracy is 250 m
+-   after 30 days, the accuracy is 250 ms
 -   after 60 days, the accuracy is 500 ms
 :::
 
