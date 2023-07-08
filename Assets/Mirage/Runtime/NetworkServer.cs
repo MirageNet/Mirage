@@ -19,6 +19,7 @@ namespace Mirage
     /// <para>NetworkServer handles remote connections from remote clients, and also has a local connection for a local client.</para>
     /// </remarks>
     [AddComponentMenu("Network/NetworkServer")]
+    [HelpURL("https://miragenet.github.io/Mirage/docs/reference/Mirage/NetworkServer")]
     [DisallowMultipleComponent]
     public class NetworkServer : MonoBehaviour
     {
