@@ -11,6 +11,7 @@ using UnityEngine;
 namespace Mirage
 {
     [AddComponentMenu("Network/ClientObjectManager")]
+    [HelpURL("https://miragenet.github.io/Mirage/docs/reference/Mirage/ClientObjectManager")]
     [DisallowMultipleComponent]
     public class ClientObjectManager : MonoBehaviour
     {
