@@ -11,6 +11,7 @@ namespace Mirage
     /// Spawns a player as soon as the connection is authenticated
     /// </summary>
     [HelpURL("https://miragenet.github.io/Mirage/docs/guides/game-objects/spawn-player/")]
+    [AddComponentMenu("Network/CharacterSpawner")]
     public class CharacterSpawner : MonoBehaviour
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(CharacterSpawner));
