@@ -344,6 +344,10 @@ namespace Mirage.Serialization
             return result;
         }
 
+        public void Skip(int bits)
+        {
+            MoveBitPosition(_bitPosition + bits);
+        }
 
         /// <summary>
         /// Moves the internal bit position
