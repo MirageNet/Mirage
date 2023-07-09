@@ -6,6 +6,31 @@ sidebar_position: 2
 
 This document describes the steps to creating a multiplayer game with Mirage. The process described here is a simplified, higher-level version of the actual process for a real game; it doesn’t always work exactly like this, but it provides a basic recipe for the process.
 
+## Installation
+
+Before everything, to install Mirage we need to add a new package manager repository to our project. To do this, we can go into `Edit menu` and then `Project Settings`.
+This will open a new Editor Window with multiple tabs. The one we are looking for is `Package Manager`, so click there.
+Once you click there, you should add a new Package Manager, so complete the fields as we show next and click apply
+
+```
+Name: OpenUPM
+Url: https://package.openupm.com
+Scopes:
+- com.cysharp.unitask
+- com.openupm
+- com.miragenet
+```
+
+![Add scoped registry](/img/scoped-registry.png)
+
+Once everything is ready, the next step is to close the Project Settings window, and jump into the `Package Manager`. So for this, we click on `Window menu` and then `Package Manager`. 
+At this window, we will click on a small button that says (probably, at today date on Unity Editor 2021.13f) `Packages: In Project`, here we have to select `My registries`.
+Once, you've done that, we should be able to see Mirage and a few transport and also plugins in that list.
+After selecting, you can choose the version on the list below the name, otherwise, you can just click install on the bottom right part of the window and after a loading bar, that's it. You already have Mirage API on your code, congrats!
+
+![Install Mirage](/img/install-mirage.png)
+
+
 ## Video Tutorials
 
 Currently, there are no Mirage-specific videos. You can use Mirror's existing videos alongside our [Mirror to Mirage Conversion](/docs/guides/mirror-migration) guide.
