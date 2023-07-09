@@ -1,3 +1,23 @@
+# [145.1.0](https://github.com/MirageNet/Mirage/compare/v145.0.4...v145.1.0) (2023-07-09)
+
+
+### Bug Fixes
+
+* add missing CompMenu for CharacterSpawner ([87c6204](https://github.com/MirageNet/Mirage/commit/87c6204aa7b6d16294b689f02d46d60f68648ea6))
+* add missing HelpUrl for CharacterSpawner ([5cd704a](https://github.com/MirageNet/Mirage/commit/5cd704ac42249ffd89742bc88a53c8d8e34624e5))
+* add missing HelpUrl for ClientObjectManager ([1186cf6](https://github.com/MirageNet/Mirage/commit/1186cf690256eb87f5e654d7e28cdec5443eefcb))
+* add missing HelpUrl for NetworkClient ([daec3a1](https://github.com/MirageNet/Mirage/commit/daec3a1a1e46422dda798a5ba0c9a1f818b532d2))
+* add missing HelpUrl for NetworkSceneManager ([cd5c753](https://github.com/MirageNet/Mirage/commit/cd5c7531d88c1c3acc0e3823df5ed3e4b3c4dbcd))
+* add missing HelpUrl for NetworkServer ([35d217e](https://github.com/MirageNet/Mirage/commit/35d217ea613281cf3cd196d2bd5c256ab1fdd820))
+* add missing HelpUrl for ServerObjectManager ([127a883](https://github.com/MirageNet/Mirage/commit/127a883a4967116ecd95f36f2d9b5bee476e7477))
+* add missing HelpUrl for SocketFactory ([a29b1b7](https://github.com/MirageNet/Mirage/commit/a29b1b7446578d5d732e3ca33c28a6f34a5fa9e9))
+* measuring time not distance. add s ([fbcdf1e](https://github.com/MirageNet/Mirage/commit/fbcdf1ef7e7260a88ef30fb9925d12506aec0239))
+
+
+### Features
+
+* adding function to skip bits ([0bcbc7f](https://github.com/MirageNet/Mirage/commit/0bcbc7f945415e7d073615c35509fda686715761))
+
 ## [145.0.4](https://github.com/MirageNet/Mirage/compare/v145.0.3...v145.0.4) (2023-07-07)
 
 
