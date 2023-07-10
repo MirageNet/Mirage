@@ -107,44 +107,4 @@ Below is an example where client pre-spawns objects while loading, and then netw
 
 Dynamic Handler avoid the need to add 1 spawn handler for each prefab hash. Instead you can just add a single dynamic handler that can then be used to find and return objects.
 
-```cs
-// store handler in field so that you dont need to allocate a new one for each DynamicSpawn call
-SpawnHandler _handler;
-List<NetworkIdentity> _preSpawnedObjects = new List<NetworkIdentity>();
-
-void Start() 
-{
-    _handler = new SpawnHandler(FindPreSpawnedObject, null);
-    
-    // fill _preSpawnedObjects here with objects
-    _preSpawnedObjects.Add(new GameObject("name").AddComponent<NetworkIdentity>());
-}
-
-public SpawnHandler DynamicSpawn(int prefabHash)
-{
-    if (IsPreSpawnedId(prefabHash))
-        // return a handler that is using FindPreSpawnedObject
-        return _handler;
-    else
-        return null;
-}
-
-bool IsPreSpawnedId(int prefabHash) 
-{
-    // prefabHash starts with 16 bits of 0, then it an id we are using for spawning
-    // this chance of this happening randomly is very low    
-    // you can do more validation on the hash based on use case
-    return (prefabHash & 0xFFFF) == 0;
-}
-
-// finds object based on hash and returns it
-public NetworkIdentity FindPreSpawnedObject(SpawnMessage spawnMessage)
-{
-    var prefabHash = spawnMessage.prefabHash.Value;
-    // we stored index in last 16 bits on hash
-    var index = prefabHash >> 16;
-    
-    var identity = _preSpawnedObjects[index];
-    return identity;
-}
-```
+{{{ Path:'Snippets/DynamicSpawning.cs' Name:'dynamic-spawning' }}}
