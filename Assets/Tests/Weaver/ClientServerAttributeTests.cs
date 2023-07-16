@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using Mirage.Weaver;
+using Mirage.CodeGen;
 using Mono.Cecil.Cil;
 using NUnit.Framework;
 

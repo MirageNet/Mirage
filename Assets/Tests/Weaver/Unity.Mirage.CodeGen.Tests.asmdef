@@ -1,8 +1,10 @@
 {
     "name": "Unity.Mirage.CodeGen.Tests",
+    "rootNamespace": "",
     "references": [
         "GUID:30817c1a0e6d646d99c048fc403f5979",
-        "GUID:1d0b9d21c3ff546a4aa32399dfd33474"
+        "GUID:1d0b9d21c3ff546a4aa32399dfd33474",
+        "GUID:f403fea27ba781d4790352849c7c1802"
     ],
     "includePlatforms": [
         "Editor"
