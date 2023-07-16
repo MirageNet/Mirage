@@ -2,8 +2,15 @@ using System.Linq;
 using System.Reflection;
 using Mono.Cecil;
 
-namespace Mirage.Weaver
+namespace Mirage.CodeGen
 {
+    internal class PostProcessorReflectionImporterProvider : IReflectionImporterProvider
+    {
+        public IReflectionImporter GetReflectionImporter(ModuleDefinition module)
+        {
+            return new PostProcessorReflectionImporter(module);
+        }
+    }
     // original code under MIT Copyright (c) 2021 Unity Technologies
     // https://github.com/Unity-Technologies/com.unity.netcode.gameobjects/blob/472d51b34520e8fb6f0aa43fd56d162c3029e0b0/com.unity.netcode.gameobjects/Editor/CodeGen/PostProcessorReflectionImporter.cs
     internal class PostProcessorReflectionImporter : DefaultReflectionImporter
