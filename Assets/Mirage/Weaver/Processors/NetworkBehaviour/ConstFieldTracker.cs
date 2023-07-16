@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using Mirage.CodeGen;
+using Mono.Cecil;
 
 namespace Mirage.Weaver.NetworkBehaviours
 {

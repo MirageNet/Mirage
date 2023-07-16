@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Mirage.Logging;
 using Mirage.Weaver;
+using Mirage.CodeGen;
 using Mono.Cecil;
 using NUnit.Framework;
 using Unity.CompilationPipeline.Common.Diagnostics;

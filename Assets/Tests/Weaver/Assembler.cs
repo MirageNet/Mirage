@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Mirage.Weaver;
+using Mirage.CodeGen;
 using Mono.Cecil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
 using UnityEditor.Compilation;

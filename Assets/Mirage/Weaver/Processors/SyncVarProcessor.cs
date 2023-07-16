@@ -1,4 +1,5 @@
 using System;
+using Mirage.CodeGen;
 using Mirage.Weaver.NetworkBehaviours;
 using Mirage.Weaver.Serialization;
 using Mirage.Weaver.SyncVars;

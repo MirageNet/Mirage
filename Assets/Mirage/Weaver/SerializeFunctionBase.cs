@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq.Expressions;
+using Mirage.CodeGen;
 using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;

@@ -1,8 +1,10 @@
 using System;
 using System.Linq.Expressions;
+using Mirage.CodeGen;
 using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 
 namespace Mirage.Weaver.Serialization
 {
