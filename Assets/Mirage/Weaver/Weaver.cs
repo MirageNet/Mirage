@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
+using Mirage.CodeGen;
 using Mono.Cecil;
-using Mono.Cecil.Cil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
 using UnityEngine;
 using ConditionalAttribute = System.Diagnostics.ConditionalAttribute;
@@ -17,15 +16,11 @@ namespace Mirage.Weaver
     /// - <c>WEAVER_DEBUG_TIMER</c><br />
     /// </para>
     /// </summary>
-    public class Weaver
+    public class Weaver : WeaverBase
     {
-        private readonly IWeaverLogger logger;
         private Readers readers;
         private Writers writers;
         private PropertySiteProcessor propertySiteProcessor;
-        private WeaverDiagnosticsTimer timer;
-
-        private AssemblyDefinition CurrentAssembly { get; set; }
 
         [Conditional("WEAVER_DEBUG_LOGS")]
         public static void DebugLog(TypeDefinition td, string message)
@@ -38,26 +33,14 @@ namespace Mirage.Weaver
             Console.WriteLine($"[Weaver] {msg}");
         }
 
-        public Weaver(IWeaverLogger logger)
-        {
-            this.logger = logger;
-        }
+        public Weaver(IWeaverLogger logger) : base(logger) { }
 
-        public AssemblyDefinition Weave(ICompiledAssembly compiledAssembly)
+        protected override ResultType Process(AssemblyDefinition assembly, ICompiledAssembly compiledAssembly)
         {
             Log($"Starting weaver on {compiledAssembly.Name}");
             try
             {
-                timer = new WeaverDiagnosticsTimer() { writeToFile = true };
-                timer.Start(compiledAssembly.Name);
-
-                using (timer.Sample("AssemblyDefinitionFor"))
-                {
-                    CurrentAssembly = AssemblyDefinitionFor(compiledAssembly);
-                }
-
-
-                var module = CurrentAssembly.MainModule;
+                var module = assembly.MainModule;
                 readers = new Readers(module, logger);
                 writers = new Writers(module, logger);
                 propertySiteProcessor = new PropertySiteProcessor();
@@ -86,7 +69,6 @@ namespace Mirage.Weaver
                     }
                 }
 
-
                 if (modified)
                 {
                     using (timer.Sample("propertySiteProcessor"))
@@ -100,14 +82,14 @@ namespace Mirage.Weaver
                     }
                 }
 
-                return CurrentAssembly;
+                return ResultType.Success;
             }
             catch (Exception e)
             {
                 logger.Error("Exception :" + e);
                 // write line too because the error about doesn't show stacktrace
                 Console.WriteLine("[WeaverException] :" + e);
-                return null;
+                return ResultType.Failed;
             }
             finally
             {
@@ -115,30 +97,6 @@ namespace Mirage.Weaver
                 // end in finally incase it return early
                 timer?.End();
             }
-        }
-
-        public static AssemblyDefinition AssemblyDefinitionFor(ICompiledAssembly compiledAssembly)
-        {
-            var assemblyResolver = new PostProcessorAssemblyResolver(compiledAssembly);
-            var readerParameters = new ReaderParameters
-            {
-                SymbolStream = new MemoryStream(compiledAssembly.InMemoryAssembly.PdbData),
-                SymbolReaderProvider = new PortablePdbReaderProvider(),
-                AssemblyResolver = assemblyResolver,
-                ReflectionImporterProvider = new PostProcessorReflectionImporterProvider(),
-                // todo we may want to use Deferred here to speed up for some dlls. (needs more testing
-                ReadingMode = ReadingMode.Immediate
-            };
-
-            var assemblyDefinition = AssemblyDefinition.ReadAssembly(new MemoryStream(compiledAssembly.InMemoryAssembly.PeData), readerParameters);
-
-            //apparently, it will happen that when we ask to resolve a type that lives inside MLAPI.Runtime, and we
-            //are also postprocessing MLAPI.Runtime, type resolving will fail, because we do not actually try to resolve
-            //inside the assembly we are processing. Let's make sure we do that, so that we can use postprocessor features inside
-            //MLAPI.Runtime itself as well.
-            assemblyResolver.AddAssemblyDefinitionBeingOperatedOn(assemblyDefinition);
-
-            return assemblyDefinition;
         }
 
         private IReadOnlyList<FoundType> FindAllClasses(ModuleDefinition module)
