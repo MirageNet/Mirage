@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Threading;
 using Mono.Cecil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
 
-namespace Mirage.Weaver
+namespace Mirage.CodeGen
 {
     // original code under MIT Copyright (c) 2021 Unity Technologies
     // https://github.com/Unity-Technologies/com.unity.netcode.gameobjects/blob/472d51b34520e8fb6f0aa43fd56d162c3029e0b0/com.unity.netcode.gameobjects/Editor/CodeGen/PostProcessorAssemblyResolver.cs
