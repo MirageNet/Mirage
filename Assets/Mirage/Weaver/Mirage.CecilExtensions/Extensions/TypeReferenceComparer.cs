@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Mono.Cecil;
 
-namespace Mirage.Weaver
+namespace Mirage.CodeGen
 {
     internal class TypeReferenceComparer : IEqualityComparer<TypeReference>
     {

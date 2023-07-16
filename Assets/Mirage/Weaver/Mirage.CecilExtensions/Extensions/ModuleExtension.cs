@@ -1,13 +1,16 @@
-using System;
+﻿using System;
 using System.Linq.Expressions;
 using System.Reflection;
 using Mono.Cecil;
 using TypeAttributes = Mono.Cecil.TypeAttributes;
 
-namespace Mirage.Weaver
+namespace Mirage.CodeGen
 {
     public static class ModuleExtension
     {
+        /// <summary>
+        /// Imports an expression
+        /// </summary>
         public static MethodReference ImportReference(this ModuleDefinition module, Expression<Action> expression) => ImportReference(module, (LambdaExpression)expression);
 
         /// <summary>
