@@ -26,5 +26,6 @@ plugins:
         - 'Assets/Mirage/Samples~/AssemblyInfo.cs'
         - 'Assets/Mirage/Samples~/RigidbodyPhysics/Scripts/AssemblyInfo.cs'
         - 'Assets/Mirage/Weaver/AssemblyInfo.cs'
+        - 'Assets/Mirage/Weaver/Mirage.CecilExtensions/AssemblyInfo.cs'
         - 'Assets/Mirage/package.json'
         - 'Assets/Mirage/CHANGELOG.md'
