@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Unity.CompilationPipeline.Common.Diagnostics;
@@ -8,12 +9,38 @@ using Unity.CompilationPipeline.Common.ILPostProcessing;
 
 namespace Mirage.CodeGen
 {
+    // note WeaverBase and BaseILPostProcessor are separate classes so that WeaverBase can be used by tests without needing the BaseILPostProcessor class
+    public abstract class BaseILPostProcessor : ILPostProcessor
+    {
+        protected abstract string RuntimeAssemblyName { get; }
+        protected abstract WeaverBase Create();
+
+        public override ILPostProcessor GetInstance() => this;
+
+        public override ILPostProcessResult Process(ICompiledAssembly compiledAssembly)
+        {
+            if (!WillProcess(compiledAssembly))
+                return null;
+
+            var weaver = Create();
+            return weaver.Process(compiledAssembly);
+        }
+
+        /// <summary>
+        /// Process when assembly that references <see cref="RuntimeAssemblyName"/>
+        /// </summary>
+        /// <param name="compiledAssembly"></param>
+        /// <returns></returns>
+        public override bool WillProcess(ICompiledAssembly compiledAssembly) =>
+            compiledAssembly.References.Any(filePath => Path.GetFileNameWithoutExtension(filePath) == RuntimeAssemblyName);
+    }
+
     /// <summary>
     /// Use as a base class for custom IL weaver. This class will read and write the AssemblyDefinition and return the results.
     /// </summary>
     public abstract class WeaverBase
     {
-        public virtual string Name => this.GetType().FullName;
+        public virtual string Name => GetType().FullName;
 
         public readonly IWeaverLogger logger;
 
@@ -24,7 +51,7 @@ namespace Mirage.CodeGen
 
         public WeaverBase(IWeaverLogger logger = null)
         {
-            this.logger = logger ?? new WeaverLogger();
+            this.logger = logger ?? new WeaverLogger(false);
         }
 
         public enum Result
@@ -40,14 +67,14 @@ namespace Mirage.CodeGen
         {
             try
             {
-                this.AssemblyDefinition = ReadAssembly(compiledAssembly);
+                AssemblyDefinition = ReadAssembly(compiledAssembly);
 
-                var result = this.Process(this.AssemblyDefinition);
+                var result = Process(AssemblyDefinition);
 
                 if (result == Result.Success)
-                    return this.Success();
+                    return Success();
                 else if (result == Result.Failed)
-                    return this.Failed();
+                    return Failed();
                 else // no changes, no results
                     return null;
             }
@@ -57,7 +84,7 @@ namespace Mirage.CodeGen
                 // we should never get here unless there is a bug in the implementation
                 // for problems with user code, use logger instead of throwing so that multiple errors can be reported to the user.
 
-                return this.Error(e);
+                return Error(e);
             }
         }
 
@@ -74,13 +101,13 @@ namespace Mirage.CodeGen
                 WriteSymbols = true
             };
 
-            this.AssemblyDefinition.Write(pe, writerParameters);
-            return new ILPostProcessResult(new InMemoryAssembly(pe.ToArray(), pdb.ToArray()), this.logger.GetDiagnostics());
+            AssemblyDefinition.Write(pe, writerParameters);
+            return new ILPostProcessResult(new InMemoryAssembly(pe.ToArray(), pdb.ToArray()), logger.GetDiagnostics());
         }
 
         private ILPostProcessResult Failed()
         {
-            return new ILPostProcessResult(null, this.logger.GetDiagnostics());
+            return new ILPostProcessResult(null, logger.GetDiagnostics());
         }
 
         private ILPostProcessResult Error(Exception e)
@@ -88,7 +115,7 @@ namespace Mirage.CodeGen
             var message = new DiagnosticMessage
             {
                 DiagnosticType = DiagnosticType.Error,
-                MessageData = $"Weaver {this.Name} failed on {this.AssemblyDefinition?.Name} because of Exception: {e}",
+                MessageData = $"Weaver {Name} failed on {AssemblyDefinition?.Name} because of Exception: {e}",
             };
             return new ILPostProcessResult(null, new List<DiagnosticMessage> { message });
         }
