@@ -6,11 +6,14 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Unity.CompilationPipeline.Common.Diagnostics;
 
-namespace Mirage.Weaver
+namespace Mirage.CodeGen
 {
     public class WeaverLogger : IWeaverLogger
     {
-        public List<DiagnosticMessage> Diagnostics = new List<DiagnosticMessage>();
+        private readonly List<DiagnosticMessage> _diagnostics = new List<DiagnosticMessage>();
+
+        // Create Copy so private list can't be altered
+        public List<DiagnosticMessage> GetDiagnostics() => _diagnostics.ToList();
 
         public bool EnableTrace { get; }
 
@@ -63,7 +66,7 @@ namespace Mirage.Weaver
 
         private void AddMessage(string message, SequencePoint sequencePoint, DiagnosticType diagnosticType)
         {
-            Diagnostics.Add(new DiagnosticMessage
+            _diagnostics.Add(new DiagnosticMessage
             {
                 DiagnosticType = diagnosticType,
                 File = sequencePoint?.Document.Url.Replace($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}", ""),
