@@ -6,7 +6,7 @@
 //        exceptions would be a bit inconsistent here)
 using Mono.Cecil;
 
-namespace Mirage.Weaver
+namespace Mirage.CodeGen
 {
     public static class Resolvers
     {

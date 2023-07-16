@@ -3,7 +3,7 @@ using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace Mirage.Weaver
+namespace Mirage.CodeGen
 {
     public static class ConstructorExtensions
     {
@@ -65,7 +65,7 @@ namespace Mirage.Weaver
                     }
                     else
                     {
-                        throw new NetworkBehaviourException($"{typeDefinition.Name} has invalid static constructor", cctor, cctor.GetSequencePoint(retInstr));
+                        throw new WeaverException($"{typeDefinition.Name} has invalid static constructor", cctor, cctor.GetSequencePoint(retInstr));
                     }
                 }
             }

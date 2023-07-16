@@ -3,15 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
+using FieldAttributes = Mono.Cecil.FieldAttributes;
+using MethodAttributes = Mono.Cecil.MethodAttributes;
+using TypeAttributes = Mono.Cecil.TypeAttributes;
 
-namespace Mirage.Weaver
+namespace Mirage.CodeGen
 {
     /// <summary>
     /// convenience methods for type definitions
     /// </summary>
     public static class TypeExtensions
     {
-
         public static MethodDefinition GetMethod(this TypeDefinition td, string methodName)
         {
             // Linq allocations don't matter in weaver
@@ -71,6 +73,45 @@ namespace Mirage.Weaver
                 try
                 {
                     var parent = typedef.BaseType;
+                    // we must have reached system.object, which has no parent, so no method found
+                    if (parent == null)
+                        break;
+
+                    if (parent.IsGenericInstance)
+                    {
+                        parent = MatchGenericParameters((GenericInstanceType)parent, typeRef);
+                    }
+                    typeRef = parent;
+                    typedef = parent?.Resolve();
+                }
+                catch (AssemblyResolutionException)
+                {
+                    // this can happen for plugins.
+                    break;
+                }
+            }
+
+            return null;
+        }
+
+        public static TypeReference GetBaseType(this TypeReference typeReference, Predicate<TypeReference> match)
+        {
+            var typedef = typeReference.Resolve();
+            var typeRef = typeReference;
+            while (typedef != null)
+            {
+                if (match.Invoke(typeRef))
+                {
+                    return typeRef;
+                }
+
+                try
+                {
+                    var parent = typedef.BaseType;
+                    // we must have reached system.object, which has no parent, so no method found
+                    if (parent == null)
+                        break;
+
                     if (parent.IsGenericInstance)
                     {
                         parent = MatchGenericParameters((GenericInstanceType)parent, typeRef);
@@ -103,7 +144,7 @@ namespace Mirage.Weaver
 
             // make new type so we can replace the args on it
             // resolve it so we have non-generic instance (eg just instance with <T> instead of <int>)
-            // if we dont cecil will make it double generic (eg INVALID IL)
+            // if we dont resolve cecil will make it double generic (eg INVALID IL)
             var generic = new GenericInstanceType(parentReference.Resolve());
             foreach (var arg in parentReference.GenericArguments)
                 generic.GenericArguments.Add(arg);
@@ -146,9 +187,20 @@ namespace Mirage.Weaver
                 var param = def.GenericParameters[i];
                 if (param.Name == paramName)
                 {
-                    var generic = (GenericInstanceType)childReference;
-                    // return generic arg with same index
-                    return generic.GenericArguments[i];
+                    if (childReference.IsGenericInstance)
+                    {
+                        var generic = (GenericInstanceType)childReference;
+                        // return generic arg with same index
+                        return generic.GenericArguments[i];
+                    }
+                    else if (childReference.HasGenericParameters)
+                    {
+                        return childReference.GenericParameters[i];
+                    }
+                    else
+                    {
+                        throw new Exception($"Could not match generic parameters for {childReference} because it was not a generic instance or had generic parameters");
+                    }
                 }
             }
 
