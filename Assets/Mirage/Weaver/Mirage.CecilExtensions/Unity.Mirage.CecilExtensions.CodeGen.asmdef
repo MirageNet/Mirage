@@ -1,11 +1,7 @@
 {
-    "name": "Unity.Mirage.CodeGen",
+    "name": "Unity.Mirage.CecilExtensions.CodeGen",
     "rootNamespace": "",
-    "references": [
-        "GUID:30817c1a0e6d646d99c048fc403f5979",
-        "GUID:f51ebe6a0ceec4240a699833d6309b23",
-        "GUID:f403fea27ba781d4790352849c7c1802"
-    ],
+    "references": [],
     "includePlatforms": [
         "Editor"
     ],
