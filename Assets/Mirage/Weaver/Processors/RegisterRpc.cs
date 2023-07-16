@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Mirage.CodeGen;
 using Mirage.RemoteCalls;
 using Mono.Cecil;
 using Mono.Cecil.Cil;

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Mirage.CodeGen;
 using Mirage.Weaver.NetworkBehaviours;
 using Mono.Cecil;
 using Mono.Cecil.Cil;

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using Mirage.CodeGen;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using Mirage.Weaver.Serialization;

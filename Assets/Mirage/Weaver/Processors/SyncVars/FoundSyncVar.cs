@@ -1,3 +1,4 @@
+using Mirage.CodeGen;
 using Mirage.Weaver.NetworkBehaviours;
 using Mirage.Weaver.Serialization;
 using Mono.Cecil;

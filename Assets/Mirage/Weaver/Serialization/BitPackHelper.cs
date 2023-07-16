@@ -1,6 +1,8 @@
 using System;
+using Mirage.CodeGen;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 
 namespace Mirage.Weaver.Serialization
 {

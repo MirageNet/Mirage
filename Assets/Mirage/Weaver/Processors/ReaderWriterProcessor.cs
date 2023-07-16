@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Mirage.CodeGen;
 using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;

@@ -1,3 +1,4 @@
+using Mirage.CodeGen;
 using Mirage.RemoteCalls;
 using Mono.Cecil;
 

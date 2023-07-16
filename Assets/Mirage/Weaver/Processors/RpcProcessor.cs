@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Mirage.CodeGen;
 using Mirage.Serialization;
 using Mirage.Weaver.Serialization;
 using Mono.Cecil;

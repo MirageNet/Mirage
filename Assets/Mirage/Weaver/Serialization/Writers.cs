@@ -1,5 +1,6 @@
 using System;
 using System.Linq.Expressions;
+using Mirage.CodeGen;
 using Mirage.Serialization;
 using Mirage.Weaver.Serialization;
 using Mono.Cecil;

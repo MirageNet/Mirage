@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Mirage.CodeGen;
 using Mono.Cecil;
 
 namespace Mirage.Weaver.SyncVars
