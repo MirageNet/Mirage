@@ -1,3 +1,10 @@
+# [145.2.0](https://github.com/MirageNet/Mirage/compare/v145.1.0...v145.2.0) (2023-07-16)
+
+
+### Features
+
+* adding code gen extensions asmdef ([1d7363d](https://github.com/MirageNet/Mirage/commit/1d7363d59aa0d63c3d7c6364c83a7cfaf3f5711c))
+
 # [145.1.0](https://github.com/MirageNet/Mirage/compare/v145.0.4...v145.1.0) (2023-07-09)
 
 
