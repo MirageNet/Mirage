@@ -206,6 +206,20 @@ namespace Mirage
         }
 
         /// <summary>
+        /// Starts the server in single player move. This will set up the server in host mode but not start the transport.
+        /// This allow you to make a multiplaye game first, that will also support single player.
+        /// <para>
+        /// Mirage is lightweight so starting in single player mode reduces code complexity of needing to check if network is active in all your code.
+        /// </para>
+        /// </summary>
+        /// <param name="localClient"></param>
+        public void StartSinglePlayer(NetworkClient localClient)
+        {
+            Listening = false;
+            StartServer(localClient);
+        }
+
+        /// <summary>
         /// Start the server
         /// <para>If <paramref name="localClient"/> is given then will start in host mode</para>
         /// </summary>
