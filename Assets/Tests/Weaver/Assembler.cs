@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Mirage.Weaver;
 using Mirage.CodeGen;
 using Mono.Cecil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
@@ -159,7 +158,8 @@ namespace Mirage.Tests.Weaver
 
             Log($"Starting weaver on {OutputFile}");
             var weaver = new Mirage.Weaver.Weaver(logger);
-            builtAssembly = weaver.Weave(compiledAssembly);
+            var result = weaver.Process(compiledAssembly);
+            builtAssembly = result.AssemblyDefinition;
             Log($"Finished weaver on {OutputFile}");
 
             // NOTE: we need to write to check for ArgumentException from writing

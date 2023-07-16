@@ -5,9 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Mirage.Logging;
-using Mirage.Weaver;
 using Mirage.CodeGen;
+using Mirage.Logging;
 using Mono.Cecil;
 using NUnit.Framework;
 using Unity.CompilationPipeline.Common.Diagnostics;
@@ -59,7 +58,7 @@ namespace Mirage.Tests.Weaver
         protected Result testResult { get; private set; }
 
         private bool currentTestIsBatch;
-        protected IReadOnlyList<DiagnosticMessage> Diagnostics => testResult.weaverLog.Diagnostics;
+        protected IReadOnlyList<DiagnosticMessage> Diagnostics => testResult.weaverLog.GetDiagnostics();
 
         private Task batchTask;
 
@@ -310,7 +309,7 @@ namespace Mirage.Tests.Weaver
             public void AssertNoCompileErrors()
             {
                 Assert.That(assembler.CompilerErrors, Is.False);
-                foreach (var error in weaverLog.Diagnostics)
+                foreach (var error in weaverLog.GetDiagnostics())
                 {
                     // ensure all errors have a location
                     Assert.That(error.MessageData, Does.Match(@"\(at .*\)$"));
