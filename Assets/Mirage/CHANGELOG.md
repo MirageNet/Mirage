@@ -1,3 +1,10 @@
+# [145.3.0](https://github.com/MirageNet/Mirage/compare/v145.2.0...v145.3.0) (2023-07-17)
+
+
+### Features
+
+* **Cecil:** adding AddProperty to cecil extensions ([328912a](https://github.com/MirageNet/Mirage/commit/328912ad6707f18aab8ba6f050c5255c4340beba))
+
 # [145.2.0](https://github.com/MirageNet/Mirage/compare/v145.1.0...v145.2.0) (2023-07-16)
 
 
