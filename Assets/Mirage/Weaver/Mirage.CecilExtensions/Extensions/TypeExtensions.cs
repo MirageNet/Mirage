@@ -259,8 +259,9 @@ namespace Mirage.CodeGen
             }
         }
 
-        public static TypeDefinition AddType(this TypeDefinition typeDefinition, string name, TypeAttributes typeAttributes, bool valueType) =>
-            AddType(typeDefinition, name, typeAttributes, valueType ? typeDefinition.Module.ImportReference(typeof(ValueType)) : null);
+        public static TypeDefinition AddType(this TypeDefinition typeDefinition, string name, TypeAttributes typeAttributes, bool valueType)
+            => AddType(typeDefinition, name, typeAttributes, valueType ? typeDefinition.Module.ImportReference(typeof(ValueType)) : null);
+
         public static TypeDefinition AddType(this TypeDefinition typeDefinition, string name, TypeAttributes typeAttributes, TypeReference baseType)
         {
             var type = new TypeDefinition("", name, typeAttributes, baseType)
@@ -271,6 +272,13 @@ namespace Mirage.CodeGen
             return type;
         }
 
+
+        public static MethodDefinition AddMethod(this TypeDefinition typeDefinition, string name, MethodAttributes attributes, Type returnType)
+            => typeDefinition.AddMethod(name, attributes, typeDefinition.Module.ImportReference(returnType));
+
+        public static MethodDefinition AddMethod(this TypeDefinition typeDefinition, string name, MethodAttributes attributes)
+            => AddMethod(typeDefinition, name, attributes, typeDefinition.Module.ImportReference(typeof(void)));
+
         public static MethodDefinition AddMethod(this TypeDefinition typeDefinition, string name, MethodAttributes attributes, TypeReference returnType)
         {
             var method = new MethodDefinition(name, attributes, returnType);
@@ -278,22 +286,36 @@ namespace Mirage.CodeGen
             return method;
         }
 
-        public static MethodDefinition AddMethod(this TypeDefinition typeDefinition, string name, MethodAttributes attributes, Type returnType)
-        => typeDefinition.AddMethod(name, attributes, typeDefinition.Module.ImportReference(returnType));
 
-        public static MethodDefinition AddMethod(this TypeDefinition typeDefinition, string name, MethodAttributes attributes) =>
-            AddMethod(typeDefinition, name, attributes, typeDefinition.Module.ImportReference(typeof(void)));
+        public static FieldDefinition AddField<T>(this TypeDefinition typeDefinition, string name, FieldAttributes attributes)
+            => AddField(typeDefinition, name, typeof(T), attributes);
 
-        public static FieldDefinition AddField<T>(this TypeDefinition typeDefinition, string name, FieldAttributes attributes) =>
-            AddField(typeDefinition, typeDefinition.Module.ImportReference(typeof(T)), name, attributes);
+        public static FieldDefinition AddField(this TypeDefinition typeDefinition, string name, Type type, FieldAttributes attributes)
+            => AddField(typeDefinition, name, typeDefinition.Module.ImportReference(type), attributes);
 
-        public static FieldDefinition AddField(this TypeDefinition typeDefinition, TypeReference fieldType, string name, FieldAttributes attributes)
+        public static FieldDefinition AddField(this TypeDefinition typeDefinition, string name, TypeReference fieldType, FieldAttributes attributes)
         {
             var field = new FieldDefinition(name, attributes, fieldType);
             field.DeclaringType = typeDefinition;
             typeDefinition.Fields.Add(field);
             return field;
         }
+
+
+        public static PropertyDefinition AddProperty<T>(this TypeDefinition typeDefinition, string name, PropertyAttributes attributes = PropertyAttributes.None)
+            => AddProperty(typeDefinition, name, typeof(T), attributes);
+
+        public static PropertyDefinition AddProperty(this TypeDefinition typeDefinition, string name, Type type, PropertyAttributes attributes = PropertyAttributes.None)
+            => AddProperty(typeDefinition, name, typeDefinition.Module.ImportReference(type), attributes);
+
+        public static PropertyDefinition AddProperty(this TypeDefinition typeDefinition, string name, TypeReference propertyType, PropertyAttributes attributes = PropertyAttributes.None)
+        {
+            var property = new PropertyDefinition(name, attributes, propertyType);
+            property.DeclaringType = typeDefinition;
+            typeDefinition.Properties.Add(property);
+            return property;
+        }
+
 
         /// <summary>
         /// Creates a generic type out of another type, if needed.
