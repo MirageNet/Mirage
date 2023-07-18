@@ -21,12 +21,6 @@ namespace Mirage.CodeGen
 
         public long ElapsedMilliseconds => stopwatch?.ElapsedMilliseconds ?? 0;
 
-        ~WeaverDiagnosticsTimer()
-        {
-            writer?.Dispose();
-            writer = null;
-        }
-
         private static bool _checkDirectory = false;
 
         private static void CheckDirectory()
@@ -90,6 +84,7 @@ namespace Mirage.CodeGen
             WriteLine($"Weave Finished: {ElapsedMilliseconds}ms - {name}");
             stopwatch?.Stop();
             writer?.Close();
+            writer = null;
             return ElapsedMilliseconds;
         }
 

@@ -94,8 +94,6 @@ namespace Mirage.Weaver
             finally
             {
                 Log($"Finished weaver on {compiledAssembly.Name}");
-                // end in finally incase it return early
-                timer?.End();
             }
         }
 

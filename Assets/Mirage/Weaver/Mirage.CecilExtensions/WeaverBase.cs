@@ -28,7 +28,6 @@ namespace Mirage.CodeGen
     /// </summary>
     public abstract class WeaverBase
     {
-
         public virtual string Name => GetType().FullName;
 
         public readonly IWeaverLogger logger;
@@ -81,6 +80,11 @@ namespace Mirage.CodeGen
                     Type = ResultType.Failed,
                     ILPostProcessResult = Error(e)
                 };
+            }
+            finally
+            {
+                // end in finally incase it return early
+                timer?.End();
             }
         }
 
