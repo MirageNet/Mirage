@@ -303,21 +303,6 @@ namespace Mirage.CodeGen
         }
 
 
-        public static PropertyDefinition AddProperty<T>(this TypeDefinition typeDefinition, string name, PropertyAttributes attributes = PropertyAttributes.None)
-            => AddProperty(typeDefinition, name, typeof(T), attributes);
-
-        public static PropertyDefinition AddProperty(this TypeDefinition typeDefinition, string name, Type type, PropertyAttributes attributes = PropertyAttributes.None)
-            => AddProperty(typeDefinition, name, typeDefinition.Module.ImportReference(type), attributes);
-
-        public static PropertyDefinition AddProperty(this TypeDefinition typeDefinition, string name, TypeReference propertyType, PropertyAttributes attributes = PropertyAttributes.None)
-        {
-            var property = new PropertyDefinition(name, attributes, propertyType);
-            property.DeclaringType = typeDefinition;
-            typeDefinition.Properties.Add(property);
-            return property;
-        }
-
-
         /// <summary>
         /// Creates a generic type out of another type, if needed.
         /// </summary>
