@@ -538,7 +538,7 @@ PlayerSettings:
   webGLDecompressionFallback: 0
   scriptingDefineSymbols:
     0: 
-    1: 
+    1: WEAVER_DEBUG_TIMER;MIRAGE_TESTS
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
