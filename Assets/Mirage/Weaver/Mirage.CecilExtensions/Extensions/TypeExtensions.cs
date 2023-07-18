@@ -264,6 +264,7 @@ namespace Mirage.CodeGen
 
         public static TypeDefinition AddType(this TypeDefinition typeDefinition, string name, TypeAttributes typeAttributes, TypeReference baseType)
         {
+            typeAttributes |= TypeAttributes.NestedPublic;
             var type = new TypeDefinition("", name, typeAttributes, baseType)
             {
                 DeclaringType = typeDefinition
