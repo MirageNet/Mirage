@@ -10,7 +10,7 @@ namespace Mirage.Tests
 {
     public abstract class TestBase
     {
-        protected static readonly ILogger logger = LogFactory.GetLogger("Tests");
+        protected static readonly ILogger logger = LogFactory.GetLogger("Mirage.Tests.Test");
 
         [OneTimeSetUp]
         public void AddTestLogger()
