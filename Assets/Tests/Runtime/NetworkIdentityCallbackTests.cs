@@ -3,7 +3,6 @@ using Cysharp.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
-using static Mirage.Tests.LocalConnections;
 
 namespace Mirage.Tests.Runtime
 {
@@ -71,7 +70,7 @@ namespace Mirage.Tests.Runtime
             gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
 
             // add own player connection
-            (var serverPlayer, var _) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
+            var serverPlayer = Substitute.For<INetworkPlayer>();
             serverPlayer.SceneIsReady = true;
             identity.SetOwner(serverPlayer);
 

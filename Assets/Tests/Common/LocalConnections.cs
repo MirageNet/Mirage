@@ -1,6 +1,5 @@
 namespace Mirage.Tests
 {
-
     public static class LocalConnections
     {
         public static (NetworkPlayer serverPlayer, NetworkPlayer clientPlayer) PipedConnections(IMessageReceiver clientMessages, IMessageReceiver serverMessages)
@@ -11,8 +10,8 @@ namespace Mirage.Tests
 
             (var clientConn, var serverConn) = PipePeerConnection.Create(clientHandler, serverHandler, null, null);
 
-            var clientPlayer = new NetworkPlayer(clientConn);
-            var serverPlayer = new NetworkPlayer(serverConn);
+            var clientPlayer = new NetworkPlayer(clientConn, false);
+            var serverPlayer = new NetworkPlayer(serverConn, false);
 
             // give connections to each other so they can invoke handlers
             clientHandler.SetConnection(clientConn, clientPlayer);

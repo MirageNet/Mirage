@@ -66,7 +66,7 @@ namespace Mirage.Tests.Runtime
 
         private static NetworkPlayer CreatePlayer(GameObject character)
         {
-            var player = new NetworkPlayer(Substitute.For<SocketLayer.IConnection>())
+            var player = new NetworkPlayer(Substitute.For<SocketLayer.IConnection>(), false)
             {
                 Identity = character.GetComponent<NetworkIdentity>()
             };
