@@ -107,6 +107,10 @@ namespace Mirage
         PlayerAuthentication Authentication { get; }
         void SetAuthentication(PlayerAuthentication authentication, bool allowReplace = false);
         bool IsAuthenticated { get; }
+        /// <summary>
+        /// True if this Player is the local player on the server or client
+        /// </summary>
+        bool IsHost { get; }
 
         void Disconnect();
         void MarkAsDisconnected();

@@ -34,6 +34,8 @@ namespace Mirage
         /// </remarks>
         private readonly IConnection _connection;
 
+        public bool IsHost { get; }
+
         /// <summary>
         /// Has this player been marked as disconnected
         /// <para>Messages sent to disconnected players will be ignored</para>
@@ -155,11 +157,11 @@ namespace Mirage
         /// Creates a new NetworkConnection with the specified address and connectionId
         /// </summary>
         /// <param name="networkConnectionId"></param>
-        public NetworkPlayer(IConnection connection)
+        public NetworkPlayer(IConnection connection, bool isHost)
         {
             _connection = connection ?? throw new ArgumentNullException(nameof(connection));
+            IsHost = isHost;
         }
-
 
         /// <summary>
         /// This sends a network message to the connection.

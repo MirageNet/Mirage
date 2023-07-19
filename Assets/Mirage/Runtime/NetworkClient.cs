@@ -156,7 +156,7 @@ namespace Mirage
                 Application.runInBackground = RunInBackground;
 
             // setup all the handlers
-            Player = new NetworkPlayer(connection);
+            Player = new NetworkPlayer(connection, false);
             dataHandler.SetConnection(connection, Player);
 
             RegisterMessageHandlers();
@@ -230,7 +230,7 @@ namespace Mirage
 
             // set up client before connecting to server, server could invoke handlers
             IsLocalClient = true;
-            Player = new NetworkPlayer(clientConn);
+            Player = new NetworkPlayer(clientConn, true);
             dataHandler.SetConnection(clientConn, Player);
 
             // invoke started event after everything is set up, but before peer has connected

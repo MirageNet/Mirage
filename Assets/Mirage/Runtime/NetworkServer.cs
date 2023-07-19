@@ -330,7 +330,7 @@ namespace Mirage
 
         private void Peer_OnConnected(IConnection conn)
         {
-            var player = new NetworkPlayer(conn);
+            var player = new NetworkPlayer(conn, false);
             if (logger.LogEnabled()) logger.Log($"Server new player {player}");
 
             // add connection
@@ -416,7 +416,7 @@ namespace Mirage
                 throw new InvalidOperationException("Local client connection already exists");
             }
 
-            var player = new NetworkPlayer(connection);
+            var player = new NetworkPlayer(connection, true);
             LocalPlayer = player;
             LocalClient = client;
 
