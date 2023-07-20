@@ -1,3 +1,15 @@
+# [146.0.0](https://github.com/MirageNet/Mirage/compare/v145.3.0...v146.0.0) (2023-07-20)
+
+
+### Features
+
+* INetworkPlayer now has a IsHost property ([5d7e5b7](https://github.com/MirageNet/Mirage/commit/5d7e5b79bffcfab9509d3425caaba8a7b5ca748b))
+
+
+### BREAKING CHANGES
+
+* NetworkPlayer constructor now requires isHost parameter
+
 # [145.3.0](https://github.com/MirageNet/Mirage/compare/v145.2.0...v145.3.0) (2023-07-17)
 
 
