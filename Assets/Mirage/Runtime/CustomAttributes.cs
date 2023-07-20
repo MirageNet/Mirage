@@ -117,6 +117,14 @@ namespace Mirage
     }
 
     /// <summary>
+    /// Tell the weaver to generate  reader and writer for a class
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
+    public class NetworkMessageAttribute : Attribute
+    {
+    }
+
+    /// <summary>
     /// Prevents a method from running if server is not active.
     /// <para>Can only be used inside a NetworkBehaviour</para>
     /// </summary>
@@ -129,14 +137,6 @@ namespace Mirage
         /// useful for unity built in methods such as Await, Update, Start, etc.
         /// </summary>
         public bool error = true;
-    }
-
-    /// <summary>
-    /// Tell the weaver to generate  reader and writer for a class
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
-    public class NetworkMessageAttribute : Attribute
-    {
     }
 
     /// <summary>
