@@ -1,3 +1,10 @@
+# [146.1.0](https://github.com/MirageNet/Mirage/compare/v146.0.0...v146.1.0) (2023-07-21)
+
+
+### Features
+
+* adding attribute that allows for combination of checks ([18852f6](https://github.com/MirageNet/Mirage/commit/18852f647e7b67258d5a84b1bbf01a2420ed324c))
+
 # [146.0.0](https://github.com/MirageNet/Mirage/compare/v145.3.0...v146.0.0) (2023-07-20)
 
 
