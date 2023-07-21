@@ -459,6 +459,5 @@ namespace Mirage.Tests.Runtime.GuardTests
             guardedComponent.CallLocalPlayerNoError();
             Assert.That(guardedComponent.Calls, Does.Not.Contain(nameof(ExampleGuards.CallLocalPlayerNoError)));
         }
-
     }
 }

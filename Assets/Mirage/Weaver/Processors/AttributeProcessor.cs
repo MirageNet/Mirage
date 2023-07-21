@@ -99,6 +99,7 @@ namespace Mirage.Weaver
             InjectGuard<ClientAttribute>(md, foundType, IsClient, "[Client] function '{0}' called when client not active");
             InjectGuard<HasAuthorityAttribute>(md, foundType, HasAuthority, "[Has Authority] function '{0}' called on player without authority");
             InjectGuard<LocalPlayerAttribute>(md, foundType, IsLocalPlayer, "[Local Player] function '{0}' called on nonlocal player");
+            InjectNetworkMethodGuard(md, foundType);
             CheckAttribute<ServerRpcAttribute>(md, foundType);
             CheckAttribute<ClientRpcAttribute>(md, foundType);
         }
@@ -115,32 +116,39 @@ namespace Mirage.Weaver
             }
         }
 
-        private void InjectGuard<TAttribute>(MethodDefinition md, FoundType foundType, MethodReference predicate, string format)
+        private bool TryGetAttribte<TAttribute>(MethodDefinition md, FoundType foundType, out CustomAttribute attribute)
         {
-            var attribute = md.GetCustomAttribute<TAttribute>();
+            attribute = md.GetCustomAttribute<TAttribute>();
             if (attribute == null)
-                return;
+                return false;
 
             if (md.IsAbstract)
             {
                 logger.Error($"{typeof(TAttribute)} can't be applied to abstract method. Apply to override methods instead.", md);
-                return;
+                return false;
             }
 
             if (!foundType.IsNetworkBehaviour)
             {
                 logger.Error($"{attribute.AttributeType.Name} method {md.Name} must be declared in a NetworkBehaviour", md);
-                return;
+                return false;
             }
 
             if (md.Name == "Awake" && !md.HasParameters)
             {
                 logger.Error($"{attribute.AttributeType.Name} will not work on the Awake method.", md);
-                return;
+                return false;
             }
 
             // dont need to set modified for errors, so we set it here when we start doing ILProcessing
             modified = true;
+            return true;
+        }
+
+        private void InjectGuard<TAttribute>(MethodDefinition md, FoundType foundType, MethodReference predicate, string format)
+        {
+            if (!TryGetAttribte<TAttribute>(md, foundType, out var attribute))
+                return;
 
             var throwError = attribute.GetField("error", true);
             var worker = md.Body.GetILProcessor();
@@ -149,6 +157,7 @@ namespace Mirage.Weaver
             worker.InsertBefore(top, worker.Create(OpCodes.Ldarg_0));
             worker.InsertBefore(top, worker.Create(OpCodes.Call, predicate));
             worker.InsertBefore(top, worker.Create(OpCodes.Brtrue, top));
+
             if (throwError)
             {
                 var message = string.Format(format, md.Name);
@@ -164,6 +173,74 @@ namespace Mirage.Weaver
                 worker.InsertBefore(top, worker.Create(OpCodes.Ret));
             }
         }
+
+        private void InjectNetworkMethodGuard(MethodDefinition md, FoundType foundType)
+        {
+            if (!TryGetAttribte<NetworkMethodAttribute>(md, foundType, out var attribute))
+                return;
+
+            // Get the required flags from the attribute constructor argument
+            var requiredFlagsValue = (NetworkFlags)attribute.ConstructorArguments[0].Value;
+            var throwError = attribute.GetField("error", true);
+            var worker = md.Body.GetILProcessor();
+            var top = md.Body.Instructions[0];
+
+            // check for each flag
+            // if true, then jump to start of code
+            // this should act as an OR check
+            if (requiredFlagsValue.HasFlag(NetworkFlags.Server))
+            {
+                worker.InsertBefore(top, worker.Create(OpCodes.Ldarg_0));
+                worker.InsertBefore(top, worker.Create(OpCodes.Call, IsServer));
+                worker.InsertBefore(top, worker.Create(OpCodes.Brtrue, top));
+            }
+            if (requiredFlagsValue.HasFlag(NetworkFlags.Client))
+            {
+                worker.InsertBefore(top, worker.Create(OpCodes.Ldarg_0));
+                worker.InsertBefore(top, worker.Create(OpCodes.Call, IsClient));
+                worker.InsertBefore(top, worker.Create(OpCodes.Brtrue, top));
+            }
+            if (requiredFlagsValue.HasFlag(NetworkFlags.HasAuthority))
+            {
+                worker.InsertBefore(top, worker.Create(OpCodes.Ldarg_0));
+                worker.InsertBefore(top, worker.Create(OpCodes.Call, HasAuthority));
+                worker.InsertBefore(top, worker.Create(OpCodes.Brtrue, top));
+            }
+            if (requiredFlagsValue.HasFlag(NetworkFlags.LocalOwner))
+            {
+                // Check if the object is the local player's
+                worker.InsertBefore(top, worker.Create(OpCodes.Ldarg_0));
+                worker.InsertBefore(top, worker.Create(OpCodes.Call, IsLocalPlayer));
+                worker.InsertBefore(top, worker.Create(OpCodes.Brtrue, top));
+            }
+
+            if (requiredFlagsValue.HasFlag(NetworkFlags.NotActive))
+            {
+                // Check if neither Server nor Clients are active
+                worker.InsertBefore(top, worker.Create(OpCodes.Ldarg_0));
+                worker.InsertBefore(top, worker.Create(OpCodes.Call, IsServer));
+                worker.InsertBefore(top, worker.Create(OpCodes.Ldarg_0));
+                worker.InsertBefore(top, worker.Create(OpCodes.Call, IsClient));
+                worker.InsertBefore(top, worker.Create(OpCodes.Or));
+                worker.InsertBefore(top, worker.Create(OpCodes.Brfalse, top));
+            }
+
+            if (throwError)
+            {
+                var message = $"Method '{md.Name}' cannot be executed as {nameof(NetworkFlags)} condition is not met.";
+                worker.InsertBefore(top, worker.Create(OpCodes.Ldstr, message));
+                worker.InsertBefore(top, worker.Create(OpCodes.Newobj, () => new MethodInvocationException("")));
+                worker.InsertBefore(top, worker.Create(OpCodes.Throw));
+            }
+            else
+            {
+                // dont need to set param or return if we throw
+                InjectGuardParameters(md, worker, top);
+                InjectGuardReturnValue(md, worker, top);
+                worker.InsertBefore(top, worker.Create(OpCodes.Ret));
+            }
+        }
+
 
         // this is required to early-out from a function with "out" parameters
         private static void InjectGuardParameters(MethodDefinition md, ILProcessor worker, Instruction top)
