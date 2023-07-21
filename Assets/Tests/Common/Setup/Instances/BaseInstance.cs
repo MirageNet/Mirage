@@ -45,5 +45,26 @@ namespace Mirage.Tests
 
             throw new KeyNotFoundException($"No NetworkIdentity found on {GameObject} with netId={other.NetId}");
         }
+
+        public bool TryGet(uint netId, out NetworkIdentity identity)
+        {
+            return World.TryGetIdentity(netId, out identity);
+        }
+
+        public bool TryGet(NetworkIdentity other, out NetworkIdentity identity)
+        {
+            return World.TryGetIdentity(other.NetId, out identity);
+        }
+
+        public bool TryGet<T>(T other, out T behaviour) where T : NetworkBehaviour
+        {
+            if (World.TryGetIdentity(other.NetId, out var identity))
+            {
+                behaviour = (T)identity.NetworkBehaviours[other.ComponentIndex];
+                return true;
+            }
+            behaviour = null;
+            return false;
+        }
     }
 }
