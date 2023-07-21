@@ -7,8 +7,8 @@ Networking attributes are added to member of [NetworkBehaviour](/docs/reference/
 NetworkBehaviour) scripts to tell Mirage to do different things.
 
 There are 4 types of attributes that Mirage has:
-- [Rpc Attributes](#RPC Attributes): Cause a method to send a network message so that the body of the method is invoked on a either server or client
-- [Block methods invokes](#Block methods invokes): Blocks invokes of a method to stop them from being invoked in wrong place
+- [Rpc Attributes](#rpc-attributes): Cause a method to send a network message so that the body of the method is invoked on a either server or client
+- [Block methods invokes](#block-methods-invokes): Blocks invokes of a method to stop them from being invoked in wrong place
 - [SyncVar](/docs/guides/sync/sync-var): Add to Fields to cause their value to be automatically synced to clients.
 - [Bit Packing](/docs/guides/bit-packing): These attributes modify how values are written, they are an easy way to tell mirage how to compress values before they are sent over network. They can be applied to Fields and method Parameters.
 
