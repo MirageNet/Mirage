@@ -164,7 +164,7 @@ namespace Mirage.CodeGen
                 SymbolReaderProvider = new PortablePdbReaderProvider(),
                 AssemblyResolver = assemblyResolver,
                 ReflectionImporterProvider = new PostProcessorReflectionImporterProvider(),
-                ReadingMode = ReadingMode.Deferred
+                ReadingMode = ReadingMode.Immediate
             };
 
             var assemblyDefinition = AssemblyDefinition.ReadAssembly(new MemoryStream(compiledAssembly.InMemoryAssembly.PeData), readerParameters);
