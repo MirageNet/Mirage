@@ -20,6 +20,12 @@ namespace Mirage.CodeGen
         /// <summary>
         /// Adds a method parameter of type <paramref name="type"/> to the <paramref name="method"/>
         /// </summary>
+        public static ParameterDefinition AddParam(this MethodDefinition method, Type type, string name, ParameterAttributes attributes = ParameterAttributes.None)
+        => AddParam(method, method.Module.ImportReference(type), name, attributes);
+
+        /// <summary>
+        /// Adds a method parameter of type <paramref name="type"/> to the <paramref name="method"/>
+        /// </summary>
         public static ParameterDefinition AddParam(this MethodDefinition method, TypeReference typeRef, string name, ParameterAttributes attributes = ParameterAttributes.None)
         {
             var param = new ParameterDefinition(name, attributes, typeRef);
