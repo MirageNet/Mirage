@@ -38,7 +38,7 @@ namespace Mirage.CodeGen
         public WeaverBase(IWeaverLogger logger = null)
         {
             this.logger = logger ?? new WeaverLogger(false);
-            timer = new WeaverDiagnosticsTimer
+            timer = new WeaverDiagnosticsTimer(GetType().Name)
             {
                 writeToFile = true,
             };

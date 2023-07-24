@@ -14,6 +14,8 @@ namespace Mirage.CodeGen
     /// </summary>
     public class WeaverDiagnosticsTimer
     {
+        private readonly string _dir;
+
         public bool writeToFile;
         private StreamWriter writer;
         private Stopwatch stopwatch;
@@ -21,16 +23,22 @@ namespace Mirage.CodeGen
 
         public long ElapsedMilliseconds => stopwatch?.ElapsedMilliseconds ?? 0;
 
-        private static bool _checkDirectory = false;
+        private bool _checkDirectory = false;
 
-        private static void CheckDirectory()
+        public WeaverDiagnosticsTimer(string baseName)
+        {
+            _dir = $"./Logs/{baseName}_Logs";
+        }
+
+        private void CheckDirectory()
         {
             if (_checkDirectory)
                 return;
             _checkDirectory = true;
-            if (!Directory.Exists("./Logs/WeaverLogs"))
+
+            if (!Directory.Exists(_dir))
             {
-                Directory.CreateDirectory("./Logs/WeaverLogs");
+                Directory.CreateDirectory(_dir);
             }
         }
 
@@ -42,7 +50,7 @@ namespace Mirage.CodeGen
             if (writeToFile)
             {
                 CheckDirectory();
-                var path = $"./Logs/WeaverLogs/Timer_{name}.log";
+                var path = $"{_dir}/Timer_{name}.log";
                 try
                 {
                     writer = new StreamWriter(path)
