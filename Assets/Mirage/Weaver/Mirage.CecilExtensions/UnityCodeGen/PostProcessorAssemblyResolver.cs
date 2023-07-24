@@ -38,38 +38,38 @@ namespace Mirage.CodeGen
             _selfAssembly = assemblyDefinition;
         }
 
-        public AssemblyDefinition Resolve(AssemblyNameReference name) => Resolve(name, new ReaderParameters(ReadingMode.Deferred));
+        public AssemblyDefinition Resolve(AssemblyNameReference name) => Resolve(name, null);
 
         public AssemblyDefinition Resolve(AssemblyNameReference name, ReaderParameters parameters)
         {
-            lock (_assemblyCache)
-            {
-                if (name.Name == _compiledAssembly.Name)
-                    return _selfAssembly;
+            if (name.Name == _compiledAssembly.Name)
+                return _selfAssembly;
 
-                var fileName = FindFile(name);
-                if (fileName == null)
-                    return null;
+            var fileName = FindFile(name);
+            if (fileName == null)
+                return null;
 
-                var lastWriteTime = File.GetLastWriteTime(fileName);
+            var lastWriteTime = File.GetLastWriteTime(fileName);
 
-                var cacheKey = fileName + lastWriteTime;
+            var cacheKey = fileName + lastWriteTime;
 
-                if (_assemblyCache.TryGetValue(cacheKey, out var result))
-                    return result;
+            if (_assemblyCache.TryGetValue(cacheKey, out var result))
+                return result;
 
-                parameters.AssemblyResolver = this;
+            if (parameters == null)
+                parameters = new ReaderParameters(ReadingMode.Deferred);
 
-                var ms = MemoryStreamFor(fileName);
+            parameters.AssemblyResolver = this;
 
-                var pdb = fileName + ".pdb";
-                if (File.Exists(pdb))
-                    parameters.SymbolStream = MemoryStreamFor(pdb);
+            var ms = MemoryStreamFor(fileName);
 
-                var assemblyDefinition = AssemblyDefinition.ReadAssembly(ms, parameters);
-                _assemblyCache.Add(cacheKey, assemblyDefinition);
-                return assemblyDefinition;
-            }
+            var pdb = fileName + ".pdb";
+            if (File.Exists(pdb))
+                parameters.SymbolStream = MemoryStreamFor(pdb);
+
+            var assemblyDefinition = AssemblyDefinition.ReadAssembly(ms, parameters);
+            _assemblyCache.Add(cacheKey, assemblyDefinition);
+            return assemblyDefinition;
         }
 
         private string FindFile(AssemblyNameReference name)
