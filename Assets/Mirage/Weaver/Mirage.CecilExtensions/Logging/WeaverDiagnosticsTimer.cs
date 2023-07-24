@@ -69,7 +69,7 @@ namespace Mirage.CodeGen
             stopwatch = Stopwatch.StartNew();
 
             WriteLine($"Weave Started - {name}");
-            WriteLine($"Time: {DateTime.Now}");
+            WriteLine($"Time: {DateTime.Now:HH:mm:ss.fff}");
 #if WEAVER_DEBUG_LOGS
             WriteLine($"Debug logs enabled");
 #else
@@ -90,6 +90,7 @@ namespace Mirage.CodeGen
         public long End()
         {
             WriteLine($"Weave Finished: {ElapsedMilliseconds}ms - {name}");
+            WriteLine($"Time: {DateTime.Now:HH:mm:ss.fff}");
             stopwatch?.Stop();
             writer?.Close();
             writer = null;
