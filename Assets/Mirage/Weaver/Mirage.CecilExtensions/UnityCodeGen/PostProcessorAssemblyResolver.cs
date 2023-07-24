@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,7 +10,7 @@ namespace Mirage.CodeGen
 {
     // original code under MIT Copyright (c) 2021 Unity Technologies
     // https://github.com/Unity-Technologies/com.unity.netcode.gameobjects/blob/472d51b34520e8fb6f0aa43fd56d162c3029e0b0/com.unity.netcode.gameobjects/Editor/CodeGen/PostProcessorAssemblyResolver.cs
-    internal class PostProcessorAssemblyResolver : IAssemblyResolver
+    internal sealed class PostProcessorAssemblyResolver : IAssemblyResolver
     {
         private readonly string[] _assemblyReferences;
         private readonly string[] _assemblyReferencesFileName;
@@ -26,16 +26,16 @@ namespace Mirage.CodeGen
             _assemblyReferencesFileName = _assemblyReferences.Select(r => Path.GetFileName(r)).ToArray();
         }
 
-
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            foreach (var asm in _assemblyCache.Values)
+                asm.Dispose();
+            _assemblyCache.Clear();
         }
 
-        protected virtual void Dispose(bool disposing)
+        public void AddAssemblyDefinitionBeingOperatedOn(AssemblyDefinition assemblyDefinition)
         {
-            // Cleanup
+            _selfAssembly = assemblyDefinition;
         }
 
         public AssemblyDefinition Resolve(AssemblyNameReference name) => Resolve(name, new ReaderParameters(ReadingMode.Deferred));
@@ -109,40 +109,35 @@ namespace Mirage.CodeGen
 
         private static MemoryStream MemoryStreamFor(string fileName)
         {
-            return Retry(10, TimeSpan.FromSeconds(1), () =>
+            var retryCount = 10;
+            const int waitMs = 1000;
+            while (retryCount > 0)
             {
-                byte[] byteArray;
-                using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                try
                 {
-                    byteArray = new byte[fs.Length];
-                    var readLength = fs.Read(byteArray, 0, (int)fs.Length);
-                    if (readLength != fs.Length)
-                        throw new InvalidOperationException("File read length is not full length of file.");
+                    byte[] byteArray;
+                    using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    {
+                        byteArray = new byte[fs.Length];
+                        var readLength = fs.Read(byteArray, 0, (int)fs.Length);
+                        if (readLength != fs.Length)
+                            throw new InvalidOperationException("File read length is not full length of file.");
+                    }
+
+                    return new MemoryStream(byteArray);
                 }
+                catch (IOException)
+                {
+                    retryCount--;
+                    if (retryCount == 0)
+                        throw;
 
-                return new MemoryStream(byteArray);
-            });
-        }
-
-        private static MemoryStream Retry(int retryCount, TimeSpan waitTime, Func<MemoryStream> func)
-        {
-            try
-            {
-                return func();
+                    Console.WriteLine($"Caught IO Exception for {fileName}, trying {retryCount} more times");
+                    Thread.Sleep(waitMs);
+                }
             }
-            catch (IOException)
-            {
-                if (retryCount == 0)
-                    throw;
-                Console.WriteLine($"Caught IO Exception, trying {retryCount} more times");
-                Thread.Sleep(waitTime);
-                return Retry(retryCount - 1, waitTime, func);
-            }
-        }
 
-        public void AddAssemblyDefinitionBeingOperatedOn(AssemblyDefinition assemblyDefinition)
-        {
-            _selfAssembly = assemblyDefinition;
+            throw new InvalidOperationException("Should never get here");
         }
     }
 }
