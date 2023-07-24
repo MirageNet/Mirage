@@ -9,7 +9,7 @@ namespace Mirage.CodeGen
     public static class ILPPHelper
     {
         /// <summary>
-        /// Process when assembly that references <see cref="RuntimeAssemblyName"/>
+        /// Process when assembly that references <paramref name="runtimeAssemblyName"/>
         /// </summary>
         /// <param name="compiledAssembly"></param>
         /// <returns></returns>
