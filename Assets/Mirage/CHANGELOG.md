@@ -1,3 +1,10 @@
+## [146.1.1](https://github.com/MirageNet/Mirage/compare/v146.1.0...v146.1.1) (2023-07-24)
+
+
+### Reverts
+
+* "pref: using deferred mode for reading, this will speed up other Weavers which dont need to read everything" ([6bff2e3](https://github.com/MirageNet/Mirage/commit/6bff2e3cd433c37682427215a644d69c50320b31))
+
 # [146.1.0](https://github.com/MirageNet/Mirage/compare/v146.0.0...v146.1.0) (2023-07-21)
 
 
