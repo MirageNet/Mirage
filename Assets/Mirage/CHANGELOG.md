@@ -1,3 +1,11 @@
+# [146.2.0](https://github.com/MirageNet/Mirage/compare/v146.1.1...v146.2.0) (2023-07-27)
+
+
+### Features
+
+* adding emit methods for weaver extensions ([6b57cd7](https://github.com/MirageNet/Mirage/commit/6b57cd708bf2be6b32fda12b9b3384a165df4770))
+* making ackSystem public so const fields can be used ([63f62bf](https://github.com/MirageNet/Mirage/commit/63f62bfba32b9c458253a86ac530a40a6a99aaaf))
+
 ## [146.1.1](https://github.com/MirageNet/Mirage/compare/v146.1.0...v146.1.1) (2023-07-24)
 
 
