@@ -83,5 +83,41 @@ namespace Mirage.CodeGen
             var typeRef = worker.Body.Method.Module.ImportReference(expression);
             return worker.Create(code, typeRef);
         }
+
+        /// <summary>
+        /// Imports the <paramref name="expression"/> and creates an instruction using the method reference
+        /// </summary>
+        public static void Emit(this ILProcessor worker, OpCode code, LambdaExpression expression)
+        {
+            var methodRef = worker.Body.Method.Module.ImportReference(expression);
+            worker.Emit(code, methodRef);
+        }
+
+        /// <summary>
+        /// Imports the <paramref name="expression"/> and creates an instruction using the method reference
+        /// </summary>
+        public static void Emit(this ILProcessor worker, OpCode code, Expression<Action> expression)
+        {
+            var methodRef = worker.Body.Method.Module.ImportReference(expression);
+            worker.Emit(code, methodRef);
+        }
+
+        /// <summary>
+        /// Imports the <paramref name="expression"/> and creates an instruction using the method reference
+        /// </summary>
+        public static void Emit<T>(this ILProcessor worker, OpCode code, Expression<Action<T>> expression)
+        {
+            var methodRef = worker.Body.Method.Module.ImportReference(expression);
+            worker.Emit(code, methodRef);
+        }
+
+        /// <summary>
+        /// Imports the <paramref name="expression"/> and creates an instruction using the method reference
+        /// </summary>
+        public static void Emit<T, TR>(this ILProcessor worker, OpCode code, Expression<Func<T, TR>> expression)
+        {
+            var methodRef = worker.Body.Method.Module.ImportReference(expression);
+            worker.Emit(code, methodRef);
+        }
     }
 }
