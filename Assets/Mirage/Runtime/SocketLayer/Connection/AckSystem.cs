@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Mirage.SocketLayer
 {
-    internal class AckSystem
+    public class AckSystem
     {
         private const int MASK_SIZE = sizeof(ulong) * 8;
 
@@ -764,7 +764,7 @@ namespace Mirage.SocketLayer
                 return new ReliablePacket(pool);
             }
         }
-        internal struct ReliableReceived : IEquatable<ReliableReceived>
+        public struct ReliableReceived : IEquatable<ReliableReceived>
         {
             public readonly ByteBuffer Buffer;
             public readonly int Length;

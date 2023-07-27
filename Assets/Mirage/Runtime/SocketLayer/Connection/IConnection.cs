@@ -4,7 +4,7 @@ namespace Mirage.SocketLayer
     /// A connection that can send data directly to sockets
     /// <para>Only things inside socket layer should be sending raw packets. Others should use the methods inside <see cref="Connection"/></para>
     /// </summary>
-    internal interface IRawConnection
+    public interface IRawConnection
     {
         /// <summary>
         /// Sends directly to socket without adding header
