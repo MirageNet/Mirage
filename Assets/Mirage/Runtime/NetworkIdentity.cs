@@ -535,6 +535,11 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log($"OnStartServer invoked on '{this}' (NetId: {NetId}, SceneId: {SceneId:X})");
 
+            // update sync direction before invoking start callback
+            // need to do this because IsServer might now be set when it previosuly wasn't
+            foreach (var comp in NetworkBehaviours)
+                comp.UpdateSyncObjectShouldSync();
+
             _onStartServer.Invoke();
         }
 
@@ -547,8 +552,13 @@ namespace Mirage
         {
             if (_clientStarted)
                 return;
-            _clientStarted = true;
 
+            // update sync direction before invoking start callback
+            // need to do this because IsClient/Owner might now be set when it previosuly wasn't
+            foreach (var comp in NetworkBehaviours)
+                comp.UpdateSyncObjectShouldSync();
+
+            _clientStarted = true;
             _onStartClient.Invoke();
         }
 
