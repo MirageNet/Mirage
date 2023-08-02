@@ -16,25 +16,30 @@ These messages are built-in and used by NetworkSceneManager. If you are creating
 1. Mark `Player` as not ready, using [NetworkPlayer.SceneIsReady](/docs/reference/Mirage/NetworkPlayer#sceneisready)
 2. Send `SceneMessage` to clients
 
+*If the scene is already loaded on server, skip steps 3/4. This might be the case if you are loading a scene for a player that joins late.*
+
+3. Load the scene on server 
+4. Call [ServerObjectManager.SpawnSceneObjects](/docs/reference/Mirage/ServerObjectManager#spawnsceneobjects) (This will tell Mirage to call Spawn on unspawned Scene objects)
+
 **Client** 
 
 *After receiving `SceneMessage`*
 
-3. (optional) Mark local player as not ready 
-4. Load the scene
+5. (optional) Mark local player as not ready 
+6. Load the scene on client
 
 *After loading finished*
 
-5. Call [ClientObjectManager.PrepareToSpawnSceneObjects](/docs/reference/Mirage/ClientObjectManager#preparetospawnsceneobjects) (This will tell Mirage about any new scene objects)
-6. (optional) Mark local player as ready 
-7. Send `SceneReadyMessage` to the server
+7. Call [ClientObjectManager.PrepareToSpawnSceneObjects](/docs/reference/Mirage/ClientObjectManager#preparetospawnsceneobjects) (This will tell Mirage about any new scene objects)
+8. (optional) Mark local player as ready 
+9. Send `SceneReadyMessage` to the server
 
 **Server** 
 
 *After receiving `SceneReadyMessage`*
 
-8. Mark the player as ready using: `player.SceneIsReady = true`
-9. Call [ServerObjectManager.SpawnVisibleObjects](/docs/reference/Mirage/ServerObjectManager#spawnvisibleobjectsinetworkplayer-boolean) or [ServerObjectManager.AddCharacter](/docs/reference/Mirage/ServerObjectManager#addcharacterinetworkplayer-networkidentity) (Mirage will send spawn message to client)
+10. Mark the player as ready using: `player.SceneIsReady = true`
+11. Call [ServerObjectManager.SpawnVisibleObjects](/docs/reference/Mirage/ServerObjectManager#spawnvisibleobjectsinetworkplayer-boolean) or [ServerObjectManager.AddCharacter](/docs/reference/Mirage/ServerObjectManager#addcharacterinetworkplayer-networkidentity) (Mirage will send spawn message to client)
 
 ### SpawnVisibleObjects vs AddCharacter
 
