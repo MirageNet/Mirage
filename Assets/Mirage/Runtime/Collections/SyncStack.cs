@@ -87,10 +87,7 @@ namespace Mirage.Collections
 
         private void AddOperation(Operation op, T newItem)
         {
-            if (IsReadOnly)
-            {
-                throw new InvalidOperationException("Synclists can only be modified at the server");
-            }
+            SyncObjectUtils.ThrowIfReadOnly(IsReadOnly);
 
             var change = new Change
             {

@@ -99,10 +99,7 @@ namespace Mirage.Collections
 
         private void AddOperation(Operation op, TKey key, TValue item)
         {
-            if (IsReadOnly)
-            {
-                throw new InvalidOperationException("SyncDictionaries can only be modified by the server");
-            }
+            SyncObjectUtils.ThrowIfReadOnly(IsReadOnly);
 
             var change = new Change
             {
