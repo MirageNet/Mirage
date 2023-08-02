@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Mirage.Collections;
 using NUnit.Framework;
@@ -271,6 +272,21 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(ObserverComponent.target, Is.EqualTo(_remoteClients[1].Get(ServerExtraIdentity)));
             Assert.That(ObserverComponent.MySyncList.Count, Is.EqualTo(1));
             Assert.That(ObserverComponent.MySyncList[0], Is.EqualTo(listValue));
+        }
+
+        [Test]
+        public void ThrowsWhenServerUpdates()
+        {
+            SetDirection(SyncFrom.Owner, SyncTo.Server | SyncTo.ObserversOnly);
+            ServerComponent.UpdateSyncObjectShouldSync();
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+            {
+                ServerComponent.MySyncList.Add(listValue);
+            });
+
+            var expected = new InvalidOperationException("SyncObject is marked as ReadOnly. Check SyncDirection and make sure you can set values on this instance. By default you can only add items on server.");
+            Assert.That(exception, Has.Message.EqualTo(expected.Message));
         }
     }
 
