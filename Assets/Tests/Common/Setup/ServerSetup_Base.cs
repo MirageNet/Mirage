@@ -173,10 +173,11 @@ namespace Mirage.Tests.BaseSetups
         // used by host and client
         protected async UniTask SetupPlayer(IClientInstance instance, bool spawnCharacter)
         {
+            // always register prefab
+            instance.ClientObjectManager.RegisterPrefab(_characterPrefab);
+
             if (spawnCharacter)
             {
-                instance.ClientObjectManager.RegisterPrefab(_characterPrefab);
-
                 _serverInstance.SpawnCharacterForNew(_characterPrefab);
                 // wait for client to spawn it
                 await AsyncUtil.WaitUntilWithTimeout(() => instance.Client.Player.HasCharacter);
