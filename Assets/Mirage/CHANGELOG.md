@@ -1,3 +1,11 @@
+## [146.2.1](https://github.com/MirageNet/Mirage/compare/v146.2.0...v146.2.1) (2023-08-02)
+
+
+### Bug Fixes
+
+* also removing character when it is removed as owned ([b96ed68](https://github.com/MirageNet/Mirage/commit/b96ed68a85b2f362212c71c1294904d1e65f8da3))
+* updating syncObject ReadOnly before StartServer/Client ([67a1d06](https://github.com/MirageNet/Mirage/commit/67a1d067b621241e9cee3fcb899a068b108ba8a7))
+
 # [146.2.0](https://github.com/MirageNet/Mirage/compare/v146.1.1...v146.2.0) (2023-07-27)
 
 
