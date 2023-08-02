@@ -953,8 +953,6 @@ namespace Mirage
         /// <param name="initialize">True if this is the first time.</param>
         public void RebuildObservers(bool initialize)
         {
-            var changed = false;
-
             // call OnRebuildObservers function
             GetNewObservers(newObservers, initialize);
 
@@ -964,9 +962,9 @@ namespace Mirage
                 newObservers.Add(Owner);
             }
 
-            changed = AddNewObservers(initialize, changed);
-
-            changed = RemoveOldObservers(changed);
+            var added = AddNewObservers(initialize);
+            var removed = RemoveOldObservers();
+            var changed = added || removed;
 
             if (changed)
             {
@@ -980,8 +978,9 @@ namespace Mirage
         }
 
         // remove all old .observers that aren't in newObservers anymore
-        private bool RemoveOldObservers(bool changed)
+        private bool RemoveOldObservers()
         {
+            var changed = false;
             foreach (var player in observers)
             {
                 if (!newObservers.Contains(player))
@@ -999,8 +998,9 @@ namespace Mirage
         }
 
         // add all newObservers that aren't in .observers yet
-        private bool AddNewObservers(bool initialize, bool changed)
+        private bool AddNewObservers(bool initialize)
         {
+            var changed = false;
             foreach (var player in newObservers)
             {
                 // only add ready connections.
