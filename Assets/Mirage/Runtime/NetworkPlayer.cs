@@ -281,6 +281,12 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log($"Removing {identity} from Player[{Address}] OwnedObjects");
 
             _ownedObjects.Remove(identity);
+
+            // if is main character, then also remove that
+            if (Identity == identity)
+            {
+                Identity = null;
+            }
         }
 
         /// <summary>
