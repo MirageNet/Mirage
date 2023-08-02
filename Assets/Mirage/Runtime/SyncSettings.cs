@@ -11,6 +11,7 @@ namespace Mirage
     {
         public const string INTERVAL_TOOLTIP = "Time in seconds until next change is synchronized to the client. '0' means send immediately if changed. '0.5' means only send changes every 500ms.\n(This is for state synchronization like SyncVars, SyncLists, OnSerialize. Not for Cmds, Rpcs, etc.)";
 
+        // FieldOffset to make sure this struct is small and can be passed around efficiently
         [FieldOffset(0)]
         public SyncFrom From;
         [FieldOffset(1)]

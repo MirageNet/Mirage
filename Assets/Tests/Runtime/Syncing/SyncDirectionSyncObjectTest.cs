@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using Mirage.Collections;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Syncing
@@ -287,6 +289,130 @@ namespace Mirage.Tests.Runtime.Syncing
 
             var expected = new InvalidOperationException("SyncObject is marked as ReadOnly. Check SyncDirection and make sure you can set values on this instance. By default you can only add items on server.");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
+        }
+    }
+
+    public class SyncDirectionObjectFromOwner_Spawning : SyncDirectionTestBase<MockPlayerWithList>
+    {
+        private const int listValue = 5;
+
+        protected override void ExtraPrefabSetup(NetworkIdentity prefab)
+        {
+            base.ExtraPrefabSetup(prefab);
+
+            SetDirection(prefab.GetComponent<MockPlayerWithList>(), SyncFrom.Owner, SyncTo.Server | SyncTo.ObserversOnly);
+        }
+
+        [UnityTest]
+        public IEnumerator CanRespawn()
+        {
+            OwnerComponent.MySyncList.Add(listValue);
+
+            // wait for sync
+            yield return null;
+            yield return null;
+
+            serverObjectManager.Destroy(ServerComponent.Identity, false);
+
+            // wait for despawn
+            yield return null;
+            yield return null;
+
+            serverObjectManager.Spawn(ServerComponent.Identity);
+
+            // wait for spawn
+            yield return null;
+            yield return null;
+
+            // dont use OwnerComponent, it will be null because of destroy
+            var clientObj = _remoteClients[0].Get(ServerComponent);
+
+            // NOTE: should be empty, because destroy will reset the list
+            Assert.That(clientObj.MySyncList.Count, Is.EqualTo(0));
+        }
+
+        [UnityTest]
+        [Ignore("todo this doesn't sync initial values. What should happen?")]
+        public IEnumerator CanSetValuesAfterDestroy()
+        {
+            serverObjectManager.Destroy(ServerComponent.Identity, false);
+
+            // wait for despawn
+            yield return null;
+            yield return null;
+
+            Assert.DoesNotThrow(() =>
+            {
+                ServerComponent.MySyncList.Add(listValue);
+            }, "Server should be able too set syncList value when object is despawned");
+            serverObjectManager.Spawn(ServerComponent.Identity);
+
+            // wait for spawn
+            yield return null;
+            yield return null;
+
+            // dont use OwnerComponent, it will be null because of destroy
+            var clientObj = _remoteClients[0].Get(ServerComponent);
+
+            Assert.That(clientObj.MySyncList.Count, Is.EqualTo(1));
+            Assert.That(clientObj.MySyncList[0], Is.EqualTo(listValue));
+        }
+
+        [UnityTest]
+        [Ignore("todo this doesn't sync initial values. What should happen?")]
+        public IEnumerator CanSetValuesBeforeSpawn()
+        {
+            var clone = InstantiateForTest(_characterPrefab);
+            var component = clone.GetComponent<MockPlayerWithList>();
+
+            Assert.DoesNotThrow(() =>
+            {
+                component.MySyncList.Add(listValue);
+            }, "Server should be able too set syncList value when object is despawned");
+            serverObjectManager.Spawn(clone);
+
+            // wait for sync
+            yield return null;
+            yield return null;
+
+            var clientObj = _remoteClients[0].Get(component);
+
+            Assert.That(clientObj.MySyncList.Count, Is.EqualTo(1));
+            Assert.That(clientObj.MySyncList[0], Is.EqualTo(listValue));
+        }
+
+        [UnityTest]
+        [Ignore("todo this doesn't sync initial values. What should happen?")]
+        public IEnumerator CanSpawnOnSecondClient()
+        {
+            SetDirection(_characterPrefab.GetComponent<MockPlayerWithList>(), SyncFrom.Owner, SyncTo.Server | SyncTo.ObserversOnly);
+
+            var clone = InstantiateForTest(_characterPrefab);
+            var component = clone.GetComponent<MockPlayerWithList>();
+
+            serverObjectManager.ReplaceCharacter(ServerPlayer(0), clone, false);
+
+            // wait for spawn
+            yield return null;
+            yield return null;
+
+            var newOwnerComp = _remoteClients[0].Get(component);
+            newOwnerComp.MySyncList.Add(listValue);
+
+            // wait for sync
+            yield return null;
+            yield return null;
+
+            Assert.That(component.MySyncList.Count, Is.EqualTo(1));
+            Assert.That(component.MySyncList[0], Is.EqualTo(listValue));
+
+            var newIndex = _remoteClients.Count;
+            var addTask = AddClient();
+            yield return new WaitWhile(() => addTask.Status == UniTaskStatus.Pending);
+
+            var newClientComp = _remoteClients[newIndex].Get(component);
+            Assert.That(newClientComp.MySyncList.Count, Is.EqualTo(1));
+            Assert.That(newClientComp.MySyncList[0], Is.EqualTo(listValue));
         }
     }
 
