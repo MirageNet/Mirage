@@ -303,20 +303,20 @@ namespace Mirage.CodeGen
         }
 
         /// <summary>
-        /// Imports a field and makes it a member of its orignal type.
-        /// <para>This is needed if orignal type is a generic instance, this will ensure that it stays a member of that instance, eg MyMessage{int}.Value</para>
+        /// Imports a field and makes it a member of its original type.
+        /// <para>This is needed if original type is a generic instance, this will ensure that it stays a member of that instance, eg MyMessage{int}.Value</para>
         /// </summary>
         /// <param name="module"></param>
         /// <param name="field"></param>
-        /// <param name="orignalType">Type that the field orignal belonged to, NOT the resolved type</param>
+        /// <param name="originalType">Type that the field original belonged to, NOT the resolved type</param>
         /// <returns></returns>
-        public static FieldReference ImportField(this ModuleDefinition module, FieldDefinition field, TypeReference orignalType)
+        public static FieldReference ImportField(this ModuleDefinition module, FieldDefinition field, TypeReference originalType)
         {
-            if (orignalType.Module != module)
-                orignalType = module.ImportReference(orignalType);
+            if (originalType.Module != module)
+                originalType = module.ImportReference(originalType);
 
             var fieldType = module.ImportReference(field.FieldType);
-            return new FieldReference(field.Name, fieldType, orignalType);
+            return new FieldReference(field.Name, fieldType, originalType);
         }
 
         /// <summary>
