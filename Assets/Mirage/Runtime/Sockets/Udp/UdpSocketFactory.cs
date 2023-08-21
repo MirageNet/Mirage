@@ -2,7 +2,7 @@
 // so only include it for standalone and editor
 // but not for mac because of code signing issue
 // #if !(UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX)
-// #define NANO_SOCKET_ALLOWED
+// #define EXCLUDE_NANOSOCKETS
 // #endif
 
 using System;
