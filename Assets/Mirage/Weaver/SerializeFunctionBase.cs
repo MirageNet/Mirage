@@ -121,7 +121,13 @@ namespace Mirage.Weaver
 
         private bool HasAsGenericAttribute(TypeReference typeReference)
         {
-            return typeReference.Resolve().HasCustomAttribute<WeaverWriteAsGenericAttribute>();
+            var typeDef = typeReference.Resolve();
+            // system types can sometimes fail to resolve
+            // but they will never have attribute so we can just return here
+            if (typeDef == null)
+                return false;
+
+            return typeDef.HasCustomAttribute<WeaverWriteAsGenericAttribute>();
         }
 
         private MethodReference GenerateFunction(TypeReference typeReference)

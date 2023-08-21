@@ -175,7 +175,10 @@ namespace Mirage.CodeGen
 
                 try
                 {
-                    parent = parent.Resolve().BaseType;
+                    var resolved = parent.Resolve();
+                    if (resolved == null)
+                        return false;
+                    parent = resolved.BaseType;
                 }
                 catch
                 {
@@ -273,6 +276,9 @@ namespace Mirage.CodeGen
 
         public static bool HasCustomAttribute(this ICustomAttributeProvider attributeProvider, Type t)
         {
+            if (attributeProvider == null)
+                throw new ArgumentNullException(nameof(attributeProvider));
+
             return attributeProvider.CustomAttributes.Any(attr => attr.AttributeType.Is(t));
         }
 
@@ -317,14 +323,14 @@ namespace Mirage.CodeGen
         /// 
         /// </summary>
         /// <param name="field"></param>
-        /// <param name="orignalType">make sure orignalType is already imported</param>
+        /// <param name="originalType">make sure originalType is already imported</param>
         /// <returns></returns>
-        public static TypeReference GetFieldTypeIncludingGeneric(this FieldDefinition field, TypeReference orignalType)
+        public static TypeReference GetFieldTypeIncludingGeneric(this FieldDefinition field, TypeReference originalType)
         {
-            // if generic, then check if it has a type from orignalType 
-            if (field.FieldType.IsGenericParameter && orignalType.IsGenericInstance)
+            // if generic, then check if it has a type from originalType 
+            if (field.FieldType.IsGenericParameter && originalType.IsGenericInstance)
             {
-                if (FindGenericArgumentWithMatchingName(field.FieldType, orignalType, out var found))
+                if (FindGenericArgumentWithMatchingName(field.FieldType, originalType, out var found))
                     return found;
             }
 
@@ -332,10 +338,10 @@ namespace Mirage.CodeGen
             return field.FieldType;
         }
 
-        private static bool FindGenericArgumentWithMatchingName(TypeReference genericParameter, TypeReference orignalType, out TypeReference found)
+        private static bool FindGenericArgumentWithMatchingName(TypeReference genericParameter, TypeReference originalType, out TypeReference found)
         {
             // resolve to get GenericParameters
-            var resolved = orignalType.Resolve();
+            var resolved = originalType.Resolve();
 
             var typeName = genericParameter.Name;
             for (var i = 0; i < resolved.GenericParameters.Count; i++)
@@ -343,7 +349,7 @@ namespace Mirage.CodeGen
                 var param = resolved.GenericParameters[i];
                 if (param.Name == typeName)
                 {
-                    var generic = (GenericInstanceType)orignalType;
+                    var generic = (GenericInstanceType)originalType;
                     found = generic.GenericArguments[i];
                     return true;
                 }
