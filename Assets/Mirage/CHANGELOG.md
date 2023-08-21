@@ -1,3 +1,15 @@
+## [146.2.2](https://github.com/MirageNet/Mirage/compare/v146.2.1...v146.2.2) (2023-08-21)
+
+
+### Bug Fixes
+
+* **Weaver:** fixing serialize methods for when type is not resolved ([21f1aee](https://github.com/MirageNet/Mirage/commit/21f1aee3ce2a2c000f8952cf12ad17ccbab5a6ce))
+
+
+### Performance Improvements
+
+* using cached Id for value types ([dccdbf3](https://github.com/MirageNet/Mirage/commit/dccdbf335a13a4c853f8e56616169cab2d376578))
+
 ## [146.2.1](https://github.com/MirageNet/Mirage/compare/v146.2.0...v146.2.1) (2023-08-02)
 
 
