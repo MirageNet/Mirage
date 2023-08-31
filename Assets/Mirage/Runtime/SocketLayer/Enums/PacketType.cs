@@ -8,7 +8,7 @@ namespace Mirage.SocketLayer
         Command = 1,
 
         /// <summary>
-        /// data packet sent with no guarantee for order or reliablity
+        /// data packet sent with no guarantee for order or reliability
         /// <para>used for data that is fire and forget</para>
         /// </summary>
         Unreliable = 2,
@@ -19,17 +19,20 @@ namespace Mirage.SocketLayer
         Notify = 3,
 
         /// <summary>
-        /// packet with just acks
+        /// data packet that are guarantee to be in order, and not lost.
+        /// <para>contains ack header</para>
+        /// <para>If a package is lost then other Reliable packets will be held until the lost packet is resent</para>
         /// </summary>
         Reliable = 4,
 
         /// <summary>
-        /// packet with just acks
+        /// part of a Reliable message. same as Reliable but only part of a message
         /// </summary>
         ReliableFragment = 6,
 
         /// <summary>
-        /// packet with just acks
+        /// packet with just ack header
+        /// <para>only sent if no other packets with ack header were sent recently</para>
         /// </summary>
         Ack = 5,
 
