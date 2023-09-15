@@ -1,9 +1,11 @@
 {
     "name": "Mirage",
+    "rootNamespace": "",
     "references": [
         "UniTask",
         "UniTask.Linq",
-        "Mirage.SocketLayer"
+        "Mirage.SocketLayer",
+        "JamesFrowen.Benchmarker"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

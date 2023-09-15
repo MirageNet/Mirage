@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using JamesFrowen.Benchmarker;
 using Mirage.Collections;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
@@ -275,6 +276,9 @@ namespace Mirage
             }
         }
 
+        private bool _shouldSync;
+        internal HashSet<NetworkIdentity> _dirtySet;
+
         /// <summary>
         /// Call this after updating SyncSettings to update all SyncObjects
         /// <para>
@@ -284,12 +288,12 @@ namespace Mirage
         /// </summary>
         public void UpdateSyncObjectShouldSync()
         {
-            var shouldSync = SyncSettings.ShouldSyncFrom(Identity);
+            _shouldSync = SyncSettings.ShouldSyncFrom(Identity);
 
-            if (logger.LogEnabled()) logger.Log($"Settings SyncObject sync on to {shouldSync} for {this}");
+            if (logger.LogEnabled()) logger.Log($"Settings SyncObject sync on to {_shouldSync} for {this}");
             for (var i = 0; i < syncObjects.Count; i++)
             {
-                syncObjects[i].SetShouldSyncFrom(shouldSync);
+                syncObjects[i].SetShouldSyncFrom(_shouldSync);
             }
         }
 
@@ -304,14 +308,22 @@ namespace Mirage
         /// these are masks, not bit numbers, ie. 0x004 not 2
         /// </summary>
         /// <param name="bitMask">Bit mask to set.</param>
+        // [BenchmarkMethod]
         public void SetDirtyBit(ulong bitMask)
         {
             if (logger.LogEnabled()) logger.Log($"Dirty bit set {bitMask} on {Identity}");
 
+            var wasZero = _syncVarDirtyBits == 0;
+
             _syncVarDirtyBits |= bitMask;
 
-            if (SyncSettings.ShouldSyncFrom(Identity))
-                Identity.SyncVarSender.AddDirtyObject(Identity);
+            if (
+                wasZero &&
+                _shouldSync
+                )
+            {
+                _dirtySet.Add(Identity);
+            }
         }
 
 
@@ -390,6 +402,7 @@ namespace Mirage
         /// <param name="writer">Writer to use to write to the stream.</param>
         /// <param name="initialState">If this is being called to send initial state.</param>
         /// <returns>True if data was written.</returns>
+        [BenchmarkMethod("Behaviour.OnSerialize")]
         public virtual bool OnSerialize(NetworkWriter writer, bool initialState)
         {
             var objectWritten = SerializeObjects(writer, initialState);

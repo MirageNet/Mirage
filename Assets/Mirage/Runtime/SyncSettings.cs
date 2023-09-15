@@ -55,6 +55,11 @@ namespace Mirage
             }
         }
 
+        // public bool ShouldSyncFrom(NetworkIdentity identity, bool initialState)
+        // {
+        //     // when initial, we want to sync even if "from.Server" is false
+        //     if ((initialState && AlwaysSendInitialToOwner) || ((From & SyncFrom.Server) != 0 && identity.IsServer))
+        //     {
         public bool ShouldSyncFrom(NetworkIdentity identity)
         {
             if ((From & SyncFrom.Server) != 0 && identity.IsServer)
@@ -83,6 +88,8 @@ namespace Mirage
             return false;
         }
 
+        // public bool ToObserverWriterOnly(NetworkIdentity identity, bool initialState)
+        // {
         public bool ToObserverWriterOnly(NetworkIdentity identity)
         {
             // if not to observer, then we can return early (saves performance on IsServer check)
@@ -94,6 +101,8 @@ namespace Mirage
                 return false;
 
             // if not to.Owner, then use ObserverWriter
+            // OR if initial
+            // if ((To & (SyncTo.Owner)) == 0 || (initialState && AlwaysSendInitialToOwner))
             if ((To & (SyncTo.Owner)) == 0)
                 return true;
 
@@ -246,6 +255,14 @@ namespace Mirage
         Owner = 1,
         ObserversOnly = 2,
         Server = 4,
+        /// <summary>
+        /// Should Server send initial state to owner on spawn
+        /// </summary>
+        OwnerSpawn = 8,
+        /// <summary>
+        /// Should Server send initial state to Observers on spawn
+        /// </summary>
+        ObserversSpawn = 16,
 
         OwnerAndObservers = Owner | ObserversOnly,
     }

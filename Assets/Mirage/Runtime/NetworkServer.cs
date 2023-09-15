@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
+using JamesFrowen.Benchmarker;
 using Mirage.Authentication;
 using Mirage.Events;
 using Mirage.Logging;
@@ -325,6 +326,12 @@ namespace Mirage
         public void UpdateSent()
         {
             SyncVarSender?.Update();
+            PeerUpdate();
+        }
+
+        [BenchmarkMethod("UpdateTransport")]
+        private void PeerUpdate()
+        {
             _peer?.UpdateSent();
         }
 

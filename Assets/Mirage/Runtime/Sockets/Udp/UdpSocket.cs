@@ -16,6 +16,8 @@ namespace Mirage.Sockets.Udp
             Endpoint = (EndPointWrapper)endPoint;
 
             socket = CreateSocket(Endpoint.inner);
+            // todo add option to disable DualMode
+            //      this is needing to run on platforms like nintendo switch
             socket.DualMode = true;
             socket.Bind(Endpoint.inner);
         }

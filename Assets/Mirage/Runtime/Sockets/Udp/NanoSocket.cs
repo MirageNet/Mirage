@@ -1,6 +1,7 @@
 // windows, linux or standalone c#, unless EXCLUDE_NANOSOCKETS is defined
 #if !EXCLUDE_NANOSOCKETS && (UNITY_EDITOR_WIN || UNITY_EDITOR_LINUX || UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || NETCOREAPP || NET_5_0_OR_GREATER)
 using System;
+using JamesFrowen.Benchmarker;
 using Mirage.SocketLayer;
 using NanoSockets;
 
@@ -38,6 +39,7 @@ namespace Mirage.Sockets.Udp
             receiveEndPoint = (NanoEndPoint)endPoint;
 
             CreateSocket();
+
             var result = UDP.Bind(socket, ref receiveEndPoint.address);
             if (result != 0)
             {
@@ -82,6 +84,7 @@ namespace Mirage.Sockets.Udp
             return count;
         }
 
+        [BenchmarkMethod]
         public void Send(IEndPoint endPoint, byte[] packet, int length)
         {
             var nanoEndPoint = (NanoEndPoint)endPoint;

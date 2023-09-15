@@ -1,0 +1,396 @@
+{
+    "ApplicationSettings": {
+        "UnityVersion": "2020.3.30f1",
+        "Platform": "WindowsEditor",
+        "IsEditor": true,
+        "IsDebug": true,
+        "IsServer": false
+    },
+    "MetaData": [
+        "FrameCount:600",
+        "PlayerCount:4",
+        "spawnAmount:10000",
+        "Idle %:0.8",
+        "SyncVarSender.Update Self Only",
+        "No_interval"
+    ],
+    "Categories": [
+        {
+            "Name": "",
+            "ProcessedResults": [
+                {
+                    "Failed": false,
+                    "BaseLine": false,
+                    "benchmark": {
+                        "name": "Behaviour.OnSerialize",
+                        "description": "",
+                        "categories": [],
+                        "baseline": false
+                    },
+                    "methodTime": {
+                        "mean": 1.7168984962412023e-7,
+                        "stdDev": 1.9775523226666886e-7,
+                        "stdError": 1.7501148344180375e-10,
+                        "min": 1.2401315789473685e-7,
+                        "max": 0.0000022392857142857145
+                    },
+                    "count": {
+                        "mean": 2128.0,
+                        "stdDev": 0.0,
+                        "stdError": 0.0,
+                        "min": 2128.0,
+                        "max": 2128.0
+                    },
+                    "frameTime": {
+                        "mean": 0.0003653559999999999,
+                        "stdDev": 0.0004211740942414434,
+                        "stdError": 0.00001719436039617352,
+                        "min": 0.0002639,
+                        "max": 0.0047652
+                    }
+                },
+                {
+                    "Failed": false,
+                    "BaseLine": false,
+                    "benchmark": {
+                        "name": "Behaviour.OnSerialize wrapper",
+                        "description": "",
+                        "categories": [],
+                        "baseline": false
+                    },
+                    "methodTime": {
+                        "mean": 2.95591557018048e-7,
+                        "stdDev": 2.8731631465814026e-7,
+                        "stdError": 2.5427218217693837e-10,
+                        "min": 2.1198308270676695e-7,
+                        "max": 0.0000025958176691729328
+                    },
+                    "count": {
+                        "mean": 2128.0,
+                        "stdDev": 0.0,
+                        "stdError": 0.0,
+                        "min": 2128.0,
+                        "max": 2128.0
+                    },
+                    "frameTime": {
+                        "mean": 0.0006290188333333337,
+                        "stdDev": 0.0006119190233305616,
+                        "stdError": 0.00002498148951770185,
+                        "min": 0.0004511,
+                        "max": 0.0055239
+                    }
+                },
+                {
+                    "Failed": false,
+                    "BaseLine": false,
+                    "benchmark": {
+                        "name": "Identity.OnSerializeAll",
+                        "description": "",
+                        "categories": [],
+                        "baseline": false
+                    },
+                    "methodTime": {
+                        "mean": 6.45611944966167e-7,
+                        "stdDev": 4.2236900714739687e-7,
+                        "stdError": 3.7344170516921626e-10,
+                        "min": 4.4108818011257039e-7,
+                        "max": 0.0000032856003752345217
+                    },
+                    "count": {
+                        "mean": 2132.0,
+                        "stdDev": 0.0,
+                        "stdError": 0.0,
+                        "min": 2132.0,
+                        "max": 2132.0
+                    },
+                    "frameTime": {
+                        "mean": 0.001376444666666666,
+                        "stdDev": 0.0009012417192216885,
+                        "stdError": 0.00003679303911669672,
+                        "min": 0.0009404,
+                        "max": 0.0070049
+                    }
+                },
+                {
+                    "Failed": false,
+                    "BaseLine": false,
+                    "benchmark": {
+                        "name": "SyncVarSender.SendUpdateVarsMessage",
+                        "description": "",
+                        "categories": [],
+                        "baseline": false
+                    },
+                    "methodTime": {
+                        "mean": 0.000002556567307689404,
+                        "stdDev": 8.374343650040364e-7,
+                        "stdError": 7.404258170990059e-10,
+                        "min": 0.0000017474671669793623,
+                        "max": 0.000006767120075046904
+                    },
+                    "count": {
+                        "mean": 2132.0,
+                        "stdDev": 0.0,
+                        "stdError": 0.0,
+                        "min": 2132.0,
+                        "max": 2132.0
+                    },
+                    "frameTime": {
+                        "mean": 0.0054506014999999969,
+                        "stdDev": 0.0017868990718568176,
+                        "stdError": 0.00007294984913170093,
+                        "min": 0.0037256,
+                        "max": 0.0144275
+                    }
+                },
+                {
+                    "Failed": false,
+                    "BaseLine": false,
+                    "benchmark": {
+                        "name": "NanoSend",
+                        "description": "",
+                        "categories": [],
+                        "baseline": false
+                    },
+                    "methodTime": {
+                        "mean": 0.000019368524682124924,
+                        "stdDev": 0.00010197369576483859,
+                        "stdError": 4.4095316092077827e-7,
+                        "min": 0.0,
+                        "max": 0.0052484
+                    },
+                    "count": {
+                        "mean": 1.0,
+                        "stdDev": 0.0,
+                        "stdError": 0.0,
+                        "min": 1.0,
+                        "max": 1.0
+                    },
+                    "frameTime": {
+                        "mean": 0.000019368524682124924,
+                        "stdDev": 0.00010197369576483859,
+                        "stdError": 4.4095316092077827e-7,
+                        "min": 0.0,
+                        "max": 0.0052484
+                    }
+                },
+                {
+                    "Failed": false,
+                    "BaseLine": false,
+                    "benchmark": {
+                        "name": "System.Void Mirage.Sockets.Udp.NanoSocket::Send(Mirage.SocketLayer.IEndPoint,System.Byte[],System.Int32)",
+                        "description": "",
+                        "categories": [],
+                        "baseline": false
+                    },
+                    "methodTime": {
+                        "mean": 0.000019368886852784194,
+                        "stdDev": 0.000010806167770391456,
+                        "stdError": 4.6728309199476489e-8,
+                        "min": 0.00001397391304347826,
+                        "max": 0.00007597826086956522
+                    },
+                    "count": {
+                        "mean": 89.13166666666666,
+                        "stdDev": 7.3178034706424779,
+                        "stdError": 0.2987480756840315,
+                        "min": 84.0,
+                        "max": 240.0
+                    },
+                    "frameTime": {
+                        "mean": 0.001726381166666667,
+                        "stdDev": 0.0009711982738386386,
+                        "stdError": 0.00003964900349960789,
+                        "min": 0.0011789,
+                        "max": 0.00699
+                    }
+                },
+                {
+                    "Failed": false,
+                    "BaseLine": false,
+                    "benchmark": {
+                        "name": "UpdateTransport",
+                        "description": "",
+                        "categories": [],
+                        "baseline": false
+                    },
+                    "methodTime": {
+                        "mean": 0.00007847983333333332,
+                        "stdDev": 0.00019233037252854062,
+                        "stdError": 0.000007851854578905463,
+                        "min": 0.0000338,
+                        "max": 0.0033645
+                    },
+                    "count": {
+                        "mean": 1.0,
+                        "stdDev": 0.0,
+                        "stdError": 0.0,
+                        "min": 1.0,
+                        "max": 1.0
+                    },
+                    "frameTime": {
+                        "mean": 0.00007847983333333332,
+                        "stdDev": 0.00019233037252854062,
+                        "stdError": 0.000007851854578905463,
+                        "min": 0.0000338,
+                        "max": 0.0033645
+                    }
+                },
+                {
+                    "Failed": false,
+                    "BaseLine": false,
+                    "benchmark": {
+                        "name": "Early Update",
+                        "description": "",
+                        "categories": [],
+                        "baseline": false
+                    },
+                    "methodTime": {
+                        "mean": 0.00014452883333333335,
+                        "stdDev": 0.00030482554897977906,
+                        "stdError": 0.000012444450926070334,
+                        "min": 0.0000447,
+                        "max": 0.0047302
+                    },
+                    "count": {
+                        "mean": 1.0,
+                        "stdDev": 0.0,
+                        "stdError": 0.0,
+                        "min": 1.0,
+                        "max": 1.0
+                    },
+                    "frameTime": {
+                        "mean": 0.00014452883333333335,
+                        "stdDev": 0.00030482554897977906,
+                        "stdError": 0.000012444450926070334,
+                        "min": 0.0000447,
+                        "max": 0.0047302
+                    }
+                },
+                {
+                    "Failed": false,
+                    "BaseLine": false,
+                    "benchmark": {
+                        "name": "Set Sync var field",
+                        "description": "",
+                        "categories": [],
+                        "baseline": false
+                    },
+                    "methodTime": {
+                        "mean": 0.0006402329999999998,
+                        "stdDev": 0.000735923400177773,
+                        "stdError": 0.000030043947003492917,
+                        "min": 0.0004445,
+                        "max": 0.005304
+                    },
+                    "count": {
+                        "mean": 1.0,
+                        "stdDev": 0.0,
+                        "stdError": 0.0,
+                        "min": 1.0,
+                        "max": 1.0
+                    },
+                    "frameTime": {
+                        "mean": 0.0006402329999999998,
+                        "stdDev": 0.000735923400177773,
+                        "stdError": 0.000030043947003492917,
+                        "min": 0.0004445,
+                        "max": 0.005304
+                    }
+                },
+                {
+                    "Failed": false,
+                    "BaseLine": false,
+                    "benchmark": {
+                        "name": "SyncVarSender.Update",
+                        "description": "",
+                        "categories": [],
+                        "baseline": false
+                    },
+                    "methodTime": {
+                        "mean": 0.006094103333333332,
+                        "stdDev": 0.0019357433629661934,
+                        "stdError": 0.00007902639187077175,
+                        "min": 0.0041656,
+                        "max": 0.0183847
+                    },
+                    "count": {
+                        "mean": 1.0,
+                        "stdDev": 0.0,
+                        "stdError": 0.0,
+                        "min": 1.0,
+                        "max": 1.0
+                    },
+                    "frameTime": {
+                        "mean": 0.006094103333333332,
+                        "stdDev": 0.0019357433629661934,
+                        "stdError": 0.00007902639187077175,
+                        "min": 0.0041656,
+                        "max": 0.0183847
+                    }
+                },
+                {
+                    "Failed": false,
+                    "BaseLine": false,
+                    "benchmark": {
+                        "name": "Late Update",
+                        "description": "",
+                        "categories": [],
+                        "baseline": false
+                    },
+                    "methodTime": {
+                        "mean": 0.006173342999999999,
+                        "stdDev": 0.0019382086837818774,
+                        "stdError": 0.00007912703817161655,
+                        "min": 0.0042216,
+                        "max": 0.0184931
+                    },
+                    "count": {
+                        "mean": 1.0,
+                        "stdDev": 0.0,
+                        "stdError": 0.0,
+                        "min": 1.0,
+                        "max": 1.0
+                    },
+                    "frameTime": {
+                        "mean": 0.006173342999999999,
+                        "stdDev": 0.0019382086837818774,
+                        "stdError": 0.00007912703817161655,
+                        "min": 0.0042216,
+                        "max": 0.0184931
+                    }
+                },
+                {
+                    "Failed": false,
+                    "BaseLine": false,
+                    "benchmark": {
+                        "name": "Server Update",
+                        "description": "",
+                        "categories": [],
+                        "baseline": false
+                    },
+                    "methodTime": {
+                        "mean": 0.0069589793333333289,
+                        "stdDev": 0.002012524745974939,
+                        "stdError": 0.0000821609787060489,
+                        "min": 0.0048485,
+                        "max": 0.0197301
+                    },
+                    "count": {
+                        "mean": 1.0,
+                        "stdDev": 0.0,
+                        "stdError": 0.0,
+                        "min": 1.0,
+                        "max": 1.0
+                    },
+                    "frameTime": {
+                        "mean": 0.0069589793333333289,
+                        "stdDev": 0.002012524745974939,
+                        "stdError": 0.0000821609787060489,
+                        "min": 0.0048485,
+                        "max": 0.0197301
+                    }
+                }
+            ]
+        }
+    ]
+}

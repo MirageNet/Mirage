@@ -2,7 +2,8 @@
     "name": "Mirage.Sockets.Udp",
     "rootNamespace": "",
     "references": [
-        "GUID:c0b2064c294eb174c9f3f7da398eb677"
+        "GUID:c0b2064c294eb174c9f3f7da398eb677",
+        "GUID:2353400444788674ab8945effbb8b282"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

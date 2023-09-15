@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using JamesFrowen.Benchmarker;
 using Mirage.Events;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
@@ -118,7 +119,7 @@ namespace Mirage
         /// <summary>
         /// Returns true if NetworkServer.active and server is not stopped.
         /// </summary>
-        public bool IsServer => IsSpawned && Server != null && Server.Active;
+        public bool IsServer { get; private set; }
 
         /// <summary>
         /// Returns true if we're on host mode.
@@ -648,6 +649,7 @@ namespace Mirage
         ///     </description></item>
         /// </list>
         /// </remarks>
+        [BenchmarkMethod("Behaviour.OnSerialize wrapper")]
         private void OnSerialize(int i, NetworkBehaviour comp, NetworkWriter writer, bool initialState)
         {
             // write index as byte [0..255]
@@ -668,6 +670,7 @@ namespace Mirage
         /// <param name="initialState"></param>
         /// <param name="ownerWriter"></param>
         /// <param name="observersWriter"></param>
+        [BenchmarkMethod("Identity.OnSerializeAll")]
         internal (int ownerWritten, int observersWritten) OnSerializeAll(bool initialState, NetworkWriter ownerWriter, NetworkWriter observersWriter)
         {
             // how many times it written to (NOT BYTES)
@@ -880,13 +883,18 @@ namespace Mirage
         internal void SetServerValues(NetworkServer networkServer, ServerObjectManager serverObjectManager)
         {
             Server = networkServer;
+            IsServer = true;
             ServerObjectManager = serverObjectManager;
             World = networkServer.World;
             SyncVarSender = networkServer.SyncVarSender;
             Client = networkServer.LocalClient;
 
             foreach (var behaviour in NetworkBehaviours)
+            {
                 behaviour.InitializeSyncObjects();
+                behaviour._dirtySet = SyncVarSender?._dirtyObjects;
+                behaviour.UpdateSyncObjectShouldSync();
+            }
         }
 
         internal void SetClientValues(ClientObjectManager clientObjectManager, SpawnMessage msg)
@@ -910,7 +918,11 @@ namespace Mirage
             }
 
             foreach (var behaviour in NetworkBehaviours)
+            {
                 behaviour.InitializeSyncObjects();
+                behaviour._dirtySet = SyncVarSender?._dirtyObjects;
+                behaviour.UpdateSyncObjectShouldSync();
+            }
         }
 
         /// <summary>
@@ -1112,6 +1124,7 @@ namespace Mirage
             _localPlayerStarted = false;
             NetId = 0;
             Server = null;
+            IsServer = false;
             Client = null;
             ServerObjectManager = null;
             ClientObjectManager = null;

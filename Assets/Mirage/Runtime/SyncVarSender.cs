@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using JamesFrowen.Benchmarker;
+using JamesFrowen.Benchmarker.Weaver;
 using Mirage.Logging;
 using Mirage.Serialization;
 using UnityEngine;
@@ -11,10 +13,16 @@ namespace Mirage
     /// </summary>
     public class SyncVarSender
     {
+        public SyncVarSender()
+        {
+            BenchmarkHelper.RegisterMethod(1, "System.Void Mirage.SyncVarSender::Update()");
+        }
         private static readonly ILogger logger = LogFactory.GetLogger<SyncVarSender>();
 
-        private readonly HashSet<NetworkIdentity> _dirtyObjects = new HashSet<NetworkIdentity>();
+        internal readonly HashSet<NetworkIdentity> _dirtyObjects = new HashSet<NetworkIdentity>();
         private readonly List<NetworkIdentity> _dirtyObjectsTmp = new List<NetworkIdentity>();
+        private readonly NetworkWriter _ownerWriter = new NetworkWriter(1300, true);
+        private readonly NetworkWriter _observersWriter = new NetworkWriter(1300, true);
 
         public void AddDirtyObject(NetworkIdentity dirty)
         {
@@ -23,8 +31,11 @@ namespace Mirage
                 logger.Log($"New Dirty Object [netId={dirty.NetId} name={dirty.name}]");
         }
 
+        [BenchmarkMethod("SyncVarSender.Update")]
         internal void Update()
         {
+            // var timestamp = BenchmarkHelper.GetTimestamp();
+
             if (_dirtyObjects.Count == 0)
                 return;
 
@@ -46,7 +57,11 @@ namespace Mirage
                 {
                     if (logger.LogEnabled()) logger.Log($"Sending syncvars to {identity.observers.Count} observers [netId={identity.NetId} name={identity.name}]");
 
+                    // var pause = BenchmarkHelper.GetTimestamp();
                     SendUpdateVarsMessage(identity);
+                    // var duration = BenchmarkHelper.GetTimestamp() - pause;
+                    // add to start end, to remove from total duration
+                    // timestamp += duration;
 
                     // todo, why didn't it sync? is it from interval? can we return still dirty from SendUpdateVarsMessage, instead of having to recheck everything?
                     if (identity.StillDirty())
@@ -66,54 +81,55 @@ namespace Mirage
 
             foreach (var obj in _dirtyObjectsTmp)
                 _dirtyObjects.Add(obj);
+            // BenchmarkHelper.EndMethod(1, timestamp);
         }
 
-        internal static void SendUpdateVarsMessage(NetworkIdentity identity)
+        [BenchmarkMethod("SyncVarSender.SendUpdateVarsMessage")]
+        internal void SendUpdateVarsMessage(NetworkIdentity identity)
         {
+            _ownerWriter.Reset();
+            _observersWriter.Reset();
             // one writer for owner, one for observers
-            using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
+            // serialize all the dirty components and send
+            (var ownerWritten, var observersWritten) = identity.OnSerializeAll(false, _ownerWriter, _observersWriter);
+            if (ownerWritten > 0 || observersWritten > 0)
             {
-                // serialize all the dirty components and send
-                (var ownerWritten, var observersWritten) = identity.OnSerializeAll(false, ownerWriter, observersWriter);
-                if (ownerWritten > 0 || observersWritten > 0)
+                var varsMessage = new UpdateVarsMessage
                 {
-                    var varsMessage = new UpdateVarsMessage
-                    {
-                        NetId = identity.NetId
-                    };
+                    NetId = identity.NetId
+                };
 
-                    // send ownerWriter to owner
-                    // (only if we serialized anything for owner)
-                    // (only if there is a connection (e.g. if not a monster),
-                    //  and if connection is ready because we use SendToReady
-                    //  below too)
-                    if (ownerWritten > 0)
-                    {
-                        SendToRemoteOwner(identity, ownerWriter, varsMessage);
-                    }
-
-                    // send observersWriter to everyone but owner
-                    // (only if we serialized anything for observers)
-                    if (observersWritten > 0)
-                    {
-                        varsMessage.Payload = observersWriter.ToArraySegment();
-                        identity.SendToRemoteObservers(varsMessage, false);
-                    }
-
-                    // clear dirty bits only for the components that we serialized
-                    // DO NOT clean ALL component's dirty bits, because
-                    // components can have different syncIntervals and we don't
-                    // want to reset dirty bits for the ones that were not
-                    // synced yet.
-                    // (we serialized only the IsDirty() components, or all of
-                    //  them if initialState. clearing the dirty ones is enough.)
-                    // TODO move this inside OnSerializeAll
-                    identity.ClearShouldSyncDirtyOnly();
+                // send ownerWriter to owner
+                // (only if we serialized anything for owner)
+                // (only if there is a connection (e.g. if not a monster),
+                //  and if connection is ready because we use SendToReady
+                //  below too)
+                if (ownerWritten > 0)
+                {
+                    SendToRemoteOwner(identity, _ownerWriter, varsMessage);
                 }
+
+                // send observersWriter to everyone but owner
+                // (only if we serialized anything for observers)
+                if (observersWritten > 0)
+                {
+                    varsMessage.Payload = _observersWriter.ToArraySegment();
+                    identity.SendToRemoteObservers(varsMessage, false);
+                }
+
+                // clear dirty bits only for the components that we serialized
+                // DO NOT clean ALL component's dirty bits, because
+                // components can have different syncIntervals and we don't
+                // want to reset dirty bits for the ones that were not
+                // synced yet.
+                // (we serialized only the IsDirty() components, or all of
+                //  them if initialState. clearing the dirty ones is enough.)
+                // TODO move this inside OnSerializeAll
+                identity.ClearShouldSyncDirtyOnly();
             }
         }
 
-        private static void SendToRemoteOwner(NetworkIdentity identity, PooledNetworkWriter ownerWriter, UpdateVarsMessage varsMessage)
+        private static void SendToRemoteOwner(NetworkIdentity identity, NetworkWriter ownerWriter, UpdateVarsMessage varsMessage)
         {
             INetworkPlayer player;
 

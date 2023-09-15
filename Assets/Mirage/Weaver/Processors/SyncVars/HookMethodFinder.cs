@@ -11,7 +11,6 @@ namespace Mirage.Weaver.SyncVars
         public readonly EventDefinition Event;
         public readonly int ArgCount;
 
-
         public SyncVarHook(MethodDefinition method, int argCount)
         {
             Method = method;
@@ -22,7 +21,6 @@ namespace Mirage.Weaver.SyncVars
             Event = @event;
             ArgCount = argCount;
         }
-
     }
     internal static class HookMethodFinder
     {
@@ -99,6 +97,7 @@ namespace Mirage.Weaver.SyncVars
 
         private static SyncVarHook FindMethod(FieldDefinition syncVar, TypeReference originalType, string hookFunctionName, int argCount)
         {
+            // todo find methods in base classes
             var methods = syncVar.DeclaringType.GetMethods(hookFunctionName);
             var methodsWithParams = methods.Where(m => m.Parameters.Count == argCount).ToArray();
             if (methodsWithParams.Length == 0)
