@@ -48,6 +48,11 @@
             "displayName": "Tanks",
             "description": "Shoot each other with tanks",
             "path": "Samples~/Tanks"
+        },
+        {
+            "displayName": "MatchScenes",
+            "description": "Multiple matches on the same server by creating new scenes for each pair of players",
+            "path": "Samples~/MatchScenes"
         }
     ]
 }
