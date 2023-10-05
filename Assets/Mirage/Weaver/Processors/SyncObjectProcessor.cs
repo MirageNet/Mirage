@@ -78,10 +78,9 @@ namespace Mirage.Weaver
                 }
             }
 
-            if (tr != null)
-            {
-                GenerateReadersAndWriters(tr.Resolve().BaseType);
-            }
+            var baseType = tr?.Resolve()?.BaseType;
+            if (baseType != null)
+                GenerateReadersAndWriters(baseType);
         }
 
         private void RegisterSyncObjects(TypeDefinition netBehaviourSubclass)
