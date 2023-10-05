@@ -1,3 +1,10 @@
+## [146.3.1](https://github.com/MirageNet/Mirage/compare/v146.3.0...v146.3.1) (2023-10-05)
+
+
+### Bug Fixes
+
+* fixing null ref when using syncObject ([362044a](https://github.com/MirageNet/Mirage/commit/362044ab6d265303eb61e2dacc7c9dc28f54ff44))
+
 # [146.3.0](https://github.com/MirageNet/Mirage/compare/v146.2.2...v146.3.0) (2023-10-02)
 
 
