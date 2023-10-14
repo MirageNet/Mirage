@@ -8,19 +8,30 @@ title: Lifecycle
 Networked GameObjects go through several lifecycle states. 
 You can add custom logic to the object lifecycle events by subscribing to the corresponding event in [NetworkIdentity](/docs/reference/Mirage/NetworkIdentity)
 
-| Server                             | Client                                    |
-| ---------------------------------- | ----------------------------------------- |
-| [Instantiate](#server-instantiate) |                                           |
-| [Start Server](#server-start)      |                                           |
-|                                    | [Instantiate](#client-instantiate)        |
-|                                    | [StartAuthority](#client-start-authority) |
-|                                    | [StartClient](#start-client)              |
-|                                    | [StartLocalPlayer](#start-local-player)   |
-|                                    | [StopAuthority](#stop-authority)          |
-| [StopServer](#server-stop)         |                                           |
-| [Destroy](#server-destroy)         |                                           |
-|                                    | [StopClient](#stop-client)                |
-|                                    | [Destroy](#client-destroy)                |
+## Spawning
+
+| Server                                                      | Client                                                      |
+| ----------------------------------------------------------- | ----------------------------------------------------------- |
+| [Instantiate](#server-instantiate)                          |                                                             |
+| [Start Server](#server-start)                               |                                                             |
+| [NetworkWorld.onSpawn](#networkworld-onspawn-and-onunspawn) |                                                             |
+|                                                             | [Instantiate](#client-instantiate)                          |
+|                                                             | [StartAuthority](#client-start-authority)                   |
+|                                                             | [StartClient](#start-client)                                |
+|                                                             | [StartLocalPlayer](#start-local-player)                     |
+|                                                             | [NetworkWorld.onSpawn](#networkworld-onspawn-and-onunspawn) |
+
+## Destroying
+
+| Server                                                        | Client                                                        |
+| ------------------------------------------------------------- | ------------------------------------------------------------- |
+| [NetworkWorld.onUnspawn](#networkworld-onspawn-and-onunspawn) |                                                               |
+|                                                               | [StopAuthority](#stop-authority)                              |
+|                                                               | [StopClient](#stop-client)                                    |
+|                                                               | [Destroy](#client-destroy)                                    |
+|                                                               | [NetworkWorld.onUnspawn](#networkworld-onspawn-and-onunspawn) |
+| [StopServer](#server-stop)                                    |                                                               |
+| [Destroy](#server-destroy)                                    |                                                               |
 
 
 :::note
@@ -43,8 +54,8 @@ To start a server object, [spawn it](/docs/guides/game-objects/spawn-object). If
 For example:
 
 ```cs
-public class MyComponent : MonoBehaviour {
-
+public class MyComponent : MonoBehaviour
+{
     public void Awake() 
     {
         GetComponent<NetworkIdentity>.OnStartServer.AddListener(OnStartServer);
@@ -61,6 +72,57 @@ You can also simply drag your `OnStartServer` method in the [NetworkIdentity.OnS
 
 During the spawn, a message will be sent to all the clients telling them to spawn the object. The message
 will include all the data in [SyncVars](/docs/guides/sync/sync-var), [SyncLists](/docs/guides/sync/sync-objects/sync-list), [SyncHashSet](/docs/guides/sync/sync-objects/sync-hash-set), [SyncDictionary](/docs/guides/sync/sync-objects/sync-dictionary)
+
+## NetworkWorld onSpawn and onUnspawn
+
+The NetworkWorld class is what holds the list of all spawned Identities. This class is used for both server and client, and can be found on `NetworkServer.World` and `NetworkClient.World`.
+
+NetworkWorld has event that are called when Network objects are spawned or unspawn, they can be used when you need to do this on all network objects, but dont want to add listeners to each one individually.
+
+```cs
+public class MyComponent : MonoBehaviour  
+{
+    public NetworkServer Server;
+    public NetworkClient Client;
+
+    public void Awake() 
+    {
+        // Client/Server.World is only set after server is started, 
+        // so wait for start, then add event listener to OnSpawn
+        Server.Started.AddListener(ServerStarted);
+        Client.Started.AddListener(ClientStarted);
+    }
+
+    private void ServerStarted() 
+    {
+        Server.World.onSpawn += OnServerSpawn;
+        Server.World.onUnspawn += OnServerUnspawn;
+    }
+    private void OnServerSpawn(NetworkIdentity identity) 
+    {
+        Debug.Log($"The object {identity} was spawned on the server");
+    }
+    private void OnServerUnspawn(NetworkIdentity identity) 
+    {
+        Debug.Log($"The object {identity} was unspawned on the server");
+    }
+
+    private void ClientStarted() 
+    {
+        Client.World.onSpawn += OnClientSpawn;
+        Client.World.onUnspawn += OnClientUnspawn;
+    }
+    private void OnClientSpawn(NetworkIdentity identity) 
+    {
+        Debug.Log($"The object {identity} was spawned on the client");
+    }
+    private void OnClientUnspawn(NetworkIdentity identity) 
+    {
+        Debug.Log($"The object {identity} was unspawned on the client");
+    }
+}
+```
+
 
 ## Client Instantiate
 
