@@ -1,3 +1,10 @@
+## [146.3.2](https://github.com/MirageNet/Mirage/compare/v146.3.1...v146.3.2) (2023-10-14)
+
+
+### Bug Fixes
+
+* fixing syncDirection for syncObjects in host mode ([ec45074](https://github.com/MirageNet/Mirage/commit/ec45074cb303fc200baa91a7397adad5650de7b3))
+
 ## [146.3.1](https://github.com/MirageNet/Mirage/compare/v146.3.0...v146.3.1) (2023-10-05)
 
 
