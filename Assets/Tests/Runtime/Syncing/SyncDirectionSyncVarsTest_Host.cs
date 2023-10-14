@@ -9,7 +9,11 @@ using UnityEngine.TestTools;
 namespace Mirage.Tests.Runtime.Syncing
 {
     // todo find way to avoid having a full copy of this class
-    public class SyncDirectionTestBase_Host : HostSetup<MockPlayer>
+    public class SyncDirectionTestBase_Host : SyncDirectionTestBase_Host<MockPlayer>
+    {
+
+    }
+    public class SyncDirectionTestBase_Host<T> : HostSetup<T> where T : MockPlayer
     {
         protected static readonly MockPlayer.Guild guild = new MockPlayer.Guild("Fun");
         protected static readonly MockPlayer.Guild guild2 = new MockPlayer.Guild("Other");
@@ -24,11 +28,11 @@ namespace Mirage.Tests.Runtime.Syncing
 
 
         /// <summary>Object on client0 that hostOwns</summary>
-        protected MockPlayer ObserverComponent => _remoteClients[0].Get(hostComponent);
+        protected T ObserverComponent => _remoteClients[0].Get(hostComponent);
 
         /// <summary>Objcet that server controls</summary>
         protected NetworkIdentity HostExtraIdentity { get; private set; }
-        protected MockPlayer HostExtraComponent { get; private set; }
+        protected T HostExtraComponent { get; private set; }
 
         protected void ResetCounters()
         {
@@ -49,7 +53,7 @@ namespace Mirage.Tests.Runtime.Syncing
             await AddClient();
 
             HostExtraIdentity = InstantiateForTest(_characterPrefab);
-            HostExtraComponent = HostExtraIdentity.GetComponent<MockPlayer>();
+            HostExtraComponent = HostExtraIdentity.GetComponent<T>();
             serverObjectManager.Spawn(HostExtraIdentity);
 
             await UniTask.Yield();
@@ -65,6 +69,7 @@ namespace Mirage.Tests.Runtime.Syncing
             behaviour.SyncSettings.From = from;
             behaviour.SyncSettings.To = to;
             behaviour._nextSyncTime = Time.time;
+            behaviour.UpdateSyncObjectShouldSync();
         }
         protected void SetDirection(SyncFrom from, SyncTo to)
         {

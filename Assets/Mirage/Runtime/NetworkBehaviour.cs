@@ -268,7 +268,7 @@ namespace Mirage
 
         private void SyncObject_OnChange()
         {
-            if (SyncSettings.ShouldSyncFrom(Identity))
+            if (SyncSettings.ShouldSyncFrom(Identity, true))
             {
                 _anySyncObjectDirty = true;
                 Identity.SyncVarSender.AddDirtyObject(Identity);
@@ -284,7 +284,7 @@ namespace Mirage
         /// </summary>
         public void UpdateSyncObjectShouldSync()
         {
-            var shouldSync = SyncSettings.ShouldSyncFrom(Identity);
+            var shouldSync = SyncSettings.ShouldSyncFrom(Identity, true);
 
             if (logger.LogEnabled()) logger.Log($"Settings SyncObject sync on to {shouldSync} for {this}");
             for (var i = 0; i < syncObjects.Count; i++)
@@ -310,7 +310,7 @@ namespace Mirage
 
             _syncVarDirtyBits |= bitMask;
 
-            if (SyncSettings.ShouldSyncFrom(Identity))
+            if (SyncSettings.ShouldSyncFrom(Identity, false))
                 Identity.SyncVarSender.AddDirtyObject(Identity);
         }
 
