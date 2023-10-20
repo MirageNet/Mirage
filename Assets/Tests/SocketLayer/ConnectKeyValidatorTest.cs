@@ -5,13 +5,23 @@ namespace Mirage.SocketLayer.Tests
     [Category("SocketLayer")]
     [TestFixture("hello")]
     [TestFixture("Mirage V123")]
+    [TestFixture("Super secure password that no one will be able to guess")]
     public class ConnectKeyValidatorTest
     {
-        private ConnectKeyValidator validator;
+        private readonly ConnectKeyValidator validator;
+        private readonly int length;
 
         public ConnectKeyValidatorTest(string key)
         {
             validator = new ConnectKeyValidator(key);
+            length = validator.KeyLength + 2;
+        }
+
+        [Test]
+        [Description("Using sha256 so all keys should be 256 bits long")]
+        public void LengthIs265()
+        {
+            Assert.That(validator.KeyLength, Is.EqualTo(256 / 8));
         }
 
         [Test]
@@ -31,7 +41,7 @@ namespace Mirage.SocketLayer.Tests
             var buffer = new byte[50];
             validator.CopyTo(buffer);
 
-            var valid = validator.Validate(buffer);
+            var valid = validator.Validate(buffer, length);
             Assert.IsTrue(valid);
         }
 
@@ -43,7 +53,7 @@ namespace Mirage.SocketLayer.Tests
             // corrupt 1 byte
             buffer[4] = 0;
 
-            var valid = validator.Validate(buffer);
+            var valid = validator.Validate(buffer, length);
             Assert.IsFalse(valid);
         }
 

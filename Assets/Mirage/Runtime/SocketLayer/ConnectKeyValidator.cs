@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Mirage.SocketLayer
@@ -27,14 +28,24 @@ namespace Mirage.SocketLayer
                 key = $"Mirage V{version}";
             }
 
-            return Encoding.ASCII.GetBytes(key);
+            var bytes = Encoding.ASCII.GetBytes(key);
+            using (var sha = SHA256.Create())
+            {
+                var hash = sha.ComputeHash(bytes);
+                return hash;
+            }
         }
         public ConnectKeyValidator(string key) : this(GetKeyBytes(key))
         {
         }
 
-        public bool Validate(byte[] buffer)
+        public bool Validate(byte[] buffer, int length)
         {
+            // buffer is pooled, so might contain old data,
+            // check the length so we only process that new data (if it is correct length)
+            if (length != OFFSET + KeyLength)
+                return false;
+
             for (var i = 0; i < KeyLength; i++)
             {
                 var keyByte = buffer[i + OFFSET];

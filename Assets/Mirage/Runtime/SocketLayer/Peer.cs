@@ -375,7 +375,7 @@ namespace Mirage.SocketLayer
             {
                 RejectConnectionWithReason(endPoint, RejectReason.ServerFull);
             }
-            else if (!_connectKeyValidator.Validate(packet.Buffer.array))
+            else if (!_connectKeyValidator.Validate(packet.Buffer.array, packet.Length))
             {
                 RejectConnectionWithReason(endPoint, RejectReason.KeyInvalid);
             }
