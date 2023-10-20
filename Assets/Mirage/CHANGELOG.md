@@ -1,3 +1,10 @@
+# [146.4.0](https://github.com/MirageNet/Mirage/compare/v146.3.2...v146.4.0) (2023-10-20)
+
+
+### Features
+
+* sending secure hash of connect key ([f8901c2](https://github.com/MirageNet/Mirage/commit/f8901c2608edf9e01ff30fc446a4702eeff163b8))
+
 ## [146.3.2](https://github.com/MirageNet/Mirage/compare/v146.3.1...v146.3.2) (2023-10-14)
 
 
