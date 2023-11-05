@@ -1,3 +1,10 @@
+# [146.6.0](https://github.com/MirageNet/Mirage/compare/v146.5.1...v146.6.0) (2023-11-05)
+
+
+### Features
+
+* adding writer for dictionary ([f89d596](https://github.com/MirageNet/Mirage/commit/f89d59687d9dd4d9b74212e2312b837437740b29))
+
 ## [146.5.1](https://github.com/MirageNet/Mirage/compare/v146.5.0...v146.5.1) (2023-11-05)
 
 
