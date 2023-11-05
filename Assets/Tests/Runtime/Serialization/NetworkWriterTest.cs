@@ -1134,6 +1134,46 @@ namespace Mirage.Tests.Runtime.Serialization
         }
 
         [Test]
+        public void DictionaryNull()
+        {
+            writer.Write<Dictionary<string, Vector3>>(null);
+            reader.Reset(writer.ToArraySegment());
+            var unpacked = reader.Read<Dictionary<string, Vector3>>();
+
+            Assert.That(unpacked, Is.Null);
+        }
+        [Test]
+        public void DictionaryEmpty()
+        {
+            var dict = new Dictionary<string, Vector3>();
+            writer.Write(dict);
+            reader.Reset(writer.ToArraySegment());
+            var unpacked = reader.Read<Dictionary<string, Vector3>>();
+
+            Assert.That(unpacked, Is.Not.Null);
+            Assert.That(unpacked.Count, Is.Zero);
+        }
+        [Test]
+        public void Dictionary()
+        {
+            var dict = new Dictionary<string, Vector3>
+            {
+                { "one", Vector3.one },
+                { "two", Vector3.one * 2 },
+                { "left", Vector3.left }
+            };
+
+            writer.Write(dict);
+            reader.Reset(writer.ToArraySegment());
+            var unpacked = reader.Read<Dictionary<string, Vector3>>();
+
+            Assert.That(unpacked.Count, Is.EqualTo(3));
+            Assert.That(unpacked["one"], Is.EqualTo(Vector3.one));
+            Assert.That(unpacked["two"], Is.EqualTo(Vector3.one * 2));
+            Assert.That(unpacked["left"], Is.EqualTo(Vector3.left));
+        }
+
+        [Test]
         public void SByteLength()
         {
             writer.WriteSByte(14);

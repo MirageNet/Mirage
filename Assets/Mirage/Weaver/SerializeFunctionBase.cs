@@ -164,7 +164,7 @@ namespace Mirage.Weaver
                 }
                 var elementType = typeReference.GetElementType();
                 var arrayMethod = module.ImportReference(ArrayExpression);
-                return GenerateCollectionFunction(typeReference, elementType, arrayMethod);
+                return GenerateCollectionFunction(typeReference, new List<TypeReference> { elementType }, arrayMethod);
             }
 
             var typeDefinition = typeReference.Resolve();
@@ -173,9 +173,11 @@ namespace Mirage.Weaver
             if (collectionMethods.TryGetValue(typeDefinition, out var collectionMethod))
             {
                 var genericInstance = (GenericInstanceType)typeReference;
-                var elementType = genericInstance.GenericArguments[0];
+                var elementTypes = new List<TypeReference>();
+                foreach (var type in genericInstance.GenericArguments)
+                    elementTypes.Add(type);
 
-                return GenerateCollectionFunction(typeReference, elementType, collectionMethod);
+                return GenerateCollectionFunction(typeReference, elementTypes, collectionMethod);
             }
 
             // check for invalid types
@@ -261,7 +263,7 @@ namespace Mirage.Weaver
         protected abstract MethodReference GetNetworkBehaviourFunction(TypeReference typeReference);
 
         protected abstract MethodReference GenerateEnumFunction(TypeReference typeReference);
-        protected abstract MethodReference GenerateCollectionFunction(TypeReference typeReference, TypeReference elementType, MethodReference collectionMethod);
+        protected abstract MethodReference GenerateCollectionFunction(TypeReference typeReference, List<TypeReference> elementTypes, MethodReference collectionMethod);
 
         protected abstract Expression<Action> ArrayExpression { get; }
 

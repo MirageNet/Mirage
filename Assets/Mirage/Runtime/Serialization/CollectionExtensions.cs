@@ -89,6 +89,20 @@ namespace Mirage.Serialization
             }
         }
 
+        [WeaverSerializeCollection]
+        public static void WriteGodotDictionary<TKey, TValue>(this NetworkWriter writer, Dictionary<TKey, TValue> dictionary)
+        {
+            WriteCountPlusOne(writer, dictionary?.Count);
+
+            if (dictionary is null)
+                return;
+
+            foreach (var kvp in dictionary)
+            {
+                writer.Write(kvp.Key);
+                writer.Write(kvp.Value);
+            }
+        }
 
         /// <returns>array or null</returns>
         public static byte[] ReadBytesAndSize(this NetworkReader reader)
@@ -159,6 +173,24 @@ namespace Mirage.Serialization
             return array != null ? new ArraySegment<T>(array) : default;
         }
 
+        [WeaverSerializeCollection]
+        public static Dictionary<TKey, TValue> ReadGodotDictionary<TKey, TValue>(this NetworkReader reader)
+        {
+            var hasValue = ReadCountPlusOne(reader, out var length);
+            if (!hasValue)
+                return null;
+
+            ValidateSize(reader, length);
+
+            var result = new Dictionary<TKey, TValue>();
+            for (var i = 0; i < length; i++)
+            {
+                var key = reader.Read<TKey>();
+                var value = reader.Read<TValue>();
+                result[key] = value;
+            }
+            return result;
+        }
 
         /// <summary>Writes null as 0, and all over values as +1</summary>
         /// <param name="count">The real count or null if collection is is null</param>

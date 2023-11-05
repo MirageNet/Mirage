@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using Mirage.CodeGen;
 using Mirage.Serialization;
@@ -15,7 +16,7 @@ namespace Mirage.Weaver
         public Readers(ModuleDefinition module, IWeaverLogger logger) : base(module, logger) { }
 
         protected override string FunctionTypeLog => "read function";
-        protected override Expression<Action> ArrayExpression => () => CollectionExtensions.ReadArray<byte>(default);
+        protected override Expression<Action> ArrayExpression => () => Mirage.Serialization.CollectionExtensions.ReadArray<byte>(default);
 
         protected override MethodReference GetGenericFunction()
         {
@@ -84,17 +85,19 @@ namespace Mirage.Weaver
             return new ReadMethod(definition, readParameter, worker);
         }
 
-        protected override MethodReference GenerateCollectionFunction(TypeReference typeReference, TypeReference elementType, MethodReference collectionMethod)
+        protected override MethodReference GenerateCollectionFunction(TypeReference typeReference, List<TypeReference> elementTypes, MethodReference collectionMethod)
         {
             // generate readers for the element
-            _ = GetFunction_Throws(elementType);
+            foreach (var elementType in elementTypes)
+                _ = GetFunction_Throws(elementType);
 
             var readMethod = GenerateReaderFunction(typeReference);
 
             var collectionReader = collectionMethod.GetElementMethod();
 
             var methodRef = new GenericInstanceMethod(collectionReader);
-            methodRef.GenericArguments.Add(elementType);
+            foreach (var elementType in elementTypes)
+                methodRef.GenericArguments.Add(elementType);
 
             // generates
             // return reader.ReadList<T>()

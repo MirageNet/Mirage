@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using Mirage.CodeGen;
 using Mirage.Serialization;
@@ -14,7 +15,7 @@ namespace Mirage.Weaver
         public Writers(ModuleDefinition module, IWeaverLogger logger) : base(module, logger) { }
 
         protected override string FunctionTypeLog => "write function";
-        protected override Expression<Action> ArrayExpression => () => CollectionExtensions.WriteArray<byte>(default, default);
+        protected override Expression<Action> ArrayExpression => () => Mirage.Serialization.CollectionExtensions.WriteArray<byte>(default, default);
 
         protected override MethodReference GetGenericFunction()
         {
@@ -151,17 +152,19 @@ namespace Mirage.Weaver
             }
         }
 
-        protected override MethodReference GenerateCollectionFunction(TypeReference typeReference, TypeReference elementType, MethodReference collectionMethod)
+        protected override MethodReference GenerateCollectionFunction(TypeReference typeReference, List<TypeReference> elementTypes, MethodReference collectionMethod)
         {
             // make sure element has a writer
             // collection writers use the generic writer, so this will make sure one exists
-            _ = GetFunction_Throws(elementType);
+            foreach (var elementType in elementTypes)
+                _ = GetFunction_Throws(elementType);
 
             var writerMethod = GenerateWriterFunc(typeReference);
             var collectionWriter = collectionMethod.GetElementMethod();
 
             var methodRef = new GenericInstanceMethod(collectionWriter);
-            methodRef.GenericArguments.Add(elementType);
+            foreach (var elementType in elementTypes)
+                methodRef.GenericArguments.Add(elementType);
 
             // generates
             // reader.WriteArray<T>(array);
