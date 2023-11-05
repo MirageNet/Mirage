@@ -171,7 +171,6 @@ namespace Mirage.Weaver
 
             // check for collections
             var isCollection = collectionMethod.TryGetValue(typeDefinition, out var collectionMethohd);
-            Console.WriteLine($"[CollectionMethod] {typeReference} isCollection={isCollection}");
             if (isCollection)
             {
                 var genericInstance = (GenericInstanceType)typeReference;
