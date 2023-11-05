@@ -18,7 +18,7 @@ namespace Mirage.Weaver
         }
 
         protected readonly Dictionary<TypeReference, MethodReference> funcs = new Dictionary<TypeReference, MethodReference>(new TypeReferenceComparer());
-        protected readonly Dictionary<TypeDefinition, MethodReference> collectionMethod = new Dictionary<TypeDefinition, MethodReference>();
+        protected readonly Dictionary<TypeDefinition, MethodReference> collectionMethods = new Dictionary<TypeDefinition, MethodReference>();
         private readonly IWeaverLogger logger;
         protected readonly ModuleDefinition module;
 
@@ -59,17 +59,17 @@ namespace Mirage.Weaver
 
         public void RegisterCollectionMethod(TypeDefinition dataType, MethodReference methodReference)
         {
-            if (collectionMethod.ContainsKey(dataType))
+            if (collectionMethods.ContainsKey(dataType))
             {
                 logger.Warning(
                     $"Registering a {FunctionTypeLog} for {dataType.FullName} when one already exists\n" +
-                    $"  old:{collectionMethod[dataType].FullName}\n" +
+                    $"  old:{collectionMethods[dataType].FullName}\n" +
                     $"  new:{methodReference.FullName}",
                     methodReference.Resolve());
             }
 
             Log($"Register Collection Method {FunctionTypeLog} for {dataType.FullName}, method:{methodReference.FullName}");
-            collectionMethod[dataType] = methodReference;
+            collectionMethods[dataType] = methodReference;
         }
 
         /// <summary>
@@ -170,13 +170,12 @@ namespace Mirage.Weaver
             var typeDefinition = typeReference.Resolve();
 
             // check for collections
-            var isCollection = collectionMethod.TryGetValue(typeDefinition, out var collectionMethohd);
-            if (isCollection)
+            if (collectionMethods.TryGetValue(typeDefinition, out var collectionMethod))
             {
                 var genericInstance = (GenericInstanceType)typeReference;
                 var elementType = genericInstance.GenericArguments[0];
 
-                return GenerateCollectionFunction(typeReference, elementType, collectionMethohd);
+                return GenerateCollectionFunction(typeReference, elementType, collectionMethod);
             }
 
             // check for invalid types
