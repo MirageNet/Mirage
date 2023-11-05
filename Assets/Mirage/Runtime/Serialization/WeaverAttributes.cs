@@ -26,6 +26,16 @@ namespace Mirage.Serialization
     public sealed class WeaverWriteAsGenericAttribute : Attribute { }
 
     /// <summary>
+    /// Tells weaver to use this method to write a generic type or collection
+    /// <para>Can also be used for other generic types like Nullable</para>
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method)]
+    public sealed class WeaverSerializeCollectionAttribute : Attribute
+    {
+        public WeaverSerializeCollectionAttribute() { }
+    }
+
+    /// <summary>
     /// Tells weaver how many bits to sue for field
     /// <para>Only works with integer fields (byte, int, ulong, enums etc)</para>
     /// <para>

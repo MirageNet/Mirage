@@ -15,9 +15,6 @@ namespace Mirage.Weaver
 
         protected override string FunctionTypeLog => "write function";
         protected override Expression<Action> ArrayExpression => () => CollectionExtensions.WriteArray<byte>(default, default);
-        protected override Expression<Action> ListExpression => () => CollectionExtensions.WriteList<byte>(default, default);
-        protected override Expression<Action> SegmentExpression => () => CollectionExtensions.WriteArraySegment<byte>(default, default);
-        protected override Expression<Action> NullableExpression => () => SystemTypesExtensions.WriteNullable<byte>(default, default);
 
         protected override MethodReference GetGenericFunction()
         {
@@ -154,15 +151,14 @@ namespace Mirage.Weaver
             }
         }
 
-        protected override MethodReference GenerateCollectionFunction(TypeReference typeReference, TypeReference elementType, Expression<Action> genericExpression)
+        protected override MethodReference GenerateCollectionFunction(TypeReference typeReference, TypeReference elementType, MethodReference collectionMethod)
         {
             // make sure element has a writer
             // collection writers use the generic writer, so this will make sure one exists
             _ = GetFunction_Throws(elementType);
 
             var writerMethod = GenerateWriterFunc(typeReference);
-
-            var collectionWriter = module.ImportReference(genericExpression).GetElementMethod();
+            var collectionWriter = collectionMethod.GetElementMethod();
 
             var methodRef = new GenericInstanceMethod(collectionWriter);
             methodRef.GenericArguments.Add(elementType);

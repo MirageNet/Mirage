@@ -395,21 +395,40 @@ namespace Mirage.Weaver
             if (!IsStatic(type))
                 return;
 
-            var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public)
+            var extensionMethods = type.GetMethods(BindingFlags.Static | BindingFlags.Public)
                    .Where(IsExtension)
-                   .Where(NotGeneric)
                    .Where(NotIgnored);
+
+            var methods = extensionMethods.Where(NotGeneric);
+            var collectionMethods = extensionMethods.Where(IsCollectionMethod);
 
             foreach (var method in methods)
             {
                 if (IsWriterMethod(method))
                 {
-                    RegisterWriter(method);
+                    var dataType = GetWriterDataType(method);
+                    writers.Register(module.ImportReference(dataType), module.ImportReference(method));
                 }
 
                 if (IsReaderMethod(method))
                 {
-                    RegisterReader(method);
+                    var dataType = GetReaderDataType(method);
+                    readers.Register(module.ImportReference(dataType), module.ImportReference(method));
+                }
+            }
+
+            foreach (var method in collectionMethods)
+            {
+                if (IsWriterMethod(method))
+                {
+                    var dataType = GetWriterDataType(method);
+                    writers.RegisterCollectionMethod(dataType.Resolve(), module.ImportReference(method));
+                }
+
+                if (IsReaderMethod(method))
+                {
+                    var dataType = GetReaderDataType(method);
+                    readers.RegisterCollectionMethod(dataType.Resolve(), module.ImportReference(method));
                 }
             }
         }
@@ -419,21 +438,40 @@ namespace Mirage.Weaver
             if (!IsStatic(type))
                 return;
 
-            var methods = type.Methods
+            var extensionMethods = type.Methods
                    .Where(IsExtension)
-                   .Where(NotGeneric)
                    .Where(NotIgnored);
+
+            var methods = extensionMethods.Where(NotGeneric);
+            var collectionMethods = extensionMethods.Where(IsCollectionMethod);
 
             foreach (var method in methods)
             {
                 if (IsWriterMethod(method))
                 {
-                    RegisterWriter(method);
+                    var dataType = GetWriterDataType(method);
+                    writers.Register(module.ImportReference(dataType), module.ImportReference(method));
                 }
 
                 if (IsReaderMethod(method))
                 {
-                    RegisterReader(method);
+                    var dataType = GetReaderDataType(method);
+                    readers.Register(module.ImportReference(dataType), module.ImportReference(method));
+                }
+            }
+
+            foreach (var method in collectionMethods)
+            {
+                if (IsWriterMethod(method))
+                {
+                    var dataType = GetWriterDataType(method);
+                    writers.RegisterCollectionMethod(dataType.Resolve(), module.ImportReference(method));
+                }
+
+                if (IsReaderMethod(method))
+                {
+                    var dataType = GetReaderDataType(method);
+                    readers.RegisterCollectionMethod(dataType.Resolve(), module.ImportReference(method));
                 }
             }
         }
@@ -449,11 +487,10 @@ namespace Mirage.Weaver
         private static bool IsExtension(MethodDefinition method) => method.HasCustomAttribute<ExtensionAttribute>();
         private static bool NotGeneric(MethodInfo method) => !method.IsGenericMethod;
         private static bool NotGeneric(MethodDefinition method) => !method.IsGenericInstance && !method.HasGenericParameters;
-
-        /// <returns>true if method does not have <see cref="WeaverIgnoreAttribute"/></returns>
         private static bool NotIgnored(MethodInfo method) => !Attribute.IsDefined(method, typeof(WeaverIgnoreAttribute));
-        /// <returns>true if method does not have <see cref="WeaverIgnoreAttribute"/></returns>
         private static bool NotIgnored(MethodDefinition method) => !method.HasCustomAttribute<WeaverIgnoreAttribute>();
+        private static bool IsCollectionMethod(MethodInfo method) => Attribute.IsDefined(method, typeof(WeaverSerializeCollectionAttribute));
+        private static bool IsCollectionMethod(MethodDefinition method) => method.HasCustomAttribute<WeaverSerializeCollectionAttribute>();
 
 
         private static bool IsWriterMethod(MethodInfo method)
@@ -510,31 +547,30 @@ namespace Mirage.Weaver
             return true;
         }
 
-        private void RegisterWriter(MethodInfo method)
+        private TypeReference GetWriterDataType(MethodInfo method)
         {
             ReaderWriterProcessor.Log($"Found writer extension methods: {method.Name}");
 
             var dataType = method.GetParameters()[1].ParameterType;
-            writers.Register(module.ImportReference(dataType), module.ImportReference(method));
+            return module.ImportReference(dataType);
         }
-        private void RegisterWriter(MethodDefinition method)
+        private TypeReference GetWriterDataType(MethodDefinition method)
         {
             ReaderWriterProcessor.Log($"Found writer extension methods: {method.Name}");
 
-            var dataType = method.Parameters[1].ParameterType;
-            writers.Register(module.ImportReference(dataType), module.ImportReference(method));
+            return method.Parameters[1].ParameterType;
         }
 
 
-        private void RegisterReader(MethodInfo method)
+        private TypeReference GetReaderDataType(MethodInfo method)
         {
             ReaderWriterProcessor.Log($"Found reader extension methods: {method.Name}");
-            readers.Register(module.ImportReference(method.ReturnType), module.ImportReference(method));
+            return module.ImportReference(method.ReturnType);
         }
-        private void RegisterReader(MethodDefinition method)
+        private TypeReference GetReaderDataType(MethodDefinition method)
         {
             ReaderWriterProcessor.Log($"Found reader extension methods: {method.Name}");
-            readers.Register(module.ImportReference(method.ReturnType), module.ImportReference(method));
+            return method.ReturnType;
         }
     }
 }

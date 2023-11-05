@@ -98,6 +98,7 @@ namespace Mirage.Serialization
             writer.WriteBytes(data, 0, data.Length);
         }
 
+        [WeaverSerializeCollection]
         public static void WriteNullable<T>(this NetworkWriter writer, T? nullable) where T : struct
         {
             var hasValue = nullable.HasValue;
@@ -143,6 +144,8 @@ namespace Mirage.Serialization
             return converter.decimalValue;
         }
         public static Guid ReadGuid(this NetworkReader reader) => new Guid(reader.ReadBytes(16));
+
+        [WeaverSerializeCollection]
         public static T? ReadNullable<T>(this NetworkReader reader) where T : struct
         {
             var hasValue = reader.ReadBoolean();

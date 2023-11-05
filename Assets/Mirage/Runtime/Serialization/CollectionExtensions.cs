@@ -41,6 +41,7 @@ namespace Mirage.Serialization
             writer.WriteBytesAndSize(buffer.Array, buffer.Offset, buffer.Count);
         }
 
+        [WeaverSerializeCollection]
         public static void WriteList<T>(this NetworkWriter writer, List<T> list)
         {
             WriteCountPlusOne(writer, list?.Count);
@@ -65,6 +66,7 @@ namespace Mirage.Serialization
                 writer.Write(array[i]);
         }
 
+        [WeaverSerializeCollection]
         public static void WriteArraySegment<T>(this NetworkWriter writer, ArraySegment<T> segment)
         {
             var array = segment.Array;
@@ -117,6 +119,7 @@ namespace Mirage.Serialization
             return bytes;
         }
 
+        [WeaverSerializeCollection]
         public static List<T> ReadList<T>(this NetworkReader reader)
         {
             var hasValue = ReadCountPlusOne(reader, out var length);
@@ -149,6 +152,7 @@ namespace Mirage.Serialization
             return result;
         }
 
+        [WeaverSerializeCollection]
         public static ArraySegment<T> ReadArraySegment<T>(this NetworkReader reader)
         {
             var array = reader.ReadArray<T>();

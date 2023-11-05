@@ -16,9 +16,6 @@ namespace Mirage.Weaver
 
         protected override string FunctionTypeLog => "read function";
         protected override Expression<Action> ArrayExpression => () => CollectionExtensions.ReadArray<byte>(default);
-        protected override Expression<Action> ListExpression => () => CollectionExtensions.ReadList<byte>(default);
-        protected override Expression<Action> SegmentExpression => () => CollectionExtensions.ReadArraySegment<byte>(default);
-        protected override Expression<Action> NullableExpression => () => SystemTypesExtensions.ReadNullable<byte>(default);
 
         protected override MethodReference GetGenericFunction()
         {
@@ -87,16 +84,16 @@ namespace Mirage.Weaver
             return new ReadMethod(definition, readParameter, worker);
         }
 
-        protected override MethodReference GenerateCollectionFunction(TypeReference typeReference, TypeReference elementType, Expression<Action> genericExpression)
+        protected override MethodReference GenerateCollectionFunction(TypeReference typeReference, TypeReference elementType, MethodReference collectionMethod)
         {
             // generate readers for the element
             _ = GetFunction_Throws(elementType);
 
             var readMethod = GenerateReaderFunction(typeReference);
 
-            var listReader = module.ImportReference(genericExpression);
+            var collectionReader = collectionMethod.GetElementMethod();
 
-            var methodRef = new GenericInstanceMethod(listReader.GetElementMethod());
+            var methodRef = new GenericInstanceMethod(collectionReader);
             methodRef.GenericArguments.Add(elementType);
 
             // generates
