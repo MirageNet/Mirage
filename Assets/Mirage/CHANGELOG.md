@@ -1,3 +1,10 @@
+# [146.5.0](https://github.com/MirageNet/Mirage/compare/v146.4.0...v146.5.0) (2023-11-05)
+
+
+### Features
+
+* adding WeaverSerializeCollection that can be added to generic writers ([00d476b](https://github.com/MirageNet/Mirage/commit/00d476b4b9784e53140eb0dff54b09ed61eaa9a0))
+
 # [146.4.0](https://github.com/MirageNet/Mirage/compare/v146.3.2...v146.4.0) (2023-10-20)
 
 
