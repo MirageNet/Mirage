@@ -1,3 +1,10 @@
+## [146.6.1](https://github.com/MirageNet/Mirage/compare/v146.6.0...v146.6.1) (2023-11-20)
+
+
+### Bug Fixes
+
+* **Weaver:** fixing lookup for collection methods ([b530360](https://github.com/MirageNet/Mirage/commit/b53036088d1668d9cd537b0d42e1655998537608))
+
 # [146.6.0](https://github.com/MirageNet/Mirage/compare/v146.5.1...v146.6.0) (2023-11-05)
 
 
