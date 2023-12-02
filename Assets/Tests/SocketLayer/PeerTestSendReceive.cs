@@ -295,12 +295,13 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             CheckServerReceived(message);
         }
 
+        private const int DEFAULT_MAX_FRAGMENTS = 50;
         [Test]
-        [TestCase(1, 5)]
-        [TestCase(0.8f, 4)]
-        [TestCase(0.5f, 3)]
-        [TestCase(0.3f, 2)]
-        [TestCase(0.2f, 1)]
+        [TestCase(1, DEFAULT_MAX_FRAGMENTS)]
+        [TestCase(0.8f, (int)(DEFAULT_MAX_FRAGMENTS * 0.8))]
+        [TestCase(0.5f, (int)(DEFAULT_MAX_FRAGMENTS * 0.5))]
+        [TestCase(0.3f, (int)(DEFAULT_MAX_FRAGMENTS * 0.3))]
+        [TestCase(0.2f, (int)(DEFAULT_MAX_FRAGMENTS * 0.2))]
         public void FragmentedSend(float maxMultiplier, int expectedFragments)
         {
             var size = (int)(maxFragmentMessageSize * maxMultiplier);
