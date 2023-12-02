@@ -97,7 +97,7 @@ namespace Mirage.SocketLayer
         /// <para>if set to 0 then messages over <see cref="SocketFactory.MaxPacketSize"/> will not be allowed to be sent</para>
         /// <para>max value is 255</para>
         /// </summary>
-        public int MaxReliableFragments = 5;
+        public int MaxReliableFragments = 50;
 
         /// <summary>
         /// Enable if the Socket you are using has its own Reliable layer. For example using Websocket, which is TCP.
