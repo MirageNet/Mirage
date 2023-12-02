@@ -1,3 +1,10 @@
+## [146.6.2](https://github.com/MirageNet/Mirage/compare/v146.6.1...v146.6.2) (2023-12-02)
+
+
+### Bug Fixes
+
+* **SocketLayer:** increase default fragment size to 50 ([1fdaa43](https://github.com/MirageNet/Mirage/commit/1fdaa43ab685c96e1911f6bc114e4dc8d8981c9f))
+
 ## [146.6.1](https://github.com/MirageNet/Mirage/compare/v146.6.0...v146.6.1) (2023-11-20)
 
 
