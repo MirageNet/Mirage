@@ -1,3 +1,10 @@
+## [146.6.3](https://github.com/MirageNet/Mirage/compare/v146.6.2...v146.6.3) (2023-12-03)
+
+
+### Bug Fixes
+
+* fixing time not being sent on connect ([66e0978](https://github.com/MirageNet/Mirage/commit/66e0978f84bc783750818ad4c1ccd40205984547))
+
 ## [146.6.2](https://github.com/MirageNet/Mirage/compare/v146.6.1...v146.6.2) (2023-12-02)
 
 
