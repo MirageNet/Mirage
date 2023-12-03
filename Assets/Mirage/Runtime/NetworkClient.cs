@@ -185,7 +185,7 @@ namespace Mirage
         private void Peer_OnConnected(IConnection conn)
         {
             if (!IsLocalClient)
-                World.Time.UpdateClient(this);
+                World.Time.PingNow(this);
 
             _connectState = ConnectState.Connected;
             _connected.Invoke(Player);

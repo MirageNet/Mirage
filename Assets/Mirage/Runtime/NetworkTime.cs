@@ -56,13 +56,22 @@ namespace Mirage
         {
             if (UnityEngine.Time.time - _lastPingTime >= PingInterval)
             {
-                var pingMessage = new NetworkPingMessage
-                {
-                    ClientTime = LocalTime()
-                };
-                client.Send(pingMessage, Channel.Unreliable);
-                _lastPingTime = UnityEngine.Time.time;
+                PingNow(client);
             }
+        }
+
+        /// <summary>
+        /// Sends <see cref="NetworkPingMessage"/> right away ignoring lastPingTime
+        /// </summary>
+        /// <param name="client"></param>
+        public void PingNow(IMessageSender client)
+        {
+            var pingMessage = new NetworkPingMessage
+            {
+                ClientTime = LocalTime()
+            };
+            client.Send(pingMessage, Channel.Unreliable);
+            _lastPingTime = UnityEngine.Time.time;
         }
 
         // executed at the server when we receive a ping message
