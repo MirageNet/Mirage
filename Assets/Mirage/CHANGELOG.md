@@ -1,3 +1,10 @@
+## [146.6.4](https://github.com/MirageNet/Mirage/compare/v146.6.3...v146.6.4) (2023-12-20)
+
+
+### Bug Fixes
+
+* fixing owner not being excluded when host ([787e55a](https://github.com/MirageNet/Mirage/commit/787e55a79f9a67cd2073da33934ff8b2a9cf58b6))
+
 ## [146.6.3](https://github.com/MirageNet/Mirage/compare/v146.6.2...v146.6.3) (2023-12-03)
 
 
