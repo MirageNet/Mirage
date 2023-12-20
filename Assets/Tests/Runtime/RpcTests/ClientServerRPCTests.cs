@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.RpcTests
@@ -94,6 +95,18 @@ namespace Mirage.Tests.Runtime.RpcTests
             Assert.That(clientComponent.ClientOwnerCalls.Count, Is.EqualTo(1));
             Assert.That(clientComponent.ClientOwnerCalls[0].arg1, Is.EqualTo(1));
             Assert.That(clientComponent.ClientOwnerCalls[0].arg2, Is.EqualTo("hello"));
+        }
+
+        [UnityTest]
+        public IEnumerator ClientExcludeOwner()
+        {
+            Debug.Assert(serverComponent.Owner != null);
+            serverComponent.ClientExcludeOwner(1, "hello");
+            // process spawn message from server
+            yield return null;
+            yield return null;
+
+            Assert.That(clientComponent.ClientExcludeOwnerCalls.Count, Is.EqualTo(0), "owner should not get if excludeOwner is true");
         }
     }
 }

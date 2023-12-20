@@ -10,6 +10,7 @@ namespace Mirage.Tests.Runtime
         public List<(int arg1, string arg2)> Client2ArgsCalls = new List<(int arg1, string arg2)>();
         public List<(INetworkPlayer player, int arg1, string arg2)> ClientTargetCalls = new List<(INetworkPlayer player, int arg1, string arg2)>();
         public List<(int arg1, string arg2)> ClientOwnerCalls = new List<(int arg1, string arg2)>();
+        public List<(int arg1, string arg2)> ClientExcludeOwnerCalls = new List<(int arg1, string arg2)>();
 
         [ServerRpc]
         public void Server2Args(int arg1, string arg2)
@@ -45,6 +46,12 @@ namespace Mirage.Tests.Runtime
         public void ClientOwner(int arg1, string arg2)
         {
             ClientOwnerCalls.Add((arg1, arg2));
+        }
+
+        [ClientRpc(excludeOwner = true)]
+        public void ClientExcludeOwner(int arg1, string arg2)
+        {
+            ClientExcludeOwnerCalls.Add((arg1, arg2));
         }
     }
 }

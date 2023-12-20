@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
@@ -171,6 +172,21 @@ namespace Mirage.Tests.Runtime.RpcTests
                 {
                     Assert.That(clientComponent[i].ClientOwnerCalls.Count, Is.EqualTo(0), $"index {i}");
                 }
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator ClientExcludeOwner([Range(0, 3)] int index)
+        {
+            // all components on same gameobject, so they are all owner
+            serverComponent[index].ClientExcludeOwner(1, "hello");
+
+            yield return null;
+            yield return null;
+
+            for (var i = 0; i < COMPONENT_COUNT; i++)
+            {
+                Assert.That(clientComponent[i].ClientExcludeOwnerCalls.Count, Is.EqualTo(0), $"index {i}");
             }
         }
     }

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Diagnostics;
 using Cysharp.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
@@ -86,6 +87,18 @@ namespace Mirage.Tests.Runtime.Host
             Assert.That(hostComponent.ClientOwnerCalls.Count, Is.EqualTo(1));
             Assert.That(hostComponent.ClientOwnerCalls[0].arg1, Is.EqualTo(1));
             Assert.That(hostComponent.ClientOwnerCalls[0].arg2, Is.EqualTo("hello"));
+        }
+
+        [UnityTest]
+        public IEnumerator ClientExcludeOwner()
+        {
+            Debug.Assert(hostComponent.HasAuthority);
+            hostComponent.ClientExcludeOwner(1, "hello");
+            // process spawn message from server
+            yield return null;
+            yield return null;
+
+            Assert.That(hostComponent.ClientExcludeOwnerCalls.Count, Is.EqualTo(0), "host owner should not get if excludeOwner is true");
         }
 
         [Test]
