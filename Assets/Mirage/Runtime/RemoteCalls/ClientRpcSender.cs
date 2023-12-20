@@ -101,7 +101,7 @@ namespace Mirage.RemoteCalls
         /// <param name="target"></param>
         /// <param name="player">player used for RpcTarget.Player</param>
         /// <returns></returns>
-        public static bool ShouldInvokeLocally(NetworkBehaviour behaviour, RpcTarget target, INetworkPlayer player)
+        public static bool ShouldInvokeLocally(NetworkBehaviour behaviour, RpcTarget target, INetworkPlayer player, bool excludeOwner)
         {
             // not server? error
             if (!behaviour.IsServer)
@@ -117,7 +117,7 @@ namespace Mirage.RemoteCalls
             switch (target)
             {
                 case RpcTarget.Observers:
-                    return IsLocalPlayerObserver(behaviour);
+                    return IsLocalPlayerObserver(behaviour, excludeOwner);
                 case RpcTarget.Owner:
                     return IsLocalPlayerTarget(behaviour, behaviour.Owner);
                 case RpcTarget.Player:
@@ -134,9 +134,14 @@ namespace Mirage.RemoteCalls
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public static bool IsLocalPlayerObserver(NetworkBehaviour behaviour)
+        public static bool IsLocalPlayerObserver(NetworkBehaviour behaviour, bool excludeOwner)
         {
             var local = behaviour.Server.LocalPlayer;
+
+            // if local player is the owner, skip
+            if (excludeOwner && behaviour.Owner == local)
+                return false;
+
             return behaviour.Identity.observers.Contains(local);
         }
 
