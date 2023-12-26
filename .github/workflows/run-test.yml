@@ -41,6 +41,7 @@ jobs:
           key: ${{ inputs.cache_key }}
 
       - name: Run editor Tests
+        id: editor_tests
         run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
         timeout-minutes: 20
         
@@ -56,9 +57,10 @@ jobs:
           path: Tests
 
       - name: Publish test results
-        uses: MirageNet/nunit-reporter@v1.0.11
+        uses: MirageNet/nunit-reporter@v1.1.1
         if: always()
         with:
           reportTitle:  ${{ inputs.test_results_name }}
           path: "Tests/*.xml"
           access-token: ${{ secrets.access_token }}
+          failed: ${{ steps.editor_tests.outcome == 'failure' }}
