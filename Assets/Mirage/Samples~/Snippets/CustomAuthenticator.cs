@@ -58,7 +58,11 @@ namespace Mirage.Snippets.Authentication
             var sendJson = JsonUtility.ToJson(new ValidateTokenJson { token = token });
 
             // make sure to send token over https
+#if UNITY_2022_3_OR_NEWER
+            var webRequest = UnityWebRequest.PostWwwForm("https://example.com/api/validate", sendJson);
+#else
             var webRequest = UnityWebRequest.Post("https://example.com/api/validate", sendJson);
+#endif
 
             // wait for result
             var op = await webRequest.SendWebRequest();
