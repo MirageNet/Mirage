@@ -1,3 +1,10 @@
+# [146.7.0](https://github.com/MirageNet/Mirage/compare/v146.6.4...v146.7.0) (2023-12-28)
+
+
+### Features
+
+* renaming IsLocalClient to IsHost ([39557cd](https://github.com/MirageNet/Mirage/commit/39557cdc16c9487589bfa990f03e37994c70440b))
+
 ## [146.6.4](https://github.com/MirageNet/Mirage/compare/v146.6.3...v146.6.4) (2023-12-20)
 
 
