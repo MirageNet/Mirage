@@ -22,10 +22,10 @@ namespace Mirage
 
         private void OnStartServer()
         {
-            if (!IsLocalClient)
+            if (!IsHost)
                 return;
 
-            // set host visbility here because "OnVisibilityChanged(..., false)" is not called when spawning
+            // set host visibility here because "OnVisibilityChanged(..., false)" is not called when spawning
             var visibility = Identity.Visibility;
             var visible = visibility.OnCheckObserver(Server.LocalPlayer);
             SetHostVisibility(visible);
@@ -48,7 +48,7 @@ namespace Mirage
 
         private void OnVisibilityChanged(INetworkPlayer player, bool visible)
         {
-            if (!IsLocalClient)
+            if (!IsHost)
                 return;
 
             if (player == Server.LocalPlayer)

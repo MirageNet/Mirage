@@ -67,7 +67,7 @@ namespace Mirage
             // if user changes scenes without NetworkSceneManager then they will need to manually call it again
             PrepareToSpawnSceneObjects();
 
-            if (_client.IsLocalClient)
+            if (_client.IsHost)
             {
                 RegisterHostHandlers();
             }
@@ -416,7 +416,7 @@ namespace Mirage
             // have to store netid, so we can remove it from world, this is because NetworkReset will clear it
             var netId = identity.NetId;
 
-            logger.Assert(!_client.IsLocalClient, "UnSpawn should not be called in host mode");
+            logger.Assert(!_client.IsHost, "UnSpawn should not be called in host mode");
             // it is useful to remove authority when destroying the object
             // this can be useful to clean up stuff after a local player is destroyed
             // call before StopClient, but dont reset the HasAuthority bool, people might want to use HasAuthority from stopclient or destroy
@@ -453,7 +453,7 @@ namespace Mirage
         public void DestroyAllClientObjects()
         {
             // dont destroy objects if we are server
-            if (_client.IsLocalClient)
+            if (_client.IsHost)
             {
                 if (logger.LogEnabled()) logger.Log("Skipping DestroyAllClientObjects because we are host client");
                 return;

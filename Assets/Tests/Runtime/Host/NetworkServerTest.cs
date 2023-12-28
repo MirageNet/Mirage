@@ -38,7 +38,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void LocalClientActiveTest()
         {
-            Assert.That(server.LocalClientActive, Is.True);
+            Assert.That(server.IsHost, Is.True);
         }
 
         [Test]

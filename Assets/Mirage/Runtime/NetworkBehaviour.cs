@@ -47,7 +47,12 @@ namespace Mirage
         /// <summary>
         /// Returns true if we're on host mode.
         /// </summary>
-        public bool IsLocalClient => Identity.IsLocalClient;
+        [System.Obsolete("use IsHost instead")]
+        public bool IsLocalClient => Identity.IsHost;
+        /// <summary>
+        /// Returns true if we're on host mode.
+        /// </summary>
+        public bool IsHost => Identity.IsHost;
 
         /// <summary>
         /// This returns true if this object is the one that represents the player on the local machine.

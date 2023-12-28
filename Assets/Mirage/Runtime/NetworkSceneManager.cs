@@ -218,7 +218,7 @@ namespace Mirage
             ThrowIfNotClient();
 
             // server should load the scene instead of sending scene message
-            if (Client.IsLocalClient)
+            if (Client.IsHost)
                 throw new InvalidOperationException("Host client should not be sent scene message");
 
             if (string.IsNullOrEmpty(message.MainActivateScene))
@@ -268,7 +268,7 @@ namespace Mirage
         /// <param name="sceneOperation">Scene operation that was just  happen</param>
         internal void OnClientSceneLoadFinished(Scene scene, SceneOperation sceneOperation)
         {
-            if (_clientPendingAdditiveSceneLoadingList.Count > 0 && Client && !Client.IsLocalClient)
+            if (_clientPendingAdditiveSceneLoadingList.Count > 0 && Client && !Client.IsHost)
             {
                 if (string.IsNullOrEmpty(_clientPendingAdditiveSceneLoadingList[0]))
                     throw new ArgumentNullException("ClientPendingAdditiveSceneLoadingList[0]", "Some how a null scene path has been entered.");
@@ -380,7 +380,7 @@ namespace Mirage
 
             OnServerStartedSceneChange?.Invoke(scenePath, sceneOperation);
 
-            if (Server.LocalClientActive)
+            if (Server.IsHost)
             {
                 // notify host client that scene loading is about to start
                 OnClientStartedSceneChange?.Invoke(scenePath, sceneOperation);
@@ -818,7 +818,7 @@ namespace Mirage
                     throw new InvalidOperationException($"SceneManager failed to load scene with path: {scenePath}");
 
                 //If non host client. Wait for server to finish scene change
-                if (Client && Client.Active && !Client.IsLocalClient)
+                if (Client && Client.Active && !Client.IsHost)
                 {
                     SceneLoadingAsyncOperationInfo.allowSceneActivation = false;
                 }

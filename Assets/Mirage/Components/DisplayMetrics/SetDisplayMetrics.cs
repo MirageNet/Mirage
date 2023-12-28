@@ -24,7 +24,7 @@ namespace Mirage.DisplayMetrics
         private void ClientConnected(INetworkPlayer arg0)
         {
             // dont set metrics if client is host (clients metrics will be null)
-            if (client.IsLocalClient)
+            if (client.IsHost)
                 return;
 
             displayMetrics.Metrics = client.Metrics;

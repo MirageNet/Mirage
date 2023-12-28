@@ -31,7 +31,7 @@ namespace Mirage
         {
             // dont add if host player
             // server should never sent to host
-            if (!client.IsLocalClient)
+            if (!client.IsHost)
             {
                 client.MessageHandler.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
             }

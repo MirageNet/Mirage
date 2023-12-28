@@ -42,7 +42,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void IsLocalClientHostTest()
         {
-            Assert.That(client.IsLocalClient, Is.True);
+            Assert.That(client.IsHost, Is.True);
         }
 
         [UnityTest]
@@ -50,7 +50,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             client.Disconnect();
 
-            await AsyncUtil.WaitUntilWithTimeout(() => !client.IsLocalClient);
+            await AsyncUtil.WaitUntilWithTimeout(() => !client.IsHost);
         });
 
         [Test]

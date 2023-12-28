@@ -114,7 +114,12 @@ namespace Mirage
         /// <summary>
         /// Is this NetworkClient connected to a local server in host mode
         /// </summary>
-        public bool IsLocalClient { get; private set; }
+        [System.Obsolete("use IsHost instead")]
+        public bool IsLocalClient => IsHost;
+        /// <summary>
+        /// Is this NetworkClient connected to a local server in host mode
+        /// </summary>
+        public bool IsHost { get; private set; }
 
         /// <summary>
         /// Connect client to a NetworkServer instance.
@@ -184,7 +189,7 @@ namespace Mirage
 
         private void Peer_OnConnected(IConnection conn)
         {
-            if (!IsLocalClient)
+            if (!IsHost)
                 World.Time.PingNow(this);
 
             _connectState = ConnectState.Connected;
@@ -229,7 +234,7 @@ namespace Mirage
             (var clientConn, var serverConn) = PipePeerConnection.Create(dataHandler, serverDataHandler, OnHostDisconnected, null);
 
             // set up client before connecting to server, server could invoke handlers
-            IsLocalClient = true;
+            IsHost = true;
             Player = new NetworkPlayer(clientConn, true);
             dataHandler.SetConnection(clientConn, Player);
 
@@ -350,7 +355,7 @@ namespace Mirage
         internal void Update()
         {
             // local connection?
-            if (!IsLocalClient && Active && _connectState == ConnectState.Connected)
+            if (!IsHost && Active && _connectState == ConnectState.Connected)
             {
                 // only update things while connected
                 World.Time.UpdateClient(this);
@@ -383,7 +388,7 @@ namespace Mirage
         {
             logger.Log("Shutting down client.");
 
-            IsLocalClient = false;
+            IsHost = false;
 
             _connectState = ConnectState.Disconnected;
 

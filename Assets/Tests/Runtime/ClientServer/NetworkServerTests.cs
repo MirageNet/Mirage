@@ -31,7 +31,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             Assert.That(server.Players, Has.Count.EqualTo(1));
             Assert.That(server.Active);
-            Assert.That(server.LocalClientActive, Is.False);
+            Assert.That(server.IsHost, Is.False);
         }
 
         [Test]

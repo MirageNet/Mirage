@@ -250,7 +250,7 @@ namespace Mirage.Weaver
                     // if invokeOnServer, then `IsServer` will also cover the Host case too so we dont need to use an OR here
                     worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsServer));
                 else
-                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsLocalClient));
+                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsHost));
                 worker.Append(worker.Create(OpCodes.Brfalse, afterIf));
 
 

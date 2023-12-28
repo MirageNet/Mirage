@@ -123,7 +123,12 @@ namespace Mirage
         /// <summary>
         /// Returns true if we're on host mode.
         /// </summary>
-        public bool IsLocalClient => IsSpawned && Server != null && Server.LocalClientActive;
+        [System.Obsolete("use IsHost instead")]
+        public bool IsLocalClient => IsHost;
+        /// <summary>
+        /// Returns true if we're on host mode.
+        /// </summary>
+        public bool IsHost => IsSpawned && Server != null && Server.IsHost;
 
         /// <summary>
         /// This returns true if this object is the one that represents the player on the local machine.

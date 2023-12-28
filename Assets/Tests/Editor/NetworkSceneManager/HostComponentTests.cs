@@ -110,7 +110,7 @@ namespace Mirage.Tests.Runtime.Host
             Assert.That(server.Players, Is.Empty);
             Assert.That(server.Active, Is.False);
             Assert.That(server.LocalPlayer, Is.Null);
-            Assert.That(server.LocalClientActive, Is.False);
+            Assert.That(server.IsHost, Is.False);
         }
 
         [Test]

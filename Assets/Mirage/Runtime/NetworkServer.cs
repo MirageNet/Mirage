@@ -123,7 +123,12 @@ namespace Mirage
         /// <summary>
         /// True if there is a local client connected to this server (host mode)
         /// </summary>
-        public bool LocalClientActive => LocalClient != null && LocalClient.Active;
+        [System.Obsolete("use IsHost instead")]
+        public bool LocalClientActive => IsHost;
+        /// <summary>
+        /// True if there is a local client connected to this server (host mode)
+        /// </summary>
+        public bool IsHost => LocalClient != null && LocalClient.Active;
 
         /// <summary>
         /// A list of local connections on the server.

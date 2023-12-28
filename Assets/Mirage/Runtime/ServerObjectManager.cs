@@ -88,7 +88,7 @@ namespace Mirage
             SpawnSceneObjects();
 
             // host mode?
-            if (_server.LocalClientActive)
+            if (_server.IsHost)
             {
                 StartHostClientObjects();
             }
@@ -528,7 +528,7 @@ namespace Mirage
             identity.SendToRemoteObservers(new ObjectDestroyMessage { NetId = identity.NetId });
 
             identity.ClearObservers();
-            if (_server.LocalClientActive)
+            if (_server.IsHost)
             {
                 // see ClientObjectManager.UnSpawn for comments
                 if (identity.HasAuthority)
