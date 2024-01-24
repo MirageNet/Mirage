@@ -72,13 +72,9 @@ Both `Cat` and `Pet` should be in the same assembly. If they are in separate ass
 :::
 
 ## SyncVar hook
-The `hook` property of SyncVar can be used to specify a function to be called when the SyncVar changes value on the client and server.
+The `hook` option of SyncVar attribute can be used to specify a function to be called when the SyncVar changes value on the client and server.
 
-**Trivia:**
-- The hook callback must have two parameters of the same type as the SyncVar property. One for the old value, one for the new value.
-- The hook is always called after the SyncVar value is set. You don't need to set it yourself.
-- The hook only fires for changed values, and changing a value in the inspector will not trigger an update.
-- Hooks can be virtual methods and overridden in a derived class.
+For more information on SyncVar hooks see [Sync Var Hooks](/docs/guides/sync/sync-var-hooks)
 
 ### Example Client Only
 Below is a simple example of assigning a random color to each player when they're spawned on the server.  All clients will see all players in the correct colors, even if they join later.
