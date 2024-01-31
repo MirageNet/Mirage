@@ -379,7 +379,7 @@ namespace Mirage
 
         internal void SendSpawnMessage(NetworkIdentity identity, INetworkPlayer player)
         {
-            logger.Assert(player.IsAuthenticated || identity.Visibility is not AlwaysVisible,
+            logger.Assert(player.IsAuthenticated || !(identity.Visibility is AlwaysVisible), // can't use `is not` in unity2020
                 "SendSpawnMessage should only be called if player is authenticated, or there is custom visibility");
             if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId}");
 
