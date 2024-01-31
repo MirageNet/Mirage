@@ -16,14 +16,21 @@ namespace Mirage.Tests
 
     public static class NetworkServerTestExtensions
     {
-        public static void AddTestPlayer(this NetworkServer server, INetworkPlayer player)
+        public static void AddTestPlayer(this NetworkServer server, INetworkPlayer player, bool authenticated = true)
         {
             var info = typeof(NetworkServer).GetField("_connections", BindingFlags.Instance | BindingFlags.NonPublic);
             var connections = (Dictionary<IConnection, INetworkPlayer>)info.GetValue(server);
 
-            var connectiion = Substitute.For<IConnection>();
-            player.Connection.Returns(connectiion);
-            connections.Add(connectiion, player);
+            var connection = Substitute.For<IConnection>();
+            player.Connection.Returns(connection);
+            if (authenticated)
+            {
+                player.IsAuthenticated.Returns(true);
+                var auth = new Authentication.PlayerAuthentication(null, null);
+                player.Authentication.Returns(auth);
+            }
+
+            connections.Add(connection, player);
         }
     }
 }

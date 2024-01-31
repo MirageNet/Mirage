@@ -131,7 +131,7 @@ namespace Mirage
         public bool IsHost => LocalClient != null && LocalClient.Active;
 
         /// <summary>
-        /// A list of local connections on the server.
+        /// A list of connections on the server.
         /// </summary>
         public IReadOnlyCollection<INetworkPlayer> Players => _connections.Values;
 

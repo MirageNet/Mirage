@@ -13,13 +13,11 @@ namespace Mirage
     /// </summary>
     internal class AlwaysVisible : INetworkVisibility
     {
-        private readonly ServerObjectManager _objectManager;
         private readonly NetworkServer _server;
 
-        public AlwaysVisible(ServerObjectManager serverObjectManager)
+        public AlwaysVisible(NetworkServer server)
         {
-            _objectManager = serverObjectManager;
-            _server = serverObjectManager.Server;
+            _server = server;
         }
 
         public bool OnCheckObserver(INetworkPlayer player) => true;
@@ -29,20 +27,16 @@ namespace Mirage
             // add all server connections
             foreach (var player in _server.Players)
             {
+                // skip players that have not authenticated
+                // this is needed because Message by default (including scene message) check IsAuthenticated 
+                if (!player.IsAuthenticated)
+                    continue;
+
+                // skip players that are loading a scene
                 if (!player.SceneIsReady)
                     continue;
 
-                // todo replace this with a better visibility system (where default checks auth/scene ready)
-                if (_objectManager.OnlySpawnOnAuthenticated && !player.IsAuthenticated)
-                    continue;
-
                 observers.Add(player);
-            }
-
-            // add local host connection (if any)
-            if (_server.LocalPlayer != null && _server.LocalPlayer.SceneIsReady)
-            {
-                observers.Add(_server.LocalPlayer);
             }
         }
     }

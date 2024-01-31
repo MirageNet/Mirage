@@ -22,6 +22,7 @@ namespace Mirage.Tests.Runtime
         private NetworkIdentity identity;
         private INetworkPlayer player1;
         private INetworkPlayer player2;
+        private INetworkPlayer player3;
 
         protected override async UniTask ExtraSetup()
         {
@@ -33,6 +34,7 @@ namespace Mirage.Tests.Runtime
 
             player1 = Substitute.For<INetworkPlayer>();
             player2 = Substitute.For<INetworkPlayer>();
+            player3 = Substitute.For<INetworkPlayer>();
         }
 
         [Test]
@@ -40,25 +42,30 @@ namespace Mirage.Tests.Runtime
         {
             player1.SceneIsReady.Returns(true);
             player2.SceneIsReady.Returns(false);
+            player3.SceneIsReady.Returns(true);
 
             // add some server connections
             server.AddTestPlayer(player1);
             server.AddTestPlayer(player2);
+            server.AddTestPlayer(player3, false);
 
             // add a host connection
             server.AddLocalConnection(client, Substitute.For<SocketLayer.IConnection>());
             server.Connected.Invoke(server.LocalPlayer);
             server.LocalPlayer.SceneIsReady = true;
+            server.LocalPlayer.SetAuthentication(new Mirage.Authentication.PlayerAuthentication(null, null));
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
 
-            var alwaysVisible = new AlwaysVisible(serverObjectManager);
+            var alwaysVisible = new AlwaysVisible(server);
 
             // add all to observers. should have the two ready connections then.
             var newObservers = new HashSet<INetworkPlayer>();
             alwaysVisible.OnRebuildObservers(newObservers, true);
 
+            // player2 should be missing, because not ready
+            // player3 should be missing, because not authenticated
             Assert.That(newObservers, Is.EquivalentTo(new[] { player1, server.LocalPlayer, serverPlayer }));
         }
 

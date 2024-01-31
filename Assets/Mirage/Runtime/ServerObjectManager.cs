@@ -33,10 +33,6 @@ namespace Mirage
         private NetworkServer _server;
         public NetworkServer Server => _server;
 
-        [Header("Authentication")]
-        [Tooltip("Will only send spawn message to Players who are Authenticated. Checks the Player.IsAuthenticated property")]
-        public bool OnlySpawnOnAuthenticated;
-
         public INetIdGenerator NetIdGenerator;
         private uint _nextNetworkId = 1;
 
@@ -52,7 +48,7 @@ namespace Mirage
             _server = server;
             _server.Stopped.AddListener(OnServerStopped);
 
-            DefaultVisibility = new AlwaysVisible(this);
+            DefaultVisibility = new AlwaysVisible(server);
 
             _rpcHandler = new RpcHandler(_server.MessageHandler, _server.World, RpcInvokeType.ServerRpc);
         }
@@ -383,8 +379,8 @@ namespace Mirage
 
         internal void SendSpawnMessage(NetworkIdentity identity, INetworkPlayer player)
         {
-            logger.Assert(!OnlySpawnOnAuthenticated || player.IsAuthenticated || identity.Visibility != DefaultVisibility,
-                "SendSpawnMessage should only be called if OnlySpawnOnAuthenticated is false, player is authenticated, or there is custom visibility");
+            logger.Assert(player.IsAuthenticated || identity.Visibility is not AlwaysVisible,
+                "SendSpawnMessage should only be called if player is authenticated, or there is custom visibility");
             if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId}");
 
             // one writer for owner, one for observers
