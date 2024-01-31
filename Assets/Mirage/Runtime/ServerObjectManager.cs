@@ -55,8 +55,6 @@ namespace Mirage
             DefaultVisibility = new AlwaysVisible(this);
 
             _rpcHandler = new RpcHandler(_server.MessageHandler, _server.World, RpcInvokeType.ServerRpc);
-
-            SpawnOrActivate();
         }
 
         private void OnServerStopped()

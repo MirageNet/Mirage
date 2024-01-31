@@ -287,16 +287,25 @@ namespace Mirage
             // make sure to call ServerObjectManager start before started event
             // this is too stop any race conditions where other scripts add their started event before SOM is setup
             if (ObjectManager != null)
+            {
                 ObjectManager.ServerStarted(this);
+                // if no hostClient, then  spawn objects right away
+                if (LocalClient == null)
+                    ObjectManager.SpawnOrActivate();
+            }
             _started?.Invoke();
 
             if (LocalClient != null)
             {
-                // we should call onStartHost after transport is ready to be used
-                // this allows server methods like ServerObjectManager.Spawn to be called in there
+                localClient.ConnectHost(this, dataHandler);
+
+                // onStartHost needs to be called after the client is active
                 _onStartHost?.Invoke();
 
-                localClient.ConnectHost(this, dataHandler);
+                // spawn scene objects in starting scene AFTER host client has activated,
+                // otherwise IsClient will be false for objects in starting scene
+                ObjectManager.SpawnOrActivate();
+
                 Connected?.Invoke(LocalPlayer);
 
                 if (logger.LogEnabled()) logger.Log("NetworkServer StartHost");
