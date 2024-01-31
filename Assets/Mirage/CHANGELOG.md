@@ -1,3 +1,19 @@
+# [147.0.0](https://github.com/MirageNet/Mirage/compare/v146.7.0...v147.0.0) (2024-01-31)
+
+
+### Bug Fixes
+
+* fixing scene object spawning in host mode for 1 scene setup ([2736fe0](https://github.com/MirageNet/Mirage/commit/2736fe0def7d22c18e878bcdd4cc845bd8f3e746))
+* fixing use of is not in unity 2020 ([61b7f68](https://github.com/MirageNet/Mirage/commit/61b7f68e2d834c301e0a6ea4ca5cdf2859ed14f0))
+
+
+* fix!: fixing spawning for unauthenticated code ([b25f2f9](https://github.com/MirageNet/Mirage/commit/b25f2f98f11d8ea7930e823ae5c05a86ee41dd7f))
+
+
+### BREAKING CHANGES
+
+* removing ServerObjectManager.OnlySpawnOnAuthenticated field
+
 # [146.7.0](https://github.com/MirageNet/Mirage/compare/v146.6.4...v146.7.0) (2023-12-28)
 
 
