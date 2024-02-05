@@ -1,3 +1,10 @@
+## [147.0.1](https://github.com/MirageNet/Mirage/compare/v147.0.0...v147.0.1) (2024-02-05)
+
+
+### Bug Fixes
+
+* fixing SocketFactory errors when Listening is false ([7ead256](https://github.com/MirageNet/Mirage/commit/7ead25678c38edda4a513addff19014c875c96c2))
+
 # [147.0.0](https://github.com/MirageNet/Mirage/compare/v146.7.0...v147.0.0) (2024-01-31)
 
 
