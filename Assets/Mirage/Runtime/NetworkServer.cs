@@ -220,7 +220,8 @@ namespace Mirage
         public void StartServer(NetworkClient localClient = null)
         {
             ThrowIfActive();
-            ThrowIfSocketIsMissing();
+            if (Listening)
+                ThrowIfSocketIsMissing();
 
             Application.quitting += Stop;
             if (logger.LogEnabled()) logger.Log($"NetworkServer created, Mirage version: {Version.Current}");
@@ -251,14 +252,14 @@ namespace Mirage
                 };
             }
 
-            var maxPacketSize = SocketFactory.MaxPacketSize;
-            NetworkWriterPool.Configure(maxPacketSize);
-
             // Are we listening for incoming connections?
             // If yes, set up a socket for incoming connections (we're a multiplayer game).
             // If not, that's okay. Some games use a non-listening server for their single player game mode (Battlefield, Call of Duty...)
             if (Listening)
             {
+                var maxPacketSize = SocketFactory.MaxPacketSize;
+                NetworkWriterPool.Configure(maxPacketSize);
+
                 // Create a server specific socket.
                 var socket = SocketFactory.CreateServerSocket();
 
