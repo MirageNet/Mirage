@@ -473,6 +473,38 @@ namespace Mirage
             _client.World.ClearSpawnedObjects();
         }
 
+        /// <summary>
+        /// Destroys all networked objects on the client, with the option to keep the local player object.
+        /// <para>This can be used to clean up when a network connection is closed.</para>
+        /// </summary>
+        public void DestroyAllClientObjects(bool keepLocalPlayer)
+        {
+            // dont destroy objects if we are server
+            if (_client.IsHost)
+            {
+                if (logger.LogEnabled()) logger.Log("Skipping DestroyAllClientObjects because we are host client");
+                return;
+            }
+
+            // create copy so they can be removed inside loop
+            // allocation here are fine because is part of clean up
+            var all = _client.World.SpawnedIdentities.ToArray();
+
+            foreach (var identity in all)
+            {
+                if (identity != null && identity.gameObject != null)
+                {
+                    // If keepLocalPlayer is true
+                    // don't destroy the local player object.
+                    if(keepLocalPlayer && identity.IsLocalPlayer)
+                        continue;
+
+                    UnSpawn(identity);
+                }
+            }
+            _client.World.ClearSpawnedObjects();
+        }
+
         private void ApplySpawnPayload(NetworkIdentity identity, SpawnMessage msg)
         {
             if (msg.PrefabHash.HasValue)
