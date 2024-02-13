@@ -1,3 +1,10 @@
+## [147.0.2](https://github.com/MirageNet/Mirage/compare/v147.0.1...v147.0.2) (2024-02-13)
+
+
+### Bug Fixes
+
+* fixing unspawn handlers not being used in disconnect cleanup ([915f307](https://github.com/MirageNet/Mirage/commit/915f307a3e51b4dacea79e57b8db549d9a47230a))
+
 ## [147.0.1](https://github.com/MirageNet/Mirage/compare/v147.0.0...v147.0.1) (2024-02-05)
 
 
