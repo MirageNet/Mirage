@@ -79,8 +79,8 @@ namespace Mirage
 
         private void OnClientDisconnected(ClientStoppedReason reason)
         {
-            ClearSpawners();
             DestroyAllClientObjects();
+            ClearSpawners();
 
             // reset for next run
             _client.Disconnected.RemoveListener(OnClientDisconnected);
