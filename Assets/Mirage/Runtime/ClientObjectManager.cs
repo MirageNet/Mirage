@@ -301,9 +301,10 @@ namespace Mirage
         /// <param name="unspawnHandler">A method to use as a custom un-spawnhandler on clients.</param>
         public void RegisterSpawnHandler(NetworkIdentity identity, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
         {
-            ThrowIfZeroHash(identity);
             var prefabHash = identity.PrefabHash;
-            RegisterSpawnHandler(prefabHash, spawnHandler, unspawnHandler);
+            ValidateRegisterSpawnHandler(prefabHash, spawnHandler, unspawnHandler);
+            
+            _handlers[prefabHash] = new SpawnHandler(identity, spawnHandler, unspawnHandler);
         }
 
         /// <summary>
@@ -322,9 +323,10 @@ namespace Mirage
 
         public void RegisterSpawnHandler(NetworkIdentity identity, SpawnHandlerAsyncDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
         {
-            ThrowIfZeroHash(identity);
             var prefabHash = identity.PrefabHash;
-            RegisterSpawnHandler(prefabHash, spawnHandler, unspawnHandler);
+            ValidateRegisterSpawnHandler(prefabHash, spawnHandler, unspawnHandler);
+            
+            _handlers[prefabHash] = new SpawnHandler(identity, spawnHandler, unspawnHandler);
         }
 
         public void RegisterSpawnHandler(int prefabHash, SpawnHandlerAsyncDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
@@ -784,8 +786,24 @@ namespace Mirage
             UnspawnHandler = unspawnHandler;
         }
 
+        public SpawnHandler(NetworkIdentity prefab, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
+        {
+            Prefab = prefab ?? throw new ArgumentNullException(nameof(prefab));
+            Handler = spawnHandler ?? throw new ArgumentNullException(nameof(spawnHandler));
+            // unspawn is allowed to be null
+            UnspawnHandler = unspawnHandler;
+        }
+
         public SpawnHandler(SpawnHandlerAsyncDelegate spawnHandlerAsync, UnSpawnDelegate unspawnHandler)
         {
+            HandlerAsync = spawnHandlerAsync ?? throw new ArgumentNullException(nameof(spawnHandlerAsync));
+            // unspawn is allowed to be null
+            UnspawnHandler = unspawnHandler;
+        }
+
+        public SpawnHandler(NetworkIdentity prefab, SpawnHandlerAsyncDelegate spawnHandlerAsync, UnSpawnDelegate unspawnHandler)
+        {
+            Prefab = prefab ?? throw new ArgumentNullException(nameof(prefab));
             HandlerAsync = spawnHandlerAsync ?? throw new ArgumentNullException(nameof(spawnHandlerAsync));
             // unspawn is allowed to be null
             UnspawnHandler = unspawnHandler;
