@@ -1,3 +1,10 @@
+## [147.0.3](https://github.com/MirageNet/Mirage/compare/v147.0.2...v147.0.3) (2024-02-16)
+
+
+### Bug Fixes
+
+* **ClientObjectManager:** add prefab to SpawnHandler when registering ([#1171](https://github.com/MirageNet/Mirage/issues/1171)) ([7a8ff46](https://github.com/MirageNet/Mirage/commit/7a8ff466f2fb227a78c2f8e98e70a80ec66d0f2c))
+
 ## [147.0.2](https://github.com/MirageNet/Mirage/compare/v147.0.1...v147.0.2) (2024-02-13)
 
 
