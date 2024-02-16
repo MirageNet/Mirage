@@ -66,7 +66,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
             var handlers = clientObjectManager._handlers[identity.PrefabHash];
-            Assert.That(handlers.Prefab == null, "should not have added prefab with handlers");
+            Assert.That(handlers.Prefab == identity, "prefab should also be added to handler if it is passed to regiester so that user can use it if they want to");
             Assert.That(handlers.Handler == TestSpawnDelegate);
             Assert.That(handlers.UnspawnHandler == TestUnspawnDelegate);
         }
@@ -81,7 +81,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
             var handlers = clientObjectManager._handlers[identity.PrefabHash];
-            Assert.That(handlers.Prefab == null, "should not have added prefab with handlers");
+            Assert.That(handlers.Prefab == identity, "prefab should also be added to handler if it is passed to regiester so that user can use it if they want to");
             Assert.That(handlers.Handler == TestSpawnDelegate);
             Assert.That(handlers.UnspawnHandler == null);
         }

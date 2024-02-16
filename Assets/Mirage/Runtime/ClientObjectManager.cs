@@ -301,9 +301,11 @@ namespace Mirage
         /// <param name="unspawnHandler">A method to use as a custom un-spawnhandler on clients.</param>
         public void RegisterSpawnHandler(NetworkIdentity identity, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
         {
+            // check identity has a hash before Validate so that there is good error meessage
+            ThrowIfZeroHash(identity);
             var prefabHash = identity.PrefabHash;
             ValidateRegisterSpawnHandler(prefabHash, spawnHandler, unspawnHandler);
-            
+
             _handlers[prefabHash] = new SpawnHandler(identity, spawnHandler, unspawnHandler);
         }
 
@@ -323,9 +325,11 @@ namespace Mirage
 
         public void RegisterSpawnHandler(NetworkIdentity identity, SpawnHandlerAsyncDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
         {
+            // check identity has a hash before Validate so that there is good error meessage
+            ThrowIfZeroHash(identity);
             var prefabHash = identity.PrefabHash;
             ValidateRegisterSpawnHandler(prefabHash, spawnHandler, unspawnHandler);
-            
+
             _handlers[prefabHash] = new SpawnHandler(identity, spawnHandler, unspawnHandler);
         }
 

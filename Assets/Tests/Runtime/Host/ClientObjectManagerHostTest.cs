@@ -50,7 +50,7 @@ namespace Mirage.Tests.Runtime.Host
 
             Assert.IsTrue(clientObjectManager._handlers.ContainsKey(identity.PrefabHash));
             var handler = clientObjectManager._handlers[identity.PrefabHash];
-            Assert.That(handler.Prefab == null);
+            Assert.That(handler.Prefab == identity);
             Assert.That(handler.Handler == TestSpawnDelegate);
             Assert.That(handler.UnspawnHandler == TestUnspawnDelegate);
         }
