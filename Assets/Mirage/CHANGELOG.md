@@ -1,3 +1,15 @@
+# [147.2.0](https://github.com/MirageNet/Mirage/compare/v147.1.0...v147.2.0) (2024-03-12)
+
+
+### Bug Fixes
+
+* fixing span support UNITY_2021_3_OR_NEWER ([7bf28ed](https://github.com/MirageNet/Mirage/commit/7bf28ed1537fe4fc4e3c389e1086149ea6d970eb))
+
+
+### Features
+
+* adding support for Span<T> ([3c48db8](https://github.com/MirageNet/Mirage/commit/3c48db8d32880c827dcd7fe7254534bf5a265b60))
+
 # [147.1.0](https://github.com/MirageNet/Mirage/compare/v147.0.3...v147.1.0) (2024-03-12)
 
 
