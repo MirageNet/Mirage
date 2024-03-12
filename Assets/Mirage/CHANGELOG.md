@@ -1,3 +1,10 @@
+# [147.1.0](https://github.com/MirageNet/Mirage/compare/v147.0.3...v147.1.0) (2024-03-12)
+
+
+### Features
+
+* adding excludeHost to ClientRpc ([a35ed9d](https://github.com/MirageNet/Mirage/commit/a35ed9df2238e282309b3b3f4b5aa026185d5ba4))
+
 ## [147.0.3](https://github.com/MirageNet/Mirage/compare/v147.0.2...v147.0.3) (2024-02-16)
 
 
