@@ -80,6 +80,7 @@ namespace Mirage.Weaver
             var target = clientRpcAttr.GetField(nameof(ClientRpcAttribute.target), RpcTarget.Observers);
             var channel = clientRpcAttr.GetField(nameof(ClientRpcAttribute.channel), 0);
             var excludeOwner = clientRpcAttr.GetField(nameof(ClientRpcAttribute.excludeOwner), false);
+            var excludeHost = clientRpcAttr.GetField(nameof(ClientRpcAttribute.excludeHost), false);
 
             var rpc = SubstituteMethod(md);
 
@@ -89,7 +90,8 @@ namespace Mirage.Weaver
             // {
             //    call the body
             // }
-            CallBody(worker, rpc, target, excludeOwner);
+            if (!excludeHost)
+                CallBody(worker, rpc, target, excludeOwner);
 
             // NetworkWriter writer = NetworkWriterPool.GetWriter()
             var writer = md.AddLocal<PooledNetworkWriter>();

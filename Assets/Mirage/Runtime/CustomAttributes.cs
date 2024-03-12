@@ -114,6 +114,8 @@ namespace Mirage
         public Channel channel = Channel.Reliable;
         public RpcTarget target = RpcTarget.Observers;
         public bool excludeOwner;
+        /// <summary>stops method being called on host/server</summary>
+        public bool excludeHost;
     }
 
     /// <summary>
