@@ -104,6 +104,7 @@ namespace Mirage.Serialization
             }
         }
 
+#if UNITY_2021_3_OR_NEWER
         [WeaverSerializeCollection]
         public static void WriteSpan<T>(this NetworkWriter writer, Span<T> span) => WriteReadOnlySpan<T>(writer, span);
         [WeaverSerializeCollection]
@@ -114,6 +115,7 @@ namespace Mirage.Serialization
             for (var i = 0; i < length; i++)
                 writer.Write(span[i]);
         }
+#endif
 
         /// <returns>array or null</returns>
         public static byte[] ReadBytesAndSize(this NetworkReader reader)
@@ -203,6 +205,7 @@ namespace Mirage.Serialization
             return result;
         }
 
+#if UNITY_2021_3_OR_NEWER
         [WeaverSerializeCollection]
         public static Span<T> ReadSpan<T>(this NetworkReader reader)
         {
@@ -218,7 +221,7 @@ namespace Mirage.Serialization
         }
         [WeaverSerializeCollection]
         public static ReadOnlySpan<T> ReadReadOnlySpan<T>(this NetworkReader reader) => ReadSpan<T>(reader);
-
+#endif
 
         /// <summary>Writes null as 0, and all over values as +1</summary>
         /// <param name="count">The real count or null if collection is is null</param>
