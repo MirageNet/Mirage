@@ -1,3 +1,11 @@
+## [147.2.1](https://github.com/MirageNet/Mirage/compare/v147.2.0...v147.2.1) (2024-03-18)
+
+
+### Bug Fixes
+
+* releasing buffers that are in acksystem when disconnecting ([42691a6](https://github.com/MirageNet/Mirage/commit/42691a6089d7753d60efdc6b7bc1597b675cb7e3))
+* stopping error when adding handlers for prefab that is already registered ([002ec48](https://github.com/MirageNet/Mirage/commit/002ec4819d1859da5b9538b4f758194759b1886e))
+
 # [147.2.0](https://github.com/MirageNet/Mirage/compare/v147.1.0...v147.2.0) (2024-03-12)
 
 
