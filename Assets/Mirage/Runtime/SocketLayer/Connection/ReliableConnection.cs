@@ -16,7 +16,7 @@ namespace Mirage.SocketLayer
         {
 
             _bufferPool = bufferPool;
-            _ackSystem = new AckSystem(this, config, maxPacketSize, time, bufferPool, metrics);
+            _ackSystem = new AckSystem(this, config, maxPacketSize, time, bufferPool, logger, metrics);
         }
 
         public void Dispose()

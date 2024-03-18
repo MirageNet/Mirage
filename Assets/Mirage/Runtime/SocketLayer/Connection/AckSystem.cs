@@ -74,7 +74,7 @@ namespace Mirage.SocketLayer
         /// <param name="connection"></param>
         /// <param name="ackTimeout">how long after last send before sending empty ack</param>
         /// <param name="time"></param>
-        public AckSystem(IRawConnection connection, Config config, int maxPacketSize, ITime time, Pool<ByteBuffer> bufferPool, Metrics metrics = null)
+        public AckSystem(IRawConnection connection, Config config, int maxPacketSize, ITime time, Pool<ByteBuffer> bufferPool, ILogger logger = null, Metrics metrics = null)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
 
@@ -97,9 +97,9 @@ namespace Mirage.SocketLayer
 
             var size = config.SequenceSize;
             if (size > 16) throw new ArgumentOutOfRangeException("SequenceSize", size, "SequenceSize has a max value of 16");
-            _sentAckablePackets = new RingBuffer<AckablePacket>(size);
+            _sentAckablePackets = new RingBuffer<AckablePacket>(size, logger);
             _reliableOrder = new Sequencer(size);
-            _reliableReceive = new RingBuffer<ReliableReceived>(size);
+            _reliableReceive = new RingBuffer<ReliableReceived>(size, logger);
 
             // set lastest to value before 0 so that first packet will be received
             // max will be 1 less than 0

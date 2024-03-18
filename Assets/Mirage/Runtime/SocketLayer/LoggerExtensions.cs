@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using UnityEngine;
 
 namespace Mirage.SocketLayer
@@ -12,6 +13,28 @@ namespace Mirage.SocketLayer
         {
             if (!condition) logger.Log(LogType.Assert, $"Failed Assertion: {msg}");
         }
+
+        /// <summary>
+        /// Assert only when DEBUG
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="condition"></param>
+        [Conditional("DEBUG")]
+        internal static void DebugAssert(this ILogger logger, bool condition)
+        {
+            if (!condition) logger.Log(LogType.Assert, "Failed Assertion");
+        }
+        /// <summary>
+        /// Assert only when DEBUG
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="condition"></param>
+        [Conditional("DEBUG")]
+        internal static void DebugAssert<T>(this ILogger logger, bool condition, T msg)
+        {
+            if (!condition) logger.Log(LogType.Assert, $"Failed Assertion: {msg}");
+        }
+
         internal static void Error<T>(this ILogger logger, T msg = default)
         {
             logger.Log(LogType.Error, msg);
