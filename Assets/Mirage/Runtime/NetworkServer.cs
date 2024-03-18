@@ -59,6 +59,7 @@ namespace Mirage
         public ServerObjectManager ObjectManager;
 
         private Peer _peer;
+        public PoolMetrics? PeerPoolMetrics => _peer?.PoolMetrics;
 
         [Tooltip("Authentication component attached to this object")]
         public AuthenticatorSettings Authenticator;

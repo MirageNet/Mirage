@@ -59,6 +59,7 @@ namespace Mirage.SocketLayer
         /// is server listening on or connected to endpoint
         /// </summary>
         private bool _active;
+        public PoolMetrics PoolMetrics => _bufferPool.Metrics;
 
         public Peer(ISocket socket, int maxPacketSize, IDataHandler dataHandler, Config config = null, ILogger logger = null, Metrics metrics = null)
         {

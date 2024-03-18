@@ -5,6 +5,25 @@ using Stopwatch = System.Diagnostics.Stopwatch;
 
 namespace Mirage.SocketLayer
 {
+    public readonly struct PoolMetrics
+    {
+        public readonly int InPool;
+        public readonly int Created;
+        public readonly int PoolSize;
+
+        public PoolMetrics(int inPool, int created, int poolSize)
+        {
+            InPool = inPool;
+            Created = created;
+            PoolSize = poolSize;
+        }
+
+        public override string ToString()
+        {
+            return $"Pool({InPool}/{PoolSize}, Created={Created})";
+        }
+    }
+
     /// <summary>
     /// Holds a collection of <see cref="ByteBuffer"/> so they can be re-used without allocations
     /// </summary>
@@ -19,6 +38,8 @@ namespace Mirage.SocketLayer
         private int _maxPoolSize;
         private int _next = -1;
         private int _created = 0;
+
+        public PoolMetrics Metrics => new PoolMetrics(_next + 1, _created, _maxPoolSize);
 
         private OverMaxLog _overMaxLog = new OverMaxLog();
 

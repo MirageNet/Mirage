@@ -52,6 +52,7 @@ namespace Mirage
         public bool RunInBackground = true;
 
         private Peer _peer;
+        public PoolMetrics? PeerPoolMetrics => _peer?.PoolMetrics;
 
         [Tooltip("Authentication component attached to this object")]
         public AuthenticatorSettings Authenticator;
