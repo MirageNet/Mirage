@@ -304,7 +304,7 @@ namespace Mirage
             // check identity has a hash before Validate so that there is good error meessage
             ThrowIfZeroHash(identity);
             var prefabHash = identity.PrefabHash;
-            ValidateRegisterSpawnHandler(prefabHash, spawnHandler, unspawnHandler);
+            ValidateRegisterSpawnHandler(prefabHash, identity, spawnHandler, unspawnHandler);
 
             _handlers[prefabHash] = new SpawnHandler(identity, spawnHandler, unspawnHandler);
         }
@@ -318,7 +318,7 @@ namespace Mirage
         /// <param name="unspawnHandler">A method to use as a custom un-spawnhandler on clients.</param>
         public void RegisterSpawnHandler(int prefabHash, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
         {
-            ValidateRegisterSpawnHandler(prefabHash, spawnHandler, unspawnHandler);
+            ValidateRegisterSpawnHandler(prefabHash, null, spawnHandler, unspawnHandler);
 
             _handlers[prefabHash] = new SpawnHandler(spawnHandler, unspawnHandler);
         }
@@ -328,25 +328,25 @@ namespace Mirage
             // check identity has a hash before Validate so that there is good error meessage
             ThrowIfZeroHash(identity);
             var prefabHash = identity.PrefabHash;
-            ValidateRegisterSpawnHandler(prefabHash, spawnHandler, unspawnHandler);
+            ValidateRegisterSpawnHandler(prefabHash, identity, spawnHandler, unspawnHandler);
 
             _handlers[prefabHash] = new SpawnHandler(identity, spawnHandler, unspawnHandler);
         }
 
         public void RegisterSpawnHandler(int prefabHash, SpawnHandlerAsyncDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
         {
-            ValidateRegisterSpawnHandler(prefabHash, spawnHandler, unspawnHandler);
+            ValidateRegisterSpawnHandler(prefabHash, null, spawnHandler, unspawnHandler);
 
             _handlers[prefabHash] = new SpawnHandler(spawnHandler, unspawnHandler);
         }
 
-        private void ValidateRegisterSpawnHandler(int prefabHash, Delegate spawnHandler, UnSpawnDelegate unspawnHandler)
+        private void ValidateRegisterSpawnHandler(int prefabHash, NetworkIdentity prefab, Delegate spawnHandler, UnSpawnDelegate unspawnHandler)
         {
             if (spawnHandler == null)
                 throw new ArgumentNullException(nameof(spawnHandler));
 
             ThrowIfZeroHash(prefabHash);
-            ThrowIfExists(prefabHash);
+            ThrowIfExists(prefabHash, prefab);
 
             if (logger.LogEnabled())
             {
