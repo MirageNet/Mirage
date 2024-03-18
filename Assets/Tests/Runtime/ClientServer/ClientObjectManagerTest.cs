@@ -106,13 +106,10 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             clientObjectManager.RegisterPrefab(identity);
 
-            var exception = Assert.Throws<InvalidOperationException>(() =>
+            Assert.DoesNotThrow(() =>
             {
                 clientObjectManager.RegisterSpawnHandler(identity, (msg) => null, (obj) => { });
-            });
-
-            Assert.That(exception, Has.Message.EqualTo($"Prefab with hash {identity.PrefabHash:X} already registered. " +
-                    $"Unregister before adding new or prefabshandlers. Too add Unspawn handler to prefab use RegisterUnspawnHandler instead"));
+            }, "should not throw if adding handler to prefab that ia already Register");
         }
 
         [Test]
