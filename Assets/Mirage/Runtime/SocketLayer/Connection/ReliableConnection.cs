@@ -4,9 +4,9 @@ using UnityEngine;
 namespace Mirage.SocketLayer
 {
     /// <summary>
-    /// Objects that represends a connection to/from a server/client. Holds state that is needed to update, send, and receive data
+    /// Objects that represents a connection to/from a server/client. Holds state that is needed to update, send, and receive data
     /// </summary>
-    internal sealed class ReliableConnection : Connection, IRawConnection
+    internal sealed class ReliableConnection : Connection, IRawConnection, IDisposable
     {
         private readonly AckSystem _ackSystem;
         private readonly Pool<ByteBuffer> _bufferPool;
@@ -19,6 +19,10 @@ namespace Mirage.SocketLayer
             _ackSystem = new AckSystem(this, config, maxPacketSize, time, bufferPool, metrics);
         }
 
+        public void Dispose()
+        {
+            _ackSystem.Dispose();
+        }
 
         void IRawConnection.SendRaw(byte[] packet, int length)
         {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using UnityEngine;
 
 namespace Mirage.SocketLayer
 {
@@ -12,6 +13,11 @@ namespace Mirage.SocketLayer
         private bool IsDefault(T value)
         {
             return _comparer.Equals(value, default);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool NotDefault(T value)
+        {
+            return !_comparer.Equals(value, default);
         }
 
         private readonly T[] _buffer;
@@ -33,6 +39,8 @@ namespace Mirage.SocketLayer
         /// <para>NOTE: this is not distance from read to write</para>
         /// </summary>
         public int Count => _count;
+
+        public int Capacity => _buffer.Length;
 
         public T this[uint index]
         {
@@ -66,6 +74,8 @@ namespace Mirage.SocketLayer
         /// <returns>sequance of written item</returns>
         public uint Enqueue(T item)
         {
+            Debug.Assert(NotDefault(item), "Adding item, but it was null");
+
             var dist = Sequencer.Distance(_write, _read);
             if (dist == -1) { throw new InvalidOperationException($"Buffer is full, write:{_write} read:{_read}"); }
 
@@ -85,7 +95,7 @@ namespace Mirage.SocketLayer
         public bool TryPeak(out T item)
         {
             item = _buffer[_read];
-            return !IsDefault(item);
+            return NotDefault(item);
         }
 
         /// <summary>
@@ -97,7 +107,7 @@ namespace Mirage.SocketLayer
         public bool Exists(uint index)
         {
             var inBounds = (uint)Sequencer.MoveInBounds(index);
-            return !IsDefault(_buffer[inBounds]);
+            return NotDefault(_buffer[inBounds]);
         }
 
         /// <summary>
@@ -107,6 +117,7 @@ namespace Mirage.SocketLayer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RemoveNext()
         {
+            Debug.Assert(NotDefault(_buffer[_read]), "Removing item, but it was already null");
             _buffer[_read] = default;
             _read = (uint)Sequencer.NextAfter(_read);
             _count--;
@@ -131,10 +142,9 @@ namespace Mirage.SocketLayer
         public bool TryDequeue(out T item)
         {
             item = _buffer[_read];
-            if (!IsDefault(item))
+            if (NotDefault(item))
             {
                 RemoveNext();
-
                 return true;
             }
             else
@@ -146,11 +156,13 @@ namespace Mirage.SocketLayer
 
         public void InsertAt(uint index, T item)
         {
+            Debug.Assert(NotDefault(item), "Adding item, but it was null");
             _count++;
             _buffer[index] = item;
         }
         public void RemoveAt(uint index)
         {
+            Debug.Assert(NotDefault(_buffer[index]), "Removing item, but it was already null");
             _count--;
             _buffer[index] = default;
         }
@@ -177,6 +189,22 @@ namespace Mirage.SocketLayer
         public void MoveReadOne()
         {
             _read = (uint)Sequencer.NextAfter(_read);
+        }
+
+        public void ClearAndRelease(Action<T> releaseItem)
+        {
+            while (_count > 0)
+            {
+                MoveReadToNextNonEmpty();
+                // peak
+                var packet = _buffer[_read];
+
+                // note: releaseItem might remove the item, so do not change count until it has been called
+                releaseItem?.Invoke(packet);
+
+                if (NotDefault(_buffer[_read]))
+                    RemoveNext();
+            }
         }
     }
 }

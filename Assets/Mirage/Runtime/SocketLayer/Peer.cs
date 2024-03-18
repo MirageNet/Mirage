@@ -574,6 +574,9 @@ namespace Mirage.SocketLayer
                 var removed = _connections.Remove(connection.EndPoint);
                 connection.State = ConnectionState.Destroyed;
 
+                if (connection is IDisposable disposable)
+                    disposable.Dispose();
+
                 // value should be removed from dictionary
                 if (!removed)
                 {
