@@ -89,10 +89,28 @@ namespace Mirage
     public interface IObjectOwner
     {
         event Action<NetworkIdentity> OnIdentityChanged;
+        /// <summary>
+        /// The main object owned by this player, normally the player's character
+        /// </summary>
         NetworkIdentity Identity { get; set; }
         bool HasCharacter { get; }
-        void RemoveOwnedObject(NetworkIdentity networkIdentity);
+
+        /// <summary>
+        /// All the objects owned by the player
+        /// </summary>
+        IReadOnlyCollection<NetworkIdentity> OwnedObjects { get; }
         void AddOwnedObject(NetworkIdentity networkIdentity);
+        void RemoveOwnedObject(NetworkIdentity networkIdentity);
+        /// <summary>
+        /// Removes all owned objects. This is useful to call when player disconnects to avoid objects being destroyed
+        /// </summary>
+        /// <param name="sendAuthorityChangeEvent">Should message be send to owner client? If player is disconnecting you should set this false</param>
+        void RemoveAllOwnedObject(bool sendAuthorityChangeEvent);
+        /// <summary>
+        /// Destroys or unspawns all owned objects.
+        /// This is called when the player is disconnects.
+        /// It will be called after <see cref="NetworkServer.Disconnected"/>, so Disconnected can be used to remove any owned objects from the list before they are destroyed.
+        /// </summary>
         void DestroyOwnedObjects();
     }
 

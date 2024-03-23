@@ -96,6 +96,7 @@ namespace Mirage
         /// </summary>
         public IReadOnlyCollection<NetworkIdentity> VisList => _visList;
 
+        public IReadOnlyCollection<NetworkIdentity> OwnedObjects => _ownedObjects;
 
         /// <summary>
         /// Disconnects the player.
@@ -287,6 +288,44 @@ namespace Mirage
             {
                 Identity = null;
             }
+        }
+
+        public void RemoveAllOwnedObject(bool sendAuthorityChangeEvent)
+        {
+            if (logger.LogEnabled()) logger.Log($"Removing all Player[{Address}] OwnedObjects");
+
+            // create a copy because the list might be modified when destroying
+            var ownedObjects = new HashSet<NetworkIdentity>(_ownedObjects);
+            var mainIdentity = Identity;
+
+            foreach (var netIdentity in ownedObjects)
+            {
+                // remove main object last
+                if (netIdentity == mainIdentity)
+                    continue;
+
+                if (netIdentity == null)
+                    continue;
+
+                // code from Identity.RemoveClientAuthority, but without the safety checks, we dont need them here
+                netIdentity.SetOwner(null);
+
+                if (sendAuthorityChangeEvent && netIdentity.ServerObjectManager != null)
+                    Send(new RemoveAuthorityMessage { NetId = netIdentity.NetId });
+            }
+
+            if (mainIdentity != null)
+            {
+                // code from ServerObjectManager.RemoveCharacter, but without the safety checks, we dont need them here
+                mainIdentity.SetOwner(null);
+
+                if (sendAuthorityChangeEvent && mainIdentity.ServerObjectManager != null)
+                    Send(new RemoveCharacterMessage { KeepAuthority = false });
+
+            }
+
+            // clear the hashset because we destroyed them all
+            _ownedObjects.Clear();
         }
 
         /// <summary>
