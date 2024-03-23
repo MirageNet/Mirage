@@ -1,3 +1,10 @@
+# [147.3.0](https://github.com/MirageNet/Mirage/compare/v147.2.1...v147.3.0) (2024-03-23)
+
+
+### Features
+
+* adding public OwnedObjects list and RemoveAllOwnedObject helper method to NetworkPlayer ([5a611ba](https://github.com/MirageNet/Mirage/commit/5a611baefc363f1afaec03dc04f17b3c2aadf4f5))
+
 ## [147.2.1](https://github.com/MirageNet/Mirage/compare/v147.2.0...v147.2.1) (2024-03-18)
 
 
