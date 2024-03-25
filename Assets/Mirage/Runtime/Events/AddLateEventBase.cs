@@ -1,15 +1,12 @@
-using UnityEngine.Events;
-
 namespace Mirage.Events
 {
     public abstract class AddLateEventBase
     {
-        protected abstract UnityEventBase baseEvent { get; }
-        protected bool hasInvoked { get; private set; }
+        protected bool HasInvoked;
 
         protected void MarkInvoked()
         {
-            hasInvoked = true;
+            HasInvoked = true;
         }
 
         /// <summary>
@@ -18,15 +15,7 @@ namespace Mirage.Events
         /// </summary>
         public void Reset()
         {
-            hasInvoked = false;
-        }
-
-        /// <summary>
-        /// Remove all non-persisent (ie created from script) listeners from the event.
-        /// </summary>
-        public void RemoveAllListeners()
-        {
-            baseEvent.RemoveAllListeners();
+            HasInvoked = false;
         }
     }
 }
