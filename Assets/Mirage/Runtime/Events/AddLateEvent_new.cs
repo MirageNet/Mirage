@@ -107,7 +107,7 @@ namespace Mirage.Events
     /// <typeparam name="T0">argument 0</typeparam>
     /// <typeparam name="TEvent">UnityEvent</typeparam>
     [Serializable]
-    public abstract class AddLateEvent_new<T0> : AddLateEventBase, IAddLateEvent_new<T0>
+    public class AddLateEvent_new<T0> : AddLateEventBase, IAddLateEvent_new<T0>
     {
         private static readonly List<Action<T0>> tmp = new List<Action<T0>>();
         private readonly List<Action<T0>> _listeners = new List<Action<T0>>();
@@ -152,7 +152,7 @@ namespace Mirage.Events
     /// <typeparam name="T0"></typeparam>
     /// <typeparam name="T1"></typeparam>
     [Serializable]
-    public abstract class AddLateEvent_new<T0, T1> : AddLateEventBase, IAddLateEvent_new<T0, T1>
+    public class AddLateEvent_new<T0, T1> : AddLateEventBase, IAddLateEvent_new<T0, T1>
     {
         private static readonly List<Action<T0, T1>> tmp = new List<Action<T0, T1>>();
         private readonly List<Action<T0, T1>> _listeners = new List<Action<T0, T1>>();
