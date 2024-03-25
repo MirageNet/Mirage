@@ -410,13 +410,13 @@ namespace Mirage
 
 
         [Header("Events")]
-        [SerializeField] private AddLateEvent _onStartServer = new AddLateEvent();
-        [SerializeField] private AddLateEvent _onStartClient = new AddLateEvent();
-        [SerializeField] private AddLateEvent _onStartLocalPlayer = new AddLateEvent();
-        [SerializeField] private BoolAddLateEvent _onAuthorityChanged = new BoolAddLateEvent();
-        [SerializeField] private NetworkPlayerAddLateEvent _onOwnerChanged = new NetworkPlayerAddLateEvent();
-        [SerializeField] private AddLateEvent _onStopClient = new AddLateEvent();
-        [SerializeField] private AddLateEvent _onStopServer = new AddLateEvent();
+        [SerializeField] private readonly AddLateEvent_new _onStartServer = new AddLateEvent_new();
+        [SerializeField] private readonly AddLateEvent_new _onStartClient = new AddLateEvent_new();
+        [SerializeField] private readonly AddLateEvent_new _onStartLocalPlayer = new AddLateEvent_new();
+        [SerializeField] private readonly AddLateEvent_new<bool> _onAuthorityChanged = new AddLateEvent_new<bool>();
+        [SerializeField] private readonly AddLateEvent_new<INetworkPlayer> _onOwnerChanged = new AddLateEvent_new<INetworkPlayer>();
+        [SerializeField] private readonly AddLateEvent_new _onStopClient = new AddLateEvent_new();
+        [SerializeField] private readonly AddLateEvent_new _onStopServer = new AddLateEvent_new();
         private bool _clientStarted;
         private bool _localPlayerStarted;
         private bool _hadAuthority;
@@ -427,21 +427,21 @@ namespace Mirage
         /// <para>This will be called for objects on a "host" as well as for object on a dedicated server.</para>
         /// <para>OnStartServer is invoked before this object is added to collection of spawned objects</para>
         /// </summary>
-        public IAddLateEvent OnStartServer => _onStartServer;
+        public IAddLateEvent_new OnStartServer => _onStartServer;
 
         /// <summary>
         /// Called on every NetworkBehaviour when it is activated on a client.
         /// <para>Objects on the host have this function called, as there is a local client on the host. The values of SyncVars on object are guaranteed to be initialized
         /// correctly with the latest state from the server when this function is called on the client.</para>
         /// </summary>
-        public IAddLateEvent OnStartClient => _onStartClient;
+        public IAddLateEvent_new OnStartClient => _onStartClient;
 
         /// <summary>
         /// Called when the local player object has been set up.
         /// <para>This happens after OnStartClient(), as it is triggered by an ownership message from the server. This is an appropriate place to activate components or
         /// functionality that should only be active for the local player, such as cameras and input.</para>
         /// </summary>
-        public IAddLateEvent OnStartLocalPlayer => _onStartLocalPlayer;
+        public IAddLateEvent_new OnStartLocalPlayer => _onStartLocalPlayer;
 
         /// <summary>
         /// This is invoked on behaviours that have authority given or removed, see <see cref="HasAuthority">NetworkIdentity.hasAuthority</see>
@@ -455,27 +455,27 @@ namespace Mirage
         /// </para>
         /// <para>NOTE: this even is only called for client and host</para>
         /// </summary>
-        public IAddLateEvent<bool> OnAuthorityChanged => _onAuthorityChanged;
+        public IAddLateEvent_new<bool> OnAuthorityChanged => _onAuthorityChanged;
 
         /// <summary>
         /// This is invoked on behaviours that have an owner assigned.
         /// <para>This even is only called on server</para>
         /// <para>See <see cref="OnAuthorityChanged"/> for more comments on owner and authority</para>
         /// </summary>
-        public IAddLateEvent<INetworkPlayer> OnOwnerChanged => _onOwnerChanged;
+        public IAddLateEvent_new<INetworkPlayer> OnOwnerChanged => _onOwnerChanged;
 
         /// <summary>
         /// This is invoked on clients when the server has caused this object to be destroyed.
         /// <para>This can be used as a hook to invoke effects or do client specific cleanup.</para>
         /// </summary>
         ///<summary>Called on clients when the server destroys the GameObject.</summary>
-        public IAddLateEvent OnStopClient => _onStopClient;
+        public IAddLateEvent_new OnStopClient => _onStopClient;
 
         /// <summary>
         /// This is called on the server when the object is unspawned
         /// </summary>
         /// <remarks>Can be used as hook to save player information</remarks>
-        public IAddLateEvent OnStopServer => _onStopServer;
+        public IAddLateEvent_new OnStopServer => _onStopServer;
 
         /// <summary>
         /// this is used when a connection is destroyed, since the "observers" property is read-only
