@@ -16,7 +16,7 @@ namespace Mirage.Events
 
 
     /// <summary>
-    /// Version of <see cref="IAddLateEvent"/> with 1 argument
+    /// Version of <see cref="IAddLateEventUnity"/> with 1 argument
     /// </summary>
     public interface IAddLateEvent_new<T0>
     {
@@ -26,7 +26,7 @@ namespace Mirage.Events
 
 
     /// <summary>
-    /// Version of <see cref="IAddLateEvent"/> with 2 arguments
+    /// Version of <see cref="IAddLateEventUnity"/> with 2 arguments
     /// </summary>
     public interface IAddLateEvent_new<T0, T1>
     {

@@ -7,5 +7,5 @@ namespace Mirage.Events
     public class BoolUnityEvent : UnityEvent<bool> { }
 
     [Serializable]
-    public class BoolAddLateEvent : AddLateEvent<bool, BoolUnityEvent> { }
+    public class BoolAddLateEvent : AddLateEventUnity<bool, BoolUnityEvent> { }
 }

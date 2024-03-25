@@ -65,11 +65,11 @@ namespace Mirage
         public AuthenticatorSettings Authenticator;
 
         [Header("Events")]
-        [SerializeField] private AddLateEvent _started = new AddLateEvent();
+        [SerializeField] private AddLateEventUnity _started = new AddLateEventUnity();
         /// <summary>
         /// This is invoked when a server is started - including when a host is started.
         /// </summary>
-        public IAddLateEvent Started => _started;
+        public IAddLateEventUnity Started => _started;
 
         /// <summary>
         /// Event fires once a new Client has connect to the Server.
@@ -92,21 +92,21 @@ namespace Mirage
         [FoldoutEvent, SerializeField] private NetworkPlayerEvent _disconnected = new NetworkPlayerEvent();
         public NetworkPlayerEvent Disconnected => _disconnected;
 
-        [SerializeField] private AddLateEvent _stopped = new AddLateEvent();
-        public IAddLateEvent Stopped => _stopped;
+        [SerializeField] private AddLateEventUnity _stopped = new AddLateEventUnity();
+        public IAddLateEventUnity Stopped => _stopped;
 
         /// <summary>
         /// This is invoked when a host is started.
         /// <para>StartHost has multiple signatures, but they all cause this hook to be called.</para>
         /// </summary>
-        [SerializeField] private AddLateEvent _onStartHost = new AddLateEvent();
-        public IAddLateEvent OnStartHost => _onStartHost;
+        [SerializeField] private AddLateEventUnity _onStartHost = new AddLateEventUnity();
+        public IAddLateEventUnity OnStartHost => _onStartHost;
 
         /// <summary>
         /// This is called when a host is stopped.
         /// </summary>
-        [SerializeField] private AddLateEvent _onStopHost = new AddLateEvent();
-        public IAddLateEvent OnStopHost => _onStopHost;
+        [SerializeField] private AddLateEventUnity _onStopHost = new AddLateEventUnity();
+        public IAddLateEventUnity OnStopHost => _onStopHost;
 
         /// <summary>
         /// The connection to the host mode client (if any).

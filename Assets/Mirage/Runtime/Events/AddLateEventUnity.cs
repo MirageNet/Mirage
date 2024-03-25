@@ -66,7 +66,7 @@ namespace Mirage.Events
     /// </code>
     /// </example>
     [Serializable]
-    public sealed class AddLateEvent : AddLateEvent_new, IAddLateEvent
+    public sealed class AddLateEventUnity : AddLateEvent_new, IAddLateEventUnity
     {
         [SerializeField] private UnityEvent _event = new UnityEvent();
 
@@ -103,13 +103,13 @@ namespace Mirage.Events
     }
 
     /// <summary>
-    /// Version of <see cref="AddLateEvent"/> with 1 argument
+    /// Version of <see cref="AddLateEventUnity"/> with 1 argument
     /// <para>Create a non-generic class inheriting from this to use in inspector. Same rules as <see cref="UnityEvent"/></para>
     /// </summary>
     /// <typeparam name="T0">argument 0</typeparam>
     /// <typeparam name="TEvent">UnityEvent</typeparam>
     [Serializable]
-    public abstract class AddLateEvent<T0, TEvent> : AddLateEvent_new<T0>, IAddLateEvent<T0>
+    public abstract class AddLateEventUnity<T0, TEvent> : AddLateEvent_new<T0>, IAddLateEventUnity<T0>
         where TEvent : UnityEvent<T0>, new()
     {
         [SerializeField] private TEvent _event = new TEvent();
@@ -147,13 +147,13 @@ namespace Mirage.Events
     }
 
     /// <summary>
-    /// Version of <see cref="AddLateEvent"/> with 2 arguments
+    /// Version of <see cref="AddLateEventUnity"/> with 2 arguments
     /// <para>Create a non-generic class inheriting from this to use in inspector. Same rules as <see cref="UnityEvent"/></para>
     /// </summary>
     /// <typeparam name="T0"></typeparam>
     /// <typeparam name="T1"></typeparam>
     [Serializable]
-    public abstract class AddLateEvent<T0, T1, TEvent> : AddLateEvent_new<T0, T1>, IAddLateEvent<T0, T1>
+    public abstract class AddLateEventUnity<T0, T1, TEvent> : AddLateEvent_new<T0, T1>, IAddLateEventUnity<T0, T1>
         where TEvent : UnityEvent<T0, T1>, new()
     {
         [SerializeField] private TEvent _event = new TEvent();
