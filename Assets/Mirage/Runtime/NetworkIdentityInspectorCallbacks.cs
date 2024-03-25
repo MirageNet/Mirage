@@ -72,7 +72,7 @@ namespace Mirage.EditorScripts
             DrawDefaultInspector();
 
             var target = (NetworkInspectorCallbacks)base.target;
-            if (GUILayout.Button("Copy Identity events"))
+            if (GUILayout.Button("Move Identity events"))
             {
                 target.Convert();
             }
