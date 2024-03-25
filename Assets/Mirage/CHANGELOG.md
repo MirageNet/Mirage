@@ -1,3 +1,10 @@
+## [147.4.1](https://github.com/MirageNet/Mirage/compare/v147.4.0...v147.4.1) (2024-03-25)
+
+
+### Bug Fixes
+
+* changing button text ([0f55b2b](https://github.com/MirageNet/Mirage/commit/0f55b2ba207ed64c1eb41cdd4bdd75b71dfcfcf9))
+
 # [147.4.0](https://github.com/MirageNet/Mirage/compare/v147.3.0...v147.4.0) (2024-03-25)
 
 
