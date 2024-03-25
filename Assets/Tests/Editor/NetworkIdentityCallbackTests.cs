@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Mirage.Serialization;
 using Mirage.Tests.EnterRuntime;
-using Mirage.Tests.Runtime;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace Mirage.Tests.NetworkIdentityCallbacks
 {
@@ -142,8 +140,8 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
         public void OnStartServerTest()
         {
             // lets add a component to check OnStartserver
-            var func1 = Substitute.For<UnityAction>();
-            var func2 = Substitute.For<UnityAction>();
+            var func1 = Substitute.For<Action>();
+            var func2 = Substitute.For<Action>();
 
             identity.OnStartServer.AddListener(func1);
             identity.OnStartServer.AddListener(func2);
@@ -244,7 +242,7 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
         public void OnStartServerCallsComponentsAndCatchesExceptions()
         {
             // make a mock delegate
-            var func = Substitute.For<UnityAction>();
+            var func = Substitute.For<Action>();
 
             // add it to the listener
             identity.OnStartServer.AddListener(func);
@@ -271,7 +269,7 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
         public void OnStartClientCallsComponentsAndCatchesExceptions()
         {
             // add component
-            var func = Substitute.For<UnityAction>();
+            var func = Substitute.For<Action>();
             identity.OnStartClient.AddListener(func);
 
             func
@@ -297,7 +295,7 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
         public void OnAuthorityChangedCallsComponentsAndCatchesExceptions()
         {
             // add component
-            var func = Substitute.For<UnityAction<bool>>();
+            var func = Substitute.For<Action<bool>>();
             identity.OnAuthorityChanged.AddListener(func);
 
             func
@@ -484,8 +482,8 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
         public void OnStartLocalPlayer()
         {
             // add components
-            var funcEx = Substitute.For<UnityAction>();
-            var func = Substitute.For<UnityAction>();
+            var funcEx = Substitute.For<Action>();
+            var func = Substitute.For<Action>();
 
             identity.OnStartLocalPlayer.AddListener(funcEx);
             identity.OnStartLocalPlayer.AddListener(func);
@@ -521,7 +519,7 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
         [Test]
         public void OnStopClient()
         {
-            var mockCallback = Substitute.For<UnityAction>();
+            var mockCallback = Substitute.For<Action>();
             identity.OnStopClient.AddListener(mockCallback);
 
             identity.StopClient();
@@ -532,7 +530,7 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
         [Test]
         public void OnStopServer()
         {
-            var mockCallback = Substitute.For<UnityAction>();
+            var mockCallback = Substitute.For<Action>();
             identity.OnStopServer.AddListener(mockCallback);
 
             identity.StopServer();
@@ -543,7 +541,7 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
         [Test]
         public void OnStopServerEx()
         {
-            var mockCallback = Substitute.For<UnityAction>();
+            var mockCallback = Substitute.For<Action>();
             mockCallback
                 .When(f => f.Invoke())
                 .Do(f => { throw new Exception("Some exception"); });

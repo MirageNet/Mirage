@@ -4,7 +4,6 @@ using Cysharp.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.TestTools;
 using InvalidOperationException = System.InvalidOperationException;
 
@@ -15,7 +14,7 @@ namespace Mirage.Tests.Runtime.Host
         private GameObject gameObject;
         private NetworkIdentity testIdentity;
 
-        protected async override UniTask ExtraSetup() 
+        protected override async UniTask ExtraSetup()
         {
             await base.ExtraSetup();
             testIdentity = CreateNetworkIdentity();
@@ -169,7 +168,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             serverObjectManager.Spawn(gameObject);
 
-            var mockHandler = Substitute.For<UnityAction>();
+            var mockHandler = Substitute.For<Action>();
             testIdentity.OnStopServer.AddListener(mockHandler);
 
             serverObjectManager.Destroy(gameObject, false);
@@ -228,7 +227,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator ClientNotNullAfterSpawnInStarted() => UniTask.ToCoroutine(async () =>
         {
-            await AsyncUtil.WaitUntilWithTimeout(() => (testIdentity.Client as NetworkClient) == client);
+            await AsyncUtil.WaitUntilWithTimeout(() => testIdentity.Client == client);
         });
     }
 }
