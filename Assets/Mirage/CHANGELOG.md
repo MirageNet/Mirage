@@ -1,3 +1,17 @@
+# [147.4.0](https://github.com/MirageNet/Mirage/compare/v147.3.0...v147.4.0) (2024-03-25)
+
+
+### Bug Fixes
+
+* fixing misplaced #if ([f663543](https://github.com/MirageNet/Mirage/commit/f663543a50c3889fd6c11790f42256b1500b2177))
+* new events should not be abstract ([e1072d0](https://github.com/MirageNet/Mirage/commit/e1072d0dda0818bc6a02632fac36d68b920a7851))
+
+
+### Features
+
+* create new c# only events ([1c9f2d8](https://github.com/MirageNet/Mirage/commit/1c9f2d84ca77b9ef7859cfa13870677b952a6ec4))
+* new NetworkInspectorCallbacks component ([a8051c4](https://github.com/MirageNet/Mirage/commit/a8051c4e4097ab85dfffe029f08938b5456074fc))
+
 # [147.3.0](https://github.com/MirageNet/Mirage/compare/v147.2.1...v147.3.0) (2024-03-23)
 
 
