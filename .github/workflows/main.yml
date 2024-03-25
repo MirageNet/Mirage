@@ -1,6 +1,7 @@
 name: Main Test and Release
 
 on:
+  workflow_dispatch:
   push:
     paths:
     # run when unity asset is changed, or CI is updated
