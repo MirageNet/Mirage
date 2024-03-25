@@ -1,3 +1,17 @@
+# [148.0.0](https://github.com/MirageNet/Mirage/compare/v147.4.2...v148.0.0) (2024-03-25)
+
+
+* refactor!: renaming AddLateEvent_new to AddLateEvent ([5d92eba](https://github.com/MirageNet/Mirage/commit/5d92eba1e3775b1be06f6f79b2a60c6dd1a769dc))
+* refactor!: renaming AddLateEvent to AddLateEventUnity ([169720c](https://github.com/MirageNet/Mirage/commit/169720ca024bd9a40c2b2bd312d26f101e344822))
+* perf!: changing NetworkIdentity events to use new c# only events ([3aaab68](https://github.com/MirageNet/Mirage/commit/3aaab68b93ab610f88b15f09a9cd00a33bc8a794))
+
+
+### BREAKING CHANGES
+
+* renaming from AddLateEvent_new placeholder to just AddLateEvent
+* renaming AddLateEvent which contains UnityEvent and UnityAction to AddLateEventUnity
+* Inspector events removed from NetworkIdentity, use Mirage v147.4.0 first to convert before updating to next version
+
 ## [147.4.2](https://github.com/MirageNet/Mirage/compare/v147.4.1...v147.4.2) (2024-03-25)
 
 
