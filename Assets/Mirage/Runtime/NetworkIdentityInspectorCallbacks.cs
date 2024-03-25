@@ -57,8 +57,8 @@ namespace Mirage
             info.SetValue(Identity, new T());
             return value;
         }
-    }
 #endif
+    }
 }
 
 #if UNITY_EDITOR
