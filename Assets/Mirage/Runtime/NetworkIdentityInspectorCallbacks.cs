@@ -8,13 +8,13 @@ namespace Mirage
     /// </summary>
     public class NetworkInspectorCallbacks : NetworkBehaviour
     {
-        [SerializeField] private AddLateEvent _onStartServer = new AddLateEvent();
-        [SerializeField] private AddLateEvent _onStartClient = new AddLateEvent();
-        [SerializeField] private AddLateEvent _onStartLocalPlayer = new AddLateEvent();
+        [SerializeField] private AddLateEventUnity _onStartServer = new AddLateEventUnity();
+        [SerializeField] private AddLateEventUnity _onStartClient = new AddLateEventUnity();
+        [SerializeField] private AddLateEventUnity _onStartLocalPlayer = new AddLateEventUnity();
         [SerializeField] private BoolAddLateEvent _onAuthorityChanged = new BoolAddLateEvent();
         [SerializeField] private NetworkPlayerAddLateEvent _onOwnerChanged = new NetworkPlayerAddLateEvent();
-        [SerializeField] private AddLateEvent _onStopClient = new AddLateEvent();
-        [SerializeField] private AddLateEvent _onStopServer = new AddLateEvent();
+        [SerializeField] private AddLateEventUnity _onStopClient = new AddLateEventUnity();
+        [SerializeField] private AddLateEventUnity _onStopServer = new AddLateEventUnity();
 
         private void Awake()
         {
@@ -31,13 +31,13 @@ namespace Mirage
 #if UNITY_EDITOR
         public void Convert()
         {
-            _onStartServer = GetAndClear<AddLateEvent>(nameof(_onStartServer));
-            _onStartClient = GetAndClear<AddLateEvent>(nameof(_onStartClient));
-            _onStartLocalPlayer = GetAndClear<AddLateEvent>(nameof(_onStartLocalPlayer));
+            _onStartServer = GetAndClear<AddLateEventUnity>(nameof(_onStartServer));
+            _onStartClient = GetAndClear<AddLateEventUnity>(nameof(_onStartClient));
+            _onStartLocalPlayer = GetAndClear<AddLateEventUnity>(nameof(_onStartLocalPlayer));
             _onAuthorityChanged = GetAndClear<BoolAddLateEvent>(nameof(_onAuthorityChanged));
             _onOwnerChanged = GetAndClear<NetworkPlayerAddLateEvent>(nameof(_onOwnerChanged));
-            _onStopClient = GetAndClear<AddLateEvent>(nameof(_onStopClient));
-            _onStopServer = GetAndClear<AddLateEvent>(nameof(_onStopServer));
+            _onStopClient = GetAndClear<AddLateEventUnity>(nameof(_onStopClient));
+            _onStopServer = GetAndClear<AddLateEventUnity>(nameof(_onStopServer));
 
             UnityEditor.EditorUtility.SetDirty(this);
             UnityEditor.EditorUtility.SetDirty(Identity);

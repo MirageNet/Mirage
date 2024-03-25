@@ -8,7 +8,7 @@ namespace Mirage.Events
     /// <remarks>
     /// Interface only contains AddHandler method because Invoke should only be called from the owner of the event
     /// </remarks>
-    public interface IAddLateEvent : IAddLateEvent_new
+    public interface IAddLateEventUnity : IAddLateEvent_new
     {
         void AddListener(UnityAction handler);
         void RemoveListener(UnityAction handler);
@@ -16,9 +16,9 @@ namespace Mirage.Events
 
 
     /// <summary>
-    /// Version of <see cref="IAddLateEvent"/> with 1 argument
+    /// Version of <see cref="IAddLateEventUnity"/> with 1 argument
     /// </summary>
-    public interface IAddLateEvent<T0> : IAddLateEvent_new<T0>
+    public interface IAddLateEventUnity<T0> : IAddLateEvent_new<T0>
     {
         void AddListener(UnityAction<T0> handler);
         void RemoveListener(UnityAction<T0> handler);
@@ -26,9 +26,9 @@ namespace Mirage.Events
 
 
     /// <summary>
-    /// Version of <see cref="IAddLateEvent"/> with 2 arguments
+    /// Version of <see cref="IAddLateEventUnity"/> with 2 arguments
     /// </summary>
-    public interface IAddLateEvent<T0, T1> : IAddLateEvent_new<T0, T1>
+    public interface IAddLateEventUnity<T0, T1> : IAddLateEvent_new<T0, T1>
     {
         void AddListener(UnityAction<T0, T1> handler);
         void RemoveListener(UnityAction<T0, T1> handler);

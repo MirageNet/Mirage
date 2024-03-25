@@ -138,10 +138,10 @@ namespace Mirage.Events.Tests
 
     public class AddLateEvent0ArgTest : AddLateEventTestsBase
     {
-        private AddLateEvent allLate;
+        private AddLateEventUnity allLate;
         protected override void Init()
         {
-            allLate = new AddLateEvent();
+            allLate = new AddLateEventUnity();
         }
 
         protected override void Invoke()
@@ -172,7 +172,7 @@ namespace Mirage.Events.Tests
 
 
     public class IntUnityEvent : UnityEvent<int> { }
-    public class IntAddLateEvent : AddLateEvent<int, IntUnityEvent> { }
+    public class IntAddLateEvent : AddLateEventUnity<int, IntUnityEvent> { }
     public class AddLateEvent1ArgTest : AddLateEventTestsBase
     {
         private IntAddLateEvent allLate;
@@ -252,7 +252,7 @@ namespace Mirage.Events.Tests
 
 
     public class IntStringUnityEvent : UnityEvent<int, string> { }
-    public class IntStringAddLateEvent : AddLateEvent<int, string, IntStringUnityEvent> { }
+    public class IntStringAddLateEvent : AddLateEventUnity<int, string, IntStringUnityEvent> { }
     public class AddLateEvent2ArgTest : AddLateEventTestsBase
     {
         private IntStringAddLateEvent allLate;

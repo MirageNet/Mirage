@@ -58,7 +58,7 @@ namespace Mirage
         public AuthenticatorSettings Authenticator;
 
         [Header("Events")]
-        [SerializeField] private AddLateEvent _started = new AddLateEvent();
+        [SerializeField] private AddLateEventUnity _started = new AddLateEventUnity();
         [SerializeField] private NetworkPlayerAddLateEvent _connected = new NetworkPlayerAddLateEvent();
         [SerializeField] private NetworkPlayerAddLateEvent _authenticated = new NetworkPlayerAddLateEvent();
         [SerializeField] private DisconnectAddLateEvent _disconnected = new DisconnectAddLateEvent();
@@ -66,22 +66,22 @@ namespace Mirage
         /// <summary>
         /// Event fires when the client starts, before it has connected to the Server.
         /// </summary>
-        public IAddLateEvent Started => _started;
+        public IAddLateEventUnity Started => _started;
 
         /// <summary>
         /// Event fires once the Client has connected its Server.
         /// </summary>
-        public IAddLateEvent<INetworkPlayer> Connected => _connected;
+        public IAddLateEventUnity<INetworkPlayer> Connected => _connected;
 
         /// <summary>
         /// Event fires after the Client connection has successfully been authenticated with its Server.
         /// </summary>
-        public IAddLateEvent<INetworkPlayer> Authenticated => _authenticated;
+        public IAddLateEventUnity<INetworkPlayer> Authenticated => _authenticated;
 
         /// <summary>
         /// Event fires after the Client has disconnected from its Server and Cleanup has been called.
         /// </summary>
-        public IAddLateEvent<ClientStoppedReason> Disconnected => _disconnected;
+        public IAddLateEventUnity<ClientStoppedReason> Disconnected => _disconnected;
 
         /// <summary>
         /// The NetworkConnection object this client is using.
