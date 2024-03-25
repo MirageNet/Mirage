@@ -66,7 +66,7 @@ namespace Mirage.Events
     /// </code>
     /// </example>
     [Serializable]
-    public sealed class AddLateEventUnity : AddLateEvent_new, IAddLateEventUnity
+    public sealed class AddLateEventUnity : AddLateEvent, IAddLateEventUnity
     {
         [SerializeField] private UnityEvent _event = new UnityEvent();
 
@@ -109,7 +109,7 @@ namespace Mirage.Events
     /// <typeparam name="T0">argument 0</typeparam>
     /// <typeparam name="TEvent">UnityEvent</typeparam>
     [Serializable]
-    public abstract class AddLateEventUnity<T0, TEvent> : AddLateEvent_new<T0>, IAddLateEventUnity<T0>
+    public abstract class AddLateEventUnity<T0, TEvent> : AddLateEvent<T0>, IAddLateEventUnity<T0>
         where TEvent : UnityEvent<T0>, new()
     {
         [SerializeField] private TEvent _event = new TEvent();
@@ -153,7 +153,7 @@ namespace Mirage.Events
     /// <typeparam name="T0"></typeparam>
     /// <typeparam name="T1"></typeparam>
     [Serializable]
-    public abstract class AddLateEventUnity<T0, T1, TEvent> : AddLateEvent_new<T0, T1>, IAddLateEventUnity<T0, T1>
+    public abstract class AddLateEventUnity<T0, T1, TEvent> : AddLateEvent<T0, T1>, IAddLateEventUnity<T0, T1>
         where TEvent : UnityEvent<T0, T1>, new()
     {
         [SerializeField] private TEvent _event = new TEvent();

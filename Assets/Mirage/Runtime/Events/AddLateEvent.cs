@@ -66,7 +66,7 @@ namespace Mirage.Events
     /// </code>
     /// </example>
     [Serializable]
-    public class AddLateEvent_new : AddLateEventBase, IAddLateEvent_new
+    public class AddLateEvent : AddLateEventBase, IAddLateEvent
     {
         private static readonly List<Action> tmp = new List<Action>();
         private readonly List<Action> _listeners = new List<Action>();
@@ -101,13 +101,13 @@ namespace Mirage.Events
     }
 
     /// <summary>
-    /// Version of <see cref="AddLateEvent_new"/> with 1 argument
+    /// Version of <see cref="AddLateEvent"/> with 1 argument
     /// <para>Create a non-generic class inheriting from this to use in inspector. Same rules as <see cref="UnityEvent"/></para>
     /// </summary>
     /// <typeparam name="T0">argument 0</typeparam>
     /// <typeparam name="TEvent">UnityEvent</typeparam>
     [Serializable]
-    public class AddLateEvent_new<T0> : AddLateEventBase, IAddLateEvent_new<T0>
+    public class AddLateEvent<T0> : AddLateEventBase, IAddLateEvent<T0>
     {
         private static readonly List<Action<T0>> tmp = new List<Action<T0>>();
         private readonly List<Action<T0>> _listeners = new List<Action<T0>>();
@@ -146,13 +146,13 @@ namespace Mirage.Events
     }
 
     /// <summary>
-    /// Version of <see cref="AddLateEvent_new"/> with 2 arguments
+    /// Version of <see cref="AddLateEvent"/> with 2 arguments
     /// <para>Create a non-generic class inheriting from this to use in inspector. Same rules as <see cref="UnityEvent"/></para>
     /// </summary>
     /// <typeparam name="T0"></typeparam>
     /// <typeparam name="T1"></typeparam>
     [Serializable]
-    public class AddLateEvent_new<T0, T1> : AddLateEventBase, IAddLateEvent_new<T0, T1>
+    public class AddLateEvent<T0, T1> : AddLateEventBase, IAddLateEvent<T0, T1>
     {
         private static readonly List<Action<T0, T1>> tmp = new List<Action<T0, T1>>();
         private readonly List<Action<T0, T1>> _listeners = new List<Action<T0, T1>>();
