@@ -5,7 +5,9 @@ using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver
 {
-    // todo add docs for what this type does
+    /// <summary>
+    /// Replaces SyncVar fields with their property getter/setting
+    /// </summary>
     public class PropertySiteProcessor
     {
         // setter functions that replace [SyncVar] member variable references. dict<field, replacement>
@@ -19,10 +21,22 @@ namespace Mirage.Weaver
             CodePass.ForEachInstruction(moduleDef, WeavedMethods, ProcessInstruction);
         }
 
-        private static bool WeavedMethods(MethodDefinition md) =>
-                        md.Name != ".cctor" &&
-                        md.Name != NetworkBehaviourProcessor.ProcessedFunctionName &&
-                        !md.IsConstructor;
+        private static bool WeavedMethods(MethodDefinition md)
+        {
+            if (md.Name == ".cctor")
+                return false;
+            if (md.Name == NetworkBehaviourProcessor.ProcessedFunctionName)
+                return false;
+
+            // dont use network get/set inside unity consturctors
+            // this is because they will try to set dirtyBit and throw unity errors
+            if (md.DeclaringType.IsDerivedFrom<UnityEngine.Object>() && md.IsConstructor)
+                return false;
+
+            // note: Constructor for non-unity types should be safe to use, for example get/set a sync var on a NB from without a struct
+
+            return true;
+        }
 
         private Instruction ProcessInstruction(MethodDefinition md, Instruction instr, SequencePoint sequencePoint)
         {
