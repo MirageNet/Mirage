@@ -24,6 +24,48 @@ namespace Mirage.Weaver
                         md.Name != NetworkBehaviourProcessor.ProcessedFunctionName &&
                         !md.IsConstructor;
 
+        private Instruction ProcessInstruction(MethodDefinition md, Instruction instr, SequencePoint sequencePoint)
+        {
+            if (instr.OpCode == OpCodes.Stfld && instr.Operand is FieldReference opFieldst)
+            {
+                FieldReference resolved = opFieldst.Resolve();
+                if (resolved == null)
+                {
+                    resolved = opFieldst.DeclaringType.Resolve().GetField(opFieldst.Name);
+                }
+
+                // this instruction sets the value of a field. cache the field reference.
+                ProcessInstructionSetterField(instr, resolved);
+            }
+
+            if (instr.OpCode == OpCodes.Ldfld && instr.Operand is FieldReference opFieldld)
+            {
+                FieldReference resolved = opFieldld.Resolve();
+                if (resolved == null)
+                {
+                    resolved = opFieldld.DeclaringType.Resolve().GetField(opFieldld.Name);
+                }
+
+                // this instruction gets the value of a field. cache the field reference.
+                ProcessInstructionGetterField(instr, resolved);
+            }
+
+            if (instr.OpCode == OpCodes.Ldflda && instr.Operand is FieldReference opFieldlda)
+            {
+                FieldReference resolved = opFieldlda.Resolve();
+                if (resolved == null)
+                {
+                    resolved = opFieldlda.DeclaringType.Resolve().GetField(opFieldlda.Name);
+                }
+
+                // loading a field by reference,  watch out for initobj instruction
+                // see https://github.com/vis2k/Mirror/issues/696
+                return ProcessInstructionLoadAddress(md, instr, resolved);
+            }
+
+            return instr;
+        }
+
         // replaces syncvar write access with the NetworkXYZ.get property calls
         private void ProcessInstructionSetterField(Instruction i, FieldReference opField)
         {
@@ -66,48 +108,6 @@ namespace Mirage.Weaver
                     i.Operand = replacement;
                 }
             }
-        }
-
-        private Instruction ProcessInstruction(MethodDefinition md, Instruction instr, SequencePoint sequencePoint)
-        {
-            if (instr.OpCode == OpCodes.Stfld && instr.Operand is FieldReference opFieldst)
-            {
-                FieldReference resolved = opFieldst.Resolve();
-                if (resolved == null)
-                {
-                    resolved = opFieldst.DeclaringType.Resolve().GetField(opFieldst.Name);
-                }
-
-                // this instruction sets the value of a field. cache the field reference.
-                ProcessInstructionSetterField(instr, resolved);
-            }
-
-            if (instr.OpCode == OpCodes.Ldfld && instr.Operand is FieldReference opFieldld)
-            {
-                FieldReference resolved = opFieldld.Resolve();
-                if (resolved == null)
-                {
-                    resolved = opFieldld.DeclaringType.Resolve().GetField(opFieldld.Name);
-                }
-
-                // this instruction gets the value of a field. cache the field reference.
-                ProcessInstructionGetterField(instr, resolved);
-            }
-
-            if (instr.OpCode == OpCodes.Ldflda && instr.Operand is FieldReference opFieldlda)
-            {
-                FieldReference resolved = opFieldlda.Resolve();
-                if (resolved == null)
-                {
-                    resolved = opFieldlda.DeclaringType.Resolve().GetField(opFieldlda.Name);
-                }
-
-                // loading a field by reference,  watch out for initobj instruction
-                // see https://github.com/vis2k/Mirror/issues/696
-                return ProcessInstructionLoadAddress(md, instr, resolved);
-            }
-
-            return instr;
         }
 
         private Instruction ProcessInstructionLoadAddress(MethodDefinition md, Instruction instr, FieldReference opField)
