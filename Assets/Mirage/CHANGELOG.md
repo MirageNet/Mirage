@@ -1,3 +1,10 @@
+## [148.0.1](https://github.com/MirageNet/Mirage/compare/v148.0.0...v148.0.1) (2024-03-28)
+
+
+### Bug Fixes
+
+* fixing use of GO/NI/NB inside Constructor ([2f5db3d](https://github.com/MirageNet/Mirage/commit/2f5db3de45cd985ba6af428c9cf521dfd4b3cfc3))
+
 # [148.0.0](https://github.com/MirageNet/Mirage/compare/v147.4.2...v148.0.0) (2024-03-25)
 
 
