@@ -68,7 +68,7 @@ namespace Mirage.Events
     [Serializable]
     public class AddLateEvent : AddLateEventBase, IAddLateEvent
     {
-        private static readonly List<Action> tmp = new List<Action>();
+        private readonly List<Action> tmp = new List<Action>();
         private readonly List<Action> _listeners = new List<Action>();
 
         public void AddListener(Action handler)
@@ -109,7 +109,7 @@ namespace Mirage.Events
     [Serializable]
     public class AddLateEvent<T0> : AddLateEventBase, IAddLateEvent<T0>
     {
-        private static readonly List<Action<T0>> tmp = new List<Action<T0>>();
+        private readonly List<Action<T0>> tmp = new List<Action<T0>>();
         private readonly List<Action<T0>> _listeners = new List<Action<T0>>();
 
         protected T0 _arg0;
@@ -154,7 +154,7 @@ namespace Mirage.Events
     [Serializable]
     public class AddLateEvent<T0, T1> : AddLateEventBase, IAddLateEvent<T0, T1>
     {
-        private static readonly List<Action<T0, T1>> tmp = new List<Action<T0, T1>>();
+        private readonly List<Action<T0, T1>> tmp = new List<Action<T0, T1>>();
         private readonly List<Action<T0, T1>> _listeners = new List<Action<T0, T1>>();
 
         protected T0 _arg0;
