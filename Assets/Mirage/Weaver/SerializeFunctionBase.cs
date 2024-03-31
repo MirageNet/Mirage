@@ -162,7 +162,15 @@ namespace Mirage.Weaver
                 {
                     throw new SerializeFunctionException($"{typeReference.Name} is an unsupported type. Multidimensional arrays are not supported", typeReference);
                 }
-                var elementType = typeReference.GetElementType();
+
+                TypeReference elementType;
+                if (typeReference is ArrayType arrayType)
+                    // need to use ArrayType to support jagged arrays
+                    elementType = arrayType.ElementType;
+                else
+                    // fallback to GetElementType just incase
+                    elementType = typeReference.GetElementType();
+
                 var arrayMethod = module.ImportReference(ArrayExpression);
                 return GenerateCollectionFunction(typeReference, new List<TypeReference> { elementType }, arrayMethod);
             }

@@ -1174,6 +1174,38 @@ namespace Mirage.Tests.Runtime.Serialization
         }
 
         [Test]
+        [TestCase(2, 2)]
+        [TestCase(2, 3)]
+        [TestCase(2, 5)]
+        [TestCase(4, 5)]
+        public void CanWriteJaggedArray(int size1, int size2)
+        {
+            var array = new int[size1][];
+            for (var i = 0; i < array.Length; i++)
+            {
+                array[i] = new int[size2];
+                for (var j = 0; j < array[i].Length; j++)
+                    array[i][j] = (i * 10) + j;
+            }
+
+            writer.Write(array);
+            reader.Reset(writer.ToArraySegment());
+            var unpacked = reader.Read<int[][]>();
+
+            Assert.That(unpacked, Is.Not.Null);
+            Assert.That(unpacked.Length == array.Length);
+            for (var i = 0; i < array.Length; i++)
+            {
+                Assert.That(unpacked[i].Length == array[i].Length);
+                for (var j = 0; j < array[i].Length; j++)
+                {
+                    Debug.Log(unpacked[i][j]);
+                    Assert.That(unpacked[i][j] == array[i][j]);
+                }
+            }
+        }
+
+        [Test]
         public void SByteLength()
         {
             writer.WriteSByte(14);
@@ -1334,26 +1366,31 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(outValue.Field3, Is.EqualTo(default(int)));
             Assert.That(outValue.Field4, Is.EqualTo(default(int)));
         }
-    }
 
-    [NetworkMessage]
-    public class _ClassWithProtected
-    {
-        // should serialize
-        public int Field1;
+        [NetworkMessage]
+        public class _ClassWithProtected
+        {
+            // should serialize
+            public int Field1;
 
-        // should NOT serialize
-        protected int _field2;
-        private int _field3;
-        internal int Field4;
+            // should NOT serialize
+            protected int _field2;
+            private int _field3;
+            internal int Field4;
 
-        // accessors for test
-        public int Field2 { get => _field2; set => _field2 = value; }
-        public int Field3 { get => _field3; set => _field3 = value; }
-    }
+            // accessors for test
+            public int Field2 { get => _field2; set => _field2 = value; }
+            public int Field3 { get => _field3; set => _field3 = value; }
+        }
 
-    public struct _MessageWithProtected
-    {
-        public _ClassWithProtected Field;
+        public struct _MessageWithProtected
+        {
+            public _ClassWithProtected Field;
+        }
+
+        public struct _MessageWithJaggedArray
+        {
+            public int[][] array;
+        }
     }
 }
