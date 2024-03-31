@@ -1,3 +1,16 @@
+# [148.1.0](https://github.com/MirageNet/Mirage/compare/v148.0.2...v148.1.0) (2024-03-31)
+
+
+### Bug Fixes
+
+* adding error message if attribute is used on static method ([dc66a54](https://github.com/MirageNet/Mirage/commit/dc66a544586f3f3ded4ca20f0c6753529db74a32))
+* trying to fix import issues after file renames ([7a0b3f3](https://github.com/MirageNet/Mirage/commit/7a0b3f347df91043e82ecd2ec0e6fb26d70e56c3))
+
+
+### Features
+
+* support for jagged arrays ([2ec6d3a](https://github.com/MirageNet/Mirage/commit/2ec6d3afc16f7560844697585d92b33a8239019f))
+
 ## [148.0.2](https://github.com/MirageNet/Mirage/compare/v148.0.1...v148.0.2) (2024-03-29)
 
 
