@@ -116,7 +116,7 @@ namespace Mirage.Weaver
             }
         }
 
-        private bool TryGetAttribte<TAttribute>(MethodDefinition md, FoundType foundType, out CustomAttribute attribute)
+        private bool TryGetAttribute<TAttribute>(MethodDefinition md, FoundType foundType, out CustomAttribute attribute)
         {
             attribute = md.GetCustomAttribute<TAttribute>();
             if (attribute == null)
@@ -140,6 +140,12 @@ namespace Mirage.Weaver
                 return false;
             }
 
+            if (md.IsStatic)
+            {
+                logger.Error($"{attribute.AttributeType.Name} will not work on static method.", md);
+                return false;
+            }
+
             // dont need to set modified for errors, so we set it here when we start doing ILProcessing
             modified = true;
             return true;
@@ -147,7 +153,7 @@ namespace Mirage.Weaver
 
         private void InjectGuard<TAttribute>(MethodDefinition md, FoundType foundType, MethodReference predicate, string format)
         {
-            if (!TryGetAttribte<TAttribute>(md, foundType, out var attribute))
+            if (!TryGetAttribute<TAttribute>(md, foundType, out var attribute))
                 return;
 
             var throwError = attribute.GetField("error", true);
@@ -176,7 +182,7 @@ namespace Mirage.Weaver
 
         private void InjectNetworkMethodGuard(MethodDefinition md, FoundType foundType)
         {
-            if (!TryGetAttribte<NetworkMethodAttribute>(md, foundType, out var attribute))
+            if (!TryGetAttribute<NetworkMethodAttribute>(md, foundType, out var attribute))
                 return;
 
             // Get the required flags from the attribute constructor argument
