@@ -563,6 +563,7 @@ namespace Mirage
 
             player.DestroyOwnedObjects();
             player.Identity = null;
+            player.RemoveAllVisibleObjects();
 
             if (player == LocalPlayer)
                 LocalPlayer = null;
