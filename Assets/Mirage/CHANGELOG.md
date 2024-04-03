@@ -1,3 +1,10 @@
+## [148.1.1](https://github.com/MirageNet/Mirage/compare/v148.1.0...v148.1.1) (2024-04-03)
+
+
+### Bug Fixes
+
+* removing disconnected player from observer lists ([ece4500](https://github.com/MirageNet/Mirage/commit/ece4500d9c6b004ce2a3f9749b8d4a5935154ec3))
+
 # [148.1.0](https://github.com/MirageNet/Mirage/compare/v148.0.2...v148.1.0) (2024-03-31)
 
 
