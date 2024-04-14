@@ -1,5 +1,8 @@
+using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
+using Mirage.Serialization;
+using Mirage.Tests.Runtime.Syncing;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
@@ -13,6 +16,21 @@ namespace Mirage.Tests.Runtime.ClientServer
 
     public class NetworkBehaviorSyncvarTest : ClientServerSetup<SampleBehaviorWithNB>
     {
+        private NetworkWriter writer;
+        private MirageNetworkReader reader;
+
+        protected override UniTask ExtraSetup()
+        {
+            writer = new NetworkWriter(1200);
+            reader = new MirageNetworkReader();
+            return base.ExtraSetup();
+        }
+        public override void ExtraTearDown()
+        {
+            reader?.Dispose();
+        }
+
+
         [Test]
         public void IsNullByDefault()
         {
@@ -31,31 +49,11 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.That(clientComponent.target, Is.SameAs(clientComponent));
         });
 
-        [Test]
-        public void UpdateAfterSpawn()
-        {
-            // this situation can happen when the client does nto see an object
-            // but the object is assigned in a syncvar.
-            // this can easily happen during spawn if spawning in an unexpected order
-            // or if there is AOI in play.
-            // in this case we would have a valid net id, but we would not
-            // find the object at spawn time
-
-            var goSyncvar = new NetworkBehaviorSyncvar
-            {
-                _objectLocator = client.World,
-                _netId = serverIdentity.NetId,
-                _component = null,
-            };
-
-            Assert.That(goSyncvar.Value, Is.SameAs(clientComponent));
-        }
-
         [UnityTest]
         public IEnumerator SpawnWithTarget() => UniTask.ToCoroutine(async () =>
         {
             // create an object, set the target and spawn it
-            UnityEngine.GameObject newObject = InstantiateForTest(_characterPrefabGo);
+            var newObject = InstantiateForTest(_characterPrefabGo);
             var newBehavior = newObject.GetComponent<SampleBehaviorWithNB>();
             newBehavior.target = serverComponent;
             serverObjectManager.Spawn(newObject);
@@ -71,5 +69,74 @@ namespace Mirage.Tests.Runtime.ClientServer
             // cleanup
             serverObjectManager.Destroy(newObject);
         });
+
+        [Test]
+        public void NetworkBehaviorSyncvarGetOnClient()
+        {
+            var goSyncvar = new NetworkBehaviorSyncvar
+            {
+                _objectLocator = client.World,
+                _netId = serverIdentity.NetId,
+                _component = null,
+            };
+
+            Assert.That(goSyncvar.Value, Is.SameAs(clientComponent));
+        }
+        [Test]
+        public void NetworkBehaviorSyncvarGetOnClientGeneric()
+        {
+            var goSyncvar = (NetworkBehaviorSyncvar<SampleBehaviorWithNB>)new NetworkBehaviorSyncvar
+            {
+                _objectLocator = client.World,
+                _netId = serverIdentity.NetId,
+                _component = null,
+            };
+
+            Assert.That(goSyncvar.Value, Is.TypeOf<SampleBehaviorWithNB>());
+            Assert.That(goSyncvar.Value, Is.SameAs(clientComponent));
+        }
+        [Test]
+        public void NetworkBehaviorSyncvarSync()
+        {
+            var serverValue = new NetworkBehaviorSyncvar(serverComponent);
+            writer.Write(serverValue);
+            reader.ObjectLocator = client.World;
+            reader.Reset(writer.ToArraySegment());
+            var clientValue = reader.Read<NetworkBehaviorSyncvar>();
+
+            Assert.That(clientValue.Value, Is.SameAs(clientComponent));
+        }
+        [Test]
+        public void NetworkBehaviorSyncvarSyncGeneric()
+        {
+            var serverValue = new NetworkBehaviorSyncvar<SampleBehaviorWithNB>(serverComponent);
+            writer.Write(serverValue);
+            reader.ObjectLocator = client.World;
+            reader.Reset(writer.ToArraySegment());
+            var clientValue = reader.Read<NetworkBehaviorSyncvar<SampleBehaviorWithNB>>();
+
+            Assert.That(clientValue.Value, Is.TypeOf<SampleBehaviorWithNB>());
+            Assert.That(clientValue.Value, Is.SameAs(clientComponent));
+        }
+        [Test]
+        public void GetAs()
+        {
+            var serverValue = new NetworkBehaviorSyncvar(serverComponent);
+            var value = serverValue.GetAs<SampleBehaviorWithNB>();
+
+            Assert.That(value, Is.TypeOf<SampleBehaviorWithNB>());
+            Assert.That(value, Is.SameAs(serverComponent));
+        }
+
+        [Test]
+        public void GetAsThrow()
+        {
+            var serverValue = new NetworkBehaviorSyncvar(serverComponent);
+
+            Assert.Throws<InvalidCastException>(() =>
+            {
+                var value = serverValue.GetAs<MockPlayer>();
+            });
+        }
     }
 }

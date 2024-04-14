@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Mirage.Serialization;
 
 namespace Mirage
@@ -18,6 +19,11 @@ namespace Mirage
         internal int _componentId;
 
         internal NetworkBehaviour _component;
+
+        public NetworkBehaviorSyncvar(NetworkBehaviour behaviour) : this()
+        {
+            _component = behaviour;
+        }
 
         internal uint NetId => _component != null ? _component.NetId : _netId;
         internal int ComponentId => _component != null ? _component.ComponentIndex : _componentId;
@@ -48,6 +54,58 @@ namespace Mirage
                 _component = value;
             }
         }
+
+        /// <summary>
+        /// returns Value cast as T
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <exception cref="System.InvalidCastException"></exception>
+        /// /// <returns></returns>
+        public T GetAs<T>() where T : NetworkBehaviour
+        {
+            var value = Value;
+            if (value is null)
+                return null;
+            else
+                return (T)value;
+        }
+
+        public static implicit operator NetworkBehaviorSyncvar(NetworkBehaviour behaviour) => new NetworkBehaviorSyncvar(behaviour);
+    }
+
+    public struct NetworkBehaviorSyncvar<T> where T : NetworkBehaviour
+    {
+        private NetworkBehaviorSyncvar inner;
+
+        public NetworkBehaviorSyncvar(T behaviour) : this()
+        {
+            inner = new NetworkBehaviorSyncvar(behaviour);
+        }
+
+        internal uint NetId
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => inner.NetId;
+        }
+
+        internal int ComponentId
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => inner.ComponentId;
+        }
+
+        public T Value
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => (T)inner.Value;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => inner.Value = value;
+        }
+
+        public static implicit operator NetworkBehaviorSyncvar<T>(T behaviour) => new NetworkBehaviorSyncvar<T>(behaviour);
+        public static implicit operator NetworkBehaviorSyncvar(NetworkBehaviorSyncvar<T> generic) => generic.inner;
+        public static explicit operator NetworkBehaviorSyncvar<T>(NetworkBehaviorSyncvar syncvar) => new NetworkBehaviorSyncvar<T>() { inner = syncvar };
     }
 
 
@@ -76,6 +134,19 @@ namespace Mirage
                 _componentId = componentId,
                 _component = hasValue ? identity.NetworkBehaviours[componentId] : null
             };
+        }
+
+        [WeaverSerializeCollection]
+        public static void WriteGenericNetworkBehaviorSyncVar<T>(this NetworkWriter writer, NetworkBehaviorSyncvar<T> id) where T : NetworkBehaviour
+        {
+            WriteNetworkBehaviorSyncVar(writer, id);
+        }
+
+        [WeaverSerializeCollection]
+        public static NetworkBehaviorSyncvar<T> ReadGenericNetworkBehaviourSyncVar<T>(this NetworkReader reader) where T : NetworkBehaviour
+        {
+            var syncvar = ReadNetworkBehaviourSyncVar(reader);
+            return (NetworkBehaviorSyncvar<T>)syncvar;
         }
     }
 }
