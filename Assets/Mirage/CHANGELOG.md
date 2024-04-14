@@ -1,3 +1,10 @@
+# [148.2.0](https://github.com/MirageNet/Mirage/compare/v148.1.1...v148.2.0) (2024-04-14)
+
+
+### Features
+
+* adding generic NetworkBehaviorSyncvar for ease of use ([5caabd9](https://github.com/MirageNet/Mirage/commit/5caabd9bf60798a3112a359646d9d1af2b96c957))
+
 ## [148.1.1](https://github.com/MirageNet/Mirage/compare/v148.1.0...v148.1.1) (2024-04-03)
 
 
