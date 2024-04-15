@@ -372,7 +372,7 @@ namespace Mirage
 #endif
                 return _prefabHash;
             }
-            internal set
+            set
             {
                 if (value == 0)
                 {
