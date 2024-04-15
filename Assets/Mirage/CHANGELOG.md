@@ -1,3 +1,10 @@
+# [148.3.0](https://github.com/MirageNet/Mirage/compare/v148.2.0...v148.3.0) (2024-04-15)
+
+
+### Features
+
+* making NetworkIdentity.PrefabHash public ([0ec3753](https://github.com/MirageNet/Mirage/commit/0ec3753c09f5dd9857194e14e8b337b0d7dcc744))
+
 # [148.2.0](https://github.com/MirageNet/Mirage/compare/v148.1.1...v148.2.0) (2024-04-14)
 
 
