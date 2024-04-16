@@ -1,3 +1,10 @@
+# [148.4.0](https://github.com/MirageNet/Mirage/compare/v148.3.0...v148.4.0) (2024-04-16)
+
+
+### Features
+
+* adding callback that can be used to handle Authentication Failed ([1cdbfb6](https://github.com/MirageNet/Mirage/commit/1cdbfb69caeea2270bb774b4c2df2983dd79953a))
+
 # [148.3.0](https://github.com/MirageNet/Mirage/compare/v148.2.0...v148.3.0) (2024-04-15)
 
 
