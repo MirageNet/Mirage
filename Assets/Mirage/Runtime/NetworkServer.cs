@@ -151,6 +151,8 @@ namespace Mirage
         private SyncVarReceiver _syncVarReceiver;
         public MessageHandler MessageHandler { get; private set; }
 
+        private Action<INetworkPlayer, AuthenticationResult> _authFallCallback;
+
         /// <summary>
         /// Set to true if you want to manually call <see cref="UpdateReceive"/> and <see cref="UpdateSent"/> and stop mirage from automatically calling them
         /// </summary>
@@ -378,9 +380,25 @@ namespace Mirage
             }
             else
             {
-                // todo use reason
-                player.Disconnect();
+                if (_authFallCallback != null)
+                {
+                    if (logger.LogEnabled()) logger.Log($"Calling user auth failed callback");
+                    _authFallCallback.Invoke(player, result);
+                }
+                else
+                {
+                    if (logger.LogEnabled()) logger.Log($"Default auth failed, disconnecting player");
+                    player.Disconnect();
+                }
             }
+        }
+
+        public void SetAuthenticationFailedCallback(Action<INetworkPlayer, AuthenticationResult> callback)
+        {
+            if (_authFallCallback != null && callback != null)
+                if (logger.WarnEnabled()) logger.LogWarning($"Replacing old callback. Only 1 auth failed callback can be used at once");
+
+            _authFallCallback = callback;
         }
 
         private void AuthenticationSuccess(INetworkPlayer player, AuthenticationResult result)
