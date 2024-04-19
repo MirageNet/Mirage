@@ -1,3 +1,10 @@
+## [148.4.1](https://github.com/MirageNet/Mirage/compare/v148.4.0...v148.4.1) (2024-04-19)
+
+
+### Bug Fixes
+
+* fixing return RPC not generating serialize functions ([3d162b8](https://github.com/MirageNet/Mirage/commit/3d162b8692c69a961feef1432f3981241f0de7a3))
+
 # [148.4.0](https://github.com/MirageNet/Mirage/compare/v148.3.0...v148.4.0) (2024-04-16)
 
 
