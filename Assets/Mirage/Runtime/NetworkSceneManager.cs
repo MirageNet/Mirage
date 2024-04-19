@@ -573,7 +573,7 @@ namespace Mirage
             // nornal client invokes start, then finish, even if scene is already loaded
             OnClientStartedSceneChange?.Invoke(ActiveScenePath, SceneOperation.Normal);
 
-            // server server and client copy of hoost player as ready
+            // server server and client copy of host player as ready
             Server.LocalClient.Player.SceneIsReady = true;
             Server.LocalPlayer.SceneIsReady = true;
 

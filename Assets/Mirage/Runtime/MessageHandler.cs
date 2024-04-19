@@ -97,7 +97,7 @@ namespace Mirage
                     LogAndCheckDisconnect(player, e);
 
                     if (_rethrowException)
-                        // note, dont add Exception here, otherwise strack trace will be overritten
+                        // note, dont add Exception here, otherwise stack trace will be overwritten
                         throw;
                 }
             }
@@ -117,7 +117,7 @@ namespace Mirage
         {
             if (_messageHandlers.TryGetValue(msgType, out var handler))
             {
-                if (CheckAuthenticaiton(player, msgType, handler))
+                if (CheckAuthentication(player, msgType, handler))
                     handler.Delegate.Invoke(player, reader);
             }
             else
@@ -136,7 +136,7 @@ namespace Mirage
             }
         }
 
-        private bool CheckAuthenticaiton(INetworkPlayer player, int msgType, Handler handler)
+        private bool CheckAuthentication(INetworkPlayer player, int msgType, Handler handler)
         {
             // always allowed
             if (handler.AllowUnauthenticated)
@@ -146,14 +146,14 @@ namespace Mirage
             if (player.Authentication != null)
                 return true;
 
-            // not authenciated
+            // not authenticated
             // log and disconnect
 
             // player is Unauthenticated so we dont trust them
             // info log only, so attacker can force server to spam logs 
             if (logger.LogEnabled())
             {
-                // we know msgType is found (because we have hanlder), so we dont need if check for tryGet
+                // we know msgType is found (because we have handler), so we dont need if check for tryGet
                 MessagePacker.MessageTypes.TryGetValue(msgType, out var type);
                 logger.Log($"Unauthenticated Message {type} received from {player}, player is not Authenticated so handler will not be invoked");
             }
