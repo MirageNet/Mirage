@@ -305,7 +305,15 @@ namespace Mirage.Weaver
             // UniTask is allowed
             var unitaskType = typeof(UniTask<int>).GetGenericTypeDefinition();
             if (returnType.Is(unitaskType))
+            {
+                var genericReturnType = (GenericInstanceType)returnType;
+                var genericArg = genericReturnType.GenericArguments[0];
+                // ensure serialize functions exist
+                _ = writers.GetFunction_Throws(genericArg);
+                _ = readers.GetFunction_Throws(genericArg);
+
                 return ReturnType.UniTask;
+            }
 
             throw new RpcException($"Use UniTask<{md.ReturnType}> to return values from [ClientRpc] or [ServerRpc]", md);
         }
