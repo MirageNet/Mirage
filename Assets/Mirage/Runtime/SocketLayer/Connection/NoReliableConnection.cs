@@ -8,17 +8,14 @@ namespace Mirage.SocketLayer
     /// </summary>
     internal sealed class NoReliableConnection : Connection
     {
-        private const int HEADER_SIZE = 1 + MESSAGE_LENGTH_SIZE;
-        private const int MESSAGE_LENGTH_SIZE = 2;
+        private const int HEADER_SIZE = 1 + Batch.MESSAGE_LENGTH_SIZE;
 
-        private byte[] _nextBatch;
-        private int _batchLength;
+        private readonly Batch _nextBatchReliable;
 
         internal NoReliableConnection(Peer peer, IEndPoint endPoint, IDataHandler dataHandler, Config config, int maxPacketSize, Time time, ILogger logger, Metrics metrics)
             : base(peer, endPoint, dataHandler, config, maxPacketSize, time, logger, metrics)
         {
-            _nextBatch = new byte[maxPacketSize];
-            CreateNewBatch();
+            _nextBatchReliable = new ArrayBatch(maxPacketSize, SendBatchInternal, PacketType.Reliable);
 
             if (maxPacketSize > ushort.MaxValue)
             {
@@ -26,7 +23,13 @@ namespace Mirage.SocketLayer
             }
         }
 
+        private void SendBatchInternal(byte[] batch, int length)
+        {
+            _peer.Send(this, batch, length);
+        }
 
+        // just sue SendReliable for unreliable/notify
+        // note: we dont need to pass in that it is reliable, receiving doesn't really care what channel it is
         public override void SendUnreliable(byte[] packet, int offset, int length) => SendReliable(packet, offset, length);
         public override void SendNotify(byte[] packet, int offset, int length, INotifyCallBack callBacks)
         {
@@ -53,35 +56,8 @@ namespace Mirage.SocketLayer
                 throw new ArgumentException($"Message is bigger than MTU, size:{length} but max message size is {_maxPacketSize - HEADER_SIZE}");
             }
 
-
-            var msgLength = length + MESSAGE_LENGTH_SIZE;
-            if (_batchLength + msgLength > _maxPacketSize)
-            {
-                // if full, send and create new
-                SendBatch();
-            }
-
-            AddToBatch(message, offset, length);
+            _nextBatchReliable.AddMessage(message, offset, length);
             _metrics?.OnSendMessageReliable(length);
-        }
-
-        private void SendBatch()
-        {
-            _peer.Send(this, _nextBatch, _batchLength);
-            CreateNewBatch();
-        }
-
-        private void CreateNewBatch()
-        {
-            _nextBatch[0] = (byte)PacketType.Reliable;
-            _batchLength = 1;
-        }
-
-        private void AddToBatch(byte[] message, int offset, int length)
-        {
-            ByteUtils.WriteUShort(_nextBatch, ref _batchLength, checked((ushort)length));
-            Buffer.BlockCopy(message, offset, _nextBatch, _batchLength, length);
-            _batchLength += length;
         }
 
         internal override void ReceiveReliablePacket(Packet packet)
@@ -96,10 +72,7 @@ namespace Mirage.SocketLayer
 
         public override void FlushBatch()
         {
-            if (_batchLength > 1)
-            {
-                SendBatch();
-            }
+            _nextBatchReliable.Flush();
         }
 
         internal override bool IsValidSize(Packet packet)
