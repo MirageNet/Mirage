@@ -20,11 +20,10 @@ namespace Mirage.SocketLayer
         /// <summary>PacketType, ack sequence, mask</summary>
         public const int ACK_HEADER_SIZE = sizeof(byte) + sizeof(ushort) + sizeof(ulong);
 
-        public const int RELIABLE_MESSAGE_LENGTH_SIZE = sizeof(ushort);
         public const int FRAGMENT_INDEX_SIZE = sizeof(byte);
 
         /// <summary>Smallest size a header for reliable packet, <see cref="RELIABLE_HEADER_SIZE"/> + 2 bytes per message</summary>
-        public const int MIN_RELIABLE_HEADER_SIZE = RELIABLE_HEADER_SIZE + RELIABLE_MESSAGE_LENGTH_SIZE;
+        public const int MIN_RELIABLE_HEADER_SIZE = RELIABLE_HEADER_SIZE + Batch.MESSAGE_LENGTH_SIZE;
 
         /// <summary>Smallest size a header for reliable packet, <see cref="RELIABLE_HEADER_SIZE"/> + 1 byte for fragment index</summary>
         public const int MIN_RELIABLE_FRAGMENT_HEADER_SIZE = RELIABLE_HEADER_SIZE + FRAGMENT_INDEX_SIZE;
@@ -66,7 +65,7 @@ namespace Mirage.SocketLayer
         private float _lastSentTime;
         private ushort _lastSentAck;
         private int _emptyAckCount = 0;
-        private ReliablePacket _nextBatch;
+        private readonly Batch _batch;
 
         /// <summary>
         /// 
@@ -83,6 +82,7 @@ namespace Mirage.SocketLayer
             _bufferPool = bufferPool;
             _reliablePool = new Pool<ReliablePacket>(ReliablePacket.CreateNew, 0, config.MaxReliablePacketsInSendBufferPerConnection);
             _metrics = metrics;
+            _batch = new ReliableBatch(maxPacketSize, CreateReliableBuffer, SendReliablePacket);
 
             _ackTimeout = config.TimeBeforeEmptyAck;
             _emptyAckLimit = config.EmptyAckLimit;
@@ -111,6 +111,9 @@ namespace Mirage.SocketLayer
         public void Dispose()
         {
             var removeSafety = new HashSet<ByteBuffer>();
+
+            if (_batch is IDisposable disposable)
+                disposable.Dispose();
 
             _sentAckablePackets.ClearAndRelease((packet) =>
             {
@@ -142,7 +145,7 @@ namespace Mirage.SocketLayer
 
 
         /// <summary>
-        /// Gets next Reliable packet in order, packet consists for multiple messsages
+        /// Gets next Reliable packet in order, packet consists for multiple messages
         /// <para>[length, message, length, message, ...]</para>
         /// </summary>
         /// <param name="packet"></param>
@@ -191,12 +194,7 @@ namespace Mirage.SocketLayer
 
         public void Update()
         {
-            if (_nextBatch != null)
-            {
-                SendReliablePacket(_nextBatch);
-                _nextBatch = null;
-            }
-
+            _batch.Flush();
 
             // todo send ack if not recently been sent
             // ack only packet sent if no other sent within last frame
@@ -308,8 +306,6 @@ namespace Mirage.SocketLayer
             }
         }
 
-
-
         public void SendReliable(byte[] message, int offset, int length)
         {
             if (_sentAckablePackets.IsFull)
@@ -325,37 +321,16 @@ namespace Mirage.SocketLayer
                 // if there is existing batch, send it first
                 // we need to do this so that fragmented message arrive in order
                 // if we dont, a message sent after maybe be added to batch and then have earlier order than fragmented message
-                if (_nextBatch != null)
-                {
-                    SendReliablePacket(_nextBatch);
-                    _nextBatch = null;
-                }
-
+                _batch.Flush();
                 SendFragmented(message, offset, length);
                 return;
             }
 
-
-            if (_nextBatch == null)
-            {
-                _nextBatch = CreateReliableBuffer(PacketType.Reliable);
-            }
-
-            var msgLength = length + RELIABLE_MESSAGE_LENGTH_SIZE;
-            var batchLength = _nextBatch.Length;
-            if (batchLength + msgLength > _maxPacketSize)
-            {
-                // if full, send and create new
-                SendReliablePacket(_nextBatch);
-
-                _nextBatch = CreateReliableBuffer(PacketType.Reliable);
-            }
-
-            AddToBatch(_nextBatch, message, offset, length);
+            _batch.AddMessage(message, offset, length);
         }
 
         /// <summary>
-        /// Splits messsage into multiple packets
+        /// Splits message into multiple packets
         /// <para>Note: this might just send 1 packet if length is equal to size.
         /// This might happen because fragmented header is 1 less that batched header</para>
         /// </summary>
@@ -408,18 +383,6 @@ namespace Mirage.SocketLayer
             return packet;
         }
 
-        private static void AddToBatch(ReliablePacket packet, byte[] message, int offset, int length)
-        {
-            var array = packet.Buffer.array;
-            var packetOffset = packet.Length;
-
-            ByteUtils.WriteUShort(array, ref packetOffset, (ushort)length);
-            Buffer.BlockCopy(message, offset, array, packetOffset, length);
-            packetOffset += length;
-
-            packet.Length = packetOffset;
-        }
-
         private void SendReliablePacket(ReliablePacket reliable)
         {
             ThrowIfBufferLimitReached();
@@ -446,7 +409,6 @@ namespace Mirage.SocketLayer
                 throw new InvalidOperationException($"Max packets in send buffer reached for {_connection}");
             }
         }
-
 
         /// <summary>
         /// Receives incoming Notify packet
@@ -743,7 +705,7 @@ namespace Mirage.SocketLayer
             }
         }
 
-        private class ReliablePacket
+        public class ReliablePacket
         {
             public ushort LastSequence;
             public int Length;
