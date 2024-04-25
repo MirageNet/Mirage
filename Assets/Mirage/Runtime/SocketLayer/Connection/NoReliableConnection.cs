@@ -62,7 +62,7 @@ namespace Mirage.SocketLayer
 
         internal override void ReceiveReliablePacket(Packet packet)
         {
-            HandleReliableBatched(packet.Buffer.array, 1, packet.Length);
+            HandleReliableBatched(packet.Buffer.array, 1, packet.Length, PacketType.Reliable);
         }
 
         internal override void ReceiveUnreliablePacket(Packet packet) => throw new NotSupportedException();

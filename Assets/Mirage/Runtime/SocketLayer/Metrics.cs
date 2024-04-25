@@ -85,6 +85,22 @@ namespace Mirage.SocketLayer
             buffer[tick].receiveMessagesNotifyBytes += length;
         }
 
+        public void OnReceiveMessage(PacketType packetType, int length)
+        {
+            switch (packetType)
+            {
+                case PacketType.Reliable:
+                    OnReceiveMessageReliable(length);
+                    break;
+                case PacketType.Unreliable:
+                    OnReceiveMessageUnreliable(length);
+                    break;
+                case PacketType.Notify:
+                    OnReceiveMessageNotify(length);
+                    break;
+            }
+        }
+
         public struct Frame
         {
             /// <summary>
