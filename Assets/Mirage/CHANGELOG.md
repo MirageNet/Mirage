@@ -1,3 +1,10 @@
+## [148.4.3](https://github.com/MirageNet/Mirage/compare/v148.4.2...v148.4.3) (2024-04-26)
+
+
+### Bug Fixes
+
+* fixing possible NRE ([dc4d6e6](https://github.com/MirageNet/Mirage/commit/dc4d6e68bc1d97c419032dc38f4e80215586c8d9))
+
 ## [148.4.2](https://github.com/MirageNet/Mirage/compare/v148.4.1...v148.4.2) (2024-04-26)
 
 
