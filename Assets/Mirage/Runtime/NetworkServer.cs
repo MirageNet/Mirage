@@ -396,8 +396,8 @@ namespace Mirage
 
         public void SetAuthenticationFailedCallback(Action<INetworkPlayer, AuthenticationResult> callback)
         {
-            if (_authFallCallback != null && callback != null)
-                if (logger.WarnEnabled()) logger.LogWarning($"Replacing old callback. Only 1 auth failed callback can be used at once");
+            if (_authFallCallback != null && callback != null && logger.WarnEnabled())
+                logger.LogWarning($"Replacing old callback. Only 1 auth failed callback can be used at once");
 
             _authFallCallback = callback;
         }
