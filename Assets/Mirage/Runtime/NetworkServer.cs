@@ -308,7 +308,8 @@ namespace Mirage
 
                 // spawn scene objects in starting scene AFTER host client has activated,
                 // otherwise IsClient will be false for objects in starting scene
-                ObjectManager.SpawnOrActivate();
+                if (ObjectManager != null)
+                    ObjectManager.SpawnOrActivate();
 
                 Connected?.Invoke(LocalPlayer);
 
