@@ -156,7 +156,7 @@ jobs:
           distribution: 'zulu'
 
       - name: Install sonar scanner
-        run: $DOTNET_ROOT/dotnet tool install dotnet-sonarscanner --tool-path . --version 6.2.0
+        run: $DOTNET_ROOT/dotnet tool install dotnet-sonarscanner --tool-path . --version 5.15.0
       
       - name: Generate Solution
         run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
