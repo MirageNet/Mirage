@@ -149,11 +149,14 @@ jobs:
           path: Library
           key: Library-2020.3.30
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'zulu'
+
       - name: Install sonar scanner
-        run: |
-          $DOTNET_ROOT/dotnet tool install dotnet-sonarscanner --tool-path . --version 5.4.0
-          apt update
-          apt install -y openjdk-11-jre-headless
+        run: $DOTNET_ROOT/dotnet tool install dotnet-sonarscanner --tool-path . --version 6.2.0
       
       - name: Generate Solution
         run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
