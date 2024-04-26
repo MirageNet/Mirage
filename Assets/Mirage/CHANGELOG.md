@@ -1,3 +1,10 @@
+## [148.4.2](https://github.com/MirageNet/Mirage/compare/v148.4.1...v148.4.2) (2024-04-26)
+
+
+### Performance Improvements
+
+* adding batching to unreliable messages ([c77bf78](https://github.com/MirageNet/Mirage/commit/c77bf7805d808024cc08f567f608b8660c608a37))
+
 ## [148.4.1](https://github.com/MirageNet/Mirage/compare/v148.4.0...v148.4.1) (2024-04-19)
 
 
