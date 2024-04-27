@@ -11,7 +11,7 @@ namespace Mirage.SocketLayer
         /// <para>packet given to this function as assumed to already have a header</para>
         /// </summary>
         /// <param name="packet">header and messages</param>
-        void SendRaw(byte[] packet, int length);
+        void SendRaw(byte[] packet, int length, SendMode mode);
     }
 
     /// <summary>

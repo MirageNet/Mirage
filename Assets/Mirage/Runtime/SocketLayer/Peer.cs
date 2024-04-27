@@ -42,7 +42,7 @@ namespace Mirage.SocketLayer
         private readonly ISocket _socket;
         private readonly IDataHandler _dataHandler;
         private readonly Config _config;
-        private readonly int _maxPacketSize;
+        private readonly SocketInfo _socketInfo;
         private readonly Time _time;
         private readonly ConnectKeyValidator _connectKeyValidator;
         private readonly Pool<ByteBuffer> _bufferPool;
@@ -61,14 +61,15 @@ namespace Mirage.SocketLayer
         private bool _active;
         public PoolMetrics PoolMetrics => _bufferPool.Metrics;
 
-        public Peer(ISocket socket, int maxPacketSize, IDataHandler dataHandler, Config config = null, ILogger logger = null, Metrics metrics = null)
+        public Peer(ISocket socket, SocketInfo socketInfo, IDataHandler dataHandler, Config config = null, ILogger logger = null, Metrics metrics = null)
         {
             _logger = logger;
             _metrics = metrics;
             _config = config ?? new Config();
-            _maxPacketSize = maxPacketSize;
-            if (maxPacketSize < AckSystem.MIN_RELIABLE_HEADER_SIZE + 1)
-                throw new ArgumentException($"Max packet size too small for AckSystem header", nameof(maxPacketSize));
+            _socketInfo = socketInfo;
+
+            if (_socketInfo.Reliability == 0)
+                throw new ArgumentNullException(nameof(socketInfo), "socketInfo was default and had no values");
 
             _socket = socket ?? throw new ArgumentNullException(nameof(socket));
             _dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
@@ -76,7 +77,7 @@ namespace Mirage.SocketLayer
 
             _connectKeyValidator = new ConnectKeyValidator(_config.key);
 
-            _bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, maxPacketSize, _config.BufferPoolStartSize, _config.BufferPoolMaxSize, _logger);
+            _bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, socketInfo.MaxSize, _config.BufferPoolStartSize, _config.BufferPoolMaxSize, _logger);
             Application.quitting += Application_quitting;
         }
 
@@ -132,13 +133,13 @@ namespace Mirage.SocketLayer
             _socket.Close();
         }
 
-        internal void Send(Connection connection, byte[] data, int length)
+        internal void Send(Connection connection, byte[] data, int length, SendMode mode)
         {
             // connecting connections can send connect messages so is allowed
             // todo check connected before message are sent from high level
             _logger?.Assert(connection.State == ConnectionState.Connected || connection.State == ConnectionState.Connecting || connection.State == ConnectionState.Disconnected, connection.State);
 
-            _socket.Send(connection.EndPoint, data, length);
+            _socket.Send(connection.EndPoint, data, length, mode);
             _metrics?.OnSend(length);
             connection.SetSendTime();
 
@@ -161,7 +162,7 @@ namespace Mirage.SocketLayer
             {
                 var length = CreateCommandPacket(buffer, command, extra);
 
-                _socket.Send(endPoint, buffer.array, length);
+                _socket.Send(endPoint, buffer.array, length, SendMode.Reliable);
                 _metrics?.OnSendUnconnected(length);
                 if (_logger.Enabled(LogType.Log))
                 {
@@ -176,7 +177,7 @@ namespace Mirage.SocketLayer
             {
                 var length = CreateCommandPacket(buffer, Commands.ConnectRequest, null);
                 _connectKeyValidator.CopyTo(buffer.array);
-                Send(connection, buffer.array, length + _connectKeyValidator.KeyLength);
+                Send(connection, buffer.array, length + _connectKeyValidator.KeyLength, SendMode.Reliable);
             }
         }
 
@@ -185,7 +186,7 @@ namespace Mirage.SocketLayer
             using (var buffer = _bufferPool.Take())
             {
                 var length = CreateCommandPacket(buffer, command, extra);
-                Send(connection, buffer.array, length);
+                Send(connection, buffer.array, length, SendMode.Reliable);
             }
         }
 
@@ -217,7 +218,7 @@ namespace Mirage.SocketLayer
             using (var buffer = _bufferPool.Take())
             {
                 buffer.array[0] = (byte)PacketType.KeepAlive;
-                Send(connection, buffer.array, 1);
+                Send(connection, buffer.array, 1, SendMode.Unreliable);
             }
         }
 
@@ -247,8 +248,8 @@ namespace Mirage.SocketLayer
                     var length = _socket.Receive(buffer.array, out var receiveEndPoint);
 
                     // this should never happen. buffer size is only MTU, if socket returns higher length then it has a bug.
-                    if (length > _maxPacketSize)
-                        throw new IndexOutOfRangeException($"Socket returned length above MTU. MaxPacketSize:{_maxPacketSize} length:{length}");
+                    if (length > _socketInfo.MaxSize)
+                        throw new IndexOutOfRangeException($"Socket returned length above MTU. MaxPacketSize:{_socketInfo.MaxSize} length:{length}");
 
                     var packet = new Packet(buffer, length);
 
@@ -425,15 +426,20 @@ namespace Mirage.SocketLayer
             var endPoint = newEndPoint?.CreateCopy();
 
             Connection connection;
-            if (_config.DisableReliableLayer)
-            {
-                connection = new NoReliableConnection(this, endPoint, _dataHandler, _config, _maxPacketSize, _time, _logger, _metrics);
-            }
-            else
-            {
-                connection = new ReliableConnection(this, endPoint, _dataHandler, _config, _maxPacketSize, _time, _bufferPool, _logger, _metrics);
-            }
 
+            switch (_socketInfo.Reliability)
+            {
+                default:// note: default will never happen because it will throw in constructor
+                case SocketReliability.Unreliable:
+                    connection = new ReliableConnection(this, endPoint, _dataHandler, _config, _socketInfo, _time, _bufferPool, _logger, _metrics);
+                    break;
+                case SocketReliability.Reliable:
+                    connection = new NoReliableConnection(this, endPoint, _dataHandler, _config, _socketInfo, _time, _logger, _metrics);
+                    break;
+                case SocketReliability.Both:
+                    connection = new PassthroughConnection(this, endPoint, _dataHandler, _config, _socketInfo, _time, _bufferPool, _logger, _metrics);
+                    break;
+            }
 
             connection.SetReceiveTime();
             _connections.Add(endPoint, connection);
