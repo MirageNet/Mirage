@@ -14,8 +14,8 @@ namespace Mirage.SocketLayer
         public PassthroughConnection(Peer peer, IEndPoint endPoint, IDataHandler dataHandler, Config config, SocketInfo socketInfo, Time time, Pool<ByteBuffer> bufferPool, ILogger logger, Metrics metrics)
             : base(peer, endPoint, dataHandler, config, socketInfo, time, logger, metrics)
         {
-            _reliableBatch = new ArrayBatch(socketInfo.MaxReliableSize, this, PacketType.Reliable, SendMode.Reliable);
-            _unreliableBatch = new ArrayBatch(socketInfo.MaxUnreliableSize, this, PacketType.Unreliable, SendMode.Unreliable);
+            _reliableBatch = new ArrayBatch(socketInfo.MaxReliableSize, logger, this, PacketType.Reliable, SendMode.Reliable);
+            _unreliableBatch = new ArrayBatch(socketInfo.MaxUnreliableSize, logger, this, PacketType.Unreliable, SendMode.Unreliable);
             _ackSystem = new AckSystem(this, config, socketInfo.MaxUnreliableSize, time, bufferPool, logger, metrics);
         }
 

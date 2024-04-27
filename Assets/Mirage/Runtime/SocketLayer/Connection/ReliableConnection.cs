@@ -15,7 +15,7 @@ namespace Mirage.SocketLayer
             : base(peer, endPoint, dataHandler, config, socketInfo, time, logger, metrics)
         {
             Debug.Assert(socketInfo.Reliability == SocketReliability.Unreliable);
-            _unreliableBatch = new ArrayBatch(socketInfo.MaxUnreliableSize, this, PacketType.Unreliable, SendMode.Unreliable);
+            _unreliableBatch = new ArrayBatch(socketInfo.MaxUnreliableSize, logger, this, PacketType.Unreliable, SendMode.Unreliable);
             _ackSystem = new AckSystem(this, config, socketInfo.MaxUnreliableSize, time, bufferPool, logger, metrics);
         }
 

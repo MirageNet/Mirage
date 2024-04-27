@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace Mirage.SocketLayer
 {
-
     /// <summary>
     /// Connection that does not run its own reliability layer, good for TCP sockets
     /// </summary>
@@ -18,7 +17,7 @@ namespace Mirage.SocketLayer
         {
             Debug.Assert(socketInfo.Reliability == SocketReliability.Reliable);
 
-            _nextBatchReliable = new ArrayBatch(socketInfo.MaxReliableSize, this, PacketType.Reliable, SendMode.Reliable);
+            _nextBatchReliable = new ArrayBatch(socketInfo.MaxReliableSize, logger, this, PacketType.Reliable, SendMode.Reliable);
         }
 
         // just sue SendReliable for unreliable/notify
