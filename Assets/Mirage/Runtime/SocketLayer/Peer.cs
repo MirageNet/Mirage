@@ -369,10 +369,18 @@ namespace Mirage.SocketLayer
 
         private void HandleNewConnection(IEndPoint endPoint, Packet packet)
         {
+            // first check if new packet is valid
             // if invalid, then reject without reason
-            if (!Validate(packet)) { return; }
+            // key could be anything, so any message over 2 could be key.
+            var minLength = 2;
+            if (packet.Length < minLength)
+                return;
+            if (packet.Type != PacketType.Command)
+                return;
+            if (packet.Command != Commands.ConnectRequest)
+                return;
 
-
+            // then process other reject reasons
             if (AtMaxConnections())
             {
                 RejectConnectionWithReason(endPoint, RejectReason.ServerFull);
@@ -389,23 +397,6 @@ namespace Mirage.SocketLayer
                 AcceptNewConnection(endPoint);
             }
         }
-
-        private bool Validate(Packet packet)
-        {
-            // key could be anything, so any message over 2 could be key.
-            var minLength = 2;
-            if (packet.Length < minLength)
-                return false;
-
-            if (packet.Type != PacketType.Command)
-                return false;
-
-            if (packet.Command != Commands.ConnectRequest)
-                return false;
-
-            return true;
-        }
-
         private bool AtMaxConnections()
         {
             return _connections.Count >= _config.MaxConnections;
