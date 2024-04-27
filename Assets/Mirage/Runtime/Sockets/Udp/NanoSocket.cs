@@ -6,7 +6,6 @@ using NanoSockets;
 
 namespace Mirage.Sockets.Udp
 {
-
     public sealed class NanoSocket : ISocket, IDisposable
     {
         public static bool Supported => true;
@@ -82,7 +81,7 @@ namespace Mirage.Sockets.Udp
             return count;
         }
 
-        public void Send(IEndPoint endPoint, byte[] packet, int length)
+        public void Send(IEndPoint endPoint, byte[] packet, int length, SendMode _)
         {
             var nanoEndPoint = (NanoEndPoint)endPoint;
             UDP.Send(socket, ref nanoEndPoint.address, packet, length);
