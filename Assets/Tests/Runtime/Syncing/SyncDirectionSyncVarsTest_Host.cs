@@ -68,7 +68,7 @@ namespace Mirage.Tests.Runtime.Syncing
 
             behaviour.SyncSettings.From = from;
             behaviour.SyncSettings.To = to;
-            behaviour._nextSyncTime = Time.time;
+            behaviour._nextSyncTime = Time.timeAsDouble;
             behaviour.UpdateSyncObjectShouldSync();
         }
         protected void SetDirection(SyncFrom from, SyncTo to)

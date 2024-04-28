@@ -79,7 +79,7 @@ namespace Mirage.Tests.Runtime.Syncing
             observersWriter.Reset();
 
             // make sure it is time to sync
-            serverComponent._nextSyncTime = Time.time;
+            serverComponent._nextSyncTime = Time.timeAsDouble;
             serverIdentity.OnSerializeAll(true, ownerWriter, observersWriter);
 
             // apply all the data from the server object
