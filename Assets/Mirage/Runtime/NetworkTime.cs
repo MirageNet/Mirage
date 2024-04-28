@@ -54,7 +54,7 @@ namespace Mirage
 
         internal void UpdateClient(IMessageSender client)
         {
-            if (UnityEngine.Time.time - _lastPingTime >= PingInterval)
+            if (UnityEngine.Time.timeAsDouble - _lastPingTime >= PingInterval)
             {
                 PingNow(client);
             }
@@ -71,7 +71,7 @@ namespace Mirage
                 ClientTime = LocalTime()
             };
             client.Send(pingMessage, Channel.Unreliable);
-            _lastPingTime = UnityEngine.Time.time;
+            _lastPingTime = UnityEngine.Time.timeAsDouble;
         }
 
         // executed at the server when we receive a ping message

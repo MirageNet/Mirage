@@ -6,11 +6,11 @@ namespace Mirage.SocketLayer
 {
     public interface ITime
     {
-        float Now { get; }
+        double Now { get; }
     }
     internal class Time : ITime
     {
-        public float Now => UnityEngine.Time.time;
+        public double Now => UnityEngine.Time.timeAsDouble;
     }
 
     public interface IPeer

@@ -62,7 +62,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             // make sure to call update so events are invoked
             // 0.5 little extra to be sure
             var end = time.Now + (config.MaxConnectAttempts * config.ConnectAttemptInterval) + 0.5f;
-            float nextSendCheck = 0;
+            double nextSendCheck = 0;
             var sendCount = 0;
             while (end > time.Now)
             {

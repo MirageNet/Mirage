@@ -1,10 +1,10 @@
-﻿namespace Mirage.SocketLayer.ConnectionTrackers
+namespace Mirage.SocketLayer.ConnectionTrackers
 {
     internal class ConnectingTracker
     {
         private readonly Config _config;
         private readonly Time _time;
-        private float _lastAttempt = float.MinValue;
+        private double _lastAttempt = float.MinValue;
         private int _attemptCount = 0;
 
         public ConnectingTracker(Config config, Time time)

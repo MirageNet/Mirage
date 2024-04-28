@@ -682,7 +682,7 @@ namespace Mirage
 
             var components = NetworkBehaviours;
             // store time as variable so we dont have to call property for each component
-            var now = Time.time;
+            var now = Time.timeAsDouble;
 
             // serialize all components
             for (var i = 0; i < components.Length; ++i)
@@ -1144,7 +1144,7 @@ namespace Mirage
         internal void ClearShouldSync()
         {
             // store time as variable so we dont have to call property for each component
-            var now = Time.time;
+            var now = Time.timeAsDouble;
 
             foreach (var comp in NetworkBehaviours)
             {
@@ -1161,7 +1161,7 @@ namespace Mirage
         internal void ClearShouldSyncDirtyOnly()
         {
             // store time as variable so we dont have to call property for each component
-            var now = Time.time;
+            var now = Time.timeAsDouble;
 
             foreach (var comp in NetworkBehaviours)
             {

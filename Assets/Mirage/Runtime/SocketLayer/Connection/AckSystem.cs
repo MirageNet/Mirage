@@ -62,7 +62,7 @@ namespace Mirage.SocketLayer
         /// <para>will be sent with next message</para>
         /// </summary>
         private ulong _ackMask;
-        private float _lastSentTime;
+        private double _lastSentTime;
         private ushort _lastSentAck;
         private int _emptyAckCount = 0;
         private readonly Batch _batch;

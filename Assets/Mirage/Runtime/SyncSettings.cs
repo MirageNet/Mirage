@@ -29,12 +29,12 @@ namespace Mirage
         };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void UpdateTime(ref float nextSyncTime, float now)
+        public void UpdateTime(ref double nextSyncTime, double now)
         {
             UpdateTime(Interval, Timing, ref nextSyncTime, now);
         }
 
-        public static void UpdateTime(float interval, SyncTiming timing, ref float nextSyncTime, float now)
+        public static void UpdateTime(float interval, SyncTiming timing, ref double nextSyncTime, double now)
         {
             switch (timing)
             {

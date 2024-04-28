@@ -25,7 +25,7 @@ namespace Mirage
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkBehaviour));
 
         // protected because it is ok for child classes to set this if they want
-        protected internal float _nextSyncTime;
+        protected internal double _nextSyncTime;
 
         /// <summary>
         /// Sync settings for this NetworkBehaviour
@@ -346,7 +346,7 @@ namespace Mirage
         /// Clears dirty bits and sets the next sync time
         /// </summary>
         /// <param name="now"></param>
-        public void ClearShouldSync(float now)
+        public void ClearShouldSync(double now)
         {
             SyncSettings.UpdateTime(ref _nextSyncTime, now);
             ClearDirtyBits();
@@ -358,7 +358,7 @@ namespace Mirage
         /// <param name="time"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ShouldSync(float time)
+        public bool ShouldSync(double time)
         {
             return AnyDirtyBits() && TimeToSync(time);
         }
@@ -369,7 +369,7 @@ namespace Mirage
         /// <param name="time"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TimeToSync(float time)
+        public bool TimeToSync(double time)
         {
             return time >= _nextSyncTime;
         }
