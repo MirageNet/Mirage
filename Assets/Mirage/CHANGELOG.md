@@ -1,3 +1,18 @@
+# [149.0.0](https://github.com/MirageNet/Mirage/compare/v148.4.3...v149.0.0) (2024-04-28)
+
+
+* fix!: changing all time fields to be double ([432af2e](https://github.com/MirageNet/Mirage/commit/432af2e1afde117d2a8c91fbf2507374578a2dbb))
+
+
+### Features
+
+* adding VarDoublePacker ([3e9e2a3](https://github.com/MirageNet/Mirage/commit/3e9e2a3ac4ce35d49b6e9ad96b4dafc59d257da0))
+
+
+### BREAKING CHANGES
+
+* time fields are now double instead of float
+
 ## [148.4.3](https://github.com/MirageNet/Mirage/compare/v148.4.2...v148.4.3) (2024-04-26)
 
 
