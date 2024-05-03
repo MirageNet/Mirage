@@ -242,9 +242,15 @@ namespace Mirage.SocketLayer
         {
             using (var buffer = _bufferPool.Take())
             {
-                while (_socket.Poll())
+                // check active, because socket might have been closed by message handler
+                while (_active && _socket.Poll())
                 {
                     var length = _socket.Receive(buffer.array, out var receiveEndPoint);
+                    if (length < 0)
+                    {
+                        _logger.Log(LogType.Warning, $"Receive returned less than 0 bytes, length={length}");
+                        continue;
+                    }
 
                     // this should never happen. buffer size is only MTU, if socket returns higher length then it has a bug.
                     if (length > _maxPacketSize)
@@ -262,9 +268,6 @@ namespace Mirage.SocketLayer
                         _metrics?.OnReceiveUnconnected(length);
                         HandleNewConnection(receiveEndPoint, packet);
                     }
-
-                    // socket might have been closed by message handler
-                    if (!_active) { break; }
                 }
             }
         }
