@@ -1,3 +1,10 @@
+## [149.0.1](https://github.com/MirageNet/Mirage/compare/v149.0.0...v149.0.1) (2024-05-03)
+
+
+### Bug Fixes
+
+* **SocketLayer:** fixing socket receive trying to handle message when length is negative ([b078387](https://github.com/MirageNet/Mirage/commit/b0783879cd68c6881b5b32e0d32a5e725f5895ab))
+
 # [149.0.0](https://github.com/MirageNet/Mirage/compare/v148.4.3...v149.0.0) (2024-04-28)
 
 
