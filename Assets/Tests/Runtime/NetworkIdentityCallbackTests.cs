@@ -54,6 +54,7 @@ namespace Mirage.Tests.Runtime
             server.Connected.Invoke(server.LocalPlayer);
             server.LocalPlayer.SceneIsReady = true;
             server.LocalPlayer.SetAuthentication(new Mirage.Authentication.PlayerAuthentication(null, null));
+            server.Reflection_AuthenticatedPlayers().Add(server.LocalPlayer);
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
