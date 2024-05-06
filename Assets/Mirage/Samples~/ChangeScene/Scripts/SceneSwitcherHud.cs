@@ -37,7 +37,7 @@ namespace Mirage.Examples.SceneChange
 
         public void AdditiveButtonHandler()
         {
-            var players = sceneManager.Server.Players;
+            var players = sceneManager.Server.AllPlayers;
 
             if (additiveLoaded)
             {

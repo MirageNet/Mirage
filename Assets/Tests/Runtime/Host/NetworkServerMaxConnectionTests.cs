@@ -34,7 +34,7 @@ namespace Mirage.Tests.Runtime.Host
             yield return null;
             secondClient.Update();
 
-            Assert.That(server.Players, Has.Count.EqualTo(1));
+            Assert.That(server.AllPlayers, Has.Count.EqualTo(1));
             // also check if client was disconnected (this will confirm it was rejected
             Assert.That(disconnectedCalled, Is.EqualTo(1));
         }

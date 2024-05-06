@@ -223,7 +223,7 @@ namespace Mirage.Tests.Runtime.Authentication
             Assert.That(_clientAuthCalls, Has.Count.EqualTo(1));
 
             Assert.That(client.Player.Authentication.Authenticator, Is.TypeOf<MockAuthenticator>());
-            var serverPlayer = server.Players.First();
+            var serverPlayer = server.AllPlayers.First();
             Assert.That(serverPlayer.Authentication.Authenticator, Is.TypeOf<MockAuthenticator>());
             var firstData = serverPlayer.Authentication.GetData<MockAuthenticator.MockData>();
             Assert.That(serverPlayer.Authentication.Data, Is.TypeOf<MockAuthenticator.MockData>());
@@ -246,7 +246,7 @@ namespace Mirage.Tests.Runtime.Authentication
             Assert.That(_clientAuthCalls, Has.Count.EqualTo(2));
 
             // get player again, reference would have changed
-            serverPlayer = server.Players.First();
+            serverPlayer = server.AllPlayers.First();
 
             Assert.That(client.Player.Authentication.Authenticator, Is.TypeOf<SessionIdAuthenticator>());
             Assert.That(serverPlayer.Authentication.Authenticator, Is.TypeOf<SessionIdAuthenticator>());

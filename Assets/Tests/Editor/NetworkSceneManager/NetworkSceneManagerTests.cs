@@ -342,10 +342,10 @@ namespace Mirage.Tests.Runtime.Host
 
             await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ServerSceneData.Count > 0);
 
-            sceneManager.OnServerPlayerDisconnected(sceneManager.Server.Players.ElementAt(0));
+            sceneManager.OnServerPlayerDisconnected(sceneManager.Server.AllPlayers.ElementAt(0));
 
             Assert.That(sceneManager.IsPlayerInScene(sceneManager.ServerSceneData.ElementAt(0).Key,
-                server.Players.ElementAt(0)), Is.False);
+                server.AllPlayers.ElementAt(0)), Is.False);
         });
 
         [UnityTest]
@@ -355,7 +355,7 @@ namespace Mirage.Tests.Runtime.Host
 
             await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ServerSceneData.Count > 0);
 
-            Assert.That(sceneManager.IsPlayerInScene(sceneManager.ServerSceneData.ElementAt(0).Key, server.Players.ElementAt(0)),
+            Assert.That(sceneManager.IsPlayerInScene(sceneManager.ServerSceneData.ElementAt(0).Key, server.AllPlayers.ElementAt(0)),
                 Is.True);
         });
     }

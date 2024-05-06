@@ -25,13 +25,8 @@ namespace Mirage
         public void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
         {
             // add all server connections
-            foreach (var player in _server.Players)
+            foreach (var player in _server.AuthenticatedPlayers)
             {
-                // skip players that have not authenticated
-                // this is needed because Message by default (including scene message) check IsAuthenticated 
-                if (!player.IsAuthenticated)
-                    continue;
-
                 // skip players that are loading a scene
                 if (!player.SceneIsReady)
                     continue;

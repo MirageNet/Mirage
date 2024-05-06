@@ -57,7 +57,7 @@ namespace Mirage.Tests
         {
             var foundCount = 0;
             INetworkPlayer found = null;
-            foreach (var player in Server.Players)
+            foreach (var player in Server.AllPlayers)
             {
                 if (_foundPlayers.Contains(player))
                     continue;

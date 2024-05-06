@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Mirage.Visibility
 {
@@ -15,7 +15,7 @@ namespace Mirage.Visibility
 
         public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
         {
-            observers.UnionWith(Server.Players);
+            observers.UnionWith(Server.AuthenticatedPlayers);
         }
     }
 }

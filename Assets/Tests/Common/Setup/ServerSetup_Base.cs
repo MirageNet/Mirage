@@ -158,11 +158,11 @@ namespace Mirage.Tests.BaseSetups
             if (_remoteClients.Contains(instance))
                 throw new ArgumentException("instance already added");
 
-            var serverStartCount = server.Players.Count;
+            var serverStartCount = server.AllPlayers.Count;
             instance.Client.Connect("localhost");
 
             // wait for new connections
-            await AsyncUtil.WaitUntilWithTimeout(() => server.Players.Count > serverStartCount);
+            await AsyncUtil.WaitUntilWithTimeout(() => server.AllPlayers.Count > serverStartCount);
 
             await SetupPlayer(instance, spawnCharacter);
 

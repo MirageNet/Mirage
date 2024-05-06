@@ -475,7 +475,7 @@ namespace Mirage
         {
             ThrowIfNotServer();
 
-            return ServerSceneLoading(scenePath, Server.Players, true, SceneOperation.Normal, sceneLoadParameters);
+            return ServerSceneLoading(scenePath, Server.AllPlayers, true, SceneOperation.Normal, sceneLoadParameters);
         }
 
         /// <summary>
@@ -659,7 +659,7 @@ namespace Mirage
         {
             ThrowIfNotServer();
 
-            foreach (var player in players ?? Server.Players)
+            foreach (var player in players ?? Server.AllPlayers)
             {
                 SetClientNotReady(player);
             }
@@ -739,7 +739,7 @@ namespace Mirage
                     _serverSceneData.Remove(scene);
                 }
 
-                _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(players ?? Server.Players));
+                _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(players ?? Server.AllPlayers));
             }
 
             // If client let's call this to finish client scene loading too
@@ -855,7 +855,7 @@ namespace Mirage
 
             if (Server && Server.Active)
             {
-                _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(players ?? Server.Players));
+                _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(players ?? Server.AllPlayers));
             }
 
             CompleteLoadingScene(scene, SceneOperation.LoadAdditive, players);

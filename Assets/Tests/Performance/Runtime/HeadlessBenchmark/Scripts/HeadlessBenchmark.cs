@@ -50,9 +50,9 @@ namespace Mirage.HeadlessBenchmark
                 var messages = messageCount - previousMessageCount;
 
                 if (Application.isEditor)
-                    Debug.LogFormat("{0} FPS {1} messages {2} clients", frames, messages, server.Players.Count);
+                    Debug.LogFormat("{0} FPS {1} messages {2} clients", frames, messages, server.AllPlayers.Count);
                 else
-                    Console.WriteLine("{0} FPS {1} messages {2} clients", frames, messages, server.Players.Count);
+                    Console.WriteLine("{0} FPS {1} messages {2} clients", frames, messages, server.AllPlayers.Count);
                 previousFrameCount = frameCount;
                 previousMessageCount = messageCount;
             }

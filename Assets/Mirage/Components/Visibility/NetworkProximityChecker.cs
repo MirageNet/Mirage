@@ -89,7 +89,7 @@ namespace Mirage
             //    magnitude faster. if we have 10k monsters and run a sphere
             //    cast 10k times, we will see a noticeable lag even with physics
             //    layers. but checking to every connection is fast.
-            foreach (var player in Server.Players)
+            foreach (var player in Server.AuthenticatedPlayers)
             {
                 // check distance
                 if (player != null && player.HasCharacter && Vector3.Distance(player.Identity.transform.position, position) < VisibilityRange)

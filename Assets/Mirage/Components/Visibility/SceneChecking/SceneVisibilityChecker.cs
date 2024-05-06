@@ -33,7 +33,7 @@ namespace Mirage
 
         public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
         {
-            foreach (var player in Server.Players)
+            foreach (var player in Server.AuthenticatedPlayers)
             {
                 if (OnCheckObserver(player))
                 {

@@ -85,7 +85,7 @@ namespace Mirage.Tests.Runtime.Authentication
 
             // should have disconnected
             Assert.That(serverPlayer.IsAuthenticated, Is.False);
-            Assert.That(server.Players.Count, Is.Zero);
+            Assert.That(server.AllPlayers.Count, Is.Zero);
 
             // client needs extra frame to receive message from server
             yield return null;

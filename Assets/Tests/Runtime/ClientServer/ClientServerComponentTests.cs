@@ -73,12 +73,12 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator ClientDisconnectTest() => UniTask.ToCoroutine(async () =>
         {
-            var playerCount = server.Players.Count;
+            var playerCount = server.AllPlayers.Count;
             client.Disconnect();
 
             await AsyncUtil.WaitUntilWithTimeout(() => client._connectState == ConnectState.Disconnected);
             // player could should be 1 less after client disconnects
-            await AsyncUtil.WaitUntilWithTimeout(() => server.Players.Count == playerCount - 1);
+            await AsyncUtil.WaitUntilWithTimeout(() => server.AllPlayers.Count == playerCount - 1);
         });
     }
 }

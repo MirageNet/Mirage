@@ -102,7 +102,7 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
 
         private (ISocket clientSocket, IEndPoint serverEndPoint) GetSocketAndEndPoint()
         {
-            var clientEndPoint = server.Players.First().Connection.EndPoint;
+            var clientEndPoint = server.AllPlayers.First().Connection.EndPoint;
             var clientSocket = TestSocket.allSockets[clientEndPoint];
 
             var serverEndPoint = ((TestSocketFactory)server.SocketFactory).serverEndpoint;

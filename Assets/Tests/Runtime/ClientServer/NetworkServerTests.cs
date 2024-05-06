@@ -29,7 +29,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void InitializeTest()
         {
-            Assert.That(server.Players, Has.Count.EqualTo(1));
+            Assert.That(server.AllPlayers, Has.Count.EqualTo(1));
             Assert.That(server.Active);
             Assert.That(server.IsHost, Is.False);
         }
@@ -113,7 +113,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void NumPlayersTest()
         {
-            Assert.That(server.Players.Count(x => x.HasCharacter), Is.EqualTo(1));
+            Assert.That(server.AllPlayers.Count(x => x.HasCharacter), Is.EqualTo(1));
         }
 
         [Test]
