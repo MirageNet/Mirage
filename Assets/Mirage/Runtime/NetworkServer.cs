@@ -476,10 +476,19 @@ namespace Mirage
                 Authenticator.PreAddHostPlayer(player);
         }
 
-        public void SendToAll<T>(T msg, bool excludeLocalPlayer, Channel channelId = Channel.Reliable)
+        [Obsolete("Use SendToAll(msg, authenticatedOnly, excludeLocalPlayer, channelId) instead", true)]
+        public void SendToAll<T>(T msg, bool excludeLocalPlayer, Channel channelId = Channel.Reliable) => SendToAll(msg, authenticatedOnly: false, excludeLocalPlayer, channelId);
+        public void SendToAll<T>(T msg, bool authenticatedOnly, bool excludeLocalPlayer, Channel channelId = Channel.Reliable)
         {
-            var enumerator = _connections.Values.GetEnumerator();
-            SendToMany(enumerator, msg, excludeLocalPlayer, channelId);
+            if (authenticatedOnly)
+            {
+                SendToMany(_authenticatedPlayers, msg, excludeLocalPlayer);
+            }
+            else
+            {
+                var enumerator = _connections.Values.GetEnumerator();
+                SendToMany(enumerator, msg, excludeLocalPlayer, channelId);
+            }
         }
 
         public void SendToMany<T>(IReadOnlyList<INetworkPlayer> players, T msg, bool excludeLocalPlayer, Channel channelId = Channel.Reliable)
