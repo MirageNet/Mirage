@@ -1,3 +1,10 @@
+## [149.1.1](https://github.com/MirageNet/Mirage/compare/v149.1.0...v149.1.1) (2024-05-06)
+
+
+### Bug Fixes
+
+* fixing initial send to observers if from server is false ([0ffa316](https://github.com/MirageNet/Mirage/commit/0ffa3169a479e516e838365127900cbc15bb59ec))
+
 # [149.1.0](https://github.com/MirageNet/Mirage/compare/v149.0.1...v149.1.0) (2024-05-06)
 
 
