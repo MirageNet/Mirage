@@ -1,3 +1,11 @@
+# [149.1.0](https://github.com/MirageNet/Mirage/compare/v149.0.1...v149.1.0) (2024-05-06)
+
+
+### Features
+
+* adding authenticatedOnly to SendToAll ([8b1117b](https://github.com/MirageNet/Mirage/commit/8b1117b4c64b529d0ea412e3539ef2b284083012))
+* adding list for AuthenticatedPlayers in NetworkServer ([dc07c38](https://github.com/MirageNet/Mirage/commit/dc07c384d2998f1afa544fa631bb5d2293b6d76f))
+
 ## [149.0.1](https://github.com/MirageNet/Mirage/compare/v149.0.0...v149.0.1) (2024-05-03)
 
 
