@@ -132,11 +132,19 @@ namespace Mirage
         public bool IsHost => LocalClient != null && LocalClient.Active;
 
         /// <summary>
-        /// A list of connections on the server.
+        /// All players on server (including unauthenticated players)
         /// </summary>
+        public IReadOnlyCollection<INetworkPlayer> AllPlayers => _connections.Values;
+        [Obsolete("Use AllPlayers or AuthenticatedPlayers instead")]
         public IReadOnlyCollection<INetworkPlayer> Players => _connections.Values;
 
+        /// <summary>
+        /// List of players that have Authenticated with server
+        /// </summary>
+        public IReadOnlyList<INetworkPlayer> AuthenticatedPlayers => _authenticatedPlayers;
+
         private readonly Dictionary<IConnection, INetworkPlayer> _connections = new Dictionary<IConnection, INetworkPlayer>();
+        private readonly List<INetworkPlayer> _authenticatedPlayers = new List<INetworkPlayer>();
 
         /// <summary>
         /// <para>Checks if the server has been started.</para>
@@ -186,6 +194,7 @@ namespace Mirage
 
             // just clear list, connections will be disconnected when peer is closed
             _connections.Clear();
+            _authenticatedPlayers.Clear();
             LocalClient = null;
             LocalPlayer = null;
 
@@ -229,7 +238,7 @@ namespace Mirage
             Application.quitting += Stop;
             if (logger.LogEnabled()) logger.Log($"NetworkServer created, Mirage version: {Version.Current}");
 
-            logger.Assert(Players.Count == 0, "Player should have been reset since previous session");
+            logger.Assert(_authenticatedPlayers.Count == 0, "Player should have been reset since previous session");
             logger.Assert(_connections.Count == 0, "Connections should have been reset since previous session");
 
             World = new NetworkWorld();
@@ -413,6 +422,7 @@ namespace Mirage
             player.Send(new AuthSuccessMessage { AuthenticatorName = result.Authenticator?.AuthenticatorName });
 
             // add connection
+            _authenticatedPlayers.Add(player);
             Authenticated?.Invoke(player);
         }
 
@@ -438,6 +448,7 @@ namespace Mirage
         private void RemoveConnection(INetworkPlayer player)
         {
             _connections.Remove(player.Connection);
+            _authenticatedPlayers.Remove(player);
         }
 
         /// <summary>
