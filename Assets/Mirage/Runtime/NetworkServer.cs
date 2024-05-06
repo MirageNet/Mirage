@@ -476,8 +476,9 @@ namespace Mirage
                 Authenticator.PreAddHostPlayer(player);
         }
 
-        [Obsolete("Use SendToAll(msg, authenticatedOnly, excludeLocalPlayer, channelId) instead", true)]
+        [Obsolete("Use SendToAll(msg, authenticatedOnly, excludeLocalPlayer, channelId) instead")]
         public void SendToAll<T>(T msg, bool excludeLocalPlayer, Channel channelId = Channel.Reliable) => SendToAll(msg, authenticatedOnly: false, excludeLocalPlayer, channelId);
+        
         public void SendToAll<T>(T msg, bool authenticatedOnly, bool excludeLocalPlayer, Channel channelId = Channel.Reliable)
         {
             if (authenticatedOnly)

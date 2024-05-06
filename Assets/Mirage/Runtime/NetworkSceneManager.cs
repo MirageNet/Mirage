@@ -609,7 +609,7 @@ namespace Mirage
 
             // todo this might cause issues if only some players are loading scene
             // send to all, excluding host
-            Server.SendToAll(new SceneReadyMessage(), excludeLocalPlayer: true);
+            Server.SendToAll(new SceneReadyMessage(), authenticatedOnly: false, excludeLocalPlayer: true);
 
             // clean up and invoke server functions before user events
             Server.World.RemoveDestroyedObjects();

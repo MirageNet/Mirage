@@ -48,7 +48,7 @@ namespace Mirage.Tests.Runtime.ServerSendTo
         [UnityTest]
         public IEnumerator SendToAll([Values(true, false)] bool excludeLocal)
         {
-            server.SendToAll(new TestMessage(), excludeLocal);
+            server.SendToAll(new TestMessage(), authenticatedOnly: true, excludeLocal);
             yield return null;
 
             for (var i = 0; i < ClientCount; i++)

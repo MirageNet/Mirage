@@ -48,7 +48,7 @@ namespace Mirage.Tests.Runtime.ServerSendTo
         {
             TestAllocation<NetworkServer>(() =>
             {
-                server.SendToAll(new TestMessage(), excludeLocal);
+                server.SendToAll(new TestMessage(), authenticatedOnly: true, excludeLocal);
             });
         }
 

@@ -49,7 +49,7 @@ namespace Mirage.Snippets.SendNetworkMessages
             };
 
             // also send to host player so we can update ui
-            Server.SendToAll(msg, excludeLocalPlayer: false);
+            Server.SendToAll(msg, authenticatedOnly: true, excludeLocalPlayer: false);
         }
     }
     // CodeEmbed-End: send-score
