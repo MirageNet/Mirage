@@ -695,8 +695,19 @@ namespace Mirage
                     continue;
 
                 // check if we should be writing this components
-                if (!comp.SyncSettings.ShouldSyncFrom(this, false))
-                    continue;
+
+                if (initialState)
+                {
+                    // for initial, check if we are sending to either owner/observers, even if From.Server is false
+                    var shouldSend = (comp.SyncSettings.To & SyncTo.OwnerAndObservers) != 0;
+                    if (!shouldSend)
+                        continue;
+                }
+                else
+                {
+                    if (!comp.SyncSettings.ShouldSyncFrom(this, false))
+                        continue;
+                }
 
                 if (logger.LogEnabled()) logger.Log($"OnSerializeAllSafely: '{name}', component '{comp.GetType()}', initial state: '{initialState}'");
 
