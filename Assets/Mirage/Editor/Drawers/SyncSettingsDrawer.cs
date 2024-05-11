@@ -1,3 +1,4 @@
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -17,8 +18,15 @@ namespace Mirage
             foreach (var target in targets)
             {
                 Debug.Assert(target is NetworkBehaviour);
+
+                // show if syncvars
                 var syncAny = InspectorHelper.SyncsAnything(target);
                 if (syncAny)
+                    return false;
+
+                // show if attribute
+                var showAttr = target.GetType().GetCustomAttributes<ShowSyncSettingsAttribute>(true);
+                if (showAttr != null)
                     return false;
             }
             return true;
