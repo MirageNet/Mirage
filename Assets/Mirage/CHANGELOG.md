@@ -1,3 +1,10 @@
+# [149.2.0](https://github.com/MirageNet/Mirage/compare/v149.1.1...v149.2.0) (2024-05-11)
+
+
+### Features
+
+* adding attribute to show SyncSettings in networkBehaviour if no syncvars ([dd6a6d6](https://github.com/MirageNet/Mirage/commit/dd6a6d68bfb7ae8cd8bde28577adec0e8361fad3))
+
 ## [149.1.1](https://github.com/MirageNet/Mirage/compare/v149.1.0...v149.1.1) (2024-05-06)
 
 
