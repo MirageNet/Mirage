@@ -35,6 +35,8 @@ namespace Mirage.Serialization
     /// </summary>
     public unsafe class NetworkWriter
     {
+        public StringStore StringStore;
+
         /// <summary>
         /// Max buffer size = 0.5MB
         /// </summary>
@@ -42,7 +44,7 @@ namespace Mirage.Serialization
         private byte[] _managedBuffer;
         private int _bitCapacity;
 
-        /// <summary>Allow internal buffer to resize if capcity is reached</summary>
+        /// <summary>Allow internal buffer to resize if capacity is reached</summary>
         private readonly bool _allowResize;
         private GCHandle _handle;
         private ulong* _longPtr;
