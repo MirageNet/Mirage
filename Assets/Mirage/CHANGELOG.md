@@ -1,3 +1,10 @@
+# [149.3.0](https://github.com/MirageNet/Mirage/compare/v149.2.0...v149.3.0) (2024-06-10)
+
+
+### Features
+
+* making PadToByte public ([43363ba](https://github.com/MirageNet/Mirage/commit/43363baa44d00864cd533ac94bc0f1a3673d3dbf))
+
 # [149.2.0](https://github.com/MirageNet/Mirage/compare/v149.1.1...v149.2.0) (2024-05-11)
 
 
