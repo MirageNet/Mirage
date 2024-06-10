@@ -184,7 +184,7 @@ namespace Mirage.Serialization
             throw new EndOfStreamException($"Can not read over end of buffer, new position {newPosition}, length {_bitLength} bits");
         }
 
-        private void PadToByte()
+        public void PadToByte()
         {
             _bitPosition = BytePosition << 3;
         }

@@ -196,7 +196,7 @@ namespace Mirage.Serialization
             throw new InvalidOperationException($"Can not write over end of buffer, new length {newLength}, capacity {_bitCapacity}");
         }
 
-        private void PadToByte()
+        public void PadToByte()
         {
             _bitPosition = ByteLength << 3;
         }
