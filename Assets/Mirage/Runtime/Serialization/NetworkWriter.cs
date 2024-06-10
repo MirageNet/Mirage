@@ -196,11 +196,6 @@ namespace Mirage.Serialization
             throw new InvalidOperationException($"Can not write over end of buffer, new length {newLength}, capacity {_bitCapacity}");
         }
 
-        private void PadToByte()
-        {
-            _bitPosition = ByteLength << 3;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteBoolean(bool value)
         {
@@ -368,15 +363,11 @@ namespace Mirage.Serialization
         /// <param name="value"></param>
         public void PadAndCopy<T>(in T value) where T : unmanaged
         {
-            PadToByte();
-            var newPosition = _bitPosition + (8 * sizeof(T));
-            CheckCapacity(newPosition);
-
-            var startPtr = ((byte*)_longPtr) + (_bitPosition >> 3);
-
-            var ptr = (T*)startPtr;
-            *ptr = value;
-            _bitPosition = newPosition;
+            fixed (T* ptr = &value)
+            {
+                var bitLength = 8 * sizeof(T);
+                CopyFromPointer(ptr, 0, bitLength);
+            }
         }
 
         /// <summary>
@@ -389,13 +380,11 @@ namespace Mirage.Serialization
         /// <param name="length"></param>
         public void WriteBytes(byte[] array, int offset, int length)
         {
-            PadToByte();
-            var newPosition = _bitPosition + (8 * length);
-            CheckCapacity(newPosition);
-
-            // todo benchmark this vs Marshal.Copy or for loop
-            Buffer.BlockCopy(array, offset, _managedBuffer, ByteLength, length);
-            _bitPosition = newPosition;
+            fixed (byte* ptr = &array[offset])
+            {
+                var bitLength = 8 * length;
+                CopyFromPointer(ptr, 0, bitLength);
+            }
         }
 
         /// <summary>

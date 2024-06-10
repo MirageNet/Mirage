@@ -184,12 +184,6 @@ namespace Mirage.Serialization
             throw new EndOfStreamException($"Can not read over end of buffer, new position {newPosition}, length {_bitLength} bits");
         }
 
-        private void PadToByte()
-        {
-            _bitPosition = BytePosition << 3;
-        }
-
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ReadBoolean()
         {
@@ -376,14 +370,72 @@ namespace Mirage.Serialization
         /// <param name="value"></param>
         public void PadAndCopy<T>(out T value) where T : unmanaged
         {
-            PadToByte();
-            var newPosition = _bitPosition + (8 * sizeof(T));
+            fixed (T* ptr = &value)
+            {
+                var bitLength = 8 * sizeof(T);
+
+                if (bitLength <= 64) // shortcut for small values
+                {
+                    var v = Read(bitLength);
+                    *ptr = *(T*)&v;
+                }
+                else
+                {
+                    CopyToPointer(ptr, 0, bitLength);
+                }
+            }
+        }
+
+        public void CopyToPointer(void* ptr, int otherBitPosition, int bitLength)
+        {
+            var newPosition = _bitPosition + bitLength;
             CheckNewLength(newPosition);
 
-            var startPtr = ((byte*)_longPtr) + (_bitPosition >> 3);
+            var ulongPos = otherBitPosition >> 6;
+            var otherPtr = (ulong*)ptr + ulongPos;
 
-            value = *(T*)startPtr;
-            _bitPosition = newPosition;
+            throw new NotImplementedException();
+
+            // TODO use NetworkWriter to write to ptr
+
+            var firstBitOffset = otherBitPosition & 0b11_1111;
+
+            //            // first align other
+            //            if (firstBitOffset != 0)
+            //            {
+            //                var bitsToCopyToFirst = Math.Min(64 - firstBitOffset, bitLength);
+
+            //                var firstValue =Read(bitsToCopyToFirst);
+            //                *otherPtr = firstValue
+
+            //                // if offset is 10, then we want to shift value by 10 to remove un-needed bits
+            //                var firstValue = *otherPtr >> firstBitOffset;
+
+            //                Write(firstValue, bitsToCopyToFirst);
+
+            //                bitLength -= bitsToCopyToFirst;
+            //                otherPtr++;
+            //            }
+
+            //            // write aligned with other
+            //            while (bitLength > 64)
+            //            {
+            //                WriteUInt64(*otherPtr);
+
+            //                bitLength -= 64;
+            //                otherPtr++;
+            //            }
+
+            //            // write left over others
+            //            //      if bitlength == 0 then write will return
+            //            Write(*otherPtr, bitLength);
+
+            //            // define to allow debug.log to be skipped when running outside of unity
+            //#if !BIT_PACKING_NO_DEBUG
+            //            Debug.Assert(_bitPosition == newBit, "bitPosition should already be equal to newBit because it would have incremented each WriteUInt64");
+            //#endif
+
+            //            _bitPosition = newBit;
         }
 
         /// <summary>
@@ -396,24 +448,53 @@ namespace Mirage.Serialization
         /// <param name="length"></param>
         public void ReadBytes(byte[] array, int offset, int length)
         {
-            PadToByte();
-            var newPosition = _bitPosition + (8 * length);
-            CheckNewLength(newPosition);
-
-            // todo benchmark this vs Marshal.Copy or for loop
-            Buffer.BlockCopy(_managedBuffer, BytePosition, array, offset, length);
-            _bitPosition = newPosition;
+            fixed (byte* ptr = &array[offset])
+            {
+                var bitLength = 8 * length;
+                CopyToPointer(ptr, 0, bitLength);
+            }
         }
 
         public ArraySegment<byte> ReadBytesSegment(int count)
         {
-            PadToByte();
-            var newPosition = _bitPosition + (8 * count);
-            CheckNewLength(newPosition);
+            // is aligned
+            if (_bitPosition % 8 == 0)
+            {
+                var newPosition = _bitPosition + (8 * count);
+                CheckNewLength(newPosition);
 
-            var result = new ArraySegment<byte>(_managedBuffer, BytePosition, count);
-            _bitPosition = newPosition;
-            return result;
+                var result = new ArraySegment<byte>(_managedBuffer, BytePosition, count);
+                _bitPosition = newPosition;
+                return result;
+            }
+            else
+            {
+                // TODO remove alloc
+                var a = new byte[count];
+                fixed (byte* ptr = &a[0])
+                {
+                    var bitLength = 8 * count;
+                    CopyToPointer(ptr, 0, bitLength);
+                }
+                return new ArraySegment<byte>(a);
+            }
         }
+
+        public BitSegment ReadBitSegment(int byteCount)
+        {
+            return new BitSegment
+            {
+                ptr = _longPtr,
+                bitOffset = _bitPosition,
+                bitLength = byteCount * 8,
+            };
+        }
+    }
+
+    public unsafe struct BitSegment
+    {
+        public void* ptr;
+        public int bitOffset;
+        public int bitLength;
     }
 }
