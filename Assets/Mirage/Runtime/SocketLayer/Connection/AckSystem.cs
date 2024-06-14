@@ -237,7 +237,7 @@ namespace Mirage.SocketLayer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Send(byte[] final, int length)
         {
-            _connection.SendRaw(final, length);
+            _connection.SendRaw(final, length, SendMode.Unreliable);
             OnSend();
         }
 
@@ -261,7 +261,7 @@ namespace Mirage.SocketLayer
                 ByteUtils.WriteUShort(final.array, ref offset, _latestAckSequence);
                 ByteUtils.WriteULong(final.array, ref offset, _ackMask);
 
-                _connection.SendRaw(final.array, offset);
+                _connection.SendRaw(final.array, offset, SendMode.Unreliable);
                 Send(final.array, offset);
             }
         }

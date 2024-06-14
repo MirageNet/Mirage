@@ -37,7 +37,7 @@ namespace Mirage.SocketLayer
         ///     and make sure not to return <paramref name="bytesReceived"/> above that size
         /// </para>
         /// </summary>
-        /// <param name="buffer">buffer to write recevived packet into</param>
+        /// <param name="buffer">buffer to write receive packet into</param>
         /// <param name="endPoint">where packet came from</param>
         /// <returns>length of packet, should not be above <paramref name="buffer"/> length</returns>
         int Receive(byte[] buffer, out IEndPoint endPoint);
@@ -49,7 +49,13 @@ namespace Mirage.SocketLayer
         /// <param name="endPoint">where packet is being sent to</param>
         /// <param name="packet">buffer that contains the packet, starting at index 0</param>
         /// <param name="length">length of the packet</param>
-        void Send(IEndPoint endPoint, byte[] packet, int length);
+        void Send(IEndPoint endPoint, byte[] packet, int length, SendMode sendMode);
+    }
+
+    public enum SendMode
+    {
+        Unreliable = 0,
+        Reliable = 1,
     }
 
     /// <summary>

@@ -26,8 +26,7 @@ namespace Mirage.Sockets.Udp
         [Header("NanoSocket-specific Options")]
         public int BufferSize = 256 * 1024;
 
-
-        public override int MaxPacketSize => UdpMTU.MaxPacketSize;
+        public override SocketInfo SocketInfo => new SocketInfo(SocketReliability.Unreliable, 0, UdpMTU.MaxPacketSize, false);
 
         // Determines if we can use NanoSockets for socket-level IO. This will be true if either:
         // - We *want* to use native library explicitly.

@@ -32,9 +32,9 @@ namespace Mirage.SocketLayer
     [HelpURL("https://miragenet.github.io/Mirage/docs/general/sockets#changing-a-socket")]
     public abstract class SocketFactory : MonoBehaviour
     {
-        /// <summary>Max size for packets sent to or received from Socket
+        /// <summary>Gets info about the socket being created
         /// <para>Called once when Sockets are created</para></summary>
-        public abstract int MaxPacketSize { get; }
+        public abstract SocketInfo SocketInfo { get; }
 
         /// <summary>Creates a <see cref="ISocket"/> to be used by <see cref="Peer"/> on the server</summary>
         /// <exception cref="NotSupportedException">Throw when Server is not supported on current platform</exception>

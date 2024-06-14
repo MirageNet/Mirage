@@ -94,7 +94,7 @@ namespace Mirage.Sockets.Udp
             return c;
         }
 
-        public void Send(IEndPoint endPoint, byte[] packet, int length)
+        public void Send(IEndPoint endPoint, byte[] packet, int length, SendMode _)
         {
             var netEndPoint = ((EndPointWrapper)endPoint).inner;
             socket.SendTo(packet, length, SocketFlags.None, netEndPoint);

@@ -3,7 +3,7 @@ using System;
 namespace Mirage.SocketLayer
 {
     /// <summary>
-    /// Warpper around a byte[] that belongs to a <see cref="Pool{T}"/>
+    /// Wrapper around a byte[] that belongs to a <see cref="Pool{T}"/>
     /// </summary>
     public sealed class ByteBuffer : IDisposable
     {
