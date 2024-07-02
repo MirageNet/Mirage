@@ -23,10 +23,10 @@ namespace Mirage
     public class ServerObjectManager : MonoBehaviour
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(ServerObjectManager));
-        /// <summary>
-        /// HashSet for NetworkIdentity that can be re-used without allocation
-        /// </summary>
-        private static HashSet<NetworkIdentity> _setCache = new HashSet<NetworkIdentity>();
+        /// <summary>HashSet for NetworkIdentity that can be re-used without allocation</summary>
+        private static HashSet<NetworkIdentity> _skipCache = new HashSet<NetworkIdentity>();
+        /// <summary>HashSet for NetworkIdentity that can be re-used without allocation</summary>
+        private static List<NetworkIdentity> _spawnCache = new List<NetworkIdentity>();
 
         internal RpcHandler _rpcHandler;
 
@@ -136,7 +136,7 @@ namespace Mirage
             }
             if (!player.HasCharacter)
             {
-                throw new InvalidOperationException($"ReplaceCharacter can only be called if Player already has a charater");
+                throw new InvalidOperationException($"ReplaceCharacter can only be called if Player already has a character");
             }
 
             //NOTE: there can be an existing player
@@ -247,8 +247,8 @@ namespace Mirage
         /// <param name="player"></param>
         internal void ShowToPlayer(NetworkIdentity identity, INetworkPlayer player)
         {
-            var visiblity = identity.Visibility;
-            if (visiblity is NetworkVisibility networkVisibility)
+            var visibility = identity.Visibility;
+            if (visibility is NetworkVisibility networkVisibility)
                 networkVisibility.InvokeVisibilityChanged(player, true);
 
             // dont send if loading scene
@@ -627,16 +627,16 @@ namespace Mirage
         /// <param name="skip">NetworkIdentity to skip when spawning. Can be null</param>
         public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter, NetworkIdentity skip)
         {
-            _setCache.Clear();
-            _setCache.Add(skip);
-            SpawnVisibleObjects(player, ignoreHasCharacter, _setCache);
+            _skipCache.Clear();
+            _skipCache.Add(skip);
+            SpawnVisibleObjects(player, ignoreHasCharacter, _skipCache);
         }
 
         /// <summary>
         /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
         /// </summary>
         /// <param name="player">The player to spawn objects for</param>
-        /// <param name="ignoreHasCharacter">If true will spawn visibile objects even if player does not have a spawned character yet</param>
+        /// <param name="ignoreHasCharacter">If true will spawn visible objects even if player does not have a spawned character yet</param>
         /// <param name="skip">NetworkIdentity to skip when spawning. Can be null</param>
         public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter, HashSet<NetworkIdentity> skip)
         {
@@ -658,11 +658,14 @@ namespace Mirage
 
             if (logger.LogEnabled()) logger.Log($"SpawnVisibleObjects: Checking Observers on {_server.World.SpawnedIdentities.Count} objects for player: {player}");
 
+            // add to cache first, so SpawnedIdentities can be modified inside loop without throwing
+            _spawnCache.Clear();
+            _spawnCache.AddRange(_server.World.SpawnedIdentities);
             // add connection to each nearby NetworkIdentity's observers, which
             // internally sends a spawn message for each one to the connection.
-            foreach (var identity in _server.World.SpawnedIdentities)
+            foreach (var identity in _spawnCache)
             {
-                // allow for skips so that addChatacter doesn't send 2 spawn message for existing object
+                // allow for skips so that addCharacter doesn't send 2 spawn message for existing object
                 if (skip != null && skip.Contains(identity))
                     continue;
 
@@ -678,6 +681,8 @@ namespace Mirage
                     }
                 }
             }
+
+            _spawnCache.Clear();
         }
 
         private sealed class NetworkIdentityComparer : IComparer<NetworkIdentity>
