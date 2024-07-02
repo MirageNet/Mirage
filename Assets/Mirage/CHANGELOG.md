@@ -1,3 +1,10 @@
+## [149.3.1](https://github.com/MirageNet/Mirage/compare/v149.3.0...v149.3.1) (2024-07-02)
+
+
+### Bug Fixes
+
+* fixing SpawnVisibleObjects throwing if SpawnedIdentities is modified ([6cf96e6](https://github.com/MirageNet/Mirage/commit/6cf96e63ebe4d05ce3283cd7cac7a9889c9f0800))
+
 # [149.3.0](https://github.com/MirageNet/Mirage/compare/v149.2.0...v149.3.0) (2024-06-10)
 
 
