@@ -4,6 +4,7 @@ using System.Linq;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
+using Unity.Profiling;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -22,7 +23,15 @@ namespace Mirage
     [DisallowMultipleComponent]
     public class ServerObjectManager : MonoBehaviour
     {
+        private static readonly ProfilerMarker spawnMarker = new ProfilerMarker(nameof(SpawnSceneObjects));
+        private static readonly ProfilerMarker addCharacterMarker = new ProfilerMarker(nameof(AddCharacter));
+        private static readonly ProfilerMarker destroyObjectMarker = new ProfilerMarker(nameof(DestroyObject));
+        private static readonly ProfilerMarker spawnVisibleObjectsMarker = new ProfilerMarker(nameof(SpawnVisibleObjects));
+        private static readonly ProfilerMarker spawnSceneObjectsMarker = new ProfilerMarker(nameof(SpawnSceneObjects));
+        private static readonly ProfilerMarker sendSpawnMessageMarker = new ProfilerMarker(nameof(SendSpawnMessage));
+
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(ServerObjectManager));
+
         /// <summary>HashSet for NetworkIdentity that can be re-used without allocation</summary>
         private static HashSet<NetworkIdentity> _skipCache = new HashSet<NetworkIdentity>();
         /// <summary>HashSet for NetworkIdentity that can be re-used without allocation</summary>
@@ -218,6 +227,8 @@ namespace Mirage
         /// <exception cref="ArgumentException">throw when the player already has a character</exception>
         public void AddCharacter(INetworkPlayer player, NetworkIdentity identity)
         {
+            using var _ = addCharacterMarker.Auto();
+
             // cannot have an existing player object while trying to Add another.
             if (player.HasCharacter)
             {
@@ -407,6 +418,8 @@ namespace Mirage
         /// </summary>
         public void Spawn(NetworkIdentity identity)
         {
+            using var _ = spawnMarker.Auto();
+
             if (!_server || !_server.Active)
             {
                 throw new InvalidOperationException("NetworkServer is not active. Cannot spawn objects without an active server.");
@@ -439,6 +452,8 @@ namespace Mirage
 
         internal void SendSpawnMessage(NetworkIdentity identity, INetworkPlayer player)
         {
+            using var _ = sendSpawnMessageMarker.Auto();
+
             logger.Assert(player.IsAuthenticated || !(identity.Visibility is AlwaysVisible), // can't use `is not` in unity2020
                 "SendSpawnMessage should only be called if player is authenticated, or there is custom visibility");
             if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId}");
@@ -635,8 +650,8 @@ namespace Mirage
                 return;
             }
 
+            using var _ = destroyObjectMarker.Auto();
             if (logger.LogEnabled()) logger.Log($"DestroyObject NetId={identity.NetId}");
-
             _server.World.RemoveIdentity(identity);
             identity.Owner?.RemoveOwnedObject(identity);
 
@@ -689,6 +704,8 @@ namespace Mirage
         /// <exception cref="InvalidOperationException">Thrown when server is not active</exception>
         public void SpawnSceneObjects()
         {
+            using var _ = spawnSceneObjectsMarker.Auto();
+
             // only if server active
             if (!_server || !_server.Active)
                 throw new InvalidOperationException("Server was not active");
@@ -761,9 +778,9 @@ namespace Mirage
         /// <param name="skip">NetworkIdentity to skip when spawning. Can be null</param>
         public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter, HashSet<NetworkIdentity> skip)
         {
+            using var _ = spawnVisibleObjectsMarker.Auto();
             // remove all, so that it will send spawn message for objects destroyed in scene change
             player.RemoveAllVisibleObjects();
-
             if (!ignoreHasCharacter && !player.HasCharacter)
             {
                 if (logger.LogEnabled()) logger.Log($"SpawnVisibleObjects: not spawning objects for {player} because it does not have a character");

@@ -12,6 +12,9 @@ namespace Mirage.Serialization
     public static class MessageIdCache<T>
     {
         public static readonly int Id = MessagePacker.GetId(typeof(T));
+
+        public static readonly ProfilerMarker SendMarker = new ProfilerMarker($"Send_{typeof(T).Name}");
+        public static readonly ProfilerMarker ReceiveMarker = new ProfilerMarker($"Handle_{typeof(T).Name}");
     }
 
     // message packing all in one place, instead of constructing headers in all

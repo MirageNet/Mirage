@@ -21,6 +21,9 @@ namespace Mirage
     /// </remarks>
     public sealed class NetworkPlayer : INetworkPlayer
     {
+        private static readonly ProfilerMarker sendMessageMarker = new ProfilerMarker("SendMessage");
+        private static readonly ProfilerMarker sendBytesMarker = new ProfilerMarker("SendBytes");
+        private static readonly ProfilerMarker sendNotifyMarket = new ProfilerMarker("SendNotify");
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
         private static readonly ProfilerMarker sendMarker = new ProfilerMarker("NetworkPlayer.Send");
         private static readonly ProfilerMarker sendNotifyMarker = new ProfilerMarker("NetworkPlayer.SendNotify");
@@ -205,6 +208,7 @@ namespace Mirage
             if (_isDisconnected)
                 return;
             using var _ = sendMarker.Auto();
+            using var __ = MessageIdCache<T>.SendMarker.Auto();
             using (var writer = NetworkWriterPool.GetWriter())
             {
                 MessagePacker.Pack(message, writer);
