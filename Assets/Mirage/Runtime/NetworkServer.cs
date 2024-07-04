@@ -7,6 +7,7 @@ using Mirage.Events;
 using Mirage.Logging;
 using Mirage.Serialization;
 using Mirage.SocketLayer;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -23,6 +24,7 @@ namespace Mirage
     [DisallowMultipleComponent]
     public class NetworkServer : MonoBehaviour
     {
+        private static readonly ProfilerMarker sendToManyMarker = new ProfilerMarker(nameof(SendToMany));
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkServer));
 
         public bool EnablePeerMetrics;
@@ -478,7 +480,7 @@ namespace Mirage
 
         [Obsolete("Use SendToAll(msg, authenticatedOnly, excludeLocalPlayer, channelId) instead")]
         public void SendToAll<T>(T msg, bool excludeLocalPlayer, Channel channelId = Channel.Reliable) => SendToAll(msg, authenticatedOnly: false, excludeLocalPlayer, channelId);
-        
+
         public void SendToAll<T>(T msg, bool authenticatedOnly, bool excludeLocalPlayer, Channel channelId = Channel.Reliable)
         {
             if (authenticatedOnly)
@@ -562,10 +564,13 @@ namespace Mirage
 
         /// <summary>
         /// Sends to list of players.
-        /// <para>All other SendTo... functions call this, it dooes not do any extra checks, just serializes message if not empty, then sends it</para>
+        /// <para>All other SendTo... functions call this, it does not do any extra checks, just serializes message if not empty, then sends it</para>
         /// </summary>
         public static void SendToMany<T>(IReadOnlyList<INetworkPlayer> players, T msg, Channel channelId = Channel.Reliable)
         {
+            using var _ = sendToManyMarker.Auto();
+            using var __ = MessageIdCache<T>.SendMarker.Auto();
+
             // avoid serializing when list is empty
             if (players.Count == 0)
                 return;
