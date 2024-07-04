@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using Mirage.Logging;
 using Mirage.Serialization;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage
 {
     public class MessageHandler : IMessageReceiver
     {
+        private static readonly ProfilerMarker handleMessageMarker = new ProfilerMarker(nameof(HandleMessage));
         private static readonly ILogger logger = LogFactory.GetLogger<MessageHandler>();
 
         private readonly bool _disconnectOnException;
@@ -47,7 +49,10 @@ namespace Mirage
 
                 if (logger.LogEnabled()) logger.Log($"Receiving {typeof(T)} from {player}");
 
-                handler.Invoke(player, message);
+                using (var _ = MessageIdCache<T>.ReceiveMarker.Auto())
+                {
+                    handler.Invoke(player, message);
+                }
             }
             return AdapterFunction;
         }
@@ -73,6 +78,8 @@ namespace Mirage
 
         public void HandleMessage(INetworkPlayer player, ArraySegment<byte> packet)
         {
+            using var _ = handleMessageMarker.Auto();
+
             using (var networkReader = NetworkReaderPool.GetReader(packet, _objectLocator))
             {
 

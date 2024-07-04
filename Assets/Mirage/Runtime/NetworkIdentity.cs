@@ -4,6 +4,7 @@ using Mirage.Events;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -103,6 +104,12 @@ namespace Mirage
     [HelpURL("https://miragenet.github.io/Mirage/docs/components/network-identity")]
     public sealed class NetworkIdentity : MonoBehaviour
     {
+        private static readonly ProfilerMarker rebuildObserversMarker = new ProfilerMarker(nameof(RebuildObservers));
+        private static readonly ProfilerMarker onSerializeAllInitialMarker = new ProfilerMarker("OnSerializeAll_Initial");
+        private static readonly ProfilerMarker onSerializeAllPartialMarker = new ProfilerMarker("OnSerializeAll_Partial");
+        private static readonly ProfilerMarker onDeserializeAllInitialMarker = new ProfilerMarker("OnDeserializeAll_Initial");
+        private static readonly ProfilerMarker onDeserializeAllPartialMarker = new ProfilerMarker("OnSerializeAll_Partial");
+
         private static readonly ILogger logger = LogFactory.GetLogger<NetworkIdentity>();
 
         public NetworkSpawnSettings SpawnSettings = NetworkSpawnSettings.Default;
@@ -675,6 +682,8 @@ namespace Mirage
         /// <param name="observersWriter"></param>
         internal (int ownerWritten, int observersWritten) OnSerializeAll(bool initialState, NetworkWriter ownerWriter, NetworkWriter observersWriter)
         {
+            using var _ = (initialState ? onSerializeAllInitialMarker : onSerializeAllPartialMarker).Auto();
+
             // how many times it written to (NOT BYTES)
             var ownerWritten = 0;
             var observersWritten = 0;
@@ -765,6 +774,8 @@ namespace Mirage
 
         internal void OnDeserializeAll(NetworkReader reader, bool initialState)
         {
+            using var _ = (initialState ? onDeserializeAllInitialMarker : onDeserializeAllPartialMarker).Auto();
+
             // set InitialState before deserializing so that syncvar hooks and other methods can check it
             InitialState = initialState;
 
@@ -979,6 +990,7 @@ namespace Mirage
         /// <param name="initialize">True if this is the first time.</param>
         public void RebuildObservers(bool initialize)
         {
+            using var _ = rebuildObserversMarker.Auto();
             // call OnRebuildObservers function
             GetNewObservers(newObservers, initialize);
 

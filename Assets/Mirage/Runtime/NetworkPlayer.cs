@@ -4,6 +4,7 @@ using Mirage.Authentication;
 using Mirage.Logging;
 using Mirage.Serialization;
 using Mirage.SocketLayer;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage
@@ -20,6 +21,9 @@ namespace Mirage
     /// </remarks>
     public sealed class NetworkPlayer : INetworkPlayer
     {
+        private static readonly ProfilerMarker sendMessageMarker = new ProfilerMarker("SendMessage");
+        private static readonly ProfilerMarker sendBytesMarker = new ProfilerMarker("SendBytes");
+        private static readonly ProfilerMarker sendNotifyMarket = new ProfilerMarker("SendNotify");
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
 
         private readonly HashSet<NetworkIdentity> _visList = new HashSet<NetworkIdentity>();
@@ -173,6 +177,9 @@ namespace Mirage
         /// <returns></returns>
         public void Send<T>(T message, Channel channelId = Channel.Reliable)
         {
+            using var _ = sendMessageMarker.Auto();
+            using var __ = MessageIdCache<T>.SendMarker.Auto();
+
             if (_isDisconnected) { return; }
 
             using (var writer = NetworkWriterPool.GetWriter())
@@ -194,6 +201,8 @@ namespace Mirage
         /// <param name="channelId"></param>
         public void Send(ArraySegment<byte> segment, Channel channelId = Channel.Reliable)
         {
+            using var _ = sendBytesMarker.Auto();
+
             if (_isDisconnected) { return; }
 
             if (channelId == Channel.Reliable)
@@ -215,6 +224,8 @@ namespace Mirage
         /// <returns></returns>
         public void Send<T>(T message, INotifyCallBack callBacks)
         {
+            using var _ = sendNotifyMarket.Auto();
+
             if (_isDisconnected) { return; }
 
             using (var writer = NetworkWriterPool.GetWriter())

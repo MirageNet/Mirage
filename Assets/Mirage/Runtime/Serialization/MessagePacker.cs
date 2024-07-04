@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Profiling;
 
 namespace Mirage.Serialization
 {
@@ -11,6 +12,9 @@ namespace Mirage.Serialization
     public static class MessageIdCache<T>
     {
         public static readonly int Id = MessagePacker.GetId(typeof(T));
+
+        public static readonly ProfilerMarker SendMarker = new ProfilerMarker($"Send_{typeof(T).Name}");
+        public static readonly ProfilerMarker ReceiveMarker = new ProfilerMarker($"Handle_{typeof(T).Name}");
     }
 
     // message packing all in one place, instead of constructing headers in all
@@ -26,6 +30,7 @@ namespace Mirage.Serialization
     //    (probably even shorter)
     public static class MessagePacker
     {
+        private static readonly ProfilerMarker packMarker = new ProfilerMarker(nameof(Pack));
         /// <summary>
         /// Backing field for <see cref="MessageTypes"/>
         /// </summary>
@@ -82,11 +87,13 @@ namespace Mirage.Serialization
         //    and do an allocation free send before recycling it.
         public static void Pack<T>(T message, NetworkWriter writer)
         {
+            using var _ = packMarker.Auto();
+
             // if it is a value type,  just use typeof(T) to avoid boxing
             // this works because value types cannot be derived
             // if it is a reference type (for example IMessageBase),
             // ask the message for the real type
-            var id = default(T) == null && message != null 
+            var id = default(T) == null && message != null
                 // for class we need to use GetType incase T is base class
                 ? GetId(message.GetType())
                 // for struct, we can use the cached Id
