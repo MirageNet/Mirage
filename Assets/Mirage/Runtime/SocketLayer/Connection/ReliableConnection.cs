@@ -6,33 +6,22 @@ namespace Mirage.SocketLayer
     /// <summary>
     /// Objects that represents a connection to/from a server/client. Holds state that is needed to update, send, and receive data
     /// </summary>
-    internal sealed class ReliableConnection : Connection, IRawConnection, IDisposable
+    internal sealed class ReliableConnection : Connection, IDisposable
     {
         private readonly AckSystem _ackSystem;
         private readonly Batch _unreliableBatch;
-        private readonly Pool<ByteBuffer> _bufferPool;
 
-        internal ReliableConnection(Peer peer, IEndPoint endPoint, IDataHandler dataHandler, Config config, int maxPacketSize, Time time, Pool<ByteBuffer> bufferPool, ILogger logger, Metrics metrics)
-            : base(peer, endPoint, dataHandler, config, maxPacketSize, time, logger, metrics)
+        internal ReliableConnection(Peer peer, IEndPoint endPoint, IDataHandler dataHandler, Config config, SocketInfo socketInfo, Time time, Pool<ByteBuffer> bufferPool, ILogger logger, Metrics metrics)
+            : base(peer, endPoint, dataHandler, config, socketInfo, time, logger, metrics)
         {
-            _bufferPool = bufferPool;
-            _unreliableBatch = new ArrayBatch(_maxPacketSize, SendBatchInternal, PacketType.Unreliable);
-            _ackSystem = new AckSystem(this, config, maxPacketSize, time, bufferPool, logger, metrics);
-        }
-
-        private void SendBatchInternal(byte[] batch, int length)
-        {
-            _peer.Send(this, batch, length);
+            Debug.Assert(socketInfo.Reliability == SocketReliability.Unreliable);
+            _unreliableBatch = new ArrayBatch(socketInfo.MaxUnreliableSize, logger, this, PacketType.Unreliable, SendMode.Unreliable);
+            _ackSystem = new AckSystem(this, config, socketInfo.MaxUnreliableSize, time, bufferPool, logger, metrics);
         }
 
         public void Dispose()
         {
             _ackSystem.Dispose();
-        }
-
-        void IRawConnection.SendRaw(byte[] packet, int length)
-        {
-            _peer.Send(this, packet, length);
         }
 
         /// <summary>
@@ -71,9 +60,10 @@ namespace Mirage.SocketLayer
         {
             ThrowIfNotConnectedOrConnecting();
 
-            if (length + 1 > _maxPacketSize)
+            // todo allow message up to MaxUnreliableSize-1, by not batching
+            if (length + 1 + Batch.MESSAGE_LENGTH_SIZE > _socketInfo.MaxUnreliableSize)
             {
-                throw new ArgumentException($"Message is bigger than MTU, size:{length} but max Unreliable message size is {_maxPacketSize - 1}");
+                throw new ArgumentException($"Message is bigger than MTU, size:{length} but max Unreliable message size is {_socketInfo.MaxUnreliableSize - (1 + Batch.MESSAGE_LENGTH_SIZE)}");
             }
 
             _unreliableBatch.AddMessage(packet, offset, length);

@@ -269,14 +269,14 @@ namespace Mirage
             // If not, that's okay. Some games use a non-listening server for their single player game mode (Battlefield, Call of Duty...)
             if (Listening)
             {
-                var maxPacketSize = SocketFactory.MaxPacketSize;
-                NetworkWriterPool.Configure(maxPacketSize);
+                var socketInfo = SocketFactory.SocketInfo;
+                NetworkWriterPool.Configure(socketInfo.MaxSize);
 
                 // Create a server specific socket.
                 var socket = SocketFactory.CreateServerSocket();
 
                 // Tell the peer to use that newly created socket.
-                _peer = new Peer(socket, maxPacketSize, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
+                _peer = new Peer(socket, socketInfo, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
                 _peer.OnConnected += Peer_OnConnected;
                 _peer.OnDisconnected += Peer_OnDisconnected;
                 // Bind it to the endpoint.

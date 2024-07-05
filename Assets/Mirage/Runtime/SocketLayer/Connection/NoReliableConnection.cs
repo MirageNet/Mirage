@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Mirage.SocketLayer
 {
     /// <summary>
-    /// Connection that does not run its own reliablity layer, good for TCP sockets
+    /// Connection that does not run its own reliability layer, good for TCP sockets
     /// </summary>
     internal sealed class NoReliableConnection : Connection
     {
@@ -12,20 +12,12 @@ namespace Mirage.SocketLayer
 
         private readonly Batch _nextBatchReliable;
 
-        internal NoReliableConnection(Peer peer, IEndPoint endPoint, IDataHandler dataHandler, Config config, int maxPacketSize, Time time, ILogger logger, Metrics metrics)
-            : base(peer, endPoint, dataHandler, config, maxPacketSize, time, logger, metrics)
+        internal NoReliableConnection(Peer peer, IEndPoint endPoint, IDataHandler dataHandler, Config config, SocketInfo socketInfo, Time time, ILogger logger, Metrics metrics)
+            : base(peer, endPoint, dataHandler, config, socketInfo, time, logger, metrics)
         {
-            _nextBatchReliable = new ArrayBatch(maxPacketSize, SendBatchInternal, PacketType.Reliable);
+            Debug.Assert(socketInfo.Reliability == SocketReliability.Reliable);
 
-            if (maxPacketSize > ushort.MaxValue)
-            {
-                throw new ArgumentException($"Max package size can not bigger than {ushort.MaxValue}. NoReliableConnection uses 2 bytes for message length, maxPacketSize over that value will mean that message will be incorrectly batched.");
-            }
-        }
-
-        private void SendBatchInternal(byte[] batch, int length)
-        {
-            _peer.Send(this, batch, length);
+            _nextBatchReliable = new ArrayBatch(socketInfo.MaxReliableSize, logger, this, PacketType.Reliable, SendMode.Reliable);
         }
 
         // just sue SendReliable for unreliable/notify
@@ -51,9 +43,9 @@ namespace Mirage.SocketLayer
         {
             ThrowIfNotConnectedOrConnecting();
 
-            if (length + HEADER_SIZE > _maxPacketSize)
+            if (length + HEADER_SIZE > _socketInfo.MaxReliableSize)
             {
-                throw new ArgumentException($"Message is bigger than MTU, size:{length} but max message size is {_maxPacketSize - HEADER_SIZE}");
+                throw new ArgumentException($"Message is bigger than MTU, size:{length} but max message size is {_socketInfo.MaxReliableSize - HEADER_SIZE}");
             }
 
             _nextBatchReliable.AddMessage(message, offset, length);

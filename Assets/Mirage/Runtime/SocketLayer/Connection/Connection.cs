@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace Mirage.SocketLayer
 {
-    internal abstract class Connection : IConnection
+    internal abstract class Connection : IConnection, IRawConnection
     {
         protected readonly ILogger _logger;
-        protected readonly int _maxPacketSize;
+        protected readonly SocketInfo _socketInfo;
         protected readonly Peer _peer;
         protected readonly IDataHandler _dataHandler;
 
@@ -55,11 +55,11 @@ namespace Mirage.SocketLayer
 
         public bool Connected => State == ConnectionState.Connected;
 
-        protected Connection(Peer peer, IEndPoint endPoint, IDataHandler dataHandler, Config config, int maxPacketSize, Time time, ILogger logger, Metrics metrics)
+        protected Connection(Peer peer, IEndPoint endPoint, IDataHandler dataHandler, Config config, SocketInfo socketInfo, Time time, ILogger logger, Metrics metrics)
         {
             _peer = peer;
             _logger = logger;
-            _maxPacketSize = maxPacketSize;
+            _socketInfo = socketInfo;
 
             EndPoint = endPoint ?? throw new ArgumentNullException(nameof(endPoint));
             _dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
@@ -71,6 +71,11 @@ namespace Mirage.SocketLayer
             _disconnectedTracker = new DisconnectedTracker(config, time);
 
             _metrics = metrics;
+        }
+
+        void IRawConnection.SendRaw(byte[] packet, int length, SendMode mode)
+        {
+            _peer.Send(this, packet, length, mode);
         }
 
         public override string ToString()
@@ -207,14 +212,30 @@ namespace Mirage.SocketLayer
 
         protected void HandleReliableBatched(byte[] array, int offset, int packetLength, PacketType packetType)
         {
+            var firstPacket = true;
             while (offset < packetLength)
             {
-                var length = ByteUtils.ReadUShort(array, ref offset);
+                var length = (int)ByteUtils.ReadUShort(array, ref offset);
+                if (length == 0)// not batched
+                {
+                    if (!firstPacket) 
+                    {
+                        // only first message can be not batched
+                        Disconnect(DisconnectReason.InvalidPacket);
+                        return;
+                    }
+
+                    _logger.Assert(offset == 3);
+                    // set real length
+                    length = packetLength - offset;
+                }
+
                 var message = new ArraySegment<byte>(array, offset, length);
                 offset += length;
 
                 _metrics?.OnReceiveMessage(packetType, length);
                 _dataHandler.ReceiveMessage(this, message);
+                firstPacket = false;
             }
         }
 
