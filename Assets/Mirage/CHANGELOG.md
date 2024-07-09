@@ -1,3 +1,16 @@
+# [149.4.0](https://github.com/MirageNet/Mirage/compare/v149.3.1...v149.4.0) (2024-07-09)
+
+
+### Bug Fixes
+
+* disconnecting player if send buffer is full ([3ea2d5d](https://github.com/MirageNet/Mirage/commit/3ea2d5d9e615b6d5cf2f42a9b92ff32701fdb7e4))
+
+
+### Features
+
+* adding SocketLayerException to better handle errors ([c76b88a](https://github.com/MirageNet/Mirage/commit/c76b88a3eb123e0e1295c43416706fe4f8f5ecea))
+* IsConnecting and IsConnected helper methods to NetworkPlayer ([d722758](https://github.com/MirageNet/Mirage/commit/d722758741dfff2e017866148382b735a34432ff))
+
 ## [149.3.1](https://github.com/MirageNet/Mirage/compare/v149.3.0...v149.3.1) (2024-07-02)
 
 
