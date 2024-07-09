@@ -325,7 +325,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             var message = Enumerable.Range(10, maxFragmentMessageSize + 1).Select(x => (byte)x).ToArray();
 
-            Assert.Throws<ArgumentException>(() =>
+            Assert.Throws<MessageSizeException>(() =>
             {
                 serverConnections[0].SendReliable(message);
             });

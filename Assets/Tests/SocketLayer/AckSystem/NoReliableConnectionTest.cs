@@ -63,7 +63,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             // 3 byte header, so max size is over max
             var bigBuffer = new byte[MAX_PACKET_SIZE - 2];
 
-            var exception = Assert.Throws<ArgumentException>(() =>
+            var exception = Assert.Throws<MessageSizeException>(() =>
             {
                 _connection.SendReliable(bigBuffer);
             });

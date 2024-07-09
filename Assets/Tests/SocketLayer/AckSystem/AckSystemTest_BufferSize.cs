@@ -28,7 +28,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 instance.ackSystem.Update();
             }
 
-            var exception = Assert.Throws<InvalidOperationException>(() =>
+            var exception = Assert.Throws<BufferFullException>(() =>
             {
                 instance.ackSystem.SendReliable(createRandomData(51));
                 instance.ackSystem.Update();
@@ -59,12 +59,12 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 instance.ackSystem.Update();
             }
 
-            var exception = Assert.Throws<InvalidOperationException>(() =>
+            var exception = Assert.Throws<BufferFullException>(() =>
             {
                 instance.ackSystem.SendReliable(createRandomData(0));
                 instance.ackSystem.Update();
             });
-            var expected = new InvalidOperationException($"Sent queue is full for {instance.connection}");
+            var expected = new BufferFullException($"Sent queue is full for {instance.connection}");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
         }
     }
