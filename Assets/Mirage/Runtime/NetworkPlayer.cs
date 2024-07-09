@@ -203,15 +203,29 @@ namespace Mirage
         /// <param name="channelId"></param>
         public void Send(ArraySegment<byte> segment, Channel channelId = Channel.Reliable)
         {
-            if (_isDisconnected) { return; }
+            if (_isDisconnected)
+                return;
 
-            if (channelId == Channel.Reliable)
+            try
             {
-                _connection.SendReliable(segment);
+                if (channelId == Channel.Reliable)
+                {
+                    _connection.SendReliable(segment);
+                }
+                else
+                {
+                    _connection.SendUnreliable(segment);
+                }
             }
-            else
+            catch (BufferFullException e)
             {
-                _connection.SendUnreliable(segment);
+                logger.LogError($"Disconnecting player because send buffer was full. {e}");
+                Disconnect();
+            }
+            catch (NoConnectionException e)
+            {
+                logger.LogError($"Inner connection was disconnected, but disconnected flag not yet. {e}");
+                Disconnect();
             }
         }
 
@@ -233,7 +247,21 @@ namespace Mirage
                 var segment = writer.ToArraySegment();
                 NetworkDiagnostics.OnSend(message, segment.Count, 1);
                 if (logger.LogEnabled()) logger.Log($"Sending {typeof(T)} to {this} channel:Notify");
-                _connection.SendNotify(segment, callBacks);
+
+                try
+                {
+                    _connection.SendNotify(segment, callBacks);
+                }
+                catch (BufferFullException e)
+                {
+                    logger.LogError($"Disconnecting player because send buffer was full. {e}");
+                    Disconnect();
+                }
+                catch (NoConnectionException e)
+                {
+                    logger.LogError($"Inner connection was disconnected, but disconnected flag not yet. {e}");
+                    Disconnect();
+                }
             }
         }
 
