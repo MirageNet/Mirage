@@ -73,7 +73,7 @@ namespace Mirage.SocketLayer
 
             if (length + 1 > _maxPacketSize)
             {
-                throw new ArgumentException($"Message is bigger than MTU, size:{length} but max Unreliable message size is {_maxPacketSize - 1}");
+                throw new MessageSizeException($"Message is bigger than MTU, size:{length} but max Unreliable message size is {_maxPacketSize - 1}");
             }
 
             _unreliableBatch.AddMessage(packet, offset, length);

@@ -280,11 +280,11 @@ namespace Mirage.SocketLayer
         {
             if (inLength + NOTIFY_HEADER_SIZE > _maxPacketSize)
             {
-                throw new ArgumentException($"Message is bigger than MTU, size:{inLength} but max Notify message size is {_maxPacketSize - NOTIFY_HEADER_SIZE}");
+                throw new MessageSizeException($"Message is bigger than MTU, size:{inLength} but max Notify message size is {_maxPacketSize - NOTIFY_HEADER_SIZE}");
             }
             if (_sentAckablePackets.IsFull)
             {
-                throw new InvalidOperationException("Sent queue is full");
+                throw new BufferFullException($"Sent queue is full for {_connection}");
             }
 
             var sequence = (ushort)_sentAckablePackets.Enqueue(new AckablePacket(callBacks));
@@ -310,13 +310,13 @@ namespace Mirage.SocketLayer
         {
             if (_sentAckablePackets.IsFull)
             {
-                throw new InvalidOperationException($"Sent queue is full for {_connection}");
+                throw new BufferFullException($"Sent queue is full for {_connection}");
             }
 
             if (length + MIN_RELIABLE_HEADER_SIZE > _maxPacketSize)
             {
                 if (!_allowFragmented)
-                    throw new ArgumentException($"Message is bigger than MTU and fragmentation is disabled, max Reliable message size is {_maxPacketSize - MIN_RELIABLE_HEADER_SIZE}", nameof(length));
+                    throw new MessageSizeException($"Message is bigger than MTU and fragmentation is disabled, max Reliable message size is {_maxPacketSize - MIN_RELIABLE_HEADER_SIZE}");
 
                 // if there is existing batch, send it first
                 // we need to do this so that fragmented message arrive in order
@@ -341,7 +341,7 @@ namespace Mirage.SocketLayer
         {
             if (length > _maxFragmentsMessageSize)
             {
-                throw new ArgumentException($"Message is bigger than MTU for fragmentation, max Reliable fragmented size is {_maxFragmentsMessageSize}", nameof(length));
+                throw new MessageSizeException($"Message is bigger than MTU for fragmentation, max Reliable fragmented size is {_maxFragmentsMessageSize}");
             }
 
             var fragments = Mathf.CeilToInt(length / (float)SizePerFragment);
@@ -406,7 +406,7 @@ namespace Mirage.SocketLayer
             // greater or equal, because we are adding 1 adder this check
             if (_sentAckablePackets.Count >= _maxPacketsInSendBufferPerConnection)
             {
-                throw new InvalidOperationException($"Max packets in send buffer reached for {_connection}");
+                throw new BufferFullException($"Max packets in send buffer reached for {_connection}");
             }
         }
 

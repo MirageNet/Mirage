@@ -74,13 +74,14 @@ namespace Mirage.SocketLayer
         /// 
         /// </summary>
         /// <param name="item"></param>
-        /// <returns>sequance of written item</returns>
+        /// <returns>sequence of written item</returns>
         public uint Enqueue(T item)
         {
             _logger?.DebugAssert(NotDefault(item), "Adding item, but it was null");
 
-            var dist = Sequencer.Distance(_write, _read);
-            if (dist == -1) { throw new InvalidOperationException($"Buffer is full, write:{_write} read:{_read}"); }
+            var distance = Sequencer.Distance(_write, _read);
+            if (distance == -1)
+                throw new BufferFullException($"Buffer is full, write:{_write} read:{_read}");
 
             _buffer[_write] = item;
             var sequence = _write;

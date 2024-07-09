@@ -23,7 +23,7 @@ namespace Mirage.SocketLayer
 
         public void OnDelivered()
         {
-            if (_notified) throw new InvalidOperationException("this token as already been notified");
+            if (_notified) throw new NotifyTokenException("this token as already been notified");
             _notified = true;
 
             Delivered?.Invoke();
@@ -31,7 +31,7 @@ namespace Mirage.SocketLayer
 
         public void OnLost()
         {
-            if (_notified) throw new InvalidOperationException("this token as already been notified");
+            if (_notified) throw new NotifyTokenException("this token as already been notified");
             _notified = true;
 
             Lost?.Invoke();

@@ -113,7 +113,7 @@ namespace Mirage.SocketLayer
         {
             // sending to Connecting is also valid
             if (_state != ConnectionState.Connected && _state != ConnectionState.Connecting)
-                throw new InvalidOperationException("Connection is not connected");
+                throw new NoConnectionException($"Connection is not connected, ConnectionState: {_state}");
         }
 
 
