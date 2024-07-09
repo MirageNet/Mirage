@@ -82,13 +82,22 @@ namespace Mirage
         /// </summary>
         public bool HasCharacter => Identity != null;
 
+        public IConnection Connection => _connection;
+
         /// <summary>
         /// The IP address / URL / FQDN associated with the connection.
         /// Can be useful for a game master to do IP Bans etc.
+        /// <para>
+        /// Best used to get concrete Endpoint type based on the <see cref="SocketFactory"/> being used
+        /// </para>
         /// </summary>
         public IEndPoint Address => _connection.EndPoint;
 
-        public IConnection Connection => _connection;
+        /// <summary>Connect called on client, but server has not replied yet</summary>
+        public bool IsConnecting => _connection.State == ConnectionState.Connecting;
+
+        /// <summary>Server and Client are connected and can send messages</summary>
+        public bool IsConnected => _connection.State == ConnectionState.Connected;
 
         /// <summary>
         /// List of all networkIdentity that this player can see

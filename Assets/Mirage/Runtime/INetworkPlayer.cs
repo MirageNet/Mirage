@@ -120,14 +120,28 @@ namespace Mirage
     /// </summary>
     public interface INetworkPlayer : IMessageSender, IVisibilityTracker, IObjectOwner, ISceneLoader
     {
-        SocketLayer.IEndPoint Address { get; }
-        SocketLayer.IConnection Connection { get; }
+        IConnection Connection { get; }
+
+        /// <summary>
+        /// The IP address / URL / FQDN associated with the connection.
+        /// Can be useful for a game master to do IP Bans etc.
+        /// <para>
+        /// Best used to get concrete Endpoint type based on the <see cref="SocketFactory"/> being used
+        /// </para>
+        /// </summary>
+        IEndPoint Address { get; }
+
+        /// <summary>Connect called on client, but server has not replied yet</summary>
+        bool IsConnecting { get; }
+
+        /// <summary>Server and Client are connected and can send messages</summary>
+        bool IsConnected { get; }
+
         PlayerAuthentication Authentication { get; }
         void SetAuthentication(PlayerAuthentication authentication, bool allowReplace = false);
         bool IsAuthenticated { get; }
-        /// <summary>
-        /// True if this Player is the local player on the server or client
-        /// </summary>
+
+        /// <summary>True if this Player is the local player on the server or client</summary>
         bool IsHost { get; }
 
         void Disconnect();
@@ -136,9 +150,7 @@ namespace Mirage
 
     public interface ISceneLoader
     {
-        /// <summary>
-        ///     Scene is fully loaded and we now can do things with player.
-        /// </summary>
+        /// <summary>Scene is fully loaded and we now can do things with player.</summary>
         bool SceneIsReady { get; set; }
     }
 }
