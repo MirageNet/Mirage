@@ -1,3 +1,10 @@
+## [149.4.1](https://github.com/MirageNet/Mirage/compare/v149.4.0...v149.4.1) (2024-08-07)
+
+
+### Bug Fixes
+
+* **Weaver:** fixing AssemblyResolver failing to find system dlls ([0551a60](https://github.com/MirageNet/Mirage/commit/0551a602803798a0db1bcc79b4242e0df25ac640))
+
 # [149.4.0](https://github.com/MirageNet/Mirage/compare/v149.3.1...v149.4.0) (2024-07-09)
 
 
