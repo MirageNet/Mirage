@@ -14,6 +14,7 @@ namespace Mirage.CodeGen
     {
         private readonly string[] _assemblyReferences;
         private readonly string[] _assemblyReferencesFileName;
+        private readonly string[] _allParentDirectories;
         private readonly Dictionary<string, AssemblyDefinition> _assemblyCache = new Dictionary<string, AssemblyDefinition>();
         private readonly ICompiledAssembly _compiledAssembly;
         private AssemblyDefinition _selfAssembly;
@@ -24,6 +25,14 @@ namespace Mirage.CodeGen
             _assemblyReferences = compiledAssembly.References;
             // cache paths here so we dont need to call it each time we resolve
             _assemblyReferencesFileName = _assemblyReferences.Select(r => Path.GetFileName(r)).ToArray();
+
+            // add path to a system type, because reference path might not be correct
+            var systemTypePath = typeof(int).Assembly.Location;
+            _allParentDirectories = _assemblyReferences
+                .Append(systemTypePath)
+                .Select(Path.GetDirectoryName)
+                .Distinct()
+                .ToArray();
         }
 
         public void Dispose()
@@ -96,8 +105,7 @@ namespace Mirage.CodeGen
             //in the ILPostProcessing API. As a workaround, we rely on the fact here that the indirect references
             //are always located next to direct references, so we search in all directories of direct references we
             //got passed, and if we find the file in there, we resolve to it.
-            var allParentDirectories = _assemblyReferences.Select(Path.GetDirectoryName).Distinct();
-            foreach (var parentDir in allParentDirectories)
+            foreach (var parentDir in _allParentDirectories)
             {
                 var candidate = Path.Combine(parentDir, name.Name + ".dll");
                 if (File.Exists(candidate))
