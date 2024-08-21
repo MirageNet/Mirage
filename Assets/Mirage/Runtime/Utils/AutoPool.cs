@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Mirage.Logging;
 using Mirage.SocketLayer;
 using UnityEngine;
@@ -36,7 +37,12 @@ namespace Mirage
                 Item = new T();
             }
 
-            public void Dispose() => _pool.Put(this);
+            public void Dispose()
+            {
+                if (Item is IList list)
+                    list.Clear();
+                _pool.Put(this);
+            }
 
             public static implicit operator T(Wrapper wrapper) => wrapper.Item;
         }

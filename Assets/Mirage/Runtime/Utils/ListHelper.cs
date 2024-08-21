@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Mirage
 {
@@ -13,7 +14,7 @@ namespace Mirage
         /// </summary>
         public static void AddToList<T, TEnumerator>(List<T> list, TEnumerator enumerator, T skip1 = null, T skip2 = null) where T : class where TEnumerator : struct, IEnumerator<T>
         {
-            list.Clear();
+            Debug.Assert(list.Count == 0);
             while (enumerator.MoveNext())
             {
                 var player = enumerator.Current;
@@ -26,7 +27,7 @@ namespace Mirage
         }
         public static void AddToList<T>(List<T> list, IEnumerable<T> players, T skip1 = null, T skip2 = null) where T : class
         {
-            list.Clear();
+            Debug.Assert(list.Count == 0);
             var enumerator = players.GetEnumerator();
             while (enumerator.MoveNext())
             {
@@ -40,7 +41,7 @@ namespace Mirage
         }
         public static void AddToList<T>(List<T> list, IReadOnlyList<T> inList, T skip1 = null, T skip2 = null) where T : class
         {
-            list.Clear();
+            Debug.Assert(list.Count == 0);
             var count = inList.Count;
             for (var i = 0; i < count; i++)
             {
