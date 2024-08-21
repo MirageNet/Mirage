@@ -1,3 +1,16 @@
+## [149.4.2](https://github.com/MirageNet/Mirage/compare/v149.4.1...v149.4.2) (2024-08-21)
+
+
+### Bug Fixes
+
+* making RemoteCallCollection public ([7945bd1](https://github.com/MirageNet/Mirage/commit/7945bd1513509e026f2a49b8d87ce059a3324ce7))
+
+
+### Performance Improvements
+
+* adding IEquatable to SyncVar wrappers ([5bb203f](https://github.com/MirageNet/Mirage/commit/5bb203fd695dcaa2714629f6be3678f4ba19add6))
+* using SendToMany for AddNewObservers ([69459f5](https://github.com/MirageNet/Mirage/commit/69459f54b22923c6c15228ee055567f101471419))
+
 ## [149.4.1](https://github.com/MirageNet/Mirage/compare/v149.4.0...v149.4.1) (2024-08-07)
 
 
