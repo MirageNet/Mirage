@@ -1211,7 +1211,7 @@ namespace Mirage
         /// </summary>
         [NonSerialized]
         private RemoteCallCollection _remoteCallCollection;
-        internal RemoteCallCollection RemoteCallCollection
+        public RemoteCallCollection RemoteCallCollection
         {
             get
             {
