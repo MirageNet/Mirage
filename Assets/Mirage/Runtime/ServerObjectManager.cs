@@ -255,11 +255,39 @@ namespace Mirage
             if (player.SceneIsReady)
                 SendSpawnMessage(identity, player);
         }
+        /// <summary>
+        /// Sends spawn message to player if it is not loading a scene
+        /// </summary>
+        /// <param name="identity"></param>
+        /// <param name="player"></param>
+        internal void ShowToPlayerMany(NetworkIdentity identity, List<INetworkPlayer> players)
+        {
+            // make new list so that we can filter out SceneIsReady
+            using var addedWrapper = AutoPool<List<INetworkPlayer>>.Take();
+            var sendTo = addedWrapper.Item;
+            Debug.Assert(sendTo.Count == 0);
+
+            foreach (var player in players)
+            {
+                var visibility = identity.Visibility;
+                if (visibility is NetworkVisibility networkVisibility)
+                    networkVisibility.InvokeVisibilityChanged(player, true);
+
+                if (player.SceneIsReady)
+                    sendTo.Add(player);
+            }
+
+            if (sendTo.Count == 1)
+                SendSpawnMessage(identity, sendTo[0]);
+            else if (sendTo.Count > 1)
+                SendSpawnMessageMany(identity, sendTo);
+        }
+
 
         internal void HideToPlayer(NetworkIdentity identity, INetworkPlayer player)
         {
-            var visiblity = identity.Visibility;
-            if (visiblity is NetworkVisibility networkVisibility)
+            var visibility = identity.Visibility;
+            if (visibility is NetworkVisibility networkVisibility)
                 networkVisibility.InvokeVisibilityChanged(player, false);
 
             player.Send(new ObjectHideMessage { NetId = identity.NetId });
@@ -388,7 +416,14 @@ namespace Mirage
             {
                 var isOwner = identity.Owner == player;
 
-                var payload = CreateSpawnMessagePayload(isOwner, identity, ownerWriter, observersWriter);
+                ArraySegment<byte> payload = default;
+                var hasPayload = CreateSpawnMessagePayload(identity, ownerWriter, observersWriter);
+                if (hasPayload)
+                {
+                    payload = isOwner
+                        ? ownerWriter.ToArraySegment()
+                        : observersWriter.ToArraySegment();
+                }
 
                 var prefabHash = identity.IsPrefab ? identity.PrefabHash : default(int?);
                 var sceneId = identity.IsSceneObject ? identity.SceneId : default(ulong?);
@@ -404,8 +439,62 @@ namespace Mirage
 
                 msg.SpawnValues = CreateSpawnValues(identity);
 
-
                 player.Send(msg);
+            }
+        }
+        internal void SendSpawnMessageMany(NetworkIdentity identity, List<INetworkPlayer> players)
+        {
+            if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId}");
+
+            // one writer for owner, one for observers
+            using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
+            {
+                ArraySegment<byte> payload = default;
+                var hasPayload = CreateSpawnMessagePayload(identity, ownerWriter, observersWriter);
+
+                var prefabHash = identity.IsPrefab ? identity.PrefabHash : default(int?);
+                var sceneId = identity.IsSceneObject ? identity.SceneId : default(ulong?);
+                var msg = new SpawnMessage
+                {
+                    NetId = identity.NetId,
+                    SceneId = sceneId,
+                    PrefabHash = prefabHash,
+                    Payload = payload,
+                };
+                msg.SpawnValues = CreateSpawnValues(identity);
+
+                // we have to send local/Owner values as their own message.
+                // but observers can be sent using SendToMany to avoid copying bytes multiple times
+                using var observersList = AutoPool<List<INetworkPlayer>>.Take();
+                var observerPlayers = observersList.Item;
+                Debug.Assert(observerPlayers.Count == 0);
+
+                foreach (var player in players)
+                {
+                    if (identity.Owner == player)
+                    {
+                        // send to owner
+                        msg.IsLocalPlayer = player.Identity == identity;
+                        msg.IsOwner = true;
+                        if (hasPayload)
+                            msg.Payload = ownerWriter.ToArraySegment();
+
+                        player.Send(msg);
+                    }
+                    else
+                    {
+                        // add all others players to list and send after
+                        observerPlayers.Add(player);
+                    }
+                }
+
+                // we only call this function with atleast 2 players, so there should always be observers
+                Debug.Assert(observerPlayers.Count > 0);
+                msg.IsLocalPlayer = false;
+                msg.IsOwner = false;
+                if (hasPayload)
+                    msg.Payload = observersWriter.ToArraySegment();
+                NetworkServer.SendToMany(observerPlayers, msg);
             }
         }
 
@@ -443,25 +532,19 @@ namespace Mirage
             });
         }
 
-        private static ArraySegment<byte> CreateSpawnMessagePayload(bool isOwner, NetworkIdentity identity, PooledNetworkWriter ownerWriter, PooledNetworkWriter observersWriter)
+        private static bool CreateSpawnMessagePayload(NetworkIdentity identity, PooledNetworkWriter ownerWriter, PooledNetworkWriter observersWriter)
         {
             // Only call OnSerializeAllSafely if there are NetworkBehaviours
             if (identity.NetworkBehaviours.Length == 0)
             {
-                return default;
+                return false;
             }
 
             // serialize all components with initialState = true
             // (can be null if has none)
             identity.OnSerializeAll(true, ownerWriter, observersWriter);
 
-            // use owner segment if 'conn' owns this identity, otherwise
-            // use observers segment
-            var payload = isOwner ?
-                ownerWriter.ToArraySegment() :
-                observersWriter.ToArraySegment();
-
-            return payload;
+            return true;
         }
 
         /// <summary>

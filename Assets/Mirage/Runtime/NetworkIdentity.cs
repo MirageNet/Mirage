@@ -1026,7 +1026,10 @@ namespace Mirage
         // add all newObservers that aren't in .observers yet
         private bool AddNewObservers(bool initialize)
         {
-            var changed = false;
+            using var addedWrapper = AutoPool<List<INetworkPlayer>>.Take();
+            var added = addedWrapper.Item;
+            Debug.Assert(added.Count == 0);
+
             foreach (var player in newObservers)
             {
                 // only add ready connections.
@@ -1036,13 +1039,15 @@ namespace Mirage
                     // new observer
                     player.AddToVisList(this);
                     // spawn identity for this conn
-                    ServerObjectManager.ShowToPlayer(this, player);
+                    added.Add(player);
                     if (logger.LogEnabled()) logger.Log($"Added new observer '{player}' for {gameObject}");
-                    changed = true;
                 }
             }
 
-            return changed;
+            if (added.Count > 0)
+                ServerObjectManager.ShowToPlayerMany(this, added);
+
+            return added.Count > 0;
         }
 
         /// <summary>
