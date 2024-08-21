@@ -1,14 +1,14 @@
+using System;
 using Mirage.Serialization;
 using UnityEngine;
 
 namespace Mirage
 {
-
     /// <summary>
     /// backing struct for a NetworkIdentity when used as a syncvar
     /// the weaver will replace the syncvar with this struct.
     /// </summary>
-    public struct GameObjectSyncvar
+    public struct GameObjectSyncvar : IEquatable<GameObjectSyncvar>
     {
         /// <summary>
         /// The network client that spawned the parent object
@@ -19,7 +19,7 @@ namespace Mirage
 
         internal GameObject _gameObject;
 
-        internal uint NetId => _gameObject != null ? _gameObject.GetComponent<NetworkIdentity>().NetId : _netId;
+        internal uint NetId => _gameObject != null && _gameObject.TryGetComponent<NetworkIdentity>(out var identity) ? identity.NetId : _netId;
 
         public GameObject Value
         {
@@ -42,6 +42,13 @@ namespace Mirage
                     _netId = 0;
                 _gameObject = value;
             }
+        }
+
+        public bool Equals(GameObjectSyncvar other)
+        {
+            // NetId is the current ID or the saved ID
+            // so we can just compare that to see if values are equal
+            return NetId == other.NetId;
         }
     }
 

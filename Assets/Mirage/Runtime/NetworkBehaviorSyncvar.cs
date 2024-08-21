@@ -1,14 +1,14 @@
+using System;
 using System.Runtime.CompilerServices;
 using Mirage.Serialization;
 
 namespace Mirage
 {
-
     /// <summary>
     /// backing struct for a NetworkIdentity when used as a syncvar
     /// the weaver will replace the syncvar with this struct.
     /// </summary>
-    public struct NetworkBehaviorSyncvar
+    public struct NetworkBehaviorSyncvar : IEquatable<NetworkBehaviorSyncvar>
     {
         /// <summary>
         /// The network client that spawned the parent object
@@ -70,10 +70,18 @@ namespace Mirage
                 return (T)value;
         }
 
+        public bool Equals(NetworkBehaviorSyncvar other)
+        {
+            // NetId is the current ID or the saved ID
+            // so we can just compare that to see if values are equal
+            return NetId == other.NetId
+                && ComponentId == other.ComponentId;
+        }
+
         public static implicit operator NetworkBehaviorSyncvar(NetworkBehaviour behaviour) => new NetworkBehaviorSyncvar(behaviour);
     }
 
-    public struct NetworkBehaviorSyncvar<T> where T : NetworkBehaviour
+    public struct NetworkBehaviorSyncvar<T> : IEquatable<NetworkBehaviorSyncvar<T>>, IEquatable<NetworkBehaviorSyncvar> where T : NetworkBehaviour
     {
         private NetworkBehaviorSyncvar inner;
 
@@ -106,8 +114,23 @@ namespace Mirage
         public static implicit operator NetworkBehaviorSyncvar<T>(T behaviour) => new NetworkBehaviorSyncvar<T>(behaviour);
         public static implicit operator NetworkBehaviorSyncvar(NetworkBehaviorSyncvar<T> generic) => generic.inner;
         public static explicit operator NetworkBehaviorSyncvar<T>(NetworkBehaviorSyncvar syncvar) => new NetworkBehaviorSyncvar<T>() { inner = syncvar };
-    }
 
+        public bool Equals(NetworkBehaviorSyncvar<T> other)
+        {
+            // NetId is the current ID or the saved ID
+            // so we can just compare that to see if values are equal
+            return NetId == other.NetId
+                && ComponentId == other.ComponentId;
+        }
+
+        public bool Equals(NetworkBehaviorSyncvar other)
+        {
+            // NetId is the current ID or the saved ID
+            // so we can just compare that to see if values are equal
+            return NetId == other.NetId
+                && ComponentId == other.ComponentId;
+        }
+    }
 
     public static class NetworkBehaviorSerializers
     {

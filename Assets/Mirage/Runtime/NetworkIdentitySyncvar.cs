@@ -1,3 +1,4 @@
+using System;
 using Mirage.Serialization;
 
 namespace Mirage
@@ -7,7 +8,7 @@ namespace Mirage
     /// backing struct for a NetworkIdentity when used as a syncvar
     /// the weaver will replace the syncvar with this struct.
     /// </summary>
-    public struct NetworkIdentitySyncvar
+    public struct NetworkIdentitySyncvar : IEquatable<NetworkIdentitySyncvar>
     {
         /// <summary>
         /// The network client that spawned the parent object
@@ -41,6 +42,13 @@ namespace Mirage
                     _netId = 0;
                 _identity = value;
             }
+        }
+
+        public bool Equals(NetworkIdentitySyncvar other)
+        {
+            // NetId is the current ID or the saved ID
+            // so we can just compare that to see if values are equal
+            return NetId == other.NetId;
         }
     }
 
