@@ -1,3 +1,10 @@
+## [149.4.3](https://github.com/MirageNet/Mirage/compare/v149.4.2...v149.4.3) (2024-08-31)
+
+
+### Bug Fixes
+
+* logging warning after disconnect instead of invoking other handler ([05a72fa](https://github.com/MirageNet/Mirage/commit/05a72facf10fada55b8e30ec3e26173801ce9c99))
+
 ## [149.4.2](https://github.com/MirageNet/Mirage/compare/v149.4.1...v149.4.2) (2024-08-21)
 
 
