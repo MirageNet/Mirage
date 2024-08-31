@@ -1,3 +1,15 @@
+# [149.5.0](https://github.com/MirageNet/Mirage/compare/v149.4.3...v149.5.0) (2024-08-31)
+
+
+### Bug Fixes
+
+* fixing using in welcomeWindow for unity2021 ([c056f9e](https://github.com/MirageNet/Mirage/commit/c056f9eff6b0b81dc3b84b1d3a14e08e48e2e49e))
+
+
+### Features
+
+* adding "dont show" toggle to welcome window ([f3eae96](https://github.com/MirageNet/Mirage/commit/f3eae9657f9dce698bc7679782c6c5b82e0fdc2f))
+
 ## [149.4.3](https://github.com/MirageNet/Mirage/compare/v149.4.2...v149.4.3) (2024-08-31)
 
 
