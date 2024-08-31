@@ -9,6 +9,10 @@ using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.UIElements;
+#if UNITY_2021_3_OR_NEWER
+using System.Linq;
+using PackageInfo = UnityEditor.PackageManager.PackageInfo;
+#endif
 
 /**
  * Docs used:
