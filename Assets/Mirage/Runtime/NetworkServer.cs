@@ -251,7 +251,7 @@ namespace Mirage
             // create after MessageHandler, SyncVarReceiver uses it 
             _syncVarReceiver = new SyncVarReceiver(this, World);
 
-            var dataHandler = new DataHandler(MessageHandler, _connections);
+            var dataHandler = new DataHandler(this, MessageHandler, _connections);
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
 
             var config = PeerConfig;
@@ -478,7 +478,7 @@ namespace Mirage
 
         [Obsolete("Use SendToAll(msg, authenticatedOnly, excludeLocalPlayer, channelId) instead")]
         public void SendToAll<T>(T msg, bool excludeLocalPlayer, Channel channelId = Channel.Reliable) => SendToAll(msg, authenticatedOnly: false, excludeLocalPlayer, channelId);
-        
+
         public void SendToAll<T>(T msg, bool authenticatedOnly, bool excludeLocalPlayer, Channel channelId = Channel.Reliable)
         {
             if (authenticatedOnly)
@@ -614,17 +614,25 @@ namespace Mirage
         /// </summary>
         private sealed class DataHandler : IDataHandler
         {
+            private readonly NetworkServer _server;
             private readonly IMessageReceiver _messageHandler;
             private readonly Dictionary<IConnection, INetworkPlayer> _players;
 
-            public DataHandler(IMessageReceiver messageHandler, Dictionary<IConnection, INetworkPlayer> connections)
+            public DataHandler(NetworkServer server, IMessageReceiver messageHandler, Dictionary<IConnection, INetworkPlayer> connections)
             {
+                _server = server;
                 _messageHandler = messageHandler;
                 _players = connections;
             }
 
             public void ReceiveMessage(IConnection connection, ArraySegment<byte> message)
             {
+                if (!_server.Active)
+                {
+                    if (logger.WarnEnabled()) logger.LogWarning("Received message after disconnect");
+                    return;
+                }
+
                 if (_players.TryGetValue(connection, out var player))
                 {
                     _messageHandler.HandleMessage(player, message);

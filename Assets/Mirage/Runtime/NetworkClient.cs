@@ -144,7 +144,7 @@ namespace Mirage
             var socket = SocketFactory.CreateClientSocket();
             var maxPacketSize = SocketFactory.MaxPacketSize;
             MessageHandler = new MessageHandler(World, DisconnectOnException, RethrowException);
-            var dataHandler = new DataHandler(MessageHandler);
+            var dataHandler = new DataHandler(this, MessageHandler);
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
 
             var config = PeerConfig ?? new Config();
@@ -231,7 +231,7 @@ namespace Mirage
 
             // create local connection objects and connect them
             MessageHandler = new MessageHandler(World, DisconnectOnException, RethrowException);
-            var dataHandler = new DataHandler(MessageHandler);
+            var dataHandler = new DataHandler(this, MessageHandler);
             (var clientConn, var serverConn) = PipePeerConnection.Create(dataHandler, serverDataHandler, OnHostDisconnected, null);
 
             // set up client before connecting to server, server could invoke handlers
@@ -419,10 +419,12 @@ namespace Mirage
         {
             private IConnection _connection;
             private INetworkPlayer _player;
+            private readonly NetworkClient _client;
             private readonly IMessageReceiver _messageHandler;
 
-            public DataHandler(IMessageReceiver messageHandler)
+            public DataHandler(NetworkClient networkClient, IMessageReceiver messageHandler)
             {
+                _client = networkClient;
                 _messageHandler = messageHandler;
             }
 
@@ -434,6 +436,11 @@ namespace Mirage
 
             public void ReceiveMessage(IConnection connection, ArraySegment<byte> message)
             {
+                if (!_client.Active)
+                {
+                    if (logger.WarnEnabled()) logger.LogWarning("Received message after disconnect");
+                    return;
+                }
                 logger.Assert(_connection == connection);
                 _messageHandler.HandleMessage(_player, message);
             }
