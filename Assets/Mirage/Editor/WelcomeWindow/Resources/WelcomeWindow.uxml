@@ -66,6 +66,9 @@
                 </ui:ScrollView>
             </ui:VisualElement>
         </ui:Box>
+        <ui:VisualElement style="align-items: end;">
+            <ui:Toggle name="DontShowToggle" text="Dont show on update" style="pad-left:6px;" />
+        </ui:VisualElement>
     </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

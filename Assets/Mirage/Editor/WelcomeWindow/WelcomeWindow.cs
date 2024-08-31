@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Mirage.Logging;
@@ -10,7 +9,6 @@ using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.UIElements;
-using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 /**
  * Docs used:
@@ -105,6 +103,10 @@ namespace Mirage
             EditorApplication.update -= ShowWindowOnFirstStart;
             firstStartUpKey = GetVersion();
 
+            var dontShow = EditorPrefs.GetBool("DontShowToggle", false);
+            if (dontShow)
+                return;
+
             if ((!EditorPrefs.GetBool(firstTimeMirageKey, false) || !EditorPrefs.GetBool(firstStartUpKey, false)) && firstStartUpKey != "MirageUnknown")
             {
                 EditorPrefs.SetString(screenToOpenKey, ShowChangeLog ? "ChangeLog" : "Welcome");
@@ -155,6 +157,11 @@ namespace Mirage
             versionText.text = "v" + GetVersion();
 
             DrawChangeLog(ParseChangeLog());
+
+            var dontShowToggle = root.Q<Toggle>("DontShowToggle");
+            dontShowToggle.value = EditorPrefs.GetBool("DontShowToggle", false);
+            dontShowToggle.tooltip = "Dont show welcome window after there is an update to Mirage";
+            dontShowToggle.RegisterValueChangedCallback(b => EditorPrefs.SetBool("DontShowToggle", b.newValue));
 
             #region Page buttons
 
