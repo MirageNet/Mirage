@@ -1,3 +1,10 @@
+## [149.5.1](https://github.com/MirageNet/Mirage/compare/v149.5.0...v149.5.1) (2024-09-04)
+
+
+### Bug Fixes
+
+* fixing NRE when DestroyObject is called on unspawned object ([ce00f0d](https://github.com/MirageNet/Mirage/commit/ce00f0de3f50900ded3e52103381adbfb50449d3))
+
 # [149.5.0](https://github.com/MirageNet/Mirage/compare/v149.4.3...v149.5.0) (2024-08-31)
 
 
