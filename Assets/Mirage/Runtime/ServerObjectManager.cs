@@ -597,7 +597,13 @@ namespace Mirage
 
         private void DestroyObject(NetworkIdentity identity, bool destroyServerObject)
         {
-            if (logger.LogEnabled()) logger.Log("DestroyObject instance:" + identity.NetId);
+            if (identity.NetId == 0)
+            {
+                if (logger.WarnEnabled()) logger.LogWarning("DestroyObject instance:" + identity.NetId);
+                return;
+            }
+
+            if (logger.LogEnabled()) logger.Log($"DestroyObject NetId={identity.NetId}");
 
             _server.World.RemoveIdentity(identity);
             identity.Owner?.RemoveOwnedObject(identity);
