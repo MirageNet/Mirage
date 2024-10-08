@@ -37,7 +37,7 @@ event Action<int, int> event2;
 
 The following is a list of rules that SyncVar hooks follows for when and where they are invoked:
 
-- Hook only invoked if value is changed
+- Hooks are only invoked if value is changed and after the value is updated
 
 - When settings SyncVar
   - both flags false
@@ -51,7 +51,8 @@ The following is a list of rules that SyncVar hooks follows for when and where t
 
 - `DeserializeSyncVars` is never called on host sending update to itself, but is called when owner sends update to server
 
-- hooks are invoked in `DeserializeSyncVars` if values changes 
-  - always invokes if Only client (eg not host mode)
+- Hooks are invoked in `DeserializeSyncVars` if values changes 
+  - Always invokes if Only client (eg not host mode)
+  - Invoked after the variable is updated with the deserialized value.
   - `invokeHookOnServer`
-    - invokes on server (eg when an change is send from owner)
+    - Invokes on server (eg when an change is send from owner)
