@@ -110,7 +110,7 @@ jobs:
           REPO_NAME: ${{ github.event.repository.name }}
 
       - name: Publish docs
-        uses: crazy-max/ghaction-github-pages@v4.0.0
+        uses: crazy-max/ghaction-github-pages@v4.1.0
         if: github.ref == 'refs/heads/main'
         with:
           keep_history: false
