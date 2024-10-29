@@ -1,3 +1,10 @@
+## [149.5.2](https://github.com/MirageNet/Mirage/compare/v149.5.1...v149.5.2) (2024-10-29)
+
+
+### Bug Fixes
+
+* fixing incorrect log message ([e05ab96](https://github.com/MirageNet/Mirage/commit/e05ab9642ac7776872b37fbdda2791bfb0751fce))
+
 ## [149.5.1](https://github.com/MirageNet/Mirage/compare/v149.5.0...v149.5.1) (2024-09-04)
 
 
