@@ -71,6 +71,9 @@ namespace Mirage.Logging
                         timePrefix = "0";
                     }
                     break;
+                case TimePrefix.UnscaledTime:
+                    timePrefix = Time.unscaledTime.ToString("0.000");
+                    break;
                 case TimePrefix.DateTimeMilliSeconds:
                     timePrefix = DateTime.Now.ToString("HH:mm:ss.fff");
                     break;
@@ -86,6 +89,7 @@ namespace Mirage.Logging
         {
             None,
             FrameCount,
+            UnscaledTime,
             DateTimeMilliSeconds,
             DateTimeSeconds,
         }
