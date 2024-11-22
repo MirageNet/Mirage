@@ -1,3 +1,10 @@
+# [149.6.0](https://github.com/MirageNet/Mirage/compare/v149.5.2...v149.6.0) (2024-11-22)
+
+
+### Features
+
+* adding UnscaledTime as log option ([ab21fbb](https://github.com/MirageNet/Mirage/commit/ab21fbbb36f33ffc71337dcc7d70990dd779a30a))
+
 ## [149.5.2](https://github.com/MirageNet/Mirage/compare/v149.5.1...v149.5.2) (2024-10-29)
 
 
