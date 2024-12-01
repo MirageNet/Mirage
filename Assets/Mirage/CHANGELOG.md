@@ -1,3 +1,10 @@
+# [149.7.0](https://github.com/MirageNet/Mirage/compare/v149.6.0...v149.7.0) (2024-12-01)
+
+
+### Features
+
+* adding try catch for return RPC ([6b7e683](https://github.com/MirageNet/Mirage/commit/6b7e68326f29485edf3858695d4615a0b7083802))
+
 # [149.6.0](https://github.com/MirageNet/Mirage/compare/v149.5.2...v149.6.0) (2024-11-22)
 
 
