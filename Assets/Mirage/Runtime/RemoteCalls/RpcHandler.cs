@@ -12,7 +12,10 @@ namespace Mirage.RemoteCalls
     {
         private static readonly ILogger logger = LogFactory.GetLogger<RpcHandler>();
 
-        private readonly Dictionary<int, Action<NetworkReader>> _callbacks = new Dictionary<int, Action<NetworkReader>>();
+        private delegate void ReplyCallbackSuccess(NetworkReader reader);
+        private delegate void ReplyCallbackFail();
+
+        private readonly Dictionary<int, (ReplyCallbackSuccess success, ReplyCallbackFail fail)> _callbacks = new Dictionary<int, (ReplyCallbackSuccess success, ReplyCallbackFail fail)>();
         private int _nextReplyId;
         /// <summary>
         /// Object locator required for deserializing the reply
@@ -103,29 +106,50 @@ namespace Mirage.RemoteCalls
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns>the task that will be completed when the result is in, and the id to use in the request</returns>
-        public (UniTask<T> task, int replyId) CreateReplyTask<T>()
+        public (UniTask<T> task, int replyId) CreateReplyTask<T>(RemoteCall info)
         {
             var newReplyId = _nextReplyId++;
             var completionSource = AutoResetUniTaskCompletionSource<T>.Create();
-            void Callback(NetworkReader reader)
+            void CallbackSuccess(NetworkReader reader)
             {
                 var result = reader.Read<T>();
                 completionSource.TrySetResult(result);
             }
 
-            _callbacks.Add(newReplyId, Callback);
+            void CallbackFail()
+            {
+                var netId = 0u;
+                var name = "";
+                if (info.Behaviour != null)
+                {
+                    netId = info.Behaviour.NetId;
+                    name = info.Behaviour.name;
+                }
+                var message = $"Exception thrown from return RPC. {info.Name} on netId={netId} {name}";
+                completionSource.TrySetException(new ReturnRpcException(message));
+            }
+
+            _callbacks.Add(newReplyId, (CallbackSuccess, CallbackFail));
             return (completionSource.Task, newReplyId);
         }
 
         private void OnReply(INetworkPlayer player, RpcReply reply)
         {
             // find the callback that was waiting for this and invoke it.
-            if (_callbacks.TryGetValue(reply.ReplyId, out var action))
+            if (_callbacks.TryGetValue(reply.ReplyId, out var callbacks))
             {
                 _callbacks.Remove(_nextReplyId);
-                using (var reader = NetworkReaderPool.GetReader(reply.Payload, _objectLocator))
+
+                if (reply.Success)
                 {
-                    action.Invoke(reader);
+                    using (var reader = NetworkReaderPool.GetReader(reply.Payload, _objectLocator))
+                    {
+                        callbacks.success.Invoke(reader);
+                    }
+                }
+                else
+                {
+                    callbacks.fail.Invoke();
                 }
             }
             else

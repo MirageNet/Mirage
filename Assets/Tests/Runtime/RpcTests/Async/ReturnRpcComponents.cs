@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -45,6 +46,27 @@ namespace Mirage.Tests.Runtime.RpcTests.Async
         public UniTask<float> GetResultOwner()
         {
             return UniTask.FromResult(rpcResult);
+        }
+    }
+    public class ReturnRpcComponent_throw : NetworkBehaviour
+    {
+        public static ArgumentException TestException => new System.ArgumentException("some bad thing happened");
+        [ServerRpc]
+        public UniTask<float> GetResultServer()
+        {
+            throw TestException;
+        }
+
+        [ClientRpc(target = RpcTarget.Player)]
+        public UniTask<float> GetResultTarget(INetworkPlayer target)
+        {
+            throw TestException;
+        }
+
+        [ClientRpc(target = RpcTarget.Owner)]
+        public UniTask<float> GetResultOwner()
+        {
+            throw TestException;
         }
     }
     public class ReturnRpcComponent_struct : NetworkBehaviour

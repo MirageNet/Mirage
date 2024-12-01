@@ -61,17 +61,38 @@ namespace Mirage.RemoteCalls
             async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
             {
                 /// invoke the serverRpc and send a reply message
-                var result = await func(obj, reader, senderPlayer, replyId);
-
-                using (var writer = NetworkWriterPool.GetWriter())
+                bool success;
+                T result = default;
+                try
                 {
-                    writer.Write(result);
-                    var serverRpcReply = new RpcReply
-                    {
-                        ReplyId = replyId,
-                        Payload = writer.ToArraySegment()
-                    };
+                    result = await func(obj, reader, senderPlayer, replyId);
+                    success = true;
+                }
+                catch (Exception e)
+                {
+                    success = false;
+                    logger.LogError($"Return RPC threw an Exception: {e}");
+                }
 
+
+                var serverRpcReply = new RpcReply
+                {
+                    ReplyId = replyId,
+                    Success = success,
+                };
+                if (success)
+                {
+                    // if success, write payload and send
+                    // else just send it without payload (since there is no result)
+                    using (var writer = NetworkWriterPool.GetWriter())
+                    {
+                        writer.Write(result);
+                        serverRpcReply.Payload = writer.ToArraySegment();
+                        senderPlayer.Send(serverRpcReply);
+                    }
+                }
+                else
+                {
                     senderPlayer.Send(serverRpcReply);
                 }
             }
@@ -148,6 +169,7 @@ namespace Mirage.RemoteCalls
         public RemoteCall(NetworkBehaviour behaviour, RpcInvokeType invokeType, RpcDelegate function, bool requireAuthority, string name)
         {
             Behaviour = behaviour;
+            DeclaringType = behaviour.GetType();
             InvokeType = invokeType;
             Function = function;
             RequireAuthority = requireAuthority;

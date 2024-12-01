@@ -39,10 +39,12 @@ namespace Mirage.RemoteCalls
 
         public static UniTask<T> SendTargetWithReturn<T>(NetworkBehaviour behaviour, int relativeIndex, NetworkWriter writer, INetworkPlayer player)
         {
-            var index = behaviour.Identity.RemoteCallCollection.GetIndexOffset(behaviour) + relativeIndex;
+            var collection = behaviour.Identity.RemoteCallCollection;
+            var index = collection.GetIndexOffset(behaviour) + relativeIndex;
             Validate(behaviour, index);
 
-            (var task, var id) = behaviour.ServerObjectManager._rpcHandler.CreateReplyTask<T>();
+            var callInfo = collection.GetAbsolute(index);
+            (var task, var id) = behaviour.ServerObjectManager._rpcHandler.CreateReplyTask<T>(callInfo);
             var message = new RpcWithReplyMessage
             {
                 NetId = behaviour.NetId,

@@ -26,7 +26,8 @@ namespace Mirage.RemoteCalls
 
         public static UniTask<T> SendWithReturn<T>(NetworkBehaviour behaviour, int relativeIndex, NetworkWriter writer, bool requireAuthority)
         {
-            var index = behaviour.Identity.RemoteCallCollection.GetIndexOffset(behaviour) + relativeIndex;
+            var collection = behaviour.Identity.RemoteCallCollection;
+            var index = collection.GetIndexOffset(behaviour) + relativeIndex;
             Validate(behaviour, index, requireAuthority);
             var message = new RpcWithReplyMessage
             {
@@ -35,7 +36,8 @@ namespace Mirage.RemoteCalls
                 Payload = writer.ToArraySegment()
             };
 
-            (var task, var id) = behaviour.ClientObjectManager._rpcHandler.CreateReplyTask<T>();
+            var callInfo = collection.GetAbsolute(index);
+            (var task, var id) = behaviour.ClientObjectManager._rpcHandler.CreateReplyTask<T>(callInfo);
 
             message.ReplyId = id;
 

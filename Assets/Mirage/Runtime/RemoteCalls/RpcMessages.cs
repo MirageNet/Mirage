@@ -28,6 +28,8 @@ namespace Mirage.RemoteCalls
     public struct RpcReply
     {
         public int ReplyId;
+        /// <summary>If result is returned, or exception was thrown</summary>
+        public bool Success;
         public ArraySegment<byte> Payload;
     }
 }

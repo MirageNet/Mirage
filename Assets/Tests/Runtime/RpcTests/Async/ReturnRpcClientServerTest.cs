@@ -1,6 +1,7 @@
 using System.Collections;
+using System.Text.RegularExpressions;
 using Cysharp.Threading.Tasks;
-using Mirage.Tests.Runtime.Host;
+using Mirage.RemoteCalls;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -36,6 +37,7 @@ namespace Mirage.Tests.Runtime.RpcTests.Async
             Assert.That(result, Is.EqualTo(random));
         });
     }
+
     public class ReturnRpcClientServerTest_float : ClientServerSetup<ReturnRpcComponent_float>
     {
         [UnityTest]
@@ -63,6 +65,60 @@ namespace Mirage.Tests.Runtime.RpcTests.Async
             clientComponent.rpcResult = random;
             var result = await serverComponent.GetResultOwner();
             Assert.That(result, Is.EqualTo(random));
+        });
+    }
+
+    public class ReturnRpcClientServerTest_throw : ClientServerSetup<ReturnRpcComponent_throw>
+    {
+        [UnityTest]
+        public IEnumerator ServerRpcReturn() => UniTask.ToCoroutine(async () =>
+        {
+            LogAssert.Expect(LogType.Error, new Regex(".*Return RPC threw an Exception:.*", RegexOptions.Multiline));
+            try
+            {
+                _ = await clientComponent.GetResultServer();
+                Assert.Fail();
+            }
+            catch (ReturnRpcException e)
+            {
+                var fullName = "Mirage.Tests.Runtime.RpcTests.Async.ReturnRpcComponent_throw.GetResultServer";
+                var message = $"Exception thrown from return RPC. {fullName} on netId={clientComponent.NetId} {clientComponent.name}";
+                Assert.That(e, Has.Message.EqualTo(message));
+            }
+        });
+
+        [UnityTest]
+        public IEnumerator ClientRpcTargetReturn() => UniTask.ToCoroutine(async () =>
+        {
+            LogAssert.Expect(LogType.Error, new Regex(".*Return RPC threw an Exception:.*", RegexOptions.Multiline));
+            try
+            {
+                _ = await serverComponent.GetResultTarget(serverPlayer);
+                Assert.Fail();
+            }
+            catch (ReturnRpcException e)
+            {
+                var fullName = "Mirage.Tests.Runtime.RpcTests.Async.ReturnRpcComponent_throw.GetResultTarget";
+                var message = $"Exception thrown from return RPC. {fullName} on netId={serverComponent.NetId} {serverComponent.name}";
+                Assert.That(e, Has.Message.EqualTo(message));
+            }
+        });
+
+        [UnityTest]
+        public IEnumerator ClientRpcOwnerReturn() => UniTask.ToCoroutine(async () =>
+        {
+            LogAssert.Expect(LogType.Error, new Regex(".*Return RPC threw an Exception:.*", RegexOptions.Multiline));
+            try
+            {
+                _ = await serverComponent.GetResultOwner();
+                Assert.Fail();
+            }
+            catch (ReturnRpcException e)
+            {
+                var fullName = "Mirage.Tests.Runtime.RpcTests.Async.ReturnRpcComponent_throw.GetResultOwner";
+                var message = $"Exception thrown from return RPC. {fullName} on netId={serverComponent.NetId} {serverComponent.name}";
+                Assert.That(e, Has.Message.EqualTo(message));
+            }
         });
     }
     public class ReturnRpcClientServerTest_struct : ClientServerSetup<ReturnRpcComponent_struct>

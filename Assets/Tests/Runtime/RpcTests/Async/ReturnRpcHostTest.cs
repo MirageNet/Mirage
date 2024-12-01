@@ -1,9 +1,10 @@
+using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using Mirage.Tests.Runtime.Host;
 using NUnit.Framework;
-using UnityEngine;
 using UnityEngine.TestTools;
+using Random = UnityEngine.Random;
 
 namespace Mirage.Tests.Runtime.RpcTests.Async
 {
@@ -65,6 +66,52 @@ namespace Mirage.Tests.Runtime.RpcTests.Async
             Assert.That(result, Is.EqualTo(random));
         });
     }
+
+    public class ReturnRpcHostTest_Throw : HostSetup<ReturnRpcComponent_throw>
+    {
+        [UnityTest]
+        public IEnumerator ServerRpcReturn() => UniTask.ToCoroutine(async () =>
+        {
+            try
+            {
+                _ = await hostComponent.GetResultServer();
+                Assert.Fail();
+            }
+            catch (ArgumentException e) // host invokes direction, so we can catch exception
+            {
+                Assert.That(e, Has.Message.EqualTo(ReturnRpcComponent_throw.TestException.Message));
+            }
+        });
+
+        [UnityTest]
+        public IEnumerator ClientRpcTargetReturn() => UniTask.ToCoroutine(async () =>
+        {
+            try
+            {
+                _ = await hostComponent.GetResultTarget(hostServerPlayer);
+                Assert.Fail();
+            }
+            catch (ArgumentException e) // host invokes direction, so we can catch exception
+            {
+                Assert.That(e, Has.Message.EqualTo(ReturnRpcComponent_throw.TestException.Message));
+            }
+        });
+
+        [UnityTest]
+        public IEnumerator ClientRpcOwnerReturn() => UniTask.ToCoroutine(async () =>
+        {
+            try
+            {
+                _ = await hostComponent.GetResultOwner();
+                Assert.Fail();
+            }
+            catch (ArgumentException e) // host invokes direction, so we can catch exception
+            {
+                Assert.That(e, Has.Message.EqualTo(ReturnRpcComponent_throw.TestException.Message));
+            }
+        });
+    }
+
     public class ReturnRpcHostTest_struct : HostSetup<ReturnRpcComponent_struct>
     {
         [UnityTest]
