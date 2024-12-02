@@ -163,7 +163,7 @@ namespace Mirage
         [SerializeField, HideInInspector]
         private ulong _sceneId = 0;
 
-        internal ulong SceneId => _sceneId;
+        public ulong SceneId => _sceneId;
 
         /// <summary>
         /// Is this object part of a scene and have a Scene Id?
