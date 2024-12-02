@@ -1,3 +1,10 @@
+# [149.8.0](https://github.com/MirageNet/Mirage/compare/v149.7.0...v149.8.0) (2024-12-02)
+
+
+### Features
+
+* making SceneId property public ([53de2a0](https://github.com/MirageNet/Mirage/commit/53de2a01e0ddb9aeda0aba824ae0071ead1337cd))
+
 # [149.7.0](https://github.com/MirageNet/Mirage/compare/v149.6.0...v149.7.0) (2024-12-01)
 
 
