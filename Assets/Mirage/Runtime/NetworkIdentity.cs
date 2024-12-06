@@ -172,6 +172,14 @@ namespace Mirage
         public bool IsSceneObject => _sceneId != 0;
 
         /// <summary>
+        /// Used to clear <see cref="SceneId"/>. Use in cases where you want to spawn object in custom way using Spawn Handlers with AssetId.
+        /// </summary>
+        public void ClearSceneId()
+        {
+            _sceneId = 0;
+        }
+
+        /// <summary>
         /// Is this object a prefab and have a <see cref="PrefabHash"/> so that it can be spawned over the network
         /// </summary>
         /// <returns></returns>
