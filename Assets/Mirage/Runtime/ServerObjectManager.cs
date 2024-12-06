@@ -340,7 +340,10 @@ namespace Mirage
         /// <summary>
         /// Assigns <paramref name="prefabHash"/> to the <paramref name="identity"/> and then spawns it with <paramref name="owner"/>
         /// <para>
-        ///     <see cref="NetworkIdentity.PrefabHash"/> can only be set on an identity if the current value is Empty
+        ///     <see cref="NetworkIdentity.PrefabHash"/> can only be set to a non-zero value.
+        /// </para>
+        /// <para>
+        ///     <see cref="NetworkIdentity.SceneId"/> will be cleared when calling this method, this will ensure that the object is spawned using the new PrefabHash rather than SceneId
         /// </para>
         /// <para>
         ///     This method is useful if you are creating network objects at runtime and both server and client know what <see cref="Guid"/> to set on an object
@@ -355,6 +358,13 @@ namespace Mirage
             ThrowIfPrefab(identity);
 
             identity.PrefabHash = prefabHash;
+
+            if (identity.IsSceneObject)
+            {
+                if (logger.LogEnabled()) logger.Log($"Clearing SceneId on {identity} because setting prefabHash when spawning. Old sceneId={identity.SceneId:X} New PrefabHash:{prefabHash:X}");
+                identity.ClearSceneId();
+            }
+
             Spawn(identity, owner);
         }
 
