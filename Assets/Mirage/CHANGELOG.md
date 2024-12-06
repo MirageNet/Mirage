@@ -1,3 +1,18 @@
+# [150.0.0](https://github.com/MirageNet/Mirage/compare/v149.8.0...v150.0.0) (2024-12-06)
+
+
+* feat!: clearing SceneId when spawning object with PrefabHash ([d638088](https://github.com/MirageNet/Mirage/commit/d638088a5e920edf8fff7dcb56309d9074696b66))
+
+
+### Features
+
+* adding ClearSceneId function ([a492705](https://github.com/MirageNet/Mirage/commit/a492705f9716350d95eb4007d213000f904b2b37))
+
+
+### BREAKING CHANGES
+
+* SceneId is now cleared when calling Spawn with PrefabHash
+
 # [149.8.0](https://github.com/MirageNet/Mirage/compare/v149.7.0...v149.8.0) (2024-12-02)
 
 
