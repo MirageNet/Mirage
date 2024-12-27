@@ -739,7 +739,8 @@ namespace Mirage
         /// <param name="skip">NetworkIdentity to skip when spawning. Can be null</param>
         public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter, HashSet<NetworkIdentity> skip)
         {
-            // todo Call player.RemoveAllVisibleObjects() first so that it will send spawn message for objects destroyed in scene change
+            // remove all, so that it will send spawn message for objects destroyed in scene change
+            player.RemoveAllVisibleObjects();
 
             if (!ignoreHasCharacter && !player.HasCharacter)
             {
@@ -768,12 +769,12 @@ namespace Mirage
                 if (skip != null && skip.Contains(identity))
                     continue;
 
-                    if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} sceneId={identity.SceneId:X}");
+                if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} sceneId={identity.SceneId:X}");
 
-                    var visible = identity.OnCheckObserver(player);
-                    if (visible)
-                    {
-                        identity.AddObserver(player);
+                var visible = identity.OnCheckObserver(player);
+                if (visible)
+                {
+                    identity.AddObserver(player);
                 }
             }
 
