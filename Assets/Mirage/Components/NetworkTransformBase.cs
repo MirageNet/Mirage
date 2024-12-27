@@ -339,7 +339,8 @@ namespace Mirage
         {
             // just use OnSerialize via SetDirtyBit only sync when position
             // changed. set dirty bits 0 or 1
-            SetDirtyBit(HasEitherMovedRotatedScaled() ? 1UL : 0UL);
+            if (HasEitherMovedRotatedScaled())
+                SetDirtyBit(1UL);
         }
 
         private void UpdateClient()

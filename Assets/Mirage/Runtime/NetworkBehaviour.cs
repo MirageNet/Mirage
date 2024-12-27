@@ -311,6 +311,7 @@ namespace Mirage
         /// <param name="bitMask">Bit mask to set.</param>
         public void SetDirtyBit(ulong bitMask)
         {
+            Debug.Assert(bitMask != 0, "SetDirtyBit called with bitMask=0, This will do nothing.");
             if (logger.LogEnabled()) logger.Log($"Dirty bit set {bitMask} on {Identity}");
 
             _syncVarDirtyBits |= bitMask;
