@@ -1,3 +1,21 @@
+# [151.0.0](https://github.com/MirageNet/Mirage/compare/v150.0.0...v151.0.0) (2024-12-27)
+
+
+### Bug Fixes
+
+* fixing SetDirtyBit being called with mask equals 0 ([56d07cd](https://github.com/MirageNet/Mirage/commit/56d07cd2a4b558f03221faaa84c4c8e54a42cc13))
+* improving error message for spawning scene objects ([91f89ea](https://github.com/MirageNet/Mirage/commit/91f89ea1af2dd809a2f52279e7002f8a09b3dec4))
+
+
+* feat!: SpawnVisibleObjects now calls RemoveAllVisibleObjects ([fe14235](https://github.com/MirageNet/Mirage/commit/fe14235a720b32cf1d6e9606e6da7628a6496f4a))
+* feat!: SpawnVisibleObjects no longer skips disabled gameObject ([d160e77](https://github.com/MirageNet/Mirage/commit/d160e77381b43fac33c3941e6f863366cd0cf510))
+
+
+### BREAKING CHANGES
+
+* SpawnVisibleObjects now calls RemoveAllVisibleObjects before spawning objects
+* SpawnVisibleObjects no longer checks `identity.gameObject.activeSelf` before spawning objects
+
 # [150.0.0](https://github.com/MirageNet/Mirage/compare/v149.8.0...v150.0.0) (2024-12-06)
 
 
