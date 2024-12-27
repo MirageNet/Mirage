@@ -768,16 +768,12 @@ namespace Mirage
                 if (skip != null && skip.Contains(identity))
                     continue;
 
-                // todo, do we only need to spawn active objects here? or all objects?
-                if (identity.gameObject.activeSelf)
-                {
                     if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} sceneId={identity.SceneId:X}");
 
                     var visible = identity.OnCheckObserver(player);
                     if (visible)
                     {
                         identity.AddObserver(player);
-                    }
                 }
             }
 
