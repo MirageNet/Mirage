@@ -535,7 +535,12 @@ namespace Mirage
                         identity = SpawnPrefab(msg, handler);
                     }
                 }
-                // no else here, should never get here because of check at start of method
+                else
+                {
+                    // note should never get here, because of check at start of method
+                    // throw just incase
+                    throw new SpawnObjectException("Spawn message did not have a SceneId or PrefabHash");
+                }
             }
 
             AfterSpawn(msg, existing, identity);
@@ -544,10 +549,10 @@ namespace Mirage
         private void AfterSpawn(SpawnMessage msg, bool alreadyExisted, NetworkIdentity spawnedIdentity)
         {
             // should never happen, Spawn methods above should throw instead
-            Debug.Assert(spawnedIdentity != null);
+            Debug.Assert(spawnedIdentity != null, "AfterSpawn");
 
             if (spawnedIdentity.NetId != 0 && spawnedIdentity.NetId != msg.NetId)
-                logger.LogWarning($"Spawn Identity already had a netId but SpawnMessage has a differnet NetId. Current Id={spawnedIdentity.NetId}, SpawnMessag Id={msg.NetId}");
+                logger.LogWarning($"Spawn Identity already had a netId but SpawnMessage has a different NetId. Current Id={spawnedIdentity.NetId}, SpawnMessag Id={msg.NetId}");
 
             ApplySpawnPayload(spawnedIdentity, msg);
 
@@ -571,6 +576,8 @@ namespace Mirage
                         msg.Payload = reader.Read<ArraySegment<byte>>();
 
                         var identity = await spawnHandler.Invoke(msg);
+                        if (identity == null)
+                            throw new SpawnObjectException($"Async Spawn handler for prefabHash={msg.PrefabHash:X} returned null");
                         AfterSpawn(msg, false, identity);
                     }
                 }
@@ -616,12 +623,16 @@ namespace Mirage
             if (spawnableObjects.TryGetValue(sceneId, out var foundSceneObject))
             {
                 spawnableObjects.Remove(sceneId);
+
+                if (foundSceneObject == null)
+                    throw new SpawnObjectException($"Scene object is null, sceneId={msg.SceneId:X}, NetId={msg.NetId}");
+
                 if (logger.LogEnabled()) logger.Log($"[ClientObjectManager] Found scene object for netid:{msg.NetId}, sceneId:{msg.SceneId.Value:X}, obj:{foundSceneObject}");
                 return foundSceneObject;
             }
 
             // failed to spawn
-            var errorMsg = $"Failed to spawn scene object sceneId={msg.SceneId:X}";
+            var errorMsg = $"Could not find scene object with sceneId={msg.SceneId:X}, NetId={msg.NetId}. Enable full logs in project settings to see current list of SpawnableObjects in the scene";
             // dump the whole spawnable objects dict for easier debugging
             if (logger.LogEnabled())
             {
