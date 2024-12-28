@@ -162,6 +162,8 @@ namespace Mirage
         [FormerlySerializedAs("m_SceneId"), FormerlySerializedAs("sceneId")]
         [SerializeField, HideInInspector]
         private ulong _sceneId = 0;
+        [SerializeField, HideInInspector]
+        private int _prefabHash;
 
         public ulong SceneId => _sceneId;
 
@@ -209,12 +211,10 @@ namespace Mirage
         /// </summary>
         public bool InitialState { get; private set; }
 
-        [Header("Runtime References")]
-
         /// <summary>
         /// The ServerObjectManager is present only for server/host instances.
         /// </summary>
-        [ReadOnlyInspector]
+        [HideInInspector]
         [Tooltip("Reference to Server set after the object is spawned. Used when debugging to see which server this object belongs to.")]
         public ServerObjectManager ServerObjectManager;
 
@@ -226,9 +226,10 @@ namespace Mirage
         /// <summary>
         /// The ClientObjectManager is present only for client instances.
         /// </summary>
-        [ReadOnlyInspector]
+        [HideInInspector]
         [Tooltip("Reference to Client set after the object is spawned. Used when debugging to see which client this object belongs to.")]
         public ClientObjectManager ClientObjectManager;
+
         private INetworkPlayer _owner;
 
         /// <summary>
@@ -365,8 +366,6 @@ namespace Mirage
                 return _visibility;
             }
         }
-
-        [SerializeField, HideInInspector] private int _prefabHash;
 
         public int PrefabHash
         {
