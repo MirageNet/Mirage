@@ -1,3 +1,10 @@
+# [151.1.0](https://github.com/MirageNet/Mirage/compare/v151.0.0...v151.1.0) (2024-12-28)
+
+
+### Features
+
+* adding custom inspector for NetworkIdentity ([8cc9179](https://github.com/MirageNet/Mirage/commit/8cc9179683f62a4c7916857986f5e652a8637590))
+
 # [151.0.0](https://github.com/MirageNet/Mirage/compare/v150.0.0...v151.0.0) (2024-12-27)
 
 
