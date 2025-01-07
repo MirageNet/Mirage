@@ -196,6 +196,9 @@ namespace Mirage.SocketLayer
         {
             _batch.Flush();
 
+            // add resend here, before empty ack check
+            ResendMessages();
+
             // todo send ack if not recently been sent
             // ack only packet sent if no other sent within last frame
             if (ShouldSendEmptyAck() && TimeToSendAck())
@@ -561,7 +564,6 @@ namespace Mirage.SocketLayer
 
             AckMessagesInSentQueue(sequence, mask);
             _sentAckablePackets.MoveReadToNextNonEmpty();
-            ResendMessages();
         }
         private void AckMessagesInSentQueue(ushort sequence, ulong mask)
         {
