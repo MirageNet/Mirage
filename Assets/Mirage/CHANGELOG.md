@@ -1,3 +1,11 @@
+## [151.1.1](https://github.com/MirageNet/Mirage/compare/v151.1.0...v151.1.1) (2025-01-07)
+
+
+### Bug Fixes
+
+* avoiding throw from ResendMessages when send queue is full ([a14a6fc](https://github.com/MirageNet/Mirage/commit/a14a6fce1eab262ab15666e0a5d842553591aad7))
+* moving ResendMessages to update ([8bdb6c1](https://github.com/MirageNet/Mirage/commit/8bdb6c1c193f5c3222bfee99ea5320eb0013d23a))
+
 # [151.1.0](https://github.com/MirageNet/Mirage/compare/v151.0.0...v151.1.0) (2024-12-28)
 
 
