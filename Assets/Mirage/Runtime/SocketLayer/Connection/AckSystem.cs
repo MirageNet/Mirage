@@ -33,6 +33,7 @@ namespace Mirage.SocketLayer
 
         // temp list for resending when processing sentqueue
         private readonly HashSet<ReliablePacket> _toResend = new HashSet<ReliablePacket>();
+        private readonly List<ReliablePacket> _resendRemoveList = new List<ReliablePacket>();
         private readonly IRawConnection _connection;
         private readonly ITime _time;
         private readonly Pool<ByteBuffer> _bufferPool;
@@ -643,12 +644,35 @@ namespace Mirage.SocketLayer
 
         private void ResendMessages()
         {
+            if (_toResend.Count == 0)
+                return;
+
+            _resendRemoveList.Clear();
+
             foreach (var reliable in _toResend)
             {
+                // exit early if we can't send any more packets
+                if (_sentAckablePackets.Count >= _maxPacketsInSendBufferPerConnection)
+                    break;
+
                 _metrics?.OnResend(reliable.Length);
                 SendReliablePacket(reliable);
+                _resendRemoveList.Add(reliable);
             }
-            _toResend.Clear();
+
+            // if we sent all packets, we can just clear the set
+            // otherwise we need to remove the ones we did send
+            if (_resendRemoveList.Count == _toResend.Count)
+            {
+                _toResend.Clear();
+            }
+            else
+            {
+                foreach (var reliable in _resendRemoveList)
+                {
+                    _toResend.Remove(reliable);
+                }
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
