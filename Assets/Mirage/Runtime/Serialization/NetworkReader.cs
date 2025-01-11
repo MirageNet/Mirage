@@ -35,6 +35,7 @@ namespace Mirage.Serialization
     /// </summary>
     public unsafe class NetworkReader : IDisposable
     {
+        public StringStore StringStore;
         private byte[] _managedBuffer;
         private GCHandle _handle;
         private ulong* _longPtr;
