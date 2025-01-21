@@ -77,13 +77,15 @@ namespace Mirage.RemoteCalls
         /// <param name="target"></param>
         /// <param name="player">player used for RpcTarget.Player</param>
         /// <returns></returns>
-        public static bool ShouldInvokeLocally(NetworkBehaviour behaviour, bool requireAuthority)
+        public static bool ShouldInvokeLocally(NetworkBehaviour behaviour, bool requireAuthority, bool allowServerToCall)
         {
+            // if allowServerToCall, then just check server because we ignore all other checks
+            if (behaviour.IsServer && allowServerToCall)
+                return true;
+
             // not client? error
             if (!behaviour.IsClient)
-            {
                 throw new InvalidOperationException("Server RPC can only be called when client is active");
-            }
 
             // not host? never invoke locally
             if (!behaviour.IsServer)
@@ -91,9 +93,7 @@ namespace Mirage.RemoteCalls
 
             // check if auth is required and that host has auth over the object
             if (requireAuthority && !behaviour.HasAuthority)
-            {
                 throw new InvalidOperationException($"Trying to send ServerRpc for object without authority.");
-            }
 
             return true;
         }

@@ -331,4 +331,88 @@ namespace Mirage.Tests.Runtime.RpcTests
             _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
         }
     }
+
+
+    public class RpcUsageHostTest_AllowServerRequireAuthority : RpcUsageHostTestBase<RpcUsageBehaviour_AllowServerRequireAuthority>
+    {
+        [UnityTest]
+        public IEnumerator CalledWhenCalledWithAuthority()
+        {
+            hostComponent_onHost.Called += _hostStub;
+            hostComponent_on2.Called += _client2Stub;
+
+            yield return null;
+            yield return null;
+
+            hostComponent_onHost.RpcAllowServerRequireAuthority(NUM);
+
+            yield return null;
+            yield return null;
+
+            _hostStub.Received(1).Invoke(NUM);
+            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+
+        [UnityTest]
+        public IEnumerator CalledWhenCalledWithoutAuthority()
+        {
+            client2Component_onHost.Called += _hostStub;
+            client2Component_on2.Called += _client2Stub;
+
+            yield return null;
+            yield return null;
+
+            // note: call is allowed, because server bypasses authority check
+            // call character 2 on client host
+            client2Component_onHost.RpcAllowServerRequireAuthority(NUM);
+
+            // ensure that none were called, even if exception was throw
+            yield return null;
+            yield return null;
+
+            _hostStub.Received(1).Invoke(NUM);
+            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+    }
+
+    public class RpcUsageHostTest_AllowServerIgnoreAuthority : RpcUsageHostTestBase<RpcUsageBehaviour_AllowServerIgnoreAuthority>
+    {
+        [UnityTest]
+        public IEnumerator CalledWhenCalledWithAuthority()
+        {
+            hostComponent_onHost.Called += _hostStub;
+            hostComponent_on2.Called += _client2Stub;
+
+            yield return null;
+            yield return null;
+
+            hostComponent_onHost.RpcAllowServerIgnoreAuthority(NUM);
+
+            yield return null;
+            yield return null;
+
+            _hostStub.Received(1).Invoke(NUM);
+            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+
+        [UnityTest]
+        public IEnumerator ThrowsWhenCalledWithoutAuthority()
+        {
+            client2Component_onHost.Called += _hostStub;
+            client2Component_on2.Called += _client2Stub;
+
+            yield return null;
+            yield return null;
+
+            // call character 2 on client host
+            client2Component_onHost.RpcAllowServerIgnoreAuthority(NUM);
+
+            // ensure that none were called, even if exception was throw
+            yield return null;
+            yield return null;
+
+            _hostStub.Received(1).Invoke(NUM);
+            _client2Stub.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+    }
 }

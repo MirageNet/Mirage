@@ -51,6 +51,7 @@ namespace Mirage.Weaver
         {
             var channel = serverRpcAttr.GetField(nameof(ServerRpcAttribute.channel), 0);
             var requireAuthority = serverRpcAttr.GetField(nameof(ServerRpcAttribute.requireAuthority), true);
+            var allowServerToCall = serverRpcAttr.GetField(nameof(ServerRpcAttribute.allowServerToCall), false);
 
             var cmd = SubstituteMethod(md);
 
@@ -61,7 +62,7 @@ namespace Mirage.Weaver
             //    call the body
             //    return;
             // }
-            CallBody(worker, cmd, requireAuthority);
+            CallBody(worker, cmd, requireAuthority, allowServerToCall);
 
             // NetworkWriter writer = NetworkWriterPool.GetWriter()
             var writer = md.AddLocal<PooledNetworkWriter>();
@@ -91,13 +92,14 @@ namespace Mirage.Weaver
             return cmd;
         }
 
-        public void InvokeLocally(ILProcessor worker, bool requiredAuthority, Action body)
+        public void InvokeLocally(ILProcessor worker, bool requireAuthority, bool allowServerToCall, Action body)
         {
             // if (IsServer) {
             var endif = worker.Create(OpCodes.Nop);
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(requiredAuthority.OpCode_Ldc()));
-            worker.Append(worker.Create(OpCodes.Call, () => ServerRpcSender.ShouldInvokeLocally(default, default)));
+            worker.Append(worker.Create(requireAuthority.OpCode_Ldc()));
+            worker.Append(worker.Create(allowServerToCall.OpCode_Ldc()));
+            worker.Append(worker.Create(OpCodes.Call, () => ServerRpcSender.ShouldInvokeLocally(default, default, default)));
             worker.Append(worker.Create(OpCodes.Brfalse, endif));
 
             body();
@@ -107,9 +109,9 @@ namespace Mirage.Weaver
 
         }
 
-        private void CallBody(ILProcessor worker, MethodDefinition rpc, bool requiredAuthority)
+        private void CallBody(ILProcessor worker, MethodDefinition rpc, bool requireAuthority, bool allowServerToCall)
         {
-            InvokeLocally(worker, requiredAuthority, () =>
+            InvokeLocally(worker, requireAuthority, allowServerToCall, () =>
             {
                 InvokeBody(worker, rpc);
                 worker.Append(worker.Create(OpCodes.Ret));

@@ -83,6 +83,11 @@ namespace Mirage
     {
         public Channel channel = Channel.Reliable;
         public bool requireAuthority = true;
+
+        /// <summary>
+        /// Allows the server to invoke the method locally. Note: this will bypass any authority checks on host.
+        /// </summary>
+        public bool allowServerToCall = false;
     }
 
     /// <summary>
