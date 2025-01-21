@@ -1,3 +1,10 @@
+# [151.2.0](https://github.com/MirageNet/Mirage/compare/v151.1.1...v151.2.0) (2025-01-21)
+
+
+### Features
+
+* adding allowServerToCall option to ServerRpc ([01721fe](https://github.com/MirageNet/Mirage/commit/01721feeeb2c795e4fcd665d2235f62d844273cc))
+
 ## [151.1.1](https://github.com/MirageNet/Mirage/compare/v151.1.0...v151.1.1) (2025-01-07)
 
 
