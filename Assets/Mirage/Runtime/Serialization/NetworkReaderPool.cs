@@ -75,6 +75,13 @@ namespace Mirage.Serialization
         /// Used to find objects by net id
         /// </summary>
         public IObjectLocator ObjectLocator { get; set; }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            // clear reference so that GC can collect release it after stopping server/client
+            ObjectLocator = null;
+        }
     }
 
     /// <summary>

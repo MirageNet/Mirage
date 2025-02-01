@@ -1144,7 +1144,10 @@ namespace Mirage
             ServerObjectManager = null;
             ClientObjectManager = null;
             _owner = null;
+            World = null;
+            SyncVarSender = null;
             _networkBehavioursCache = null;
+            _visibility = null;
 
             ClearObservers();
             ResetEvents();
