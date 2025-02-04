@@ -98,6 +98,14 @@ namespace Mirage.Events
                 handler.Invoke();
             tmp.Clear();
         }
+
+        /// <summary>
+        /// Clears listeners, should be called from OnDestroy
+        /// </summary>
+        public void OnDestroyCleanup()
+        {
+            _listeners.Clear();
+        }
     }
 
     /// <summary>
@@ -142,6 +150,14 @@ namespace Mirage.Events
             foreach (var handler in tmp)
                 handler.Invoke(arg0);
             tmp.Clear();
+        }
+
+        /// <summary>
+        /// Clears listeners, should be called from OnDestroy
+        /// </summary>
+        public void OnDestroyCleanup()
+        {
+            _listeners.Clear();
         }
     }
 
@@ -189,6 +205,14 @@ namespace Mirage.Events
             foreach (var handler in tmp)
                 handler.Invoke(arg0, arg1);
             tmp.Clear();
+        }
+
+        /// <summary>
+        /// Clears listeners, should be called from OnDestroy
+        /// </summary>
+        public void OnDestroyCleanup()
+        {
+            _listeners.Clear();
         }
     }
 }

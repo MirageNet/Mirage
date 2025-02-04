@@ -320,7 +320,7 @@ namespace Mirage
             }
 
             var components = childNetworkBehavioursCache.ToArray();
-
+            childNetworkBehavioursCache.Clear(); // clear to stop static field holding references
 #if DEBUG
             // validate the results here (just incase they are wrong)
             // we only need to do this in debug mode because results should be right
@@ -535,12 +535,41 @@ namespace Mirage
             if (SpawnedFromInstantiate)
                 return;
 
+            // get behaviour list before Server.Destroy, because that will clear it 
+            var behaviourList = _networkBehavioursCache;
+
             // If false the object has already been unspawned
             // if it is still true, then we need to unspawn it
             if (IsServer)
             {
                 ServerObjectManager.Destroy(this);
             }
+
+            if (behaviourList != null)
+            {
+                foreach (var behaviour in behaviourList)
+                    behaviour.OnDestroyCleanup();
+            }
+
+            // Clear references to help GC collect
+            observers.Clear();
+            _networkBehavioursCache = null;
+            Server = null;
+            World = null;
+            SyncVarSender = null;
+            ServerObjectManager = null;
+            Client = null;
+            ClientObjectManager = null;
+            _owner = null;
+            _visibility = null;
+
+            _onStartServer.OnDestroyCleanup();
+            _onStartClient.OnDestroyCleanup();
+            _onStartLocalPlayer.OnDestroyCleanup();
+            _onAuthorityChanged.OnDestroyCleanup();
+            _onOwnerChanged.OnDestroyCleanup();
+            _onStopClient.OnDestroyCleanup();
+            _onStopServer.OnDestroyCleanup();
         }
 
         internal void StartServer()

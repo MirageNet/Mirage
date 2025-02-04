@@ -172,6 +172,12 @@ namespace Mirage
             // if gameobject with server on is destroyed, stop the server
             if (Active)
                 Stop();
+
+            // Clear references to help GC collect
+            _started.RemoveAllListeners();
+            _stopped.RemoveAllListeners();
+            _onStartHost.RemoveAllListeners();
+            _onStopHost.RemoveAllListeners();
         }
 
         /// <summary>
@@ -206,8 +212,12 @@ namespace Mirage
             _onStopHost.Reset();
             _stopped.Reset();
 
+            // Clear references to help GC collect
             World = null;
             SyncVarSender = null;
+            _syncVarReceiver = null;
+            MessageHandler = null;
+            Metrics = null;
 
             if (_peer != null)
             {

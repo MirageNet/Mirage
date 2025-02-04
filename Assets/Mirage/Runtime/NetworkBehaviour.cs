@@ -561,6 +561,15 @@ namespace Mirage
             }
         }
 
+        internal void OnDestroyCleanup()
+        {
+            foreach (var syncObject in syncObjects)
+            {
+                syncObject.OnChange -= SyncObject_OnChange;
+            }
+            syncObjects.Clear();
+        }
+
         #region RPC
         // overridden by weaver
         protected internal virtual int GetRpcCount() => 0;

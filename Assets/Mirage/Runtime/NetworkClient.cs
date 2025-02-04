@@ -407,6 +407,13 @@ namespace Mirage
                 _peer.Close();
                 _peer = null;
             }
+
+            // Clear references to help GC collect
+            World = null;
+            SyncVarSender = null;
+            _syncVarReceiver = null;
+            MessageHandler = null;
+            Metrics = null;
         }
 
         private void ThrowIfSendingWhileNotConnected()

@@ -99,6 +99,7 @@ namespace Mirage.Events
         public void RemoveAllListeners()
         {
             _event.RemoveAllListeners();
+            OnDestroyCleanup();
         }
     }
 
@@ -143,6 +144,7 @@ namespace Mirage.Events
         public void RemoveAllListeners()
         {
             _event.RemoveAllListeners();
+            OnDestroyCleanup();
         }
     }
 
@@ -187,6 +189,7 @@ namespace Mirage.Events
         public void RemoveAllListeners()
         {
             _event.RemoveAllListeners();
+            OnDestroyCleanup();
         }
     }
 }
