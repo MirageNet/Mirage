@@ -377,10 +377,16 @@ namespace Mirage.SocketLayer
 
             if (AtMaxConnections())
             {
+                if (_logger.Enabled(LogType.Warning))
+                    _logger.Log(LogType.Warning, $"Reject Connection: At max connections");
+
                 RejectConnectionWithReason(endPoint, RejectReason.ServerFull);
             }
             else if (!_connectKeyValidator.Validate(packet.Buffer.array, packet.Length))
             {
+                if (_logger.Enabled(LogType.Warning))
+                    _logger.Log(LogType.Warning, $"Reject Connection: Invalid key");
+
                 RejectConnectionWithReason(endPoint, RejectReason.KeyInvalid);
             }
             // todo do other security stuff here:

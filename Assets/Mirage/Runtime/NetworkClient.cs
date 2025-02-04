@@ -199,7 +199,7 @@ namespace Mirage
 
         private void Peer_OnConnectionFailed(IConnection conn, RejectReason reason)
         {
-            if (logger.LogEnabled()) logger.Log($"Failed to connect to {conn.EndPoint} with reason {reason}");
+            if (logger.WarnEnabled()) logger.LogWarning($"Failed to connect to {conn.EndPoint} with reason {reason}");
             Player?.MarkAsDisconnected();
             _disconnected?.Invoke(reason.ToClientStoppedReason());
             Cleanup();
