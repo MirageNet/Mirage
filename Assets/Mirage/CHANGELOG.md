@@ -1,3 +1,10 @@
+## [151.2.2](https://github.com/MirageNet/Mirage/compare/v151.2.1...v151.2.2) (2025-02-04)
+
+
+### Bug Fixes
+
+* increasing logging when failing to connect to server ([d77c240](https://github.com/MirageNet/Mirage/commit/d77c24056e56c66fbfd62aba20d99e0bf65b05eb))
+
 ## [151.2.1](https://github.com/MirageNet/Mirage/compare/v151.2.0...v151.2.1) (2025-02-01)
 
 
