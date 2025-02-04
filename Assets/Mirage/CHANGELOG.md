@@ -1,3 +1,10 @@
+## [151.2.3](https://github.com/MirageNet/Mirage/compare/v151.2.2...v151.2.3) (2025-02-04)
+
+
+### Bug Fixes
+
+* clearing references to help with GC collect ([c6d5596](https://github.com/MirageNet/Mirage/commit/c6d5596e88fc310de3907c2f2923979e4bd273ec))
+
 ## [151.2.2](https://github.com/MirageNet/Mirage/compare/v151.2.1...v151.2.2) (2025-02-04)
 
 
