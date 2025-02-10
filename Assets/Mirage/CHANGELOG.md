@@ -1,3 +1,10 @@
+## [151.2.4](https://github.com/MirageNet/Mirage/compare/v151.2.3...v151.2.4) (2025-02-10)
+
+
+### Bug Fixes
+
+* logging message name for Unauthenticated Message ([bd1b12b](https://github.com/MirageNet/Mirage/commit/bd1b12bbfa065a6f67045b46a653bb55e571cb4a))
+
 ## [151.2.3](https://github.com/MirageNet/Mirage/compare/v151.2.2...v151.2.3) (2025-02-04)
 
 
