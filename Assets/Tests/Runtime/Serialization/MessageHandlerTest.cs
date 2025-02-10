@@ -73,7 +73,7 @@ namespace Mirage.Tests.Runtime
                 var messageId = MessagePacker.GetId<SceneReadyMessage>();
                 messageHandler.InvokeHandler(player, messageId, reader);
             }
-            , LogType.Error, $"Disconnecting Unauthenticated player");
+            , LogType.Error, $"Unauthenticated Message {typeof(SceneReadyMessage).FullName}, Disconnecting player");
 
             Assert.That(invoked, Is.EqualTo(0), "Should not have been invoked");
             connection.Received(1).Disconnect();

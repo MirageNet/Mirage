@@ -36,7 +36,7 @@ namespace Mirage
             }
 
             var del = MessageWrapper(handler);
-            _messageHandlers[msgId] = new Handler(del, allowUnauthenticated);
+            _messageHandlers[msgId] = new Handler(del, allowUnauthenticated, typeof(T));
         }
 
         private static NetworkMessageDelegate MessageWrapper<T>(MessageDelegateWithPlayer<T> handler)
@@ -158,7 +158,7 @@ namespace Mirage
                 logger.Log($"Unauthenticated Message {type} received from {player}, player is not Authenticated so handler will not be invoked");
             }
 
-            logger.LogError("Disconnecting Unauthenticated player");
+            logger.LogError(handler.UnauthenticatedError);
             player.Disconnect();
 
             return false;
@@ -175,11 +175,16 @@ namespace Mirage
         {
             public readonly NetworkMessageDelegate Delegate;
             public readonly bool AllowUnauthenticated;
+            public readonly string UnauthenticatedError;
 
-            public Handler(NetworkMessageDelegate @delegate, bool allowUnauthenticated)
+            public Handler(NetworkMessageDelegate @delegate, bool allowUnauthenticated, Type type)
             {
                 Delegate = @delegate;
                 AllowUnauthenticated = allowUnauthenticated;
+
+                // cache the error message with the type, so we can log it on server with less allocations
+                if (!allowUnauthenticated)
+                    UnauthenticatedError = $"Unauthenticated Message {type.FullName}, Disconnecting player";
             }
         }
     }
