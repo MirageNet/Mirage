@@ -1,6 +1,8 @@
 # Network Transform Child
 
-:::caution  It is recommended to use the new and improved [NetworkPositionSync](https://github.com/James-Frowen/NetworkPositionSync) instead of this old NetworkTransform.  :::
+:::caution
+It is recommended to use the new and improved [NetworkPositionSync](https://github.com/James-Frowen/NetworkPositionSync) instead of this old NetworkTransform.
+:::
 
 The Network Transform Child component synchronizes the position and rotation of the child game object of a game object with a Network Transform component. You should use this component in situations where you need to synchronize an independently-moving child object with a Networked game object.
 
