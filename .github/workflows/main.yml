@@ -12,6 +12,9 @@ on:
       - '.github/workflows/main.yml'
       - '.github/workflows/run-test.yml'
 
+# available list of containers here:
+# https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
+
 jobs:
   Tests2020:
     # note: reuseable workflow is a job, not a step
@@ -21,8 +24,6 @@ jobs:
       unity_license: ${{ secrets.UNITY_LICENSE2 }}
       access_token: ${{ secrets.GITHUB_TOKEN }}
     with:
-      # available list of containers here:
-      # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
       unity_container: unityci/editor:ubuntu-2020.3.30f1-base-3.0.0
       cache_key: Library-2020.3.30
       test_results_name: Test results 2020
@@ -49,13 +50,23 @@ jobs:
       unity_container: unityci/editor:ubuntu-2022.2.8f1-base-3.0.0
       cache_key: Library-2022.2.8
       test_results_name: Test results 2022
+  
+  Tests6000:
+    name: Run Tests 6000
+    uses: ./.github/workflows/run-test.yml
+    secrets:
+      # checking if same license will work
+      unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
+      access_token: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      unity_container: unityci/editor:ubuntu-6000.0.37f1-base-3.1.0
+      cache_key: Library-6000.0.37
+      test_results_name: Test results 6000
 
   BuildIL2CPP:
     name: BuildIL2CPP
     runs-on: ubuntu-latest
-    # available list of containers here:
-    # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
-    container: unityci/editor:ubuntu-2020.3.30f1-linux-il2cpp-3.0.0
+    container: unityci/editor:ubuntu-2022.2.8f1-linux-il2cpp-3.0.0
     
     steps:
       - name: Activate unity
@@ -75,7 +86,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-2020.3.30
+          key: Library-2022.2.8
 
       - name: Run by Build with il2cpp
       # checks that all weaver generate code in the test dlls also compiles for IL2CPP
@@ -84,7 +95,7 @@ jobs:
 
   Publish:
     # only run once both tests and il2cpp have passed
-    needs: [Tests2020, Tests2021, Tests2022, BuildIL2CPP]
+    needs: [Tests2020, Tests2021, Tests2022, Tests6000, BuildIL2CPP]
     # only run on main
     if: github.ref == 'refs/heads/main'
     name: Publish
@@ -121,13 +132,11 @@ jobs:
 
   SonarScan:
     # needs coverage from test CI
-    # only need 2020 test because that is the container that this action uses 
-    needs: [Tests2020] 
+    # only need 2022 test because that is the container that this action uses 
+    needs: [Tests2022] 
     name: SonarScan
     runs-on: ubuntu-latest
-    # available list of containers here:
-    # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
-    container: unityci/editor:ubuntu-2020.3.30f1-base-3.0.0
+    container: unityci/editor:ubuntu-2022.2.8f1-base-3.0.0
     env:
       DOTNET_ROOT: '/opt/unity/Editor/Data/NetCore/Sdk-2.2.107'
     steps:
@@ -148,7 +157,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-2020.3.30
+          key: Library-2022.2.8
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -172,7 +181,7 @@ jobs:
       - name: Get test coverages
         uses: actions/download-artifact@v4
         with:
-          name: Test results 2020
+          name: Test results 2022
           path: Tests
     
       # Get version from Release step
