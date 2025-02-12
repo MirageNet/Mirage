@@ -281,7 +281,7 @@ namespace Mirage.Tests.Runtime.Host
             sceneManager.ServerLoadSceneNormal(TestScenes.Path);
 
 #if UNITY_EDITOR
-            await EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Tests/Performance/Runtime/10K/Scenes/Scene.unity", new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive });
+            await EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Tests/Performance/Runtime/10K/Scenes/Scene.unity", new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive }).ToUniTask();
 #else
             throw new System.NotSupportedException("Test not supported in player");
 #endif

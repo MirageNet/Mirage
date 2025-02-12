@@ -24,7 +24,7 @@ namespace Mirage.Tests.Performance.Runtime
         public IEnumerator SetUp() => UniTask.ToCoroutine(async () =>
         {
 #if UNITY_EDITOR
-            await EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive });
+            await EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive }).ToUniTask();
 #else
             throw new System.NotSupportedException("Test not supported in player");
 #endif

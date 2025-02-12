@@ -29,7 +29,7 @@ namespace Mirage.Tests
             {
                 var op = SceneManager.UnloadSceneAsync(scene);
                 if (op != null)
-                    await op;
+                    await op.ToUniTask();
             }
 
             // maybe test unload scene it self, if so wait for it to finish
