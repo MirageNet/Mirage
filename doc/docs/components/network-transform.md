@@ -1,6 +1,8 @@
 # Network Transform
 
-:::caution  It is recommended to use the new and improved [NetworkPositionSync](https://github.com/James-Frowen/NetworkPositionSync) instead of this old NetworkTransform.  :::
+:::caution
+It is recommended to use the new and improved [NetworkPositionSync](https://github.com/James-Frowen/NetworkPositionSync) instead of this old NetworkTransform.
+:::
 
 The Network Transform component synchronizes the position, rotation, and scale of networked game objects across the network.
 
