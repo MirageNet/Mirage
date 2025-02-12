@@ -1,5 +1,7 @@
 # Network Transform
 
+:::caution  It is recommended to use the new and improved [NetworkPositionSync](https://github.com/James-Frowen/NetworkPositionSync) instead of this old NetworkTransform.  :::
+
 The Network Transform component synchronizes the position, rotation, and scale of networked game objects across the network.
 
 A game object with a Network Transform component must also have a Network Identity component. When you add a Network Transform component to a game object, Mirage also adds a Network Identity component on that game object if it does not already have one.

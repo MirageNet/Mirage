@@ -22,7 +22,28 @@ using UnityEngine;
 
 namespace Mirage
 {
-    [Obsolete("NetworkTransform is not optimzied so should not used in production.")]
+#if UNITY_EDITOR
+    [UnityEditor.CustomEditor(typeof(NetworkTransformBase), true)]
+    [UnityEditor.CanEditMultipleObjects]
+    public class NetworkTransformBaseEditor : UnityEditor.Editor
+    {
+        public override void OnInspectorGUI()
+        {
+            var msg = "NetworkTransform is not optimized and should not be used in production. Use instead NetworkPositionSync";
+            UnityEditor.EditorGUILayout.HelpBox(msg, UnityEditor.MessageType.Warning);
+
+            if (GUILayout.Button("Open NetworkPositionSync on github"))
+            {
+                Application.OpenURL("https://github.com/James-Frowen/NetworkPositionSync");
+            }
+            GUILayout.Space(20);
+
+            DrawDefaultInspector();
+        }
+    }
+#endif
+
+    [Obsolete("NetworkTransform is not optimzied so should not used in production. Use NetworkPositionSync instead")]
     public abstract class NetworkTransformBase : NetworkBehaviour
     {
         [Header("Authority")]
