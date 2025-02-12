@@ -1,3 +1,10 @@
+## [151.2.5](https://github.com/MirageNet/Mirage/compare/v151.2.4...v151.2.5) (2025-02-12)
+
+
+### Bug Fixes
+
+* Adding warning to old NetworkTransformBase ([e944f59](https://github.com/MirageNet/Mirage/commit/e944f597cde11ac91be16c9e083dee0d24c56b29))
+
 ## [151.2.4](https://github.com/MirageNet/Mirage/compare/v151.2.3...v151.2.4) (2025-02-10)
 
 
