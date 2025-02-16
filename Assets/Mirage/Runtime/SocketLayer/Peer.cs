@@ -246,9 +246,9 @@ namespace Mirage.SocketLayer
                 while (_active && _socket.Poll())
                 {
                     var length = _socket.Receive(buffer.array, out var receiveEndPoint);
-                    if (length < 0)
+                    if (length < 0 && _logger.Enabled(LogType.Warning))
                     {
-                        _logger.Log(LogType.Warning, $"Receive returned less than 0 bytes, length={length}");
+                        _logger.Warn($"Receive returned less than 0 bytes, length={length}");
                         continue;
                     }
 
