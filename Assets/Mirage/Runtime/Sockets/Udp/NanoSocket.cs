@@ -6,7 +6,6 @@ using NanoSockets;
 
 namespace Mirage.Sockets.Udp
 {
-
     public sealed class NanoSocket : ISocket, IDisposable
     {
         public static bool Supported => true;
@@ -16,9 +15,9 @@ namespace Mirage.Sockets.Udp
         private readonly int bufferSize;
         private bool needsDisposing;
 
-        public NanoSocket(UdpSocketFactory factory)
+        public NanoSocket(int bufferSize)
         {
-            bufferSize = factory.BufferSize;
+            this.bufferSize = bufferSize;
         }
         ~NanoSocket()
         {

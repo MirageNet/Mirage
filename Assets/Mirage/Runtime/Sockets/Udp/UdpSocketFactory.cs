@@ -86,7 +86,7 @@ namespace Mirage.Sockets.Udp
 
             if (useNanoSocket)
             {
-                return new NanoSocket(this);
+                return new NanoSocket(BufferSize);
             }
             else
             {
@@ -100,7 +100,7 @@ namespace Mirage.Sockets.Udp
 
             if (useNanoSocket)
             {
-                return new NanoSocket(this);
+                return new NanoSocket(BufferSize);
             }
             else
             {
@@ -123,8 +123,6 @@ namespace Mirage.Sockets.Udp
         public override IEndPoint GetConnectEndPoint(string address = null, ushort? port = null)
         {
             var addressString = address ?? Address;
-            var ipAddress = getAddress(addressString);
-
             var portIn = port ?? Port;
 
             if (useNanoSocket)
@@ -133,6 +131,7 @@ namespace Mirage.Sockets.Udp
             }
             else
             {
+                var ipAddress = getAddress(addressString);
                 return new EndPointWrapper(new IPEndPoint(ipAddress, portIn));
             }
         }
