@@ -1,3 +1,11 @@
+## [151.2.6](https://github.com/MirageNet/Mirage/compare/v151.2.5...v151.2.6) (2025-02-16)
+
+
+### Bug Fixes
+
+* fixing nullref from _logger ([c3a618c](https://github.com/MirageNet/Mirage/commit/c3a618c33de4b182bd86c287e64d71e793447deb))
+* passing bufferSize to nanosocket class instead of UdpSocketFactory ([ea2791c](https://github.com/MirageNet/Mirage/commit/ea2791cd1d5947355942af0fb088502e5590fb16))
+
 ## [151.2.5](https://github.com/MirageNet/Mirage/compare/v151.2.4...v151.2.5) (2025-02-12)
 
 
