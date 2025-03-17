@@ -272,8 +272,6 @@ namespace Mirage
 
         private void AuthenticationSuccessCallback(INetworkPlayer _, AuthSuccessMessage message)
         {
-            if (logger.LogEnabled()) logger.Log($"Authentication successful with {message.AuthenticatorName}");
-
             INetworkAuthenticator authenticator = null;
             // only need to check if server sent its name
             if (!string.IsNullOrEmpty(message.AuthenticatorName))
@@ -282,6 +280,12 @@ namespace Mirage
                     throw new InvalidOperationException("Authenticator set on server but not client");
 
                 authenticator = Authenticator.Authenticators.FirstOrDefault(x => x.AuthenticatorName == message.AuthenticatorName);
+                logger.Log($"Authentication was successful with {message.AuthenticatorName}");
+            }
+            else
+            {
+                // Better than a generic 'Client authentication successful with' that is like a sentence fragment
+                logger.Log("Authentication was successful without an authenticator set");
             }
 
             Player.SetAuthentication(new PlayerAuthentication(authenticator, null));
