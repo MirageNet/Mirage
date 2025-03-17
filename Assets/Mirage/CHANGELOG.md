@@ -1,3 +1,10 @@
+## [151.2.7](https://github.com/MirageNet/Mirage/compare/v151.2.6...v151.2.7) (2025-03-17)
+
+
+### Bug Fixes
+
+* Auth success message wording in NetworkClient ([#1183](https://github.com/MirageNet/Mirage/issues/1183)) ([ff4873d](https://github.com/MirageNet/Mirage/commit/ff4873db57ad6bfab96c605f0020109f2638afda))
+
 ## [151.2.6](https://github.com/MirageNet/Mirage/compare/v151.2.5...v151.2.6) (2025-02-16)
 
 
