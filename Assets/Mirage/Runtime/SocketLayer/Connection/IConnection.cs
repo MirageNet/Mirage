@@ -23,6 +23,7 @@ namespace Mirage.SocketLayer
         ConnectionState State { get; }
 
         void Disconnect();
+        void Disconnect(DisconnectReason reason);
 
         INotifyToken SendNotify(byte[] packet, int offset, int length);
 

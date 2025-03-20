@@ -125,6 +125,23 @@ namespace Mirage
         }
 
         /// <summary>
+        /// Disconnects the player.
+        /// <para>A disconnected player can not send messages</para>
+        /// </summary>
+        /// <remarks>
+        /// This method exists so that users do not need to add reference to SocketLayer asmdef
+        /// </remarks>
+        public void Disconnect(DisconnectReason reason)
+        {
+            // dont need to call disconnect twice, so just return
+            if (_isDisconnected)
+                return;
+
+            _connection.Disconnect(reason);
+            _isDisconnected = true;
+        }
+
+        /// <summary>
         /// Marks player as disconnected, used when the disconnect call is from peer
         /// <para>A disconnected player can not send messages</para>
         /// </summary>
@@ -220,7 +237,7 @@ namespace Mirage
             catch (BufferFullException e)
             {
                 logger.LogError($"Disconnecting player because send buffer was full. {e}");
-                Disconnect();
+                Disconnect(DisconnectReason.SendBufferFull);
             }
             catch (NoConnectionException e)
             {
@@ -255,7 +272,7 @@ namespace Mirage
                 catch (BufferFullException e)
                 {
                     logger.LogError($"Disconnecting player because send buffer was full. {e}");
-                    Disconnect();
+                    Disconnect(DisconnectReason.SendBufferFull);
                 }
                 catch (NoConnectionException e)
                 {

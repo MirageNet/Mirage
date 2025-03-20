@@ -122,9 +122,16 @@ namespace Mirage.SocketLayer
         /// </summary>
         public void Disconnect()
         {
-            Disconnect(DisconnectReason.RequestedByLocalPeer);
+            DisconnectInternal(DisconnectReason.RequestedByLocalPeer);
         }
-        internal void Disconnect(DisconnectReason reason, bool sendToOther = true)
+        /// <summary>
+        /// starts disconnecting this connection
+        /// </summary>
+        public void Disconnect(DisconnectReason reason)
+        {
+            DisconnectInternal(reason);
+        }
+        internal void DisconnectInternal(DisconnectReason reason, bool sendToOther = true)
         {
             if (_logger.Enabled(LogType.Log)) _logger.Log($"Disconnect with reason: {reason}");
             switch (State)
@@ -181,7 +188,7 @@ namespace Mirage.SocketLayer
         {
             if (_timeoutTracker.TimeToDisconnect())
             {
-                Disconnect(DisconnectReason.Timeout);
+                DisconnectInternal(DisconnectReason.Timeout);
                 return;
             }
 
@@ -192,7 +199,7 @@ namespace Mirage.SocketLayer
             catch (BufferFullException e)
             {
                 _logger?.LogException(e);
-                Disconnect(DisconnectReason.SendBufferFull);
+                DisconnectInternal(DisconnectReason.SendBufferFull);
                 return;
             }
 

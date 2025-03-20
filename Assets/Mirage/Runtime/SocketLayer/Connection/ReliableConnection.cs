@@ -96,7 +96,7 @@ namespace Mirage.SocketLayer
         {
             if (_ackSystem.InvalidFragment(packet.Buffer.array))
             {
-                Disconnect(DisconnectReason.InvalidPacket);
+                DisconnectInternal(DisconnectReason.InvalidPacket);
                 return;
             }
 

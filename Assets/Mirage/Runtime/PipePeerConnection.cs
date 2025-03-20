@@ -74,6 +74,7 @@ namespace Mirage
             // tell other connection to also disconnect
             _otherConnection.Disconnect();
         }
+        void IConnection.Disconnect(DisconnectReason reason) => ((IConnection)this).Disconnect();
 
         public INotifyToken SendNotify(byte[] packet, int offset, int length)
         {
