@@ -1,3 +1,11 @@
+## [151.2.8](https://github.com/MirageNet/Mirage/compare/v151.2.7...v151.2.8) (2025-03-20)
+
+
+### Bug Fixes
+
+* catching BufferFullException from flush ([5dd80ea](https://github.com/MirageNet/Mirage/commit/5dd80ea3d7572839b40ba209086f68e92c9dcec8))
+* using SendBufferFull from NetworkPlayer when disconnecting ([b6c98f9](https://github.com/MirageNet/Mirage/commit/b6c98f90ae894a1407296e0a8c2937e606744069))
+
 ## [151.2.7](https://github.com/MirageNet/Mirage/compare/v151.2.6...v151.2.7) (2025-03-17)
 
 
