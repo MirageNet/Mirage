@@ -28,6 +28,8 @@ namespace Mirage
         RemoteConnectionClosed = 3,
         /// <summary>Server disconnected because sent packet was not allowed by server config</summary>
         InvalidPacket = 8,
+        /// <summary>Server disconnected because send buffer was full</summary>
+        SendBufferFull = 10,
 
         /// <summary>Server rejected connecting because it was full</summary>
         ServerFull = 4,
@@ -55,6 +57,7 @@ namespace Mirage
                 case DisconnectReason.RequestedByRemotePeer: return ClientStoppedReason.RemoteConnectionClosed;
                 case DisconnectReason.RequestedByLocalPeer: return ClientStoppedReason.LocalConnectionClosed;
                 case DisconnectReason.InvalidPacket: return ClientStoppedReason.InvalidPacket;
+                case DisconnectReason.SendBufferFull: return ClientStoppedReason.SendBufferFull;
             }
         }
 

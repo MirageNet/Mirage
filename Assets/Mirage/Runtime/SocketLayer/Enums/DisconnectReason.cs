@@ -29,5 +29,10 @@ namespace Mirage.SocketLayer
         /// Received packet was not allowed by config
         /// </summary>
         InvalidPacket = 4,
+
+        /// <summary>
+        /// Send buffer was full and could not accept more data
+        /// </summary>
+        SendBufferFull = 5,
     }
 }

@@ -182,9 +182,19 @@ namespace Mirage.SocketLayer
             if (_timeoutTracker.TimeToDisconnect())
             {
                 Disconnect(DisconnectReason.Timeout);
+                return;
             }
 
-            FlushBatch();
+            try
+            {
+                FlushBatch();
+            }
+            catch (BufferFullException e)
+            {
+                _logger?.LogException(e);
+                Disconnect(DisconnectReason.SendBufferFull);
+                return;
+            }
 
             if (_keepAliveTracker.TimeToSend())
             {
