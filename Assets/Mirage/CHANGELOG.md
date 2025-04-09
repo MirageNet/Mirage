@@ -1,3 +1,10 @@
+## [151.2.9](https://github.com/MirageNet/Mirage/compare/v151.2.8...v151.2.9) (2025-04-09)
+
+
+### Bug Fixes
+
+* fixing not supported version of NanoSocket to accept int bufferSize ([a067a70](https://github.com/MirageNet/Mirage/commit/a067a701b230a61381e36d71dcaa051c929d67e4)), closes [#1185](https://github.com/MirageNet/Mirage/issues/1185)
+
 ## [151.2.8](https://github.com/MirageNet/Mirage/compare/v151.2.7...v151.2.8) (2025-03-20)
 
 
