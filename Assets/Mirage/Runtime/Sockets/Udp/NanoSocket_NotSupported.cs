@@ -16,7 +16,7 @@ namespace Mirage.Sockets.Udp
     {
         public static bool Supported => false;
 
-        public NanoSocket(UdpSocketFactory factory) => throw new NotSupportedException();
+        public NanoSocket(int bufferSize) => throw new NotSupportedException();
         public void Bind(IEndPoint endPoint) => throw new NotSupportedException();
         public void Connect(IEndPoint endPoint) => throw new NotSupportedException();
         public void Close() => throw new NotSupportedException();
