@@ -1,3 +1,11 @@
+## [151.2.10](https://github.com/MirageNet/Mirage/compare/v151.2.9...v151.2.10) (2025-04-12)
+
+
+### Bug Fixes
+
+* **AuthenticatorSettings:** Fix missing semicolon ([f3cac70](https://github.com/MirageNet/Mirage/commit/f3cac702fb8dfd7b883caae64e2e450a350f0737))
+* **AuthenticatorSettings:** fix NullReferenceException ([0073c27](https://github.com/MirageNet/Mirage/commit/0073c2755f85f0754e3039f72c838147b1ad2c14))
+
 ## [151.2.9](https://github.com/MirageNet/Mirage/compare/v151.2.8...v151.2.9) (2025-04-09)
 
 
