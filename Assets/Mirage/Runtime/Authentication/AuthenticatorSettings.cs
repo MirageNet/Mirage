@@ -39,6 +39,12 @@ namespace Mirage.Authentication
 
             foreach (var authenticator in Authenticators)
             {
+                // there might be a null entry, warn and skip to avoid an NRE.
+                if (authenticator == null) {
+                    logger.LogWarning("Null/missing authenticator detected in Network Authenticator list!")
+                    continue;
+                }
+                
                 authenticator.Setup(_authHandler, AfterAuth);
             }
         }
