@@ -1,3 +1,13 @@
+## [151.2.11](https://github.com/MirageNet/Mirage/compare/v151.2.10...v151.2.11) (2025-04-13)
+
+
+### Bug Fixes
+
+* fixing compile error from use of logger ([c98e5b0](https://github.com/MirageNet/Mirage/commit/c98e5b076a8822cabe32748c6ed1b8598159f2c7))
+* fixing connection state in test setup ([750cb26](https://github.com/MirageNet/Mirage/commit/750cb263f43ef731bb71b50b9bdc1b424d1f7a88))
+* making sure messageHandler isn't given message after disconnect ([f0376e1](https://github.com/MirageNet/Mirage/commit/f0376e1afc3dac29b01ca55f8ae95e3aeee7b198))
+* making sure that AuthMessage can't be received twice ([c07a662](https://github.com/MirageNet/Mirage/commit/c07a662d5549ed5e0138c8cbf40f0884120950c7))
+
 ## [151.2.10](https://github.com/MirageNet/Mirage/compare/v151.2.9...v151.2.10) (2025-04-12)
 
 
