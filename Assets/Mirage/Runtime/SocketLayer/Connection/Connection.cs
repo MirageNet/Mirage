@@ -229,7 +229,7 @@ namespace Mirage.SocketLayer
                 // Check if connection is still valid before processing next message
                 if (State != ConnectionState.Connected)
                 {
-                    if (_logger.WarnEnabled()) _logger.LogWarning("Connection not connected, stopping message processing");
+                    if (_logger.Enabled(LogType.Warning)) _logger.Warn("Connection not connected, stopping message processing");
                     return;
                 }
 
