@@ -33,6 +33,8 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             _bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, MAX_PACKET_SIZE, 0, 100);
 
             _connection = _peerInstance.peer.Connect(Substitute.For<IEndPoint>());
+            // Set connection state to Connected after creation
+            ((NoReliableConnection)_connection).State = ConnectionState.Connected;
 
             _buffer = new byte[MAX_PACKET_SIZE - 1];
             for (var i = 0; i < _buffer.Length; i++)
