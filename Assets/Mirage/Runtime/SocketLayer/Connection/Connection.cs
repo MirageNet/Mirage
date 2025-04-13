@@ -226,6 +226,13 @@ namespace Mirage.SocketLayer
         {
             while (offset < packetLength)
             {
+                // Check if connection is still valid before processing next message
+                if (State != ConnectionState.Connected)
+                {
+                    if (_logger.WarnEnabled()) _logger.LogWarning("Connection not connected, stopping message processing");
+                    return;
+                }
+
                 var length = ByteUtils.ReadUShort(array, ref offset);
                 var message = new ArraySegment<byte>(array, offset, length);
                 offset += length;

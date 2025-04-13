@@ -639,7 +639,13 @@ namespace Mirage
             {
                 if (!_server.Active)
                 {
-                    if (logger.WarnEnabled()) logger.LogWarning("Received message after disconnect");
+                    if (logger.WarnEnabled()) logger.LogWarning("Received message after server stopped");
+                    return;
+                }
+
+                if (connection.State != ConnectionState.Connected)
+                {
+                    if (logger.WarnEnabled()) logger.LogWarning($"Received message but connection is not connected");
                     return;
                 }
 
@@ -649,7 +655,6 @@ namespace Mirage
                 }
                 else
                 {
-                    // todo remove or replace with assert
                     if (logger.WarnEnabled()) logger.LogWarning($"No player found for message received from client {connection}");
                 }
             }

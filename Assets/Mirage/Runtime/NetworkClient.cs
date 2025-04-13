@@ -449,9 +449,16 @@ namespace Mirage
             {
                 if (!_client.Active)
                 {
-                    if (logger.WarnEnabled()) logger.LogWarning("Received message after disconnect");
+                    if (logger.WarnEnabled()) logger.LogWarning("Received message after client stopped");
                     return;
                 }
+
+                if (connection.State != ConnectionState.Connected)
+                {
+                    if (logger.WarnEnabled()) logger.LogWarning($"Received message but connection is not connected");
+                    return;
+                }
+
                 logger.Assert(_connection == connection);
                 _messageHandler.HandleMessage(_player, message);
             }
