@@ -19,6 +19,8 @@ namespace Mirage.Authentication
         public List<NetworkAuthenticator> Authenticators = new List<NetworkAuthenticator>();
 
         private readonly Dictionary<INetworkPlayer, UniTaskCompletionSource<AuthenticationResult>> _pending = new Dictionary<INetworkPlayer, UniTaskCompletionSource<AuthenticationResult>>();
+        /// <summary>Set to make sure player can't send 2 AuthMessage</summary>
+        private readonly HashSet<INetworkPlayer> _hasSentAuth = new HashSet<INetworkPlayer>();
 
         private MessageHandler _authHandler;
         private NetworkServer _server;
@@ -51,11 +53,22 @@ namespace Mirage.Authentication
 
         private void HandleAuthMessage(INetworkPlayer player, AuthMessage authMessage)
         {
+            // Check if player has already sent an auth message
+            var added = _hasSentAuth.Add(player);
+            if (!added)
+            {
+                if (logger.WarnEnabled()) logger.LogWarning($"Player {player} attempted to send multiple authentication messages");
+                return;
+            }
+
             _authHandler.HandleMessage(player, authMessage.Payload);
         }
 
         private void ServerDisconnected(INetworkPlayer player)
         {
+            // Clean up tracking for disconnected player
+            _hasSentAuth.Remove(player);
+
             // if player is pending, then set their result to fail
             if (_pending.TryGetValue(player, out var taskCompletion))
             {
