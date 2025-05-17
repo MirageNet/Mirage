@@ -1,3 +1,10 @@
+# [151.3.0](https://github.com/MirageNet/Mirage/compare/v151.2.11...v151.3.0) (2025-05-17)
+
+
+### Features
+
+* storing message for Async spawning and applying them after ([23c6fa8](https://github.com/MirageNet/Mirage/commit/23c6fa8363e16cf9711d31743556fd7b1e333318))
+
 ## [151.2.11](https://github.com/MirageNet/Mirage/compare/v151.2.10...v151.2.11) (2025-04-13)
 
 
