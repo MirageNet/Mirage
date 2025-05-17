@@ -13,38 +13,18 @@ namespace Mirage
 
         private readonly IObjectLocator _objectLocator;
 
-        public SyncVarReceiver(NetworkClient client, IObjectLocator objectLocator)
+        public SyncVarReceiver(IObjectLocator objectLocator)
         {
             _objectLocator = objectLocator;
-            if (client.IsConnected)
-            {
-                AddHandlers(client);
-            }
-            else
-            {
-                // todo replace this with RunOnceEvent
-                client.Connected.AddListener(_ => AddHandlers(client));
-            }
         }
 
-        private void AddHandlers(NetworkClient client)
+        // note: client handles message in ClientObjectManager
+        public void ServerRegisterHandlers(MessageHandler messageHandler)
         {
-            // dont add if host player
-            // server should never sent to host
-            if (!client.IsHost)
-            {
-                client.MessageHandler.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
-            }
+            messageHandler.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
         }
 
-        public SyncVarReceiver(NetworkServer server, IObjectLocator objectLocator)
-        {
-            _objectLocator = objectLocator;
-            server.MessageHandler.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
-        }
-
-
-        private void OnUpdateVarsMessage(INetworkPlayer sender, UpdateVarsMessage msg)
+        internal void OnUpdateVarsMessage(INetworkPlayer sender, UpdateVarsMessage msg)
         {
             if (logger.LogEnabled()) logger.Log("SyncVarReceiver.OnUpdateVarsMessage " + msg.NetId);
 

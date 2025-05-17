@@ -156,7 +156,6 @@ namespace Mirage
         // todo move syncVarsender, it doesn't need to be a public fields on network server any more
         public SyncVarSender SyncVarSender { get; private set; }
 
-        private SyncVarReceiver _syncVarReceiver;
         public MessageHandler MessageHandler { get; private set; }
 
         private Action<INetworkPlayer, AuthenticationResult> _authFallCallback;
@@ -215,7 +214,6 @@ namespace Mirage
             // Clear references to help GC collect
             World = null;
             SyncVarSender = null;
-            _syncVarReceiver = null;
             MessageHandler = null;
             Metrics = null;
 
@@ -257,9 +255,6 @@ namespace Mirage
             LocalClient = localClient;
             MessageHandler = new MessageHandler(World, DisconnectOnException, RethrowException);
             MessageHandler.RegisterHandler<NetworkPingMessage>(World.Time.OnServerPing, allowUnauthenticated: true);
-
-            // create after MessageHandler, SyncVarReceiver uses it 
-            _syncVarReceiver = new SyncVarReceiver(this, World);
 
             var dataHandler = new DataHandler(this, MessageHandler, _connections);
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;

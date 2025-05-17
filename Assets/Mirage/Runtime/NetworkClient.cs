@@ -103,7 +103,6 @@ namespace Mirage
 
         public NetworkWorld World { get; private set; }
         public SyncVarSender SyncVarSender { get; private set; }
-        private SyncVarReceiver _syncVarReceiver;
         public MessageHandler MessageHandler { get; private set; }
 
         /// <summary>
@@ -136,7 +135,6 @@ namespace Mirage
 
             World = new NetworkWorld();
             SyncVarSender = new SyncVarSender();
-            _syncVarReceiver = new SyncVarReceiver(this, World);
 
             var endPoint = SocketFactory.GetConnectEndPoint(address, port);
             if (logger.LogEnabled()) logger.Log($"Client connecting to endpoint: {endPoint}");
@@ -145,6 +143,7 @@ namespace Mirage
             var maxPacketSize = SocketFactory.MaxPacketSize;
             MessageHandler = new MessageHandler(World, DisconnectOnException, RethrowException);
             var dataHandler = new DataHandler(this, MessageHandler);
+
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
 
             var config = PeerConfig ?? new Config();
@@ -415,7 +414,6 @@ namespace Mirage
             // Clear references to help GC collect
             World = null;
             SyncVarSender = null;
-            _syncVarReceiver = null;
             MessageHandler = null;
             Metrics = null;
         }
