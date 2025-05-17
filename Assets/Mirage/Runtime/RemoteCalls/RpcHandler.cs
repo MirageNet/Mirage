@@ -26,14 +26,18 @@ namespace Mirage.RemoteCalls
         /// </summary>
         private readonly RpcInvokeType _invokeType;
 
-        public RpcHandler(MessageHandler messageHandler, IObjectLocator objectLocator, RpcInvokeType invokeType)
+        public RpcHandler(IObjectLocator objectLocator, RpcInvokeType invokeType)
+        {
+            _objectLocator = objectLocator;
+            _invokeType = invokeType;
+        }
+
+        // note: client handles message in ClientObjectManager
+        public void ServerRegisterHandler(MessageHandler messageHandler)
         {
             messageHandler.RegisterHandler<RpcReply>(OnReply);
             messageHandler.RegisterHandler<RpcMessage>(OnRpcMessage);
             messageHandler.RegisterHandler<RpcWithReplyMessage>(OnRpcWithReplyMessage);
-
-            _objectLocator = objectLocator;
-            _invokeType = invokeType;
         }
 
         /// <summary>
@@ -41,7 +45,7 @@ namespace Mirage.RemoteCalls
         /// </summary>
         /// <param name="player"></param>
         /// <param name="msg"></param>
-        private void OnRpcWithReplyMessage(INetworkPlayer player, RpcWithReplyMessage msg)
+        internal void OnRpcWithReplyMessage(INetworkPlayer player, RpcWithReplyMessage msg)
         {
             HandleRpc(player, msg.NetId, msg.FunctionIndex, msg.Payload, msg.ReplyId);
         }
@@ -133,7 +137,7 @@ namespace Mirage.RemoteCalls
             return (completionSource.Task, newReplyId);
         }
 
-        private void OnReply(INetworkPlayer player, RpcReply reply)
+        internal void OnReply(INetworkPlayer player, RpcReply reply)
         {
             // find the callback that was waiting for this and invoke it.
             if (_callbacks.TryGetValue(reply.ReplyId, out var callbacks))

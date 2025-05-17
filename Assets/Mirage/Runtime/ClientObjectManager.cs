@@ -18,6 +18,7 @@ namespace Mirage
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientObjectManager));
 
         internal RpcHandler _rpcHandler;
+        internal SyncVarReceiver _syncVarReceiver;
 
         private NetworkClient _client;
         public NetworkClient Client => _client;
@@ -52,6 +53,8 @@ namespace Mirage
         /// </summary>
         public readonly Dictionary<ulong, NetworkIdentity> spawnableObjects = new Dictionary<ulong, NetworkIdentity>();
 
+        private readonly Dictionary<uint, PendingAsyncSpawn> pendingSpawn = new Dictionary<uint, PendingAsyncSpawn>();
+
         internal void ClientStarted(NetworkClient client)
         {
             if (_client != null && _client != client)
@@ -85,6 +88,12 @@ namespace Mirage
             // reset for next run
             _client.Disconnected.RemoveListener(OnClientDisconnected);
             _client = null;
+            _rpcHandler = null;
+            _syncVarReceiver = null;
+
+            foreach (var pending in pendingSpawn.Values)
+                pending.Dispose();
+            pendingSpawn.Clear();
         }
 
         internal void RegisterHostHandlers()
@@ -103,8 +112,50 @@ namespace Mirage
             _client.MessageHandler.RegisterHandler<SpawnMessage>(OnSpawn);
             _client.MessageHandler.RegisterHandler<RemoveAuthorityMessage>(OnRemoveAuthority);
             _client.MessageHandler.RegisterHandler<RemoveCharacterMessage>(OnRemoveCharacter);
-            _rpcHandler = new RpcHandler(_client.MessageHandler, _client.World, RpcInvokeType.ClientRpc);
+
+            _rpcHandler = new RpcHandler(_client.World, RpcInvokeType.ClientRpc);
+            _client.MessageHandler.RegisterHandler<RpcReply>(_rpcHandler.OnReply); // no pending, but we still need to register it
+            _client.MessageHandler.RegisterHandler<RpcMessage>(OnRpcMessage);
+            _client.MessageHandler.RegisterHandler<RpcWithReplyMessage>(OnRpcWithReplyMessage);
+
+            _syncVarReceiver = new SyncVarReceiver(_client.World);
+            _client.MessageHandler.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
         }
+
+        internal void OnRpcMessage(INetworkPlayer player, RpcMessage msg)
+        {
+            if (pendingSpawn.Count > 0 && pendingSpawn.TryGetValue(msg.NetId, out var pending)) // async spawning
+            {
+                if (logger.LogEnabled()) logger.Log($"Pending spawn for {msg.NetId}, storing new RpcMessage for later");
+                pending.AddMessage(msg);
+                return;
+            }
+
+            _rpcHandler.OnRpcMessage(player, msg);
+        }
+        internal void OnRpcWithReplyMessage(INetworkPlayer player, RpcWithReplyMessage msg)
+        {
+            if (pendingSpawn.Count > 0 && pendingSpawn.TryGetValue(msg.NetId, out var pending)) // async spawning
+            {
+                if (logger.LogEnabled()) logger.Log($"Pending spawn for {msg.NetId}, storing new RpcWithReplyMessage for later");
+                pending.AddMessage(msg);
+                return;
+            }
+
+            _rpcHandler.OnRpcWithReplyMessage(player, msg);
+        }
+        internal void OnUpdateVarsMessage(INetworkPlayer player, UpdateVarsMessage msg)
+        {
+            if (pendingSpawn.Count > 0 && pendingSpawn.TryGetValue(msg.NetId, out var pending)) // async spawning
+            {
+                if (logger.LogEnabled()) logger.Log($"Pending spawn for {msg.NetId}, storing new UpdateVarsMessage for later");
+                pending.AddMessage(msg);
+                return;
+            }
+
+            _syncVarReceiver.OnUpdateVarsMessage(player, msg);
+        }
+
 
         private bool ConsiderForSpawning(NetworkIdentity identity)
         {
@@ -507,6 +558,14 @@ namespace Mirage
 
         internal void OnSpawn(SpawnMessage msg)
         {
+            // pendingSpawn.Count check to skip dictionary lookup if empty
+            if (pendingSpawn.Count > 0 && pendingSpawn.TryGetValue(msg.NetId, out var pending)) // async spawning
+            {
+                if (logger.LogEnabled()) logger.Log($"Pending spawn for {msg.NetId}, storing new SpawnMessage for later");
+                pending.AddMessage(msg);
+                return;
+            }
+
             if (msg.PrefabHash == null && msg.SceneId == null)
                 throw new SpawnObjectException($"Empty prefabHash and sceneId for netId: {msg.NetId}");
 
@@ -574,11 +633,27 @@ namespace Mirage
                     using (var reader = NetworkReaderPool.GetReader(writer.ToArraySegment(), null))
                     {
                         msg.Payload = reader.Read<ArraySegment<byte>>();
+                        var pending = new PendingAsyncSpawn(msg.NetId);
+                        pendingSpawn.Add(msg.NetId, pending);
 
-                        var identity = await spawnHandler.Invoke(msg);
-                        if (identity == null)
-                            throw new SpawnObjectException($"Async Spawn handler for prefabHash={msg.PrefabHash:X} returned null");
-                        AfterSpawn(msg, false, identity);
+                        try
+                        {
+                            var identity = await spawnHandler.Invoke(msg);
+                            if (identity == null)
+                                throw new SpawnObjectException($"Async Spawn handler for prefabHash={msg.PrefabHash:X} returned null");
+                            AfterSpawn(msg, false, identity);
+
+                            // IMPORTANT: remove from pendingSpawn first, so that methods will be invoked instead of adding to pending a 2nd time
+                            pendingSpawn.Remove(msg.NetId);
+                            pending.ApplyAll(this);
+                        }
+                        finally
+                        {
+                            // ensure we always clean up, even if spawn fails
+                            pending.Dispose();
+                            // double check it is removed, incase we throw while spawning
+                            pendingSpawn.Remove(msg.NetId);
+                        }
                     }
                 }
             }
@@ -650,6 +725,13 @@ namespace Mirage
 
         internal void OnRemoveAuthority(RemoveAuthorityMessage msg)
         {
+            if (pendingSpawn.Count > 0 && pendingSpawn.TryGetValue(msg.NetId, out var pending)) // async spawning
+            {
+                if (logger.LogEnabled()) logger.Log($"Pending spawn for {msg.NetId}, storing new RemoveAuthorityMessage for later");
+                pending.AddMessage(msg);
+                return;
+            }
+
             if (logger.LogEnabled()) logger.Log($"Client remove auth handler");
 
             // was the object already spawned?
@@ -687,11 +769,25 @@ namespace Mirage
 
         internal void OnObjectHide(ObjectHideMessage msg)
         {
+            if (pendingSpawn.Count > 0 && pendingSpawn.TryGetValue(msg.NetId, out var pending)) // async spawning
+            {
+                if (logger.LogEnabled()) logger.Log($"Pending spawn for {msg.NetId}, storing new ObjectHideMessage for later");
+                pending.AddMessage(msg);
+                return;
+            }
+
             DestroyObject(msg.NetId);
         }
 
         internal void OnObjectDestroy(ObjectDestroyMessage msg)
         {
+            if (pendingSpawn.Count > 0 && pendingSpawn.TryGetValue(msg.NetId, out var pending)) // async spawning
+            {
+                if (logger.LogEnabled()) logger.Log($"Pending spawn for {msg.NetId}, storing new ObjectDestroyMessage for later");
+                pending.AddMessage(msg);
+                return;
+            }
+
             DestroyObject(msg.NetId);
         }
 
@@ -837,6 +933,143 @@ namespace Mirage
         public bool IsAsyncSpawn()
         {
             return HandlerAsync != null;
+        }
+    }
+
+    public class PendingAsyncSpawn : IDisposable
+    {
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientObjectManager));
+
+        public readonly uint NetId;
+
+        /// <summary>
+        /// extra messages to apply in order after spawning is complete
+        /// </summary>
+        private List<MessageType> _messageTypes;
+        private PooledNetworkWriter _messageBytes;
+
+        public PendingAsyncSpawn(uint netid)
+        {
+            NetId = netid;
+        }
+
+        public void AddMessage(ObjectDestroyMessage message) => AddMessageInternal(MessageType.ObjectDestroyMessage, message);
+        public void AddMessage(ObjectHideMessage message) => AddMessageInternal(MessageType.ObjectHideMessage, message);
+        public void AddMessage(SpawnMessage message) => AddMessageInternal(MessageType.SpawnMessage, message);
+        public void AddMessage(RemoveAuthorityMessage message) => AddMessageInternal(MessageType.RemoveAuthorityMessage, message);
+        public void AddMessage(RpcMessage message) => AddMessageInternal(MessageType.RpcMessage, message);
+        public void AddMessage(RpcWithReplyMessage message) => AddMessageInternal(MessageType.RpcWithReplyMessage, message);
+        public void AddMessage(UpdateVarsMessage message) => AddMessageInternal(MessageType.UpdateVarsMessage, message);
+
+        private void AddMessageInternal<T>(MessageType messageType, T message) where T : struct
+        {
+            _messageTypes ??= new List<MessageType>();
+            _messageBytes ??= NetworkWriterPool.GetWriter();
+
+            _messageTypes.Add(messageType);
+            _messageBytes.Write(message);
+
+            // log warning for every 20, we dont want to be storing too many message here
+            // it also indicates that spawning failed or is taking too long
+            if (_messageTypes.Count % 20 == 0)
+            {
+                if (logger.WarnEnabled())
+                    logger.LogWarning($"Pending message count for {NetId} is {_messageTypes.Count}. Make sure async spawned object isn't being sent too many message before it is spawned");
+            }
+        }
+
+        public void ApplyAll(ClientObjectManager clientObjectManager)
+        {
+            if (_messageTypes == null)
+                return;
+
+            // use read and write so that payload will look the same as original
+            var world = clientObjectManager.Client.World;
+            var player = clientObjectManager.Client.Player;
+            using (var reader = NetworkReaderPool.GetReader(_messageBytes.ToArraySegment(), world))
+            {
+                foreach (var messageType in _messageTypes)
+                {
+                    switch (messageType)
+                    {
+                        case MessageType.ObjectDestroyMessage:
+                            {
+                                var msg = reader.Read<ObjectDestroyMessage>();
+                                clientObjectManager.OnObjectDestroy(msg);
+
+                                break;
+                            }
+                        case MessageType.ObjectHideMessage:
+                            {
+                                var msg = reader.Read<ObjectHideMessage>();
+                                clientObjectManager.OnObjectHide(msg);
+
+                                break;
+                            }
+                        case MessageType.SpawnMessage:
+                            {
+                                var msg = reader.Read<SpawnMessage>();
+                                clientObjectManager.OnSpawn(msg);
+
+                                break;
+                            }
+                        case MessageType.RemoveAuthorityMessage:
+                            {
+                                var msg = reader.Read<RemoveAuthorityMessage>();
+                                clientObjectManager.OnRemoveAuthority(msg);
+
+                                break;
+                            }
+
+                        case MessageType.RpcMessage:
+                            {
+                                var msg = reader.Read<RpcMessage>();
+                                clientObjectManager.OnRpcMessage(player, msg);
+                                break;
+                            }
+                        case MessageType.RpcWithReplyMessage:
+                            {
+                                var msg = reader.Read<RpcWithReplyMessage>();
+                                clientObjectManager.OnRpcWithReplyMessage(player, msg);
+                                break;
+                            }
+
+                        case MessageType.UpdateVarsMessage:
+                            {
+                                var msg = reader.Read<UpdateVarsMessage>();
+                                clientObjectManager.OnUpdateVarsMessage(player, msg);
+                                break;
+                            }
+
+                        default:
+                            {
+                                // should never happen, but log just incase we dont add case here
+                                logger.LogError($"Unhandled MessageType {messageType} in PendingAsyncSpawn.ApplyAll");
+                                break;
+                            }
+                    }
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            _messageTypes = null;
+            _messageBytes?.Release();
+            _messageBytes = null;
+        }
+
+        public enum MessageType
+        {
+            ObjectDestroyMessage,
+            ObjectHideMessage,
+            SpawnMessage,
+            RemoveAuthorityMessage,
+
+            RpcMessage,
+            RpcWithReplyMessage,
+
+            UpdateVarsMessage,
         }
     }
 }

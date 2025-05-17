@@ -29,6 +29,7 @@ namespace Mirage
         private static List<NetworkIdentity> _spawnCache = new List<NetworkIdentity>();
 
         internal RpcHandler _rpcHandler;
+        private SyncVarReceiver _syncVarReceiver;
 
         private NetworkServer _server;
         public NetworkServer Server => _server;
@@ -50,7 +51,11 @@ namespace Mirage
 
             DefaultVisibility = new AlwaysVisible(server);
 
-            _rpcHandler = new RpcHandler(_server.MessageHandler, _server.World, RpcInvokeType.ServerRpc);
+            _rpcHandler = new RpcHandler(_server.World, RpcInvokeType.ServerRpc);
+            _rpcHandler.ServerRegisterHandler(_server.MessageHandler);
+
+            _syncVarReceiver = new SyncVarReceiver(_server.World);
+            _syncVarReceiver.ServerRegisterHandlers(_server.MessageHandler);
         }
 
         private void OnServerStopped()
@@ -69,6 +74,8 @@ namespace Mirage
             // clear server after stopping
             _server.Stopped.RemoveListener(OnServerStopped);
             _server = null;
+            _rpcHandler = null;
+            _syncVarReceiver = null;
         }
 
         internal void SpawnOrActivate()
