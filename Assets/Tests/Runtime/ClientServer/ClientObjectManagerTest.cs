@@ -304,6 +304,12 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.That(handlerStarted, Is.EqualTo(1));
             Assert.That(handlerFinished, Is.EqualTo(0));
 
+            // pending checks
+            Assert.IsTrue(clientObjectManager.pendingSpawn.ContainsKey(NET_ID));
+            var pending = clientObjectManager.pendingSpawn[NET_ID];
+            Assert.That(pending.NetId, Is.EqualTo(NET_ID));
+            Assert.That(pending.PendingCount, Is.EqualTo(0), "no pending for first message only");
+
             // wait for delay+1 frame
             await UniTask.Delay(DELAY);
             await UniTask.Yield();
@@ -313,6 +319,87 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.IsTrue(world.TryGetIdentity(NET_ID, out var spawned));
             Assert.That(spawned.transform.position, Is.EqualTo(pos));
         });
+
+        [UnityTest]
+        public IEnumerator SpawnsAsyncPending() => UniTask.ToCoroutine(async () =>
+        {
+            const int NET_ID = 1000;
+            const int DELAY = 200;
+            var pos = new Vector3(100, 0, 0);
+            var handlerStarted = 0;
+            var handlerFinished = 0;
+
+            var identity = CreateNetworkIdentity();
+            identity.PrefabHash = NewUniqueHash();
+            clientObjectManager.RegisterSpawnHandler(identity.PrefabHash, new SpawnHandlerAsyncDelegate(async (msg) =>
+            {
+                handlerStarted++;
+                await UniTask.Delay(DELAY);
+                handlerFinished++;
+                return identity;
+            }), (obj) => { });
+
+            var msg = new SpawnMessage
+            {
+                NetId = NET_ID,
+                PrefabHash = identity.PrefabHash,
+                Payload = new ArraySegment<byte>(new byte[0]),
+                SpawnValues = new SpawnValues { Position = pos, }
+            };
+
+            clientObjectManager.OnSpawn(msg);
+            var world = client.World;
+            // does not exist yet
+            Assert.IsFalse(world.TryGetIdentity(NET_ID, out var _));
+
+            Assert.That(handlerStarted, Is.EqualTo(1));
+            Assert.That(handlerFinished, Is.EqualTo(0));
+
+            // pending checks
+            Assert.IsTrue(clientObjectManager.pendingSpawn.ContainsKey(NET_ID));
+            var pending = clientObjectManager.pendingSpawn[NET_ID];
+            Assert.That(pending.NetId, Is.EqualTo(NET_ID));
+            Assert.That(pending.PendingCount, Is.EqualTo(0), "no pending for first message only");
+
+            // send 2nd message, it should be added to pending
+            var pos2 = new Vector3(120, 0, 0);
+            var msg2 = new SpawnMessage
+            {
+                NetId = NET_ID,
+                PrefabHash = identity.PrefabHash,
+                Payload = new ArraySegment<byte>(new byte[0]),
+                SpawnValues = new SpawnValues { Position = pos2, }
+            };
+            clientObjectManager.OnSpawn(msg2);
+            Assert.IsTrue(clientObjectManager.pendingSpawn.ContainsKey(NET_ID));
+            Assert.That(clientObjectManager.pendingSpawn[NET_ID], Is.EqualTo(pending), "pending instance should not change");
+            Assert.That(pending.PendingCount, Is.EqualTo(1), "Should have pending for 2nd message");
+
+            var pos3 = new Vector3(150, 0, 0);
+            var msg3 = new SpawnMessage
+            {
+                NetId = NET_ID,
+                PrefabHash = identity.PrefabHash,
+                Payload = new ArraySegment<byte>(new byte[0]),
+                SpawnValues = new SpawnValues { Position = pos3, }
+            };
+            clientObjectManager.OnSpawn(msg3);
+
+            Assert.IsTrue(clientObjectManager.pendingSpawn.ContainsKey(NET_ID));
+            Assert.That(clientObjectManager.pendingSpawn[NET_ID], Is.EqualTo(pending), "pending instance should not change");
+            Assert.That(pending.PendingCount, Is.EqualTo(2), "Should have pending for 2nd message");
+
+            // wait for delay+1 frame
+            await UniTask.Delay(DELAY);
+            await UniTask.Yield();
+
+            Assert.That(handlerStarted, Is.EqualTo(1));
+            Assert.That(handlerFinished, Is.EqualTo(1));
+            Assert.IsTrue(world.TryGetIdentity(NET_ID, out var spawned));
+            Assert.That(spawned.transform.position, Is.EqualTo(pos3), "Should apply extra message, in order");
+            Assert.IsFalse(clientObjectManager.pendingSpawn.ContainsKey(NET_ID), "Key should have been removed");
+        });
+
 
         [Test]
         public void ThrowsWhenAddingAsyncWhenAlreadyAdded()

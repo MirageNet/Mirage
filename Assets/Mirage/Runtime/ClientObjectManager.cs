@@ -53,7 +53,7 @@ namespace Mirage
         /// </summary>
         public readonly Dictionary<ulong, NetworkIdentity> spawnableObjects = new Dictionary<ulong, NetworkIdentity>();
 
-        private readonly Dictionary<uint, PendingAsyncSpawn> pendingSpawn = new Dictionary<uint, PendingAsyncSpawn>();
+        internal readonly Dictionary<uint, PendingAsyncSpawn> pendingSpawn = new Dictionary<uint, PendingAsyncSpawn>();
 
         internal void ClientStarted(NetworkClient client)
         {
@@ -947,6 +947,8 @@ namespace Mirage
         /// </summary>
         private List<MessageType> _messageTypes;
         private PooledNetworkWriter _messageBytes;
+
+        public int PendingCount => _messageTypes?.Count ?? 0;
 
         public PendingAsyncSpawn(uint netid)
         {
