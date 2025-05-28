@@ -78,7 +78,16 @@ namespace Mirage
             _syncVarReceiver = null;
         }
 
-        internal void SpawnOrActivate()
+        [System.Obsolete("Use SpawnSceneObjects instead")]
+        internal void SpawnOrActivate() => SpawnSceneObjects();
+
+        /// <summary>
+        /// Should be called when server is started, after host client is connected.
+        /// <para>
+        /// note: this method only needs to be called on setup, <see cref="SpawnSceneObjects"/> should be called after scene loading.
+        /// </para>
+        /// </summary>
+        internal void FirstServerSpawn()
         {
             if (!_server || !_server.Active)
             {
@@ -91,23 +100,29 @@ namespace Mirage
             // host mode?
             if (_server.IsHost)
             {
-                StartHostClientObjects();
-            }
-        }
-
-        /// <summary>
-        /// Loops spawned collection for NetworkIdentities that are not IsClient and calls StartClient().
-        /// </summary>
-        // todo can this function be removed? do we only need to run it when host connects?
-        private void StartHostClientObjects()
-        {
-            foreach (var identity in _server.World.SpawnedIdentities)
-            {
-                if (!identity.IsClient)
+                // edge case, if object is spawned before host client is connected,
+                // we will need to 
+                foreach (var identity in _server.World.SpawnedIdentities)
                 {
-                    if (logger.LogEnabled()) logger.Log("ActivateHostScene " + identity.NetId + " " + identity);
+                    // object was not set up as host, need to call OnHostClientSpawn to set it up
+                    if (!identity.IsClient)
+                    {
+                        if (logger.LogEnabled()) logger.Log("ActivateHostScene " + identity.NetId + " " + identity);
+                        Debug.Assert(identity.IsServer, "identity should already be spawned on server");
 
-                    identity.StartClient();
+                        // easier to just make a spawn message and call OnHostClientSpawn,
+                        // than to copy those function
+                        var localPlayer = _server.LocalPlayer;
+                        var msg = new SpawnMessage
+                        {
+                            NetId = identity.NetId,
+                            IsOwner = identity.Owner == localPlayer,
+                            IsLocalPlayer = localPlayer.Identity == identity,
+                        };
+
+                        _server.LocalClient.ObjectManager.OnHostClientSpawn(msg);
+                        Debug.Assert(identity.IsClient && identity.IsServer, "identity should now be both client and server");
+                    }
                 }
             }
         }

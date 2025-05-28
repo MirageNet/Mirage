@@ -613,7 +613,7 @@ namespace Mirage
 
             // clean up and invoke server functions before user events
             Server.World.RemoveDestroyedObjects();
-            ServerObjectManager.SpawnOrActivate();
+            ServerObjectManager.SpawnSceneObjects();
 
             OnServerFinishedSceneChange?.Invoke(scene, operation);
         }

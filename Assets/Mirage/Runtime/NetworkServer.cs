@@ -309,7 +309,7 @@ namespace Mirage
                 ObjectManager.ServerStarted(this);
                 // if no hostClient, then  spawn objects right away
                 if (LocalClient == null)
-                    ObjectManager.SpawnOrActivate();
+                    ObjectManager.FirstServerSpawn();
             }
             _started?.Invoke();
 
@@ -323,7 +323,7 @@ namespace Mirage
                 // spawn scene objects in starting scene AFTER host client has activated,
                 // otherwise IsClient will be false for objects in starting scene
                 if (ObjectManager != null)
-                    ObjectManager.SpawnOrActivate();
+                    ObjectManager.FirstServerSpawn();
 
                 Connected?.Invoke(LocalPlayer);
 
