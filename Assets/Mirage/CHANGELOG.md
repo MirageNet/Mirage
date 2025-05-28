@@ -1,3 +1,10 @@
+## [151.3.1](https://github.com/MirageNet/Mirage/compare/v151.3.0...v151.3.1) (2025-05-28)
+
+
+### Bug Fixes
+
+* removing SpawnOrActivate and fixing StartHostClientObjects setup for objects spawned before host client is connected ([a5e1eb7](https://github.com/MirageNet/Mirage/commit/a5e1eb791aaf480125a53439ba5bf5f2964ed56c))
+
 # [151.3.0](https://github.com/MirageNet/Mirage/compare/v151.2.11...v151.3.0) (2025-05-17)
 
 
