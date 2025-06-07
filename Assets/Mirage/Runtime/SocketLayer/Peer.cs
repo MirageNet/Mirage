@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage.SocketLayer
@@ -37,6 +38,11 @@ namespace Mirage.SocketLayer
     /// </summary>
     public sealed class Peer : IPeer
     {
+        private static readonly ProfilerMarker sendMarker = new ProfilerMarker("Peer.Send");
+        private static readonly ProfilerMarker sendUnconnectedMarker = new ProfilerMarker("Peer.SendUnconnected");
+        private static readonly ProfilerMarker receiveLoopMarker = new ProfilerMarker("Peer.ReceiveLoop");
+        private static readonly ProfilerMarker updateConnectionsMarker = new ProfilerMarker("Peer.UpdateConnections");
+
         private readonly ILogger _logger;
         private readonly Metrics _metrics;
         private readonly ISocket _socket;
@@ -59,6 +65,7 @@ namespace Mirage.SocketLayer
         /// is server listening on or connected to endpoint
         /// </summary>
         private bool _active;
+
         public PoolMetrics PoolMetrics => _bufferPool.Metrics;
 
         public Peer(ISocket socket, int maxPacketSize, IDataHandler dataHandler, Config config = null, ILogger logger = null, Metrics metrics = null)
@@ -134,6 +141,7 @@ namespace Mirage.SocketLayer
 
         internal void Send(Connection connection, byte[] data, int length)
         {
+            using var _ = sendMarker.Auto();
             // connecting connections can send connect messages so is allowed
             // todo check connected before message are sent from high level
             _logger?.Assert(connection.State == ConnectionState.Connected || connection.State == ConnectionState.Connecting || connection.State == ConnectionState.Disconnected, connection.State);
@@ -157,6 +165,7 @@ namespace Mirage.SocketLayer
 
         internal void SendCommandUnconnected(IEndPoint endPoint, Commands command, byte? extra = null)
         {
+            using var _ = sendUnconnectedMarker.Auto();
             using (var buffer = _bufferPool.Take())
             {
                 var length = CreateCommandPacket(buffer, command, extra);
@@ -226,6 +235,7 @@ namespace Mirage.SocketLayer
         /// </summary>
         public void UpdateReceive()
         {
+            using var _ = receiveLoopMarker.Auto();
             ReceiveLoop();
         }
         /// <summary>
@@ -233,10 +243,10 @@ namespace Mirage.SocketLayer
         /// </summary>
         public void UpdateSent()
         {
+            using var _ = updateConnectionsMarker.Auto();
             UpdateConnections();
             _metrics?.OnTick(_connections.Count);
         }
-
 
         private void ReceiveLoop()
         {
