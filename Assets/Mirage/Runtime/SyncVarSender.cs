@@ -34,7 +34,7 @@ namespace Mirage
             _dirtyObjectsTmp.Clear();
 
             // store time as variable so we dont have to call property for each component
-            var now = Time.timeAsDouble;
+            var now = Time.unscaledTimeAsDouble;
 
             foreach (var identity in _dirtyObjects)
             {
