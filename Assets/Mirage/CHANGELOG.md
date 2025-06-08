@@ -1,3 +1,10 @@
+## [151.3.2](https://github.com/MirageNet/Mirage/compare/v151.3.1...v151.3.2) (2025-06-08)
+
+
+### Bug Fixes
+
+* fixing syncvar not sending while timescale is zero ([869e756](https://github.com/MirageNet/Mirage/commit/869e756ee48167730fa48063257e263792c7cf8f))
+
 ## [151.3.1](https://github.com/MirageNet/Mirage/compare/v151.3.0...v151.3.1) (2025-05-28)
 
 
