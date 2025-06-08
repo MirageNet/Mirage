@@ -1,7 +1,7 @@
 using System;
 using Mirage.Serialization;
-using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace Mirage.Tests.Runtime.Syncing
 {
@@ -29,7 +29,7 @@ namespace Mirage.Tests.Runtime.Syncing
         [Test]
         [TestCase(true)]
         [TestCase(false)]
-        public void InitialStateHasCorrectValue(bool input)
+        public void InitialStateHasCorrectValue(bool initial)
         {
             serverComponent.number = 10;
 
@@ -41,12 +41,15 @@ namespace Mirage.Tests.Runtime.Syncing
                 result = clientIdentity.InitialState;
             };
 
-            serverIdentity.OnSerializeAll(input, ownerWriter, observersWriter);
+            if (initial)
+                serverIdentity.OnSerializeInitial(ownerWriter, observersWriter);
+            else
+                serverIdentity.OnSerializeDelta(Time.unscaledTimeAsDouble, ownerWriter, observersWriter);
             reader.Reset(observersWriter.ToArraySegment());
-            clientIdentity.OnDeserializeAll(reader, input);
+            clientIdentity.OnDeserializeAll(reader, initial);
 
             Assert.That(invoked, Is.EqualTo(1));
-            Assert.That(result, Is.EqualTo(input));
+            Assert.That(result, Is.EqualTo(initial));
         }
     }
 }

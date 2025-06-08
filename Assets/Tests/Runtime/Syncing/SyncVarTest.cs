@@ -1,6 +1,5 @@
 using System;
 using Mirage.Serialization;
-using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -81,8 +80,9 @@ namespace Mirage.Tests.Runtime.Syncing
         [Test]
         public void TestSyncIntervalAndClearDirtyComponents()
         {
+            var now = Time.unscaledTimeAsDouble;
             var player = CreateBehaviour<MockPlayer>();
-            player._nextSyncTime = Time.time + 1f;
+            player._nextSyncTime = now + 1f;
             player.SyncSettings.Interval = 1f;
 
             player.guild = new MockPlayer.Guild
@@ -90,24 +90,25 @@ namespace Mirage.Tests.Runtime.Syncing
                 name = "Back street boys"
             };
 
-            Assert.That(player.ShouldSync(Time.time), Is.False, "Sync interval not met, so not dirty yet");
+            Assert.That(player.ShouldSync(now), Is.False, "Sync interval not met, so not dirty yet");
 
             // ClearDirtyComponents should do nothing since syncInterval is not
             // elapsed yet
             player.Identity.ClearShouldSyncDirtyOnly();
 
             // set lastSyncTime far enough back to be ready for syncing
-            player._nextSyncTime = Time.time - 1f;
+            player._nextSyncTime = now - 1f;
 
             // should be dirty now
-            Assert.That(player.ShouldSync(Time.time), Is.True, "Sync interval met, should be dirty");
+            Assert.That(player.ShouldSync(now), Is.True, "Sync interval met, should be dirty");
         }
 
         [Test]
         public void TestSyncIntervalAndClearAllComponents()
         {
+            var now = Time.unscaledTimeAsDouble;
             var player = CreateBehaviour<MockPlayer>();
-            player._nextSyncTime = Time.time + 1f;
+            player._nextSyncTime = now + 1f;
             player.SyncSettings.Interval = 1f;
 
             player.guild = new MockPlayer.Guild
@@ -115,17 +116,17 @@ namespace Mirage.Tests.Runtime.Syncing
                 name = "Back street boys"
             };
 
-            Assert.That(player.ShouldSync(Time.time), Is.False, "Sync interval not met, so not dirty yet");
+            Assert.That(player.ShouldSync(now), Is.False, "Sync interval not met, so not dirty yet");
 
             // ClearAllComponents should clear dirty even if syncInterval not
             // elapsed yet
-            player.Identity.ClearShouldSync();
+            player.Identity.ClearShouldSync(now);
 
             // set lastSyncTime far enough back to be ready for syncing
-            player._nextSyncTime = Time.time - 1f;
+            player._nextSyncTime = now - 1f;
 
             // should be dirty now
-            Assert.That(player.ShouldSync(Time.time), Is.False, "Sync interval met, should still not be dirty");
+            Assert.That(player.ShouldSync(now), Is.False, "Sync interval met, should still not be dirty");
         }
 
         [Test]
@@ -143,7 +144,7 @@ namespace Mirage.Tests.Runtime.Syncing
             serverObjectManager.Spawn(player1.Identity);
 
             //serialize all the data as we would for the network
-            var (ownerWritten, observersWritten) = player1.Identity.OnSerializeAll(true, ownerWriter, observersWriter);
+            var (ownerWritten, observersWritten) = player1.Identity.OnSerializeInitial(ownerWriter, observersWriter);
 
             Assert.That(ownerWritten, Is.EqualTo(0), "no owner, should have only written to observersWriter");
             Assert.That(observersWritten, Is.GreaterThanOrEqualTo(1), "should have written to observer writer");

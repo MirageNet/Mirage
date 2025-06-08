@@ -659,66 +659,33 @@ namespace Mirage
         // random number that is unlikely to appear in a regular data stream
         private const byte BARRIER = 171;
 
-        // paul: readstring bug prevention: https://issuetracker.unity3d.com/issues/unet-networkwriter-dot-write-causing-readstring-slash-readbytes-out-of-range-errors-in-clients
-        // -> OnSerialize writes componentData, barrier, componentData, barrier,componentData,...
-        // -> OnDeserialize carefully extracts each data, then deserializes the barrier and check it
-        //    -> If we read too many or too few bytes,  the barrier is very unlikely to match
-        //    -> we can properly track down errors
         /// <summary>
-        /// Serializes component and its lengths
+        /// Serialize all components for spawn message, ignores dirty bits or sync time
         /// </summary>
-        /// <param name="comp"></param>
-        /// <param name="writer"></param>
-        /// <param name="initialState"></param>
-        /// <returns></returns>
-        /// <remarks>
-        /// paul: readstring bug prevention
-        /// <see cref="https://issuetracker.unity3d.com/issues/unet-networkwriter-dot-write-causing-readstring-slash-readbytes-out-of-range-errors-in-clients"/>
-        /// <list type="bullet">
-        ///     <item><description>
-        ///         OnSerialize writes componentData, barrier, componentData, barrier,componentData,...
-        ///     </description></item>
-        ///     <item><description>
-        ///         OnDeserialize carefully extracts each data, then deserializes the barrier and check it
-        ///     </description></item>
-        ///     <item><description>
-        ///         If we read too many or too few bytes,  the barrier is very unlikely to match
-        ///     </description></item>
-        ///     <item><description>
-        ///         We can properly track down errors
-        ///     </description></item>
-        /// </list>
-        /// </remarks>
-        private void OnSerialize(int i, NetworkBehaviour comp, NetworkWriter writer, bool initialState)
+        /// <param name="ownerWriter"></param>
+        /// <param name="observersWriter"></param>
+        internal (int ownerWritten, int observersWritten) OnSerializeInitial(NetworkWriter ownerWriter, NetworkWriter observersWriter)
         {
-            // write index as byte [0..255]
-            writer.WriteByte((byte)i);
-
-            comp.OnSerialize(writer, initialState);
-            if (logger.LogEnabled()) logger.Log($"OnSerializeSafely written for '{comp.name}', Component '{comp.GetType()}', SceneId {SceneId:X}");
-
-            // serialize a barrier to be checked by the deserializer
-            writer.WriteByte(BARRIER);
+            return OnSerialize(true, default, ownerWriter, observersWriter);
         }
 
         /// <summary>
-        /// serialize all components using dirtyComponentsMask
-        /// <para>check ownerWritten/observersWritten to know if anything was written</para>
-        /// <para>We pass dirtyComponentsMask into this function so that we can check if any Components are dirty before creating writers</para>
+        /// Serialize all components, checking dirty bits and time to sync
         /// </summary>
-        /// <param name="initialState"></param>
+        /// <param name="now"></param>
         /// <param name="ownerWriter"></param>
         /// <param name="observersWriter"></param>
-        internal (int ownerWritten, int observersWritten) OnSerializeAll(bool initialState, NetworkWriter ownerWriter, NetworkWriter observersWriter)
+        internal (int ownerWritten, int observersWritten) OnSerializeDelta(double now, NetworkWriter ownerWriter, NetworkWriter observersWriter)
+        {
+            return OnSerialize(false, now, ownerWriter, observersWriter);
+        }
+
+        private (int ownerWritten, int observersWritten) OnSerialize(bool initialState, double now, NetworkWriter ownerWriter, NetworkWriter observersWriter)
         {
             // how many times it written to (NOT BYTES)
             var ownerWritten = 0;
             var observersWritten = 0;
-
-
             var components = NetworkBehaviours;
-            // store time as variable so we dont have to call property for each component
-            var now = Time.timeAsDouble;
 
             // serialize all components
             for (var i = 0; i < components.Length; ++i)
@@ -786,6 +753,49 @@ namespace Mirage
 
             return (ownerWritten, observersWritten);
         }
+
+        // paul: readstring bug prevention: https://issuetracker.unity3d.com/issues/unet-networkwriter-dot-write-causing-readstring-slash-readbytes-out-of-range-errors-in-clients
+        // -> OnSerialize writes componentData, barrier, componentData, barrier,componentData,...
+        // -> OnDeserialize carefully extracts each data, then deserializes the barrier and check it
+        //    -> If we read too many or too few bytes,  the barrier is very unlikely to match
+        //    -> we can properly track down errors
+        /// <summary>
+        /// Serializes component and its lengths
+        /// </summary>
+        /// <param name="comp"></param>
+        /// <param name="writer"></param>
+        /// <param name="initialState"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// paul: readstring bug prevention
+        /// <see cref="https://issuetracker.unity3d.com/issues/unet-networkwriter-dot-write-causing-readstring-slash-readbytes-out-of-range-errors-in-clients"/>
+        /// <list type="bullet">
+        ///     <item><description>
+        ///         OnSerialize writes componentData, barrier, componentData, barrier,componentData,...
+        ///     </description></item>
+        ///     <item><description>
+        ///         OnDeserialize carefully extracts each data, then deserializes the barrier and check it
+        ///     </description></item>
+        ///     <item><description>
+        ///         If we read too many or too few bytes,  the barrier is very unlikely to match
+        ///     </description></item>
+        ///     <item><description>
+        ///         We can properly track down errors
+        ///     </description></item>
+        /// </list>
+        /// </remarks>
+        private void OnSerialize(int i, NetworkBehaviour comp, NetworkWriter writer, bool initialState)
+        {
+            // write index as byte [0..255]
+            writer.WriteByte((byte)i);
+
+            comp.OnSerialize(writer, initialState);
+            if (logger.LogEnabled()) logger.Log($"OnSerializeSafely written for '{comp.name}', Component '{comp.GetType()}', SceneId {SceneId:X}");
+
+            // serialize a barrier to be checked by the deserializer
+            writer.WriteByte(BARRIER);
+        }
+
 
         // Determines if there are changes in any component that have not
         // been synchronized yet. Probably due to not meeting the syncInterval
@@ -1196,11 +1206,8 @@ namespace Mirage
         /// <summary>
         /// Clears dirty bits and sets the next sync time on each Component 
         /// </summary>
-        internal void ClearShouldSync()
+        internal void ClearShouldSync(double now)
         {
-            // store time as variable so we dont have to call property for each component
-            var now = Time.timeAsDouble;
-
             foreach (var comp in NetworkBehaviours)
             {
                 comp.ClearShouldSync(now);

@@ -38,7 +38,7 @@ namespace Mirage.Tests.Runtime.Syncing
 
         private void SendSyncVars(NetworkIdentity target)
         {
-            var (ownerWritten, observersWritten) = target.OnSerializeAll(false, _ownerWriter, _observersWriter);
+            var (ownerWritten, observersWritten) = target.OnSerializeDelta(Time.unscaledTimeAsDouble, _ownerWriter, _observersWriter);
             Assert.That(ownerWritten, Is.GreaterThanOrEqualTo(1));
             Assert.That(observersWritten, Is.EqualTo(0));
             var msg = new UpdateVarsMessage

@@ -1,6 +1,5 @@
 using System;
 using Mirage.Serialization;
-using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -80,7 +79,7 @@ namespace Mirage.Tests.Runtime.Syncing
 
             // make sure it is time to sync
             serverComponent._nextSyncTime = Time.timeAsDouble;
-            serverIdentity.OnSerializeAll(true, ownerWriter, observersWriter);
+            serverIdentity.OnSerializeInitial(ownerWriter, observersWriter);
 
             // apply all the data from the server object
 

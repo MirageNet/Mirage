@@ -574,7 +574,7 @@ namespace Mirage
 
             // serialize all components with initialState = true
             // (can be null if has none)
-            identity.OnSerializeAll(true, ownerWriter, observersWriter);
+            identity.OnSerializeInitial(ownerWriter, observersWriter);
 
             return true;
         }
