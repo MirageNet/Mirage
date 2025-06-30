@@ -111,7 +111,7 @@ namespace Mirage
                     // (we serialized only the IsDirty() components, or all of
                     //  them if initialState. clearing the dirty ones is enough.)
                     // TODO move this inside OnSerializeAll
-                    identity.ClearShouldSyncDirtyOnly();
+                    identity.ClearShouldSyncDirtyOnly(now);
                 }
             }
         }

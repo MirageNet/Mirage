@@ -94,7 +94,7 @@ namespace Mirage.Tests.Runtime.Syncing
 
             // ClearDirtyComponents should do nothing since syncInterval is not
             // elapsed yet
-            player.Identity.ClearShouldSyncDirtyOnly();
+            player.Identity.ClearShouldSyncDirtyOnly(now);
 
             // set lastSyncTime far enough back to be ready for syncing
             player._nextSyncTime = now - 1f;

@@ -1220,11 +1220,8 @@ namespace Mirage
         /// Note: generally this is called after syncing to clear dirty bits of components we just synced
         /// </para>
         /// </summary>
-        internal void ClearShouldSyncDirtyOnly()
+        internal void ClearShouldSyncDirtyOnly(double now)
         {
-            // store time as variable so we dont have to call property for each component
-            var now = Time.timeAsDouble;
-
             foreach (var comp in NetworkBehaviours)
             {
                 // todo this seems weird, should we be clearing this somewhere else?
