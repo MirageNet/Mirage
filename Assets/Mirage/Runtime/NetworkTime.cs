@@ -44,6 +44,8 @@ namespace Mirage
         // returns the clock time _in this system_
         private double LocalTime() => _stopwatch.Elapsed.TotalSeconds;
 
+        private double Now => UnityEngine.Time.unscaledTimeAsDouble;
+
         public void Reset()
         {
             _rtt = new ExponentialMovingAverage(PingWindowSize);
@@ -54,7 +56,7 @@ namespace Mirage
 
         internal void UpdateClient(IMessageSender client)
         {
-            if (UnityEngine.Time.timeAsDouble - _lastPingTime >= PingInterval)
+            if (Now - _lastPingTime >= PingInterval)
             {
                 PingNow(client);
             }
@@ -71,7 +73,7 @@ namespace Mirage
                 ClientTime = LocalTime()
             };
             client.Send(pingMessage, Channel.Unreliable);
-            _lastPingTime = UnityEngine.Time.timeAsDouble;
+            _lastPingTime = Now;
         }
 
         // executed at the server when we receive a ping message
