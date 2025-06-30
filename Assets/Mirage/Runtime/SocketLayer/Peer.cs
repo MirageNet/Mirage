@@ -10,7 +10,7 @@ namespace Mirage.SocketLayer
     }
     internal class Time : ITime
     {
-        public double Now => UnityEngine.Time.timeAsDouble;
+        public double Now => UnityEngine.Time.unscaledTimeAsDouble;
     }
 
     public interface IPeer
