@@ -1,3 +1,12 @@
+## [151.3.3](https://github.com/MirageNet/Mirage/compare/v151.3.2...v151.3.3) (2025-06-30)
+
+
+### Bug Fixes
+
+* fixing desync issue caused by `ClearShouldSyncDirtyOnly` using wrong time ([321badc](https://github.com/MirageNet/Mirage/commit/321badc845b5e0f5035028930513e651631eec70))
+* fixing NetworkTime Ping not using unscaled time to check ([0dd327a](https://github.com/MirageNet/Mirage/commit/0dd327add09d133524a5b41d429f85c63dc9b5da))
+* fixing SocketLayer not using unscaled time ([137fd79](https://github.com/MirageNet/Mirage/commit/137fd798217a017919113ab4d2728ac82e99421f))
+
 ## [151.3.2](https://github.com/MirageNet/Mirage/compare/v151.3.1...v151.3.2) (2025-06-08)
 
 
