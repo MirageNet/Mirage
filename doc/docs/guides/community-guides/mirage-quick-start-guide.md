@@ -180,9 +180,7 @@ After we save the file, we go back into our `NetworkManager` GO, and assign the 
 
 ## Understanding Network Hud
 
-:::danger TODO
-From here: This guide was written for Mirror so some information might be out-of-date for Mirage
-:::
+For information on the Network Manager HUD, please refer to the [Network Manager HUD documentation](/docs/components/network-manager-hud).
 
 ## Names And Colours
 

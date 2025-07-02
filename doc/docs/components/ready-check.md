@@ -10,7 +10,7 @@ See the API reference for more details
 
 1. Attach the `LobbyReady` component to your network manager or other non-networked object.
 2. Attach the `ReadyCheck` component to your player's lobby object.
-3. Set the sync direction on `ReadyCheck` to `From Server and Owner`, `To Server`, `Owner`, and optionally `Observers`. This will allow the value to be set on the owner client as well as on the server to reset it when, like when `LobbyReady.SetAllClientsNotReady()` is called.
+3. Ensure the `ReadyCheck` component is configured to synchronize its `IsReady` state from the owner client to the server, and from the server to all observers. This is typically handled by the `SyncVar` attributes on the `IsReady` field within the `ReadyCheck` script, which ensures the value is set on the owner client and reset on the server when `LobbyReady.SetAllClientsNotReady()` is called.
 
 ### Usage
 
