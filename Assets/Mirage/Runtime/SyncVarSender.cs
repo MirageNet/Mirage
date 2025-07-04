@@ -102,16 +102,6 @@ namespace Mirage
                         varsMessage.Payload = observersWriter.ToArraySegment();
                         identity.SendToRemoteObservers(varsMessage, false);
                     }
-
-                    // clear dirty bits only for the components that we serialized
-                    // DO NOT clean ALL component's dirty bits, because
-                    // components can have different syncIntervals and we don't
-                    // want to reset dirty bits for the ones that were not
-                    // synced yet.
-                    // (we serialized only the IsDirty() components, or all of
-                    //  them if initialState. clearing the dirty ones is enough.)
-                    // TODO move this inside OnSerializeAll
-                    identity.ClearShouldSyncDirtyOnly(now);
                 }
             }
         }

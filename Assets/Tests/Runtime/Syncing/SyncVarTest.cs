@@ -82,6 +82,7 @@ namespace Mirage.Tests.Runtime.Syncing
         {
             var now = Time.unscaledTimeAsDouble;
             var player = CreateBehaviour<MockPlayer>();
+            serverObjectManager.Spawn(player.Identity);
             player._nextSyncTime = now + 1f;
             player.SyncSettings.Interval = 1f;
 
@@ -92,15 +93,21 @@ namespace Mirage.Tests.Runtime.Syncing
 
             Assert.That(player.ShouldSync(now), Is.False, "Sync interval not met, so not dirty yet");
 
-            // ClearDirtyComponents should do nothing since syncInterval is not
+            // on serialize should do nothing since syncInterval is not
             // elapsed yet
-            player.Identity.ClearShouldSyncDirtyOnly(now);
+            player.Identity.OnSerializeDelta(now, ownerWriter, observersWriter);
+
+            Assert.That(player.AnyDirtyBits(), Is.True, "Should still be dirty");
 
             // set lastSyncTime far enough back to be ready for syncing
             player._nextSyncTime = now - 1f;
 
             // should be dirty now
             Assert.That(player.ShouldSync(now), Is.True, "Sync interval met, should be dirty");
+
+            // after serializing, the dirty bit should be cleared
+            player.Identity.OnSerializeDelta(now, ownerWriter, observersWriter);
+            Assert.That(player.AnyDirtyBits(), Is.False, "Dirty bit should be cleared after sync");
         }
 
         [Test]

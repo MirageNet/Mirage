@@ -686,9 +686,15 @@ namespace Mirage
             var ownerWritten = 0;
             var observersWritten = 0;
             var components = NetworkBehaviours;
+            var componentCount = components.Length;
+
+            // Use a stack-allocated array to track the components that were serialized.
+            Span<bool> syncedComponents = stackalloc bool[componentCount];
+            // stackalloc doesn't guarantee that memory is zeroed, so we clear it first
+            syncedComponents.Clear();
 
             // serialize all components
-            for (var i = 0; i < components.Length; ++i)
+            for (var i = 0; i < componentCount; ++i)
             {
                 var comp = components[i];
 
@@ -714,6 +720,7 @@ namespace Mirage
 
                 if (logger.LogEnabled()) logger.Log($"OnSerializeAllSafely: '{name}', component '{comp.GetType()}', initial state: '{initialState}'");
 
+                syncedComponents[i] = true;
 
                 // if only observers, then just write directly to observersWriter
                 if (comp.SyncSettings.ToObserverWriterOnly(this))
@@ -747,6 +754,18 @@ namespace Mirage
                         var bitLength = ownerWriter.BitPosition - startBitPosition;
                         observersWriter.CopyFromWriter(ownerWriter, startBitPosition, bitLength);
                         observersWritten++;
+                    }
+                }
+            }
+
+            // clear dirty bits only for the components that we serialized
+            if (!initialState)
+            {
+                for (var i = 0; i < componentCount; i++)
+                {
+                    if (syncedComponents[i])
+                    {
+                        components[i].ClearShouldSync(now);
                     }
                 }
             }
@@ -1214,23 +1233,7 @@ namespace Mirage
             }
         }
 
-        /// <summary>
-        /// Clear dirty bits of Component only if it is after syncInterval
-        /// <para>
-        /// Note: generally this is called after syncing to clear dirty bits of components we just synced
-        /// </para>
-        /// </summary>
-        internal void ClearShouldSyncDirtyOnly(double now)
-        {
-            foreach (var comp in NetworkBehaviours)
-            {
-                // todo this seems weird, should we be clearing this somewhere else?
-                if (comp.TimeToSync(now))
-                {
-                    comp.ClearShouldSync(now);
-                }
-            }
-        }
+        
 
         private void ResetSyncObjects()
         {
