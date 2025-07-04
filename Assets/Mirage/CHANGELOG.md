@@ -1,3 +1,13 @@
+# [152.0.0](https://github.com/MirageNet/Mirage/compare/v151.3.3...v152.0.0) (2025-07-04)
+
+
+* build!: Drop Unity 2020.3 LTS support ([989a784](https://github.com/MirageNet/Mirage/commit/989a7842bced580d059345d389613bc56787d68a))
+
+
+### BREAKING CHANGES
+
+* Unity 2020.3 LTS is no longer supported due to end-of-life and incompatibility with recent fixes. The minimum supported version is now 2021.3 LTS.
+
 ## [151.3.3](https://github.com/MirageNet/Mirage/compare/v151.3.2...v151.3.3) (2025-06-30)
 
 
