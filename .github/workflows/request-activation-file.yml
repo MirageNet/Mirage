@@ -6,11 +6,11 @@ on:
       unity-version:
         description: 'What unityci container to use. Just need part after `ubuntu-`'     
         required: true
-        default: '2020.3.17f1-base-0.15.0'
+        default: '2021.3.30f1-base-3.0.0'
       license-file:
         description: 'Name of generated file, version expect -base...'     
         required: true
-        default: '2020.3.17f1'
+        default: '2021.3.30f1'
   
 jobs:
   requestActivationFile:

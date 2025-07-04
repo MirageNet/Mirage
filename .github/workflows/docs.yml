@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     # available list of containers here:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
-    container: unityci/editor:ubuntu-2021.3.5f1-base-3.0.0
+    container: unityci/editor:ubuntu-2021.3.30f1-base-3.0.0
 
     steps:
       - name: Activate unity
@@ -42,17 +42,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-2021.3.5
+          key: Library-2021.3.30
 
       - name: Generate Solution
         run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod GitTools.Solution.Sync -quit
-
-      # unity 2020.3 outputs <ReferenceOutputAssembly>false</ReferenceOutputAssembly> on linux
-      # this breaks references to other csproj for docfx and sonar.
-      # This step is a work around for this so docfx runs in correctly
-      # replacing false with true in ReferenceOutputAssembly
-      - name: Fix Csproj
-        run: sed -i 's/<ReferenceOutputAssembly>false<\/ReferenceOutputAssembly>/<ReferenceOutputAssembly>true<\/ReferenceOutputAssembly>/g' *.csproj
 
       - uses: nikeee/docfx-action@v1.0.0
         with:

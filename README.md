@@ -61,7 +61,7 @@ Mirage has some notable differences from its distant sister, Mirror. The table b
 | Methods use PascalCase (C# guidelines)              | No consistency                         |
 | `NetworkTime` available in `NetworkBehaviour`       | `NetworkTime` is global static         |
 | Send any data as messages                           | Messages must implement NetworkMessage |
-| Supports Unity 2020.3 LTS or later                  | Supports Unity 2020.3 LTS or later     |
+| Supports Unity 2021.3 LTS or later                  | Supports Unity 2021.3 LTS or later     |
 | Offers simple Socket API to implement new protocols | Each protocol requires a new transport |
 
 **Some notable features that Mirage has:**
@@ -94,7 +94,7 @@ If you want to contribute to Mirage, follow these steps:
     mkdir MirageNetworking
     git clone https://github.com/MirageNet/Mirage.git MirageNetworking
     ```
-3) Open the newly cloned repo in Unity 2020.3 LTS or later.
+3) Open the newly cloned repo in Unity 2021.3 LTS or later.
 
 ### Windows
 
@@ -108,7 +108,7 @@ If you want to contribute to Mirage, follow these steps:
     ```
     If you don't want to use administrator, [add symlink support](https://www.joshkel.com/2018/01/18/symlinks-in-windows/) to your account.
     If you don't enable symlinks, you will be able to work on Mirage but Unity will not see the examples.
-3) Open in Unity 2020.3 LTS or later and have fun!
+3) Open in Unity 2021.3 LTS or later and have fun!
 
 ## Transport and Sockets
 

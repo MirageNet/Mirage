@@ -16,17 +16,6 @@ on:
 # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
 
 jobs:
-  Tests2020:
-    # note: reuseable workflow is a job, not a step
-    name: Run Tests 2020
-    uses: ./.github/workflows/run-test.yml
-    secrets: 
-      unity_license: ${{ secrets.UNITY_LICENSE2 }}
-      access_token: ${{ secrets.GITHUB_TOKEN }}
-    with:
-      unity_container: unityci/editor:ubuntu-2020.3.30f1-base-3.0.0
-      cache_key: Library-2020.3.30
-      test_results_name: Test results 2020
 
   Tests2021:
     name: Run Tests 2021
@@ -35,8 +24,8 @@ jobs:
       unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
       access_token: ${{ secrets.GITHUB_TOKEN }}
     with:
-      unity_container: unityci/editor:ubuntu-2021.3.5f1-base-3.0.0
-      cache_key: Library-2021.3.5
+      unity_container: unityci/editor:ubuntu-2021.3.30f1-base-3.0.0
+      cache_key: Library-2021.3.30
       test_results_name: Test results 2021
 
   Tests2022:
@@ -47,8 +36,8 @@ jobs:
       unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
       access_token: ${{ secrets.GITHUB_TOKEN }}
     with:
-      unity_container: unityci/editor:ubuntu-2022.2.8f1-base-3.0.0
-      cache_key: Library-2022.2.8
+      unity_container: unityci/editor:ubuntu-2022.3.6f1-base-3.0.0
+      cache_key: Library-2022.3.6
       test_results_name: Test results 2022
   
   Tests6000:
@@ -59,14 +48,14 @@ jobs:
       unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
       access_token: ${{ secrets.GITHUB_TOKEN }}
     with:
-      unity_container: unityci/editor:ubuntu-6000.0.37f1-base-3.1.0
-      cache_key: Library-6000.0.37
+      unity_container: unityci/editor:ubuntu-6000.0.52f1-base-3.1.0
+      cache_key: Library-6000.0.52
       test_results_name: Test results 6000
 
   BuildIL2CPP:
     name: BuildIL2CPP
     runs-on: ubuntu-latest
-    container: unityci/editor:ubuntu-2022.2.8f1-linux-il2cpp-3.0.0
+    container: unityci/editor:ubuntu-2022.3.6f1-linux-il2cpp-3.0.0
     
     steps:
       - name: Activate unity
@@ -95,7 +84,7 @@ jobs:
 
   Publish:
     # only run once both tests and il2cpp have passed
-    needs: [Tests2020, Tests2021, Tests2022, Tests6000, BuildIL2CPP]
+    needs: [Tests2021, Tests2022, Tests6000, BuildIL2CPP]
     # only run on main
     if: github.ref == 'refs/heads/main'
     name: Publish
@@ -170,13 +159,6 @@ jobs:
       
       - name: Generate Solution
         run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
-      
-      # unity 2020.3 outputs <ReferenceOutputAssembly>false</ReferenceOutputAssembly> on linux
-      # this breaks references to other csproj for docfx and sonar.
-      # This step is a work around for this so docfx runs in correctly
-      # replacing false with true in ReferenceOutputAssembly
-      - name: Fix Csproj
-        run: sed -i 's/<ReferenceOutputAssembly>false<\/ReferenceOutputAssembly>/<ReferenceOutputAssembly>true<\/ReferenceOutputAssembly>/g' *.csproj
 
       - name: Get test coverages
         uses: actions/download-artifact@v4
