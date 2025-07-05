@@ -2,6 +2,12 @@
 
 The Network Animator component allows you to synchronize animation states for networked objects. It synchronizes state and parameters from an Animator Controller.
 
+:::danger
+
+NetworkAnimator is not optimized and should not be used in production. It is recommended to create your own animation synchronization solution.
+
+:::
+
 Note that if you create a Network Animator component on an empty game object, Mirage also creates a Network Identity component and an Animator component on that game object.
 
 ![The Network Animator component in the Inspector window](/img/components/NetworkAnimatorComponent.png)
@@ -14,7 +20,7 @@ Note that if you create a Network Animator component on an empty game object, Mi
 
 Normally, changes are sent to all observers of the object this component is on.  Setting **Sync Mode** to Owner Only makes the changes private between the server and the client owner of the object.
 
-You can use the **Sync Interval** to specify how often it syncs (in seconds).
+Synchronization is not performed on a fixed interval. Instead, the component will automatically synchronize when the animation state changes.
 
 ## Details
 
