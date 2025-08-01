@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Mirage.Logging;
@@ -56,8 +57,11 @@ namespace Mirage.Authentication
 
         private void ServerStopped()
         {
-            foreach (var pending in _pending.Values)
-                pending.SetResult(AuthenticationResult.CreateFail("Server Stopped"));
+            if (_pending.Count > 0)
+            {
+                foreach (var pending in _pending.Values.ToArray()) // ToArray because SetResult will remove from _pending
+                    pending.SetResult(AuthenticationResult.CreateFail("Server Stopped"));
+            }
             _pending.Clear();
             _hasSentAuth.Clear();
         }
