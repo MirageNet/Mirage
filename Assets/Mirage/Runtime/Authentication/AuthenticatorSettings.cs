@@ -134,8 +134,8 @@ namespace Mirage.Authentication
 
             try
             {
-                await pendingAuth.WaitWithTimeout(TimeoutSeconds);
-                Debug.Assert(pendingAuth.Complete, "WaitWithTimeout should only return after it is complete");
+                var result = await pendingAuth.WaitWithTimeout(TimeoutSeconds);
+                return result;
             }
             catch (Exception e)
             {
@@ -147,8 +147,6 @@ namespace Mirage.Authentication
                 pendingAuth.CancelSource.Cancel();
                 _pending.Remove(player);
             }
-
-            return pendingAuth.Result;
         }
 
         public CancellationToken GetCancellationToken(INetworkPlayer player)
@@ -185,46 +183,28 @@ namespace Mirage.Authentication
 
         public class PendingAuth
         {
-            public bool Complete;
-            public AuthenticationResult Result;
+            private readonly UniTaskCompletionSource<AuthenticationResult> _result = new UniTaskCompletionSource<AuthenticationResult>();
             public readonly CancellationTokenSource CancelSource = new CancellationTokenSource();
-
-            public bool CompleteOrCancelled => Complete || CancelSource.IsCancellationRequested;
 
             public void SetResult(AuthenticationResult result)
             {
-                if (Complete)
-                    return;
-
-                Complete = true;
-                Result = result;
+                _result.TrySetResult(result);
             }
 
-            public async UniTask WaitWithTimeout(float timeoutSecond)
+            public async UniTask<AuthenticationResult> WaitWithTimeout(float timeoutSecond)
             {
-                var endTime = Time.unscaledTimeAsDouble + timeoutSecond;
-                while (true)
-                {
-                    if (Complete)
-                        return;
+                // need cancel for when player disconnects
+                (var isCancelled, var (isTimeout, result)) = await _result.Task
+                    .TimeoutWithoutException(TimeSpan.FromSeconds(timeoutSecond), delayType: DelayType.UnscaledDeltaTime)
+                    .AttachExternalCancellation(CancelSource.Token).SuppressCancellationThrow();
 
-                    var now = Time.unscaledTimeAsDouble;
-                    if (now > endTime) // timeout
-                    {
-                        // note, we call CancelSource after this when removing player from pending dictionary
-                        SetResult(AuthenticationResult.CreateFail("Timeout"));
-                        return;
-                    }
+                if (isTimeout)
+                    return AuthenticationResult.CreateFail("Timeout");
 
-                    if (CancelSource.IsCancellationRequested)
-                    {
-                        if (!Complete) // set result if not already set
-                            SetResult(AuthenticationResult.CreateFail("Cancelled"));
-                        return;
-                    }
+                if (isCancelled)
+                    return AuthenticationResult.CreateFail("Cancelled");
 
-                    await UniTask.Yield();
-                }
+                return result;
             }
         }
     }
