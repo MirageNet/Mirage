@@ -1,3 +1,19 @@
+# [153.0.0](https://github.com/MirageNet/Mirage/compare/v152.0.0...v153.0.0) (2025-08-01)
+
+
+### Bug Fixes
+
+* changing back to UniTaskCompletionSource so task completes same a frame earlier ([3669a6d](https://github.com/MirageNet/Mirage/commit/3669a6d783d1b614407f37099d31197b8b8da587))
+* fixing pending dictionary changed in ServerStopped ([86df5ef](https://github.com/MirageNet/Mirage/commit/86df5ef1a0a897954a5c9b895e02bf2bf7f50d9a))
+
+
+* feat!: improving NetworkAuthenticator to include CancellationToken for AuthenticateAsync ([98ed8f1](https://github.com/MirageNet/Mirage/commit/98ed8f129389dc7a19d0a6bb613704e3b81f647a))
+
+
+### BREAKING CHANGES
+
+* AuthenticateAsync override now needs CancellationToken cancellationToken argument
+
 # [152.0.0](https://github.com/MirageNet/Mirage/compare/v151.3.3...v152.0.0) (2025-07-04)
 
 
