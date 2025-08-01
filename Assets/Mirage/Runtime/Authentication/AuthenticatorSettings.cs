@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using UnityEngine;
@@ -18,7 +19,7 @@ namespace Mirage.Authentication
         [Tooltip("List of Authenticators allowed, User can use any of them")]
         public List<NetworkAuthenticator> Authenticators = new List<NetworkAuthenticator>();
 
-        private readonly Dictionary<INetworkPlayer, UniTaskCompletionSource<AuthenticationResult>> _pending = new Dictionary<INetworkPlayer, UniTaskCompletionSource<AuthenticationResult>>();
+        private readonly Dictionary<INetworkPlayer, PendingAuth> _pending = new Dictionary<INetworkPlayer, PendingAuth>();
         /// <summary>Set to make sure player can't send 2 AuthMessage</summary>
         private readonly HashSet<INetworkPlayer> _hasSentAuth = new HashSet<INetworkPlayer>();
 
@@ -38,17 +39,27 @@ namespace Mirage.Authentication
             _authHandler = new MessageHandler(null, true, _server.RethrowException);
 
             server.Disconnected.AddListener(ServerDisconnected);
+            server.Stopped.AddListener(ServerStopped);
 
             foreach (var authenticator in Authenticators)
             {
                 // there might be a null entry, warn and skip to avoid an NRE.
-                if (authenticator == null) {
+                if (authenticator == null)
+                {
                     logger.LogWarning("Null/missing authenticator detected in Network Authenticator list!");
                     continue;
                 }
-                
-                authenticator.Setup(_authHandler, AfterAuth);
+
+                authenticator.Setup(this, _authHandler, AfterAuth);
             }
+        }
+
+        private void ServerStopped()
+        {
+            foreach (var pending in _pending.Values)
+                pending.SetResult(AuthenticationResult.CreateFail("Server Stopped"));
+            _pending.Clear();
+            _hasSentAuth.Clear();
         }
 
         private void HandleAuthMessage(INetworkPlayer player, AuthMessage authMessage)
@@ -70,9 +81,9 @@ namespace Mirage.Authentication
             _hasSentAuth.Remove(player);
 
             // if player is pending, then set their result to fail
-            if (_pending.TryGetValue(player, out var taskCompletion))
+            if (_pending.TryGetValue(player, out var pendingAuth))
             {
-                taskCompletion.TrySetResult(AuthenticationResult.CreateFail("Disconnected"));
+                pendingAuth.SetResult(AuthenticationResult.CreateFail("Disconnected"));
             }
         }
 
@@ -108,32 +119,23 @@ namespace Mirage.Authentication
 
         private async UniTask<AuthenticationResult> RunServerAuthenticate(INetworkPlayer player)
         {
-            UniTaskCompletionSource<AuthenticationResult> taskCompletion;
+            PendingAuth pendingAuth;
             // host player should be added by PreAddHostPlayer, so we just get item
             if (player == _server.LocalPlayer)
             {
-                taskCompletion = _pending[player];
+                pendingAuth = _pending[player];
             }
             // remote player should add new token here
             else
             {
-                taskCompletion = new UniTaskCompletionSource<AuthenticationResult>();
-                _pending.Add(player, taskCompletion);
+                pendingAuth = new PendingAuth();
+                _pending.Add(player, pendingAuth);
             }
-
 
             try
             {
-                // need cancel for when player disconnects
-                (var isTimeout, var result) = await taskCompletion.Task
-                    .TimeoutWithoutException(TimeSpan.FromSeconds(TimeoutSeconds), delayType: DelayType.UnscaledDeltaTime);
-
-                if (isTimeout)
-                {
-                    return AuthenticationResult.CreateFail("Timeout");
-                }
-
-                return result;
+                await pendingAuth.WaitWithTimeout(TimeoutSeconds);
+                Debug.Assert(pendingAuth.Complete, "WaitWithTimeout should only return after it is complete");
             }
             catch (Exception e)
             {
@@ -142,15 +144,26 @@ namespace Mirage.Authentication
             }
             finally
             {
+                pendingAuth.CancelSource.Cancel();
                 _pending.Remove(player);
             }
+
+            return pendingAuth.Result;
+        }
+
+        public CancellationToken GetCancellationToken(INetworkPlayer player)
+        {
+            if (_pending.TryGetValue(player, out var result))
+                return result.CancelSource.Token;
+            else
+                throw new ArgumentException("Can't get CancellationToken for player that is not pending");
         }
 
         internal void AfterAuth(INetworkPlayer player, AuthenticationResult result)
         {
-            if (_pending.TryGetValue(player, out var taskCompletion))
+            if (_pending.TryGetValue(player, out var pendingAuth))
             {
-                taskCompletion.TrySetResult(result);
+                pendingAuth.SetResult(result);
             }
             else
             {
@@ -167,8 +180,52 @@ namespace Mirage.Authentication
             // host player is a special case, they are added early
             // otherwise Client.Connected can't be used to send auth message
             // because that is called before RunServerAuthenticate is called.
-            var taskCompletion = new UniTaskCompletionSource<AuthenticationResult>();
-            _pending.Add(player, taskCompletion);
+            _pending.Add(player, new PendingAuth());
+        }
+
+        public class PendingAuth
+        {
+            public bool Complete;
+            public AuthenticationResult Result;
+            public readonly CancellationTokenSource CancelSource = new CancellationTokenSource();
+
+            public bool CompleteOrCancelled => Complete || CancelSource.IsCancellationRequested;
+
+            public void SetResult(AuthenticationResult result)
+            {
+                if (Complete)
+                    return;
+
+                Complete = true;
+                Result = result;
+            }
+
+            public async UniTask WaitWithTimeout(float timeoutSecond)
+            {
+                var endTime = Time.unscaledTimeAsDouble + timeoutSecond;
+                while (true)
+                {
+                    if (Complete)
+                        return;
+
+                    var now = Time.unscaledTimeAsDouble;
+                    if (now > endTime) // timeout
+                    {
+                        // note, we call CancelSource after this when removing player from pending dictionary
+                        SetResult(AuthenticationResult.CreateFail("Timeout"));
+                        return;
+                    }
+
+                    if (CancelSource.IsCancellationRequested)
+                    {
+                        if (!Complete) // set result if not already set
+                            SetResult(AuthenticationResult.CreateFail("Cancelled"));
+                        return;
+                    }
+
+                    await UniTask.Yield();
+                }
+            }
         }
     }
 }

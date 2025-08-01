@@ -43,18 +43,21 @@ namespace Mirage.Tests.Runtime.Authentication
         [Test]
         [TestCase(true)]
         [TestCase(false)]
-        public void AuthBaseInvokesCallbackAfterRecivingMessage(bool success)
+        public void AuthBaseInvokesCallbackAfterReceivingMessage(bool success)
         {
             var mockAuth = new MockAuthenticator();
             mockAuth.Success = success;
 
             var messageHandler = new MessageHandler(null, true);
             var calls = new List<(INetworkPlayer player, AuthenticationResult result)>();
-            mockAuth.Setup(messageHandler, (p, r) => calls.Add((p, r)));
+            mockAuth.Setup(_serverSettings, messageHandler, (p, r) => calls.Add((p, r)));
 
             Assert.That(calls.Count, Is.EqualTo(0));
 
             var mockPlayer = Substitute.For<INetworkPlayer>();
+            // add player so it is in pending list
+            var authTask = _serverSettings.ServerAuthenticate(mockPlayer);
+
             var bytes = MessagePacker.Pack(new MockAuthenticator.MockMessage { });
             messageHandler.HandleMessage(mockPlayer, new ArraySegment<byte>(bytes));
 

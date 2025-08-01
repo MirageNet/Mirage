@@ -151,6 +151,10 @@ namespace Mirage
         /// <para>This will be true after NetworkServer.Listen() has been called.</para>
         /// </summary>
         public bool Active { get; private set; }
+        /// <summary>
+        /// use new number each time we call StartServer, to make sure any async function works when calling Start/Stop in the same frame
+        /// </summary>
+        [NonSerialized] private int _startNumber;
 
         public NetworkWorld World { get; private set; }
         // todo move syncVarsender, it doesn't need to be a public fields on network server any more
@@ -249,6 +253,7 @@ namespace Mirage
             logger.Assert(_authenticatedPlayers.Count == 0, "Player should have been reset since previous session");
             logger.Assert(_connections.Count == 0, "Connections should have been reset since previous session");
 
+            _startNumber++;
             World = new NetworkWorld();
             SyncVarSender = new SyncVarSender();
 
@@ -386,7 +391,13 @@ namespace Mirage
 
         private async UniTaskVoid AuthenticateAsync(INetworkPlayer player)
         {
+            var startNumber = _startNumber;
             var result = await Authenticator.ServerAuthenticate(player);
+            if (!Active || startNumber != _startNumber) // server stopped (and/or started again) 
+            {
+                if (logger.WarnEnabled()) logger.LogWarning($"Server stopped while AuthenticateAsync was running, ignoring auth AuthenticationResult");
+                return;
+            }
 
             // process results
             if (result.Success)

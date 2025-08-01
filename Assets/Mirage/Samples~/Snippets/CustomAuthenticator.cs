@@ -1,3 +1,4 @@
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Mirage.Authentication;
 using UnityEngine;
@@ -27,7 +28,7 @@ namespace Mirage.Snippets.Authentication
     public class CustomAuthenticator : NetworkAuthenticator<CustomAuthMessage>
     {
         // CodeEmbed-End: authenticator-def
-        protected override async UniTask<AuthenticationResult> AuthenticateAsync(INetworkPlayer player, CustomAuthMessage msg)
+        protected override async UniTask<AuthenticationResult> AuthenticateAsync(INetworkPlayer player, CustomAuthMessage msg, CancellationToken cancellationToken)
         {
             // check user sent token, if they didn't then return fail
             if (string.IsNullOrEmpty(msg.token))

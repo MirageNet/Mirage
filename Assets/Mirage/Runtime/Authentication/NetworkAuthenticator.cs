@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Mirage.Serialization;
 using UnityEngine;
@@ -14,22 +15,25 @@ namespace Mirage.Authentication
     {
         public virtual string AuthenticatorName => GetType().Name;
 
-        internal abstract void Setup(MessageHandler messageHandler, Action<INetworkPlayer, AuthenticationResult> afterAuth);
+        internal abstract void Setup(AuthenticatorSettings settings, MessageHandler messageHandler, Action<INetworkPlayer, AuthenticationResult> afterAuth);
     }
 
     public abstract class NetworkAuthenticator<T> : NetworkAuthenticator, INetworkAuthenticator
     {
         private Action<INetworkPlayer, AuthenticationResult> _afterAuth;
+        private AuthenticatorSettings settings;
 
-        internal sealed override void Setup(MessageHandler messageHandler, Action<INetworkPlayer, AuthenticationResult> afterAuth)
+        internal sealed override void Setup(AuthenticatorSettings settings, MessageHandler messageHandler, Action<INetworkPlayer, AuthenticationResult> afterAuth)
         {
+            this.settings = settings;
             messageHandler.RegisterHandler<T>(HandleAuth, allowUnauthenticated: true);
             _afterAuth = afterAuth;
         }
 
         private async UniTaskVoid HandleAuth(INetworkPlayer player, T msg)
         {
-            var result = await AuthenticateAsync(player, msg);
+            var cancel = settings.GetCancellationToken(player);
+            var result = await AuthenticateAsync(player, msg, cancel);
             _afterAuth.Invoke(player, result);
         }
 
@@ -43,7 +47,7 @@ namespace Mirage.Authentication
         /// <param name="player">player that send message</param>
         /// <param name="message"></param>
         /// <returns></returns>
-        protected internal virtual UniTask<AuthenticationResult> AuthenticateAsync(INetworkPlayer player, T message)
+        protected internal virtual UniTask<AuthenticationResult> AuthenticateAsync(INetworkPlayer player, T message, CancellationToken cancellationToken)
         {
             return UniTask.FromResult(Authenticate(player, message));
         }
