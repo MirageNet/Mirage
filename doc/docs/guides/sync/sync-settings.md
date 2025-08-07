@@ -28,7 +28,7 @@ Invalid sync directions include:
 - Sync from both Owner and `Server` to Owner only
 
 :::note
-`ObserversOnly` excludes the `Owner`. In order too sync too owner the `Owner` Flag must be set.
+`ObserversOnly` excludes the `Owner`. In order to sync to owner the `Owner` Flag must be set.
 :::
 
 If syncing from both `Owner` and `Server` at the same time, there will be a race condition. If they both update a value at the same time, they will both send an update to the other side which will set the value and cause them to be out of sync. While this option is allowed, it is advised to only sync from either `Server` or `Owner`.
