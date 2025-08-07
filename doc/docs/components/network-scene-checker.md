@@ -1,5 +1,9 @@
 # Network Scene Checker
 
+:::danger
+This checker is inefficient, use `SimpleSceneChecker` instead.
+:::
+
 The Network Scene Checker component controls the visibility of game objects for network clients, based on which scene they're in.
 
 ![Network Scene Checker component](/img/components/NetworkSceneChecker.png)
