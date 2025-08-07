@@ -33,6 +33,11 @@ Invalid sync directions include:
 
 If syncing from both `Owner` and `Server` at the same time, there will be a race condition. If they both update a value at the same time, they will both send an update to the other side which will set the value and cause them to be out of sync. While this option is allowed, it is advised to only sync from either `Server` or `Owner`.
 
+:::info[Flags/Bitmasks]
+The `SyncFrom` and `SyncTo` fields are flag enums. This means you can combine multiple values. For example, in `SyncTo` you can select both `Owner` and `ObserversOnly` to send data to both. These enums work as bitmasks, so combining flags is done using a bitwise OR operation.
+
+It is important to understand how the `None` flag works. When you combine `None` with another flag, like `Owner`, the result is just `Owner`, the `None` flag is essentially ignored. Some UI might display the enum as `None | Owner`, but this simply means that only the `Owner` flag is active.
+:::
 
 ### When to use Server to Owner
 
