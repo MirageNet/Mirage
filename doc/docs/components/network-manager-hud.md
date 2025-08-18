@@ -1,14 +1,12 @@
 # Network Manager HUD
 
-The Network Manager HUD ("heads-up display") is a quick-start tool to help you start building your multiplayer game straight away, without first having to build a user interface for game creation/connection/joining. It allows you to jump straight into your gameplay programming and means you can build your own version of these controls later in your development schedule.
+The Network Manager HUD is a quick-start tool to help you start building your multiplayer game straight away, without first having to build a user interface for game creation/connection/joining. It allows you to jump straight into your gameplay programming and means you can build your own version of these controls later in your development schedule.
 
 It is not, however, intended to be included in finished games. The idea is that these controls are useful to get you started, but you should create your own UI later on, to allow your players to find and join games in a way that suits your game. For example, you might want to stylize the design of the screens, buttons, and list of available games to match the overall style of your game.
 
-<!-- TODO: This is now a canvas based prefab but currently only in the examples. -->
-
 ![The Network Manager HUD component, as viewed in the inspector](/img/components/NetworkManagerHUDComponent.png)
 
-The Network Manager HUD provides the basic functions so that people playing your game can start hosting a networked game, or find and join an existing networked game. Unity displays the Network Manager HUD as a collection of simple UI buttons in the Game view.
+The Network Manager HUD provides the basic functions so that people playing your game can start hosting a networked game, or find and join an existing networked game. The HUD is a Canvas-based UI prefab that you can add to your scene.
 
 ![The Network Manager HUD GUI, as viewed in the Game view](/img/components/NetworkManagerHUDUI.png)
 

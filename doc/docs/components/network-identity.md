@@ -2,11 +2,19 @@
 
 **See also [NetworkIdentity](/docs/reference/Mirage/NetworkIdentity) in the API Reference.**
  
-The Network Identity component is at the heart of the Unity networking high-level API. It controls a game object’s unique identity on the network, and it uses that identity to make the networking system aware of the game object. It offers two different options for configuration and they are mutually exclusive, which means either one of the options or none can be checked.
--   **Server Only**  
-    Tick this checkbox to ensure that Unity only spawns the game object on the server, and not on clients.
+The Network Identity component is at the heart of the Unity networking high-level API. It controls a game object’s unique identity on the network, and it uses that identity to make the networking system aware of the game object.
 
 ![Inspector](/img/components/NetworkIdentity.PNG)
+
+### Spawn Settings
+
+The `SpawnSettings` field on the `NetworkIdentity` component controls which properties of the object are synchronized when it is spawned. You can use these settings to control the initial state of the object on the clients.
+
+-   **Send Position:** Synchronizes the object's position.
+-   **Send Rotation:** Synchronizes the object's rotation.
+-   **Send Scale:** Synchronizes the object's scale.
+-   **Send Name:** Synchronizes the object's name.
+-   **Send Active:** Synchronizes the object's active state.
 
 ## Instantiated Network Game Objects
 

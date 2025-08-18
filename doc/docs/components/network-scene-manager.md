@@ -12,6 +12,8 @@ The Network Scene Manager component controls the Unity Scenes running over the n
     The event that fires before the server changes scenes.
 -   **Server Changed Scene**  
     The event that fires after the server changes scenes.
+-   **Player Scene Ready**
+    The event that fires on the server, after Client sends `SceneReadyMessage` to the server.
 
 The Network Scene Manager allows the user to change network scenes during runtime. There are three types of scene changes broadly supported by Mirage: Normal, Additive Load, and Additive Unload.
 
@@ -34,7 +36,14 @@ If the scene change involves network objects then it is strongly recommended to 
 To do a network scene change you initiate the process via the server NetworkSceneManager via:
 
 ```cs
-sceneManager.ChangeServerScene("Assets/GameScene.unity");
+// For normal scene changes
+sceneManager.ServerLoadSceneNormal("Assets/GameScene.unity");
+
+// For additive scene loading
+sceneManager.ServerLoadSceneAdditively("Assets/AdditiveScene.unity", players);
+
+// For additive scene unloading
+sceneManager.ServerUnloadSceneAdditively(scene, players);
 ```
 
 :::note
