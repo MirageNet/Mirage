@@ -12,11 +12,20 @@ namespace Mirage
     /// A High level network connection. This is used for connections from client-to-server and for connection from server-to-client.
     /// </summary>
     /// <remarks>
-    /// <para>A NetworkConnection corresponds to a specific connection for a host in the transport layer. It has a connectionId that is assigned by the transport layer and passed to the Initialize function.</para>
-    /// <para>A NetworkClient has one NetworkConnection. A NetworkServerSimple manages multiple NetworkConnections. The NetworkServer has multiple "remote" connections and a "local" connection for the local client.</para>
-    /// <para>The NetworkConnection class provides message sending and handling facilities. For sending data over a network, there are methods to send message objects, byte arrays, and NetworkWriter objects. To handle data arriving from the network, handler functions can be registered for message Ids, byte arrays can be processed by HandleBytes(), and NetworkReader object can be processed by HandleReader().</para>
-    /// <para>NetworkConnection objects also act as observers for networked objects. When a connection is an observer of a networked object with a NetworkIdentity, then the object will be visible to corresponding client for the connection, and incremental state changes will be sent to the client.</para>
-    /// <para>There are many virtual functions on NetworkConnection that allow its behaviour to be customized. NetworkClient and NetworkServer can both be made to instantiate custom classes derived from NetworkConnection by setting their networkConnectionClass member variable.</para>
+    /// <para>
+    /// A NetworkClient has one NetworkPlayer.
+    /// A NetworkServer manages multiple NetworkPlayers.
+    /// The NetworkServer has multiple "remote" connections and a "local" connection for the local client.
+    /// </para>
+    /// <para>
+    /// The NetworkPlayer class provides methods to send and handle network messages.
+    /// To send data, you can pass a message object to the <see cref="NetworkPlayer.Send{T}(T, Channel)"/> method, and Mirage will handle the serialization.
+    /// To handle incoming messages, you can register handlers for specific message types using <see cref="MessageHandler"/> found on <see cref="NetworkServer"/> or <see cref="NetworkClient"/>
+    /// </para>
+    /// <para>
+    /// NetworkPlayer objects also act as observers for networked objects.
+    /// When a connection is an observer of a networked object with a NetworkIdentity, then the object will be visible to corresponding client for the connection, and incremental state changes will be sent to the client.
+    /// </para>
     /// </remarks>
     public sealed class NetworkPlayer : INetworkPlayer
     {
@@ -27,11 +36,6 @@ namespace Mirage
         /// <summary>
         /// Transport level connection
         /// </summary>
-        /// <remarks>
-        /// <para>On a server, this Id is unique for every connection on the server. On a client this Id is local to the client, it is not the same as the Id on the server for this connection.</para>
-        /// <para>Transport layers connections begin at one. So on a client with a single connection to a server, the connectionId of that connection will be one. In NetworkServer, the connectionId of the local connection is zero.</para>
-        /// <para>Clients do not know their connectionId on the server, and do not know the connectionId of other clients on the server.</para>
-        /// </remarks>
         private readonly IConnection _connection;
 
         public bool IsHost { get; }
@@ -71,9 +75,22 @@ namespace Mirage
 
         /// <summary>
         /// Flag that tells us if the scene has fully loaded in for player.
-        /// <para>This property is read-only. It is set by the system on the client when the scene has fully loaded, and set by the system on the server when a ready message is received from a client.</para>
-        /// <para>A client that is ready is sent spawned objects by the server and updates to the state of spawned objects. A client that is not ready is not sent spawned objects.</para>
-        /// <para>Starts as true, when a client connects it is assumed that it is already in a ready scene. It will be set to not ready if NetworkSceneManager loads a scene</para>
+        /// <para>
+        /// A client that is ready is sent spawned objects by the server and updates to the state of spawned objects. A client that is not ready is not sent spawned objects.
+        /// </para>
+        /// <para>
+        /// Starts as true, when a client connects it is assumed that it is already in a ready scene.
+        /// </para>
+        /// <para>
+        /// It will be set to not ready if NetworkSceneManager loads a scene.
+        /// If you are controlling scene loading manually, you need to set this property to true or false before and after loading a scene.
+        /// This is normally done using <see cref="SceneReadyMessage"/> and <see cref="SceneNotReadyMessage"/>
+        /// </para>
+        /// <para>
+        /// On the client, this property is used to keep track of if the local scene is loading or ready.
+        /// On the server, it is used to track if the player's scene is loading or ready.
+        /// When server loads a new scene for everyone, it will normally set this property to false for all players.
+        /// </para>
         /// </summary>
         public bool SceneIsReady { get; set; } = true;
 
@@ -105,6 +122,13 @@ namespace Mirage
         /// </summary>
         public IReadOnlyCollection<NetworkIdentity> VisList => _visList;
 
+        /// <summary>
+        /// A list of the NetworkIdentity objects owned by this connection. This list is read-only.
+        /// <para>Only valid on server</para>
+        /// <para>This includes the player's character</para>
+        /// <para>This list can be used to validate messages from clients, to ensure that clients are only trying to control objects that they own.</para>
+        /// <para>Objects in the list will also have their <see cref="NetworkIdentity.Owner"/> field set to this NetworkPlayer</para>
+        /// </summary>
         public IReadOnlyCollection<NetworkIdentity> OwnedObjects => _ownedObjects;
 
         /// <summary>
@@ -171,19 +195,14 @@ namespace Mirage
             }
         }
 
-        /// <summary>
-        /// A list of the NetworkIdentity objects owned by this connection. This list is read-only.
-        /// <para>This includes the player object for the connection - if it has localPlayerAuthority set, and any objects spawned with local authority or set with AssignLocalAuthority.</para>
-        /// <para>This list can be used to validate messages from clients, to ensure that clients are only trying to control objects that they own.</para>
-        /// </summary>
-        // IMPORTANT: this needs to be <NetworkIdentity>, not <uint netId>. fixes a bug where DestroyOwnedObjects wouldn't find
-        //            the netId anymore: https://github.com/vis2k/Mirror/issues/1380 . Works fine with NetworkIdentity pointers though.
+        /// <summary>backing field for <see cref="OwnedObjects"/></summary>
         private readonly HashSet<NetworkIdentity> _ownedObjects = new HashSet<NetworkIdentity>();
 
         /// <summary>
-        /// Creates a new NetworkConnection with the specified address and connectionId
+        /// Creates a new NetworkPlayer
         /// </summary>
-        /// <param name="networkConnectionId"></param>
+        /// <param name="connection">Transport level connection for this player</param>
+        /// <param name="isHost">True if this player is the host player</param>
         public NetworkPlayer(IConnection connection, bool isHost)
         {
             _connection = connection ?? throw new ArgumentNullException(nameof(connection));
@@ -196,7 +215,6 @@ namespace Mirage
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="msg">The message to send.</param>
         /// <param name="channelId">The transport layer channel to send on.</param>
-        /// <returns></returns>
         public void Send<T>(T message, Channel channelId = Channel.Reliable)
         {
             if (_isDisconnected) { return; }
@@ -214,7 +232,11 @@ namespace Mirage
 
         /// <summary>
         /// Sends a block of data
-        /// <para>Only use this method if data has message Id already included, otherwise receives wont know how to handle it. Otherwise use <see cref="Send{T}(T, int)"/></para>
+        /// <para>
+        /// This is a low-level method to send a raw bytes.
+        /// Only use this method if you have manually included the message id and serialized the payload.
+        /// Otherwise, receivers will not know how to handle it.
+        /// It is recommended to use <see cref="Send{T}(T, Channel)"/> instead.</para>
         /// </summary>
         /// <param name="segment"></param>
         /// <param name="channelId"></param>
@@ -252,7 +274,6 @@ namespace Mirage
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="msg">The message to send.</param>
         /// <param name="channelId">The transport layer channel to send on.</param>
-        /// <returns></returns>
         public void Send<T>(T message, INotifyCallBack callBacks)
         {
             if (_isDisconnected) { return; }
@@ -303,7 +324,6 @@ namespace Mirage
         /// Checks if player can see NetworkIdentity
         /// </summary>
         /// <param name="identity"></param>
-        /// <returns></returns>
         public bool ContainsInVisList(NetworkIdentity identity)
         {
             return _visList.Contains(identity);
