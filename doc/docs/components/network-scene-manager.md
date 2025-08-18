@@ -1,3 +1,6 @@
+---
+sidebar_position: 7
+---
 # Network Scene Manager
 
 The Network Scene Manager component controls the Unity Scenes running over the network.

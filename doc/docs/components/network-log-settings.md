@@ -1,3 +1,6 @@
+---
+sidebar_position: 15
+---
 # Network Log Settings
 
 Mirage's logging system provides granular control over log levels for different parts of your game, allowing you to easily manage the verbosity of messages from various Mirage components and your own custom code.

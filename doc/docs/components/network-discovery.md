@@ -1,3 +1,6 @@
+---
+sidebar_position: 13
+---
 # Network Discovery
 
 :::info[External Repository]

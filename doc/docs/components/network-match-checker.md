@@ -1,3 +1,6 @@
+---
+sidebar_position: 6
+---
 # Network Match Checker
 
 The Network Match Checker component controls the visibility of networked objects based on match id.

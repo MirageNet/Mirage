@@ -1,3 +1,6 @@
+---
+sidebar_position: 2
+---
 # Network Identity
 
 **See also [NetworkIdentity](/docs/reference/Mirage/NetworkIdentity) in the API Reference.**

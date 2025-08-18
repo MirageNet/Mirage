@@ -1,3 +1,6 @@
+---
+sidebar_position: 10
+---
 # Network Transform Child
 
 :::danger

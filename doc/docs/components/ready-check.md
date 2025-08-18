@@ -1,3 +1,6 @@
+---
+sidebar_position: 14
+---
 # Ready Check and Lobby Ready
 
 :::info

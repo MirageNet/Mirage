@@ -1,3 +1,6 @@
+---
+sidebar_position: 4
+---
 # Scene Visibility Checkers
 
 :::info

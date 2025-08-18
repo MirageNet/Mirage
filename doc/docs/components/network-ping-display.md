@@ -1,3 +1,6 @@
+---
+sidebar_position: 12
+---
 # Network Ping Display
 
 Network Ping Display shows the ping time for clients using a UI Text component.

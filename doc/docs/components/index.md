@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # Overview
 
 These core components are included in Mirage:

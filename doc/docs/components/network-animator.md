@@ -1,3 +1,6 @@
+---
+sidebar_position: 8
+---
 # Network Animator
 
 The Network Animator component allows you to synchronize animation states for networked objects. It synchronizes state and parameters from an Animator Controller.

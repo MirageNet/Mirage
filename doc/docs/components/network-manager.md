@@ -1,3 +1,6 @@
+---
+sidebar_position: 3
+---
 # Network Manager
 
 NetworkManager is a helper class with instance references to the other major parts of the Mirage network.
