@@ -3,7 +3,7 @@ sidebar_position: 2
 ---
 # Authenticator Settings
 
-Add `AuthenticatorSettings` to your `NetworkManager` and assign a reference to `NetworkServer` and `NetworkClient`.
+Add `AuthenticatorSettings` to your `NetworkManager`. The `NetworkManager` will automatically assign references to `NetworkServer` and `NetworkClient` if its `ValidateReferences` field is set to true.
 
 AuthenticatorSettings allows you to configure the timeout duration and specify which authenticators are available.
 

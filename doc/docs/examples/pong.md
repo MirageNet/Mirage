@@ -2,8 +2,8 @@
 
 A simple example of "How to build a multiplayer game with Mirage" is Pong,
 which is included in the AssetStore package of Mirage. It illustrates the usage
-of NetworkManager, NetworkManagerHUD, NetworkBehaviour, NetworkIdentity,
-NetworkTransform, NetworkStartPosition, and NetworkingAttributes.
+of NetworkManager, NetworkManagerHud, NetworkBehaviour, NetworkIdentity,
+NetworkTransform, and NetworkingAttributes.
 
 ![Pong](/img/examples/pong/Pong1.jpg)
 
@@ -22,27 +22,22 @@ online or offline scene) in this sample the properties for **Offline Scene** and
 Furthermore, every player needs a racket to play with. Each player who joins the
 game will have his own controllable object, which represents him within the
 game. This game object is called *PlayerObject*. For spawning the *PlayerObject*
-a prefab has to be created, containing at least a NetworkIdentity component with
-**Local Player Authority** checked. The **Local Player Authority** allows the
-player to control and modify the game objects properties (e.g. for movement). The
-NetworkManager needs a reference to this prefab, which is located in **Spawn
-Info/Player Prefab**. To have the player movement synchronized over the network,
-the player prefab also contains a NetworkTransform.
+a prefab has to be created, containing at least a NetworkIdentity component.
+The player's ability to control and modify the game object's properties (e.g., for movement) is determined by the `HasAuthority` property on the `NetworkIdentity` and the `ClientAuthority` setting on the `NetworkTransform` component.
+The NetworkManager needs a reference to this prefab, which is located in **Spawn Info/Player Prefab**. To have the player movement synchronized over the network, the player prefab also contains a NetworkTransform.
 
 ![NetworkManagerSettings](/img/examples/pong/Pong2.jpg)
 
 ## Player start position
 
-The main scene contains 2 game objects with only a NetworkStartPosition component
-(game objects RacketSpawnLeft, RacketSpawnRight in the scene). These transforms
-will be automatically registered by the NetworkManager as spawning positions.
+The main scene contains 2 game objects that serve as spawn points for players. These transforms are manually registered with the NetworkManager as available spawning positions.
 
 ![NetworkStartPositions](/img/examples/pong/Pong3.jpg)
 
 ## Setting up the network
 
 A very convenient component for establishing/testing connections is the
-NetworkManagerHUD. It provides basic functionality for starting a game as
+NetworkManagerHud. It provides basic functionality for starting a game as
 a Client, Server, or Host (Client and Server at the same time). It
 requires the NetworkManager component.
 
@@ -51,8 +46,7 @@ requires the NetworkManager component.
 ## The ball of Pong
 
 The ball is the main focus of Pong, as this is the object needed to score
-points. Its NetworkIdentity component has neither **Server Only** nor **Local
-Player Authority** checked, as it's moved by the server physics engine and can
+points. Its NetworkIdentity component has neither **Server Only** nor **Client Authority** checked, as it's moved by the server physics engine and can
 be influenced by the players. As with the *PlayerObject* the position is
 synchronized via NetworkTransform. When having multiple scenes, the ball can be
 spawned by the NetworkManager, but to keep this sample simple, it's placed

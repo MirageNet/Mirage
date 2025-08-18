@@ -9,7 +9,7 @@ states and reliability. Peer then uses the low-level sockets API to send and rec
 Check [this section](#implementing-new-socket) below to see how to implement your own socket.
 
 ## Available sockets
-The table below shows a list of available sockets and their features.
+The table below shows a list of commonly used sockets and their features. Please note that not all of these may be included directly with the Mirage package; some might require separate installation.
 
 | | UDP (built-in) | Steam ([Steamworks.NET](https://github.com/MirageNet/FizzySteamyMirror), [Facepunch](https://github.com/MirageNet/SteamyFaceNG)) | [Websocket](https://github.com/James-Frowen/SimpleWebSocket)            | 
 | - | :-: | :-: | :-: |

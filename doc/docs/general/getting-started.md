@@ -139,7 +139,7 @@ See [Remote Actions](/docs/guides/remote-actions/).
 Fix non-player prefabs such as enemies:
 -   Add the `NetworkIdentify` component
 -   Add the correct component needed to sync movement as the state above with player movement.
--   Once all objects have a network identity. Find ClientObjectManager under the `NetworkManager` game object in the scene and hit register prefabs.
+-   Once all objects have a Network Identity, ensure they are registered with the `ClientObjectManager`. You can typically do this by selecting the `NetworkManager` GameObject in your scene and using the `ClientObjectManager` component's "Register Prefabs" button, or by manually registering them via code.
 -   Update scripts with game state and actions
 
 ## Spawners
