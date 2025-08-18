@@ -2,4 +2,4 @@
 title: Change Log
 ---
 
-This is a placeholder. The actual changelog is located at the root of the project: [CHANGELOG.md](/CHANGELOG.md)
+This is a placeholder replaced when docs are built. The actual changelog is located at the root of the project.
