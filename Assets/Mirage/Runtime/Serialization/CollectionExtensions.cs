@@ -206,6 +206,13 @@ namespace Mirage.Serialization
         }
 
 #if UNITY_2021_3_OR_NEWER
+        /// <summary>
+        /// Reads a span from the reader.
+        /// <para>NOTE: this method allocates a new array internally to hold the data.</para>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="reader"></param>
+        /// <returns>A span pointing to a new array with the read data.</returns>
         [WeaverSerializeCollection]
         public static Span<T> ReadSpan<T>(this NetworkReader reader)
         {
@@ -223,9 +230,105 @@ namespace Mirage.Serialization
         public static ReadOnlySpan<T> ReadReadOnlySpan<T>(this NetworkReader reader) => ReadSpan<T>(reader);
 #endif
 
+        /// <summary>
+        /// Reads a list from the reader into a provided list so that no new list is allocated.
+        /// <para>This will clear the list before adding the new items.</para>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="reader"></param>
+        /// <param name="list">List to be populated with data. Can not be null.</param>
+        /// <param name="wasNull">true if the list was null on the wire</param>
+        public static void ReadListNonAlloc<T>(this NetworkReader reader, List<T> outList, out bool wasNull)
+        {
+            if (outList is null)
+                throw new ArgumentNullException(nameof(outList));
+
+            outList.Clear();
+
+            wasNull = !ReadCountPlusOne(reader, out var length);
+            if (wasNull)
+                return;
+
+            ValidateSize(reader, length);
+            for (var i = 0; i < length; i++)
+                outList.Add(reader.Read<T>());
+        }
+
+        /// <summary>
+        /// Reads a dictionary from the reader into a provided dictionary so that no new dictionary is allocated.
+        /// <para>This will clear the dictionary before adding the new items.</para>
+        /// </summary>
+        public static void ReadDictionaryNonAlloc<TKey, TValue>(this NetworkReader reader, Dictionary<TKey, TValue> outDictionary, out bool wasNull)
+        {
+            if (outDictionary is null)
+                throw new ArgumentNullException(nameof(outDictionary));
+
+            outDictionary.Clear();
+
+            wasNull = !ReadCountPlusOne(reader, out var length);
+            if (wasNull)
+                return;
+
+            ValidateSize(reader, length);
+            for (var i = 0; i < length; i++)
+            {
+                var key = reader.Read<TKey>();
+                var value = reader.Read<TValue>();
+                outDictionary[key] = value;
+            }
+        }
+
+        /// <summary>
+        /// Reads an array from the reader into a provided array so that no new array is allocated.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="reader"></param>
+        /// <param name="outArray">Array to be populated with data. Must be large enough to hold all elements.</param>
+        /// <returns>The number of elements read, or null if the array was null when sent</returns>
+        public static int? ReadArrayNonAlloc<T>(this NetworkReader reader, T[] outArray)
+        {
+            if (outArray is null)
+                throw new ArgumentNullException(nameof(outArray));
+
+            var wasNull = !ReadCountPlusOne(reader, out var length);
+            if (wasNull)
+                return null;
+
+            ValidateSize(reader, length);
+
+            if (outArray.Length < length)
+                throw new ArgumentException($"Provided array is too small. Need {length}, but has {outArray.Length}", nameof(outArray));
+
+            for (var i = 0; i < length; i++)
+                outArray[i] = reader.Read<T>();
+            return length;
+        }
+
+#if UNITY_2021_3_OR_NEWER
+        /// <summary>
+        /// Reads a span from the reader into a provided span so that no new array is allocated.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="reader"></param>
+        /// <param name="outSpan">Span to be populated with data. Must be large enough to hold all elements.</param>
+        /// <returns>The number of elements read.</returns>
+        public static int ReadSpanNonAlloc<T>(this NetworkReader reader, Span<T> outSpan)
+        {
+            var length = checked((int)reader.ReadPackedUInt32());
+            ValidateSize(reader, length);
+
+            if (outSpan.Length < length)
+                throw new ArgumentException($"Provided array is too small. Need {length}, but has {outSpan.Length}", nameof(outSpan));
+
+            for (var i = 0; i < length; i++)
+                outSpan[i] = reader.Read<T>();
+            return length;
+        }
+#endif
+
         /// <summary>Writes null as 0, and all over values as +1</summary>
         /// <param name="count">The real count or null if collection is is null</param>
-        internal static void WriteCountPlusOne(NetworkWriter writer, int? count)
+        public static void WriteCountPlusOne(NetworkWriter writer, int? count)
         {
             // null is supported
             // write 0 for null array, increment normal size by 1 to save bandwith
@@ -243,7 +346,7 @@ namespace Mirage.Serialization
         /// <summary>Reads 0 as null, and all over values as -1</summary>
         /// <param name="count">The real count of the </param>
         /// <returns>true if collection has value, false if collection is null</returns>
-        internal static bool ReadCountPlusOne(NetworkReader reader, out int count)
+        public static bool ReadCountPlusOne(NetworkReader reader, out int count)
         {
             // count = 0 means the array was null
             // otherwise count -1 is the length of the array
@@ -260,7 +363,7 @@ namespace Mirage.Serialization
         /// </summary>
         /// <param name="reader"></param>
         /// <param name="lengthInBits"></param>
-        internal static void ValidateSize(NetworkReader reader, int lengthInBits)
+        public static void ValidateSize(NetworkReader reader, int lengthInBits)
         {
             // T might be only 1 bit long, so we have to check vs bit length
             // todo have weaver calculate minimum size for T, so we can use it here instead of 1 bit
