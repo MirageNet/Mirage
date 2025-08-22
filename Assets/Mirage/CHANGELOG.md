@@ -1,3 +1,10 @@
+# [153.1.0](https://github.com/MirageNet/Mirage/compare/v153.0.0...v153.1.0) (2025-08-22)
+
+
+### Features
+
+* adding NonAlloc read methods for collections ([535b347](https://github.com/MirageNet/Mirage/commit/535b3472325b5c1f16f73c9a135519b57d35b058))
+
 # [153.0.0](https://github.com/MirageNet/Mirage/compare/v152.0.0...v153.0.0) (2025-08-01)
 
 
