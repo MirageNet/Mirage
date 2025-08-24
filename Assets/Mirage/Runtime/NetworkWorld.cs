@@ -28,6 +28,7 @@ namespace Mirage
 
         /// <summary>
         /// Raised when object is unspawned or destroyed
+        /// <para><b>WARNING:</b> onUnspawn might be called after Identity has been destroyed by unity</para>
         /// </summary>
         public event Action<NetworkIdentity> onUnspawn;
 
@@ -117,7 +118,7 @@ namespace Mirage
                 if (identity == null)
                 {
                     if (logger.LogEnabled()) logger.Log($"Removing destroyed object:[netId={identity.NetId}]");
-                    _spawnedObjects.Remove(identity.NetId);
+                    RemoveIdentity(identity);
                 }
             }
         }
