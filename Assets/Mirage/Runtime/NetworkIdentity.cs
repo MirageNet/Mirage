@@ -1233,7 +1233,7 @@ namespace Mirage
             }
         }
 
-        
+
 
         private void ResetSyncObjects()
         {
@@ -1245,7 +1245,10 @@ namespace Mirage
 
         public override string ToString()
         {
-            return $"Identity[{NetId}, {name}]";
+            if (this != null) // unity null
+                return $"Identity[{NetId}, {name}]";
+            else
+                return $"Identity[{NetId}, \"NULL\"]";
         }
 
 
