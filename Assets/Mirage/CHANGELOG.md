@@ -1,3 +1,12 @@
+## [153.2.1](https://github.com/MirageNet/Mirage/compare/v153.2.0...v153.2.1) (2025-08-24)
+
+
+### Bug Fixes
+
+* calling RemoveDestroyedObjects when PrepareToSpawnSceneObjects is called ([8750260](https://github.com/MirageNet/Mirage/commit/875026072ca023a50af0e1c7d34fbd979d2dc271))
+* checking world is empty after ObjectManagers unspawn all identities ([73e0153](https://github.com/MirageNet/Mirage/commit/73e015378eec9ca7fc15794cdea476c98c7a78c8))
+* fixing onUnspawn not called if client object was destroyed ([637c6d0](https://github.com/MirageNet/Mirage/commit/637c6d0e31f46f70b84a8d179f32f34257acc8ae))
+
 # [153.2.0](https://github.com/MirageNet/Mirage/compare/v153.1.0...v153.2.0) (2025-08-24)
 
 
