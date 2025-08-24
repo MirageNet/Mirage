@@ -182,6 +182,10 @@ namespace Mirage
         /// </summary>
         public void PrepareToSpawnSceneObjects()
         {
+            // clear up old scene,
+            // we can just assume PrepareToSpawnSceneObjects is called after loading scene and call remove here
+            Client.World?.RemoveDestroyedObjects();
+
             // add all unspawned NetworkIdentities to spawnable objects
             spawnableObjects.Clear();
             var sceneObjects =

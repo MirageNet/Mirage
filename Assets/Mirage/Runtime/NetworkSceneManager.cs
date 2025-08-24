@@ -285,7 +285,6 @@ namespace Mirage
                 SetSceneIsReady();
 
             //Call event once all scene related actions (sub-scenes and ready) are done.
-            Client.World.RemoveDestroyedObjects();
             ClientObjectManager.PrepareToSpawnSceneObjects();
             OnClientFinishedSceneChange?.Invoke(scene, sceneOperation);
         }
