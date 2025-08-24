@@ -67,6 +67,7 @@ namespace Mirage
                 DestroyObject(obj, !obj.IsSceneObject);
             }
 
+            Debug.Assert(_server.World.SpawnedIdentities.Count == 0, "All Identities should have been removed by DestroyObject above");
             _server.World.ClearSpawnedObjects();
             // reset so ids stay small in each session
             _nextNetworkId = 1;
@@ -631,7 +632,7 @@ namespace Mirage
         {
             if (identity.NetId == 0)
             {
-                if (logger.WarnEnabled()) logger.LogWarning("DestroyObject instance:" + identity.NetId);
+                if (logger.WarnEnabled()) logger.LogWarning($"DestroyObject was given identity without an id {identity}");
                 return;
             }
 

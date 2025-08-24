@@ -526,11 +526,20 @@ namespace Mirage
 
             foreach (var identity in all)
             {
+                // check if destroyed
                 if (identity != null && identity.gameObject != null)
                 {
+                    // if not destoryed, do null unspawn with callbacks
                     UnSpawn(identity);
                 }
+                else
+                {
+                    // if destroyed, we just want to remove it from the dictionary
+                    _client.World.RemoveIdentity(identity);
+                }
             }
+
+            Debug.Assert(_client.World.SpawnedIdentities.Count == 0, "All Identities should have been removed by UnSpawn above");
             _client.World.ClearSpawnedObjects();
         }
 
