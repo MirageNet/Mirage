@@ -1,3 +1,10 @@
+# [153.2.0](https://github.com/MirageNet/Mirage/compare/v153.1.0...v153.2.0) (2025-08-24)
+
+
+### Features
+
+* making NetworkWorld.RemoveDestroyedObjects public ([a1beda3](https://github.com/MirageNet/Mirage/commit/a1beda3cf375d84d196ce00fcedc0fb70a2a10df))
+
 # [153.1.0](https://github.com/MirageNet/Mirage/compare/v153.0.0...v153.1.0) (2025-08-22)
 
 
