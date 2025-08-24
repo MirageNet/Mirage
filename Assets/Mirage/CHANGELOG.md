@@ -1,3 +1,10 @@
+## [153.2.2](https://github.com/MirageNet/Mirage/compare/v153.2.1...v153.2.2) (2025-08-24)
+
+
+### Bug Fixes
+
+* fixing throw in NetworkIdentity.ToString ([585ae30](https://github.com/MirageNet/Mirage/commit/585ae305e68cd68a8881909a72beebe9166a490c))
+
 ## [153.2.1](https://github.com/MirageNet/Mirage/compare/v153.2.0...v153.2.1) (2025-08-24)
 
 
