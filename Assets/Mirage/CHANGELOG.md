@@ -1,3 +1,10 @@
+## [153.2.4](https://github.com/MirageNet/Mirage/compare/v153.2.3...v153.2.4) (2025-08-27)
+
+
+### Bug Fixes
+
+* ensuring that SpawnVisibleObjects spawns NetworkIdentity in netId order ([de7a657](https://github.com/MirageNet/Mirage/commit/de7a657e0a65f34e785343201ada72a8aa651edb))
+
 ## [153.2.3](https://github.com/MirageNet/Mirage/compare/v153.2.2...v153.2.3) (2025-08-27)
 
 
