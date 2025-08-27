@@ -48,6 +48,30 @@ namespace Mirage
         private readonly Dictionary<uint, NetworkIdentity> _spawnedObjects = new Dictionary<uint, NetworkIdentity>();
         public IReadOnlyCollection<NetworkIdentity> SpawnedIdentities => _spawnedObjects.Values;
 
+        private readonly List<NetworkIdentity> _sortedIdentities = new List<NetworkIdentity>();
+        private bool _needsSorting = true;
+
+        /// <summary>
+        /// A list of spawned identities, sorted by netId.
+        /// <para>This list is cached and will only be re-sorted if identities have changed</para>
+        /// </summary>
+        public IReadOnlyList<NetworkIdentity> GetSortedIdentities()
+        {
+            if (_needsSorting)
+            {
+                _needsSorting = false;
+                _sortedIdentities.Clear();
+
+                // increase Capacity first to avoid alloc when adding
+                if (_sortedIdentities.Capacity < _spawnedObjects.Count)
+                    _sortedIdentities.Capacity = _spawnedObjects.Count;
+
+                _sortedIdentities.AddRange(_spawnedObjects.Values);
+                _sortedIdentities.Sort((x, y) => x.NetId.CompareTo(y.NetId));
+            }
+            return _sortedIdentities;
+        }
+
         public bool TryGetIdentity(uint netId, out NetworkIdentity identity)
         {
             return _spawnedObjects.TryGetValue(netId, out identity) && identity != null;
@@ -70,6 +94,7 @@ namespace Mirage
             // dont use add, netId might already exist but have been destroyed
             // this can happen client side. we check for this case in TryGetValue above
             _spawnedObjects[netId] = identity;
+            _needsSorting = true;
             onSpawn?.Invoke(identity);
 
             // owner might be set before World is
@@ -99,6 +124,7 @@ namespace Mirage
             // only invoke event if values was successfully removed
             if (removed)
             {
+                _needsSorting = true;
                 if (logger.LogEnabled()) logger.Log($"Removing [netId={netId}, name={identity?.name}] from World");
                 onUnspawn?.Invoke(identity);
             }
@@ -126,6 +152,7 @@ namespace Mirage
         internal void ClearSpawnedObjects()
         {
             _spawnedObjects.Clear();
+            _needsSorting = true;
         }
 
         internal void InvokeOnAuthorityChanged(NetworkIdentity identity, bool hasAuthority, INetworkPlayer owner)

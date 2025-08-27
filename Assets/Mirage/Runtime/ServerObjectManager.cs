@@ -25,8 +25,6 @@ namespace Mirage
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(ServerObjectManager));
         /// <summary>HashSet for NetworkIdentity that can be re-used without allocation</summary>
         private static HashSet<NetworkIdentity> _skipCache = new HashSet<NetworkIdentity>();
-        /// <summary>HashSet for NetworkIdentity that can be re-used without allocation</summary>
-        private static List<NetworkIdentity> _spawnCache = new List<NetworkIdentity>();
 
         internal RpcHandler _rpcHandler;
         private SyncVarReceiver _syncVarReceiver;
@@ -61,6 +59,7 @@ namespace Mirage
         private void OnServerStopped()
         {
             // todo dont send messages on server stop, only reset NI
+            // todo why are we calling .Reverse() here? should we be using sorted list here instead of dictionary
             foreach (var obj in _server.World.SpawnedIdentities.Reverse())
             {
                 // Unspawn all, but only destroy non-scene objects on server
@@ -98,12 +97,12 @@ namespace Mirage
 
             SpawnSceneObjects();
 
-            // host mode?
             if (_server.IsHost)
             {
                 // edge case, if object is spawned before host client is connected,
-                // we will need to 
-                foreach (var identity in _server.World.SpawnedIdentities)
+                // we will need to spawn on host's client side
+                var sortedIdentities = _server.World.GetSortedIdentities();
+                foreach (var identity in sortedIdentities)
                 {
                     // object was not set up as host, need to call OnHostClientSpawn to set it up
                     if (!identity.IsClient)
@@ -781,12 +780,13 @@ namespace Mirage
 
             if (logger.LogEnabled()) logger.Log($"SpawnVisibleObjects: Checking Observers on {_server.World.SpawnedIdentities.Count} objects for player: {player}");
 
-            // add to cache first, so SpawnedIdentities can be modified inside loop without throwing
-            _spawnCache.Clear();
-            _spawnCache.AddRange(_server.World.SpawnedIdentities);
+            // use sorted list, it will be sorted by netid
+            // we want to make sure Identities are always spawned on same order on client
+            var sortedIdentities = _server.World.GetSortedIdentities();
+
             // add connection to each nearby NetworkIdentity's observers, which
             // internally sends a spawn message for each one to the connection.
-            foreach (var identity in _spawnCache)
+            foreach (var identity in sortedIdentities)
             {
                 // allow for skips so that addCharacter doesn't send 2 spawn message for existing object
                 if (skip != null && skip.Contains(identity))
@@ -800,8 +800,6 @@ namespace Mirage
                     identity.AddObserver(player);
                 }
             }
-
-            _spawnCache.Clear();
         }
 
         private sealed class NetworkIdentityComparer : IComparer<NetworkIdentity>
