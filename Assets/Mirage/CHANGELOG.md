@@ -1,3 +1,10 @@
+## [153.2.3](https://github.com/MirageNet/Mirage/compare/v153.2.2...v153.2.3) (2025-08-27)
+
+
+### Bug Fixes
+
+* improving logs of prefabHash to always be hex ([a6fdb94](https://github.com/MirageNet/Mirage/commit/a6fdb942e66b87208d702d163767fbc9cdf6d60d))
+
 ## [153.2.2](https://github.com/MirageNet/Mirage/compare/v153.2.1...v153.2.2) (2025-08-24)
 
 
