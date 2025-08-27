@@ -187,7 +187,7 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
                 identity.PrefabHash = 0;
             });
 
-            Assert.That(exception.Message, Is.EqualTo($"Cannot set PrefabHash to 0 on '{identity.name}'. Old PrefabHash '{hash}'."));
+            Assert.That(exception.Message, Is.EqualTo($"Cannot set PrefabHash to 0 on '{identity.name}'. Old PrefabHash '{hash:X}'."));
 
             // guid was NOT changed
             Assert.That(identity.PrefabHash, Is.EqualTo(hash));

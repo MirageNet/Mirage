@@ -71,7 +71,7 @@ namespace Mirage
         {
             string spawnIDStr;
             if (SceneId.HasValue)
-                spawnIDStr = $"SceneId:{SceneId.Value}";
+                spawnIDStr = $"SceneId:{SceneId.Value:X}";
             else if (PrefabHash.HasValue)
                 spawnIDStr = $"PrefabHash:{PrefabHash.Value:X}";
             else

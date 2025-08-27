@@ -37,7 +37,7 @@ namespace Mirage
         public NetworkPrefabs NetworkPrefabs;
 
         /// <summary>
-        /// This is a dictionary of the prefabs and deligates that are registered on the client with ClientScene.RegisterPrefab().
+        /// This is a dictionary of the prefabs and delegates that are registered on the client with RegisterPrefab().
         /// <para>The key to the dictionary is the prefab asset Id.</para>
         /// </summary>
         internal readonly Dictionary<int, SpawnHandler> _handlers = new Dictionary<int, SpawnHandler>();
@@ -242,7 +242,7 @@ namespace Mirage
 
             if (_handlers.TryGetValue(prefabHash, out var registeredHandle))
             {
-                if (logger.LogEnabled()) logger.Log($"Found Registered Handle for {prefabHash}");
+                if (logger.LogEnabled()) logger.Log($"Found Registered Handle for {prefabHash:X}");
                 return registeredHandle;
             }
 
@@ -251,7 +251,7 @@ namespace Mirage
                 var handler = dynamicHandler.Invoke(prefabHash);
                 if (handler != null)
                 {
-                    if (logger.LogEnabled()) logger.Log($"Found Dynamic Handle for {prefabHash}");
+                    if (logger.LogEnabled()) logger.Log($"Found Dynamic Handle for {prefabHash:X}");
                     return handler;
                 }
             }
@@ -267,8 +267,8 @@ namespace Mirage
         /// the server will send a spawn message to the client with the PrefabHash.
         /// the client then finds the prefab registered with RegisterPrefab() to instantiate the client object.
         /// </para>
-        /// <para>The ClientObjectManager has a list of spawnable prefabs, it uses this function to register those prefabs with the ClientScene.</para>
-        /// <para>The set of current spawnable object is available in the ClientScene static member variable ClientScene.prefabs, which is a dictionary of PrefabHash and prefab references.</para>
+        /// <para>The ClientObjectManager has a list of spawnable prefabs, it uses this function to register them.</para>
+        /// <para>The set of current spawnable object is available in the <see cref="spawnableObjects"/> dictionary.</para>
         /// </summary>
         /// <param name="identity">A Prefab that will be spawned.</param>
         /// <param name="newPrefabHash">A hash to be assigned to this prefab. This allows a dynamically created game object to be registered for an already known asset Id.</param>
@@ -285,8 +285,8 @@ namespace Mirage
         /// the server will send a spawn message to the client with the PrefabHash.
         /// the client then finds the prefab registered with RegisterPrefab() to instantiate the client object.
         /// </para>
-        /// <para>The ClientObjectManager has a list of spawnable prefabs, it uses this function to register those prefabs with the ClientScene.</para>
-        /// <para>The set of current spawnable object is available in the ClientScene static member variable ClientScene.prefabs, which is a dictionary of PrefabHash and prefab references.</para>
+        /// <para>The ClientObjectManager has a list of spawnable prefabs, it uses this function to register them.</para>
+        /// <para>The set of current spawnable object is available in the <see cref="spawnableObjects"/> dictionary.</para>
         /// </summary>
         /// <param name="identity">A Prefab that will be spawned.</param>
         // todo does inheritdoc here? instead of having duplicate doc comments for each RegisterPrefab
@@ -330,7 +330,7 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Removes a registered spawn prefab that was setup with ClientScene.RegisterPrefab.
+        /// Removes a registered spawn prefab that was setup with RegisterPrefab.
         /// </summary>
         /// <param name="identity">The prefab to be removed from registration.</param>
         public void UnregisterPrefab(NetworkIdentity identity)
@@ -347,8 +347,8 @@ namespace Mirage
         /// the server will send a spawn message to the client with the PrefabHash.
         /// the client then finds the prefab registered with RegisterPrefab() to instantiate the client object.
         /// </para>
-        /// <para>The ClientObjectManager has a list of spawnable prefabs, it uses this function to register those prefabs with the ClientScene.</para>
-        /// <para>The set of current spawnable object is available in the ClientScene static member variable ClientScene.prefabs, which is a dictionary of PrefabHash and prefab references.</para>
+        /// <para>The ClientObjectManager has a list of spawnable prefabs, it uses this function to register them.</para>
+        /// <para>The set of current spawnable object is available in the <see cref="spawnableObjects"/> dictionary.</para>
         /// </summary>
         /// <seealso cref="RegisterUnspawnHandler"/>
         /// <param name="identity">A Prefab that will be spawned.</param>
@@ -412,7 +412,7 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Removes a registered spawn handler function that was registered with ClientScene.RegisterHandler().
+        /// Removes a registered spawn handler function that was registered with RegisterSpawnHandler().
         /// </summary>
         /// <param name="prefabHash">The prefabHash for the handler to be removed for.</param>
         public void UnregisterSpawnHandler(int prefabHash)
@@ -696,7 +696,7 @@ namespace Mirage
 
             var prefab = handler.Prefab;
 
-            if (logger.LogEnabled()) logger.Log($"[ClientObjectManager] Instantiate Prefab for netid:{msg.NetId}, hash:{msg.PrefabHash.Value}, prefab:{prefab.name}");
+            if (logger.LogEnabled()) logger.Log($"[ClientObjectManager] Instantiate Prefab for netid:{msg.NetId}, hash:{msg.PrefabHash.Value:X}, prefab:{prefab.name}");
 
             // we need to set position and rotation here incase that their values are used from awake/onenable
             var pos = msg.SpawnValues.Position ?? prefab.transform.position;
@@ -728,7 +728,7 @@ namespace Mirage
                 builder.AppendLine($"{errorMsg} SpawnableObjects.Count={spawnableObjects.Count}");
 
                 foreach (var kvp in spawnableObjects)
-                    builder.AppendLine($"Spawnable: SceneId={kvp.Key} name={kvp.Value.name}");
+                    builder.AppendLine($"Spawnable: SceneId={kvp.Key:X} name={kvp.Value.name}");
 
                 logger.Log(builder.ToString());
             }
@@ -806,7 +806,7 @@ namespace Mirage
 
         private void DestroyObject(uint netId)
         {
-            if (logger.LogEnabled()) logger.Log("ClientScene.OnObjDestroy netId:" + netId);
+            if (logger.LogEnabled()) logger.Log($"OnObjectDestroy netId:{netId}");
 
             if (_client.World.TryGetIdentity(netId, out var localObject))
             {
@@ -840,7 +840,7 @@ namespace Mirage
                 // Set isLocalPlayer to true on this NetworkIdentity and trigger OnStartLocalPlayer in all scripts on the same GO
                 identity.StartLocalPlayer();
 
-                if (logger.LogEnabled()) logger.Log("ClientScene.OnOwnerMessage - player=" + identity.name);
+                if (logger.LogEnabled()) logger.Log($"OnOwnerMessage player={identity.name}");
             }
         }
 

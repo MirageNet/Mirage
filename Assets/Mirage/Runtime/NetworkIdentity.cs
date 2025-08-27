@@ -383,13 +383,13 @@ namespace Mirage
             {
                 if (value == 0)
                 {
-                    throw new ArgumentException($"Cannot set PrefabHash to 0 on '{name}'. Old PrefabHash '{_prefabHash}'.");
+                    throw new ArgumentException($"Cannot set PrefabHash to 0 on '{name}'. Old PrefabHash '{_prefabHash:X}'.");
                 }
 
                 var old = _prefabHash;
                 _prefabHash = value;
 
-                if (logger.LogEnabled()) logger.Log($"Setting PrefabHash on '{name}' to '{value}', Old PrefabHash:{old}");
+                if (logger.LogEnabled()) logger.Log($"Setting PrefabHash on '{name}' to '{value:X}', Old PrefabHash:{old:X}");
             }
         }
 
