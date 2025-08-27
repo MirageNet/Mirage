@@ -91,6 +91,5 @@ These are only called on the **Player Game Objects** when a client connects:
 -   `OnRebuildObservers`
 -   `OnStartAuthority`
 -   `OnStartClient`
--   `OnSetHostVisibility`
 -   `OnStartLocalPlayer`
 -   `Start` 

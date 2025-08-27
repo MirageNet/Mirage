@@ -13,8 +13,22 @@ Mirage includes several small examples to help you learn how to use various feat
     A simple text chat for multiple networked clients.
 -   [ChangeScene](/docs/examples/change-scene)  
     Provides examples for Normal and Additive network scene changing.
+-   [Interest Management](/docs/examples/interest-management)
+    This example demonstrates how to use interest management to control which objects are visible to which clients.
+-   [Match Scenes](/docs/examples/match-scenes)
+    This example demonstrates how to use match scenes to create separate game instances on a single server.
+-   [Multiple Additive Scenes](/docs/examples/multiple-additive-scenes)
+    This example demonstrates how to load and unload multiple additive scenes.
+-   [Notify](/docs/examples/notify)
+    This example demonstrates how to use the Notify system for sending messages.
 -   [Pong](/docs/examples/pong)  
     A simple example of "How to build a multiplayer game with Mirage" is Pong. It illustrates the usage of `NetworkManager`, `NetworkManagerHUD`, NetworkBehaviour, NetworkIdentity, `NetworkTransform`, `NetworkStartPosition`and various Attributes.
+-   [Rigidbody Physics](/docs/examples/rigidbody-physics)
+    This example demonstrates how to synchronize rigidbodies over the network.
+-   [Send Prefab](/docs/examples/send-prefab)
+    This example demonstrates how to send prefabs over the network.
+-   [Spawn Custom Player](/docs/examples/spawn-custom-player)
+    This example demonstrates how to spawn custom player objects.
 -   [Tanks](/docs/examples/tanks)  
     This is a simple scene with animated tanks, networked rigidbody projectiles, and NavMesh movement
 
