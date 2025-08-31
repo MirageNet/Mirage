@@ -1,3 +1,10 @@
+## [153.2.5](https://github.com/MirageNet/Mirage/compare/v153.2.4...v153.2.5) (2025-08-31)
+
+
+### Bug Fixes
+
+* adding compile error when [NetworkMessage] is incorrectly added to generic class ([e9b3a39](https://github.com/MirageNet/Mirage/commit/e9b3a39220d37b31d40967dc9632eb2e8ba6c141))
+
 ## [153.2.4](https://github.com/MirageNet/Mirage/compare/v153.2.3...v153.2.4) (2025-08-27)
 
 
