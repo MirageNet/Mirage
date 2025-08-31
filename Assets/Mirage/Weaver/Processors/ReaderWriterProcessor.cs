@@ -192,6 +192,12 @@ namespace Mirage.Weaver
         {
             if (klass.HasCustomAttribute<NetworkMessageAttribute>())
             {
+                if (klass.HasGenericParameters)
+                {
+                    logger.Error($"The [NetworkMessage] attribute cannot be applied to open generic types like '{klass.Name}'. Network messages must be concrete types.");
+                    return;
+                }
+
                 Log($"Loading message: {klass.FullName}");
                 readers.TryGetFunction(klass, null);
                 writers.TryGetFunction(klass, null);
