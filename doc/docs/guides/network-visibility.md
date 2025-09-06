@@ -30,13 +30,7 @@ When a player on a remote client joins a networked game, only game objects that 
 
 When a player moves within the world, the set of network-visible game objects changes. The player’s client is told about these changes as they happen. The `ObjectHide` message is sent to clients when a game object becomes no longer network-visible. By default, Mirage destroys the game object when it receives this message. When a game object becomes visible, the client receives an `ObjectSpawn` message, as if Mirage has spawned the game object for the first time. By default, the game object is instantiated like any other spawned game object.
 
-## Network Visibility on the Host
 
-The host shares the same Scene as the server because it acts as both the server and the client to the player hosting the game. For this reason, it cannot destroy game objects that are not visible to the local player.
-
-Instead, there is the virtual method OnSetLocalVisibility in the NetworkVisibility class that is invoked. This method is invoked on all scripts that inherit from `NetworkVisibility` on game objects that change the visibility state on the host.
-
-The default implementation of `OnSetLocalVisibility` disables or enables all renderer components on the game object. If you want to customize this implementation, you can override the method in your script, and provide new behavior for how the host (and therefore the local client) should respond when a game object becomes network-visible or invisible (such as disabling HUD elements or renderers).
 
 ## Customizing Network Visibility
 
