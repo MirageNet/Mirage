@@ -1,3 +1,16 @@
+# [153.3.0](https://github.com/MirageNet/Mirage/compare/v153.2.6...v153.3.0) (2025-09-11)
+
+
+### Bug Fixes
+
+* adding check to SocketLayer config for MaxReliableFragments ([8b4a6ea](https://github.com/MirageNet/Mirage/commit/8b4a6ea7df515e5063578b2b4a87fd870e9e6a18))
+* fixing max length check SendUnreliable ([5aa89c0](https://github.com/MirageNet/Mirage/commit/5aa89c0074a2aef29701a8184d88432591b0c476))
+
+
+### Features
+
+* adding helper methods to get max message size for each channel ([8d623fb](https://github.com/MirageNet/Mirage/commit/8d623fb4b24da0e21bf4157fa8ffea5a87ec119b))
+
 ## [153.2.6](https://github.com/MirageNet/Mirage/compare/v153.2.5...v153.2.6) (2025-09-11)
 
 
