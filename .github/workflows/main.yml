@@ -98,7 +98,7 @@ jobs:
           node-version: '14'
 
       - name: Release
-        uses: cycjimmy/semantic-release-action@v4
+        uses: cycjimmy/semantic-release-action@v5
         id: semantic
         with:
           semantic_version: 23
