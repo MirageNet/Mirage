@@ -1,3 +1,10 @@
+## [153.2.6](https://github.com/MirageNet/Mirage/compare/v153.2.5...v153.2.6) (2025-09-11)
+
+
+### Bug Fixes
+
+* adding byte count to HandleMessage log ([6627d74](https://github.com/MirageNet/Mirage/commit/6627d74591ce3f243cb9f200bc68bb9b31f2604a))
+
 ## [153.2.5](https://github.com/MirageNet/Mirage/compare/v153.2.4...v153.2.5) (2025-08-31)
 
 
