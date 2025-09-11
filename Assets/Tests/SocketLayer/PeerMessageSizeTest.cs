@@ -1,3 +1,4 @@
+using System;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -101,6 +102,36 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             var sizePerFragment = MAX_PACKET_SIZE - minReliableFragmentHeader;
             var expected = maxFragments * sizePerFragment;
             Assert.That(peer.GetMaxReliableMessageSize(), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void PeerConstructor_ThrowsIfMaxFragmentsIsTooHigh()
+        {
+            var config = new Config
+            {
+                MaxReliableFragments = 256
+            };
+
+            var exception = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                new Peer(Substitute.For<ISocket>(), MAX_PACKET_SIZE, Substitute.For<IDataHandler>(), config);
+            });
+
+            Assert.That(exception.ParamName, Is.EqualTo("MaxReliableFragments"));
+        }
+
+        [Test]
+        public void PeerConstructor_DoesNotThrowIfMaxFragmentsIsAtLimit()
+        {
+            var config = new Config
+            {
+                MaxReliableFragments = 255
+            };
+
+            Assert.DoesNotThrow(() =>
+            {
+                new Peer(Substitute.For<ISocket>(), MAX_PACKET_SIZE, Substitute.For<IDataHandler>(), config);
+            });
         }
     }
 }

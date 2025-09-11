@@ -69,6 +69,8 @@ namespace Mirage.SocketLayer
             _maxPacketSize = maxPacketSize;
             if (maxPacketSize < AckSystem.MIN_RELIABLE_HEADER_SIZE + 1)
                 throw new ArgumentException($"Max packet size too small for AckSystem header", nameof(maxPacketSize));
+            if (_config.MaxReliableFragments > 255)
+                throw new ArgumentOutOfRangeException(nameof(_config.MaxReliableFragments), _config.MaxReliableFragments, "MaxReliableFragments must be less than or equal to 255");
 
             _socket = socket ?? throw new ArgumentNullException(nameof(socket));
             _dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
