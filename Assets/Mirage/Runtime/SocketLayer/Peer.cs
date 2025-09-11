@@ -594,5 +594,53 @@ namespace Mirage.SocketLayer
             }
             _connectionsToRemove.Clear();
         }
+
+        public int GetMaxUnreliableMessageSize()
+        {
+            // for both Reliable and NoReliable connections, unreliable is just a header + message
+            // header is 1 byte for type, 2 for length
+            const int header = 1 + Batch.MESSAGE_LENGTH_SIZE;
+            return _maxPacketSize - header;
+        }
+
+        public int GetMaxNotifyMessageSize()
+        {
+            if (_config.DisableReliableLayer)
+            {
+                // NoReliableConnection calls SendReliable for notify
+                const int header = 1 + Batch.MESSAGE_LENGTH_SIZE; // packet type + message length
+                return _maxPacketSize - header;
+            }
+            else
+            {
+                // from AckSystem
+                return _maxPacketSize - AckSystem.NOTIFY_HEADER_SIZE;
+            }
+        }
+
+        public int GetMaxReliableMessageSize()
+        {
+            if (_config.DisableReliableLayer)
+            {
+                // from NoReliableConnection
+                const int header = 1 + Batch.MESSAGE_LENGTH_SIZE; // packet type + message length
+                return _maxPacketSize - header;
+            }
+            else
+            {
+                // from AckSystem
+                // if fragmentation is enabled
+                if (_config.MaxReliableFragments >= 0)
+                {
+                    var sizePerFragment = _maxPacketSize - AckSystem.MIN_RELIABLE_FRAGMENT_HEADER_SIZE;
+                    return _config.MaxReliableFragments * sizePerFragment;
+                }
+                else
+                {
+                    // if not fragmented
+                    return _maxPacketSize - AckSystem.MIN_RELIABLE_HEADER_SIZE;
+                }
+            }
+        }
     }
 }
