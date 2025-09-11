@@ -14,5 +14,5 @@ Mirage has many attributes that can be applied to SyncVars and Rpc parameters
 - [VarInt](/docs/guides/bit-packing/var-int) Packs int to different sizes based on their size. Allows for 3 configurable size ranges
 - [VarIntBlocks](/docs/guides/bit-packing/var-int-blocks)  Packs int to different sizes based on their size. Uses block size so can be used over a large range of values
 - [FloatPack](/docs/guides/bit-packing/float-pack) Compresses a float value
-- [VectorPack](/docs/guides/bit-packing/vector-pack) Compresses a Vector value
+
 - [QuaternionPack](/docs/guides/bit-packing/quaternion-pack) Compresses a Quaternion value
