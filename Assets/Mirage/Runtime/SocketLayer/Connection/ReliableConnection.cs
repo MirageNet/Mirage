@@ -71,9 +71,10 @@ namespace Mirage.SocketLayer
         {
             ThrowIfNotConnectedOrConnecting();
 
-            if (length + 1 > _maxPacketSize)
+            const int batchHeader = 1 + Batch.MESSAGE_LENGTH_SIZE;
+            if (length + batchHeader > _maxPacketSize)
             {
-                throw new MessageSizeException($"Message is bigger than MTU, size:{length} but max Unreliable message size is {_maxPacketSize - 1}");
+                throw new MessageSizeException($"Message is bigger than MTU, size:{length} but max Unreliable message size is {_maxPacketSize - batchHeader}");
             }
 
             _unreliableBatch.AddMessage(packet, offset, length);
