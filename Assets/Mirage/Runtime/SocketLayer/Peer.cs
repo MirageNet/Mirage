@@ -288,11 +288,11 @@ namespace Mirage.SocketLayer
             {
                 if (packet.Type == PacketType.Command)
                 {
-                    _logger.Log($"Receive from {connection} type: Command, {packet.Command}");
+                    _logger.Log($"Receive {packet.Length} bytes from {connection} type: Command, {packet.Command}");
                 }
                 else
                 {
-                    _logger.Log($"Receive from {connection} type: {packet.Type}");
+                    _logger.Log($"Receive {packet.Length} bytes from {connection} type: {packet.Type}");
                 }
             }
 
