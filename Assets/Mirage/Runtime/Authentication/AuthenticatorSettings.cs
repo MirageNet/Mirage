@@ -198,14 +198,15 @@ namespace Mirage.Authentication
             public async UniTask<AuthenticationResult> WaitWithTimeout(float timeoutSecond)
             {
                 // need cancel for when player disconnects
-                (var isCancelled, var (isTimeout, result)) = await _result.Task
+                var (isCanceled, (isTimeout, result)) = await _result.Task
+                    .AttachExternalCancellation(CancelSource.Token)
                     .TimeoutWithoutException(TimeSpan.FromSeconds(timeoutSecond), delayType: DelayType.UnscaledDeltaTime)
-                    .AttachExternalCancellation(CancelSource.Token).SuppressCancellationThrow();
+                    .SuppressCancellationThrow();
 
                 if (isTimeout)
                     return AuthenticationResult.CreateFail("Timeout");
 
-                if (isCancelled)
+                if (isCanceled)
                     return AuthenticationResult.CreateFail("Cancelled");
 
                 return result;
