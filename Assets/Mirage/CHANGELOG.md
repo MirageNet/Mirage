@@ -1,3 +1,10 @@
+## [153.3.1](https://github.com/MirageNet/Mirage/compare/v153.3.0...v153.3.1) (2025-09-25)
+
+
+### Bug Fixes
+
+* swapping AttachExternalCancellation order ([7dfe8f7](https://github.com/MirageNet/Mirage/commit/7dfe8f7b9fdafaf847eac31175f1817a829580cb))
+
 # [153.3.0](https://github.com/MirageNet/Mirage/compare/v153.2.6...v153.3.0) (2025-09-11)
 
 
