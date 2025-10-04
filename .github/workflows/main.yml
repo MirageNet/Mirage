@@ -38,8 +38,9 @@ jobs:
       unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
       access_token: ${{ secrets.GITHUB_TOKEN }}
     with:
-      unity_container: unityci/editor:ubuntu-6000.0.58f2-base-3.1.0
-      cache_key: Library-6000.0.58
+      unity_container: unityci/editor:ubuntu-6000.0.37f1-base-3.1.0
+      cache_key: Library-6000.0.37
+      cache_key_restore: Library-6000
       test_results_name: Test results 6000
 
   BuildIL2CPP:
