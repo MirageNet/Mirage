@@ -1,36 +1,49 @@
 # Multiple Additive Scenes Example
 
-In Build Settings, remove all scenes and add both of the scenes from the Scenes folder in the following order:
+This example demonstrates how to manage multiple additive scenes on the server and synchronize player movement and object interactions within these scenes.
 
-- Main
-- Game
+## Setup
 
-Open the Main scene in the Editor and make sure the Game Scene field in the MultiScene Network Manager on the Network scene object contains the Game scene. This is already set up by default, but if the Main scene was opened and saved before putting the scenes in the Build Settings list, the Game Scene field may be cleared accidentally.
+1.  In Unity, go to `File > Build Settings`.
+2.  Remove all existing scenes from the "Scenes In Build" list.
+3.  Add the following scenes from `Assets/Examples/MultipleAdditiveScenes/Scenes` in this order:
+    -   `Main.unity`
+    -   `Game.unity`
 
-## MultiScene Network Manager
+4.  Open the `Main.unity` scene in the Editor.
+5.  Select the `NetworkManager` GameObject.
+6.  Ensure the `Game Scene` field in the `MultiScene Network Manager` component is set to the `Game.unity` scene. This should be set by default, but verify it.
 
-The MultiScene Network Manager is derived from the base Network Manager and is responsible for additively loading the sub-scene instances and placing the players in their respective sub-scene instances and initializing player SyncVars. It has a Game Scene field where the Game sub-scene is assigned, and an Instances field to set how many instances are loaded on the server.
+## Key Components
 
-In this example, the sub-scene instances are additively loaded on the server with `localPhysicsMode = LocalPhysicsMode.Physics3D`. Physics sub-scenes do not auto-simulate, so each scene has a game object with a generic `PhysicsSimulator` script on it. This script does nothing on the client, only on the server.
+### `MultiSceneNetManager.cs`
 
-Clients only ever have one instance of the sub-scene additively loaded (without `localPhysicsMode`), while the server has them all. All networked objects have a `NetworkSceneChecker` component which is what isolates them to their specific sub-scene.
+This script extends `NetworkManager` and is central to managing the multiple additive scenes. It handles:
 
-## Playing in the Instances
+-   **Additive Scene Loading:** On server start, it loads multiple instances of the `Game.unity` scene additively. Each instance has its own physics scene, allowing for isolated physics simulations.
+-   **Player Placement:** When a player connects, they are assigned to one of the additive scene instances. The player's `NetworkIdentity` GameObject is moved into the assigned additive scene.
+-   **Scene Unloading:** On server or client stop, it unloads the additive scenes to clean up.
 
-File -\> Build and Run
+### `PhysicsCollision.cs`
 
-Start at least 3 built instances: These will all be client players.
+Attached to objects within the additive scenes (e.g., the tumblers), this script demonstrates server-authoritative physics. It applies force to rigidbodies when a player collides with them. The `isKinematic` property of the Rigidbody is set to `true` on clients and `false` on the server, ensuring physics simulation only occurs on the server.
 
-Press Play in the Editor and click Host (Server + Client) in the HUD - This will be the host and the 1st player. You can also use Server Only if you prefer.
+### `PhysicsSimulator.cs`
 
-Click Client in the built instances.
+This script is placed on a GameObject within each additive scene. Its purpose is to explicitly simulate the physics for that specific additive scene on the server. Unity's additive scenes with `localPhysicsMode` do not auto-simulate, so this script ensures that physics interactions within each isolated scene are processed.
 
--   WASDQE keys to move & turn your player capsule, Space to jump.
+### `PlayerController.cs`
 
--   Colliding with the small colored spheres scores points based on their color.
+This script handles player movement and camera control. It demonstrates:
 
--   Colliding with the larger tumblers sends them rolling around...they're server-side non-kinematic rigidbodies.
+-   **Local Player Control:** Only the local player's input is processed for movement.
+-   **Camera Setup:** On `OnStartLocalPlayer`, it configures the main camera to follow the player.
+-   **Network Transform:** It relies on the `NetworkTransform` component (attached to the same GameObject) to synchronize the player's position and rotation across the network.
 
--   Only scores for the players in the same sub-scene are shown at the top of the game window.
+## How to Run
 
-![MultiScene Network Manager](/img/examples/multiple-additive-scenes/MultiSceneNetworkManager.PNG)
+1.  **Run as Host:** Press Play in the Unity Editor. The game will start as a host (server + client).
+2.  **Run as Client:** Build and run at least two standalone instances of the game. In each standalone instance, click the "Client" button to connect to the host running in the editor.
+3.  Observe how players are distributed across different additive scene instances. You can move around using WASDQE and jump with Space. Collide with the colored spheres to score points and with the tumblers to see server-side physics in action. Notice that scores are only shown for players within the same sub-scene.
+
+This example provides a comprehensive look at managing complex scene structures and physics interactions in a networked environment using Mirage.

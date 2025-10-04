@@ -141,13 +141,7 @@ private CustomCharacter GetPrefab(CreateMMOCharacterMessage msg)
 
 ## Ready State
 
-:::danger Out of date!
-This is out of date and needs to be updated!
-:::
-
-In addition to characters, players also have a "scene is ready" state. The server sends clients that are ready information about spawned game objects and state synchronization updates; clients which are not ready are not sent these updates. 
-
-When a client initially connects to a server, their SceneIsReady property will be true. However initial spawning will not happen until a character has been added or you manually tell the server to send spawned objects.
+When a client initially connects to a server, their `SceneIsReady` property will be `false`. After the client has completed all its pre-game setup and all its assets are loaded, it can send a `SceneReadyMessage` to the server. This tells the server that the client is ready to receive spawned objects and state synchronization updates. The server will then automatically send spawn messages for visible objects to the client.
 
 Once a client has completed all its pre-game setup, and all its Assets are loaded, it can send a character message. As seen in the example above this will tell the server to spawn the player's character using `ServerObjectManager.AddCharacter`. After the character is spawned mirage will automatically send a spawn message for the other spawned object to the client.
 
