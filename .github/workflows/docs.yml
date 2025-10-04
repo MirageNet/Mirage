@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     # available list of containers here:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
-    container: unityci/editor:ubuntu-2021.3.30f1-base-3.0.0
+    container: unityci/editor:ubuntu-2022.3.62f2-base-3.1.0
 
     steps:
       - name: Activate unity
@@ -42,7 +42,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-2021.3.30
+          key: Library-2022.3.62
+          restore-keys: Library-2022
 
       - name: Generate Solution
         run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod GitTools.Solution.Sync -quit
