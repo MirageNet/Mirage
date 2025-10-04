@@ -75,7 +75,7 @@ jobs:
 
   Publish:
     # only run once both tests and il2cpp have passed
-    needs: [Tests2021, Tests2022, Tests6000, BuildIL2CPP]
+    needs: [Tests2022, Tests6000, BuildIL2CPP]
     # only run on main
     if: github.ref == 'refs/heads/main'
     name: Publish
