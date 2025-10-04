@@ -24,7 +24,7 @@ Mirage is built by passionate network engineers and is backed by a friendly comm
 
 To install Mirage, follow these steps:
 
-1) Mirage requires at least Unity 2020 LTS. You may install [Unity 2020 LTS](https://unity.com/) via the Unity website or via the Unity Hub. <br/>
+1) Mirage requires at least Unity 2022 LTS. You may install [Unity 2022 LTS](https://unity.com/) via the Unity website or via the Unity Hub. <br/>
     You may use newer versions, however, _LTS versions are strongly recommended_ as newer versions can contain bugs, glitches, or just flat-out break game projects.
 2) Start a new project or open your existing one. If opening an existing one, it is **strongly recommended** to back it up before installing Mirage.
 4) Add the OpenUPM registry.  Click on the `Edit` menu, then select `Project settings...`, select `Package Manager`, and add a scoped registry like so: <br/>
@@ -61,7 +61,7 @@ Mirage has some notable differences from its distant sister, Mirror. The table b
 | Methods use PascalCase (C# guidelines)              | No consistency                         |
 | `NetworkTime` available in `NetworkBehaviour`       | `NetworkTime` is global static         |
 | Send any data as messages                           | Messages must implement NetworkMessage |
-| Supports Unity 2021.3 LTS or later                  | Supports Unity 2021.3 LTS or later     |
+| Supports Unity 2022.3 LTS or later                  | Supports Unity 2022.3 LTS or later     |
 | Offers simple Socket API to implement new protocols | Each protocol requires a new transport |
 
 **Some notable features that Mirage has:**
@@ -94,7 +94,7 @@ If you want to contribute to Mirage, follow these steps:
     mkdir MirageNetworking
     git clone https://github.com/MirageNet/Mirage.git MirageNetworking
     ```
-3) Open the newly cloned repo in Unity 2021.3 LTS or later.
+3) Open the newly cloned repo in Unity 2022.3 LTS or later.
 
 ### Windows
 
@@ -108,7 +108,7 @@ If you want to contribute to Mirage, follow these steps:
     ```
     If you don't want to use administrator, [add symlink support](https://www.joshkel.com/2018/01/18/symlinks-in-windows/) to your account.
     If you don't enable symlinks, you will be able to work on Mirage but Unity will not see the examples.
-3) Open in Unity 2021.3 LTS or later and have fun!
+3) Open in Unity 2022.3 LTS or later and have fun!
 
 ## Transport and Sockets
 
