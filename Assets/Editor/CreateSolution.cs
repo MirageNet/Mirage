@@ -1,7 +1,9 @@
 #if UNITY_EDITOR
 
-using Unity.CodeEditor;
+using System.IO;
 using UnityEditor;
+using UnityEngine;
+using VSCodeEditor;
 
 namespace GitTools
 {
@@ -9,8 +11,9 @@ namespace GitTools
     {
         public static void Sync()
         {
-            CodeEditor.Editor.CurrentCodeEditor.SyncAll();
+            var projectGeneration = new ProjectGeneration(Directory.GetParent(Application.dataPath).FullName);
             AssetDatabase.Refresh();
+            projectGeneration.GenerateAndWriteSolutionAndProjects();
         }
     }
 }

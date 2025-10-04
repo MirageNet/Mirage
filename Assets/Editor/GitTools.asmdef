@@ -2,7 +2,7 @@
     "name": "GitTools",
     "rootNamespace": "",
     "references": [
-        "GUID:b93f844d45cfcc44fa2b0eed5c9ec6bb"
+        "GUID:8b845b123ab418448a8be2935fa804e0"
     ],
     "includePlatforms": [
         "Editor"
