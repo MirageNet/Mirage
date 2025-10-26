@@ -3,9 +3,9 @@ using UnityEngine.UI;
 
 namespace Mirage.Examples.Basic
 {
-    public class Player : NetworkBehaviour
+    public class BasicPlayer : NetworkBehaviour
     {
-        [Header("Player Components")]
+        [Header("BasicPlayer Components")]
         public RectTransform rectTransform;
         public Image image;
 
@@ -13,18 +13,16 @@ namespace Mirage.Examples.Basic
         public Text playerNameText;
         public Text playerDataText;
 
+        [SerializeField] private Vector2 offset = new Vector2(100, -170);
+        [SerializeField] private Vector2 padding = new Vector2(10, 10);
+
         // These are set in OnStartServer and used in OnStartClient
-        [SyncVar]
-        private int playerNo;
+
+        [SyncVar(initialOnly = true)] // playerNo is set on spawn so we can use initialOnly so it is only synced once
+        public int playerNo;
+
         [SyncVar]
         private Color playerColor;
-
-        private static int playerCounter = 1;
-
-        private static int GetNextPlayerId()
-        {
-            return playerCounter++;
-        }
 
         // This is updated by UpdateData which is called from OnStartServer via InvokeRepeating
         [SyncVar(hook = nameof(OnPlayerDataChanged))]
@@ -47,8 +45,7 @@ namespace Mirage.Examples.Basic
         // This fires on server when this player object is network-ready
         public void OnStartServer()
         {
-            // Set SyncVar values
-            playerNo = GetNextPlayerId();
+            // Set SyncVar values in OnStartServer so they will be sent with Spawn message
             playerColor = Random.ColorHSV(0f, 1f, 0.9f, 0.9f, 1f, 1f);
 
             // Start generating updates
@@ -65,14 +62,20 @@ namespace Mirage.Examples.Basic
         // This fires on all clients when this player object is network-ready
         public void OnStartClient()
         {
+            // Get spawner so we can set the parent under the canvas
+            var spawner = Client.GetComponent<CanvasCharacterSpawner>();
+            transform.SetParent(spawner.Parent);
+
+            var size = rectTransform.sizeDelta + padding;
+
             // Calculate position in the layout panel
-            var x = 100 + ((playerNo % 4) * 150);
-            var y = -170 - ((playerNo / 4) * 80);
-            rectTransform.anchoredPosition = new Vector2(x, y);
+            var x = playerNo % 4 * size.x;
+            var y = playerNo / 4 * size.y;
+            rectTransform.anchoredPosition = offset + new Vector2(x, -y);
 
             // Apply SyncVar values
             playerNameText.color = playerColor;
-            playerNameText.text = string.Format("Player {0:00}", playerNo);
+            playerNameText.text = string.Format("BasicPlayer {0:00}", playerNo);
         }
 
         // This only fires on the local client when this player object is network-ready
