@@ -1,3 +1,10 @@
+## [153.3.2](https://github.com/MirageNet/Mirage/compare/v153.3.1...v153.3.2) (2025-10-26)
+
+
+### Bug Fixes
+
+* **Examples:** fixing UI in basic example ([7cd9ccb](https://github.com/MirageNet/Mirage/commit/7cd9ccb221c4f851d3f43808205f2cd1eaa5c542))
+
 ## [153.3.1](https://github.com/MirageNet/Mirage/compare/v153.3.0...v153.3.1) (2025-09-25)
 
 
