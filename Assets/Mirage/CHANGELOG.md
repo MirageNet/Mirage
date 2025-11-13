@@ -1,3 +1,13 @@
+# [154.0.0](https://github.com/MirageNet/Mirage/compare/v153.3.2...v154.0.0) (2025-11-13)
+
+
+* fix!: stopping _networkBehavioursCache from being automatically cleared on destroy ([9cd8c94](https://github.com/MirageNet/Mirage/commit/9cd8c94a9790fd7cd61eac09d84e72d2a425f23c))
+
+
+### BREAKING CHANGES
+
+* NetworkBehaviour list no longer cleared in OnDestroy or NetworkReset
+
 ## [153.3.2](https://github.com/MirageNet/Mirage/compare/v153.3.1...v153.3.2) (2025-10-26)
 
 
