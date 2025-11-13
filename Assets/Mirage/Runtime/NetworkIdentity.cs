@@ -553,7 +553,6 @@ namespace Mirage
 
             // Clear references to help GC collect
             observers.Clear();
-            _networkBehavioursCache = null;
             Server = null;
             World = null;
             SyncVarSender = null;
@@ -1204,11 +1203,20 @@ namespace Mirage
             _owner = null;
             World = null;
             SyncVarSender = null;
-            _networkBehavioursCache = null;
             _visibility = null;
 
             ClearObservers();
             ResetEvents();
+        }
+
+        /// <summary>
+        /// Can be used to clear the Cache for <see cref="NetworkBehaviours"/>.
+        /// Use this if you need to change what behaviours are part of this identity.
+        /// <para>WARNING: changing behaviour at runtime could lead to desync, use at your own risk</para>
+        /// </summary>
+        public void ClearNetworkBehaviourCache()
+        {
+            _networkBehavioursCache = null;
         }
 
         private void ResetEvents()
