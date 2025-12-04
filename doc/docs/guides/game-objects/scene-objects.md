@@ -22,3 +22,48 @@ Networked scene objects are spawned by the ClientObjectManager and ServerObjectM
 If a Scene game object is destroyed on the server before a client joins the game, then it is never spawned on new clients. It will be left in the state it is when you were editing the scene.
 
 After a client has connected and you have called [AddCharacter](/docs/reference/Mirage/ServerObjectManager#addcharacterinetworkplayer-networkidentity) or [SpawnVisibleObjects](/docs/reference/Mirage/ServerObjectManager#spawnvisibleobjectsinetworkplayer-boolean), the client is sent a spawn message for each of the Scene objects that exist on the server, that are visible to that client. This message causes the game object on the client to be enabled and has the latest state of that game object from the server in it. This means that only game objects that are visible to the client and not destroyed on the server, are spawned on the client. Like regular non-Scene objects, these Scene objects are started with the latest state when the client joins the game.
+
+
+### Filtering Scene Objects
+
+By default, calling `SpawnSceneObjects` or `PrepareToSpawnSceneObjects` will cause Mirage to find all `NetworkIdentity` components in all loaded scenes using `Resources.FindObjectsOfTypeAll<NetworkIdentity>()`.
+
+In some cases, like when running multiple server or client instances in the same unity process, this can be problematic as it might find objects from scenes that don't belong to the current instance.
+
+To solve this, you can provide a custom filter by setting the `SceneObjectFilter` property on the `ServerObjectManager` and `ClientObjectManager`. This allows you to control exactly which `NetworkIdentity` components are included. If the filter is left `null`, the default behavior is used.
+
+**Example: Only include objects from a specific scene**
+```csharp
+using Mirage;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class MySceneManager : MonoBehaviour
+{
+    public ServerObjectManager serverObjectManager;
+    public ClientObjectManager clientObjectManager;
+    public Scene myScene;
+
+    // Set the scene to use for filtering
+    public void SetScene(Scene scene) 
+    {
+        myScene = scene;
+    }
+
+    void Awake()
+    {
+        // Set the filter before spawning scene objects
+        var filter = (NetworkIdentity identity) =>
+        {
+            return identity.gameObject.scene == myScene;
+        };
+
+        serverObjectManager.SceneObjectFilter = filter;
+        clientObjectManager.SceneObjectFilter = filter;
+
+        // Now when SpawnSceneObjects is called, it will only
+        // consider objects from `myScene`.
+        serverObjectManager.SpawnSceneObjects();
+    }
+}
+```
