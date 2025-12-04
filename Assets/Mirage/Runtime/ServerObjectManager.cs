@@ -39,6 +39,13 @@ namespace Mirage
 
         public INetworkVisibility DefaultVisibility { get; private set; }
 
+        /// <summary>
+        /// A filter to only include certain scene objects when spawning.
+        /// <para>Used by <see cref="SpawnSceneObjects"/> when finding scene objects.</para>
+        /// <para>If the filter is null, all valid scene objects will be included.</para>
+        /// </summary>
+        public Func<NetworkIdentity, bool> SceneObjectFilter { get; set; }
+
         internal void ServerStarted(NetworkServer server)
         {
             if (_server != null && _server != server)
@@ -679,6 +686,7 @@ namespace Mirage
             return identity.IsSceneObject;
         }
 
+        private readonly List<NetworkIdentity> spawnCache = new();
         /// <summary>
         /// This causes NetworkIdentity objects in a scene to be spawned on a server.
         /// <para>
@@ -693,18 +701,24 @@ namespace Mirage
             if (!_server || !_server.Active)
                 throw new InvalidOperationException("Server was not active");
 
-            var identities = Resources.FindObjectsOfTypeAll<NetworkIdentity>();
-            Array.Sort(identities, new NetworkIdentityComparer());
-
-            foreach (var identity in identities)
+            spawnCache.Clear();
+            foreach (var identity in Resources.FindObjectsOfTypeAll<NetworkIdentity>())
             {
-                if (ValidateSceneObject(identity))
-                {
-                    if (logger.LogEnabled()) logger.Log($"SpawnObjects sceneId:{identity.SceneId:X} name:{identity.gameObject.name}");
-
-                    Spawn(identity);
-                }
+                if (!ValidateSceneObject(identity))
+                    continue;
+                if (SceneObjectFilter != null && !SceneObjectFilter.Invoke(identity))
+                    continue;
+                spawnCache.Add(identity);
             }
+
+            // sort after filtering objects
+            spawnCache.Sort(NetworkIdentityComparer.instance);
+            foreach (var identity in spawnCache)
+            {
+                if (logger.LogEnabled()) logger.Log($"SpawnObjects sceneId:{identity.SceneId:X} name:{identity.gameObject.name}");
+                Spawn(identity);
+            }
+            spawnCache.Clear();
         }
 
         /// <summary>
@@ -804,6 +818,7 @@ namespace Mirage
 
         private sealed class NetworkIdentityComparer : IComparer<NetworkIdentity>
         {
+            public static readonly NetworkIdentityComparer instance = new NetworkIdentityComparer();
             public int Compare(NetworkIdentity x, NetworkIdentity y)
             {
                 return x.NetId.CompareTo(y.NetId);

@@ -37,6 +37,13 @@ namespace Mirage
         public NetworkPrefabs NetworkPrefabs;
 
         /// <summary>
+        /// A filter to only include certain scene objects when spawning.
+        /// <para>Used by <see cref="PrepareToSpawnSceneObjects"/> when finding scene objects.</para>
+        /// <para>If the filter is null, all valid scene objects will be included.</para>
+        /// </summary>
+        public Func<NetworkIdentity, bool> SceneObjectFilter { get; set; }
+
+        /// <summary>
         /// This is a dictionary of the prefabs and delegates that are registered on the client with RegisterPrefab().
         /// <para>The key to the dictionary is the prefab asset Id.</para>
         /// </summary>
@@ -188,13 +195,14 @@ namespace Mirage
 
             // add all unspawned NetworkIdentities to spawnable objects
             spawnableObjects.Clear();
-            var sceneObjects =
-                Resources.FindObjectsOfTypeAll<NetworkIdentity>()
-                               .Where(ConsiderForSpawning);
-
-            foreach (var obj in sceneObjects)
+            foreach (var identity in Resources.FindObjectsOfTypeAll<NetworkIdentity>())
             {
-                spawnableObjects.Add(obj.SceneId, obj);
+                if (!ConsiderForSpawning(identity))
+                    continue;
+                if (SceneObjectFilter != null && !SceneObjectFilter.Invoke(identity))
+                    continue;
+
+                spawnableObjects.Add(identity.SceneId, identity);
             }
         }
 
