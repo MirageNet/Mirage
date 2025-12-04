@@ -23,8 +23,6 @@ namespace Mirage
     public class ServerObjectManager : MonoBehaviour
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(ServerObjectManager));
-        /// <summary>HashSet for NetworkIdentity that can be re-used without allocation</summary>
-        private static HashSet<NetworkIdentity> _skipCache = new HashSet<NetworkIdentity>();
 
         internal RpcHandler _rpcHandler;
         private SyncVarReceiver _syncVarReceiver;
@@ -686,7 +684,6 @@ namespace Mirage
             return identity.IsSceneObject;
         }
 
-        private readonly List<NetworkIdentity> spawnCache = new();
         /// <summary>
         /// This causes NetworkIdentity objects in a scene to be spawned on a server.
         /// <para>
@@ -701,24 +698,27 @@ namespace Mirage
             if (!_server || !_server.Active)
                 throw new InvalidOperationException("Server was not active");
 
-            spawnCache.Clear();
+            using var spawnListWrapper = AutoPool<List<NetworkIdentity>>.Take();
+            var spawnList = spawnListWrapper.Item;
+            spawnList.Clear();
+
             foreach (var identity in Resources.FindObjectsOfTypeAll<NetworkIdentity>())
             {
                 if (!ValidateSceneObject(identity))
                     continue;
                 if (SceneObjectFilter != null && !SceneObjectFilter.Invoke(identity))
                     continue;
-                spawnCache.Add(identity);
+                spawnList.Add(identity);
             }
 
             // sort after filtering objects
-            spawnCache.Sort(NetworkIdentityComparer.instance);
-            foreach (var identity in spawnCache)
+            spawnList.Sort(NetworkIdentityComparer.instance);
+            foreach (var identity in spawnList)
             {
                 if (logger.LogEnabled()) logger.Log($"SpawnObjects sceneId:{identity.SceneId:X} name:{identity.gameObject.name}");
                 Spawn(identity);
             }
-            spawnCache.Clear();
+            spawnList.Clear();
         }
 
         /// <summary>
@@ -738,7 +738,7 @@ namespace Mirage
         /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
         /// </summary>
         /// <param name="player">The player to spawn objects for</param>
-        /// <param name="ignoreHasCharacter">If true will spawn visibile objects even if player does not have a spawned character yet</param>
+        /// <param name="ignoreHasCharacter">If true will spawn visible objects even if player does not have a spawned character yet</param>
         public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter)
         {
             SpawnVisibleObjects(player, ignoreHasCharacter, (HashSet<NetworkIdentity>)null);
@@ -748,7 +748,7 @@ namespace Mirage
         /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
         /// </summary>
         /// <param name="player">The player to spawn objects for</param>
-        /// <param name="ignoreHasCharacter">If true will spawn visibile objects even if player does not have a spawned character yet</param>
+        /// <param name="ignoreHasCharacter">If true will spawn visible objects even if player does not have a spawned character yet</param>
         public void SpawnVisibleObjects(INetworkPlayer player, NetworkIdentity skip)
         {
             SpawnVisibleObjects(player, false, skip);
@@ -758,13 +758,16 @@ namespace Mirage
         /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
         /// </summary>
         /// <param name="player">The player to spawn objects for</param>
-        /// <param name="ignoreHasCharacter">If true will spawn visibile objects even if player does not have a spawned character yet</param>
+        /// <param name="ignoreHasCharacter">If true will spawn visible objects even if player does not have a spawned character yet</param>
         /// <param name="skip">NetworkIdentity to skip when spawning. Can be null</param>
         public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter, NetworkIdentity skip)
         {
-            _skipCache.Clear();
-            _skipCache.Add(skip);
-            SpawnVisibleObjects(player, ignoreHasCharacter, _skipCache);
+            using var skipWrapper = AutoPool<HashSet<NetworkIdentity>>.Take();
+            var skipSet = skipWrapper.Item;
+            skipSet.Clear();
+            skipSet.Add(skip);
+            SpawnVisibleObjects(player, ignoreHasCharacter, skipSet);
+            skipSet.Clear();
         }
 
         /// <summary>
