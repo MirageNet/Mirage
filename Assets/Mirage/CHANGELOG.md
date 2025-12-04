@@ -1,3 +1,15 @@
+# [154.1.0](https://github.com/MirageNet/Mirage/compare/v154.0.0...v154.1.0) (2025-12-04)
+
+
+### Bug Fixes
+
+* using pools instead of static cache incase function is called 2nd time ([0fa39d9](https://github.com/MirageNet/Mirage/commit/0fa39d9897fe95dd349ae04660cf283604e92ac5))
+
+
+### Features
+
+* **ObjectManager:** adding optional filter for scene objects ([bb8294a](https://github.com/MirageNet/Mirage/commit/bb8294a2c66c0b1e227d1412600f8ba36e0564d9))
+
 # [154.0.0](https://github.com/MirageNet/Mirage/compare/v153.3.2...v154.0.0) (2025-11-13)
 
 
