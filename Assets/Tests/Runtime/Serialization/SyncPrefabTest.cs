@@ -78,9 +78,12 @@ namespace Mirage.Tests.Runtime.Serialization
         }
 
         [Test]
-        public void GetsHashFromPrefabEvenIfFieldIsSetUnlessPrefabHashIsZeroo()
+        public void GetsHashFromPrefabEvenIfFieldIsSetUnlessPrefabHashIsZero()
         {
-            var identity = CreateNetworkIdentity();
+            // avoid CreateNetworkIdentity because it sets hash
+            var go = CreateGameObject();
+            var identity = go.AddComponent<NetworkIdentity>();
+            // reset hash
             const int hash = 350;
             var inValue = new SyncPrefab()
             {

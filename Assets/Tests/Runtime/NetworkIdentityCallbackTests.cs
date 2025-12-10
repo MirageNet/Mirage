@@ -27,8 +27,8 @@ namespace Mirage.Tests.Runtime
         protected override async UniTask ExtraSetup()
         {
             await base.ExtraSetup();
-            gameObject = CreateGameObject();
-            identity = gameObject.AddComponent<NetworkIdentity>();
+            identity = CreateNetworkIdentity();
+            gameObject = identity.gameObject;
             identity.Server = server;
             identity.ServerObjectManager = serverObjectManager;
 

@@ -80,7 +80,9 @@ namespace Mirage.Tests
         protected NetworkIdentity CreateNetworkIdentity(bool disable = false)
         {
             var go = CreateGameObject($"A GameObject {toDestroy.Count}", disable);
-            return go.AddComponent<NetworkIdentity>();
+            var identity = go.AddComponent<NetworkIdentity>();
+            identity.PrefabHash = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
+            return identity;
         }
 
         /// <summary>
@@ -90,7 +92,8 @@ namespace Mirage.Tests
         protected T CreateBehaviour<T>(bool disable = false) where T : NetworkBehaviour
         {
             var go = CreateGameObject($"A NetworkBehaviour {typeof(T).Name} {toDestroy.Count}", disable);
-            go.AddComponent<NetworkIdentity>();
+            var identity = go.AddComponent<NetworkIdentity>();
+            identity.PrefabHash = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
             return go.AddComponent<T>();
         }
 

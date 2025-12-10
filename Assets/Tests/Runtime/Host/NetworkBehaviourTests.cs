@@ -58,13 +58,11 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void OnStartServer()
         {
-            var gameObject = CreateGameObject();
-            var netIdentity = gameObject.AddComponent<NetworkIdentity>();
-            var comp = gameObject.AddComponent<OnStartServerTestComponent>();
-            netIdentity.OnStartServer.AddListener(comp.OnStartServer);
+            var comp = CreateBehaviour<OnStartServerTestComponent>();
+            comp.Identity.OnStartServer.AddListener(comp.OnStartServer);
 
             Assert.That(comp.called, Is.False);
-            serverObjectManager.Spawn(gameObject);
+            serverObjectManager.Spawn(comp.gameObject);
 
             Assert.That(comp.called, Is.True);
         }
