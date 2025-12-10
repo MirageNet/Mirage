@@ -1,3 +1,10 @@
+## [154.1.1](https://github.com/MirageNet/Mirage/compare/v154.1.0...v154.1.1) (2025-12-10)
+
+
+### Bug Fixes
+
+* adding check to SendSpawnMessage to avoid server sending invalid SpawnMessage ([eb794e4](https://github.com/MirageNet/Mirage/commit/eb794e4f4a79e0b3839cb26889d913371b03b86f))
+
 # [154.1.0](https://github.com/MirageNet/Mirage/compare/v154.0.0...v154.1.0) (2025-12-04)
 
 
