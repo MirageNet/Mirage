@@ -453,6 +453,14 @@ namespace Mirage
             {
                 var isOwner = identity.Owner == player;
 
+                var prefabHash = identity.IsPrefab ? identity.PrefabHash : default(int?);
+                var sceneId = identity.IsSceneObject ? identity.SceneId : default(ulong?);
+
+                // same validation that client does
+                // no point sending message if client has no way to spawn it
+                if (prefabHash == null && sceneId == null)
+                    throw new SpawnObjectException($"Empty prefabHash and sceneId for {identity}");
+
                 ArraySegment<byte> payload = default;
                 var hasPayload = CreateSpawnMessagePayload(identity, ownerWriter, observersWriter);
                 if (hasPayload)
@@ -462,8 +470,6 @@ namespace Mirage
                         : observersWriter.ToArraySegment();
                 }
 
-                var prefabHash = identity.IsPrefab ? identity.PrefabHash : default(int?);
-                var sceneId = identity.IsSceneObject ? identity.SceneId : default(ulong?);
                 var msg = new SpawnMessage
                 {
                     NetId = identity.NetId,
