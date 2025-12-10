@@ -19,7 +19,8 @@ namespace Mirage.Tests
             server.ObjectManager = serverObjectManager;
             networkServerGameObject.AddComponent<NetworkClient>();
 
-            identity = CreateNetworkIdentity();
+            // avoid CreateNetworkIdentity because it sets hash
+            identity = CreateGameObject().AddComponent<NetworkIdentity>();
             identity.Server = server;
             identity.ServerObjectManager = serverObjectManager;
         }
