@@ -8,6 +8,7 @@ using UnityEditor.TestTools;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 using UnityEngine.TestTools;
+using TestMode = UnityEditor.TestTools.TestRunner.Api.TestMode; // fix for unity 6.3
 
 [assembly: TestPlayerBuildModifier(typeof(MakeRestsReleaseMode))]
 [assembly: PostBuildCleanup(typeof(MakeRestsReleaseMode))]
