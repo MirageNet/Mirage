@@ -1,3 +1,10 @@
+## [154.1.2](https://github.com/MirageNet/Mirage/compare/v154.1.1...v154.1.2) (2025-12-16)
+
+
+### Bug Fixes
+
+* fixing null ref in NetworkInformationPreview from EditorStyles ([7755343](https://github.com/MirageNet/Mirage/commit/7755343543dfac40ba7ec6b640515f32ca4bde1d))
+
 ## [154.1.1](https://github.com/MirageNet/Mirage/compare/v154.1.0...v154.1.1) (2025-12-10)
 
 
