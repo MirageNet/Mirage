@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -22,12 +23,26 @@ namespace Mirage
 
         private class Styles
         {
-            public GUIStyle LabelStyle = new GUIStyle(EditorStyles.label);
-            public GUIStyle ComponentName = new GUIStyle(EditorStyles.boldLabel);
-            public GUIStyle DisabledName = new GUIStyle(EditorStyles.miniLabel);
+            public readonly GUIStyle LabelStyle;
+            public readonly GUIStyle ComponentName;
+            public readonly GUIStyle DisabledName;
 
             public Styles()
             {
+                try // EditorStyles internal state can sometimes throw null
+                {
+                    LabelStyle = new GUIStyle(EditorStyles.label);
+                    ComponentName = new GUIStyle(EditorStyles.boldLabel);
+                    DisabledName = new GUIStyle(EditorStyles.miniLabel);
+                }
+                catch (NullReferenceException)
+                {
+                    Debug.LogWarning("EditorStyles threw NullReferenceException");
+                    LabelStyle = new GUIStyle();
+                    ComponentName = new GUIStyle();
+                    DisabledName = new GUIStyle();
+                }
+
                 var fontColor = new Color(0.7f, 0.7f, 0.7f);
                 LabelStyle.padding.right += 20;
                 LabelStyle.normal.textColor = fontColor;
