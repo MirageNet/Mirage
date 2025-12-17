@@ -1,3 +1,10 @@
+## [154.1.3](https://github.com/MirageNet/Mirage/compare/v154.1.2...v154.1.3) (2025-12-17)
+
+
+### Bug Fixes
+
+* fixing Exception from reader ([bae71ef](https://github.com/MirageNet/Mirage/commit/bae71efabbfc8ae9441baf12fc1075873de1b2ce))
+
 ## [154.1.2](https://github.com/MirageNet/Mirage/compare/v154.1.1...v154.1.2) (2025-12-16)
 
 
