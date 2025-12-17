@@ -83,8 +83,18 @@ namespace Mirage.Serialization
             return ZigZag.Decode(data);
         }
 
-        /// <exception cref="OverflowException">throws if values overflows uint</exception>
-        public static uint ReadPackedUInt32(this NetworkReader reader) => checked((uint)reader.ReadPackedUInt64());
+        public static uint ReadPackedUInt32(this NetworkReader reader)
+        {
+            var u = reader.ReadPackedUInt64();
+#if DEBUG
+            if (u > uint.MaxValue)
+                UnityEngine.Debug.LogError($"ReadPackedUInt32 Overflow");
+#endif
+            // avoid throwing
+            // the packing will only be wrong if build mismatch or cheater
+            // server should be doing validation on values it receives anyway
+            return (uint)u;
+        }
 
         public static long ReadPackedInt64(this NetworkReader reader)
         {
