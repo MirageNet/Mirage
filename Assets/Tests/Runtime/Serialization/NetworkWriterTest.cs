@@ -575,12 +575,15 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test, TestCaseSource(nameof(int32Fail))]
         public void TestPackedUInt32Failure(long data)
         {
-            Assert.Throws<OverflowException>(() =>
+            UnityEngine.TestTools.LogAssert.Expect(LogType.Error, "ReadPackedUInt32 Overflow");
+            // dont throw, hurts server performance
+            Assert.DoesNotThrow(() =>
             {
                 writer.WritePackedUInt64((ulong)data);
                 reader.Reset(writer.ToArraySegment());
                 reader.ReadPackedUInt32();
             });
+            UnityEngine.TestTools.LogAssert.NoUnexpectedReceived();
         }
 
         private static readonly int[] int32s =
@@ -620,12 +623,15 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test, TestCaseSource(nameof(int32Fail))]
         public void TestPackedInt32Failure(long data)
         {
-            Assert.Throws<OverflowException>(() =>
+            UnityEngine.TestTools.LogAssert.Expect(LogType.Error, "ReadPackedUInt32 Overflow");
+            // dont throw, hurts server performance
+            Assert.DoesNotThrow(() =>
             {
                 writer.WritePackedInt64(data);
                 reader.Reset(writer.ToArraySegment());
                 reader.ReadPackedInt32();
             });
+            UnityEngine.TestTools.LogAssert.NoUnexpectedReceived();
         }
 
         private static readonly ulong[] uint64s =
