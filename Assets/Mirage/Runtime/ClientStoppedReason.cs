@@ -9,7 +9,7 @@ namespace Mirage
     /// <remarks>
     /// Use different enums than SocketLayer so that:
     ///   User doesn't need to add reference to socket layer to use event;
-    ///   Give high level reason so that they are easierto understand by the end user.
+    ///   Give high level reason so that they are easier to understand by the end user.
     /// </remarks>
     [Serializable]
     public enum ClientStoppedReason
@@ -39,6 +39,10 @@ namespace Mirage
         ConnectingCancel = 6,
         /// <summary>Key given with first message did not match the value on the server, See SocketLayer Config</summary>
         KeyInvalid = 9,
+        /// <summary>
+        /// Send if <see cref="Config.SendRejectIfUnconnectedPacketIsInvalid"/> is true
+        /// </summary>
+        InvalidUnconnectedPacket = 11,
 
         /// <summary>Disconnect called when server was stopped in host mode</summary>
         HostModeStopped = 7,
@@ -71,6 +75,7 @@ namespace Mirage
                 case RejectReason.ServerFull: return ClientStoppedReason.ServerFull;
                 case RejectReason.KeyInvalid: return ClientStoppedReason.KeyInvalid;
                 case RejectReason.ClosedByPeer: return ClientStoppedReason.ConnectingCancel;
+                case RejectReason.InvalidUnconnectedPacket: return ClientStoppedReason.InvalidUnconnectedPacket;
             }
         }
     }

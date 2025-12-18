@@ -304,8 +304,8 @@ namespace Mirage.SocketLayer
                 if (packet.Type == PacketType.Command)
                 {
                     HandleCommand(connection, packet);
+                    // only set time if valid packet
                     connection.SetReceiveTime();
-
                 }
                 else if (_logger.Enabled(LogType.Warning))
                 {
@@ -346,6 +346,7 @@ namespace Mirage.SocketLayer
                     return;
             }
 
+            // only set time if valid packet
             connection.SetReceiveTime();
         }
 
@@ -374,10 +375,13 @@ namespace Mirage.SocketLayer
         private void HandleNewConnection(IEndPoint endPoint, Packet packet)
         {
             // if invalid, then reject without reason
-            if (!Validate(packet)) { return; }
-
-
-            if (AtMaxConnections())
+            if (!Validate(packet))
+            {
+                if (_config.SendRejectIfUnconnectedPacketIsInvalid)
+                    RejectConnectionWithReason(endPoint, RejectReason.InvalidUnconnectedPacket);
+                // else ignore
+            }
+            else if (AtMaxConnections())
             {
                 if (_logger.Enabled(LogType.Warning))
                     _logger.Log(LogType.Warning, $"Reject Connection: At max connections");

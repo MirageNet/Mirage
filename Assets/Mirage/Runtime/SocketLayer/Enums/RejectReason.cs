@@ -29,5 +29,10 @@ namespace Mirage.SocketLayer
         /// Key given with first message did not match the value on the server
         /// </summary>
         KeyInvalid = 4,
+
+        /// <summary>
+        /// Send if <see cref="Config.SendRejectIfUnconnectedPacketIsInvalid"/> is true
+        /// </summary>
+        InvalidUnconnectedPacket = 5,
     }
 }

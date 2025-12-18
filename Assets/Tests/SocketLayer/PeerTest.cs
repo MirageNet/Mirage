@@ -198,5 +198,55 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             // if a receive handler calls close while in receive loop we should stop the loop before calling poll again
             // if we dont we will get object disposed errors
         }
+
+        [Test]
+        [TestCase(new byte[] {  })] // empty
+        [TestCase(new byte[] { 0 })] // too short
+        [TestCase(new byte[] { 255, 255 })] // not a command
+        [TestCase(new byte[] { (byte)PacketType.Command, 255 })] // command but not ConnectRequest
+        public void SendsRejectForInvalidUnconnectedPacketIfConfigIsTrue(byte[] invalidPacket)
+        {
+            config.SendRejectIfUnconnectedPacketIsInvalid = true;
+            peer.Bind(TestEndPoint.CreateSubstitute());
+
+            var connectAction = Substitute.For<Action<IConnection>>();
+            peer.OnConnected += connectAction;
+
+            var endPoint = TestEndPoint.CreateSubstitute();
+            socket.SetupReceiveCall(invalidPacket, endPoint);
+
+            peer.UpdateTest();
+
+            // server sends reject for invalid
+            socket.Received(1).Send(
+                endPoint: endPoint,
+                length: 3,
+                packet: Arg.Is<byte[]>(sent =>
+                    sent[0] == (byte)PacketType.Command &&
+                    sent[1] == (byte)Commands.ConnectionRejected &&
+                    sent[2] == (byte)RejectReason.InvalidUnconnectedPacket
+                ));
+            connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+
+        [Test]
+        public void IgnoresInvalidCommandWhenConfigIsFalse()
+        {
+            // config.SendRejectIfUnconnectedPacketIsInvalid is false by default
+            peer.Bind(TestEndPoint.CreateSubstitute());
+
+            var connectAction = Substitute.For<Action<IConnection>>();
+            peer.OnConnected += connectAction;
+
+            var endPoint = TestEndPoint.CreateSubstitute();
+            var invalidPacket = new byte[] { (byte)PacketType.Command, 255 };
+            socket.SetupReceiveCall(invalidPacket, endPoint);
+
+            peer.UpdateTest();
+
+            // server does nothing for invalid
+            socket.DidNotReceiveWithAnyArgs().Send(default, default, default);
+            connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
     }
 }
