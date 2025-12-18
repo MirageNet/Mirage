@@ -55,13 +55,16 @@ namespace Mirage
         {
             switch (reason)
             {
-                default:
                 case DisconnectReason.None: return ClientStoppedReason.None;
                 case DisconnectReason.Timeout: return ClientStoppedReason.Timeout;
                 case DisconnectReason.RequestedByRemotePeer: return ClientStoppedReason.RemoteConnectionClosed;
                 case DisconnectReason.RequestedByLocalPeer: return ClientStoppedReason.LocalConnectionClosed;
                 case DisconnectReason.InvalidPacket: return ClientStoppedReason.InvalidPacket;
                 case DisconnectReason.SendBufferFull: return ClientStoppedReason.SendBufferFull;
+
+                default:
+                    // just hard cast, it could be custom number from transport
+                    return (ClientStoppedReason)reason;
             }
         }
 
@@ -69,13 +72,16 @@ namespace Mirage
         {
             switch (reason)
             {
-                default:
                 case RejectReason.None: return ClientStoppedReason.None;
                 case RejectReason.Timeout: return ClientStoppedReason.ConnectingTimeout;
                 case RejectReason.ServerFull: return ClientStoppedReason.ServerFull;
                 case RejectReason.KeyInvalid: return ClientStoppedReason.KeyInvalid;
                 case RejectReason.ClosedByPeer: return ClientStoppedReason.ConnectingCancel;
                 case RejectReason.InvalidUnconnectedPacket: return ClientStoppedReason.InvalidUnconnectedPacket;
+
+                default:
+                    // just hard cast, it could be custom number from transport
+                    return (ClientStoppedReason)reason;
             }
         }
     }
