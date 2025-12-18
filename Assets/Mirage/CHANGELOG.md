@@ -1,3 +1,10 @@
+# [154.2.0](https://github.com/MirageNet/Mirage/compare/v154.1.3...v154.2.0) (2025-12-18)
+
+
+### Features
+
+* adding option for Peer to always send reject reason, allowing stateful sockets to close a connection ([d3c2a5d](https://github.com/MirageNet/Mirage/commit/d3c2a5debf429aaaf301187ca9f370d6d20fb106))
+
 ## [154.1.3](https://github.com/MirageNet/Mirage/compare/v154.1.2...v154.1.3) (2025-12-17)
 
 
