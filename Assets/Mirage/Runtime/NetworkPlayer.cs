@@ -462,16 +462,11 @@ namespace Mirage
         /// <param name="flags">optional flag for error type</param>
         public void SetError(int cost, PlayerErrorFlags flags)
         {
+            // silent return, makes calling this easier, no checking for host/client (ErrorRateLimit==null) in shared code used by server and client
             if (IsHost)
-            {
-                logger.LogWarning($"SetError does nothing on host");
                 return;
-            }
             if (ErrorRateLimit == null)
-            {
-                logger.LogError($"SetError should only be called on server if ErrorRateLimitEnabled is true");
                 return;
-            }
 
             ErrorFlags |= flags;
             var overLimit = ErrorRateLimit.UseTokens(cost);
