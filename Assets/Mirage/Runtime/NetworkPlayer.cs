@@ -40,6 +40,12 @@ namespace Mirage
 
         public bool IsHost { get; }
 
+        private readonly NetworkServer _server;
+        /// <summary>Any flags set from catching errors</summary>
+        public PlayerErrorFlags ErrorFlags { get; private set; }
+        /// <summary>Error rate limiting, will invoke disconnect player (or call <see cref="NetworkServer._errorRateLimitReached"/> if set) when limit is reached</summary>
+        public RateLimitBucket ErrorRateLimit { get; }
+
         /// <summary>
         /// Has this player been marked as disconnected
         /// <para>Messages sent to disconnected players will be ignored</para>
@@ -203,10 +209,18 @@ namespace Mirage
         /// </summary>
         /// <param name="connection">Transport level connection for this player</param>
         /// <param name="isHost">True if this player is the host player</param>
-        public NetworkPlayer(IConnection connection, bool isHost)
+        /// <param name="server">The server that created this player, can be null for client side players</param>
+        public NetworkPlayer(IConnection connection, bool isHost, NetworkServer server, RateLimitBucket.RefillConfig? errorRateLimit)
         {
             _connection = connection ?? throw new ArgumentNullException(nameof(connection));
             IsHost = isHost;
+
+            _server = server;
+            if (errorRateLimit != null)
+            {
+                Debug.Assert(_server != null, "Server should be set if using errorRateLimit");
+                ErrorRateLimit = new RateLimitBucket(Time.unscaledTimeAsDouble, errorRateLimit.Value);
+            }
         }
 
         /// <summary>
@@ -439,6 +453,35 @@ namespace Mirage
                 // make sure to check sceneObject, we dont want to destory server's copy of a Scene object
                 identity.ServerObjectManager.Destroy(identity, destroyServerObject: !identity.IsSceneObject);
             }
+        }
+
+        /// <summary>
+        /// Call this when player causes an error
+        /// </summary>
+        /// <param name="cost">how bad or costly is the error. higher cost means player will trigger limit faster</param>
+        /// <param name="flags">optional flag for error type</param>
+        public void SetError(int cost, PlayerErrorFlags flags)
+        {
+            if (IsHost)
+            {
+                logger.LogWarning($"SetError does nothing on host");
+                return;
+            }
+            if (ErrorRateLimit == null)
+            {
+                logger.LogError($"SetError should only be called on server if ErrorRateLimitEnabled is true");
+                return;
+            }
+
+            ErrorFlags |= flags;
+            var overLimit = ErrorRateLimit.UseTokens(cost);
+            if (overLimit)
+                _server.ErrorRateLimitReached(this);
+        }
+        /// <summary>Call to reset error flags</summary>
+        public void ResetErrorFlag()
+        {
+            ErrorFlags = 0;
         }
     }
 }

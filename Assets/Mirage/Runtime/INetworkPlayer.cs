@@ -141,6 +141,22 @@ namespace Mirage
         void SetAuthentication(PlayerAuthentication authentication, bool allowReplace = false);
         bool IsAuthenticated { get; }
 
+
+        /// <summary>Error rate limiting, will invoke disconnect player (or call <see cref="NetworkServer._errorRateLimitReached"/> if set) when limit is reached</summary>
+        RateLimitBucket ErrorRateLimit { get; }
+        /// <summary>Any flags set from catching errors</summary>
+        PlayerErrorFlags ErrorFlags { get; }
+
+        /// <summary>
+        /// Call this when player causes an error
+        /// </summary>
+        /// <param name="cost">how bad or costly is the error. higher cost means player will trigger limit faster</param>
+        /// <param name="flags">optional flag for error type</param>
+        void SetError(int cost, PlayerErrorFlags flags);
+
+        /// <summary>Call to reset error flags</summary>
+        void ResetErrorFlag();
+
         /// <summary>True if this Player is the local player on the server or client</summary>
         bool IsHost { get; }
 
@@ -152,5 +168,54 @@ namespace Mirage
     {
         /// <summary>Scene is fully loaded and we now can do things with player.</summary>
         bool SceneIsReady { get; set; }
+    }
+
+    [Flags]
+    public enum PlayerErrorFlags
+    {
+        /// <summary>No custom errors code set.</summary>
+        None = 0,
+
+        //** Likely developer bugs **
+
+        /// <summary>Rpc function threw <see cref="NullReferenceException"/> or <see cref="UnityEngine.MissingReferenceException"/>. Likely logic error in code</summary>
+        RpcNullException = 1 << 0,
+
+        /// <summary>Rpc function threw <see cref="Exception"/>. Likely logic error in code</summary>
+        RpcException = 1 << 1,
+
+
+        //** Connection/versioning issues, could be normal player or hacker but they should be disconnected **
+
+        /// <summary>NetworkReader threw <see cref="Exception"/>. More likely to be out of sync version than logic error, but could be caused by custom reader.</summary>
+        DeserializationException = 1 << 2,
+
+        /// <summary>Rpc index or message type was wrong. This could be from out-of-date build.</summary>
+        RpcSync = 1 << 3,
+
+        /// <summary>User hit a rate limit, rather than causing a direct error</summary>
+        RateLimit = 1 << 4,
+
+
+        //** Security/Malicious Intent **
+
+        /// <summary>message send before Authentication is complete</summary>
+        Unauthorized = 1 << 5,
+
+        /// <summary>Error was critical, should be used to indicate player should be kicked/timed out/banned</summary>
+        Critical = 1 << 6,
+
+
+        //** Custom developer defined errors **
+
+        /// <summary> 
+        /// Mirage errors will be defined from bits 0 to 16. the remaining 16 bits can be used for custom error.
+        /// <para>
+        /// <c>CustomError</c> can be used as start of bit shift. <br />
+        /// MyError1 = CustomError &lt;&lt; 0 <br />
+        /// MyError2 = CustomError &lt;&lt; 1 <br />
+        /// </para>
+        /// </summary>
+        CustomError = 1 << 16
     }
 }

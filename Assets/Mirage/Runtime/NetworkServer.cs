@@ -25,6 +25,7 @@ namespace Mirage
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkServer));
 
+        public delegate void RateLimitCallback(INetworkPlayer player);
         public delegate void AuthFailCallback(INetworkPlayer player, AuthenticationResult result);
 
         public bool EnablePeerMetrics;
@@ -44,10 +45,6 @@ namespace Mirage
         [Tooltip("Maximum number of concurrent connections. Excluding the host player.\nNOTE: this field is not used if PeerConfig is set via code.")]
         [Min(1)]
         public int MaxConnections = 4;
-
-        public bool DisconnectOnException = true;
-        [Tooltip("Should the message handler rethrow the exception after logging. This should only be used when deubgging as it may stop other Mirage functions from running after messages handling")]
-        public bool RethrowException = false;
 
         [Tooltip("If true will set Application.runInBackground")]
         public bool RunInBackground = true;
@@ -110,12 +107,27 @@ namespace Mirage
         [SerializeField] private AddLateEventUnity _onStopHost = new AddLateEventUnity();
         public IAddLateEventUnity OnStopHost => _onStopHost;
 
+        [Header("Error Spam")]
+        [System.Obsolete("Use RpcErrorConfig and RateLimitCallback", true)]
+        [HideInInspector]
+        public bool DisconnectOnException = true;
+
+        [Tooltip("Should the message handler rethrow the exception after logging. This should only be used when debugging as it may stop other Mirage functions from running after messages handling")]
+        public bool RethrowException = false;
+
+        public bool ErrorRateLimitEnabled = true;
+
+        [Tooltip("Configuration for kicking players who send too many invalid Network network messages and RPC. Errors may cost more than 1 token.")]
+        public RateLimitBucket.RefillConfig ErrorRateLimitConfig = new RateLimitBucket.RefillConfig
+        {
+            MaxTokens = 200,
+            Refill = 50,
+            Interval = 1,
+        };
+
         /// <summary>
         /// The connection to the host mode client (if any).
         /// </summary>
-        // original HLAPI has .localConnections list with only m_LocalConnection in it
-        // (for backwards compatibility because they removed the real localConnections list a while ago)
-        // => removed it for easier code. use .localConnection now!
         public INetworkPlayer LocalPlayer { get; private set; }
 
         /// <summary>
@@ -159,18 +171,49 @@ namespace Mirage
         [NonSerialized] private int _startNumber;
 
         public NetworkWorld World { get; private set; }
-        // todo move syncVarsender, it doesn't need to be a public fields on network server any more
+        // todo move syncVarSender, it doesn't need to be a public fields on network server any more
         public SyncVarSender SyncVarSender { get; private set; }
 
         public MessageHandler MessageHandler { get; private set; }
 
         private AuthFailCallback _authFailCallback;
+        private RateLimitCallback _errorRateLimitReached;
 
         /// <summary>
         /// Set to true if you want to manually call <see cref="UpdateReceive"/> and <see cref="UpdateSent"/> and stop mirage from automatically calling them
         /// </summary>
         [HideInInspector]
         public bool ManualUpdate = false;
+
+        public void ErrorRateLimitReached(INetworkPlayer player)
+        {
+            if (_errorRateLimitReached != null)
+            {
+                if (logger.WarnEnabled())
+                    logger.LogWarning($"ErrorRateLimit reached {player}. Invoking user callback");
+                _errorRateLimitReached.Invoke(player);
+            }
+            else
+            {
+                if (logger.WarnEnabled())
+                    logger.LogWarning($"ErrorRateLimit reached {player}. Disconnecting player");
+                player.Disconnect();
+            }
+        }
+        public void SetErrorRateLimitReachedCallback(RateLimitCallback callback)
+        {
+            if (_errorRateLimitReached != null && callback != null && logger.WarnEnabled())
+                logger.LogWarning($"Replacing old callback. Only 1 error limit callback can be used at once");
+
+            _errorRateLimitReached = callback;
+        }
+
+        private void UpdatePlayerErrorLimits()
+        {
+            var now = Time.unscaledTimeAsDouble;
+            foreach (var player in AllPlayers)
+                player.ErrorRateLimit?.CheckRefill(now);
+        }
 
         private void OnDestroy()
         {
@@ -260,7 +303,7 @@ namespace Mirage
             SyncVarSender = new SyncVarSender();
 
             LocalClient = localClient;
-            MessageHandler = new MessageHandler(World, DisconnectOnException, RethrowException);
+            MessageHandler = new MessageHandler(World, disconnectOnException: false, RethrowException);
             MessageHandler.RegisterHandler<NetworkPingMessage>(World.Time.OnServerPing, allowUnauthenticated: true);
 
             var dataHandler = new DataHandler(this, MessageHandler, _connections);
@@ -361,7 +404,13 @@ namespace Mirage
             UpdateSent();
         }
 
-        public void UpdateReceive() => _peer?.UpdateReceive();
+        public void UpdateReceive()
+        {
+            if (ErrorRateLimitEnabled)
+                UpdatePlayerErrorLimits();
+            _peer?.UpdateReceive();
+        }
+
         public void UpdateSent()
         {
             SyncVarSender?.Update();
@@ -370,7 +419,7 @@ namespace Mirage
 
         private void Peer_OnConnected(IConnection conn)
         {
-            var player = new NetworkPlayer(conn, false);
+            var player = new NetworkPlayer(conn, false, this, ErrorRateLimitEnabled ? ErrorRateLimitConfig : null);
             if (logger.LogEnabled()) logger.Log($"Server new player {player}");
 
             // add connection
@@ -480,7 +529,7 @@ namespace Mirage
                 throw new InvalidOperationException("Local client connection already exists");
             }
 
-            var player = new NetworkPlayer(connection, true);
+            var player = new NetworkPlayer(connection, true, this, null);
             LocalPlayer = player;
             LocalClient = client;
 
