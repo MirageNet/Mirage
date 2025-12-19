@@ -19,7 +19,7 @@ namespace Mirage.Tests.Runtime
         public void SetUp()
         {
             connection = Substitute.For<SocketLayer.IConnection>();
-            player = new NetworkPlayer(connection, false);
+            player = new NetworkPlayer(connection, false, null, null);
             var newAuthh = new Mirage.Authentication.PlayerAuthentication(null, null);
             player.SetAuthentication(newAuthh, true);
 

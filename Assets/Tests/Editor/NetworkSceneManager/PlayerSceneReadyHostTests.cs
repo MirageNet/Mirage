@@ -9,7 +9,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void NetworkPlayerStartsReady()
         {
-            var player = new NetworkPlayer(Substitute.For<SocketLayer.IConnection>(), false);
+            var player = new NetworkPlayer(Substitute.For<SocketLayer.IConnection>(), false, null, null);
             Assert.That(player.SceneIsReady, Is.True);
         }
 

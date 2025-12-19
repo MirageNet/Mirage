@@ -15,7 +15,7 @@ namespace Mirage.Tests.Runtime
         public virtual void SetUp()
         {
             connection = Substitute.For<SocketLayer.IConnection>();
-            player = new NetworkPlayer(connection, false);
+            player = new NetworkPlayer(connection, false, null, null);
         }
 
         [TearDown]
