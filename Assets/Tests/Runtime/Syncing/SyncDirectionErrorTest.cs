@@ -102,6 +102,8 @@ namespace Mirage.Tests.Runtime.Syncing
             // should not throw, but should give warning
             var msgType = MessagePacker.UnpackId(_reader);
 
+            // note: rethrow is on, so we expect a log message and throw
+            LogAssert.Expect(LogType.Error, new Regex(".*DeserializeFailedException in Message handler.*"));
             var exception = Assert.Throws<DeserializeFailedException>(() =>
             {
                 server.MessageHandler.InvokeHandler(ServerPlayer(0), msgType, _reader);
@@ -112,6 +114,12 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(serverComp3.guild.name, Is.Null.Or.Empty, "Server should not have updated value");
 
             Assert.That(exception.Message, Does.StartWith("Invalid sync settings on"));
+
+            // Assert that the error flags are set on the player
+            Assert.That(ServerPlayer(0).ErrorFlags, Is.Not.EqualTo(PlayerErrorFlags.None), "Error flags should be set");
+            Assert.That(ServerPlayer(0).ErrorFlags & PlayerErrorFlags.RpcException, Is.Not.Zero, "Expected RpcException flag");
+            // Also assert that the player is still connected, as a single deserialize error typically doesn't auto-disconnect with default settings
+            Assert.That(ServerPlayer(0).IsConnected, Is.True, "Player should remain connected after a single deserialize error");
         }
     }
 }
