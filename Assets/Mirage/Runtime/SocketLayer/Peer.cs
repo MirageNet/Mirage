@@ -588,14 +588,22 @@ namespace Mirage.SocketLayer
             {
                 var removed = _connections.Remove(connection.EndPoint);
                 connection.State = ConnectionState.Destroyed;
-
-                if (connection is IDisposable disposable)
-                    disposable.Dispose();
-
                 // value should be removed from dictionary
                 if (!removed)
                 {
                     _logger?.Error($"Failed to remove {connection} from connection set");
+                }
+
+                // try/catch just incase something goes wrong
+                // if it does we dont want to be stuck running dispose every frame
+                try
+                {
+                    if (connection is IDisposable disposable)
+                        disposable.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    _logger?.Error($"Connection.Dispose threw: {ex}");
                 }
             }
             _connectionsToRemove.Clear();
