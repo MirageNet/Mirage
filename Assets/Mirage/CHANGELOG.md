@@ -1,3 +1,15 @@
+# [155.1.0](https://github.com/MirageNet/Mirage/compare/v155.0.0...v155.1.0) (2025-12-19)
+
+
+### Bug Fixes
+
+* avoiding logs from new player.SetError ([d92f42b](https://github.com/MirageNet/Mirage/commit/d92f42b9f6b5b29652d7436d3ecf5e1c2f3ee475))
+
+
+### Features
+
+* adding PlayerErrorFlags.LikelyCheater flag ([70bc6a1](https://github.com/MirageNet/Mirage/commit/70bc6a1d27a4605b72c324c5b0be5c1383eb81e7))
+
 # [155.0.0](https://github.com/MirageNet/Mirage/compare/v154.3.0...v155.0.0) (2025-12-19)
 
 
