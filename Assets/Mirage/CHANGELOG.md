@@ -1,3 +1,13 @@
+# [155.0.0](https://github.com/MirageNet/Mirage/compare/v154.3.0...v155.0.0) (2025-12-19)
+
+
+* feat!: better error handling for NetworkPlayers ([bac64ae](https://github.com/MirageNet/Mirage/commit/bac64aeb27b8e1e5c70a5a6892c102ac705afbdd))
+
+
+### BREAKING CHANGES
+
+* NetworkServer.DisconnectOnException is no longer used. ErrorRateLimitEnabled and ErrorRateLimitConfig should be used instead
+
 # [154.3.0](https://github.com/MirageNet/Mirage/compare/v154.2.0...v154.3.0) (2025-12-19)
 
 
