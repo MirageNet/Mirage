@@ -153,6 +153,12 @@ namespace Mirage
         /// <param name="cost">how bad or costly is the error. higher cost means player will trigger limit faster</param>
         /// <param name="flags">optional flag for error type</param>
         void SetError(int cost, PlayerErrorFlags flags);
+        /// <summary>
+        /// Call this when player causes an error, will set cost to be above maxTokens to ensure that limit is cheated to trigger disconnect.
+        /// <para>If <see cref="ErrorRateLimit"/> is null will call <see cref="Disconnect"/> instead</para>
+        /// </summary>
+        /// <param name="flags">optional flag for error type</param>
+        void SetErrorAndDisconnect(PlayerErrorFlags flags);
 
         /// <summary>Call to reset error flags</summary>
         void ResetErrorFlag();

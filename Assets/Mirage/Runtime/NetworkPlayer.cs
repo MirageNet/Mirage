@@ -463,8 +463,6 @@ namespace Mirage
         public void SetError(int cost, PlayerErrorFlags flags)
         {
             // silent return, makes calling this easier, no checking for host/client (ErrorRateLimit==null) in shared code used by server and client
-            if (IsHost)
-                return;
             if (ErrorRateLimit == null)
                 return;
 
@@ -473,6 +471,21 @@ namespace Mirage
             if (overLimit)
                 _server.ErrorRateLimitReached(this);
         }
+
+        /// <summary>
+        /// Call this when player causes an error, will set cost to be above maxTokens to ensure that limit is cheated to trigger disconnect.
+        /// <para>If <see cref="ErrorRateLimit"/> is null will call <see cref="Disconnect"/> instead</para>
+        /// </summary>
+        /// <param name="flags">optional flag for error type</param>
+        public void SetErrorAndDisconnect(PlayerErrorFlags flags)
+        {
+            if (ErrorRateLimit != null)
+                // use max+1 tokens to ensure ErrorRateLimitReached is called
+                SetError(ErrorRateLimit.Config.MaxTokens + 1, flags);
+            else
+                Disconnect();
+        }
+
         /// <summary>Call to reset error flags</summary>
         public void ResetErrorFlag()
         {

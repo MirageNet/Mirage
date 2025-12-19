@@ -4,7 +4,7 @@ namespace Mirage.SocketLayer
 {
     public class RateLimitBucket
     {
-        private readonly RefillConfig _config;
+        public readonly RefillConfig Config;
         private float _tokens;
         private double _previousRefill;
 
@@ -17,7 +17,7 @@ namespace Mirage.SocketLayer
             if (config.Refill < 0)
                 throw new ArgumentException("Refill can't be negative", "RefillConfig.Refill");
 
-            _config = config;
+            Config = config;
             _tokens = config.MaxTokens;
             _previousRefill = now;
         }
@@ -32,13 +32,13 @@ namespace Mirage.SocketLayer
 
             // this will cover case where elapsed is negative
             // (which shouldn't happen but if it does it will be fine)
-            if (elapsed < _config.Interval)
+            if (elapsed < Config.Interval)
                 return;
 
             _previousRefill = now;
-            var tokensPerSecond = _config.Refill / _config.Interval;
+            var tokensPerSecond = Config.Refill / Config.Interval;
             var tokensToAdd = elapsed * tokensPerSecond;
-            _tokens = Math.Min(_config.MaxTokens, _tokens + tokensToAdd);
+            _tokens = Math.Min(Config.MaxTokens, _tokens + tokensToAdd);
         }
 
         /// <summary>

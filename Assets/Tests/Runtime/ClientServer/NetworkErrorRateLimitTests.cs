@@ -5,7 +5,7 @@ using Mirage.Tests.Runtime.Host;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Runtime.ClientServer
+namespace Mirage.Tests.Runtime.ClientServer.ErrorRateLimit
 {
     public class NetworkErrorRateLimitTests : ClientServerSetup
     {
@@ -56,6 +56,30 @@ namespace Mirage.Tests.Runtime.ClientServer
         });
 
         [UnityTest]
+        public IEnumerator SetErrorAndDisconnectDisconnectsPlayer() => UniTask.ToCoroutine(async () =>
+        {
+            var disconnected = false;
+            server.Disconnected.AddListener(player =>
+            {
+                if (player == serverPlayer)
+                {
+                    disconnected = true;
+                }
+            });
+
+            serverPlayer.SetErrorAndDisconnect(PlayerErrorFlags.Critical);
+
+            // Wait for a few frames for disconnect to process
+            await UniTask.Yield();
+            await UniTask.Yield();
+
+            Assert.That(disconnected, Is.True);
+            Assert.That(client.IsConnected, Is.False);
+            Assert.That(serverPlayer.ErrorFlags, Is.EqualTo(PlayerErrorFlags.Critical));
+        });
+
+
+        [UnityTest]
         public IEnumerator CustomCallbackInvokedWhenErrorLimitReached() => UniTask.ToCoroutine(async () =>
         {
             var callbackInvoked = false;
@@ -69,6 +93,29 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             // Consume all tokens plus one
             serverPlayer.SetError(MAX_TOKENS + 1, PlayerErrorFlags.RpcException);
+
+            await UniTask.Yield();
+            await UniTask.Yield();
+
+            Assert.That(callbackInvoked, Is.True);
+            Assert.That(receivedPlayer, Is.EqualTo(serverPlayer));
+            Assert.That(client.IsConnected, Is.True, "Client should not be disconnected if custom callback is used");
+            Assert.That(serverPlayer.ErrorFlags, Is.EqualTo(PlayerErrorFlags.RpcException));
+        });
+
+        [UnityTest]
+        public IEnumerator SetErrorAndDisconnectCallsCustomCallback() => UniTask.ToCoroutine(async () =>
+        {
+            var callbackInvoked = false;
+            INetworkPlayer receivedPlayer = null;
+
+            server.SetErrorRateLimitReachedCallback((player) =>
+            {
+                callbackInvoked = true;
+                receivedPlayer = player;
+            });
+
+            serverPlayer.SetErrorAndDisconnect(PlayerErrorFlags.RpcException);
 
             await UniTask.Yield();
             await UniTask.Yield();
@@ -165,10 +212,33 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [Test]
-        public void SetErrorWhenRateLimitNotEnabledLogsError()
+        public void SetErrorWhenRateLimitNotEnabledHasNoEffect()
         {
             serverPlayer.SetError(1, PlayerErrorFlags.RpcException);
             Assert.That(serverPlayer.ErrorFlags, Is.EqualTo(PlayerErrorFlags.None));
         }
+
+        [UnityTest]
+        public IEnumerator SetErrorAndDisconnectDisconnectsWhenRateLimitDisabled() => UniTask.ToCoroutine(async () =>
+        {
+            var disconnected = false;
+            server.Disconnected.AddListener(player =>
+            {
+                if (player == serverPlayer)
+                {
+                    disconnected = true;
+                }
+            });
+
+            serverPlayer.SetErrorAndDisconnect(PlayerErrorFlags.Critical);
+
+            // Wait for a few frames for disconnect to process
+            await UniTask.Yield();
+            await UniTask.Yield();
+
+            Assert.That(disconnected, Is.True);
+            Assert.That(client.IsConnected, Is.False);
+            Assert.That(serverPlayer.ErrorFlags, Is.EqualTo(PlayerErrorFlags.None), "Error flags should not be set if rate limit is disabled");
+        });
     }
 }
