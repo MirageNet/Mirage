@@ -21,6 +21,7 @@ namespace Mirage.Weaver
         protected readonly Dictionary<TypeDefinition, MethodReference> collectionMethods = new Dictionary<TypeDefinition, MethodReference>(new TypeReferenceComparer());
         private readonly IWeaverLogger logger;
         protected readonly ModuleDefinition module;
+        protected readonly NetworkHashGenerator hashGenerator;
 
         public int Count => funcs.Count;
 
@@ -29,10 +30,11 @@ namespace Mirage.Weaver
         /// </summary>
         protected abstract string FunctionTypeLog { get; }
 
-        protected SerializeFunctionBase(ModuleDefinition module, IWeaverLogger logger)
+        protected SerializeFunctionBase(ModuleDefinition module, IWeaverLogger logger, NetworkHashGenerator hashGenerator)
         {
             this.logger = logger;
             this.module = module;
+            this.hashGenerator = hashGenerator;
         }
 
         public void Register(TypeReference dataType, MethodReference methodReference)

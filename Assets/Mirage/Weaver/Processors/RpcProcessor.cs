@@ -15,14 +15,16 @@ namespace Mirage.Weaver
         protected readonly Readers readers;
         protected readonly Writers writers;
         protected readonly IWeaverLogger logger;
+        protected readonly NetworkHashGenerator hashGenerator;
 
 
-        protected RpcProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger)
+        protected RpcProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger, NetworkHashGenerator hashGenerator)
         {
             this.module = module;
             this.readers = readers;
             this.writers = writers;
             this.logger = logger;
+            this.hashGenerator = hashGenerator;
         }
 
         /// <summary>

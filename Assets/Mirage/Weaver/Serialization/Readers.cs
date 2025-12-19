@@ -13,7 +13,13 @@ namespace Mirage.Weaver
 {
     public class Readers : SerializeFunctionBase
     {
-        public Readers(ModuleDefinition module, IWeaverLogger logger) : base(module, logger) { }
+        public Readers(ModuleDefinition module, IWeaverLogger logger, NetworkHashGenerator hashGenerator) : base(module, logger, hashGenerator) { }
+
+        public override void Register(TypeReference dataType, MethodReference methodReference)
+        {
+            base.Register(dataType, methodReference);
+            hashGenerator.AddReader(dataType, methodReference);
+        }
 
         protected override string FunctionTypeLog => "read function";
         protected override Expression<Action> ArrayExpression => () => Mirage.Serialization.CollectionExtensions.ReadArray<byte>(default);

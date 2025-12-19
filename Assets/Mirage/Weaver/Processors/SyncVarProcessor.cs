@@ -20,15 +20,17 @@ namespace Mirage.Weaver
         private readonly Readers readers;
         private readonly Writers writers;
         private readonly PropertySiteProcessor propertySiteProcessor;
+        private readonly NetworkHashGenerator hashGenerator;
 
         private FoundNetworkBehaviour behaviour;
 
-        public SyncVarProcessor(ModuleDefinition module, Readers readers, Writers writers, PropertySiteProcessor propertySiteProcessor)
+        public SyncVarProcessor(ModuleDefinition module, Readers readers, Writers writers, PropertySiteProcessor propertySiteProcessor, NetworkHashGenerator hashGenerator)
         {
             this.module = module;
             this.readers = readers;
             this.writers = writers;
             this.propertySiteProcessor = propertySiteProcessor;
+            this.hashGenerator = hashGenerator;
         }
 
         public void ProcessSyncVars(TypeDefinition td, IWeaverLogger logger)
@@ -50,6 +52,7 @@ namespace Mirage.Weaver
                         var syncVar = behaviour.AddSyncVar(fd);
                         ProcessSyncVar(syncVar);
                         syncVar.HasProcessed = true;
+                        hashGenerator.AddSyncVar(fd);
                     }
                 }
                 catch (ValueSerializerException e)

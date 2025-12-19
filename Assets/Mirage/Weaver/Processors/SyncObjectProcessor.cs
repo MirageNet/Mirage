@@ -13,12 +13,14 @@ namespace Mirage.Weaver
         private readonly Readers readers;
         private readonly Writers writers;
         private readonly IWeaverLogger logger;
+        private readonly NetworkHashGenerator hashGenerator;
 
-        public SyncObjectProcessor(Readers readers, Writers writers, IWeaverLogger logger)
+        public SyncObjectProcessor(Readers readers, Writers writers, IWeaverLogger logger, NetworkHashGenerator hashGenerator)
         {
             this.readers = readers;
             this.writers = writers;
             this.logger = logger;
+            this.hashGenerator = hashGenerator;
         }
 
         /// <summary>
@@ -53,6 +55,7 @@ namespace Mirage.Weaver
                     GenerateReadersAndWriters(fd.FieldType);
 
                     syncObjects.Add(fd);
+                    hashGenerator.AddSyncObject(fd);
                 }
             }
 

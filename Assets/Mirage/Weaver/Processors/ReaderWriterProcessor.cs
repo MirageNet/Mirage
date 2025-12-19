@@ -21,7 +21,7 @@ namespace Mirage.Weaver
             Console.Write($"[Weaver.ReaderWriterProcessor] {msg}\n");
         }
 
-        private readonly HashSet<TypeReference> messages = new HashSet<TypeReference>(new TypeReferenceComparer());
+        public readonly HashSet<TypeReference> Messages = new HashSet<TypeReference>(new TypeReferenceComparer());
 
         private readonly IWeaverLogger logger;
         private readonly ModuleDefinition module;
@@ -29,18 +29,20 @@ namespace Mirage.Weaver
         private readonly Writers writers;
         private readonly SerailizeExtensionHelper extensionHelper;
         private readonly ModuleDefinition mirageModule;
+        private readonly NetworkHashGenerator hashGenerator;
 
         /// <summary>
         /// Mirage's main module used to find built in extension methods and messages
         /// </summary>
 
-        public ReaderWriterProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger)
+        public ReaderWriterProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger, NetworkHashGenerator hashGenerator)
         {
             this.module = module;
             this.readers = readers;
             this.writers = writers;
             this.logger = logger;
-            extensionHelper = new SerailizeExtensionHelper(module, readers, writers);
+            this.hashGenerator = hashGenerator;
+            extensionHelper = new SerailizeExtensionHelper(module, readers, writers, hashGenerator);
 
             var typeInMirage = module.ImportReference(typeof(NetworkWriter));
             // have to resolve to get typedef, then get the module
@@ -49,7 +51,7 @@ namespace Mirage.Weaver
 
         public bool Process()
         {
-            messages.Clear();
+            Messages.Clear();
 
             var processed = FindAllExtensionMethods();
 
@@ -169,7 +171,7 @@ namespace Mirage.Weaver
                 // these can use the throw version, because if they break Mirage/weaver is broken
                 writers.GetFunction_Throws(typeReference);
                 readers.GetFunction_Throws(typeReference);
-                messages.Add(typeReference);
+                Messages.Add(typeReference);
             }
         }
 
@@ -201,7 +203,8 @@ namespace Mirage.Weaver
                 Log($"Loading message: {klass.FullName}");
                 readers.TryGetFunction(klass, null);
                 writers.TryGetFunction(klass, null);
-                messages.Add(klass);
+                Messages.Add(klass);
+                hashGenerator.AddMessage(klass);
             }
 
             foreach (var nestedClass in klass.NestedTypes)
@@ -261,7 +264,7 @@ namespace Mirage.Weaver
 
                 GenerateReadersWriters(parameterType, sequencePoint);
                 if (isMessage)
-                    messages.Add(parameterType);
+                    Messages.Add(parameterType);
             }
         }
 
@@ -369,7 +372,7 @@ namespace Mirage.Weaver
             var method = typeof(MessagePacker).GetMethod(nameof(MessagePacker.RegisterMessage));
             var registerMethod = module.ImportReference(method);
 
-            foreach (var message in messages)
+            foreach (var message in Messages)
             {
                 var genericMethodCall = new GenericInstanceMethod(registerMethod);
                 genericMethodCall.GenericArguments.Add(module.ImportReference(message));
@@ -386,12 +389,14 @@ namespace Mirage.Weaver
         private readonly ModuleDefinition module;
         private readonly Readers readers;
         private readonly Writers writers;
+        private readonly NetworkHashGenerator hashGenerator;
 
-        public SerailizeExtensionHelper(ModuleDefinition module, Readers readers, Writers writers)
+        public SerailizeExtensionHelper(ModuleDefinition module, Readers readers, Writers writers, NetworkHashGenerator hashGenerator)
         {
             this.module = module;
             this.readers = readers;
             this.writers = writers;
+            this.hashGenerator = hashGenerator;
         }
 
         // todo can this be removed, doesn't seem to be used any more
@@ -413,13 +418,17 @@ namespace Mirage.Weaver
                 if (IsWriterMethod(method))
                 {
                     var dataType = GetWriterDataType(method);
-                    writers.Register(module.ImportReference(dataType), module.ImportReference(method));
+                    var methodRef = module.ImportReference(method);
+                    writers.Register(module.ImportReference(dataType), methodRef);
+                    hashGenerator.AddWriter(dataType, methodRef);
                 }
 
                 if (IsReaderMethod(method))
                 {
                     var dataType = GetReaderDataType(method);
-                    readers.Register(module.ImportReference(dataType), module.ImportReference(method));
+                    var methodRef = module.ImportReference(method);
+                    readers.Register(module.ImportReference(dataType), methodRef);
+                    hashGenerator.AddReader(dataType, methodRef);
                 }
             }
 
@@ -428,13 +437,17 @@ namespace Mirage.Weaver
                 if (IsWriterMethod(method))
                 {
                     var dataType = GetWriterDataType(method);
-                    writers.RegisterCollectionMethod(dataType.Resolve(), module.ImportReference(method));
+                    var methodRef = module.ImportReference(method);
+                    writers.RegisterCollectionMethod(dataType.Resolve(), methodRef);
+                    hashGenerator.AddWriter(dataType, methodRef);
                 }
 
                 if (IsReaderMethod(method))
                 {
                     var dataType = GetReaderDataType(method);
-                    readers.RegisterCollectionMethod(dataType.Resolve(), module.ImportReference(method));
+                    var methodRef = module.ImportReference(method);
+                    readers.RegisterCollectionMethod(dataType.Resolve(), methodRef);
+                    hashGenerator.AddReader(dataType, methodRef);
                 }
             }
         }
@@ -456,13 +469,17 @@ namespace Mirage.Weaver
                 if (IsWriterMethod(method))
                 {
                     var dataType = GetWriterDataType(method);
-                    writers.Register(module.ImportReference(dataType), module.ImportReference(method));
+                    var methodRef = module.ImportReference(method);
+                    writers.Register(module.ImportReference(dataType), methodRef);
+                    hashGenerator.AddWriter(dataType, methodRef);
                 }
 
                 if (IsReaderMethod(method))
                 {
                     var dataType = GetReaderDataType(method);
-                    readers.Register(module.ImportReference(dataType), module.ImportReference(method));
+                    var methodRef = module.ImportReference(method);
+                    readers.Register(module.ImportReference(dataType), methodRef);
+                    hashGenerator.AddReader(dataType, methodRef);
                 }
             }
 
@@ -471,13 +488,17 @@ namespace Mirage.Weaver
                 if (IsWriterMethod(method))
                 {
                     var dataType = GetWriterDataType(method);
-                    writers.RegisterCollectionMethod(dataType.Resolve(), module.ImportReference(method));
+                    var methodRef = module.ImportReference(method);
+                    writers.RegisterCollectionMethod(dataType.Resolve(), methodRef);
+                    hashGenerator.AddWriter(dataType, methodRef);
                 }
 
                 if (IsReaderMethod(method))
                 {
                     var dataType = GetReaderDataType(method);
-                    readers.RegisterCollectionMethod(dataType.Resolve(), module.ImportReference(method));
+                    var methodRef = module.ImportReference(method);
+                    readers.RegisterCollectionMethod(dataType.Resolve(), methodRef);
+                    hashGenerator.AddReader(dataType, methodRef);
                 }
             }
         }

@@ -15,7 +15,7 @@ namespace Mirage.Weaver
     /// </summary>
     public class ClientRpcProcessor : RpcProcessor
     {
-        public ClientRpcProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger) : base(module, readers, writers, logger)
+        public ClientRpcProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger, NetworkHashGenerator hashGenerator) : base(module, readers, writers, logger, hashGenerator)
         {
         }
 
@@ -236,6 +236,8 @@ namespace Mirage.Weaver
             var returnType = ValidateReturnType(md, RemoteCallType.ClientRpc, target);
 
             var paramSerializers = GetValueSerializers(md);
+
+            hashGenerator.AddRpc(md);
 
             var userCodeFunc = GenerateStub(md, clientRpcAttr, rpcIndex, paramSerializers, returnType);
 

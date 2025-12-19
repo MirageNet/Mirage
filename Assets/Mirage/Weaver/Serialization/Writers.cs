@@ -12,7 +12,13 @@ namespace Mirage.Weaver
 {
     public class Writers : SerializeFunctionBase
     {
-        public Writers(ModuleDefinition module, IWeaverLogger logger) : base(module, logger) { }
+        public Writers(ModuleDefinition module, IWeaverLogger logger, NetworkHashGenerator hashGenerator) : base(module, logger, hashGenerator) { }
+
+        public override void Register(TypeReference dataType, MethodReference methodReference)
+        {
+            base.Register(dataType, methodReference);
+            hashGenerator.AddWriter(dataType, methodReference);
+        }
 
         protected override string FunctionTypeLog => "write function";
         protected override Expression<Action> ArrayExpression => () => Mirage.Serialization.CollectionExtensions.WriteArray<byte>(default, default);

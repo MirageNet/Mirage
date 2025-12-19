@@ -21,13 +21,14 @@ namespace Mirage.Weaver
         private Readers readers;
         private Writers writers;
         private PropertySiteProcessor propertySiteProcessor;
+        private NetworkHashGenerator hashGenerator;
 
         [Conditional("WEAVER_DEBUG_LOGS")]
         public static void DebugLog(TypeDefinition td, string message)
         {
             Console.WriteLine($"Weaver[{td.Name}] {message}");
         }
-
+        
         private static void Log(string msg)
         {
             Console.WriteLine($"[Weaver] {msg}");
@@ -41,10 +42,11 @@ namespace Mirage.Weaver
             try
             {
                 var module = assembly.MainModule;
-                readers = new Readers(module, logger);
-                writers = new Writers(module, logger);
+                hashGenerator = new NetworkHashGenerator();
+                readers = new Readers(module, logger, hashGenerator);
+                writers = new Writers(module, logger, hashGenerator);
                 propertySiteProcessor = new PropertySiteProcessor();
-                var rwProcessor = new ReaderWriterProcessor(module, readers, writers, logger);
+                var rwProcessor = new ReaderWriterProcessor(module, readers, writers, logger, hashGenerator);
 
                 var modified = false;
                 using (timer.Sample("ReaderWriterProcessor"))
@@ -80,6 +82,17 @@ namespace Mirage.Weaver
                     {
                         rwProcessor.InitializeReaderAndWriters();
                     }
+
+                    using (timer.Sample("Generate NetworkHash"))
+                    {
+                        var hash = hashGenerator.GenerateHash();
+                        var generatedClass = module.GeneratedClass();
+                        generatedClass.SetConst("NetworkHash", hash);
+
+                        var formattedText = hashGenerator.GetFormattedText();
+                        var assemblyName = module.Assembly.Name.Name;
+                        System.IO.File.WriteAllText($"network_api_{assemblyName}.txt", formattedText);
+                    }
                 }
 
                 return ResultType.Success;
@@ -96,7 +109,7 @@ namespace Mirage.Weaver
                 Log($"Finished weaver on {compiledAssembly.Name}");
             }
         }
-
+        
         private IReadOnlyList<FoundType> FindAllClasses(ModuleDefinition module)
         {
             using (timer.Sample("FindAllClasses"))
@@ -154,7 +167,7 @@ namespace Mirage.Weaver
                 var behaviour = behaviourClasses[i];
                 if (NetworkBehaviourProcessor.WasProcessed(behaviour)) { continue; }
 
-                modified |= new NetworkBehaviourProcessor(behaviour, readers, writers, propertySiteProcessor, logger).Process();
+                modified |= new NetworkBehaviourProcessor(behaviour, readers, writers, propertySiteProcessor, logger, hashGenerator).Process();
             }
             return modified;
         }

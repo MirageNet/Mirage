@@ -15,7 +15,7 @@ namespace Mirage.Weaver
     /// </summary>
     public class ServerRpcProcessor : RpcProcessor
     {
-        public ServerRpcProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger) : base(module, readers, writers, logger)
+        public ServerRpcProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger, NetworkHashGenerator hashGenerator) : base(module, readers, writers, logger, hashGenerator)
         {
         }
 
@@ -150,6 +150,8 @@ namespace Mirage.Weaver
             var requireAuthority = serverRpcAttr.GetField(nameof(ServerRpcAttribute.requireAuthority), true);
 
             var paramSerializers = GetValueSerializers(md);
+
+            hashGenerator.AddRpc(md);
 
             var userCodeFunc = GenerateStub(md, serverRpcAttr, rpcIndex, paramSerializers, returnType);
 
