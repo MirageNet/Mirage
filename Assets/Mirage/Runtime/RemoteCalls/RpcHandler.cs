@@ -60,28 +60,60 @@ namespace Mirage.RemoteCalls
         {
             if (!_objectLocator.TryGetIdentity(netId, out var identity))
             {
+                // cost=1 we dont want users spamming this, but also likely to happen if server has just destroyed the object in recent frames
+                player.SetError(1, PlayerErrorFlags.None);
+
                 if (logger.WarnEnabled()) logger.LogWarning($"Spawned object not found when handling ServerRpc message [netId={netId}]");
                 return;
             }
 
             var remoteCall = identity.RemoteCallCollection.GetAbsolute(functionIndex);
+            if (remoteCall == null)
+            {
+                player.SetError(50, PlayerErrorFlags.RpcSync);
+                if (logger.WarnEnabled()) logger.LogWarning($"Invalid Rpc for index. Out of bounds");
+                return;
+            }
 
             if (remoteCall.InvokeType != _invokeType)
-                ThrowInvalidRpc(remoteCall);
+            {
+                player.SetError(50, PlayerErrorFlags.RpcSync);
+                if (logger.WarnEnabled()) logger.LogWarning($"Invalid Rpc for index {remoteCall.Name}. Expected {_invokeType} but was {remoteCall.InvokeType}");
+                return;
+            }
 
             // for ServerRpc we need to check if the player has authority
             if (_invokeType == RpcInvokeType.ServerRpc)
             {
                 var ok = CheckAuthority(remoteCall, identity, player);
                 if (!ok)
+                {
+                    if (logger.WarnEnabled()) logger.LogWarning($"ServerRpc for object without authority {identity}");
+                    player.SetError(10, PlayerErrorFlags.NoAuthority);
                     return;
+                }
             }
 
             if (logger.LogEnabled()) logger.Log($"Rpc for {identity} from {player}");
 
             using (var reader = NetworkReaderPool.GetReader(payload, _objectLocator))
             {
-                remoteCall.Invoke(reader, player, replyId);
+                try
+                {
+                    remoteCall.Invoke(reader, player, replyId);
+                }
+                catch (Exception e)
+                {
+                    if (e is NullReferenceException || e is UnityEngine.MissingReferenceException || e is UnityEngine.UnassignedReferenceException)
+                    {
+                        // Common errors caused by developer mistake
+                        player.SetError(1, PlayerErrorFlags.RpcNullException);
+                    }
+                    else
+                    {
+                        player.SetError(2, PlayerErrorFlags.RpcException);
+                    }
+                }
             }
         }
 
@@ -96,14 +128,9 @@ namespace Mirage.RemoteCalls
                 return true;
 
             // not ok
-            if (logger.WarnEnabled()) logger.LogWarning($"ServerRpc for object without authority {identity}");
             return false;
         }
 
-        private void ThrowInvalidRpc(RemoteCall remoteCall)
-        {
-            throw new MethodInvocationException($"Invalid Rpc for index {remoteCall.Name}. Expected {_invokeType} but was {remoteCall.InvokeType}");
-        }
 
         /// <summary>
         /// Creates a task that waits for a reply from the server

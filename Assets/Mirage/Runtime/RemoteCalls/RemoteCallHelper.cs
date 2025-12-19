@@ -120,7 +120,10 @@ namespace Mirage.RemoteCalls
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public RemoteCall GetAbsolute(int index)
         {
-            return RemoteCalls[index];
+            if (0 < index && index < RemoteCalls.Length)
+                return RemoteCalls[index];
+            else
+                return null;
         }
     }
     /// <summary>
