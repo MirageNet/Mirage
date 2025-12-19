@@ -123,6 +123,7 @@ namespace Mirage.SocketLayer
                 var reliablePacket = packet.ReliablePacket;
                 if (reliablePacket != null)
                 {
+                    // packet might be in multiple indexes, remove them all
                     foreach (var seq in reliablePacket.Sequences)
                         _sentAckablePackets.RemoveAt(seq);
 
@@ -470,7 +471,7 @@ namespace Mirage.SocketLayer
             _ = ProcessIncomingHeader(sequence, ackSequence, ackMask);
 
             // checks acks, late message are allowed for reliable
-            // but only insert lastest if later than read Index
+            // but only insert latest if later than read Index
 
             var reliableDistance = _reliableReceive.DistanceToRead(reliableSequence);
 
@@ -480,8 +481,7 @@ namespace Mirage.SocketLayer
                 return;
             }
 
-
-            if (PacketExists(reliableSequence))
+            if (_reliableReceive.Exists(reliableSequence))
             {
                 // packet already received 
                 return;
@@ -492,12 +492,6 @@ namespace Mirage.SocketLayer
             var bufferLength = length - RELIABLE_HEADER_SIZE;
             Buffer.BlockCopy(packet, RELIABLE_HEADER_SIZE, savedPacket.array, 0, bufferLength);
             _reliableReceive.InsertAt(reliableSequence, new ReliableReceived(savedPacket, bufferLength, isFragment));
-        }
-
-        private bool PacketExists(ushort reliableSequence)
-        {
-            var existing = _reliableReceive[reliableSequence];
-            return existing.Buffer != null;
         }
 
         public void ReceiveAck(byte[] packet)
@@ -577,12 +571,12 @@ namespace Mirage.SocketLayer
             for (uint i = 0; i < count; i++)
             {
                 var ackableSequence = (uint)sequencer.MoveInBounds(start + i);
-                var ackable = _sentAckablePackets[ackableSequence];
 
-                if (ackable.IsNotValid())
-                    continue;
-
-                CheckAckablePacket(sequence, mask, ackable, ackableSequence);
+                if (_sentAckablePackets.TryGet(ackableSequence, out var ackable))
+                {
+                    Debug.Assert(ackable.IsValid());
+                    CheckAckablePacket(sequence, mask, ackable, ackableSequence);
+                }
             }
         }
 
@@ -719,15 +713,6 @@ namespace Mirage.SocketLayer
             public bool IsValid()
             {
                 return Token != null || ReliablePacket != null;
-            }
-
-            /// <summary>
-            /// returns true if this is default value of struct
-            /// </summary>
-            /// <returns></returns>
-            public bool IsNotValid()
-            {
-                return Token == null && ReliablePacket == null;
             }
         }
 
