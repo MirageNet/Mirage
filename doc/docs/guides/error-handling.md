@@ -161,7 +161,7 @@ void CmdSendPublicMessage(string message, INetworkPlayer sender = null)
 
     // ...
 }
-
+```
 
 ## Custom Error Handling
 
