@@ -34,6 +34,7 @@ namespace Mirage.SocketLayer
         // temp list for resending when processing sentqueue
         private readonly HashSet<ReliablePacket> _toResend = new HashSet<ReliablePacket>();
         private readonly List<ReliablePacket> _resendRemoveList = new List<ReliablePacket>();
+        private readonly ILogger _logger;
         private readonly IRawConnection _connection;
         private readonly ITime _time;
         private readonly Pool<ByteBuffer> _bufferPool;
@@ -78,6 +79,7 @@ namespace Mirage.SocketLayer
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
 
+            _logger = logger;
             _connection = connection;
             _time = time;
             _bufferPool = bufferPool;
@@ -111,7 +113,25 @@ namespace Mirage.SocketLayer
 
         public void Dispose()
         {
-            var removeSafety = new HashSet<ByteBuffer>();
+            var releasedBuffers = new HashSet<ByteBuffer>();
+
+            // helper method
+            void SafeRelease(ByteBuffer buffer)
+            {
+                if (buffer == null) return;
+
+                // Add returns false if the item was already in the set
+                if (releasedBuffers.Add(buffer))
+                {
+                    buffer.Release();
+                }
+                else
+                {
+                    // If we reach here, logic elsewhere tried to release twice
+                    if (_logger.Enabled(LogType.Warning))
+                        _logger.Warn("Attempted to release the same ByteBuffer multiple times during Dispose.");
+                }
+            }
 
             if (_batch is IDisposable disposable)
                 disposable.Dispose();
@@ -127,10 +147,7 @@ namespace Mirage.SocketLayer
                     foreach (var seq in reliablePacket.Sequences)
                         _sentAckablePackets.RemoveAt(seq);
 
-                    reliablePacket.Buffer.Release();
-
-                    Debug.Assert(!removeSafety.Contains(reliablePacket.Buffer));
-                    removeSafety.Add(reliablePacket.Buffer);
+                    SafeRelease(reliablePacket.Buffer);
                 }
             });
 
@@ -139,9 +156,7 @@ namespace Mirage.SocketLayer
                 var buffer = packet.Buffer;
                 Debug.Assert(buffer != null);
 
-                buffer.Release();
-                Debug.Assert(!removeSafety.Contains(buffer));
-                removeSafety.Add(buffer);
+                SafeRelease(buffer);
             });
         }
 
