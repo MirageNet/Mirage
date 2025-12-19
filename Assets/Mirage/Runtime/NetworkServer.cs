@@ -25,6 +25,8 @@ namespace Mirage
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkServer));
 
+        public delegate void AuthFailCallback(INetworkPlayer player, AuthenticationResult result);
+
         public bool EnablePeerMetrics;
         [Tooltip("Sequence size of buffer in bits.\n10 => array size 1024 => ~17 seconds at 60hz")]
         public int MetricsSize = 10;
@@ -162,7 +164,7 @@ namespace Mirage
 
         public MessageHandler MessageHandler { get; private set; }
 
-        private Action<INetworkPlayer, AuthenticationResult> _authFallCallback;
+        private AuthFailCallback _authFailCallback;
 
         /// <summary>
         /// Set to true if you want to manually call <see cref="UpdateReceive"/> and <see cref="UpdateSent"/> and stop mirage from automatically calling them
@@ -406,10 +408,10 @@ namespace Mirage
             }
             else
             {
-                if (_authFallCallback != null)
+                if (_authFailCallback != null)
                 {
                     if (logger.LogEnabled()) logger.Log($"Calling user auth failed callback");
-                    _authFallCallback.Invoke(player, result);
+                    _authFailCallback.Invoke(player, result);
                 }
                 else
                 {
@@ -419,12 +421,12 @@ namespace Mirage
             }
         }
 
-        public void SetAuthenticationFailedCallback(Action<INetworkPlayer, AuthenticationResult> callback)
+        public void SetAuthenticationFailedCallback(AuthFailCallback callback)
         {
-            if (_authFallCallback != null && callback != null && logger.WarnEnabled())
+            if (_authFailCallback != null && callback != null && logger.WarnEnabled())
                 logger.LogWarning($"Replacing old callback. Only 1 auth failed callback can be used at once");
 
-            _authFallCallback = callback;
+            _authFailCallback = callback;
         }
 
         private void AuthenticationSuccess(INetworkPlayer player, AuthenticationResult result)
