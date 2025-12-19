@@ -1,3 +1,17 @@
+# [154.3.0](https://github.com/MirageNet/Mirage/compare/v154.2.0...v154.3.0) (2025-12-19)
+
+
+### Bug Fixes
+
+* adding safety checks when releasing buffers from _sentAckablePackets ([68328fe](https://github.com/MirageNet/Mirage/commit/68328feecc0695b46717313fc2f61af711d81271))
+* improving ring buffer and stopping cleanup errors ([49367e9](https://github.com/MirageNet/Mirage/commit/49367e92647f03476997227af8486152d4ae2ff4))
+* try catch for connection dispose to ensure list is cleared ([7f6f09d](https://github.com/MirageNet/Mirage/commit/7f6f09d6b86f534ec6b3116a5ee23f4b2663a5fb))
+
+
+### Features
+
+* allowing custom ClientStoppedReason codes ([46b21be](https://github.com/MirageNet/Mirage/commit/46b21bed675d3abea1ed93b20345e52181221bf3))
+
 # [154.2.0](https://github.com/MirageNet/Mirage/compare/v154.1.3...v154.2.0) (2025-12-18)
 
 
