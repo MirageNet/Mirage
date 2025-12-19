@@ -214,7 +214,7 @@ namespace Mirage
             }
 
             logger.LogError(handler.UnauthenticatedError);
-            player.SetErrorAndDisconnect(PlayerErrorFlags.Unauthorized);
+            player.SetErrorAndDisconnect(PlayerErrorFlags.Unauthenticated);
 
             return false;
         }

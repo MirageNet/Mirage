@@ -205,14 +205,17 @@ namespace Mirage
 
         //** Security/Malicious Intent **
 
+        /// <summary>Player does not have authority to call this object. Could happen in normal gameplay if changing the owner of an object.</summary>
+        NoAuthority = 1 << 5,
+
         /// <summary>Message send before Authentication is complete</summary>
-        Unauthorized = 1 << 5,
+        Unauthenticated = 1 << 6,
 
         /// <summary>Error was critical, should be used to indicate player should be kicked/timed out/banned</summary>
-        Critical = 1 << 6,
+        Critical = 1 << 7,
 
         /// <summary>Message value only possible with cheats/mods/etc</summary>
-        LikelyCheater = 1 << 7,
+        LikelyCheater = 1 << 8,
 
 
         //** Custom developer defined errors **
