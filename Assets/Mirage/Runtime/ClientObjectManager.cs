@@ -682,7 +682,7 @@ namespace Mirage
             // this async is called from message handler, so we want to catch and maybe disconnect
             catch (Exception e)
             {
-                _client.MessageHandler.LogAndCheckDisconnect(_client.Player, e);
+                _client.MessageHandler.HandleExceptionInMessage(_client.Player, e);
             }
         }
 

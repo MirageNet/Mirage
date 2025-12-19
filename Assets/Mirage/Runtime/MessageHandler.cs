@@ -39,15 +39,42 @@ namespace Mirage
             _messageHandlers[msgId] = new Handler(del, allowUnauthenticated, typeof(T));
         }
 
-        private static NetworkMessageDelegate MessageWrapper<T>(MessageDelegateWithPlayer<T> handler)
+        private NetworkMessageDelegate MessageWrapper<T>(MessageDelegateWithPlayer<T> handler)
         {
             void AdapterFunction(INetworkPlayer player, NetworkReader reader)
             {
-                var message = NetworkDiagnostics.ReadWithDiagnostics<T>(reader);
+                T message;
+                try
+                {
+                    message = NetworkDiagnostics.ReadWithDiagnostics<T>(reader);
+                }
+                catch (Exception e)
+                {
+                    HandleExceptionInReader(player, e);
+
+                    if (_rethrowException)
+                        // note, dont add Exception here, otherwise stack trace will be overwritten
+                        throw;
+                    else
+                        return;
+                }
 
                 if (logger.LogEnabled()) logger.Log($"Receiving {typeof(T)} from {player}");
 
-                handler.Invoke(player, message);
+                try
+                {
+                    handler.Invoke(player, message);
+                }
+                catch (Exception e)
+                {
+                    HandleExceptionInMessage(player, e);
+
+                    if (_rethrowException)
+                        // note, dont add Exception here, otherwise stack trace will be overwritten
+                        throw;
+                    else
+                        return;
+                }
             }
             return AdapterFunction;
         }
@@ -75,7 +102,6 @@ namespace Mirage
         {
             using (var networkReader = NetworkReaderPool.GetReader(packet, _objectLocator))
             {
-
                 // protect against attackers trying to send invalid data packets
                 // exception could be throw if:
                 // - invalid headers
@@ -89,12 +115,21 @@ namespace Mirage
 
                 try
                 {
+                    // we can check if there are enough bytes in reader before calling UnpackId
+                    if (!networkReader.CanReadBytes(MessagePacker.ID_BYTE_SIZE))
+                    {
+                        // cost=50 because NetworkReader throwing means serialization mismatch, hard to recover from, likely need to kick player if it happens often.
+                        player.SetError(50, PlayerErrorFlags.DeserializationException);
+                        return;
+                    }
+
                     var msgType = MessagePacker.UnpackId(networkReader);
                     InvokeHandler(player, msgType, networkReader);
                 }
                 catch (Exception e)
                 {
-                    LogAndCheckDisconnect(player, e);
+                    // TODO can this happen any more? we have try/catch inside MessageWrapper
+                    HandleExceptionInMessage(player, e);
 
                     if (_rethrowException)
                         // note, dont add Exception here, otherwise stack trace will be overwritten
@@ -103,14 +138,28 @@ namespace Mirage
             }
         }
 
-        public void LogAndCheckDisconnect(INetworkPlayer player, Exception e)
+        public void HandleExceptionInReader(INetworkPlayer player, Exception e)
+        {
+            var disconnectMessage = _disconnectOnException ? $", Closed connection: {player}" : "";
+            logger.LogError($"{e.GetType()} in NetworkReader (see stack below){disconnectMessage}\n{e}");
+
+            // cost=50 because NetworkReader throwing means serialization mismatch, hard to recover from, likely need to kick player if it happens often.
+            player.SetError(50, PlayerErrorFlags.DeserializationException);
+
+            if (_disconnectOnException)
+                player.Disconnect();
+        }
+
+        public void HandleExceptionInMessage(INetworkPlayer player, Exception e)
         {
             var disconnectMessage = _disconnectOnException ? $", Closed connection: {player}" : "";
             logger.LogError($"{e.GetType()} in Message handler (see stack below){disconnectMessage}\n{e}");
+
+            // use cost=10 for this because NetworkMessage handler should almost never be throwing
+            player.SetError(10, PlayerErrorFlags.RpcException);
+
             if (_disconnectOnException)
-            {
                 player.Disconnect();
-            }
         }
 
         internal void InvokeHandler(INetworkPlayer player, int msgType, NetworkReader reader)
@@ -122,17 +171,23 @@ namespace Mirage
             }
             else
             {
+                int errorCost;
                 if (MessagePacker.MessageTypes.TryGetValue(msgType, out var type))
                 {
+                    errorCost = 20;
                     // this means we received a Message that has a struct, but no handler, It is likely that the developer forgot to register a handler or sent it by mistake
                     // we want this to be warning level
                     if (logger.WarnEnabled()) logger.LogWarning($"Unexpected message {type} received from {player}. Did you register a handler for it?");
                 }
                 else
                 {
+                    errorCost = 60;
                     // todo maybe we should handle it differently? we dont want someone spaming ids to find a handler they can do stuff with...
                     if (logger.LogEnabled()) logger.Log($"Unexpected message ID {msgType} received from {player}. May be due to no existing RegisterHandler for this message.");
                 }
+
+                // cost=20 because NetworkReader throwing means serialization mismatch, hard to recover from, likely need to kick player if it happens often.
+                player.SetError(errorCost, PlayerErrorFlags.RpcSync);
             }
         }
 
@@ -159,7 +214,7 @@ namespace Mirage
             }
 
             logger.LogError(handler.UnauthenticatedError);
-            player.Disconnect();
+            player.SetErrorAndDisconnect(PlayerErrorFlags.Unauthorized);
 
             return false;
         }

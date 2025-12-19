@@ -26,6 +26,8 @@ namespace Mirage.Serialization
     //    (probably even shorter)
     public static class MessagePacker
     {
+        public const int ID_BYTE_SIZE = 2;
+
         /// <summary>
         /// Backing field for <see cref="MessageTypes"/>
         /// </summary>
@@ -86,7 +88,7 @@ namespace Mirage.Serialization
             // this works because value types cannot be derived
             // if it is a reference type (for example IMessageBase),
             // ask the message for the real type
-            var id = default(T) == null && message != null 
+            var id = default(T) == null && message != null
                 // for class we need to use GetType incase T is base class
                 ? GetId(message.GetType())
                 // for struct, we can use the cached Id
@@ -143,6 +145,7 @@ namespace Mirage.Serialization
             if (id != typeId)
                 throw new FormatException("Invalid message,  could not unpack " + typeof(T).FullName);
         }
+
 
         // unpack message after receiving
         // -> pass NetworkReader so it's less strange if we create it in here

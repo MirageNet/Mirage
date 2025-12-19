@@ -708,7 +708,15 @@ namespace Mirage
 
                 if (_players.TryGetValue(connection, out var player))
                 {
-                    _messageHandler.HandleMessage(player, message);
+                    // safety try/catch so that SocketLayer is not effected
+                    try
+                    {
+                        _messageHandler.HandleMessage(player, message);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
                 }
                 else
                 {

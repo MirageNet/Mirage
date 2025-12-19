@@ -458,7 +458,16 @@ namespace Mirage
                 }
 
                 logger.Assert(_connection == connection);
-                _messageHandler.HandleMessage(_player, message);
+
+                // safety try/catch so that SocketLayer is not effected
+                try
+                {
+                    _messageHandler.HandleMessage(_player, message);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
             }
         }
     }
