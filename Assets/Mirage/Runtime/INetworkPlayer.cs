@@ -199,11 +199,14 @@ namespace Mirage
 
         //** Security/Malicious Intent **
 
-        /// <summary>message send before Authentication is complete</summary>
+        /// <summary>Message send before Authentication is complete</summary>
         Unauthorized = 1 << 5,
 
         /// <summary>Error was critical, should be used to indicate player should be kicked/timed out/banned</summary>
         Critical = 1 << 6,
+
+        /// <summary>Message value only possible with cheats/mods/etc</summary>
+        LikelyCheater = 1 << 7,
 
 
         //** Custom developer defined errors **
