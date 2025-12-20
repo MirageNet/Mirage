@@ -1,3 +1,20 @@
+# [155.2.0](https://github.com/MirageNet/Mirage/compare/v155.1.0...v155.2.0) (2025-12-20)
+
+
+### Bug Fixes
+
+* adding PlayerErrorFlags.Unauthenticated to use along side Unauthorized ([b56d341](https://github.com/MirageNet/Mirage/commit/b56d34133f75f50f87503f43e2aa68ba7fe13fd9))
+* adding safety check for calling SetError inside ErrorRateLimitReached ([fe1a0ca](https://github.com/MirageNet/Mirage/commit/fe1a0cae1c8a84e152df794efb6f27739717db97))
+* fixing RPC.GetAbsolute bounds check ([6df3a4a](https://github.com/MirageNet/Mirage/commit/6df3a4a5e26f68edb383f86fb90417a3f508b4f5))
+
+
+### Features
+
+* adding player.SetErrorAndDisconnect for errors that should always kick ([96c96e9](https://github.com/MirageNet/Mirage/commit/96c96e9e82ef3957a4a1665975bdad0de20a71f4))
+* using new error handling for MessageHandler ([a1528f6](https://github.com/MirageNet/Mirage/commit/a1528f652050ad0a06122b624542a1096b9f8b46))
+* using new error handling for RpcHandler ([88cba12](https://github.com/MirageNet/Mirage/commit/88cba12e39c104609315a1298f9068875671095f))
+* using senderPlayer.SetError for async rpcs ([8de21ca](https://github.com/MirageNet/Mirage/commit/8de21ca12136bc14fc72e4c4cf5179bde6ff8b25))
+
 # [155.1.0](https://github.com/MirageNet/Mirage/compare/v155.0.0...v155.1.0) (2025-12-19)
 
 
