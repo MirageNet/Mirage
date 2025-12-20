@@ -45,6 +45,7 @@ namespace Mirage
         public PlayerErrorFlags ErrorFlags { get; private set; }
         /// <summary>Error rate limiting, will invoke disconnect player (or call <see cref="NetworkServer._errorRateLimitReached"/> if set) when limit is reached</summary>
         public RateLimitBucket ErrorRateLimit { get; }
+        private bool _invokingErrorRateLimitReached;
 
         /// <summary>
         /// Has this player been marked as disconnected
@@ -468,9 +469,21 @@ namespace Mirage
 
             ErrorFlags |= flags;
             var overLimit = ErrorRateLimit.UseTokens(cost);
-            if (overLimit)
-                _server.ErrorRateLimitReached(this);
+            if (overLimit && !_invokingErrorRateLimitReached)
+            {
+                // make sure ErrorRateLimitReached does not cause infinite loop if SetError is called inside it
+                _invokingErrorRateLimitReached = true;
+                try
+                {
+                    _server.ErrorRateLimitReached(this);
+                }
+                finally
+                {
+                    _invokingErrorRateLimitReached = false;
+                }
+            }
         }
+
 
         /// <summary>
         /// Call this when player causes an error, will set cost to be above maxTokens to ensure that limit is cheated to trigger disconnect.
