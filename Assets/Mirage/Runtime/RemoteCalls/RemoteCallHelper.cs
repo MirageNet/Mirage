@@ -72,6 +72,12 @@ namespace Mirage.RemoteCalls
                 {
                     success = false;
                     logger.LogError($"Return RPC threw an Exception: {e}");
+
+                    // Common errors caused by developer mistake
+                    if (e is NullReferenceException || e is UnityEngine.MissingReferenceException || e is UnityEngine.UnassignedReferenceException)
+                        senderPlayer.SetError(1, PlayerErrorFlags.RpcNullException);
+                    else
+                        senderPlayer.SetError(2, PlayerErrorFlags.RpcException);
                 }
 
 
