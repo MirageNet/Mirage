@@ -5,7 +5,7 @@ using Mirage.Tests.Runtime.Host;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Runtime.ClientServer.ErrorRateLimit
+namespace Mirage.Tests.Runtime.ErrorRateLimit
 {
     public class NetworkErrorRateLimitTests : ClientServerSetup
     {
