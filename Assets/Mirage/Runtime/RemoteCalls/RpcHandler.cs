@@ -190,7 +190,10 @@ namespace Mirage.RemoteCalls
             }
             else
             {
-                throw new MethodAccessException("Received reply but no handler was registered");
+                logger.LogError($"Received RpcReply from {player} but no pending callbacks for id={reply.ReplyId}");
+                // TODO do we need a flag for errors like this?
+                //      for actions that are not allowed due to invalid state
+                player.SetError(10, PlayerErrorFlags.None);
             }
         }
     }
