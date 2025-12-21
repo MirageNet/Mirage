@@ -30,6 +30,7 @@ namespace Mirage
     public sealed class NetworkPlayer : INetworkPlayer
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
+        private static readonly ILogger errorLogger = LogFactory.GetLogger(typeof(PlayerErrorFlags));
 
         private readonly HashSet<NetworkIdentity> _visList = new HashSet<NetworkIdentity>();
 
@@ -467,10 +468,16 @@ namespace Mirage
             if (ErrorRateLimit == null)
                 return;
 
+            if (errorLogger.LogEnabled())
+                errorLogger.Log($"{this} SetError cost={cost}, flags:{flags}");
+
             ErrorFlags |= flags;
             var overLimit = ErrorRateLimit.UseTokens(cost);
             if (overLimit && !_invokingErrorRateLimitReached)
             {
+                if (errorLogger.WarnEnabled())
+                    errorLogger.LogWarning($"{this} error Limit reached");
+
                 // make sure ErrorRateLimitReached does not cause infinite loop if SetError is called inside it
                 _invokingErrorRateLimitReached = true;
                 try
@@ -492,6 +499,9 @@ namespace Mirage
         /// <param name="flags">optional flag for error type</param>
         public void SetErrorAndDisconnect(PlayerErrorFlags flags)
         {
+            if (errorLogger.WarnEnabled())
+                errorLogger.LogWarning($"{this} SetErrorAndDisconnect flags:{flags}");
+
             if (ErrorRateLimit != null)
                 // use max+1 tokens to ensure ErrorRateLimitReached is called
                 SetError(ErrorRateLimit.Config.MaxTokens + 1, flags);
