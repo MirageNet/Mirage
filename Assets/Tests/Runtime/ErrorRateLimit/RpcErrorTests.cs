@@ -151,6 +151,8 @@ namespace Mirage.Tests.Runtime.ErrorRateLimit
         [UnityTest]
         public IEnumerator RpcThrowsNullRef() => UniTask.ToCoroutine(async () =>
         {
+            LogAssert.Expect(LogType.Error, new Regex(".*RPC threw an Exception: System.NullReferenceException.*"));
+
             clientComponent.ServerRpcThrowsNullRef();
 
             await UniTask.Yield();
@@ -163,6 +165,8 @@ namespace Mirage.Tests.Runtime.ErrorRateLimit
         [UnityTest]
         public IEnumerator RpcThrowsGeneric() => UniTask.ToCoroutine(async () =>
         {
+            LogAssert.Expect(LogType.Error, new Regex(".*RPC threw an Exception: System.Exception:.*"));
+
             clientComponent.ServerRpcThrowsGeneric();
 
             await UniTask.Yield();
