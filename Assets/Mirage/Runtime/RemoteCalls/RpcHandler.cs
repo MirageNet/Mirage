@@ -102,17 +102,22 @@ namespace Mirage.RemoteCalls
                 {
                     remoteCall.Invoke(reader, player, replyId);
                 }
+                catch (System.IO.EndOfStreamException e)
+                {
+                    logger.LogError($"RPC threw EndOfStreamException: {e}");
+
+                    // cost=50 because NetworkReader throwing means serialization mismatch, hard to recover from, likely need to kick player if it happens often.
+                    player.SetError(50, PlayerErrorFlags.DeserializationException);
+                }
                 catch (Exception e)
                 {
+                    logger.LogError($"RPC threw an Exception: {e}");
+
+                    // Common errors caused by developer mistake
                     if (e is NullReferenceException || e is UnityEngine.MissingReferenceException || e is UnityEngine.UnassignedReferenceException)
-                    {
-                        // Common errors caused by developer mistake
                         player.SetError(1, PlayerErrorFlags.RpcNullException);
-                    }
                     else
-                    {
                         player.SetError(2, PlayerErrorFlags.RpcException);
-                    }
                 }
             }
         }

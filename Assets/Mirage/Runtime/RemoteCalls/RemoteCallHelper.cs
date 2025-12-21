@@ -68,6 +68,14 @@ namespace Mirage.RemoteCalls
                     result = await func(obj, reader, senderPlayer, replyId);
                     success = true;
                 }
+                catch (System.IO.EndOfStreamException e)
+                {
+                    success = false;
+                    logger.LogError($"Return RPC threw EndOfStreamException: {e}");
+
+                    // cost=50 because NetworkReader throwing means serialization mismatch, hard to recover from, likely need to kick player if it happens often.
+                    senderPlayer.SetError(50, PlayerErrorFlags.DeserializationException);
+                }
                 catch (Exception e)
                 {
                     success = false;
