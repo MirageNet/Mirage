@@ -58,6 +58,13 @@ namespace Mirage.RemoteCalls
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void HandleRpc(INetworkPlayer player, uint netId, int functionIndex, ArraySegment<byte> payload, int replyId)
         {
+            if (payload.Array == null)
+            {
+                player.SetError(50, PlayerErrorFlags.DeserializationException);
+                if (logger.WarnEnabled()) logger.LogWarning($"HandleRpc was given null array");
+                return;
+            }
+
             if (!_objectLocator.TryGetIdentity(netId, out var identity))
             {
                 // cost=1 we dont want users spamming this, but also likely to happen if server has just destroyed the object in recent frames
