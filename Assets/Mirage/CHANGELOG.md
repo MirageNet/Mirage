@@ -1,3 +1,12 @@
+## [155.2.1](https://github.com/MirageNet/Mirage/compare/v155.2.0...v155.2.1) (2025-12-21)
+
+
+### Bug Fixes
+
+* detecting EndOfStreamException from reader and using higher cost DeserializationException ([17395e3](https://github.com/MirageNet/Mirage/commit/17395e3e8626c32063edcf2280c3f6be8673d97c))
+* fixing OnReply not removing correct ID ([caa78e6](https://github.com/MirageNet/Mirage/commit/caa78e6c93a8e64e576e918c0090e861d4b5c717))
+* SetError for RpcReply if id is not found ([0b666bb](https://github.com/MirageNet/Mirage/commit/0b666bb655c2178d2e086c755e7f5de3b3da662b))
+
 # [155.2.0](https://github.com/MirageNet/Mirage/compare/v155.1.0...v155.2.0) (2025-12-20)
 
 
