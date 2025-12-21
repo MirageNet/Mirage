@@ -172,10 +172,8 @@ namespace Mirage.RemoteCalls
         internal void OnReply(INetworkPlayer player, RpcReply reply)
         {
             // find the callback that was waiting for this and invoke it.
-            if (_callbacks.TryGetValue(reply.ReplyId, out var callbacks))
+            if (_callbacks.Remove(reply.ReplyId, out var callbacks))
             {
-                _callbacks.Remove(_nextReplyId);
-
                 if (reply.Success)
                 {
                     using (var reader = NetworkReaderPool.GetReader(reply.Payload, _objectLocator))
