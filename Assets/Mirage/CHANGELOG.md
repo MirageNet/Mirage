@@ -1,3 +1,15 @@
+# [155.3.0](https://github.com/MirageNet/Mirage/compare/v155.2.1...v155.3.0) (2025-12-21)
+
+
+### Bug Fixes
+
+* using DeserializationException for null rpc payload ([92ff7fe](https://github.com/MirageNet/Mirage/commit/92ff7fee2ba57331c495386ee7e079bbccbb17bf))
+
+
+### Features
+
+* adding logger for PlayerErrorFlags ([eebf2a0](https://github.com/MirageNet/Mirage/commit/eebf2a0c99ac456b5ab2ff004ab99c44bc3a32fc))
+
 ## [155.2.1](https://github.com/MirageNet/Mirage/compare/v155.2.0...v155.2.1) (2025-12-21)
 
 
