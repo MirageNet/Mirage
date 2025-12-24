@@ -115,6 +115,9 @@ namespace Mirage
         [Tooltip("Should the message handler rethrow the exception after logging. This should only be used when debugging as it may stop other Mirage functions from running after messages handling")]
         public bool RethrowException = false;
 
+        /// <summary>
+        /// Will kick players or run callback if players hit Error limit set by <see cref="ErrorRateLimitConfig"/>. If changed at runtime, new value will only apply to new connections
+        /// </summary>
         public bool ErrorRateLimitEnabled = true;
 
         [Tooltip("Configuration for kicking players who send too many invalid Network network messages and RPC. Errors may cost more than 1 token.")]
