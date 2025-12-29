@@ -116,7 +116,7 @@ namespace Mirage
         /// Best used to get concrete Endpoint type based on the <see cref="SocketFactory"/> being used
         /// </para>
         /// </summary>
-        public IEndPoint Address => _connection.EndPoint;
+        public IEndPoint Address => _connection.Handle;
 
         /// <summary>Connect called on client, but server has not replied yet</summary>
         public bool IsConnecting => _connection.State == ConnectionState.Connecting;

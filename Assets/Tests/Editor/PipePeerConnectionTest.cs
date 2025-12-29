@@ -177,7 +177,7 @@ namespace Mirage.Tests
         [Test]
         public void EndpointIsPipeEndPoint()
         {
-            Assert.That(conn1.connection.EndPoint, Is.TypeOf<PipePeerConnection.PipeEndPoint>());
+            Assert.That(conn1.connection.Handle, Is.TypeOf<PipePeerConnection.PipeEndPoint>());
         }
 
         [Test]

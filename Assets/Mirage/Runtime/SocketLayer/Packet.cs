@@ -6,18 +6,17 @@ namespace Mirage.SocketLayer
     /// Received packet
     /// <para>contains raw data and helper methods to help process that data</para>
     /// </summary>
-    internal struct Packet
+    internal ref struct Packet
     {
-        public readonly ByteBuffer Buffer;
-        public readonly int Length;
+        public readonly ReadOnlySpan<byte> Span;
 
-        public Packet(ByteBuffer data, int length)
+        public Packet(ReadOnlySpan<byte> span)
         {
-            Buffer = data ?? throw new ArgumentNullException(nameof(data));
-            Length = length;
+            Span = span;
         }
 
-        public PacketType Type => (PacketType)Buffer.array[0];
-        public Commands Command => (Commands)Buffer.array[1];
+        public PacketType Type => (PacketType)Span[0];
+        public Commands Command => (Commands)Span[1];
+        public int Length => Span.Length;
     }
 }

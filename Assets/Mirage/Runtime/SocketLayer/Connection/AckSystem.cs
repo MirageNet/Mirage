@@ -436,7 +436,7 @@ namespace Mirage.SocketLayer
         /// </summary>
         /// <param name="packet"></param>
         /// <returns>default or new packet to handle</returns>
-        public ArraySegment<byte> ReceiveNotify(byte[] packet, int length)
+        public ReadOnlySpan<byte> ReceiveNotify(ReadOnlySpan<byte> packet)
         {
             // start at 1 to skip packet type
             var offset = 1;
@@ -450,20 +450,21 @@ namespace Mirage.SocketLayer
             // duplicate or arrived late
             if (distance <= 0) { return default; }
 
-            var segment = new ArraySegment<byte>(packet, NOTIFY_HEADER_SIZE, length - NOTIFY_HEADER_SIZE);
-            return segment;
+            _logger.Assert(offset == NOTIFY_HEADER_SIZE, "offset should be NOTIFY_HEADER_SIZE");
+            var slice = packet[offset..];
+            return slice;
         }
 
 
         /// <summary>
         /// Checks if fragment index is less than max fragment size
         /// </summary>
-        /// <param name="array"></param>
+        /// <param name="packet"></param>
         /// <returns></returns>
-        public bool InvalidFragment(byte[] array)
+        public bool InvalidFragment(ReadOnlySpan<byte> packet)
         {
             var offset = RELIABLE_HEADER_SIZE;
-            var fragmentIndex = ByteUtils.ReadByte(array, ref offset);
+            var fragmentIndex = ByteUtils.ReadByte(packet, ref offset);
 
             // invalid if equal to (because it should be 0 indexed)
             return fragmentIndex >= _maxFragments;
@@ -473,7 +474,7 @@ namespace Mirage.SocketLayer
         /// </summary>
         /// <param name="packet"></param>
         /// <returns>true if there are ordered message to read</returns>
-        public void ReceiveReliable(byte[] packet, int length, bool isFragment)
+        public void ReceiveReliable(ReadOnlySpan<byte> packet, bool isFragment)
         {
             // start at 1 to skip packet type
             var offset = 1;
@@ -504,12 +505,14 @@ namespace Mirage.SocketLayer
 
             // new packet
             var savedPacket = _bufferPool.Take();
-            var bufferLength = length - RELIABLE_HEADER_SIZE;
-            Buffer.BlockCopy(packet, RELIABLE_HEADER_SIZE, savedPacket.array, 0, bufferLength);
-            _reliableReceive.InsertAt(reliableSequence, new ReliableReceived(savedPacket, bufferLength, isFragment));
+
+            // skip the first RELIABLE_HEADER_SIZE bytes so we just get payload
+            var payload = packet[RELIABLE_HEADER_SIZE..];
+            payload.CopyTo(savedPacket.array);
+            _reliableReceive.InsertAt(reliableSequence, new ReliableReceived(savedPacket, payload.Length, isFragment));
         }
 
-        public void ReceiveAck(byte[] packet)
+        public void ReceiveAck(ReadOnlySpan<byte> packet)
         {
             // start at 1 to skip packet type
             var offset = 1;

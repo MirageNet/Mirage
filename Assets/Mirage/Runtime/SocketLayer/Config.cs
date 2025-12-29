@@ -11,8 +11,8 @@ namespace Mirage.SocketLayer
         public int MaxConnections = 100;
 
         /// <summary>
-        /// Send reject if a new (unconnected) endpoint sends an invalid packet. If this is false then invalid packets will be ignored
-        /// <para>Setting this to true is useful if the Endpoint/Socket has a stateful connection and can listen for reject to close the connection</para>
+        /// Send reject if a new (unconnected) endPoint sends an invalid packet. If this is false then invalid packets will be ignored
+        /// <para>Setting this to true is useful if the EndPoint/Socket has a stateful connection and can listen for reject to close the connection</para>
         /// </summary>
         public bool SendRejectIfUnconnectedPacketIsInvalid = false;
         #endregion

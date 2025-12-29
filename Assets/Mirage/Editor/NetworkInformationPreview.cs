@@ -198,7 +198,7 @@ namespace Mirage
 
                 foreach (var player in identity.observers)
                 {
-                    GUI.Label(observerRect, player.Connection.EndPoint + ":" + player, styles.ComponentName);
+                    GUI.Label(observerRect, player.Connection.Handle + ":" + player, styles.ComponentName);
                     observerRect.y += observerRect.height;
                     Y = observerRect.y;
                 }

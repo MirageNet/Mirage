@@ -12,8 +12,8 @@ namespace Mirage.SocketLayer
 
         private readonly Batch _nextBatchReliable;
 
-        internal NoReliableConnection(Peer peer, IEndPoint endPoint, IDataHandler dataHandler, Config config, int maxPacketSize, Time time, ILogger logger, Metrics metrics)
-            : base(peer, endPoint, dataHandler, config, maxPacketSize, time, logger, metrics)
+        internal NoReliableConnection(Peer peer, IConnectionHandle handle, IDataHandler dataHandler, Config config, int maxPacketSize, Time time, ILogger logger, Metrics metrics)
+            : base(peer, handle, dataHandler, config, maxPacketSize, time, logger, metrics)
         {
             _nextBatchReliable = new ArrayBatch(maxPacketSize, SendBatchInternal, PacketType.Reliable);
 
@@ -62,7 +62,7 @@ namespace Mirage.SocketLayer
 
         internal override void ReceiveReliablePacket(Packet packet)
         {
-            HandleReliableBatched(packet.Buffer.array, 1, packet.Length, PacketType.Reliable);
+            HandleReliableBatched(packet.Span[1..], PacketType.Reliable);
         }
 
         internal override void ReceiveUnreliablePacket(Packet packet) => throw new NotSupportedException();

@@ -19,7 +19,7 @@ namespace Mirage.SocketLayer
     /// </summary>
     public interface IConnection
     {
-        IEndPoint EndPoint { get; }
+        IConnectionHandle Handle { get; }
         ConnectionState State { get; }
 
         void Disconnect();
