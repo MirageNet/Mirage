@@ -12,8 +12,8 @@ namespace Mirage.SocketLayer
         private readonly Batch _unreliableBatch;
         private readonly Pool<ByteBuffer> _bufferPool;
 
-        internal ReliableConnection(Peer peer, IEndPoint endPoint, IDataHandler dataHandler, Config config, int maxPacketSize, Time time, Pool<ByteBuffer> bufferPool, ILogger logger, Metrics metrics)
-            : base(peer, endPoint, dataHandler, config, maxPacketSize, time, logger, metrics)
+        internal ReliableConnection(Peer peer, IConnectionHandle handle, IDataHandler dataHandler, Config config, int maxPacketSize, Time time, Pool<ByteBuffer> bufferPool, ILogger logger, Metrics metrics)
+            : base(peer, handle, dataHandler, config, maxPacketSize, time, logger, metrics)
         {
             _bufferPool = bufferPool;
             _unreliableBatch = new ArrayBatch(_maxPacketSize, SendBatchInternal, PacketType.Unreliable);
@@ -83,25 +83,25 @@ namespace Mirage.SocketLayer
 
         internal override void ReceiveUnreliablePacket(Packet packet)
         {
-            HandleReliableBatched(packet.Buffer.array, 1, packet.Length, PacketType.Unreliable);
+            HandleReliableBatched(packet.Span[1..], PacketType.Unreliable);
         }
 
         internal override void ReceiveReliablePacket(Packet packet)
         {
-            _ackSystem.ReceiveReliable(packet.Buffer.array, packet.Length, false);
+            _ackSystem.ReceiveReliable(packet.Span, false);
 
             HandleQueuedMessages();
         }
 
         internal override void ReceiveReliableFragment(Packet packet)
         {
-            if (_ackSystem.InvalidFragment(packet.Buffer.array))
+            if (_ackSystem.InvalidFragment(packet.Span))
             {
                 DisconnectInternal(DisconnectReason.InvalidPacket);
                 return;
             }
 
-            _ackSystem.ReceiveReliable(packet.Buffer.array, packet.Length, true);
+            _ackSystem.ReceiveReliable(packet.Span, true);
 
             HandleQueuedMessages();
         }
@@ -171,17 +171,27 @@ namespace Mirage.SocketLayer
 
         internal override void ReceiveNotifyPacket(Packet packet)
         {
-            var segment = _ackSystem.ReceiveNotify(packet.Buffer.array, packet.Length);
-            if (segment != default)
+            var span = _ackSystem.ReceiveNotify(packet.Span);
+            if (span.Length != 0)
             {
                 _metrics?.OnReceiveMessageNotify(packet.Length);
-                _dataHandler.ReceiveMessage(this, segment);
+                using (var buffer = _bufferPool.Take())
+                {
+                    if (span.Length > buffer.array.Length)
+                    {
+                        _logger.Error("Received a packet that is larger than buffer pool");
+                        return;
+                    }
+
+                    span.CopyTo(buffer.array);
+                    _dataHandler.ReceiveMessage(this, new ArraySegment<byte>(buffer.array, 0, span.Length));
+                }
             }
         }
 
         internal override void ReceiveNotifyAck(Packet packet)
         {
-            _ackSystem.ReceiveAck(packet.Buffer.array);
+            _ackSystem.ReceiveAck(packet.Span);
         }
 
         public override void FlushBatch()

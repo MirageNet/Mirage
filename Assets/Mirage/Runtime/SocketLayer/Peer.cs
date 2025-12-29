@@ -19,8 +19,8 @@ namespace Mirage.SocketLayer
         event Action<IConnection, RejectReason> OnConnectionFailed;
         event Action<IConnection, DisconnectReason> OnDisconnected;
 
-        void Bind(IEndPoint endPoint);
-        IConnection Connect(IEndPoint endPoint);
+        void Bind(IBindEndPoint endPoint);
+        IConnection Connect(IConnectEndPoint endPoint);
         void Close();
         /// <summary>
         /// Call this at the start of the frame to receive new messages
@@ -45,8 +45,11 @@ namespace Mirage.SocketLayer
         private readonly int _maxPacketSize;
         private readonly Time _time;
         private readonly ConnectKeyValidator _connectKeyValidator;
-        private readonly Pool<ByteBuffer> _bufferPool;
-        private readonly Dictionary<IEndPoint, Connection> _connections = new Dictionary<IEndPoint, Connection>();
+        internal readonly Pool<ByteBuffer> _bufferPool;
+        private readonly List<Connection> _connections = new List<Connection>();
+        /// <summary>lookup for stateless connections</summary>
+        private readonly Dictionary<IConnectionHandle, Connection> _connectionLookup = new Dictionary<IConnectionHandle, Connection>();
+        private ReceiveLoop receiveLoop;
 
         // list so that remove can take place after foreach loops
         private readonly List<Connection> _connectionsToRemove = new List<Connection>();
@@ -56,7 +59,7 @@ namespace Mirage.SocketLayer
         public event Action<IConnection, RejectReason> OnConnectionFailed;
 
         /// <summary>
-        /// is server listening on or connected to endpoint
+        /// is server listening on or connected to endPoint
         /// </summary>
         private bool _active;
         public PoolMetrics PoolMetrics => _bufferPool.Metrics;
@@ -79,6 +82,9 @@ namespace Mirage.SocketLayer
             _connectKeyValidator = new ConnectKeyValidator(_config.key);
 
             _bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, maxPacketSize, _config.BufferPoolStartSize, _config.BufferPoolMaxSize, _logger);
+            receiveLoop = new ReceiveLoop();
+            receiveLoop.Setup(this, _socket);
+
             Application.quitting += Application_quitting;
         }
 
@@ -90,22 +96,22 @@ namespace Mirage.SocketLayer
                 Close();
         }
 
-        public void Bind(IEndPoint endPoint)
+        public void Bind(IBindEndPoint endPoint)
         {
             if (_active) throw new InvalidOperationException("Peer is already active");
             _active = true;
             _socket.Bind(endPoint);
         }
 
-        public IConnection Connect(IEndPoint endPoint)
+        public IConnection Connect(IConnectEndPoint endPoint)
         {
             if (_active) throw new InvalidOperationException("Peer is already active");
             if (endPoint == null) throw new ArgumentNullException(nameof(endPoint));
 
             _active = true;
-            _socket.Connect(endPoint);
+            var handle = _socket.Connect(endPoint);
 
-            var connection = CreateNewConnection(endPoint);
+            var connection = CreateNewConnection(handle);
             connection.State = ConnectionState.Connecting;
 
             // update now to send connectRequest command
@@ -124,7 +130,7 @@ namespace Mirage.SocketLayer
             Application.quitting -= Application_quitting;
 
             // send disconnect messages
-            foreach (var conn in _connections.Values)
+            foreach (var conn in _connections)
             {
                 conn.DisconnectInternal(DisconnectReason.RequestedByLocalPeer);
             }
@@ -140,7 +146,7 @@ namespace Mirage.SocketLayer
             // todo check connected before message are sent from high level
             _logger?.Assert(connection.State == ConnectionState.Connected || connection.State == ConnectionState.Connecting || connection.State == ConnectionState.Disconnected, connection.State);
 
-            _socket.Send(connection.EndPoint, data, length);
+            _socket.Send(connection.Handle, data.AsSpan(0, length));
             _metrics?.OnSend(length);
             connection.SetSendTime();
 
@@ -157,17 +163,17 @@ namespace Mirage.SocketLayer
             }
         }
 
-        internal void SendCommandUnconnected(IEndPoint endPoint, Commands command, byte? extra = null)
+        internal void SendCommandUnconnected(IConnectionHandle handle, Commands command, byte? extra = null)
         {
             using (var buffer = _bufferPool.Take())
             {
                 var length = CreateCommandPacket(buffer, command, extra);
 
-                _socket.Send(endPoint, buffer.array, length);
+                _socket.Send(handle, buffer.array.AsSpan(0, length));
                 _metrics?.OnSendUnconnected(length);
                 if (_logger.Enabled(LogType.Log))
                 {
-                    _logger.Log($"Send to {endPoint} type: Command, {command}");
+                    _logger.Log($"Send to {handle} type: Command, {command}");
                 }
             }
         }
@@ -228,7 +234,7 @@ namespace Mirage.SocketLayer
         /// </summary>
         public void UpdateReceive()
         {
-            ReceiveLoop();
+            receiveLoop.Tick();
         }
         /// <summary>
         /// Call this at end of frame to send new batches
@@ -239,44 +245,9 @@ namespace Mirage.SocketLayer
             _metrics?.OnTick(_connections.Count);
         }
 
-
-        private void ReceiveLoop()
-        {
-            using (var buffer = _bufferPool.Take())
-            {
-                // check active, because socket might have been closed by message handler
-                while (_active && _socket.Poll())
-                {
-                    var length = _socket.Receive(buffer.array, out var receiveEndPoint);
-                    if (length < 0 && _logger.Enabled(LogType.Warning))
-                    {
-                        _logger.Warn($"Receive returned less than 0 bytes, length={length}");
-                        continue;
-                    }
-
-                    // this should never happen. buffer size is only MTU, if socket returns higher length then it has a bug.
-                    if (length > _maxPacketSize)
-                        throw new IndexOutOfRangeException($"Socket returned length above MTU. MaxPacketSize:{_maxPacketSize} length:{length}");
-
-                    var packet = new Packet(buffer, length);
-
-                    if (_connections.TryGetValue(receiveEndPoint, out var connection))
-                    {
-                        _metrics?.OnReceive(length);
-                        HandleMessage(connection, packet);
-                    }
-                    else
-                    {
-                        _metrics?.OnReceiveUnconnected(length);
-                        HandleNewConnection(receiveEndPoint, packet);
-                    }
-                }
-            }
-        }
-
         private void HandleMessage(Connection connection, Packet packet)
         {
-            // ingore message of invalid size
+            // ignore message of invalid size
             if (!connection.IsValidSize(packet))
             {
                 if (_logger.Enabled(LogType.Log))
@@ -372,13 +343,13 @@ namespace Mirage.SocketLayer
             }
         }
 
-        private void HandleNewConnection(IEndPoint endPoint, Packet packet)
+        private void HandleNewConnection(IConnectionHandle handle, Packet packet)
         {
             // if invalid, then reject without reason
             if (!Validate(packet))
             {
                 if (_config.SendRejectIfUnconnectedPacketIsInvalid)
-                    RejectConnectionWithReason(endPoint, RejectReason.InvalidUnconnectedPacket);
+                    RejectConnectionWithReason(handle, RejectReason.InvalidUnconnectedPacket);
                 // else ignore
             }
             else if (AtMaxConnections())
@@ -386,21 +357,21 @@ namespace Mirage.SocketLayer
                 if (_logger.Enabled(LogType.Warning))
                     _logger.Log(LogType.Warning, $"Reject Connection: At max connections");
 
-                RejectConnectionWithReason(endPoint, RejectReason.ServerFull);
+                RejectConnectionWithReason(handle, RejectReason.ServerFull);
             }
-            else if (!_connectKeyValidator.Validate(packet.Buffer.array, packet.Length))
+            else if (!_connectKeyValidator.Validate(packet.Span))
             {
                 if (_logger.Enabled(LogType.Warning))
                     _logger.Log(LogType.Warning, $"Reject Connection: Invalid key");
 
-                RejectConnectionWithReason(endPoint, RejectReason.KeyInvalid);
+                RejectConnectionWithReason(handle, RejectReason.KeyInvalid);
             }
             // todo do other security stuff here:
-            // - white/black list for endpoint?
+            // - white/black list for endPoint?
             // (maybe a callback for developers to use?)
             else
             {
-                AcceptNewConnection(endPoint);
+                AcceptNewConnection(handle);
             }
         }
 
@@ -424,34 +395,45 @@ namespace Mirage.SocketLayer
         {
             return _connections.Count >= _config.MaxConnections;
         }
-        private void AcceptNewConnection(IEndPoint endPoint)
+        private void AcceptNewConnection(IConnectionHandle handle)
         {
-            if (_logger.Enabled(LogType.Log)) _logger.Log($"Accepting new connection from:{endPoint}");
+            if (_logger.Enabled(LogType.Log)) _logger.Log($"Accepting new connection from:{handle}");
 
-            var connection = CreateNewConnection(endPoint);
+            var connection = CreateNewConnection(handle);
 
             HandleConnectionRequest(connection);
         }
 
-        private Connection CreateNewConnection(IEndPoint newEndPoint)
+        private Connection CreateNewConnection(IConnectionHandle newHandle)
         {
-            // create copy of endpoint for this connection
-            // this is so that we can re-use the endpoint (reduces alloc) for receive and not worry about changing internal data needed for each connection
-            var endPoint = newEndPoint?.CreateCopy();
-
-            Connection connection;
-            if (_config.DisableReliableLayer)
+            IConnectionHandle handle;
+            if (newHandle.IsStateful)
             {
-                connection = new NoReliableConnection(this, endPoint, _dataHandler, _config, _maxPacketSize, _time, _logger, _metrics);
+                // dont need to create copy, because returned handle should not be reused by socket for stateful connections
+                handle = newHandle;
             }
             else
             {
-                connection = new ReliableConnection(this, endPoint, _dataHandler, _config, _maxPacketSize, _time, _bufferPool, _logger, _metrics);
+                // create copy of endPoint for this connection
+                // this is so that we can re-use the endPoint (reduces alloc) for receive and not worry about changing internal data needed for each connection
+                handle = newHandle?.CreateCopy();
             }
 
 
+            Connection connection;
+            if (_config.DisableReliableLayer)
+                connection = new NoReliableConnection(this, handle, _dataHandler, _config, _maxPacketSize, _time, _logger, _metrics);
+            else
+                connection = new ReliableConnection(this, handle, _dataHandler, _config, _maxPacketSize, _time, _bufferPool, _logger, _metrics);
+
             connection.SetReceiveTime();
-            _connections.Add(endPoint, connection);
+
+            if (handle.IsStateful)
+                handle.SocketLayerConnection = connection;
+            else
+                _connectionLookup.Add(handle, connection);
+
+            _connections.Add(connection);
             return connection;
         }
 
@@ -478,9 +460,9 @@ namespace Mirage.SocketLayer
         }
 
 
-        private void RejectConnectionWithReason(IEndPoint endPoint, RejectReason reason)
+        private void RejectConnectionWithReason(IConnectionHandle handle, RejectReason reason)
         {
-            SendCommandUnconnected(endPoint, Commands.ConnectionRejected, (byte)reason);
+            SendCommandUnconnected(handle, Commands.ConnectionRejected, (byte)reason);
         }
 
         private void HandleConnectionAccepted(Connection connection)
@@ -507,7 +489,7 @@ namespace Mirage.SocketLayer
             switch (connection.State)
             {
                 case ConnectionState.Connecting:
-                    var reason = (RejectReason)packet.Buffer.array[2];
+                    var reason = (RejectReason)packet.Span[2];
                     FailedToConnect(connection, reason);
                     break;
 
@@ -533,6 +515,10 @@ namespace Mirage.SocketLayer
 
             // tell high level
             OnDisconnected?.Invoke(connection, reason);
+
+            // tell stateful connections
+            if (connection.Handle.IsStateful)
+                connection.Handle.Disconnect(null);
         }
 
         internal void FailedToConnect(Connection connection, RejectReason reason)
@@ -543,6 +529,10 @@ namespace Mirage.SocketLayer
 
             // tell high level
             OnConnectionFailed?.Invoke(connection, reason);
+
+            // tell stateful connections
+            if (connection.Handle.IsStateful)
+                connection.Handle.Disconnect(null);
         }
 
         internal void RemoveConnection(Connection connection)
@@ -558,7 +548,7 @@ namespace Mirage.SocketLayer
         {
             DisconnectReason reason;
             if (packet.Length == 3)
-                reason = (DisconnectReason)packet.Buffer.array[2];
+                reason = (DisconnectReason)packet.Span[2];
             else
                 reason = DisconnectReason.None;
 
@@ -567,7 +557,7 @@ namespace Mirage.SocketLayer
 
         private void UpdateConnections()
         {
-            foreach (var connection in _connections.Values)
+            foreach (var connection in _connections)
             {
                 connection.Update();
 
@@ -586,13 +576,25 @@ namespace Mirage.SocketLayer
 
             foreach (var connection in _connectionsToRemove)
             {
-                var removed = _connections.Remove(connection.EndPoint);
                 connection.State = ConnectionState.Destroyed;
-                // value should be removed from dictionary
+
+                var removed = _connections.Remove(connection);
                 if (!removed)
                 {
-                    _logger?.Error($"Failed to remove {connection} from connection set");
+                    // value should be removed from list
+                    _logger?.Error($"Failed to remove {connection} from connection list");
                 }
+
+                if (!connection.Handle.IsStateful)
+                {
+                    // value should be removed from dictionary
+                    var removedLookup = _connectionLookup.Remove(connection.Handle);
+                    if (!removedLookup)
+                    {
+                        _logger?.Error($"Failed to remove {connection} from connection lookup");
+                    }
+                }
+
 
                 // try/catch just incase something goes wrong
                 // if it does we dont want to be stuck running dispose every frame
@@ -606,6 +608,7 @@ namespace Mirage.SocketLayer
                     _logger?.Error($"Connection.Dispose threw: {ex}");
                 }
             }
+
             _connectionsToRemove.Clear();
         }
 
@@ -653,6 +656,142 @@ namespace Mirage.SocketLayer
                 {
                     // if not fragmented
                     return _maxPacketSize - AckSystem.MIN_RELIABLE_HEADER_SIZE;
+                }
+            }
+        }
+
+        public class ReceiveLoop
+        {
+            private Peer Peer;
+            private ISocket Socket;
+
+            public void Setup(Peer peer, ISocket socket)
+            {
+                Peer = peer;
+                Socket = socket;
+                socket.SetTickEvents(Peer._maxPacketSize, OnData, OnDisconnect);
+            }
+
+            private void OnData(IConnectionHandle handle, ReadOnlySpan<byte> data)
+            {
+                var length = data.Length;
+                if (length < 0 && Peer._logger.Enabled(LogType.Warning))
+                {
+                    Peer._logger.Warn($"Receive returned less than 0 bytes, length={length}");
+                    return;
+                }
+
+                // this should never happen. buffer size is only MTU, if socket returns higher length then it has a bug.
+                // NOTE: this can now happen if transport are pushing data to us (rather than pull)
+                if (length > Peer._maxPacketSize)
+                {
+                    Peer._logger.Error($"Socket returned length above MTU. MaxPacketSize:{Peer._maxPacketSize} length:{length}");
+                    SafeDisconnectFromError(handle);
+                    return;
+                }
+
+                var packet = new Packet(data);
+
+
+                if (handle.IsStateful)
+                {
+                    if (handle.SocketLayerConnection != null)
+                    {
+                        var connection = (Connection)handle.SocketLayerConnection;
+                        Peer._metrics?.OnReceive(length);
+                        Peer.HandleMessage(connection, packet);
+                    }
+                    else
+                    {
+                        Peer._metrics?.OnReceiveUnconnected(length);
+                        Peer.HandleNewConnection(handle, packet);
+                    }
+                }
+                else
+                {
+                    if (Peer._connectionLookup.TryGetValue(handle, out var connection))
+                    {
+                        Peer._metrics?.OnReceive(length);
+                        Peer.HandleMessage(connection, packet);
+                    }
+                    else
+                    {
+                        Peer._metrics?.OnReceiveUnconnected(length);
+                        Peer.HandleNewConnection(handle, packet);
+                    }
+                }
+            }
+
+            private void SafeDisconnectFromError(IConnectionHandle handle)
+            {
+                if (handle.IsStateful)
+                {
+                    if (handle.SocketLayerConnection != null)
+                    {
+                        // connected and stateful
+                        var connection = (Connection)handle.SocketLayerConnection;
+                        Peer.OnConnectionDisconnected(connection, DisconnectReason.InvalidPacket, true);
+                    }
+                    else
+                    {
+                        // not connected and stateful
+                        handle.Disconnect(null);
+                    }
+                }
+                else
+                {
+                    if (Peer._connectionLookup.TryGetValue(handle, out var connection))
+                    {
+                        // connected and stateless
+                        Peer.OnConnectionDisconnected(connection, DisconnectReason.InvalidPacket, true);
+                    }
+                    else
+                    {
+                        // not connected and stateless
+                        // just ignore
+                    }
+                }
+            }
+
+            private void OnDisconnect(IConnectionHandle handle, ReadOnlySpan<byte> data, string reason)
+            {
+                Peer._logger.Assert(handle.IsStateful, "only stateful connection should use OnDisconnect event");
+                // todo assert connection is stateful
+                // TODO handle data and reason better
+
+                DisconnectReason disconnectReason;
+                if (data.Length == 3)
+                    disconnectReason = (DisconnectReason)data[2];
+                else
+                    disconnectReason = DisconnectReason.None;
+
+                var connection = (Connection)handle.SocketLayerConnection;
+                connection.DisconnectInternal(disconnectReason, false);
+            }
+
+            public void Tick()
+            {
+                try
+                {
+                    // tick loop (push)
+                    Socket.Tick();
+
+
+                    // poll loop (pull)
+                    using (var buffer = Peer._bufferPool.Take())
+                    {
+                        // check active, because socket might have been closed by message handler
+                        while (Peer._active && Peer._socket.Poll())
+                        {
+                            var length = Peer._socket.Receive(buffer.array, out var handle);
+
+                            OnData(handle, new Span<byte>(buffer.array, 0, length));
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Peer._logger.LogException(e);
                 }
             }
         }

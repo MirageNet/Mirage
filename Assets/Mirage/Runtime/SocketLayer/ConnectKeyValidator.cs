@@ -1,3 +1,4 @@
+using System;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -39,16 +40,16 @@ namespace Mirage.SocketLayer
         {
         }
 
-        public bool Validate(byte[] buffer, int length)
+        public bool Validate(ReadOnlySpan<byte> span)
         {
             // buffer is pooled, so might contain old data,
             // check the length so we only process that new data (if it is correct length)
-            if (length != OFFSET + KeyLength)
+            if (span.Length != OFFSET + KeyLength)
                 return false;
 
             for (var i = 0; i < KeyLength; i++)
             {
-                var keyByte = buffer[i + OFFSET];
+                var keyByte = span[i + OFFSET];
                 if (keyByte != _key[i])
                     return false;
             }

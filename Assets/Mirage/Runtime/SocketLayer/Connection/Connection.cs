@@ -4,14 +4,14 @@ using UnityEngine;
 
 namespace Mirage.SocketLayer
 {
-    internal abstract class Connection : IConnection
+    internal abstract class Connection : IConnection, ISocketLayerConnection
     {
         protected readonly ILogger _logger;
         protected readonly int _maxPacketSize;
         protected readonly Peer _peer;
         protected readonly IDataHandler _dataHandler;
 
-        public readonly IEndPoint EndPoint;
+        public readonly IConnectionHandle Handle;
 
         protected readonly ConnectingTracker _connectingTracker;
         protected readonly TimeoutTracker _timeoutTracker;
@@ -46,22 +46,22 @@ namespace Mirage.SocketLayer
                         break;
                 }
 
-                if (_logger.Enabled(LogType.Log)) _logger.Log($"{EndPoint} changed state from {_state} to {value}");
+                if (_logger.Enabled(LogType.Log)) _logger.Log($"{Handle} changed state from {_state} to {value}");
                 _state = value;
             }
         }
 
-        IEndPoint IConnection.EndPoint => EndPoint;
+        IConnectionHandle IConnection.Handle => Handle;
 
         public bool Connected => State == ConnectionState.Connected;
 
-        protected Connection(Peer peer, IEndPoint endPoint, IDataHandler dataHandler, Config config, int maxPacketSize, Time time, ILogger logger, Metrics metrics)
+        protected Connection(Peer peer, IConnectionHandle handle, IDataHandler dataHandler, Config config, int maxPacketSize, Time time, ILogger logger, Metrics metrics)
         {
             _peer = peer;
             _logger = logger;
             _maxPacketSize = maxPacketSize;
 
-            EndPoint = endPoint ?? throw new ArgumentNullException(nameof(endPoint));
+            Handle = handle ?? throw new ArgumentNullException(nameof(handle));
             _dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
             State = ConnectionState.Created;
 
@@ -75,7 +75,7 @@ namespace Mirage.SocketLayer
 
         public override string ToString()
         {
-            return $"[{EndPoint}]";
+            return $"[{Handle}]";
         }
 
         /// <summary>
@@ -222,6 +222,17 @@ namespace Mirage.SocketLayer
         internal abstract void ReceiveNotifyAck(Packet packet);
         internal abstract void ReceiveReliableFragment(Packet packet);
 
+        protected void HandleReliableBatched(ReadOnlySpan<byte> span, PacketType packetType)
+        {
+            using var buffer = _peer._bufferPool.Take();
+            if (span.Length > buffer.array.Length)
+            {
+                _logger.Error("Received a packet that is larger than buffer pool");
+                return;
+            }
+            span.CopyTo(buffer.array);
+            HandleReliableBatched(buffer.array, 0, span.Length, packetType);
+        }
         protected void HandleReliableBatched(byte[] array, int offset, int packetLength, PacketType packetType)
         {
             while (offset < packetLength)
