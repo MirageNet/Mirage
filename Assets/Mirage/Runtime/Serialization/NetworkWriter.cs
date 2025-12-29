@@ -49,6 +49,9 @@ namespace Mirage.Serialization
         private bool _needsDisposing;
         private int _bitPosition;
 
+
+        public byte* GetPinnedBuffer() => (byte*)_longPtr;
+
         /// <summary>
         /// Size limit of buffer
         /// </summary>
@@ -172,6 +175,10 @@ namespace Mirage.Serialization
         public ArraySegment<byte> ToArraySegment()
         {
             return new ArraySegment<byte>(_managedBuffer, 0, ByteLength);
+        }
+        public ReadOnlySpan<byte> ToSpan()
+        {
+            return new ReadOnlySpan<byte>(_managedBuffer, 0, ByteLength);
         }
 
 

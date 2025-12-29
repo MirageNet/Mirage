@@ -88,27 +88,7 @@ namespace Mirage.RemoteCalls
                         senderPlayer.SetError(2, PlayerErrorFlags.RpcException);
                 }
 
-
-                var serverRpcReply = new RpcReply
-                {
-                    ReplyId = replyId,
-                    Success = success,
-                };
-                if (success)
-                {
-                    // if success, write payload and send
-                    // else just send it without payload (since there is no result)
-                    using (var writer = NetworkWriterPool.GetWriter())
-                    {
-                        writer.Write(result);
-                        serverRpcReply.Payload = writer.ToArraySegment();
-                        senderPlayer.Send(serverRpcReply);
-                    }
-                }
-                else
-                {
-                    senderPlayer.Send(serverRpcReply);
-                }
+                SendReply(senderPlayer, replyId, success, result);
             }
 
             void CmdWrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
@@ -117,6 +97,30 @@ namespace Mirage.RemoteCalls
             }
 
             Register(index, name, cmdRequireAuthority, invokerType, behaviour, CmdWrapper);
+        }
+
+        private static void SendReply<T>(INetworkPlayer senderPlayer, int replyId, bool success, T result)
+        {
+            var serverRpcReply = new RpcReply
+            {
+                ReplyId = replyId,
+                Success = success,
+            };
+            if (success)
+            {
+                // if success, write payload and send
+                // else just send it without payload (since there is no result)
+                using (var writer = NetworkWriterPool.GetWriter())
+                {
+                    writer.Write(result);
+                    serverRpcReply.Payload = writer.ToArraySegment();
+                    senderPlayer.Send(serverRpcReply);
+                }
+            }
+            else
+            {
+                senderPlayer.Send(serverRpcReply);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
