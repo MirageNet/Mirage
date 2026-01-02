@@ -6,7 +6,8 @@ using UnityEngine;
 namespace Mirage
 {
     /// <summary>
-    /// A <see cref="IConnection"/> that is directly sends data to a <see cref="IDataHandler"/>
+    /// A <see cref="IConnection"/> that directly sends data to a <see cref="IDataHandler"/>
+    /// bypassing the transport layer for local host/client communication.
     /// </summary>
     public class PipePeerConnection : IConnection
     {
@@ -27,7 +28,7 @@ namespace Mirage
         /// </summary>
         private string _name;
         private Action _onDisconnect;
-
+        private PipeConnectionHandle _handle = new PipeConnectionHandle();
         private PipePeerConnection() { }
 
         public static (IConnection clientConn, IConnection serverConn) Create(IDataHandler clientHandler, IDataHandler serverHandler, Action clientOnDisconnect, Action serverOnDisconnect)
@@ -53,13 +54,11 @@ namespace Mirage
             return (client, server);
         }
 
-        public override string ToString()
-        {
-            return _name;
-        }
+        public override string ToString() => _name;
 
-        IEndPoint IConnection.EndPoint => new PipeEndPoint();
-        void IConnection.FlushBatch() { /* nothing to flush for pipe */ }
+        IConnectionHandle IConnection.Handle => _handle;
+
+        void IConnection.FlushBatch() { /* nothing to flush */ }
 
         public ConnectionState State { get; private set; } = ConnectionState.Connected;
 
@@ -128,11 +127,26 @@ namespace Mirage
             _otherHandler.ReceiveMessage(_otherConnection, new ArraySegment<byte>(packet, offset, length));
         }
 
-        public class PipeEndPoint : IEndPoint
+        /// <summary>
+        /// Virtual connection handle for internal pipe connections.
+        /// </summary>
+        public class PipeConnectionHandle : IConnectionHandle
         {
-            IEndPoint IEndPoint.CreateCopy()
+            public override string ToString() => "LocalPipe";
+
+            public bool IsStateful => false;
+            public ISocketLayerConnection SocketLayerConnection
             {
-                // never need copy of pipeendpoint
+                get => throw new NotSupportedException();
+                set => throw new NotSupportedException();
+            }
+
+            public bool SupportsGracefulDisconnect => false;
+            public void Disconnect(string gracefulDisconnectReason) => throw new NotSupportedException();
+
+            IConnectionHandle IConnectionHandle.CreateCopy()
+            {
+                // never need copy of PipeEndPoint
                 throw new NotSupportedException();
             }
         }
