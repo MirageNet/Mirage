@@ -120,16 +120,21 @@ namespace Mirage
     /// </summary>
     public interface INetworkPlayer : IMessageSender, IVisibilityTracker, IObjectOwner, ISceneLoader
     {
+        /// <summary>
+        /// Connection object managed by <see cref="Peer"/>
+        /// <para>
+        /// This is used to send messages and handle any reliability state for the underlying connection
+        /// </para>
+        /// </summary>
         IConnection Connection { get; }
 
         /// <summary>
-        /// The IP address / URL / FQDN associated with the connection.
-        /// Can be useful for a game master to do IP Bans etc.
-        /// <para>
-        /// Best used to get concrete Endpoint type based on the <see cref="SocketFactory"/> being used
-        /// </para>
+        /// The low-level handle returned by <see cref="ISocket"/>.
+        /// Can be used to find out more information about the low-level transport used or to get the Address of the connection.
+        /// <para>Cast this to the handle type for the transport you are using.<br />
+        /// example: <c>if (ConnectionHandle is UdpConnectionHandle udpHandle)</c> and then get the address via <c>udpHandle.Endpoint</c></para>
         /// </summary>
-        IEndPoint Address { get; }
+        IConnectionHandle ConnectionHandle { get; }
 
         /// <summary>Connect called on client, but server has not replied yet</summary>
         bool IsConnecting { get; }

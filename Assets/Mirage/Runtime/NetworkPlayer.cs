@@ -116,7 +116,7 @@ namespace Mirage
         /// Best used to get concrete Endpoint type based on the <see cref="SocketFactory"/> being used
         /// </para>
         /// </summary>
-        public IEndPoint Address => _connection.Handle;
+        public IConnectionHandle ConnectionHandle => _connection.Handle;
 
         /// <summary>Connect called on client, but server has not replied yet</summary>
         public bool IsConnecting => _connection.State == ConnectionState.Connecting;
@@ -321,18 +321,18 @@ namespace Mirage
 
         public override string ToString()
         {
-            return $"connection({Address})";
+            return $"connection({ConnectionHandle})";
         }
 
         public void AddToVisList(NetworkIdentity identity)
         {
-            if (logger.LogEnabled()) logger.Log($"Adding {identity} to Player[{Address}] VisList");
+            if (logger.LogEnabled()) logger.Log($"Adding {identity} to Player[{ConnectionHandle}] VisList");
             _visList.Add(identity);
         }
 
         public void RemoveFromVisList(NetworkIdentity identity)
         {
-            if (logger.LogEnabled()) logger.Log($"Removing {identity} from Player[{Address}] VisList");
+            if (logger.LogEnabled()) logger.Log($"Removing {identity} from Player[{ConnectionHandle}] VisList");
             _visList.Remove(identity);
         }
 
@@ -351,7 +351,7 @@ namespace Mirage
         /// </summary>
         public void RemoveAllVisibleObjects()
         {
-            if (logger.LogEnabled()) logger.Log($"Removing all from Player[{Address}] VisList");
+            if (logger.LogEnabled()) logger.Log($"Removing all from Player[{ConnectionHandle}] VisList");
 
             foreach (var identity in _visList)
             {
@@ -362,14 +362,14 @@ namespace Mirage
 
         public void AddOwnedObject(NetworkIdentity identity)
         {
-            if (logger.LogEnabled()) logger.Log($"Adding {identity} to Player[{Address}] OwnedObjects");
+            if (logger.LogEnabled()) logger.Log($"Adding {identity} to Player[{ConnectionHandle}] OwnedObjects");
 
             _ownedObjects.Add(identity);
         }
 
         public void RemoveOwnedObject(NetworkIdentity identity)
         {
-            if (logger.LogEnabled()) logger.Log($"Removing {identity} from Player[{Address}] OwnedObjects");
+            if (logger.LogEnabled()) logger.Log($"Removing {identity} from Player[{ConnectionHandle}] OwnedObjects");
 
             _ownedObjects.Remove(identity);
 
@@ -382,7 +382,7 @@ namespace Mirage
 
         public void RemoveAllOwnedObject(bool sendAuthorityChangeEvent)
         {
-            if (logger.LogEnabled()) logger.Log($"Removing all Player[{Address}] OwnedObjects");
+            if (logger.LogEnabled()) logger.Log($"Removing all Player[{ConnectionHandle}] OwnedObjects");
 
             // create a copy because the list might be modified when destroying
             var ownedObjects = new HashSet<NetworkIdentity>(_ownedObjects);
@@ -424,7 +424,7 @@ namespace Mirage
         /// </summary>
         public void DestroyOwnedObjects()
         {
-            if (logger.LogEnabled()) logger.Log($"Destroying all Player[{Address}] OwnedObjects");
+            if (logger.LogEnabled()) logger.Log($"Destroying all Player[{ConnectionHandle}] OwnedObjects");
 
             // create a copy because the list might be modified when destroying
             var ownedObjects = new HashSet<NetworkIdentity>(_ownedObjects);
