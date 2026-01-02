@@ -9,11 +9,15 @@ namespace Mirage.Sockets.Udp
     public class UdpSocket : ISocket
     {
         private Socket socket;
-        private EndPointWrapper Endpoint;
+        private UdpConnectionHandle Endpoint;
 
-        public void Bind(IEndPoint endPoint)
+        private byte[] _internalReceiveBuffer;
+        private byte[] _internalSendBuffer;
+        private OnData _onData;
+
+        public void Bind(IBindEndPoint endPoint)
         {
-            Endpoint = (EndPointWrapper)endPoint;
+            Endpoint = (UdpConnectionHandle)endPoint;
 
             socket = CreateSocket(Endpoint.inner);
             socket.DualMode = true;
@@ -65,39 +69,64 @@ namespace Mirage.Sockets.Udp
             }
         }
 
-        public void Connect(IEndPoint endPoint)
+        public IConnectionHandle Connect(IConnectEndPoint endPoint)
         {
-            Endpoint = (EndPointWrapper)endPoint;
-
+            Endpoint = (UdpConnectionHandle)endPoint;
             socket = CreateSocket(Endpoint.inner);
+            return Endpoint;
         }
 
         public void Close()
         {
             socket.Close();
             socket.Dispose();
+            socket = null;
         }
 
-        /// <summary>
-        /// Is message avaliable
-        /// </summary>
-        /// <returns>true if data to read</returns>
-        public bool Poll()
+        public bool Poll() // called from Peer before each Receive
         {
-            return socket.Poll(0, SelectMode.SelectRead);
+            return false;
         }
 
-        public int Receive(byte[] buffer, out IEndPoint endPoint)
+        public int Receive(Span<byte> outBuffer, out IConnectionHandle handle)
         {
-            var c = socket.ReceiveFrom(buffer, ref Endpoint.inner);
-            endPoint = Endpoint;
-            return c;
+            throw new NotSupportedException("Use Tick() instead");
         }
 
-        public void Send(IEndPoint endPoint, byte[] packet, int length)
+        public void Send(IConnectionHandle handle, ReadOnlySpan<byte> span)
         {
-            var netEndPoint = ((EndPointWrapper)endPoint).inner;
-            socket.SendTo(packet, length, SocketFlags.None, netEndPoint);
+            var netEndPoint = ((UdpConnectionHandle)handle).inner;
+
+            // .netstandard2.1 socket does not support span, so we have to copy buffer to an array before sending
+            span.CopyTo(_internalSendBuffer);
+            socket.SendTo(_internalSendBuffer, 0, span.Length, SocketFlags.None, netEndPoint);
+        }
+
+        void ISocket.Tick()
+        {
+            while (socket != null && socket.Poll(0, SelectMode.SelectRead))
+            {
+                try
+                {
+                    var length = socket.ReceiveFrom(_internalReceiveBuffer, ref Endpoint.inner);
+                    if (length > 0) // ignore zero byte receives
+                    {
+                        var span = _internalReceiveBuffer.AsSpan(0, length);
+                        _onData.Invoke(Endpoint, span);
+                    }
+                }
+                catch (SocketException e)
+                {
+                    // Usually occurs if a remote port is closed and SIO_UDP_CONNRESET didn't catch it
+                    Debug.LogWarning($"UDP Receive Error: {e.Message}");
+                }
+            }
+        }
+        void ISocket.SetTickEvents(int maxPacketSize, OnData onData, OnDisconnect onDisconnect)
+        {
+            _internalReceiveBuffer = new byte[maxPacketSize];
+            _internalSendBuffer = new byte[maxPacketSize];
+            _onData = onData;
         }
     }
 }

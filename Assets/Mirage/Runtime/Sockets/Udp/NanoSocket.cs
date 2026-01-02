@@ -11,7 +11,7 @@ namespace Mirage.Sockets.Udp
         public static bool Supported => true;
 
         private Socket socket;
-        private NanoEndPoint receiveEndPoint;
+        private NanoConnectionHandle receiveEndPoint;
         private readonly int bufferSize;
         private bool needsDisposing;
 
@@ -32,9 +32,9 @@ namespace Mirage.Sockets.Udp
             needsDisposing = true;
         }
 
-        public void Bind(IEndPoint endPoint)
+        public void Bind(IBindEndPoint endPoint)
         {
-            receiveEndPoint = (NanoEndPoint)endPoint;
+            receiveEndPoint = (NanoConnectionHandle)endPoint;
 
             CreateSocket();
             var result = UDP.Bind(socket, ref receiveEndPoint.address);
@@ -56,9 +56,9 @@ namespace Mirage.Sockets.Udp
             Dispose();
         }
 
-        public void Connect(IEndPoint endPoint)
+        public IConnectionHandle Connect(IConnectEndPoint endPoint)
         {
-            receiveEndPoint = (NanoEndPoint)endPoint;
+            receiveEndPoint = (NanoConnectionHandle)endPoint;
 
             CreateSocket();
             var result = UDP.Connect(socket, ref receiveEndPoint.address);
@@ -66,6 +66,8 @@ namespace Mirage.Sockets.Udp
             {
                 throw new NanoSocketException("Socket Connect failed");
             }
+
+            return receiveEndPoint;
         }
 
         public bool Poll()
@@ -73,19 +75,27 @@ namespace Mirage.Sockets.Udp
             return UDP.Poll(socket, 0) > 0;
         }
 
-        public int Receive(byte[] buffer, out IEndPoint endPoint)
+        public unsafe int Receive(Span<byte> outBuffer, out IConnectionHandle handle)
         {
-            var count = UDP.Receive(socket, ref receiveEndPoint.address, buffer, buffer.Length);
-            endPoint = receiveEndPoint;
-
-            return count;
+            fixed (byte* ptr = outBuffer)
+            {
+                var count = UDP.Receive(socket, ref receiveEndPoint.address, new IntPtr(ptr), outBuffer.Length);
+                handle = receiveEndPoint;
+                return count;
+            }
         }
 
-        public void Send(IEndPoint endPoint, byte[] packet, int length)
+        public unsafe void Send(IConnectionHandle handle, ReadOnlySpan<byte> span)
         {
-            var nanoEndPoint = (NanoEndPoint)endPoint;
-            UDP.Send(socket, ref nanoEndPoint.address, packet, length);
+            var nanoEndPoint = (NanoConnectionHandle)handle;
+            fixed (byte* ptr = span)
+            {
+                UDP.Send(socket, ref nanoEndPoint.address, new IntPtr(ptr), span.Length);
+            }
         }
+
+        void ISocket.Tick() { }
+        void ISocket.SetTickEvents(int maxPacketSize, OnData onData, OnDisconnect onDisconnect) { }
     }
 }
 #endif
