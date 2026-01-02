@@ -6,34 +6,39 @@ using NanoSockets;
 
 namespace Mirage.Sockets.Udp
 {
-    public sealed class NanoEndPoint : IEndPoint, IEquatable<NanoEndPoint>
+    public sealed class NanoConnectionHandle : IConnectionHandle, IBindEndPoint, IConnectEndPoint, IEquatable<NanoConnectionHandle>
     {
         public Address address = new Address();
 
-        public NanoEndPoint(string host, ushort port)
+        public NanoConnectionHandle(string host, ushort port)
         {
             address.port = port;
             UDP.SetHostName(ref address, host);
         }
 
-        public NanoEndPoint(Address address)
+        public NanoConnectionHandle(Address address)
         {
             this.address = address;
         }
 
-        public IEndPoint CreateCopy()
+        bool IConnectionHandle.IsStateful => false;
+        bool IConnectionHandle.SupportsGracefulDisconnect => false;
+        void IConnectionHandle.Disconnect(string gracefulDisconnectReason) { /* not supported */ }
+        ISocketLayerConnection IConnectionHandle.SocketLayerConnection { get; set; }
+
+        public IConnectionHandle CreateCopy()
         {
-            return new NanoEndPoint(address);
+            return new NanoConnectionHandle(address);
         }
 
-        public bool Equals(NanoEndPoint other)
+        public bool Equals(NanoConnectionHandle other)
         {
             return address.Equals(other.address);
         }
 
         public override bool Equals(object obj)
         {
-            if (obj is NanoEndPoint endPoint)
+            if (obj is NanoConnectionHandle endPoint)
             {
                 return address.Equals(endPoint.address);
             }

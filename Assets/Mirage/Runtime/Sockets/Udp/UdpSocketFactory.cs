@@ -108,31 +108,31 @@ namespace Mirage.Sockets.Udp
             }
         }
 
-        public override IEndPoint GetBindEndPoint()
+        public override IBindEndPoint GetBindEndPoint()
         {
             if (useNanoSocket)
             {
-                return new NanoEndPoint("::0", Port);
+                return new NanoConnectionHandle("::0", Port);
             }
             else
             {
-                return new EndPointWrapper(new IPEndPoint(IPAddress.IPv6Any, Port));
+                return new UdpConnectionHandle(new IPEndPoint(IPAddress.IPv6Any, Port));
             }
         }
 
-        public override IEndPoint GetConnectEndPoint(string address = null, ushort? port = null)
+        public override IConnectEndPoint GetConnectEndPoint(string address = null, ushort? port = null)
         {
             var addressString = address ?? Address;
             var portIn = port ?? Port;
 
             if (useNanoSocket)
             {
-                return new NanoEndPoint(addressString, portIn);
+                return new NanoConnectionHandle(addressString, portIn);
             }
             else
             {
                 var ipAddress = getAddress(addressString);
-                return new EndPointWrapper(new IPEndPoint(ipAddress, portIn));
+                return new UdpConnectionHandle(new IPEndPoint(ipAddress, portIn));
             }
         }
 
@@ -171,18 +171,22 @@ namespace Mirage.Sockets.Udp
         private static bool IsWebGL => Application.platform == RuntimePlatform.WebGLPlayer;
     }
 
-    public class EndPointWrapper : IEndPoint
+    public class UdpConnectionHandle : IConnectionHandle, IBindEndPoint, IConnectEndPoint, IEquatable<UdpConnectionHandle>
     {
         public EndPoint inner;
 
-        public EndPointWrapper(EndPoint endPoint)
+        public UdpConnectionHandle(EndPoint endPoint)
         {
             inner = endPoint;
         }
 
+        public bool Equals(UdpConnectionHandle other)
+        {
+            return inner.Equals(other.inner);
+        }
         public override bool Equals(object obj)
         {
-            if (obj is EndPointWrapper other)
+            if (obj is UdpConnectionHandle other)
             {
                 return inner.Equals(other.inner);
             }
@@ -199,11 +203,16 @@ namespace Mirage.Sockets.Udp
             return inner.ToString();
         }
 
-        IEndPoint IEndPoint.CreateCopy()
+        bool IConnectionHandle.IsStateful => false;
+        bool IConnectionHandle.SupportsGracefulDisconnect => false;
+        void IConnectionHandle.Disconnect(string gracefulDisconnectReason) { /* not supported */ }
+        ISocketLayerConnection IConnectionHandle.SocketLayerConnection { get; set; }
+
+        IConnectionHandle IConnectionHandle.CreateCopy()
         {
             // copy the inner endpoint
             var copy = inner.Create(inner.Serialize());
-            return new EndPointWrapper(copy);
+            return new UdpConnectionHandle(copy);
         }
     }
 
