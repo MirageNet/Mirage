@@ -8,18 +8,23 @@ using UnityEngine.TestTools;
 namespace Mirage.SocketLayer.Tests.PeerTests
 {
     [Category("SocketLayer"), Description("tests for Peer that only apply to client")]
-    [TestFixture(SocketBehavior.PollReceive)]
-    [TestFixture(SocketBehavior.TickEvent)]
+    [TestFixture(SocketBehavior.PollReceive, ConnectionHandleBehavior.Stateful)]
+    [TestFixture(SocketBehavior.PollReceive, ConnectionHandleBehavior.Stateless)]
+    [TestFixture(SocketBehavior.TickEvent, ConnectionHandleBehavior.Stateful)]
+    [TestFixture(SocketBehavior.TickEvent, ConnectionHandleBehavior.Stateless)]
     public class PeerTestAsClient : PeerTestBase
     {
-        public PeerTestAsClient(SocketBehavior behavior) : base(behavior)
+        private readonly ConnectionHandleBehavior _handleBehavior;
+
+        public PeerTestAsClient(SocketBehavior behavior, ConnectionHandleBehavior handleBehavior) : base(behavior)
         {
+            _handleBehavior = handleBehavior;
         }
 
         [Test]
         public void ConnectShouldSendMessageToSocket()
         {
-            var handle = TestEndPoint.CreateSubstitute();
+            var handle = TestEndPoint.CreateSubstitute(_handleBehavior);
             peer.Connect((IConnectEndPoint)handle);
 
             var expected = connectRequest;
@@ -35,7 +40,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             config.DisableReliableLayer = disableReliable;
 
-            var endPoint = TestEndPoint.CreateSubstitute();
+            var endPoint = TestEndPoint.CreateSubstitute(_handleBehavior);
             var conn = peer.Connect((IConnectEndPoint)endPoint);
             if (disableReliable)
                 Assert.That(conn, Is.TypeOf<NoReliableConnection>(), "returned type should be connection");
@@ -48,7 +53,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void InvokesConnectEventAfterReceivingAccept()
         {
-            var handle = TestEndPoint.CreateSubstitute();
+            var handle = TestEndPoint.CreateSubstitute(_handleBehavior);
             var conn = peer.Connect((IConnectEndPoint)handle);
 
             socket.AsMock().QueueReceiveCall(new byte[2] {
@@ -65,7 +70,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [UnityTest]
         public IEnumerator ShouldResendConnectMessageIfNoReply()
         {
-            var endPoint = TestEndPoint.CreateSubstitute();
+            var endPoint = TestEndPoint.CreateSubstitute(_handleBehavior);
             _ = peer.Connect((IConnectEndPoint)endPoint);
 
             var expected = connectRequest;
@@ -100,7 +105,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [UnityTest]
         public IEnumerator ShouldInvokeConnectionFailedIfNoReplyAfterMax()
         {
-            var endPoint = TestEndPoint.CreateSubstitute();
+            var endPoint = TestEndPoint.CreateSubstitute(_handleBehavior);
             var conn = peer.Connect((IConnectEndPoint)endPoint);
 
             // wait enough time so that  would have been called
@@ -120,7 +125,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ShouldInvokeConnectionFailedIfServerRejects()
         {
-            var endPoint = TestEndPoint.CreateSubstitute();
+            var endPoint = TestEndPoint.CreateSubstitute(_handleBehavior);
             var conn = peer.Connect((IConnectEndPoint)endPoint);
             Debug.Assert(conn.Handle == endPoint, "Mock Socket should have returned the same connection");
 
@@ -140,7 +145,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [UnityTest]
         public IEnumerator InvokesConnectFailedIfClosedBeforeConnect()
         {
-            var endPoint = TestEndPoint.CreateSubstitute();
+            var endPoint = TestEndPoint.CreateSubstitute(_handleBehavior);
             var conn = peer.Connect((IConnectEndPoint)endPoint);
 
             peer.Close();
@@ -169,7 +174,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             // todo test as client with 1 connection
             Assert.Ignore("new NotImplementedException(What should happen if close / disconnect is called while still connecting)");
 
-            var endPoint = TestEndPoint.CreateSubstitute();
+            var endPoint = TestEndPoint.CreateSubstitute(_handleBehavior);
             var conn = peer.Connect((IConnectEndPoint)endPoint);
 
             peer.Close();

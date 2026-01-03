@@ -13,23 +13,8 @@ namespace Mirage.SocketLayer.Tests.PeerTests
     [TestFixture(SocketBehavior.TickEvent)]
     public class StatefulPeerTest : PeerTestBase
     {
-        public abstract class MockIConnectionHandle : IConnectionHandle
-        {
-            public bool IsStateful => true;
-            public ISocketLayerConnection SocketLayerConnection { get; set; }
-
-            public abstract bool SupportsGracefulDisconnect { get; }
-            public abstract IConnectionHandle CreateCopy();
-            public abstract void Disconnect(string gracefulDisconnectReason);
-        }
-
         public StatefulPeerTest(SocketBehavior behavior) : base(behavior)
         {
-        }
-
-        private IConnectionHandle CreateStatefulHandleMock()
-        {
-            return Substitute.ForPartsOf<MockIConnectionHandle>();
         }
 
         private IConnectionHandle clientStatefulHandle;
@@ -38,7 +23,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         public override void SetUp()
         {
             base.SetUp();
-            clientStatefulHandle = CreateStatefulHandleMock();
+            clientStatefulHandle = TestEndPoint.CreateSubstitute(ConnectionHandleBehavior.Stateful);
 
             // override the default connect behaviour
             socket.Connect(Arg.Any<IConnectEndPoint>()).Returns(clientStatefulHandle);
@@ -47,7 +32,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ConnectShouldReturnAStatefulConnection()
         {
-            var conn = peer.Connect((IConnectEndPoint)TestEndPoint.CreateSubstitute());
+            var conn = peer.Connect((IConnectEndPoint)TestEndPoint.CreateSubstitute(ConnectionHandleBehavior.Stateful));
 
             Assert.That(conn, Is.TypeOf<ReliableConnection>());
             Assert.That(conn.State, Is.EqualTo(ConnectionState.Connecting));
@@ -59,10 +44,9 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ServerShouldUseSameHandleForStatefulConnection()
         {
-            peer.Bind((IBindEndPoint)TestEndPoint.CreateSubstitute());
+            peer.Bind(Substitute.For<IBindEndPoint>());
 
-            var serverHandle = CreateStatefulHandleMock();
-
+            var serverHandle = TestEndPoint.CreateSubstitute(ConnectionHandleBehavior.Stateful);
 
             socket.AsMock().QueueReceiveCall(connectRequest, serverHandle);
 
@@ -85,7 +69,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         public void ShouldCallDisconnectOnHandleWhenSocketDisconnects()
         {
             // connect first
-            var conn = peer.Connect((IConnectEndPoint)TestEndPoint.CreateSubstitute());
+            var conn = peer.Connect((IConnectEndPoint)TestEndPoint.CreateSubstitute(ConnectionHandleBehavior.Stateful));
             socket.AsMock().QueueReceiveCall(new byte[] { (byte)PacketType.Command, (byte)Commands.ConnectionAccepted }, clientStatefulHandle);
             peer.UpdateTest();
             Assert.That(conn.State, Is.EqualTo(ConnectionState.Connected));
@@ -101,7 +85,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         public void ShouldProcessDataFromOnDataEvent()
         {
             // connect first
-            var conn = peer.Connect((IConnectEndPoint)TestEndPoint.CreateSubstitute());
+            var conn = peer.Connect((IConnectEndPoint)TestEndPoint.CreateSubstitute(ConnectionHandleBehavior.Stateful));
             socket.AsMock().QueueReceiveCall(new byte[] { (byte)PacketType.Command, (byte)Commands.ConnectionAccepted }, clientStatefulHandle);
             peer.UpdateTest();
             Assert.That(conn.State, Is.EqualTo(ConnectionState.Connected));
@@ -124,7 +108,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         public void SafeDisconnectFromErrorShouldDisconnectStatefulConnection()
         {
             // connect first
-            var conn = peer.Connect((IConnectEndPoint)TestEndPoint.CreateSubstitute());
+            var conn = peer.Connect((IConnectEndPoint)TestEndPoint.CreateSubstitute(ConnectionHandleBehavior.Stateful));
             socket.AsMock().QueueReceiveCall(new byte[] { (byte)PacketType.Command, (byte)Commands.ConnectionAccepted }, clientStatefulHandle);
             peer.UpdateTest();
             Assert.That(conn.State, Is.EqualTo(ConnectionState.Connected));

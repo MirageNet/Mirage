@@ -7,6 +7,7 @@ using NUnit.Framework;
 namespace Mirage.Tests
 {
     public enum SocketBehavior { PollReceive, TickEvent }
+    public enum ConnectionHandleBehavior { Stateful, Stateless }
 
     /// <summary>
     /// Socket that can send message to other sockets
@@ -158,13 +159,32 @@ namespace Mirage.Tests
         }
     }
 
+    public abstract class MockIConnectionHandle : IConnectionHandle, IBindEndPoint, IConnectEndPoint
+    {
+        public bool IsStateful => true;
+        public ISocketLayerConnection SocketLayerConnection { get; set; }
+
+        public abstract bool SupportsGracefulDisconnect { get; }
+        public abstract IConnectionHandle CreateCopy();
+        public abstract void Disconnect(string gracefulDisconnectReason);
+    }
+
+
     public static class TestEndPoint
     {
-        public static IConnectionHandle CreateSubstitute()
+        public static IConnectionHandle CreateSubstitute(ConnectionHandleBehavior handleBehavior = ConnectionHandleBehavior.Stateless)
         {
-            var endpoint = Substitute.For<IConnectionHandle, IBindEndPoint, IConnectEndPoint>();
-            endpoint.CreateCopy().Returns(endpoint);
-            return endpoint;
+            if (handleBehavior == ConnectionHandleBehavior.Stateful)
+            {
+                var endpoint = Substitute.ForPartsOf<MockIConnectionHandle>();
+                return endpoint;
+            }
+            else
+            {
+                var endpoint = Substitute.For<IConnectionHandle, IBindEndPoint, IConnectEndPoint>();
+                endpoint.CreateCopy().Returns(endpoint);
+                return endpoint;
+            }
         }
     }
 
