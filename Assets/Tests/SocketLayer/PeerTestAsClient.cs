@@ -8,8 +8,14 @@ using UnityEngine.TestTools;
 namespace Mirage.SocketLayer.Tests.PeerTests
 {
     [Category("SocketLayer"), Description("tests for Peer that only apply to client")]
+    [TestFixture(SocketBehavior.PollReceive)]
+    [TestFixture(SocketBehavior.TickEvent)]
     public class PeerTestAsClient : PeerTestBase
     {
+        public PeerTestAsClient(SocketBehavior behavior) : base(behavior)
+        {
+        }
+
         [Test]
         public void ConnectShouldSendMessageToSocket()
         {

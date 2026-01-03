@@ -6,8 +6,14 @@ using NUnit.Framework;
 namespace Mirage.SocketLayer.Tests.PeerTests
 {
     [Category("SocketLayer"), Description("tests for Peer that only apply to server")]
+    [TestFixture(SocketBehavior.PollReceive)]
+    [TestFixture(SocketBehavior.TickEvent)]
     public class PeerTestAsServer : PeerTestBase
     {
+        public PeerTestAsServer(SocketBehavior behavior) : base(behavior)
+        {
+        }
+
         [Test]
         public void BindShouldCallSocketBind()
         {

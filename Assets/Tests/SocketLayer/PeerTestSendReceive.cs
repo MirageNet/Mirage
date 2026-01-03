@@ -18,6 +18,8 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         }
     }
     [Category("SocketLayer"), Description("integration test to make sure that send and receiving works as a whole")]
+    [TestFixture(SocketBehavior.PollReceive)]
+    [TestFixture(SocketBehavior.TickEvent)]
     public class PeerTestSendReceive
     {
         private const int ClientCount = 4;
@@ -27,6 +29,12 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         private List<IConnection> serverConnections;
         private int maxFragmentMessageSize;
         private float NotifyWaitTime;
+        private readonly SocketBehavior _behavior;
+
+        public PeerTestSendReceive(SocketBehavior behavior)
+        {
+            _behavior = behavior;
+        }
 
         [SetUp]
         public void SetUp()
@@ -39,7 +47,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             NotifyWaitTime = config.TimeBeforeEmptyAck * 2;
 
 
-            server = new PeerInstanceWithSocket(config);
+            server = new PeerInstanceWithSocket(_behavior, config);
             clients = new PeerInstanceWithSocket[ClientCount];
             Action<IConnection> serverConnect = (conn) => serverConnections.Add(conn);
             server.peer.OnConnected += serverConnect;
@@ -47,7 +55,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             server.peer.Bind((IBindEndPoint)TestEndPoint.CreateSubstitute());
             for (var i = 0; i < ClientCount; i++)
             {
-                clients[i] = new PeerInstanceWithSocket(config);
+                clients[i] = new PeerInstanceWithSocket(_behavior, config);
                 clientConnections.Add(clients[i].peer.Connect((IConnectEndPoint)server.endPoint));
             }
 
@@ -296,6 +304,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         }
 
         private const int DEFAULT_MAX_FRAGMENTS = 50;
+
         [Test]
         [TestCase(1, DEFAULT_MAX_FRAGMENTS)]
         [TestCase(0.8f, (int)(DEFAULT_MAX_FRAGMENTS * 0.8))]

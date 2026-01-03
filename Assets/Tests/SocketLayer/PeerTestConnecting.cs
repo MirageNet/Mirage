@@ -8,20 +8,28 @@ using NUnit.Framework;
 namespace Mirage.SocketLayer.Tests.PeerTests
 {
     [Category("SocketLayer"), Description("tests using multiple instances of peer to check they can connect to each other")]
+    [TestFixture(SocketBehavior.PollReceive)]
+    [TestFixture(SocketBehavior.TickEvent)]
     public class PeerTestConnecting
     {
         private const int ClientCount = 4;
         private PeerInstanceWithSocket server;
         private PeerInstanceWithSocket[] clients;
+        private SocketBehavior _behavior;
+
+        public PeerTestConnecting(SocketBehavior behavior)
+        {
+            _behavior = behavior;
+        }
 
         [SetUp]
         public void SetUp()
         {
-            server = new PeerInstanceWithSocket(new Config { MaxConnections = ClientCount });
+            server = new PeerInstanceWithSocket(_behavior, new Config { MaxConnections = ClientCount });
             clients = new PeerInstanceWithSocket[ClientCount];
             for (var i = 0; i < ClientCount; i++)
             {
-                clients[i] = new PeerInstanceWithSocket();
+                clients[i] = new PeerInstanceWithSocket(_behavior);
             }
         }
 

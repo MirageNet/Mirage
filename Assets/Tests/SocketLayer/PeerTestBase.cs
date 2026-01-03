@@ -31,11 +31,17 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         protected Peer peer => instance.peer;
 
         internal readonly Time time = new Time();
+        private readonly SocketBehavior _behavior;
+
+        public PeerTestBase(SocketBehavior behavior)
+        {
+            _behavior = behavior;
+        }
 
         [SetUp]
         public void SetUp()
         {
-            instance = new PeerInstance();
+            instance = new PeerInstance(_behavior);
 
             connectAction = Substitute.For<Action<IConnection>>();
             connectFailedAction = Substitute.For<Action<IConnection, RejectReason>>();
@@ -68,16 +74,20 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         public ILogger logger;
         public Peer peer;
 
-        private static ISocket CreateMock()
+        private static ISocket CreateMock(SocketBehavior behavior)
         {
-            var mock = Substitute.ForPartsOf<MockISocket>();
+            var mock = Substitute.ForPartsOf<MockISocket>(behavior);
             mock.Connect(Arg.Any<IConnectEndPoint>()).Returns(x => x.Args()[0]);
             return mock;
         }
 
-        public PeerInstance(Config config = null, ISocket socket = null, int? maxPacketSize = null)
+        public PeerInstance(SocketBehavior behavior, Config config = null, int? maxPacketSize = null)
+            : this(CreateMock(behavior), config, maxPacketSize)
         {
-            this.socket = socket ?? CreateMock();
+        }
+        public PeerInstance(ISocket socket, Config config = null, int? maxPacketSize = null)
+        {
+            this.socket = socket;
             dataHandler = Substitute.For<IDataHandler>();
 
             this.config = config ?? new Config()
@@ -96,27 +106,57 @@ namespace Mirage.SocketLayer.Tests.PeerTests
     {
         public readonly List<(IConnectionHandle handle, byte[] packet)> SendReceiveCalls = new List<(IConnectionHandle handle, byte[] packet)>();
         public readonly Queue<(IConnectionHandle handle, byte[] data)> ReceiveQueue = new();
+        private readonly SocketBehavior _behavior;
+        private OnData _onData;
 
-        // can't use NUnit for Span calls, so custom mock for this method
+        public MockISocket(SocketBehavior behavior)
+        {
+            _behavior = behavior;
+        }
+
         public void Send(IConnectionHandle handle, ReadOnlySpan<byte> packet)
         {
             SendReceiveCalls.Add((handle, packet.ToArray()));
         }
-        public int Receive(Span<byte> outBuffer, out IConnectionHandle handle)
+        public int Receive(Span<byte> outBuffer, out IConnectionHandle outHandle)
         {
-            var (h, data) = ReceiveQueue.Dequeue();
-            handle = h;
+            if (_behavior != SocketBehavior.PollReceive)
+                Assert.Fail("Receive should only be called in PollReceive mode");
+
+            var (handle, data) = ReceiveQueue.Dequeue();
+            outHandle = handle;
             var copyLength = Math.Min(outBuffer.Length, data.Length);
             data.AsSpan(0, copyLength).CopyTo(outBuffer);
             return data.Length;
         }
-        public bool Poll() => ReceiveQueue.Count > 0;
+        public bool Poll()
+        {
+            if (_behavior == SocketBehavior.PollReceive)
+                return ReceiveQueue.Count > 0;
+            else
+                return false;
+        }
+
+        public void SetTickEvents(int maxPacketSize, OnData onData, OnDisconnect onDisconnect)
+        {
+            if (_behavior == SocketBehavior.TickEvent)
+                _onData = onData;
+        }
+        public void Tick()
+        {
+            if (_behavior == SocketBehavior.TickEvent)
+            {
+                while (ReceiveQueue.TryDequeue(out var next))
+                {
+                    var (handle, data) = next;
+                    _onData.Invoke(handle, data);
+                }
+            }
+        }
 
         public abstract void Bind(IBindEndPoint endPoint);
         public abstract void Close();
         public abstract IConnectionHandle Connect(IConnectEndPoint endPoint);
-        public abstract void SetTickEvents(int maxPacketSize, OnData onData, OnDisconnect onDisconnect);
-        public abstract void Tick();
     }
     public static class MockISocketExtension
     {
@@ -196,7 +236,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         /// </summary>
         public IConnectionHandle endPoint;
 
-        public PeerInstanceWithSocket(Config config = null) : base(config, socket: new TestSocket("TestInstance"))
+        public PeerInstanceWithSocket(SocketBehavior behavior, Config config = null) : base(new TestSocket("TestInstance", behavior), config)
         {
             socket = (TestSocket)base.socket;
             endPoint = socket.endPoint;
