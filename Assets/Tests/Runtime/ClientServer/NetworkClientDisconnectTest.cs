@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Linq;
 using Cysharp.Threading.Tasks;
@@ -84,7 +85,7 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
             (var clientSocket, var serverEndPoint) = GetSocketAndEndPoint();
             var badMessage = CreateInvalidPacket();
 
-            clientSocket.Send(serverEndPoint, badMessage, 20);
+            clientSocket.Send(serverEndPoint, badMessage.AsSpan(0, 20));
 
             var called = 0;
             client.Disconnected.AddListener((reason) =>
@@ -100,7 +101,7 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
             Assert.That(called, Is.EqualTo(1));
         }
 
-        private (ISocket clientSocket, IEndPoint serverEndPoint) GetSocketAndEndPoint()
+        private (ISocket clientSocket, IConnectionHandle serverEndPoint) GetSocketAndEndPoint()
         {
             var clientEndPoint = server.AllPlayers.First().Connection.Handle;
             var clientSocket = TestSocket.allSockets[clientEndPoint];

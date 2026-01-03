@@ -28,7 +28,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ServerAcceptsAllClients()
         {
-            server.peer.Bind(TestEndPoint.CreateSubstitute());
+            server.peer.Bind((IBindEndPoint)TestEndPoint.CreateSubstitute());
 
             var connectAction = Substitute.For<Action<IConnection>>();
             server.peer.OnConnected += connectAction;
@@ -36,7 +36,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             for (var i = 0; i < ClientCount; i++)
             {
                 // tell client i to connect
-                clients[i].peer.Connect(server.endPoint);
+                clients[i].peer.Connect((IConnectEndPoint)server.endPoint);
                 var clientConnectAction = Substitute.For<Action<IConnection>>();
                 clients[i].peer.OnConnected += clientConnectAction;
 
@@ -70,7 +70,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void EachServerConnectionIsANewInstance()
         {
-            server.peer.Bind(TestEndPoint.CreateSubstitute());
+            server.peer.Bind((IBindEndPoint)TestEndPoint.CreateSubstitute());
             var serverConnections = new List<IConnection>();
 
             Action<IConnection> connectAction = (conn) =>
@@ -82,7 +82,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             for (var i = 0; i < ClientCount; i++)
             {
                 // tell client i to connect
-                clients[i].peer.Connect(server.endPoint);
+                clients[i].peer.Connect((IConnectEndPoint)server.endPoint);
 
                 // run tick on server, should read packet from client i
                 server.peer.UpdateTest();

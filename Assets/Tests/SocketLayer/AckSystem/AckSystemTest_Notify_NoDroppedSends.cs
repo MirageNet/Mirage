@@ -48,14 +48,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 // send to conn1
                 instance1.ackSystem.SendNotify(instance1.messages[i]);
                 // give to instance2 from conn1
-                var segment2 = instance2.ackSystem.ReceiveNotify(instance1.connection.packets[i], instance1.connection.packets[i].Length);
-                received2.Add(segment2);
+                var segment2 = instance2.ackSystem.ReceiveNotify(instance1.connection.packets[i].AsSpan());
+                received2.Add(new ArraySegment<byte>(segment2.ToArray()));
 
                 // send to conn2
                 instance2.ackSystem.SendNotify(instance2.messages[i]);
                 // give to instance1 from conn2
-                var segment1 = instance1.ackSystem.ReceiveNotify(instance2.connection.packets[i], instance2.connection.packets[i].Length);
-                received1.Add(segment1);
+                var segment1 = instance1.ackSystem.ReceiveNotify(instance2.connection.packets[i].AsSpan());
+                received1.Add(new ArraySegment<byte>(segment1.ToArray()));
             }
 
             // should have got 1 packet

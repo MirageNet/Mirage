@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Mirage.SocketLayer.Tests.PeerTests;
+using Mirage.Tests;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -18,7 +19,6 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         private PeerInstance _peerInstance;
         private Pool<ByteBuffer> _bufferPool;
         private readonly Random rand = new Random();
-        private byte[] _sentArray;
 
         private ISocket Socket => _peerInstance.socket;
 
@@ -32,7 +32,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             _peerInstance = new PeerInstance(_config, maxPacketSize: MAX_PACKET_SIZE);
             _bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, MAX_PACKET_SIZE, 0, 100);
 
-            _connection = _peerInstance.peer.Connect(Substitute.For<IEndPoint>());
+            _connection = _peerInstance.peer.Connect((IConnectEndPoint)TestEndPoint.CreateSubstitute());
             // Set connection state to Connected after creation
             ((NoReliableConnection)_connection).State = ConnectionState.Connected;
 
@@ -43,14 +43,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             }
 
             // clear calls, Connect will have sent one
-            Socket.ClearReceivedCalls();
-            Socket.When(x => x.Send(Arg.Any<IEndPoint>(), Arg.Any<byte[]>(), Arg.Any<int>()))
-                .Do(x =>
-                {
-                    var arg = (byte[])x.Args()[1];
-                    // create copy
-                    _sentArray = arg.ToArray();
-                });
+            Socket.ClearSendAndReceivedCalls();
         }
 
         [Test]
@@ -74,20 +67,23 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
         }
 
+        /// <summary>
+        /// Checks that batched message were sent as 1 packet
+        /// </summary>
+        /// <param name="messageLengths"></param>
         private void AssertSentPacket(IEnumerable<int> messageLengths)
         {
             var totalLength = 1 + (2 * messageLengths.Count()) + messageLengths.Sum();
 
-            // only 1 at any length
-            Socket.Received(1).Send(Arg.Any<IEndPoint>(), Arg.Any<byte[]>(), Arg.Any<int>());
-            // but also check we received length
-            Socket.Received(1).Send(Arg.Any<IEndPoint>(), Arg.Any<byte[]>(), totalLength);
+            var mockSocket = Socket.AsMock();
+
+            mockSocket.AssertSendCall(1, null, totalLength);
 
             // check packet was correct
-            CheckMessage(_sentArray, messageLengths);
+            CheckMessage(mockSocket.GetLastSendArray(), messageLengths);
 
             // clear calls after, so we are ready to process next message
-            Socket.ClearReceivedCalls();
+            mockSocket.ClearSendAndReceivedCalls();
         }
 
         private void CheckMessage(byte[] packet, IEnumerable<int> messageLengths)
@@ -127,7 +123,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             foreach (var length in lessThanBatchLengths)
             {
                 _connection.SendReliable(_buffer, 0, length);
-                Socket.DidNotReceive().Send(Arg.Any<IEndPoint>(), Arg.Any<byte[]>(), Arg.Any<int>());
+                Socket.AsMock().AssertSendDidNotReceive();
             }
 
             // should be 97 in buffer now => 1+(length+2)*3
@@ -165,7 +161,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 else
                 {
                     _connection.SendReliable(_buffer, 0, length);
-                    Socket.DidNotReceive().Send(Arg.Any<IEndPoint>(), Arg.Any<byte[]>(), Arg.Any<int>());
+                    Socket.AsMock().AssertSendDidNotReceive();
                     total = newTotal;
                 }
                 currentBatch.Add(length);
@@ -185,7 +181,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             foreach (var length in lessThanBatchLengths)
             {
                 _connection.SendReliable(_buffer, 0, length);
-                Socket.DidNotReceive().Send(Arg.Any<IEndPoint>(), Arg.Any<byte[]>(), Arg.Any<int>());
+                Socket.AsMock().AssertSendDidNotReceive();
             }
 
             _connection.FlushBatch();
@@ -196,9 +192,9 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         public void FlushDoesNotSendEmptyMessage()
         {
             _connection.FlushBatch();
-            Socket.DidNotReceive().Send(Arg.Any<IEndPoint>(), Arg.Any<byte[]>(), Arg.Any<int>());
+            Socket.AsMock().AssertSendDidNotReceive();
             _connection.FlushBatch();
-            Socket.DidNotReceive().Send(Arg.Any<IEndPoint>(), Arg.Any<byte[]>(), Arg.Any<int>());
+            Socket.AsMock().AssertSendDidNotReceive();
         }
 
 
@@ -216,7 +212,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             _peerInstance.dataHandler
                 .When(x => x.ReceiveMessage(_connection, Arg.Any<ArraySegment<byte>>()))
                 .Do(x => segments.Add(x.ArgAt<ArraySegment<byte>>(1)));
-            ((NoReliableConnection)_connection).ReceiveReliablePacket(new Packet(receive, offset));
+            ((NoReliableConnection)_connection).ReceiveReliablePacket(new Packet(receive.array.AsSpan(0, offset)));
             _peerInstance.dataHandler.Received(3).ReceiveMessage(_connection, Arg.Any<ArraySegment<byte>>());
 
 

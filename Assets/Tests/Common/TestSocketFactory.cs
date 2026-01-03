@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Mirage.SocketLayer;
 using NSubstitute;
 
@@ -14,14 +13,14 @@ namespace Mirage.Tests
         /// <summary>
         /// this static dictionary will act as the internet
         /// </summary>
-        public static Dictionary<IEndPoint, TestSocket> allSockets = new Dictionary<IEndPoint, TestSocket>();
+        public static Dictionary<IConnectionHandle, TestSocket> allSockets = new Dictionary<IConnectionHandle, TestSocket>();
 
         /// <summary>
         /// Can be useful to fake timeouts or dropped messages
         /// </summary>
         public static bool StopAllMessages;
 
-        public static bool EndpointInUse(IEndPoint endPoint) => allSockets.ContainsKey(endPoint);
+        public static bool EndpointInUse(IConnectionHandle endPoint) => allSockets.ContainsKey(endPoint);
 
         /// <summary>
         /// adds this socket as an option to receive data
@@ -42,27 +41,32 @@ namespace Mirage.Tests
         }
 
 
-        public readonly IEndPoint endPoint;
+        /// <summary>
+        /// what other instances can use too send message to the socket
+        /// </summary>
+        public readonly IConnectionHandle endPoint;
         private readonly Queue<Packet> received = new Queue<Packet>();
         public List<Packet> Sent = new List<Packet>();
 
         public readonly string name;
 
-        public TestSocket(string name, IEndPoint endPoint = null)
+        public TestSocket(string name, IConnectionHandle endPoint = null)
         {
             this.name = name;
             this.endPoint = endPoint ?? TestEndPoint.CreateSubstitute();
         }
 
 
-        void ISocket.Bind(IEndPoint endPoint)
+        void ISocket.Bind(IBindEndPoint endPoint)
         {
             AddThisSocket();
         }
 
-        void ISocket.Connect(IEndPoint endPoint)
+        IConnectionHandle ISocket.Connect(IConnectEndPoint endPoint)
         {
             AddThisSocket();
+            // return server's endpoint
+            return (IConnectionHandle)endPoint;
         }
 
         void ISocket.Close()
@@ -70,38 +74,40 @@ namespace Mirage.Tests
             allSockets.Remove(endPoint);
         }
 
+        void ISocket.Tick() { }
+        void ISocket.SetTickEvents(int maxPacketSize, OnData onData, OnDisconnect onDisconnect) { }
+
         bool ISocket.Poll()
         {
             return received.Count > 0;
         }
 
-        int ISocket.Receive(byte[] buffer, out IEndPoint endPoint)
+        int ISocket.Receive(Span<byte> outBuffer, out IConnectionHandle handle)
         {
             var next = received.Dequeue();
-            endPoint = next.endPoint;
-            var length = next.length;
+            handle = next.endPoint;
 
-            Buffer.BlockCopy(next.data, 0, buffer, 0, length);
-            return length;
+            next.AsSpan().CopyTo(outBuffer);
+            return next.length;
         }
 
-        void ISocket.Send(IEndPoint remoteEndPoint, byte[] packet, int length)
+        void ISocket.Send(IConnectionHandle handle, ReadOnlySpan<byte> packet)
         {
             AddThisSocket();
 
-            if (!allSockets.TryGetValue(remoteEndPoint, out var other))
+            if (!allSockets.TryGetValue(handle, out var other))
             {
                 // other socket might have been closed
                 return;
             }
 
             // create copy because data is from buffer
-            var clone = packet.Take(length).ToArray();
+            var clone = packet.ToArray();
             Sent.Add(new Packet
             {
-                endPoint = remoteEndPoint,
+                endPoint = handle,
                 data = clone,
-                length = length
+                length = clone.Length
             });
 
             // mark as sent, but not as received
@@ -112,23 +118,25 @@ namespace Mirage.Tests
             {
                 endPoint = endPoint,
                 data = clone,
-                length = length
+                length = clone.Length
             });
         }
 
         public struct Packet
         {
-            public IEndPoint endPoint;
+            public IConnectionHandle endPoint;
             public byte[] data;
             public int length;
+
+            public Span<byte> AsSpan() => data.AsSpan(0, length);
         }
     }
 
     public static class TestEndPoint
     {
-        public static IEndPoint CreateSubstitute()
+        public static IConnectionHandle CreateSubstitute()
         {
-            var endpoint = Substitute.For<IEndPoint>();
+            var endpoint = Substitute.For<IConnectionHandle, IBindEndPoint, IConnectEndPoint>();
             endpoint.CreateCopy().Returns(endpoint);
             return endpoint;
         }
@@ -136,7 +144,7 @@ namespace Mirage.Tests
 
     public class TestSocketFactory : SocketFactory
     {
-        public IEndPoint serverEndpoint = TestEndPoint.CreateSubstitute();
+        public IConnectionHandle serverEndpoint = TestEndPoint.CreateSubstitute();
         private int clientNameIndex;
         private int serverNameIndex;
         public override int MaxPacketSize => 1300;
@@ -156,14 +164,14 @@ namespace Mirage.Tests
             return new TestSocket($"Server {serverNameIndex++}", serverEndpoint);
         }
 
-        public override IEndPoint GetBindEndPoint()
+        public override IBindEndPoint GetBindEndPoint()
         {
             return default;
         }
 
-        public override IEndPoint GetConnectEndPoint(string address = null, ushort? port = null)
+        public override IConnectEndPoint GetConnectEndPoint(string address = null, ushort? port = null)
         {
-            return serverEndpoint;
+            return (IConnectEndPoint)serverEndpoint;
         }
     }
 }

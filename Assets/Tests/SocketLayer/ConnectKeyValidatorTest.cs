@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 
 namespace Mirage.SocketLayer.Tests
@@ -41,7 +42,7 @@ namespace Mirage.SocketLayer.Tests
             var buffer = new byte[50];
             validator.CopyTo(buffer);
 
-            var valid = validator.Validate(buffer, length);
+            var valid = validator.Validate(buffer.AsSpan(0, length));
             Assert.IsTrue(valid);
         }
 
@@ -53,7 +54,7 @@ namespace Mirage.SocketLayer.Tests
             // corrupt 1 byte
             buffer[4] = 0;
 
-            var valid = validator.Validate(buffer, length);
+            var valid = validator.Validate(buffer.AsSpan(0, length));
             Assert.IsFalse(valid);
         }
 

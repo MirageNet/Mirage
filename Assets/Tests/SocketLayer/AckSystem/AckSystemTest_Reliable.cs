@@ -76,7 +76,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 switch (type)
                 {
                     case PacketType.Reliable:
-                        ackSystem.ReceiveReliable(packet, packet.Length, false);
+                        ackSystem.ReceiveReliable(packet.AsSpan(), false);
                         break;
                     case PacketType.Ack:
                         ackSystem.ReceiveAck(packet);
