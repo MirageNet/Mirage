@@ -6,18 +6,23 @@ using NUnit.Framework;
 namespace Mirage.SocketLayer.Tests.PeerTests
 {
     [Category("SocketLayer"), Description("tests for Peer that only apply to server")]
-    [TestFixture(SocketBehavior.PollReceive)]
-    [TestFixture(SocketBehavior.TickEvent)]
+    [TestFixture(SocketBehavior.PollReceive, ConnectionHandleBehavior.Stateful)]
+    [TestFixture(SocketBehavior.PollReceive, ConnectionHandleBehavior.Stateless)]
+    [TestFixture(SocketBehavior.TickEvent, ConnectionHandleBehavior.Stateful)]
+    [TestFixture(SocketBehavior.TickEvent, ConnectionHandleBehavior.Stateless)]
     public class PeerTestAsServer : PeerTestBase
     {
-        public PeerTestAsServer(SocketBehavior behavior) : base(behavior)
+        private readonly ConnectionHandleBehavior _handleBehavior;
+
+        public PeerTestAsServer(SocketBehavior behavior, ConnectionHandleBehavior handleBehavior) : base(behavior)
         {
+            _handleBehavior = handleBehavior;
         }
 
         [Test]
         public void BindShouldCallSocketBind()
         {
-            var endPoint = (IBindEndPoint)TestEndPoint.CreateSubstitute();
+            var endPoint = Substitute.For<IBindEndPoint>();
             peer.Bind(endPoint);
 
             socket.Received(1).Bind(Arg.Is(endPoint));
@@ -26,13 +31,13 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void CloseSendsDisconnectMessageToAllConnections()
         {
-            var endPoint = TestEndPoint.CreateSubstitute();
-            peer.Bind((IBindEndPoint)endPoint);
+            var endPoint = TestEndPoint.CreateSubstitute(_handleBehavior);
+            peer.Bind(Substitute.For<IBindEndPoint>());
 
             var endPoints = new IConnectionHandle[maxConnections];
             for (var i = 0; i < maxConnections; i++)
             {
-                endPoints[i] = TestEndPoint.CreateSubstitute();
+                endPoints[i] = TestEndPoint.CreateSubstitute(_handleBehavior);
 
                 socket.AsMock().QueueReceiveCall(connectRequest, endPoints[i]);
                 peer.UpdateTest();
@@ -61,12 +66,12 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void AcceptsConnectionForValidMessage()
         {
-            peer.Bind((IBindEndPoint)TestEndPoint.CreateSubstitute());
+            peer.Bind(Substitute.For<IBindEndPoint>());
 
             var connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
 
-            var endPoint = TestEndPoint.CreateSubstitute();
+            var endPoint = TestEndPoint.CreateSubstitute(_handleBehavior);
             socket.AsMock().QueueReceiveCall(connectRequest, endPoint);
             peer.UpdateTest();
 
@@ -81,7 +86,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void AcceptsConnectionsUpToMax()
         {
-            peer.Bind((IBindEndPoint)TestEndPoint.CreateSubstitute());
+            peer.Bind(Substitute.For<IBindEndPoint>());
 
             var connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
@@ -90,7 +95,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             var endPoints = new IConnectionHandle[maxConnections];
             for (var i = 0; i < maxConnections; i++)
             {
-                endPoints[i] = TestEndPoint.CreateSubstitute();
+                endPoints[i] = TestEndPoint.CreateSubstitute(_handleBehavior);
 
                 socket.AsMock().QueueReceiveCall(connectRequest, endPoints[i]);
                 peer.UpdateTest();
@@ -110,14 +115,14 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void RejectsConnectionOverMax()
         {
-            peer.Bind((IBindEndPoint)TestEndPoint.CreateSubstitute());
+            peer.Bind(Substitute.For<IBindEndPoint>());
 
             var connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
 
             for (var i = 0; i < maxConnections; i++)
             {
-                socket.AsMock().QueueReceiveCall(connectRequest, TestEndPoint.CreateSubstitute());
+                socket.AsMock().QueueReceiveCall(connectRequest, TestEndPoint.CreateSubstitute(_handleBehavior));
                 peer.UpdateTest();
             }
 
@@ -125,7 +130,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             socket.AsMock().ClearSendAndReceivedCalls();
             connectAction.ClearReceivedCalls();
 
-            var overMaxEndpoint = TestEndPoint.CreateSubstitute();
+            var overMaxEndpoint = TestEndPoint.CreateSubstitute(_handleBehavior);
             socket.AsMock().QueueReceiveCall(connectRequest, overMaxEndpoint);
 
             peer.UpdateTest();
