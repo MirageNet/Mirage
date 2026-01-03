@@ -2,7 +2,16 @@ using System;
 
 namespace Mirage.SocketLayer
 {
+    /// <summary>
+    /// Delegate for handling incoming data from a connection.
+    /// <para>Should only be invoked from within <see cref="ISocket.Tick"/>.</para>
+    /// </summary>
     public delegate void OnData(IConnectionHandle handle, ReadOnlySpan<byte> data);
+
+    /// <summary>
+    /// Delegate for handling a disconnection from a connection.
+    /// <para>Should only be invoked from within <see cref="ISocket.Tick"/>.</para>
+    /// </summary>
     public delegate void OnDisconnect(IConnectionHandle handle, ReadOnlySpan<byte> data, string reason);
 
 
@@ -31,12 +40,14 @@ namespace Mirage.SocketLayer
         void Close();
 
         /// <summary>
-        /// Set events that will be used by <see cref="Tick"/>. Will be called once when <see cref="Peer"/> is set up with <see cref="ISocket"/>
+        /// Set events that will be used by <see cref="Tick"/>. Will be called once when <see cref="Peer"/> is set up with <see cref="ISocket"/>.
+        /// <para>The <paramref name="onData"/> and <paramref name="onDisconnect"/> events should only be invoked from within the <see cref="Tick"/> method.</para>
         /// </summary>
         void SetTickEvents(int maxPacketSize, OnData onData, OnDisconnect onDisconnect);
 
         /// <summary>
-        /// Should invoke all events
+        /// Should invoke <see cref="OnData"/> and <see cref="OnDisconnect"/> events for any new data or disconnections.
+        /// <para>This method is called by <see cref="Peer.UpdateReceive"/> once per frame.</para>
         /// </summary>
         void Tick();
 
