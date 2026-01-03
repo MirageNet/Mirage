@@ -49,7 +49,6 @@ namespace Mirage.SocketLayer
         private readonly List<Connection> _connections = new List<Connection>();
         /// <summary>lookup for stateless connections</summary>
         private readonly Dictionary<IConnectionHandle, Connection> _connectionLookup = new Dictionary<IConnectionHandle, Connection>();
-        private ReceiveLoop receiveLoop;
 
         // list so that remove can take place after foreach loops
         private readonly List<Connection> _connectionsToRemove = new List<Connection>();
@@ -82,8 +81,7 @@ namespace Mirage.SocketLayer
             _connectKeyValidator = new ConnectKeyValidator(_config.key);
 
             _bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, maxPacketSize, _config.BufferPoolStartSize, _config.BufferPoolMaxSize, _logger);
-            receiveLoop = new ReceiveLoop();
-            receiveLoop.Setup(this, _socket);
+            socket.SetTickEvents(_maxPacketSize, OnDataEvent, OnDisconnectEvent);
 
             Application.quitting += Application_quitting;
         }
@@ -230,19 +228,156 @@ namespace Mirage.SocketLayer
         }
 
         /// <summary>
-        /// Call this at the start of the frame to receive new messages
-        /// </summary>
-        public void UpdateReceive()
-        {
-            receiveLoop.Tick();
-        }
-        /// <summary>
         /// Call this at end of frame to send new batches
         /// </summary>
         public void UpdateSent()
         {
             UpdateConnections();
             _metrics?.OnTick(_connections.Count);
+        }
+
+        /// <summary>
+        /// Call this at the start of the frame to receive new messages
+        /// </summary>
+        public void UpdateReceive()
+        {
+            try
+            {
+                // tick loop (push)
+                _socket.Tick();
+
+                // poll loop (pull)
+                using (var buffer = _bufferPool.Take())
+                {
+                    // check active, because socket might have been closed by message handler
+                    while (_active && _socket.Poll())
+                    {
+                        var length = _socket.Receive(buffer.array, out var handle);
+
+                        if (length < 0 && _logger.Enabled(LogType.Warning))
+                        {
+                            _logger.Warn($"Receive returned less than 0 bytes, length={length}");
+                            return;
+                        }
+
+                        // this should never happen. buffer size is only MTU, if socket returns higher length then it has a bug.
+                        // NOTE: this can now happen if transport are pushing data to us (rather than pull)
+                        if (length > _maxPacketSize)
+                        {
+                            _logger.Error($"Socket returned length above MTU. MaxPacketSize:{_maxPacketSize} length:{length}");
+                            SafeDisconnectFromError(handle);
+                            return;
+                        }
+
+                        OnData(handle, new Packet(buffer.array.AsSpan(0, length)));
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogException(e);
+            }
+        }
+
+        /// <summary>
+        /// Called if receiving invalid packet
+        /// </summary>
+        /// <param name="handle"></param>
+        private void SafeDisconnectFromError(IConnectionHandle handle)
+        {
+            if (handle.IsStateful)
+            {
+                if (handle.SocketLayerConnection != null)
+                {
+                    // connected and stateful
+                    var connection = (Connection)handle.SocketLayerConnection;
+                    OnConnectionDisconnected(connection, DisconnectReason.InvalidPacket, true);
+                }
+                else
+                {
+                    // not connected and stateful
+                    handle.Disconnect(null);
+                }
+            }
+            else
+            {
+                if (_connectionLookup.TryGetValue(handle, out var connection))
+                {
+                    // connected and stateless
+                    OnConnectionDisconnected(connection, DisconnectReason.InvalidPacket, true);
+                }
+                else
+                {
+                    // not connected and stateless
+                    // just ignore
+                }
+            }
+        }
+
+        private void OnDataEvent(IConnectionHandle handle, ReadOnlySpan<byte> data)
+        {
+            var length = data.Length;
+            if (length < 0 && _logger.Enabled(LogType.Warning))
+            {
+                _logger.Warn($"Receive returned less than 0 bytes, length={length}");
+                return;
+            }
+
+            // this should never happen. buffer size is only MTU, if socket returns higher length then it has a bug.
+            // NOTE: this can now happen if transport are pushing data to us (rather than pull)
+            if (length > _maxPacketSize)
+            {
+                _logger.Error($"Socket returned length above MTU. MaxPacketSize:{_maxPacketSize} length:{length}");
+                SafeDisconnectFromError(handle);
+                return;
+            }
+
+            OnData(handle, new Packet(data));
+        }
+        private void OnDisconnectEvent(IConnectionHandle handle, ReadOnlySpan<byte> data, string reason)
+        {
+            _logger.Assert(handle.IsStateful, "only stateful connection should use OnDisconnect event");
+            // todo assert connection is stateful
+            // TODO handle data and reason better
+
+            DisconnectReason disconnectReason;
+            if (data.Length == 3)
+                disconnectReason = (DisconnectReason)data[2];
+            else
+                disconnectReason = DisconnectReason.None;
+
+            var connection = (Connection)handle.SocketLayerConnection;
+            connection.DisconnectInternal(disconnectReason, false);
+        }
+        private void OnData(IConnectionHandle handle, Packet packet)
+        {
+            if (handle.IsStateful)
+            {
+                if (handle.SocketLayerConnection != null)
+                {
+                    var connection = (Connection)handle.SocketLayerConnection;
+                    _metrics?.OnReceive(packet.Length);
+                    HandleMessage(connection, packet);
+                }
+                else
+                {
+                    _metrics?.OnReceiveUnconnected(packet.Length);
+                    HandleNewConnection(handle, packet);
+                }
+            }
+            else
+            {
+                if (_connectionLookup.TryGetValue(handle, out var connection))
+                {
+                    _metrics?.OnReceive(packet.Length);
+                    HandleMessage(connection, packet);
+                }
+                else
+                {
+                    _metrics?.OnReceiveUnconnected(packet.Length);
+                    HandleNewConnection(handle, packet);
+                }
+            }
         }
 
         private void HandleMessage(Connection connection, Packet packet)
@@ -656,142 +791,6 @@ namespace Mirage.SocketLayer
                 {
                     // if not fragmented
                     return _maxPacketSize - AckSystem.MIN_RELIABLE_HEADER_SIZE;
-                }
-            }
-        }
-
-        public class ReceiveLoop
-        {
-            private Peer Peer;
-            private ISocket Socket;
-
-            public void Setup(Peer peer, ISocket socket)
-            {
-                Peer = peer;
-                Socket = socket;
-                socket.SetTickEvents(Peer._maxPacketSize, OnData, OnDisconnect);
-            }
-
-            private void OnData(IConnectionHandle handle, ReadOnlySpan<byte> data)
-            {
-                var length = data.Length;
-                if (length < 0 && Peer._logger.Enabled(LogType.Warning))
-                {
-                    Peer._logger.Warn($"Receive returned less than 0 bytes, length={length}");
-                    return;
-                }
-
-                // this should never happen. buffer size is only MTU, if socket returns higher length then it has a bug.
-                // NOTE: this can now happen if transport are pushing data to us (rather than pull)
-                if (length > Peer._maxPacketSize)
-                {
-                    Peer._logger.Error($"Socket returned length above MTU. MaxPacketSize:{Peer._maxPacketSize} length:{length}");
-                    SafeDisconnectFromError(handle);
-                    return;
-                }
-
-                var packet = new Packet(data);
-
-
-                if (handle.IsStateful)
-                {
-                    if (handle.SocketLayerConnection != null)
-                    {
-                        var connection = (Connection)handle.SocketLayerConnection;
-                        Peer._metrics?.OnReceive(length);
-                        Peer.HandleMessage(connection, packet);
-                    }
-                    else
-                    {
-                        Peer._metrics?.OnReceiveUnconnected(length);
-                        Peer.HandleNewConnection(handle, packet);
-                    }
-                }
-                else
-                {
-                    if (Peer._connectionLookup.TryGetValue(handle, out var connection))
-                    {
-                        Peer._metrics?.OnReceive(length);
-                        Peer.HandleMessage(connection, packet);
-                    }
-                    else
-                    {
-                        Peer._metrics?.OnReceiveUnconnected(length);
-                        Peer.HandleNewConnection(handle, packet);
-                    }
-                }
-            }
-
-            private void SafeDisconnectFromError(IConnectionHandle handle)
-            {
-                if (handle.IsStateful)
-                {
-                    if (handle.SocketLayerConnection != null)
-                    {
-                        // connected and stateful
-                        var connection = (Connection)handle.SocketLayerConnection;
-                        Peer.OnConnectionDisconnected(connection, DisconnectReason.InvalidPacket, true);
-                    }
-                    else
-                    {
-                        // not connected and stateful
-                        handle.Disconnect(null);
-                    }
-                }
-                else
-                {
-                    if (Peer._connectionLookup.TryGetValue(handle, out var connection))
-                    {
-                        // connected and stateless
-                        Peer.OnConnectionDisconnected(connection, DisconnectReason.InvalidPacket, true);
-                    }
-                    else
-                    {
-                        // not connected and stateless
-                        // just ignore
-                    }
-                }
-            }
-
-            private void OnDisconnect(IConnectionHandle handle, ReadOnlySpan<byte> data, string reason)
-            {
-                Peer._logger.Assert(handle.IsStateful, "only stateful connection should use OnDisconnect event");
-                // todo assert connection is stateful
-                // TODO handle data and reason better
-
-                DisconnectReason disconnectReason;
-                if (data.Length == 3)
-                    disconnectReason = (DisconnectReason)data[2];
-                else
-                    disconnectReason = DisconnectReason.None;
-
-                var connection = (Connection)handle.SocketLayerConnection;
-                connection.DisconnectInternal(disconnectReason, false);
-            }
-
-            public void Tick()
-            {
-                try
-                {
-                    // tick loop (push)
-                    Socket.Tick();
-
-
-                    // poll loop (pull)
-                    using (var buffer = Peer._bufferPool.Take())
-                    {
-                        // check active, because socket might have been closed by message handler
-                        while (Peer._active && Peer._socket.Poll())
-                        {
-                            var length = Peer._socket.Receive(buffer.array, out var handle);
-
-                            OnData(handle, new Span<byte>(buffer.array, 0, length));
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    Peer._logger.LogException(e);
                 }
             }
         }
