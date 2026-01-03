@@ -61,6 +61,7 @@ namespace Mirage.SocketLayer
         /// is server listening on or connected to endPoint
         /// </summary>
         private bool _active;
+        private bool _isTicking;
         public PoolMetrics PoolMetrics => _bufferPool.Metrics;
 
         public Peer(ISocket socket, int maxPacketSize, IDataHandler dataHandler, Config config = null, ILogger logger = null, Metrics metrics = null)
@@ -244,7 +245,15 @@ namespace Mirage.SocketLayer
             try
             {
                 // tick loop (push)
-                _socket.Tick();
+                _isTicking = true;
+                try
+                {
+                    _socket.Tick();
+                }
+                finally
+                {
+                    _isTicking = false;
+                }
 
                 // poll loop (pull)
                 using (var buffer = _bufferPool.Take())
@@ -316,6 +325,9 @@ namespace Mirage.SocketLayer
 
         private void OnDataEvent(IConnectionHandle handle, ReadOnlySpan<byte> data)
         {
+            if (!_isTicking)
+                _logger?.Warn("OnDataEvent was called outside of Peer.Tick(). This is not recommended and may cause issues.");
+
             var length = data.Length;
             if (length < 0 && _logger.Enabled(LogType.Warning))
             {
@@ -336,6 +348,9 @@ namespace Mirage.SocketLayer
         }
         private void OnDisconnectEvent(IConnectionHandle handle, ReadOnlySpan<byte> data, string reason)
         {
+            if (!_isTicking)
+                _logger?.Warn("OnDisconnectEvent was called outside of Peer.Tick(). This is not recommended and may cause issues.");
+
             _logger.Assert(handle.IsStateful, "only stateful connection should use OnDisconnect event");
             // todo assert connection is stateful
             // TODO handle data and reason better
