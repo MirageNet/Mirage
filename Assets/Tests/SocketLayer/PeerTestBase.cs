@@ -12,7 +12,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
     /// <summary>
     /// base class of PeerTests that has setup
     /// </summary>
-    public class PeerTestBase
+    public abstract class PeerTestBase
     {
         public const int maxConnections = 5;
         public const int MAX_PACKET_SIZE = 1300;
@@ -31,7 +31,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         protected Peer peer => instance.peer;
 
         internal readonly Time time = new Time();
-        private readonly SocketBehavior _behavior;
+        protected readonly SocketBehavior _behavior;
 
         public PeerTestBase(SocketBehavior behavior)
         {
@@ -39,7 +39,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         }
 
         [SetUp]
-        public void SetUp()
+        public virtual void SetUp()
         {
             instance = new PeerInstance(_behavior);
 
@@ -105,13 +105,14 @@ namespace Mirage.SocketLayer.Tests.PeerTests
     public abstract class MockISocket : ISocket
     {
         public readonly List<(IConnectionHandle handle, byte[] packet)> SendReceiveCalls = new List<(IConnectionHandle handle, byte[] packet)>();
-        public readonly Queue<(IConnectionHandle handle, byte[] data)> ReceiveQueue = new();
-        private readonly SocketBehavior _behavior;
+        public readonly Queue<(IConnectionHandle handle, bool isDisconnect, byte[] data)> ReceiveQueue = new();
+        public readonly SocketBehavior Behavior;
         private OnData _onData;
+        private OnDisconnect _onDisconnect;
 
         public MockISocket(SocketBehavior behavior)
         {
-            _behavior = behavior;
+            Behavior = behavior;
         }
 
         public void Send(IConnectionHandle handle, ReadOnlySpan<byte> packet)
@@ -120,10 +121,11 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         }
         public int Receive(Span<byte> outBuffer, out IConnectionHandle outHandle)
         {
-            if (_behavior != SocketBehavior.PollReceive)
+            if (Behavior != SocketBehavior.PollReceive)
                 Assert.Fail("Receive should only be called in PollReceive mode");
 
-            var (handle, data) = ReceiveQueue.Dequeue();
+            // dont care if it is disconnect or not, just return the data, it should be the disconnect command
+            var (handle, _, data) = ReceiveQueue.Dequeue();
             outHandle = handle;
             var copyLength = Math.Min(outBuffer.Length, data.Length);
             data.AsSpan(0, copyLength).CopyTo(outBuffer);
@@ -131,7 +133,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         }
         public bool Poll()
         {
-            if (_behavior == SocketBehavior.PollReceive)
+            if (Behavior == SocketBehavior.PollReceive)
                 return ReceiveQueue.Count > 0;
             else
                 return false;
@@ -139,17 +141,23 @@ namespace Mirage.SocketLayer.Tests.PeerTests
 
         public void SetTickEvents(int maxPacketSize, OnData onData, OnDisconnect onDisconnect)
         {
-            if (_behavior == SocketBehavior.TickEvent)
+            if (Behavior == SocketBehavior.TickEvent)
+            {
                 _onData = onData;
+                _onDisconnect = onDisconnect;
+            }
         }
         public void Tick()
         {
-            if (_behavior == SocketBehavior.TickEvent)
+            if (Behavior == SocketBehavior.TickEvent)
             {
                 while (ReceiveQueue.TryDequeue(out var next))
                 {
-                    var (handle, data) = next;
-                    _onData.Invoke(handle, data);
+                    var (handle, isDisconnect, data) = next;
+                    if (isDisconnect)
+                        _onDisconnect.Invoke(handle, data, null);
+                    else
+                        _onData.Invoke(handle, data);
                 }
             }
         }
@@ -221,7 +229,18 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             var queueEndpoint = endPoint;
             var queueArray = new byte[length ?? data.Length];
             data.AsSpan().CopyTo(queueArray.AsSpan());
-            socket.ReceiveQueue.Enqueue((queueEndpoint, queueArray));
+            socket.ReceiveQueue.Enqueue((queueEndpoint, false, queueArray));
+        }
+        public static void QueueDisconnectCall(this MockISocket socket, IConnectionHandle endPoint, DisconnectReason? disconnectReason = null)
+        {
+            Debug.Assert(endPoint != null, "QueueReceiveCall needs endpoint, use TestEndPoint.CreateSubstitute() to create mock");
+            var queueEndpoint = endPoint;
+            var queueArray = new byte[disconnectReason.HasValue ? 3 : 2];
+            queueArray[0] = (byte)PacketType.Command;
+            queueArray[1] = (byte)Commands.Disconnect;
+            if (disconnectReason.HasValue)
+                queueArray[2] = (byte)disconnectReason.Value;
+            socket.ReceiveQueue.Enqueue((queueEndpoint, true, queueArray));
         }
     }
 
@@ -246,6 +265,16 @@ namespace Mirage.SocketLayer.Tests.PeerTests
     public static class ArgCollection
     {
         public static bool AreEquivalentIgnoringLength<T>(this T[] actual, T[] expected) where T : IEquatable<T>
+        {
+            return AreEquivalentIgnoringLength<T>(actual.AsSpan(), expected.AsSpan());
+        }
+
+        public static bool AreEquivalentIgnoringLength<T>(this ArraySegment<T> actual, ArraySegment<T> expected) where T : IEquatable<T>
+        {
+            return AreEquivalentIgnoringLength<T>(actual.AsSpan(), expected.AsSpan());
+        }
+
+        public static bool AreEquivalentIgnoringLength<T>(ReadOnlySpan<T> actual, ReadOnlySpan<T> expected) where T : IEquatable<T>
         {
             // atleast same length
             if (actual.Length < expected.Length)
