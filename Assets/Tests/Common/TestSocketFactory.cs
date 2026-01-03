@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using Mirage.SocketLayer;
 using NSubstitute;
+using NUnit.Framework;
 
 namespace Mirage.Tests
 {
+    public enum SocketBehavior { PollReceive, TickEvent }
+
     /// <summary>
     /// Socket that can send message to other sockets
     /// </summary>
@@ -49,10 +52,13 @@ namespace Mirage.Tests
         public List<Packet> Sent = new List<Packet>();
 
         public readonly string name;
+        private readonly SocketBehavior _behavior;
+        private OnData _onData;
 
-        public TestSocket(string name, IConnectionHandle endPoint = null)
+        public TestSocket(string name, SocketBehavior behavior, IConnectionHandle endPoint = null)
         {
             this.name = name;
+            _behavior = behavior;
             this.endPoint = endPoint ?? TestEndPoint.CreateSubstitute();
         }
 
@@ -74,16 +80,36 @@ namespace Mirage.Tests
             allSockets.Remove(endPoint);
         }
 
-        void ISocket.Tick() { }
-        void ISocket.SetTickEvents(int maxPacketSize, OnData onData, OnDisconnect onDisconnect) { }
+        void ISocket.Tick()
+        {
+            if (_behavior == SocketBehavior.TickEvent)
+            {
+                while (received.TryDequeue(out var next))
+                {
+                    _onData.Invoke(next.endPoint, next.AsSpan());
+                }
+            }
+
+        }
+        void ISocket.SetTickEvents(int maxPacketSize, OnData onData, OnDisconnect onDisconnect)
+        {
+            if (_behavior == SocketBehavior.TickEvent)
+                _onData = onData;
+        }
 
         bool ISocket.Poll()
         {
-            return received.Count > 0;
+            if (_behavior == SocketBehavior.PollReceive)
+                return received.Count > 0;
+            else
+                return false;
         }
 
         int ISocket.Receive(Span<byte> outBuffer, out IConnectionHandle handle)
         {
+            if (_behavior != SocketBehavior.PollReceive)
+                Assert.Fail("Receive should only be called in PollReceive mode");
+
             var next = received.Dequeue();
             handle = next.endPoint;
 
@@ -144,13 +170,14 @@ namespace Mirage.Tests
 
     public class TestSocketFactory : SocketFactory
     {
+        public SocketBehavior Behavior = SocketBehavior.TickEvent;
         public IConnectionHandle serverEndpoint = TestEndPoint.CreateSubstitute();
         private int clientNameIndex;
         private int serverNameIndex;
         public override int MaxPacketSize => 1300;
         public override ISocket CreateClientSocket()
         {
-            return new TestSocket($"Client {clientNameIndex++}");
+            return new TestSocket($"Client {clientNameIndex++}", Behavior);
         }
 
         public override ISocket CreateServerSocket()
@@ -161,7 +188,7 @@ namespace Mirage.Tests
                 // Clients use Server endpoint to connect, so a 2nd server can't be started from the same TestSocketFactory
                 // if multiple server are needed then it would require multiple instances of TestSocketFactory
             }
-            return new TestSocket($"Server {serverNameIndex++}", serverEndpoint);
+            return new TestSocket($"Server {serverNameIndex++}", Behavior, serverEndpoint);
         }
 
         public override IBindEndPoint GetBindEndPoint()

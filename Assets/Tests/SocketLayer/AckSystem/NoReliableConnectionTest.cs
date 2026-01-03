@@ -29,7 +29,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             {
                 DisableReliableLayer = true,
             };
-            _peerInstance = new PeerInstance(_config, maxPacketSize: MAX_PACKET_SIZE);
+            _peerInstance = new PeerInstance(SocketBehavior.PollReceive, _config, maxPacketSize: MAX_PACKET_SIZE);
             _bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, MAX_PACKET_SIZE, 0, 100);
 
             _connection = _peerInstance.peer.Connect((IConnectEndPoint)TestEndPoint.CreateSubstitute());
