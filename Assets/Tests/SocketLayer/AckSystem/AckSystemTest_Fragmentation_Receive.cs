@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 
 namespace Mirage.SocketLayer.Tests.AckSystemTests
@@ -74,11 +75,11 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void MessageShouldBeInQueueAfterReceive()
         {
-            ackSystem.ReceiveReliable(packet1, packet1.Length, true);
+            ackSystem.ReceiveReliable(packet1.AsSpan(), true);
 
             Assert.IsFalse(ackSystem.NextReliablePacket(out var _));
 
-            ackSystem.ReceiveReliable(packet2, packet2.Length, true);
+            ackSystem.ReceiveReliable(packet2.AsSpan(), true);
 
             var bytesIn1 = MAX_PACKET_SIZE - AckSystem.MIN_RELIABLE_FRAGMENT_HEADER_SIZE;
             var bytesIn2 = message.Length - bytesIn1;

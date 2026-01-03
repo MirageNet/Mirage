@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
@@ -61,13 +62,13 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
                 // give to instance2 if received
                 if (received2[i])
-                    instance2.ackSystem.ReceiveNotify(instance1.connection.packets[i], instance1.connection.packets[i].Length);
+                    instance2.ackSystem.ReceiveNotify(instance1.connection.packets[i].AsSpan());
 
                 // send to conn2
                 instance2.ackSystem.SendNotify(instance2.messages[i]);
                 // give to instance1 if received
                 if (received1[i])
-                    instance1.ackSystem.ReceiveNotify(instance2.connection.packets[i], instance2.connection.packets[i].Length);
+                    instance1.ackSystem.ReceiveNotify(instance2.connection.packets[i].AsSpan());
             }
 
             // should have got 1 packet

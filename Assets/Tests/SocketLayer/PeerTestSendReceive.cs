@@ -44,11 +44,11 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             Action<IConnection> serverConnect = (conn) => serverConnections.Add(conn);
             server.peer.OnConnected += serverConnect;
 
-            server.peer.Bind(TestEndPoint.CreateSubstitute());
+            server.peer.Bind((IBindEndPoint)TestEndPoint.CreateSubstitute());
             for (var i = 0; i < ClientCount; i++)
             {
                 clients[i] = new PeerInstanceWithSocket(config);
-                clientConnections.Add(clients[i].peer.Connect(server.endPoint));
+                clientConnections.Add(clients[i].peer.Connect((IConnectEndPoint)server.endPoint));
             }
 
             UpdateAll();
