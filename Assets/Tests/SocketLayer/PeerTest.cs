@@ -118,7 +118,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             const int aboveMTU = 5000;
             socket.AsMock().QueueReceiveCall(new byte[1000], TestEndPoint.CreateSubstitute(_handleBehavior), length: aboveMTU);
 
-            LogAssert.Expect(LogType.Error, $"Socket returned length above MTU. MaxPacketSize:{MAX_PACKET_SIZE} length:{aboveMTU}");
+            LogAssert.Expect(LogType.Error, new Regex($".*Socket returned length above MTU. MaxPacketSize:{MAX_PACKET_SIZE} length:{aboveMTU}"));
             peer.UpdateTest();
             LogAssert.NoUnexpectedReceived();
         }
