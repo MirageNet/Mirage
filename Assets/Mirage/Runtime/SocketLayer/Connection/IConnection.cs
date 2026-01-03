@@ -17,7 +17,7 @@ namespace Mirage.SocketLayer
     /// <summary>
     /// Connection for <see cref="Peer"/>
     /// </summary>
-    public interface IConnection
+    public interface IConnection : ISocketLayerConnection
     {
         IConnectionHandle Handle { get; }
         ConnectionState State { get; }
