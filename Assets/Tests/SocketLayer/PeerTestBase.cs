@@ -162,6 +162,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             }
         }
 
+        public abstract void Flush();
         public abstract void Bind(IBindEndPoint endPoint);
         public abstract void Close();
         public abstract IConnectionHandle Connect(IConnectEndPoint endPoint);

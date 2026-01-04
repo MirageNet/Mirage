@@ -234,6 +234,7 @@ namespace Mirage.SocketLayer
         public void UpdateSent()
         {
             UpdateConnections();
+            _socket.Flush();
             _metrics?.OnTick(_connections.Count);
         }
 

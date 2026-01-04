@@ -90,8 +90,9 @@ namespace Mirage.Tests
                     _onData.Invoke(next.endPoint, next.AsSpan());
                 }
             }
-
         }
+        void ISocket.Flush() { }
+
         void ISocket.SetTickEvents(int maxPacketSize, OnData onData, OnDisconnect onDisconnect)
         {
             if (_behavior == SocketBehavior.TickEvent)

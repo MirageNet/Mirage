@@ -122,6 +122,7 @@ namespace Mirage.Sockets.Udp
                 }
             }
         }
+        void ISocket.Flush() { }
         void ISocket.SetTickEvents(int maxPacketSize, OnData onData, OnDisconnect onDisconnect)
         {
             _internalReceiveBuffer = new byte[maxPacketSize];

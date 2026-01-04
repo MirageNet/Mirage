@@ -89,6 +89,16 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         }
 
         [Test]
+        public void FlushShouldCallSocketFlush()
+        {
+            // activate peer
+            peer.Bind(Substitute.For<IBindEndPoint>());
+            // flush peer via UpdateSent
+            peer.UpdateSent();
+            socket.Received(1).Flush();
+        }
+
+        [Test]
         public void IgnoresMessageThatIsTooShort()
         {
             peer.Bind(Substitute.For<IBindEndPoint>());

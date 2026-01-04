@@ -95,6 +95,7 @@ namespace Mirage.Sockets.Udp
         }
 
         void ISocket.Tick() { }
+        void ISocket.Flush() { }
         void ISocket.SetTickEvents(int maxPacketSize, OnData onData, OnDisconnect onDisconnect) { }
     }
 }

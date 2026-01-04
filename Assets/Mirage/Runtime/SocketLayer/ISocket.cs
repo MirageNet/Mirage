@@ -52,6 +52,11 @@ namespace Mirage.SocketLayer
         void Tick();
 
         /// <summary>
+        /// Optional function, <see cref="Peer"/> will call this after <see cref="Peer.UpdateSent"/>
+        /// </summary>
+        void Flush();
+
+        /// <summary>
         /// Checks if a packet is available 
         /// </summary>
         /// <returns>true if there is atleast 1 packet to read</returns>
