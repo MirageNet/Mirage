@@ -1,3 +1,22 @@
+# [156.0.0](https://github.com/MirageNet/Mirage/compare/v155.3.0...v156.0.0) (2026-01-04)
+
+
+* refactor!: Updating INetworkPlayer to use new IConnectionHandle ([d04f7c5](https://github.com/MirageNet/Mirage/commit/d04f7c53894d7a5a2786c53bfdd53a1909b6ce39))
+* feat(SocketLayer)!: adding support for stateful connections ([0dc36d7](https://github.com/MirageNet/Mirage/commit/0dc36d7060ec7678ad42273905d8ba222f6157cc))
+
+
+### BREAKING CHANGES
+
+* IEndPoint Address is now IConnectionHandle ConnectionHandle
+* Low-level transports will now need to use the new the new ISocket, IConnectionHandle, IBindEndPoint, and IConnectEndPoint interfaces
+- ISocket.Bind now requires IBindEndPoint.
+- ISocket.Connect now requires IConnectEndPoint and returns IConnectionHandle.
+- ISocket implementation must now include SetTickEvents() and Tick() methods.
+- ISocket.Send/Receive signatures updated from byte[] to Span/ReadOnlySpan.
+- All Send/Receive methods now use IConnectionHandle instead of IEndPoint.
+- Custom Handles must implement IConnectionHandle, including IsStateful
+  and SocketLayerConnection properties.
+
 # [155.3.0](https://github.com/MirageNet/Mirage/compare/v155.2.1...v155.3.0) (2025-12-21)
 
 
