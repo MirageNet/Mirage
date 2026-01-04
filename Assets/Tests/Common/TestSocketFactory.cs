@@ -195,6 +195,7 @@ namespace Mirage.Tests
         private int clientNameIndex;
         private int serverNameIndex;
         public override int MaxPacketSize => 1300;
+        public override bool IsSupported => true;
         public override ISocket CreateClientSocket()
         {
             return new TestSocket($"Client {clientNameIndex++}", Behavior);
