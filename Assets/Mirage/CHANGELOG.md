@@ -1,3 +1,10 @@
+# [156.1.0](https://github.com/MirageNet/Mirage/compare/v156.0.0...v156.1.0) (2026-01-04)
+
+
+### Features
+
+* adding IsSupported to SocketFactory to be checked instead of CreateClientSocket ([893c210](https://github.com/MirageNet/Mirage/commit/893c2100ca87db01b8683030d3060b8e75994dbf))
+
 # [156.0.0](https://github.com/MirageNet/Mirage/compare/v155.3.0...v156.0.0) (2026-01-04)
 
 
