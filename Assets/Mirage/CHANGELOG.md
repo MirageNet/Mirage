@@ -1,3 +1,10 @@
+# [156.2.0](https://github.com/MirageNet/Mirage/compare/v156.1.0...v156.2.0) (2026-01-04)
+
+
+### Features
+
+* adding ISocket.Flush ([ac1ae64](https://github.com/MirageNet/Mirage/commit/ac1ae6426447af695c03a1e788f555be96f5a9e9))
+
 # [156.1.0](https://github.com/MirageNet/Mirage/compare/v156.0.0...v156.1.0) (2026-01-04)
 
 
