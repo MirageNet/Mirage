@@ -36,6 +36,11 @@ namespace Mirage.SocketLayer
         /// <para>Called once when Sockets are created</para></summary>
         public abstract int MaxPacketSize { get; }
 
+        /// <summary>
+        /// Can be used on client (or server) to check if this Socket is supported on the current platform
+        /// </summary>
+        public abstract bool IsSupported { get; }
+
         /// <summary>Creates a <see cref="ISocket"/> to be used by <see cref="Peer"/> on the server</summary>
         /// <exception cref="NotSupportedException">Throw when Server is not supported on current platform</exception>
         public abstract ISocket CreateServerSocket();

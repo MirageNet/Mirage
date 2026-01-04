@@ -165,6 +165,8 @@ namespace Mirage.Sockets.Udp
             }
         }
 
+        public override bool IsSupported => !IsWebGL;
+
         /// <summary>
         /// Is this platform a WebGL-based one?
         /// </summary>
