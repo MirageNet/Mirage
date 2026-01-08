@@ -1,3 +1,10 @@
+## [156.2.1](https://github.com/MirageNet/Mirage/compare/v156.2.0...v156.2.1) (2026-01-08)
+
+
+### Bug Fixes
+
+* saving AssetDatabase after log settings are changed ([9fcd0eb](https://github.com/MirageNet/Mirage/commit/9fcd0eb5ed7658c1f5a57a2203147581656be7d8))
+
 # [156.2.0](https://github.com/MirageNet/Mirage/compare/v156.1.0...v156.2.0) (2026-01-04)
 
 
