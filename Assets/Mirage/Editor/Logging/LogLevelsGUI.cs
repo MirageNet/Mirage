@@ -227,8 +227,8 @@ namespace Mirage.EditorScripts.Logging
                 logger.filterLogType = logSetting.logLevel;
             }
 
-            // todo save outside of editor
             EditorUtility.SetDirty(settings);
+            AssetDatabase.SaveAssets();
         }
 
         private LogType GetGroupLevel(IEnumerable<LogSettingsSO.LoggerSettings> group)
