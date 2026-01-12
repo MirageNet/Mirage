@@ -1,3 +1,10 @@
+## [156.2.2](https://github.com/MirageNet/Mirage/compare/v156.2.1...v156.2.2) (2026-01-12)
+
+
+### Bug Fixes
+
+* fixing EXCLUDE_NANOSOCKETS code for new IConnectionHandle ([6e65199](https://github.com/MirageNet/Mirage/commit/6e6519999c091638bbd90b1cb3473022759021eb))
+
 ## [156.2.1](https://github.com/MirageNet/Mirage/compare/v156.2.0...v156.2.1) (2026-01-08)
 
 
