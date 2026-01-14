@@ -469,7 +469,7 @@ namespace Mirage
                 return;
 
             if (errorLogger.LogEnabled())
-                errorLogger.Log($"{this} SetError cost={cost}, flags:{flags}");
+                errorLogger.Log($"{this} SetError cost={cost}, flags:{flags} tokens:{ErrorRateLimit.Tokens}/{ErrorRateLimit.Config.MaxTokens}");
 
             ErrorFlags |= flags;
             var overLimit = ErrorRateLimit.UseTokens(cost);

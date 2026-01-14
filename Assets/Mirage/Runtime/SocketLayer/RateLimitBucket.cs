@@ -8,6 +8,8 @@ namespace Mirage.SocketLayer
         private float _tokens;
         private double _previousRefill;
 
+        public float Tokens => _tokens;
+
         public RateLimitBucket(double now, RefillConfig config)
         {
             if (config.Interval <= 0)
