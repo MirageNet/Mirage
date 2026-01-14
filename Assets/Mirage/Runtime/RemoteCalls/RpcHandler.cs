@@ -87,7 +87,17 @@ namespace Mirage.RemoteCalls
                 {
                     // cost=1 we dont want users spamming this, but also likely to happen if server has just destroyed the object in recent frames
                     player.SetError(1, PlayerErrorFlags.None);
-                    if (logger.ErrorEnabled()) logger.LogError($"Spawned object not found when handling ServerRpc message [netId={netId}]");
+
+                    // on client we want to keep as warning (even if outside grace period)
+                    // because message comes from server and is more trusted
+                    if (_invokeType == RpcInvokeType.ClientRpc)
+                    {
+                        if (logger.WarnEnabled()) logger.LogWarning($"Spawned object not found when handling ClientRpc message [netId={netId}]");
+                    }
+                    else
+                    {
+                        if (logger.ErrorEnabled()) logger.LogError($"Spawned object not found when handling ServerRpc message [netId={netId}]");
+                    }
                 }
 
                 return;
