@@ -1,3 +1,10 @@
+## [156.2.3](https://github.com/MirageNet/Mirage/compare/v156.2.2...v156.2.3) (2026-01-14)
+
+
+### Bug Fixes
+
+* checking destroy and remove authority times before adding error tokens ([4aa27cd](https://github.com/MirageNet/Mirage/commit/4aa27cdc11762901b9bd98d9de8df2b9e600282f))
+
 ## [156.2.2](https://github.com/MirageNet/Mirage/compare/v156.2.1...v156.2.2) (2026-01-12)
 
 
