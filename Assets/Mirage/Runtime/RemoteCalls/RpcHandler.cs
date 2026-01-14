@@ -10,6 +10,9 @@ namespace Mirage.RemoteCalls
 {
     internal class RpcHandler
     {
+        // 1 second should be more than enough time for client to receive message and stop sending RPC to previously owned and destroyed objects
+        public const double DESTROY_GRACE_PERIOD = 1f;
+
         private static readonly ILogger logger = LogFactory.GetLogger<RpcHandler>();
 
         private delegate void ReplyCallbackSuccess(NetworkReader reader);
@@ -26,10 +29,13 @@ namespace Mirage.RemoteCalls
         /// </summary>
         private readonly RpcInvokeType _invokeType;
 
+        public RecentlyDestroyed RecentlyDestroyed;
+
         public RpcHandler(IObjectLocator objectLocator, RpcInvokeType invokeType)
         {
             _objectLocator = objectLocator;
             _invokeType = invokeType;
+            RecentlyDestroyed = new RecentlyDestroyed();
         }
 
         // note: client handles message in ClientObjectManager
@@ -67,10 +73,23 @@ namespace Mirage.RemoteCalls
 
             if (!_objectLocator.TryGetIdentity(netId, out var identity))
             {
-                // cost=1 we dont want users spamming this, but also likely to happen if server has just destroyed the object in recent frames
-                player.SetError(1, PlayerErrorFlags.None);
+                // clean up old objects
+                RecentlyDestroyed.CleanUp(DESTROY_GRACE_PERIOD);
 
-                if (logger.WarnEnabled()) logger.LogWarning($"Spawned object not found when handling ServerRpc message [netId={netId}]");
+                var inGracePeriod = RecentlyDestroyed.WasRecentlyDestroyed(netId, out var destroyTime)
+                    && destroyTime + DESTROY_GRACE_PERIOD > Time.unscaledTimeAsDouble;
+
+                if (inGracePeriod)
+                {
+                    if (logger.WarnEnabled()) logger.LogWarning($"Spawned object not found, but was recently destroyed [netId={netId}]");
+                }
+                else
+                {
+                    // cost=1 we dont want users spamming this, but also likely to happen if server has just destroyed the object in recent frames
+                    player.SetError(1, PlayerErrorFlags.None);
+                    if (logger.ErrorEnabled()) logger.LogError($"Spawned object not found when handling ServerRpc message [netId={netId}]");
+                }
+
                 return;
             }
 
@@ -95,8 +114,22 @@ namespace Mirage.RemoteCalls
                 var ok = CheckAuthority(remoteCall, identity, player);
                 if (!ok)
                 {
-                    if (logger.WarnEnabled()) logger.LogWarning($"ServerRpc for object without authority {identity}");
-                    player.SetError(10, PlayerErrorFlags.NoAuthority);
+                    // If authority was removed recently, then we can ignore the rpc without error
+                    // we need to check the time on the identity
+                    var removed = identity.AuthorityRemovedTime;
+                    var inGracePeriod = removed.Owner == player
+                        && removed.Time + DESTROY_GRACE_PERIOD > Time.unscaledTimeAsDouble;
+
+                    if (inGracePeriod)
+                    {
+                        if (logger.WarnEnabled()) logger.LogWarning($"ServerRpc for object without authority {identity} but within grace period");
+                    }
+                    else
+                    {
+                        if (logger.ErrorEnabled()) logger.LogError($"ServerRpc for object without authority {identity}");
+                        player.SetError(10, PlayerErrorFlags.NoAuthority);
+                    }
+
                     return;
                 }
             }

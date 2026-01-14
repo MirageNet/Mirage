@@ -640,18 +640,21 @@ namespace Mirage
 
         private void DestroyObject(NetworkIdentity identity, bool destroyServerObject)
         {
-            if (identity.NetId == 0)
+            var netId = identity.NetId;
+            if (netId == 0)
             {
                 if (logger.WarnEnabled()) logger.LogWarning($"DestroyObject was given identity without an id {identity}");
                 return;
             }
 
-            if (logger.LogEnabled()) logger.Log($"DestroyObject NetId={identity.NetId}");
+            if (logger.LogEnabled()) logger.Log($"DestroyObject NetId={netId}");
+
+            _rpcHandler.RecentlyDestroyed.Add(netId);
 
             _server.World.RemoveIdentity(identity);
             identity.Owner?.RemoveOwnedObject(identity);
 
-            identity.SendToRemoteObservers(new ObjectDestroyMessage { NetId = identity.NetId });
+            identity.SendToRemoteObservers(new ObjectDestroyMessage { NetId = netId });
 
             identity.ClearObservers();
             if (_server.IsHost)

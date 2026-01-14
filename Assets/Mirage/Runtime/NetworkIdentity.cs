@@ -144,6 +144,12 @@ namespace Mirage
         public bool HasAuthority { get; internal set; }
 
         /// <summary>
+        /// Time on server when authority was removed, and who it was removed from. Can be used to ignore RPCs that were sent before client knew about authority change
+        /// <para>Value is 0 if authority has not been removed. Only valid on server</para>
+        /// </summary>
+        public AuthorityTime AuthorityRemovedTime;
+
+        /// <summary>
         /// The set of network connections (players) that can see this object.
         /// </summary>
         public readonly HashSet<INetworkPlayer> observers = new HashSet<INetworkPlayer>();
@@ -250,6 +256,11 @@ namespace Mirage
 
             if (_owner != null)
             {
+                // set the time we removed authority
+                // it is rare/unadvised to change owner multiple times quickly,
+                // so we can just store the most recent previous owner
+                AuthorityRemovedTime = new AuthorityTime(_owner, Time.unscaledTimeAsDouble);
+
                 // invoke OnAuthority for remove owner and then again if there is new owner
                 // world can be null if owner is set before object is spawned
                 World?.InvokeOnAuthorityChanged(this, false, _owner);
@@ -1282,6 +1293,18 @@ namespace Mirage
                 }
                 return _remoteCallCollection;
             }
+        }
+    }
+
+    public readonly struct AuthorityTime
+    {
+        public readonly INetworkPlayer Owner;
+        public readonly double Time;
+
+        public AuthorityTime(INetworkPlayer owner, double time)
+        {
+            Owner = owner;
+            Time = time;
         }
     }
 }
