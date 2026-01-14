@@ -1,3 +1,10 @@
+## [156.2.4](https://github.com/MirageNet/Mirage/compare/v156.2.3...v156.2.4) (2026-01-14)
+
+
+### Bug Fixes
+
+* changing not found log back to warning for client side ([dcf7da1](https://github.com/MirageNet/Mirage/commit/dcf7da1f29e5fdc61184911c61cf007002f84d77))
+
 ## [156.2.3](https://github.com/MirageNet/Mirage/compare/v156.2.2...v156.2.3) (2026-01-14)
 
 
