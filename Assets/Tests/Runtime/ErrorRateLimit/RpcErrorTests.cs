@@ -140,7 +140,7 @@ namespace Mirage.Tests.Runtime.ErrorRateLimit
                 var rpcMessage = CreateRpcMessage(nameof(RpcErrorBehaviour.ServerRpcThrowsGeneric), writer);
                 rpcMessage.NetId = newIdentity.NetId;
 
-                LogAssert.Expect(LogType.Warning, new Regex(".*ServerRpc for object without authority.*"));
+                LogAssert.Expect(LogType.Error, new Regex(".*ServerRpc for object without authority.*"));
                 SendRpc(rpcMessage);
             }
 
