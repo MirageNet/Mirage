@@ -162,25 +162,27 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator ClientUnSpawnEvent() => UniTask.ToCoroutine(async () =>
         {
-            var mockHandler = Substitute.For<Action<NetworkIdentity>>();
+            var mockHandler = Substitute.For<NetworkWorld.UnspawnHandler>();
             client.World.onUnspawn += mockHandler;
             var newObj = InstantiateForTest(_characterPrefabGo);
             serverObjectManager.Spawn(newObj);
             serverObjectManager.Destroy(newObj);
 
             await UniTask.WaitUntil(() => mockHandler.ReceivedCalls().Any()).Timeout(TimeSpan.FromMilliseconds(200));
-            mockHandler.Received().Invoke(Arg.Any<NetworkIdentity>());
+            mockHandler.Received().Invoke(Arg.Any<uint>(), Arg.Any<NetworkIdentity>());
         });
 
         [Test]
         public void UnSpawnEvent()
         {
-            var mockHandler = Substitute.For<Action<NetworkIdentity>>();
+            var mockHandler = Substitute.For<NetworkWorld.UnspawnHandler>();
             server.World.onUnspawn += mockHandler;
             var newObj = InstantiateForTest(_characterPrefabGo);
-            serverObjectManager.Spawn(newObj);
-            serverObjectManager.Destroy(newObj);
-            mockHandler.Received().Invoke(newObj.GetComponent<NetworkIdentity>());
+            var identity = newObj.GetComponent<NetworkIdentity>();
+            serverObjectManager.Spawn(identity);
+            var netId = identity.NetId;
+            serverObjectManager.Destroy(identity);
+            mockHandler.Received().Invoke(netId, identity);
         }
 
         [Test]

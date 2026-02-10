@@ -19,6 +19,8 @@ namespace Mirage
     /// </summary>
     public class NetworkWorld : IObjectLocator
     {
+        public delegate void UnspawnHandler(uint netId, NetworkIdentity identity);
+
         private static readonly ILogger logger = LogFactory.GetLogger<NetworkWorld>();
 
         /// <summary>
@@ -29,8 +31,9 @@ namespace Mirage
         /// <summary>
         /// Raised when object is unspawned or destroyed
         /// <para><b>WARNING:</b> onUnspawn might be called after Identity has been destroyed by unity</para>
+        /// <para>NetworkIdentity might be null when this event is called, use the netId argument instead</para>
         /// </summary>
-        public event Action<NetworkIdentity> onUnspawn;
+        public event UnspawnHandler onUnspawn;
 
         /// <summary>
         /// Raised when authority is given or removed from an identity. It is invoked on both server and client
@@ -126,7 +129,7 @@ namespace Mirage
             {
                 _needsSorting = true;
                 if (logger.LogEnabled()) logger.Log($"Removing [netId={netId}, name={identity?.name}] from World");
-                onUnspawn?.Invoke(identity);
+                onUnspawn?.Invoke(netId, identity);
             }
             else
             {

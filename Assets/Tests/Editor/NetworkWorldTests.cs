@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using NSubstitute;
 using NUnit.Framework;
-using UnityEngine;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
@@ -12,7 +11,7 @@ namespace Mirage.Tests
     {
         private NetworkWorld world;
         private Action<NetworkIdentity> spawnListener;
-        private Action<NetworkIdentity> unspawnListener;
+        private NetworkWorld.UnspawnHandler unspawnListener;
         private HashSet<uint> existingIds;
 
         [SetUp]
@@ -20,7 +19,7 @@ namespace Mirage.Tests
         {
             world = new NetworkWorld();
             spawnListener = Substitute.For<Action<NetworkIdentity>>();
-            unspawnListener = Substitute.For<Action<NetworkIdentity>>();
+            unspawnListener = Substitute.For<NetworkWorld.UnspawnHandler>();
             world.onSpawn += spawnListener;
             world.onUnspawn += unspawnListener;
             existingIds = new HashSet<uint>();
@@ -256,13 +255,13 @@ namespace Mirage.Tests
             Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(3));
 
             world.RemoveIdentity(identity3);
-            unspawnListener.Received(1).Invoke(identity3);
+            unspawnListener.Received(1).Invoke(id3, identity3);
 
             world.RemoveIdentity(id1);
-            unspawnListener.Received(1).Invoke(identity1);
+            unspawnListener.Received(1).Invoke(id1, identity1);
 
             world.RemoveIdentity(id2);
-            unspawnListener.Received(1).Invoke(identity2);
+            unspawnListener.Received(1).Invoke(id2, identity2);
         }
 
         [Test]
@@ -278,7 +277,7 @@ namespace Mirage.Tests
             var expected = new ArgumentException("id can not be zero", "netId");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
 
-            unspawnListener.DidNotReceiveWithAnyArgs().Invoke(default);
+            unspawnListener.DidNotReceiveWithAnyArgs().Invoke(default, default);
         }
 
         [Test]
@@ -301,7 +300,7 @@ namespace Mirage.Tests
             Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(3));
 
             world.ClearSpawnedObjects();
-            unspawnListener.DidNotReceiveWithAnyArgs().Invoke(default);
+            unspawnListener.DidNotReceiveWithAnyArgs().Invoke(default, default);
         }
 
         [Test]

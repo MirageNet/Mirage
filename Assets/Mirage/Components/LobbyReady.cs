@@ -31,7 +31,7 @@ namespace Mirage.Components
             }
         }
 
-        private void OnUnspawn(NetworkIdentity obj)
+        private void OnUnspawn(uint netId, NetworkIdentity obj)
         {
             Players.Remove(obj);
         }
