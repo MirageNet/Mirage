@@ -41,6 +41,14 @@ To install Mirage, follow these steps:
    ![Install Mirage](doc/static/img/install-mirage.png)
 6) You may come back to the package manager at any time to uninstall Mirage or upgrade it.
 
+### Alternative: Install via Git URL
+
+If you prefer to install a specific version or hash directly from GitHub, you can add the following line to your `Packages/manifest.json` file under the `dependencies` section:
+
+```json
+"com.miragenet.mirage": "https://github.com/MirageNet/Mirage.git?path=/Assets/Mirage#v156.2.4",
+```
+
 ## Migrating from Mirror
 
 If you've got a project already using Mirror and you want to migrate it to Mirage, it's recommended to check out our [Migration Guide](https://miragenet.github.io/Mirage/docs/guides/mirror-migration) for a smooth transition. Also check the heading below, as there are some major differences between Mirage and the other network library.
