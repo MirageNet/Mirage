@@ -102,9 +102,9 @@ public class MyComponent : MonoBehaviour
     {
         Debug.Log($"The object {identity} was spawned on the server");
     }
-    private void OnServerUnspawn(NetworkIdentity identity) 
+    private void OnServerUnspawn(uint netId, NetworkIdentity identity) 
     {
-        Debug.Log($"The object {identity} was unspawned on the server");
+        Debug.Log($"The object {identity} (netId={netId}) was unspawned on the server");
     }
 
     private void ClientStarted() 
@@ -116,9 +116,9 @@ public class MyComponent : MonoBehaviour
     {
         Debug.Log($"The object {identity} was spawned on the client");
     }
-    private void OnClientUnspawn(NetworkIdentity identity) 
+    private void OnClientUnspawn(uint netId, NetworkIdentity identity) 
     {
-        Debug.Log($"The object {identity} was unspawned on the client");
+        Debug.Log($"The object {identity} (netId={netId}) was unspawned on the client");
     }
 }
 ```
