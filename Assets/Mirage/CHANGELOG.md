@@ -1,3 +1,13 @@
+# [157.0.0](https://github.com/MirageNet/Mirage/compare/v156.2.4...v157.0.0) (2026-02-10)
+
+
+* fix!: adding netid to world.Unspawn event ([5270646](https://github.com/MirageNet/Mirage/commit/5270646d111cc82f6f459956881a4377bfe181a1))
+
+
+### BREAKING CHANGES
+
+* NetworkWorld.Unspawn event now requires NetId argument
+
 ## [156.2.4](https://github.com/MirageNet/Mirage/compare/v156.2.3...v156.2.4) (2026-01-14)
 
 
