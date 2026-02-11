@@ -156,7 +156,7 @@ jobs:
         run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
 
       - name: Get test coverages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: Test results 2022
           path: Tests
@@ -165,7 +165,7 @@ jobs:
       # Run this as late as possible, to give time for publish job to finish and upload
       - name: Get version
         continue-on-error: true
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: SemanticVersion
           path: SemanticVersion
