@@ -225,6 +225,12 @@ namespace Mirage
         public ServerObjectManager ServerObjectManager;
 
         /// <summary>
+        /// Explicit parent override for this object. Used by <see cref="SpawnParentingMode.Manual"/>.
+        /// </summary>
+        [Tooltip("Explicit parent override for this object. Used by SpawnParentingMode.Manual.")]
+        public NetworkIdentity Parent;
+
+        /// <summary>
         /// The NetworkClient associated with this NetworkIdentity.
         /// </summary>
         public NetworkClient Client { get; internal set; }
@@ -982,13 +988,6 @@ namespace Mirage
 
         internal void SetClientValues(ClientObjectManager clientObjectManager, SpawnMessage msg)
         {
-            var spawnValues = msg.SpawnValues;
-            if (spawnValues.Position.HasValue) transform.localPosition = spawnValues.Position.Value;
-            if (spawnValues.Rotation.HasValue) transform.localRotation = spawnValues.Rotation.Value;
-            if (spawnValues.Scale.HasValue) transform.localScale = spawnValues.Scale.Value;
-            if (!string.IsNullOrEmpty(spawnValues.Name)) gameObject.name = spawnValues.Name;
-            if (spawnValues.SelfActive.HasValue) gameObject.SetActive(spawnValues.SelfActive.Value);
-
             NetId = msg.NetId;
             HasAuthority = msg.IsOwner;
             ClientObjectManager = clientObjectManager;
@@ -999,6 +998,19 @@ namespace Mirage
                 World = Client.World;
                 SyncVarSender = Client.SyncVarSender;
             }
+
+            var spawnValues = msg.SpawnValues;
+            if (spawnValues.ParentNetId.HasValue)
+            {
+                if (World.TryGetIdentity(spawnValues.ParentNetId.Value, out var parentIdentity))
+                    transform.SetParent(parentIdentity.transform, false);
+            }
+
+            if (spawnValues.Position.HasValue) transform.localPosition = spawnValues.Position.Value;
+            if (spawnValues.Rotation.HasValue) transform.localRotation = spawnValues.Rotation.Value;
+            if (spawnValues.Scale.HasValue) transform.localScale = spawnValues.Scale.Value;
+            if (!string.IsNullOrEmpty(spawnValues.Name)) gameObject.name = spawnValues.Name;
+            if (spawnValues.SelfActive.HasValue) gameObject.SetActive(spawnValues.SelfActive.Value);
 
             foreach (var behaviour in NetworkBehaviours)
                 behaviour.InitializeSyncObjects();

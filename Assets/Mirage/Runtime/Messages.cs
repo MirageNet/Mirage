@@ -96,6 +96,7 @@ namespace Mirage
         public Vector3? Scale;
         public string Name;
         public bool? SelfActive;
+        public uint? ParentNetId;
 
         [ThreadStatic]
         private static StringBuilder builder;
@@ -124,6 +125,9 @@ namespace Mirage
 
             if (SelfActive.HasValue)
                 Append(ref first, $"SelfActive={SelfActive.Value}");
+
+            if (ParentNetId.HasValue)
+                Append(ref first, $"ParentNetId={ParentNetId.Value}");
 
             builder.Append(")");
             return builder.ToString();
