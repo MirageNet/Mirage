@@ -565,17 +565,27 @@ namespace Mirage
             if (settings.SendParent != SpawnParentingMode.None)
             {
                 NetworkIdentity parentIdentity = null;
+                NetworkBehaviour parentBehaviour = null;
+                
                 if (settings.SendParent == SpawnParentingMode.Manual)
                 {
-                    parentIdentity = identity.Parent;
+                    if (identity.Parent is NetworkIdentity id) parentIdentity = id;
+                    else if (identity.Parent is NetworkBehaviour b) { parentBehaviour = b; parentIdentity = b.Identity; }
                 }
                 else if (settings.SendParent == SpawnParentingMode.Auto)
                 {
+                    parentBehaviour = identity.transform.parent?.GetComponentInParent<NetworkBehaviour>();
                     parentIdentity = identity.transform.parent?.GetComponentInParent<NetworkIdentity>();
                 }
 
                 if (parentIdentity != null && parentIdentity.NetId != 0)
-                    values.ParentNetId = parentIdentity.NetId;
+                {
+                    values.Parent = new NetworkReferenceId 
+                    { 
+                        NetId = parentIdentity.NetId, 
+                        ComponentIndex = parentBehaviour != null ? (byte?)parentBehaviour.ComponentIndex : null 
+                    };
+                }
             }
 
             return values;

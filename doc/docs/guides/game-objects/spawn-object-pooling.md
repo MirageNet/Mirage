@@ -37,7 +37,9 @@ namespace Mirage.Examples
         // used by clientObjectManager.RegisterPrefab
         NetworkIdentity SpawnHandler(SpawnMessage msg)
         {
-            return GetFromPool(msg.position, msg.rotation);
+            var pos = msg.SpawnValues.Position ?? prefab.transform.position;
+            var rot = msg.SpawnValues.Rotation ?? prefab.transform.rotation;
+            return GetFromPool(pos, rot);
         }
 
         // used by clientObjectManager.RegisterPrefab

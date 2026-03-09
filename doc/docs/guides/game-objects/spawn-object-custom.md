@@ -62,7 +62,9 @@ The spawn functions themselves are implemented with the delegate signature. Here
 ``` cs
 public NetworkIdentity SpawnCoin(SpawnMessage msg)
 {
-    return Instantiate(m_CoinPrefab, msg.position, msg.rotation);
+    var pos = msg.SpawnValues.Position ?? m_CoinPrefab.transform.position;
+    var rot = msg.SpawnValues.Rotation ?? m_CoinPrefab.transform.rotation;
+    return Instantiate(m_CoinPrefab, pos, rot);
 }
 public void UnSpawnCoin(NetworkIdentity spawned)
 {

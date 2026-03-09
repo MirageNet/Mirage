@@ -226,9 +226,10 @@ namespace Mirage
 
         /// <summary>
         /// Explicit parent override for this object. Used by <see cref="SpawnParentingMode.Manual"/>.
+        /// Can be a NetworkIdentity or a NetworkBehaviour.
         /// </summary>
         [Tooltip("Explicit parent override for this object. Used by SpawnParentingMode.Manual.")]
-        public NetworkIdentity Parent;
+        public Component Parent;
 
         /// <summary>
         /// The NetworkClient associated with this NetworkIdentity.
@@ -1000,11 +1001,7 @@ namespace Mirage
             }
 
             var spawnValues = msg.SpawnValues;
-            if (spawnValues.ParentNetId.HasValue)
-            {
-                if (World.TryGetIdentity(spawnValues.ParentNetId.Value, out var parentIdentity))
-                    transform.SetParent(parentIdentity.transform, false);
-            }
+
 
             if (spawnValues.Position.HasValue) transform.localPosition = spawnValues.Position.Value;
             if (spawnValues.Rotation.HasValue) transform.localRotation = spawnValues.Rotation.Value;

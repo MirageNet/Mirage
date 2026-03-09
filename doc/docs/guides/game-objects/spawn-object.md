@@ -155,8 +155,51 @@ void SpawnTrees()
 
 Attach the `Tree` script to the `treePrefab` script created earlier to see this in action.
 
+## Network Parenting
+
+Mirage supports synchronizing the parent-child hierarchy during the spawn process. This allows you to spawn an object and ensure it is correctly parented on all clients immediately.
+
+There are three modes for network parenting, defined in `SpawnParentingMode`:
+
+- **None**: No parenting information is sent. The object will spawn at the root of the scene (unless manually parented by a custom spawn handler).
+- **Auto**: Mirage will automatically look up the transform hierarchy for the nearest `NetworkIdentity` and use it as the parent.
+- **Manual**: You explicitly set the parent using the `NetworkIdentity.Parent` field or by using the `Spawn` overload that takes a parent.
+
+### Spawning with a Parent
+
+To spawn an object with a specific parent, you can use the extension method provided in `ServerObjectManagerExtensions`:
+
+```cs
+public GameObject childPrefab;
+public NetworkIdentity parentIdentity;
+
+void SpawnChild()
+{
+    GameObject childGo = Instantiate(childPrefab);
+    NetworkIdentity childIdentity = childGo.GetComponent<NetworkIdentity>();
+    
+    // Set parenting mode to Manual if you want to explicitly specify the parent
+    childIdentity.SpawnSettings.SendParent = SpawnParentingMode.Manual;
+    
+    // Spawn with parent
+    ServerObjectManager.Spawn(childIdentity, parentIdentity);
+}
+```
+
+### Network Spawn Settings
+
+The `NetworkSpawnSettings` on the `NetworkIdentity` component allows you to configure what data is sent during spawning.
+
+- **Send Position/Rotation/Scale**: Whether to synchronize the transform values.
+- **Send Name**: Whether to synchronize the game object's name.
+- **Send Active**: How to handle the active state of the game object.
+- **Send Parent**: The `SpawnParentingMode` to use for this object.
+
+![Spawn Settings](/img/guides/game-objects/spawn-settings.png)
+
 ### Constraints
 -   A NetworkIdentity must be on the root game object of a spawnable Prefab. Without this, the Network Manager can’t register the Prefab.
+-   When using `SpawnParentingMode.Auto`, the parent `NetworkIdentity` must already be spawned and visible to the client receiving the spawn message.
 
 ## Game Object Creation Flow
 

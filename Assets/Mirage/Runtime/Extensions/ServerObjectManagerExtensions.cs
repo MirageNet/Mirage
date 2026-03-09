@@ -116,7 +116,7 @@ namespace Mirage
         /// <param name="identity">The object to spawn.</param>
         /// <param name="parent">The parent for the object.</param>
         /// <param name="owner">The connection that has authority over the object.</param>
-        public static void Spawn(this ServerObjectManager som, NetworkIdentity identity, NetworkIdentity parent, INetworkPlayer owner = null)
+        public static void Spawn(this ServerObjectManager som, NetworkIdentity identity, Component parent, INetworkPlayer owner = null)
         {
             if (parent == null)
                 throw new ArgumentNullException(nameof(parent));
