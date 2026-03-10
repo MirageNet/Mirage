@@ -118,6 +118,7 @@ namespace Mirage.Serialization
             // => dont put it back for finalize
             if (disposing)
             {
+                StringStore = null; // clear store reference before putting back into pool
                 _pool.Put(this);
             }
         }

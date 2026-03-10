@@ -27,15 +27,33 @@ namespace Mirage.Serialization
             }
         }
 
-        private static readonly UTF8Encoding defaultEncoding = new UTF8Encoding(false, true);
+        public static readonly UTF8Encoding defaultEncoding = new UTF8Encoding(false, true);
         private static byte[] stringBuffer = new byte[MaxStringLength];
 
         /// <param name="value">string or null</param>
-        public static void WriteString(this NetworkWriter writer, string value) => WriteString(writer, value, defaultEncoding);
+        public static void WriteString(this NetworkWriter writer, string value)
+        {
+            // note, only use StringStore for default encoding
+            if (writer.StringStore != null)
+            {
+                writer.StringStore.WriteString(writer, value);
+                return;
+            }
+
+            WriteString(writer, value, defaultEncoding);
+        }
 
         /// <returns>string or null</returns>
         /// <exception cref="ArgumentException">Throws if invalid utf8 string is received</exception>
-        public static string ReadString(this NetworkReader reader) => ReadString(reader, defaultEncoding);
+        public static string ReadString(this NetworkReader reader)
+        {
+            if (reader.StringStore != null)
+            {
+                return reader.StringStore.ReadString(reader);
+            }
+
+            return ReadString(reader, defaultEncoding);
+        }
 
         /// <param name="encoding">Use this for encoding other than the default (UTF8). Make sure to use same encoding for ReadString</param>
         /// <param name="value">string or null</param>

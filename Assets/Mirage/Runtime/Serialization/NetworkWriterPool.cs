@@ -85,6 +85,7 @@ namespace Mirage.Serialization
                 return;
 
             Reset();
+            StringStore = null; // clear store reference before putting back into pool
             _pool.Put(this);
             _inPool = true;
         }
