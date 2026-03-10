@@ -1,3 +1,10 @@
+# [157.1.0](https://github.com/MirageNet/Mirage/compare/v157.0.0...v157.1.0) (2026-03-10)
+
+
+### Features
+
+* WeaverIgnore now ignores fields when creating Serialize functions ([68c0b06](https://github.com/MirageNet/Mirage/commit/68c0b06925f51e1961ab137caaf6897ed1c34433))
+
 # [157.0.0](https://github.com/MirageNet/Mirage/compare/v156.2.4...v157.0.0) (2026-02-10)
 
 
