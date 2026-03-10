@@ -17,3 +17,6 @@ This section of the Mirage documentation covers different aspects of how data is
 - [SyncPrefab](/docs/guides/serialization/sync-prefab)
   Explains the SyncPrefab struct in Mirage, which is used to synchronize prefabs over the network. It is particularly useful for short-lived objects like visual effects, audio, or projectiles.
 
+- [String Store](/docs/guides/serialization/string-store)
+  An optional optimization for deduplicating strings during serialization to reduce bandwidth.
+
