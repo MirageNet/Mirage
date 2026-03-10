@@ -59,6 +59,7 @@ namespace Mirage.Logging
             switch (_settings.TimePrefix)
             {
                 default:
+                    // return without changing string
                     return format;
                 case TimePrefix.FrameCount:
                     try
@@ -68,11 +69,19 @@ namespace Mirage.Logging
                     }
                     catch
                     {
-                        timePrefix = "0";
+                        timePrefix = "SideThread";
                     }
                     break;
                 case TimePrefix.UnscaledTime:
-                    timePrefix = Time.unscaledTime.ToString("0.000");
+                    try
+                    {
+                        // need try/catch for unity function because unity can throw if called from side thread 
+                        timePrefix = Time.unscaledTime.ToString("0.000");
+                    }
+                    catch
+                    {
+                        timePrefix = "SideThread";
+                    }
                     break;
                 case TimePrefix.DateTimeMilliSeconds:
                     timePrefix = DateTime.Now.ToString("HH:mm:ss.fff");
