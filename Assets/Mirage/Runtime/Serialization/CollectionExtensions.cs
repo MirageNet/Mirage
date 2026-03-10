@@ -7,19 +7,31 @@ namespace Mirage.Serialization
     public static class CollectionExtensions
     {
         /// <summary>
+        /// Write method for weaver to use
+        /// </summary>
+        public static void WriteSpanAndSize(this NetworkWriter writer, Span<byte> span)
+        {
+            WriteSpanAndSize(writer, (ReadOnlySpan<byte>)span);
+        }
+        /// <summary>
+        /// Write method for weaver to use
+        /// </summary>
+        public static void WriteSpanAndSize(this NetworkWriter writer, ReadOnlySpan<byte> span)
+        {
+            writer.WritePackedUInt32(checked((uint)span.Length));
+            writer.WriteSpanRaw(span);
+        }
+
+        /// <summary>
         /// For byte arrays with dynamic size, where the reader doesn't know how many will come 
         /// </summary>
         /// <param name="buffer">array or null</param>
         public static void WriteBytesAndSize(this NetworkWriter writer, byte[] buffer, int offset, int count)
         {
-            if (buffer == null)
-            {
-                WriteCountPlusOne(writer, null);
-                return;
-            }
-
-            WriteCountPlusOne(writer, count);
-            writer.WriteBytes(buffer, offset, count);
+            int? length = buffer != null ? count : null;
+            WriteCountPlusOne(writer, length);
+            if (buffer != null)
+                writer.WriteSpanRaw(new ReadOnlySpan<byte>(buffer, offset, count));
         }
 
         /// <summary>
@@ -28,12 +40,7 @@ namespace Mirage.Serialization
         /// <param name="buffer">array or null</param>
         public static void WriteBytesAndSize(this NetworkWriter writer, byte[] buffer)
         {
-            WriteCountPlusOne(writer, buffer?.Length);
-
-            if (buffer == null)
-                return;
-
-            writer.WriteBytes(buffer, 0, buffer.Length);
+            writer.WriteBytesAndSize(buffer, 0, buffer?.Length ?? 0);
         }
 
         public static void WriteBytesAndSizeSegment(this NetworkWriter writer, ArraySegment<byte> buffer)
@@ -104,7 +111,6 @@ namespace Mirage.Serialization
             }
         }
 
-#if UNITY_2021_3_OR_NEWER
         [WeaverSerializeCollection]
         public static void WriteSpan<T>(this NetworkWriter writer, Span<T> span) => WriteReadOnlySpan<T>(writer, span);
         [WeaverSerializeCollection]
@@ -115,7 +121,6 @@ namespace Mirage.Serialization
             for (var i = 0; i < length; i++)
                 writer.Write(span[i]);
         }
-#endif
 
         /// <returns>array or null</returns>
         public static byte[] ReadBytesAndSize(this NetworkReader reader)
@@ -135,6 +140,19 @@ namespace Mirage.Serialization
                 ? reader.ReadBytesSegment(count)
                 : default;
         }
+
+        /// <summary>
+        /// Read method for weaver to use
+        /// </summary>
+        public static Span<byte> ReadSpanAndSize(this NetworkReader reader)
+        {
+            var length = checked((int)reader.ReadPackedUInt32());
+            return reader.ReadBytesSegment(length);
+        }
+        /// <summary>
+        /// Read method for weaver to use
+        /// </summary>
+        public static ReadOnlySpan<byte> ReadReadOnlySpanAndSize(this NetworkReader reader) => ReadSpanAndSize(reader);
 
         public static byte[] ReadBytes(this NetworkReader reader, int count)
         {
@@ -205,7 +223,6 @@ namespace Mirage.Serialization
             return result;
         }
 
-#if UNITY_2021_3_OR_NEWER
         /// <summary>
         /// Reads a span from the reader.
         /// <para>NOTE: this method allocates a new array internally to hold the data.</para>
@@ -228,7 +245,6 @@ namespace Mirage.Serialization
         }
         [WeaverSerializeCollection]
         public static ReadOnlySpan<T> ReadReadOnlySpan<T>(this NetworkReader reader) => ReadSpan<T>(reader);
-#endif
 
         /// <summary>
         /// Reads a list from the reader into a provided list so that no new list is allocated.
@@ -304,7 +320,6 @@ namespace Mirage.Serialization
             return length;
         }
 
-#if UNITY_2021_3_OR_NEWER
         /// <summary>
         /// Reads a span from the reader into a provided span so that no new array is allocated.
         /// </summary>
@@ -324,7 +339,6 @@ namespace Mirage.Serialization
                 outSpan[i] = reader.Read<T>();
             return length;
         }
-#endif
 
         /// <summary>Writes null as 0, and all over values as +1</summary>
         /// <param name="count">The real count or null if collection is is null</param>

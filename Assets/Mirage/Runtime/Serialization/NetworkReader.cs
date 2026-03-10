@@ -386,25 +386,32 @@ namespace Mirage.Serialization
             _bitPosition = newPosition;
         }
 
-        /// <summary>
-        /// <para>
-        ///    Moves position to nearest byte then copies bytes from that position
-        /// </para>
-        /// </summary>
-        /// <param name="array"></param>
-        /// <param name="offset"></param>
-        /// <param name="length"></param>
         public void ReadBytes(byte[] array, int offset, int length)
         {
+            ReadSpanRaw(new Span<byte>(array, offset, length));
+        }
+
+        /// <summary>
+        /// Moves position to nearest byte then copies bytes from that position into the span
+        /// </summary>
+        /// <param name="span"></param>
+        public void ReadSpanRaw(Span<byte> span)
+        {
             PadToByte();
+            var length = span.Length;
             var newPosition = _bitPosition + (8 * length);
             CheckNewLength(newPosition);
 
-            // todo benchmark this vs Marshal.Copy or for loop
-            Buffer.BlockCopy(_managedBuffer, BytePosition, array, offset, length);
+            var startPtr = ((byte*)_longPtr) + BytePosition;
+            var sourceSpan = new Span<byte>(startPtr, length);
+            sourceSpan.CopyTo(span);
             _bitPosition = newPosition;
         }
 
+        public ReadOnlySpan<byte> ReadSpanRaw(int count)
+        {
+            return ReadBytesSegment(count);
+        }
         public ArraySegment<byte> ReadBytesSegment(int count)
         {
             PadToByte();

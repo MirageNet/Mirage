@@ -380,21 +380,31 @@ namespace Mirage.Serialization
         }
 
         /// <summary>
-        /// <para>
-        ///    Moves position to nearest byte then writes bytes to that position
-        /// </para>
+        /// Moves position to nearest byte then writes bytes to that position
         /// </summary>
         /// <param name="array"></param>
         /// <param name="offset"></param>
         /// <param name="length"></param>
         public void WriteBytes(byte[] array, int offset, int length)
         {
+            WriteSpanRaw(new ReadOnlySpan<byte>(array, offset, length));
+        }
+
+        /// <summary>
+        /// Moves position to nearest byte then copies span to that position
+        /// </summary>
+        /// <param name="span"></param>
+        public void WriteSpanRaw(ReadOnlySpan<byte> span)
+        {
             PadToByte();
+            var length = span.Length;
             var newPosition = _bitPosition + (8 * length);
             CheckCapacity(newPosition);
 
-            // todo benchmark this vs Marshal.Copy or for loop
-            Buffer.BlockCopy(array, offset, _managedBuffer, ByteLength, length);
+            // convert pointer to byte* then shift it to correct offset
+            var startPtr = ((byte*)_longPtr) + ByteLength;
+            var targetSpan = new Span<byte>(startPtr, length);
+            span.CopyTo(targetSpan);
             _bitPosition = newPosition;
         }
 
