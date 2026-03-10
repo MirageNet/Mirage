@@ -6,9 +6,9 @@ namespace Mirage.Serialization
 #pragma warning disable IDE0060 // Remove unused parameter
 
     /// <summary>
-    /// Tells Weaver to ignore an Extension method
+    /// Tells Weaver to ignore a field or Method
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Field)]
     public sealed class WeaverIgnoreAttribute : Attribute { }
 
     /// <summary>

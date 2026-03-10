@@ -31,7 +31,34 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(copy.second, Is.EqualTo(data.second));
             reader.Dispose();
         }
+        [Test]
+        public void IgnoresField()
+        {
+            var data = new MyTypeWithIgnore
+            {
+                serializedField = 10,
+                ignoredField = 20,
+            };
+            var writer = new NetworkWriter(1300);
+            writer.Write(data);
+            var reader = new NetworkReader();
+            reader.Reset(writer.ToArraySegment());
+            var copy = reader.Read<MyTypeWithIgnore>();
+
+            Assert.That(copy.serializedField, Is.EqualTo(data.serializedField));
+            Assert.That(copy.ignoredField, Is.Not.EqualTo(data.ignoredField));
+            Assert.That(copy.ignoredField, Is.EqualTo(0));
+            reader.Dispose();
+        }
     }
+
+    public struct MyTypeWithIgnore
+    {
+        public int serializedField;
+        [WeaverIgnore]
+        public int ignoredField;
+    }
+
     public struct MyCustomType
     {
         public int first;

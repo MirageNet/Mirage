@@ -245,6 +245,9 @@ namespace Mirage.CodeGen
                     if (field.IsNotSerialized)
                         continue;
 
+                    if (field.CustomAttributes.Any(attr => attr.AttributeType.FullName == "Mirage.Serialization.WeaverIgnoreAttribute"))
+                        continue;
+
                     yield return field;
                 }
 
