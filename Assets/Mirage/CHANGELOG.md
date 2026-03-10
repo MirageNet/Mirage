@@ -1,3 +1,11 @@
+# [157.2.0](https://github.com/MirageNet/Mirage/compare/v157.1.0...v157.2.0) (2026-03-10)
+
+
+### Features
+
+* adding StringStore class to send indexes instead of strings ([f046a5c](https://github.com/MirageNet/Mirage/commit/f046a5c7f5cda45858d71dd3c3f7b98291ddd6f0))
+* better span support for NetworkWriter/Reader ([ee9cc28](https://github.com/MirageNet/Mirage/commit/ee9cc2812c6548fd67707c942075278f33258585))
+
 # [157.1.0](https://github.com/MirageNet/Mirage/compare/v157.0.0...v157.1.0) (2026-03-10)
 
 
