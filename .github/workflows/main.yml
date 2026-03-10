@@ -63,7 +63,7 @@ jobs:
 
       - name: Cache Library
         id: cache-library
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: Library
           key: Library-2022.3.62
@@ -138,7 +138,7 @@ jobs:
 
       - name: Cache Library
         id: cache-library
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: Library
           key: Library-2022.2.8

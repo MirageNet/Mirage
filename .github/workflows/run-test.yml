@@ -38,7 +38,7 @@ jobs:
 
       - name: Cache Library
         id: cache-library
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: Library
           key: ${{ inputs.cache_key }}
