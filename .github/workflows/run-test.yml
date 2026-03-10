@@ -28,7 +28,7 @@ jobs:
       - name: Activate unity
         continue-on-error: true
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE_2022_3_0 }}
+          UNITY_LICENSE: ${{ secrets.unity_license }}
         run: |          
           echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
           unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
@@ -60,10 +60,9 @@ jobs:
           path: Tests
 
       - name: Publish test results
-        uses: dorny/test-reporter@v2
+        uses: MirageNet/nunit-reporter@v1.0.11
         if: always()
         with:
-          name: ${{ inputs.test_results_name }}
+          reportTitle:  ${{ inputs.test_results_name }}
           path: "Tests/*.xml"
-          reporter: dotnet-nunit
-          token: ${{ secrets.access_token }}
+          access-token: ${{ secrets.access_token }}
