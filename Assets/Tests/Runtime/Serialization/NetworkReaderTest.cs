@@ -16,13 +16,33 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             // calling ReadBytes with a count bigger than what is in Reader
             // should throw an exception
-            byte[] bytes = { 0x00, 0x01 };
+            byte[] readerBytes = { 0x00, 0x01 };
 
-            using (var reader = NetworkReaderPool.GetReader(bytes, null))
+            using (var reader = NetworkReaderPool.GetReader(readerBytes, null))
             {
                 Assert.Throws<EndOfStreamException>(() =>
                 {
-                    reader.ReadBytes(bytes, 0, bytes.Length + 1);
+                    // read 3 bytes from 2 byte reader, should throw EndOfStream
+                    Span<byte> spanBytes = stackalloc byte[3];
+                    reader.ReadSpanRaw(spanBytes);
+                });
+            }
+        }
+        [Test]
+        public void ReadBytesArrayTooSmall()
+        {
+            // calling ReadBytes with a count bigger than what is in Reader
+            // should throw an exception
+            byte[] readerBytes = { 0x00, 0x01 };
+            var outBytes = new byte[2];
+
+            using (var reader = NetworkReaderPool.GetReader(readerBytes, null))
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(() =>
+                {
+                    // read 3 bytes by array that is only 2 bytes,
+                    // show throw when creating span from array
+                    reader.ReadBytes(outBytes, 0, 3);
                 });
             }
         }
