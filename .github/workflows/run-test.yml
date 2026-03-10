@@ -60,9 +60,10 @@ jobs:
           path: Tests
 
       - name: Publish test results
-        uses: MirageNet/nunit-reporter@v1.0.11
+        uses: dorny/test-reporter@v2
         if: always()
         with:
-          reportTitle:  ${{ inputs.test_results_name }}
+          name: ${{ inputs.test_results_name }}
           path: "Tests/*.xml"
-          access-token: ${{ secrets.access_token }}
+          reporter: dotnet-nunit
+          token: ${{ secrets.access_token }}
