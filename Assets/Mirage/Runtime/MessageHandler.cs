@@ -198,7 +198,7 @@ namespace Mirage
                 return true;
 
             // is authenticated
-            if (player.Authentication != null)
+            if (player.IsAuthenticated)
                 return true;
 
             // not authenticated
