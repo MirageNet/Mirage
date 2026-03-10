@@ -59,11 +59,11 @@ jobs:
           unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
       
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Cache Library
         id: cache-library
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: Library
           key: Library-2022.3.62
@@ -83,14 +83,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: '14'
 
       - name: Release
-        uses: cycjimmy/semantic-release-action@v4
+        uses: cycjimmy/semantic-release-action@v6
         id: semantic
         with:
           semantic_version: 23
@@ -105,7 +105,7 @@ jobs:
       # upload next version so that sonar job can use it
       - run: echo ${{ steps.semantic.outputs.new_release_version }} > SemanticVersion.txt
       - name: Archive Version
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: SemanticVersion
@@ -134,17 +134,17 @@ jobs:
           unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
       
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Cache Library
         id: cache-library
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: Library
           key: Library-2022.2.8
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: 17
           distribution: 'zulu'
@@ -156,7 +156,7 @@ jobs:
         run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
 
       - name: Get test coverages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: Test results 2022
           path: Tests
@@ -165,7 +165,7 @@ jobs:
       # Run this as late as possible, to give time for publish job to finish and upload
       - name: Get version
         continue-on-error: true
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: SemanticVersion
           path: SemanticVersion
