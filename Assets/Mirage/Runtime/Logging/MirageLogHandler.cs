@@ -89,6 +89,9 @@ namespace Mirage.Logging
                 case TimePrefix.DateTimeSeconds:
                     timePrefix = DateTime.Now.ToString("HH:mm:ss");
                     break;
+                case TimePrefix.Custom:
+                    timePrefix = _settings.CustomTimePrefix.Invoke();
+                    break;
             }
 
             return $"{timePrefix}: {format}";
@@ -101,6 +104,7 @@ namespace Mirage.Logging
             UnscaledTime,
             DateTimeMilliSeconds,
             DateTimeSeconds,
+            Custom,
         }
         [Serializable]
         public class Settings
@@ -118,9 +122,18 @@ namespace Mirage.Logging
             public float ColorSaturation = 0.6f;
             public float ColorValue = 0.8f;
 
+            public Func<string> CustomTimePrefix;
+
             public Settings(TimePrefix timePrefix, bool coloredLabel, bool label)
             {
                 TimePrefix = timePrefix;
+                ColoredLabel = coloredLabel;
+                Label = label;
+            }
+            public Settings(bool coloredLabel, bool label, Func<string> customTimePrefix)
+            {
+                TimePrefix = TimePrefix.Custom;
+                CustomTimePrefix = customTimePrefix;
                 ColoredLabel = coloredLabel;
                 Label = label;
             }
@@ -138,7 +151,7 @@ namespace Mirage.Logging
                 if (ColorSeed != 0)
                     hash = unchecked(ColorSeed * hash);
 
-                var hue = Mathf.Abs((float)hash / (float)int.MaxValue);
+                var hue = Mathf.Abs(hash / (float)int.MaxValue);
                 return Color.HSVToRGB(hue, ColorSaturation, ColorValue);
             }
         }
