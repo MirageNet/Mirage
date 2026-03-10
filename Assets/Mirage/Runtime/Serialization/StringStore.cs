@@ -112,6 +112,11 @@ namespace Mirage.Serialization.BrotliCompression
         private readonly NetworkWriter _lengthsWriter;
         private readonly NetworkWriter _stringsWriter;
 
+        public (int lengthsByteCount, int stringsByteCount) GetByteLength()
+        {
+            return (_lengthsWriter.ByteLength, _stringsWriter.ByteLength);
+        }
+
         private StringStoreBrotliEncoder(NetworkWriter lengthsWriter, NetworkWriter stringsWriter)
         {
             _lengthsWriter = lengthsWriter;
