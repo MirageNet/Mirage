@@ -28,7 +28,7 @@ jobs:
       - name: Activate unity
         continue-on-error: true
         env:
-          UNITY_LICENSE: ${{ secrets.unity_license }}
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE_2022_3_0 }}
         run: |          
           echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
           unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
