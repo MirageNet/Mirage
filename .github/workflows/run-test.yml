@@ -58,7 +58,11 @@ jobs:
         with:
           name: ${{ inputs.test_results_name }}
           path: Tests
-
+      
+      - name: Fix git safe directory
+        if: always()
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      
       - name: Publish test results
         uses: dorny/test-reporter@v2
         if: always()
