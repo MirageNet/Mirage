@@ -1,0 +1,43 @@
+name: Force Release
+
+on:
+  workflow_dispatch
+
+# available list of containers here:
+# https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
+
+jobs:
+  Publish:
+    if: github.ref == 'refs/heads/main'
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Release
+        uses: cycjimmy/semantic-release-action@v6
+        id: semantic
+        with:
+          semantic_version: 23
+          extra_plugins: |
+            @semantic-release/exec
+            @semantic-release/changelog
+            @semantic-release/git
+          branch: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # upload next version so that sonar job can use it
+      - run: echo ${{ steps.semantic.outputs.new_release_version }} > SemanticVersion.txt
+
+      - name: Archive Version
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: SemanticVersion
+          path: SemanticVersion.txt
