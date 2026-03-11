@@ -709,7 +709,14 @@ namespace Mirage
             // we need to set position and rotation here incase that their values are used from awake/onenable
             var pos = msg.SpawnValues.Position ?? prefab.transform.position;
             var rot = msg.SpawnValues.Rotation ?? prefab.transform.rotation;
-            return Instantiate(prefab, pos, rot);
+            var clone = Instantiate(prefab, pos, rot);
+
+            if (msg.SpawnValues.Parent.HasValue && msg.SpawnValues.Parent.Value.TryGet(_client.World, out var parentTransform))
+            {
+                clone.transform.SetParent(parentTransform, false);
+            }
+
+            return clone;
         }
 
         internal NetworkIdentity SpawnSceneObject(SpawnMessage msg)
@@ -724,6 +731,12 @@ namespace Mirage
                     throw new SpawnObjectException($"Scene object is null, sceneId={msg.SceneId:X}, NetId={msg.NetId}");
 
                 if (logger.LogEnabled()) logger.Log($"[ClientObjectManager] Found scene object for netid:{msg.NetId}, sceneId:{msg.SceneId.Value:X}, obj:{foundSceneObject}");
+
+                if (msg.SpawnValues.Parent.HasValue && msg.SpawnValues.Parent.Value.TryGet(_client.World, out var parentTransform))
+                {
+                    foundSceneObject.transform.SetParent(parentTransform, false);
+                }
+
                 return foundSceneObject;
             }
 

@@ -109,6 +109,24 @@ namespace Mirage
             som.Spawn(identity, owner);
         }
 
+        /// <summary>
+        /// Spawns the <paramref name="identity"/> with a specific <paramref name="parent"/> and assigns <paramref name="owner"/> to be it's owner.
+        /// <para>This will set the transform parent on the server and ensure the client receives the parent information if <see cref="NetworkSpawnSettings.SendParent"/> is enabled.</para>
+        /// </summary>
+        /// <param name="identity">The object to spawn.</param>
+        /// <param name="parent">The parent for the object.</param>
+        /// <param name="owner">The connection that has authority over the object.</param>
+        public static void Spawn(this ServerObjectManager som, NetworkIdentity identity, Component parent, INetworkPlayer owner = null)
+        {
+            if (parent == null)
+                throw new ArgumentNullException(nameof(parent));
+
+            identity.Parent = parent;
+            identity.transform.SetParent(parent.transform);
+
+            som.Spawn(identity, owner);
+        }
+
 
         /// <summary>
         /// Instantiate a prefab an then Spawns it with ServerObjectManager

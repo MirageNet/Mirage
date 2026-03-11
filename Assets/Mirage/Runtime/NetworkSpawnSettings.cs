@@ -11,15 +11,18 @@ namespace Mirage
         public bool SendScale;
         public bool SendName;
         public SyncActiveOption SendActive;
+        public SpawnParentingMode SendParent;
 
-        public NetworkSpawnSettings(bool sendPosition, bool sendRotation, bool sendScale, bool sendName, SyncActiveOption sendActive) : this()
+        public NetworkSpawnSettings(bool sendPosition, bool sendRotation, bool sendScale, bool sendName, SyncActiveOption sendActive, SpawnParentingMode sendParent) : this()
         {
             SendPosition = sendPosition;
             SendRotation = sendRotation;
             SendScale = sendScale;
             SendName = sendName;
             SendActive = sendActive;
+            SendParent = sendParent;
         }
+
         public NetworkSpawnSettings(bool sendPosition, bool sendRotation, bool sendScale) : this()
         {
             SendPosition = sendPosition;
@@ -32,7 +35,8 @@ namespace Mirage
             sendRotation: true,
             sendScale: false,
             sendName: false,
-            sendActive: SyncActiveOption.ForceEnable);
+            sendActive: SyncActiveOption.ForceEnable,
+            sendParent: SpawnParentingMode.None);
     }
 
 
@@ -52,5 +56,23 @@ namespace Mirage
         /// Force-enable the game object, even if the server's version is disabled.
         /// </summary>
         ForceEnable,
+    }
+
+    public enum SpawnParentingMode
+    {
+        /// <summary>
+        /// Don't synchronize parent-child relationship.
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// Automatically detect parent NetworkIdentity in the transform hierarchy.
+        /// </summary>
+        Auto,
+
+        /// <summary>
+        /// Manually specify the parent NetworkIdentity via the <see cref="NetworkIdentity.Parent"/> field.
+        /// </summary>
+        Manual,
     }
 }
