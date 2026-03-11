@@ -87,7 +87,8 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: '14'
+          node-version: '24'
+          cache: 'npm'
 
       - name: Release
         uses: cycjimmy/semantic-release-action@v6
@@ -104,6 +105,7 @@ jobs:
 
       # upload next version so that sonar job can use it
       - run: echo ${{ steps.semantic.outputs.new_release_version }} > SemanticVersion.txt
+
       - name: Archive Version
         uses: actions/upload-artifact@v7
         if: always()
