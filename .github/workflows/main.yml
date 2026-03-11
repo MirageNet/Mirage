@@ -93,7 +93,7 @@ jobs:
         uses: cycjimmy/semantic-release-action@v6
         id: semantic
         with:
-          semantic_version: 23
+          semantic_version: 25
           extra_plugins: |
             @semantic-release/exec
             @semantic-release/changelog
