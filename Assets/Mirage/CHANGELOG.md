@@ -1,3 +1,16 @@
+# [157.3.0](https://github.com/MirageNet/Mirage/compare/v157.2.0...v157.3.0) (2026-03-11)
+
+
+### Bug Fixes
+
+* adding try/catch for Time.unscaledTime if called on side thread ([90df0ab](https://github.com/MirageNet/Mirage/commit/90df0ab95501a5f1338243d791f08d2968d1cbdb))
+
+
+### Features
+
+* adding Custom time prefix for MirageLogHandler ([ab54bfe](https://github.com/MirageNet/Mirage/commit/ab54bfee5048aebbadc452c7fc75bbc86699cd62))
+* adding StringStoreBrotliEncoder.GetByteLength ([fb857a4](https://github.com/MirageNet/Mirage/commit/fb857a4a9768d656e1066968d2153fba1775db2d))
+
 # [157.2.0](https://github.com/MirageNet/Mirage/compare/v157.1.0...v157.2.0) (2026-03-10)
 
 
