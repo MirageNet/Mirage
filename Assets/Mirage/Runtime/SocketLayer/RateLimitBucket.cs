@@ -25,9 +25,19 @@ namespace Mirage.SocketLayer
         }
 
         /// <summary>
-        /// refills tokens based on config
+        /// Refills the bucket based on time passed and then consumes tokens.
+        /// Useful for rarely used buckets that need to be up-to-date at the moment of a call.
         /// </summary>
-        /// <param name="now">seconds</param>
+        public bool UseTokens(double now, int amount)
+        {
+            CheckRefill(now);
+            return UseTokens(amount);
+        }
+
+        /// <summary>
+        /// Refills tokens based on config. If the bucket is full, it will reset the refill timer to 'now'.
+        /// </summary>
+        /// <param name="now">Current time in seconds</param>
         public void CheckRefill(double now)
         {
             var elapsed = (float)(now - _previousRefill);
@@ -40,14 +50,16 @@ namespace Mirage.SocketLayer
             _previousRefill = now;
             var tokensPerSecond = Config.Refill / Config.Interval;
             var tokensToAdd = elapsed * tokensPerSecond;
+
+            // Clamp to MaxTokens so that idle buckets don't accumulate infinite credit
             _tokens = Math.Min(Config.MaxTokens, _tokens + tokensToAdd);
         }
 
         /// <summary>
-        /// subtracts cost from token count, returns true if tokens is negative (we ran out)
+        /// Subtracts cost from token count. 
+        /// Tokens can go negative to penalize burst spam.
         /// </summary>
-        /// <param name="cost"></param>
-        /// <returns></returns>
+        /// <returns>True if the bucket is empty (negative), indicating the rate limit was exceeded.</returns>
         public bool UseTokens(int cost)
         {
             _tokens -= cost;
@@ -55,9 +67,8 @@ namespace Mirage.SocketLayer
         }
 
         /// <summary>
-        /// returns true if tokens is negative (we ran out)
+        /// Returns true if tokens is negative (indicating we ran out and are currently in debt).
         /// </summary>
-        /// <returns></returns>
         public bool IsEmpty()
         {
             return _tokens < 0;
@@ -70,7 +81,7 @@ namespace Mirage.SocketLayer
             public float Interval;
             /// <summary>How many tokens refilled each interval</summary>
             public int Refill;
-            /// <summary>Max number of tokens in bucket. set this number higher than per seconds value to allow bursts of usage</summary>
+            /// <summary>Max number of tokens in bucket. Set this higher than 'Refill' to allow for bursts of usage.</summary>
             public int MaxTokens;
         }
     }

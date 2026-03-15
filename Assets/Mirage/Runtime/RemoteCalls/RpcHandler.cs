@@ -144,6 +144,17 @@ namespace Mirage.RemoteCalls
                 }
             }
 
+            // --- Rate Limit Check ---
+            if (_invokeType == RpcInvokeType.ServerRpc && remoteCall.RateLimit.IsEnabled)
+            {
+                var allowed = player.CheckRateLimit(remoteCall);
+                if (!allowed)
+                {
+                    if (logger.WarnEnabled()) logger.LogWarning($"ServerRpc '{remoteCall.Name}' dropped for {player} due to rate limiting on {identity}");
+                    return;
+                }
+            }
+
             if (logger.LogEnabled()) logger.Log($"Rpc for {identity} from {player}");
 
             using (var reader = NetworkReaderPool.GetReader(payload, _objectLocator))

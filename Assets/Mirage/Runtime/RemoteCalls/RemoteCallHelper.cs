@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using Mirage.Serialization;
+using Mirage.SocketLayer;
 using UnityEngine;
 
 namespace Mirage.RemoteCalls
@@ -39,14 +40,14 @@ namespace Mirage.RemoteCalls
             }
         }
 
-        public void Register(int index, string name, bool cmdRequireAuthority, RpcInvokeType invokerType, NetworkBehaviour behaviour, RpcDelegate func)
+        public void Register(int index, string name, bool cmdRequireAuthority, RpcInvokeType invokerType, NetworkBehaviour behaviour, RpcDelegate func, RpcRateLimitConfig rateLimit)
         {
             var indexOffset = GetIndexOffset(behaviour);
             // weaver gives index, so should never give 2 indexes that are the same
             if (RemoteCalls[indexOffset + index] != null)
                 throw new InvalidOperationException("2 Rpc has same index");
 
-            var call = new RemoteCall(behaviour, invokerType, func, cmdRequireAuthority, name);
+            var call = new RemoteCall(behaviour, index, invokerType, func, cmdRequireAuthority, name, rateLimit);
             RemoteCalls[indexOffset + index] = call;
 
             if (logger.LogEnabled())
@@ -56,7 +57,7 @@ namespace Mirage.RemoteCalls
             }
         }
 
-        public void RegisterRequest<T>(int index, string name, bool cmdRequireAuthority, RpcInvokeType invokerType, NetworkBehaviour behaviour, RequestDelegate<T> func)
+        public void RegisterRequest<T>(int index, string name, bool cmdRequireAuthority, RpcInvokeType invokerType, NetworkBehaviour behaviour, RequestDelegate<T> func, RpcRateLimitConfig rateLimit)
         {
             async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
             {
@@ -116,7 +117,7 @@ namespace Mirage.RemoteCalls
                 Wrapper(obj, reader, senderPlayer, replyId).Forget();
             }
 
-            Register(index, name, cmdRequireAuthority, invokerType, behaviour, CmdWrapper);
+            Register(index, name, cmdRequireAuthority, invokerType, behaviour, CmdWrapper, rateLimit);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -156,6 +157,87 @@ namespace Mirage.RemoteCalls
     }
 
     /// <summary>
+    /// Rate limit configuration for an RPC method.
+    /// Use <see cref="Disabled"/> for no rate limiting, or <see cref="Enabled"/> to configure a token bucket.
+    /// </summary>
+    public readonly struct RpcRateLimitConfig
+    {
+        public readonly bool IsEnabled;
+        public readonly RateLimitBucket.RefillConfig BucketConfig;
+        public readonly int Penalty;
+
+        private RpcRateLimitConfig(float interval, int refill, int maxTokens, int penalty)
+        {
+            IsEnabled = true;
+            BucketConfig = new RateLimitBucket.RefillConfig
+            {
+                Interval = interval,
+                Refill = refill,
+                MaxTokens = maxTokens,
+            };
+            Penalty = penalty;
+        }
+
+        /// <summary>
+        /// No rate limiting for this RPC
+        /// </summary>
+        public static RpcRateLimitConfig Disabled()
+        {
+            return default;
+        }
+
+        /// <summary>
+        /// Enables rate limiting with the specified token bucket configuration
+        /// </summary>
+        /// <param name="interval">Seconds between refills</param>
+        /// <param name="refill">How many tokens refilled each interval</param>
+        /// <param name="maxTokens">Max number of tokens in bucket</param>
+        /// <param name="penalty">Error cost applied to NetworkPlayer's ErrorRateLimit when limit is exceeded</param>
+        public static RpcRateLimitConfig Enabled(float interval, int refill, int maxTokens, int penalty)
+        {
+            return new RpcRateLimitConfig(interval, refill, maxTokens, penalty);
+        }
+    }
+
+    public readonly struct RpcId : IEquatable<RpcId>
+    {
+        public readonly int Hash;
+        public readonly Type DeclaringType;
+        public readonly int DeclaringIndex;
+
+        public RpcId(Type declaringType, int index) : this()
+        {
+            DeclaringType = declaringType;
+            DeclaringIndex = index;
+            var hash1 = declaringType.FullName.GetStableHashCode();
+            var hash2 = index;
+            unchecked
+            {
+                var hash = 17;
+                hash = (hash * 23) + hash1;
+                hash = (hash * 23) + hash2;
+                Hash = hash;
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return Hash;
+        }
+        public override bool Equals(object obj)
+        {
+            return obj is RpcId other && Equals(other);
+        }
+        public bool Equals(RpcId other)
+        {
+            return Hash == other.Hash &&
+                DeclaringType == other.DeclaringType &&
+                DeclaringIndex == other.DeclaringIndex;
+        }
+    }
+
+
+    /// <summary>
     /// Used for invoking a RPC methods
     /// </summary>
     public class RemoteCall
@@ -183,7 +265,24 @@ namespace Mirage.RemoteCalls
 
         public readonly NetworkBehaviour Behaviour;
 
-        public RemoteCall(NetworkBehaviour behaviour, RpcInvokeType invokeType, RpcDelegate function, bool requireAuthority, string name)
+        /// <summary>
+        /// Rate limit configuration for this RPC
+        /// </summary>
+        public readonly RpcRateLimitConfig RateLimit;
+
+        /// <summary>
+        /// Stable Id for an RPC inside a type
+        /// </summary>
+        public readonly RpcId RpcId;
+
+        public RemoteCall(
+            NetworkBehaviour behaviour,
+            int indexInType,
+            RpcInvokeType invokeType,
+            RpcDelegate function,
+            bool requireAuthority,
+            string name,
+            RpcRateLimitConfig rateLimit)
         {
             Behaviour = behaviour;
             DeclaringType = behaviour.GetType();
@@ -191,6 +290,8 @@ namespace Mirage.RemoteCalls
             Function = function;
             RequireAuthority = requireAuthority;
             Name = name;
+            RpcId = new RpcId(DeclaringType, indexInType);
+            RateLimit = rateLimit;
         }
 
         internal void Invoke(NetworkReader reader, INetworkPlayer senderPlayer = null, int replyId = 0)

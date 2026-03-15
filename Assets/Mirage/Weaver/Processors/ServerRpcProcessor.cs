@@ -155,6 +155,28 @@ namespace Mirage.Weaver
 
             var skeletonFunc = GenerateSkeleton(md, userCodeFunc, clientRpcAttr: null, paramSerializers);
 
+
+            // check for [RateLimit] attribute on the method
+            RateLimitSettings? rateLimitSettings = null;
+            if (md.TryGetCustomAttribute<RateLimitAttribute>(out var rateLimitAttr))
+            {
+                var s = new RateLimitSettings();
+                s.interval = rateLimitAttr.GetField(nameof(RateLimitAttribute.Interval), RateLimitAttribute.DEFAULT_INTERVAL);
+                s.refill = rateLimitAttr.GetField(nameof(RateLimitAttribute.Refill), RateLimitAttribute.DEFAULT_REFILL);
+                s.maxTokens = rateLimitAttr.GetField(nameof(RateLimitAttribute.MaxTokens), RateLimitAttribute.DEFAULT_MAX_TOKENS);
+                s.penalty = rateLimitAttr.GetField(nameof(RateLimitAttribute.Penalty), RateLimitAttribute.DEFAULT_PENALTY);
+                rateLimitSettings = s;
+
+                if (s.interval <= 0)
+                    throw new RpcException($"[RateLimit] Interval must be greater than 0", md);
+                if (s.refill <= 0)
+                    throw new RpcException($"[RateLimit] Refill must be greater than 0", md);
+                if (s.maxTokens <= 0)
+                    throw new RpcException($"[RateLimit] MaxTokens must be greater than 0", md);
+                if (s.penalty < 0) // can be zero
+                    throw new RpcException($"[RateLimit] Penalty must be greater than or equal to 0", md);
+            }
+
             return new ServerRpcMethod
             {
                 Index = rpcIndex,
@@ -162,6 +184,7 @@ namespace Mirage.Weaver
                 requireAuthority = requireAuthority,
                 skeleton = skeletonFunc,
                 ReturnType = returnType,
+                RateLimitSettings = rateLimitSettings,
             };
         }
 
