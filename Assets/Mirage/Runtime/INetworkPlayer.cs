@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Mirage.Authentication;
 using Mirage.SocketLayer;
+using Mirage.RemoteCalls;
 
 namespace Mirage
 {
@@ -173,6 +174,13 @@ namespace Mirage
 
         void Disconnect();
         void MarkAsDisconnected();
+
+        /// <summary>
+        /// Checks and enforces rate limiting for an RPC.
+        /// Returns true if the RPC is allowed to execute.
+        /// If false, the RPC should be ignored.
+        /// </summary>
+        bool CheckRateLimit(RemoteCall remoteCall);
     }
 
     public interface ISceneLoader

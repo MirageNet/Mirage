@@ -17,11 +17,11 @@ namespace Mirage.Weaver
             {
                 if (rpc is ServerRpcMethod serverRpc)
                 {
-                    CallRegister(worker, rpc, RpcInvokeType.ServerRpc, serverRpc.requireAuthority);
+                    CallRegister(worker, rpc, RpcInvokeType.ServerRpc, serverRpc.requireAuthority, serverRpc.RateLimitSettings);
                 }
                 else if (rpc is ClientRpcMethod clientRpc)
                 {
-                    CallRegister(worker, rpc, RpcInvokeType.ClientRpc, false);
+                    CallRegister(worker, rpc, RpcInvokeType.ClientRpc, false, null);
                 }
             }
         }
@@ -42,7 +42,7 @@ namespace Mirage.Weaver
             var skeleton = rpcMethod.skeleton;
             if (rpcMethod.ReturnType == ReturnType.Void)
             {
-                return skeleton.Module.ImportReference((RemoteCallCollection c) => c.Register(default, default, default, default, default, default));
+                return skeleton.Module.ImportReference((RemoteCallCollection c) => c.Register(default, default, default, default, default, default, default));
             }
             else
             {
@@ -56,7 +56,7 @@ namespace Mirage.Weaver
 
             var returnType = taskReturnType.GenericArguments[0];
 
-            var genericRegisterMethod = func.Module.ImportReference((RemoteCallCollection c) => c.RegisterRequest<object>(default, default, default, default, default, default)) as GenericInstanceMethod;
+            var genericRegisterMethod = func.Module.ImportReference((RemoteCallCollection c) => c.RegisterRequest<object>(default, default, default, default, default, default, default)) as GenericInstanceMethod;
 
             var registerInstance = new GenericInstanceMethod(genericRegisterMethod.ElementMethod);
             registerInstance.GenericArguments.Add(returnType);
@@ -64,7 +64,7 @@ namespace Mirage.Weaver
         }
 
 
-        private static void CallRegister(ILProcessor worker, RpcMethod rpcMethod, RpcInvokeType invokeType, bool requireAuthority)
+        private static void CallRegister(ILProcessor worker, RpcMethod rpcMethod, RpcInvokeType invokeType, bool requireAuthority, RateLimitSettings? rateLimitSettings)
         {
             var registerMethod = GetRegisterMethod(rpcMethod);
 
@@ -88,6 +88,23 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldftn, skeleton.MakeHostInstanceSelfGeneric()));
             var @delegate = CreateRpcDelegate(skeleton);
             worker.Append(worker.Create(OpCodes.Newobj, @delegate));
+
+            // emit RpcRateLimitConfig via static factory method
+            if (rateLimitSettings.HasValue)
+            {
+                var rateLimit = rateLimitSettings.Value;
+                // RpcRateLimitConfig.Enabled(interval, refill, maxTokens, penalty)
+                worker.Append(worker.Create(OpCodes.Ldc_R4, rateLimit.interval));
+                worker.Append(worker.Create(OpCodes.Ldc_I4, rateLimit.refill));
+                worker.Append(worker.Create(OpCodes.Ldc_I4, rateLimit.maxTokens));
+                worker.Append(worker.Create(OpCodes.Ldc_I4, rateLimit.penalty));
+                worker.Append(worker.Create(OpCodes.Call, skeleton.Module.ImportReference(() => RpcRateLimitConfig.Enabled(default, default, default, default))));
+            }
+            else
+            {
+                // RpcRateLimitConfig.Disabled()
+                worker.Append(worker.Create(OpCodes.Call, skeleton.Module.ImportReference(() => RpcRateLimitConfig.Disabled())));
+            }
 
             // invoke register
             worker.Append(worker.Create(OpCodes.Call, registerMethod));

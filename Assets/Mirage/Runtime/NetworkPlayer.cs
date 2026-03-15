@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Mirage.Authentication;
 using Mirage.Logging;
+using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using Mirage.SocketLayer;
 using UnityEngine;
@@ -47,6 +48,8 @@ namespace Mirage
         /// <summary>Error rate limiting, will invoke disconnect player (or call <see cref="NetworkServer._errorRateLimitReached"/> if set) when limit is reached</summary>
         public RateLimitBucket ErrorRateLimit { get; }
         private bool _invokingErrorRateLimitReached;
+
+        public Dictionary<RpcId, RateLimitBucket> RpcRateLimit;
 
         /// <summary>
         /// Has this player been marked as disconnected
@@ -513,6 +516,34 @@ namespace Mirage
         public void ResetErrorFlag()
         {
             ErrorFlags = 0;
+        }
+
+        /// <summary>
+        /// Checks and enforces rate limiting for an RPC.
+        /// Returns true if the RPC is allowed to execute.
+        /// If false, the RPC should be ignored.
+        /// </summary>
+        public bool CheckRateLimit(RemoteCall remoteCall)
+        {
+            RpcRateLimit ??= new Dictionary<RpcId, RateLimitBucket>();
+            if (!RpcRateLimit.TryGetValue(remoteCall.RpcId, out var bucket))
+            {
+                bucket = new RateLimitBucket(Time.unscaledTimeAsDouble, remoteCall.RateLimit.BucketConfig);
+                RpcRateLimit.Add(remoteCall.RpcId, bucket);
+
+                if (errorLogger.LogEnabled())
+                    errorLogger.Log($"{this} created RPC rate limit bucket for '{remoteCall.Name}' [maxTokens={remoteCall.RateLimit.BucketConfig.MaxTokens}, interval={remoteCall.RateLimit.BucketConfig.Interval}]");
+            }
+
+            var callAllowed = bucket.TryConsume(now: Time.unscaledTimeAsDouble, 1);
+            if (!callAllowed)
+            {
+                if (errorLogger.WarnEnabled())
+                    errorLogger.LogWarning($"{this} RPC rate limit exceeded for '{remoteCall.Name}', dropping call [penalty={remoteCall.RateLimit.Penalty}]");
+
+                SetError(remoteCall.RateLimit.Penalty, PlayerErrorFlags.RateLimit);
+            }
+            return callAllowed;
         }
     }
 }
