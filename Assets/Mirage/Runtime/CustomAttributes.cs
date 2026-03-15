@@ -90,6 +90,29 @@ namespace Mirage
         public bool allowServerToCall = false;
     }
 
+    [AttributeUsage(AttributeTargets.Method)]
+    public class RateLimitAttribute : Attribute
+    {
+        public const float DEFAULT_INTERVAL = 1f;
+        public const int DEFAULT_REFILL = 50;
+        public const int DEFAULT_MAX_TOKENS = 200;
+        public const int DEFAULT_PENALTY = 1;
+
+        /// <summary>Seconds</summary>
+        public float Interval = DEFAULT_INTERVAL;
+
+        /// <summary>How many tokens refilled each interval</summary>
+        public int Refill = DEFAULT_REFILL;
+
+        /// <summary>Max number of tokens in bucket. set this number higher than per seconds value to allow bursts of usage</summary>
+        public int MaxTokens = DEFAULT_MAX_TOKENS;
+
+        /// <summary>
+        /// Amount of error cost added to NetworkPlayer's ErrorRateLimit when the player exceeds the allowed rate limit interval.
+        /// </summary>
+        public int Penalty = DEFAULT_PENALTY;
+    }
+
     /// <summary>
     /// Used by ClientRpc to tell mirage who to send remote call to
     /// </summary>

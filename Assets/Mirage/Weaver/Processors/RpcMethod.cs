@@ -17,6 +17,15 @@ namespace Mirage.Weaver
     public class ServerRpcMethod : RpcMethod
     {
         public bool requireAuthority;
+        public RateLimitSettings? RateLimitSettings;
+    }
+
+    public struct RateLimitSettings
+    {
+        public float interval;
+        public int refill;
+        public int maxTokens;
+        public int penalty;
     }
 
     public class ClientRpcMethod : RpcMethod
