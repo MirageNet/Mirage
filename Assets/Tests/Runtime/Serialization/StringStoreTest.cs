@@ -1,8 +1,6 @@
 using System;
-using Mirage;
 using Mirage.Serialization;
 using Mirage.Serialization.BrotliCompression;
-using Mirage.SocketLayer;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -208,6 +206,58 @@ namespace Mirage.Tests.Runtime.Serialization
             {
                 Assert.That(decoder.StringStore.Strings[i], Is.EqualTo(store.Strings[i]));
             }
+        }
+
+        [Test]
+        public void WriterAndReaderExtensionsUseAssignedStringStore()
+        {
+            var store = new StringStore();
+            var writer = new NetworkWriter(1300);
+            writer.StringStore = store;
+
+            // These should use StringStore instead of raw encoding
+            writer.WriteString("apple");
+            writer.WriteString("banana");
+            writer.WriteString("apple"); // Duplicate
+            writer.WriteString(null);
+
+            // Verify StringStore captured them
+            Assert.That(store.Strings.Count, Is.EqualTo(2));
+
+            var reader = new NetworkReader();
+            reader.Reset(writer.ToArraySegment());
+            reader.StringStore = store;
+
+            // These should read using StringStore
+            Assert.That(reader.ReadString(), Is.EqualTo("apple"));
+            Assert.That(reader.ReadString(), Is.EqualTo("banana"));
+            Assert.That(reader.ReadString(), Is.EqualTo("apple"));
+            Assert.That(reader.ReadString(), Is.Null);
+        }
+
+        [Test]
+        public void PooledNetworkWriterReleasesStringStore()
+        {
+            var store = new StringStore();
+            var writer = NetworkWriterPool.GetWriter();
+            writer.StringStore = store;
+
+            writer.Release();
+
+            Assert.That(writer.StringStore, Is.Null, "StringStore should be cleared when putting the writer back in the pool");
+        }
+
+        [Test]
+        public void PooledNetworkReaderReleasesStringStore()
+        {
+            var store = new StringStore();
+            byte[] dummyBytes = { 0x00 };
+            var reader = NetworkReaderPool.GetReader(dummyBytes, null);
+            reader.StringStore = store;
+
+            reader.Dispose();
+
+            Assert.That(reader.StringStore, Is.Null, "StringStore should be cleared when putting the reader back in the pool");
         }
     }
 }
