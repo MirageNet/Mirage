@@ -93,5 +93,29 @@ namespace Mirage.Tests.Weaver
         {
             IsSuccess();
         }
+
+        [Test]
+        public void RateLimitNegativeInterval()
+        {
+            HasError("[RateLimit] Interval must be greater than 0", "System.Void ServerRpcTests.RateLimitNegativeInterval.RateLimitNegativeInterval::DoSomething()");
+        }
+
+        [Test]
+        public void RateLimitZeroRefill()
+        {
+            HasError("[RateLimit] Refill must be greater than 0", "System.Void ServerRpcTests.RateLimitZeroRefill.RateLimitZeroRefill::DoSomething()");
+        }
+
+        [Test]
+        public void RateLimitZeroMaxTokens()
+        {
+            HasError("[RateLimit] MaxTokens must be greater than 0", "System.Void ServerRpcTests.RateLimitZeroMaxTokens.RateLimitZeroMaxTokens::DoSomething()");
+        }
+
+        [Test]
+        public void RateLimitNegativePenalty()
+        {
+            HasError("[RateLimit] Penalty must be greater than or equal to 0", "System.Void ServerRpcTests.RateLimitNegativePenalty.RateLimitNegativePenalty::DoSomething()");
+        }
     }
 }
