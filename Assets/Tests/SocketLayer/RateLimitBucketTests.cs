@@ -189,5 +189,55 @@ namespace Mirage.SocketLayer.Tests
             Assert.That(bucket.UseTokens(5), Is.False); // Still 5 tokens left, not empty
             Assert.That(bucket.UseTokens(1), Is.True); // Becomes empty
         }
+
+        [Test]
+        public void UseTokensOverloadReturnsFalseWhenTokensAreAvailable()
+        {
+            var config = new RateLimitBucket.RefillConfig
+            {
+                Interval = 1,
+                MaxTokens = 10,
+                Refill = 1
+            };
+            var bucket = new RateLimitBucket(_time, config);
+
+            Assert.That(bucket.UseTokens(_time, 5), Is.False);
+            Assert.That(bucket.UseTokens(_time, 5), Is.False);
+        }
+
+        [Test]
+        public void UseTokensOverloadReturnsTrueWhenTokensAreExceeded()
+        {
+            var config = new RateLimitBucket.RefillConfig
+            {
+                Interval = 1,
+                MaxTokens = 10,
+                Refill = 1
+            };
+            var bucket = new RateLimitBucket(_time, config);
+
+            bucket.UseTokens(_time, 10);
+            Assert.That(bucket.UseTokens(_time, 1), Is.True);
+        }
+
+        [Test]
+        public void UseTokensOverloadRefillsBeforeConsuming()
+        {
+            var config = new RateLimitBucket.RefillConfig
+            {
+                Interval = 1,
+                MaxTokens = 10,
+                Refill = 2
+            };
+            var bucket = new RateLimitBucket(_time, config);
+
+            bucket.UseTokens(10); // Bucket is now empty (0 tokens)
+
+            _time += 1.0;
+            // Should refill 2 tokens first, then consume 2, so it should succeed (return false)
+            Assert.That(bucket.UseTokens(_time, 2), Is.False);
+            // And then return true if we try to consume one more
+            Assert.That(bucket.UseTokens(_time, 1), Is.True);
+        }
     }
 }
