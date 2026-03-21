@@ -1,3 +1,10 @@
+# [157.4.0](https://github.com/MirageNet/Mirage/compare/v157.3.0...v157.4.0) (2026-03-21)
+
+
+### Features
+
+* RateLimit attribute for ServerRpc ([46f9415](https://github.com/MirageNet/Mirage/commit/46f941511103c605b10e98144740da360aa4959e))
+
 # [157.3.0](https://github.com/MirageNet/Mirage/compare/v157.2.0...v157.3.0) (2026-03-11)
 
 
