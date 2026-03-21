@@ -33,6 +33,14 @@ namespace Mirage.Tests.Runtime.RateLimit
             AsyncCount++;
             return UniTask.FromResult(AsyncCount);
         }
+
+        public int UnattributedCount;
+
+        [ServerRpc(requireAuthority = false)]
+        public void UnattributedRpc()
+        {
+            UnattributedCount++;
+        }
     }
 
     public class RpcRateLimitTests : ClientServerSetup<RpcRateLimitBehaviour>
@@ -172,6 +180,20 @@ namespace Mirage.Tests.Runtime.RateLimit
             await UniTask.Delay(100);
 
             Assert.That(serverComponent.Count, Is.EqualTo(2), "Call should be dropped because interval hasn't accumulated enough time for a refill");
+        });
+
+        [UnityTest]
+        public IEnumerator RpcWithoutAttributeIsNotRateLimited() => UniTask.ToCoroutine(async () =>
+        {
+            for (int i = 0; i < 1000; i++)
+            {
+                clientComponent.UnattributedRpc();
+            }
+
+            await UniTask.Delay(100); // adjust delay if needed
+
+            Assert.That(serverComponent.UnattributedCount, Is.EqualTo(1000), "RPC without attribute should not be rate limited");
+            Assert.That(serverPlayer.ErrorFlags, Is.Not.EqualTo(PlayerErrorFlags.RateLimit));
         });
     }
 
