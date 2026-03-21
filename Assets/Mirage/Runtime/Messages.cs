@@ -96,6 +96,7 @@ namespace Mirage
         public Vector3? Scale;
         public string Name;
         public bool? SelfActive;
+        public NetworkReferenceId? Parent;
 
         [ThreadStatic]
         private static StringBuilder builder;
@@ -124,6 +125,9 @@ namespace Mirage
 
             if (SelfActive.HasValue)
                 Append(ref first, $"SelfActive={SelfActive.Value}");
+
+            if (Parent.HasValue)
+                Append(ref first, $"Parent={Parent.Value}");
 
             builder.Append(")");
             return builder.ToString();
@@ -184,5 +188,43 @@ namespace Mirage
     {
         public double ClientTime;
         public double ServerTime;
+    }
+
+    public struct NetworkReferenceId : IEquatable<NetworkReferenceId>
+    {
+        public uint NetId;
+        public byte? ComponentIndex;
+
+        public bool TryGet(NetworkWorld world, out Transform transform)
+        {
+            if (world.TryGetIdentity(NetId, out var identity))
+            {
+                if (ComponentIndex.HasValue)
+                {
+                    if (ComponentIndex.Value < identity.NetworkBehaviours.Length)
+                    {
+                        transform = identity.NetworkBehaviours[ComponentIndex.Value].transform;
+                        return true;
+                    }
+                }
+                else
+                {
+                    transform = identity.transform;
+                    return true;
+                }
+            }
+            transform = null;
+            return false;
+        }
+
+        public bool Equals(NetworkReferenceId other)
+        {
+            return NetId == other.NetId && ComponentIndex == other.ComponentIndex;
+        }
+
+        public override string ToString()
+        {
+            return ComponentIndex.HasValue ? $"[NetId:{NetId}, Comp:{ComponentIndex.Value}]" : $"[NetId:{NetId}]";
+        }
     }
 }
