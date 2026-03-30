@@ -41,6 +41,24 @@ namespace Mirage.Tests.Runtime.RateLimit
         {
             UnattributedCount++;
         }
+
+        public int DefaultCount;
+
+        [ServerRpc(requireAuthority = false)]
+        [RateLimit]
+        public void RpcWithDefaultRateLimit()
+        {
+            DefaultCount++;
+        }
+
+        public int PartialCount;
+
+        [ServerRpc(requireAuthority = false)]
+        [RateLimit(Refill = 2, MaxTokens = 5)]
+        public void RpcWithPartialRateLimit()
+        {
+            PartialCount++;
+        }
     }
 
     public class RpcRateLimitTests : ClientServerSetup<RpcRateLimitBehaviour>
@@ -194,6 +212,44 @@ namespace Mirage.Tests.Runtime.RateLimit
 
             Assert.That(serverComponent.UnattributedCount, Is.EqualTo(1000), "RPC without attribute should not be rate limited");
             Assert.That(serverPlayer.ErrorFlags, Is.Not.EqualTo(PlayerErrorFlags.RateLimit));
+        });
+
+        [UnityTest]
+        public IEnumerator RpcWithDefaultRateLimitUsesDefaults() => UniTask.ToCoroutine(async () =>
+        {
+            // Trigger bucket creation by calling it once
+            clientComponent.RpcWithDefaultRateLimit();
+            await UniTask.Delay(100);
+
+            // Inspect the RemoteCall configuration on the server
+            var identity = serverComponent.Identity;
+            var rpc = System.Linq.Enumerable.First(identity.RemoteCallCollection.RemoteCalls, r => r != null && r.Name.Contains(nameof(RpcRateLimitBehaviour.RpcWithDefaultRateLimit)));
+
+            Assert.That(rpc.RateLimit.IsEnabled, Is.True);
+            Assert.That(rpc.RateLimit.BucketConfig.MaxTokens, Is.EqualTo(RateLimitAttribute.DEFAULT_MAX_TOKENS));
+            Assert.That(rpc.RateLimit.BucketConfig.Refill, Is.EqualTo(RateLimitAttribute.DEFAULT_REFILL));
+            Assert.That(rpc.RateLimit.BucketConfig.Interval, Is.EqualTo(RateLimitAttribute.DEFAULT_INTERVAL));
+            Assert.That(rpc.RateLimit.Penalty, Is.EqualTo(RateLimitAttribute.DEFAULT_PENALTY));
+        });
+
+        [UnityTest]
+        public IEnumerator RpcWithPartialSettingsUsesDefaultsForOthers() => UniTask.ToCoroutine(async () =>
+        {
+            // Trigger bucket creation
+            clientComponent.RpcWithPartialRateLimit();
+            await UniTask.Delay(100);
+
+            // Inspect the RemoteCall configuration on the server
+            var identity = serverComponent.Identity;
+            var rpc = System.Linq.Enumerable.First(identity.RemoteCallCollection.RemoteCalls, r => r != null && r.Name.Contains(nameof(RpcRateLimitBehaviour.RpcWithPartialRateLimit)));
+
+            Assert.That(rpc.RateLimit.IsEnabled, Is.True);
+            // Explicitly set values
+            Assert.That(rpc.RateLimit.BucketConfig.MaxTokens, Is.EqualTo(5));
+            Assert.That(rpc.RateLimit.BucketConfig.Refill, Is.EqualTo(2));
+            // Defaults
+            Assert.That(rpc.RateLimit.BucketConfig.Interval, Is.EqualTo(RateLimitAttribute.DEFAULT_INTERVAL));
+            Assert.That(rpc.RateLimit.Penalty, Is.EqualTo(RateLimitAttribute.DEFAULT_PENALTY));
         });
     }
 
