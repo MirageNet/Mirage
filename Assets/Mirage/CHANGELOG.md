@@ -1,3 +1,10 @@
+## [157.4.1](https://github.com/MirageNet/Mirage/compare/v157.4.0...v157.4.1) (2026-04-05)
+
+
+### Bug Fixes
+
+* fixing reply RPC never returning if rpc call is rejected ([86c5134](https://github.com/MirageNet/Mirage/commit/86c5134f64c526583ae679beb82525196c98bcdb))
+
 # [157.4.0](https://github.com/MirageNet/Mirage/compare/v157.3.0...v157.4.0) (2026-03-21)
 
 
