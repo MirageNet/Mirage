@@ -177,4 +177,66 @@ namespace Mirage.Tests.Runtime.RpcTests.Async
             Assert.That(result, Is.EqualTo(serverIdentity));
         });
     }
+
+    public class ReturnRpcClientServerTest_DropExceptions : ClientServerSetup<ReturnRpcComponent_int>
+    {
+        [UnityTest]
+        public IEnumerator ThrowsWhenObjectDestroyed() => UniTask.ToCoroutine(async () =>
+        {
+            // We destroy the object on the server
+            // Client still attempts to make the RPC before processing the destroy message
+            serverObjectManager.Destroy(serverComponent.gameObject);
+
+            // Expect the grace period warning because the object was just destroyed
+            LogAssert.Expect(LogType.Warning, new Regex(".*Spawned object not found, but was recently destroyed.*", RegexOptions.IgnoreCase));
+
+            try
+            {
+                _ = await clientComponent.GetResultServer();
+                Assert.Fail("Should have thrown ReturnRpcException");
+            }
+            catch (ReturnRpcException e)
+            {
+                // Verify it actually is a ReturnRpcException sent by the handler!
+                Assert.That(e.Message, Does.Contain("Exception thrown from return RPC"));
+            }
+        });
+
+        [UnityTest]
+        public IEnumerator ThrowsWhenNoAuthority() => UniTask.ToCoroutine(async () =>
+        {
+            // Spawn a new object with authority so the client gets it as HasAuthority = true
+            var newObject = InstantiateForTest(_characterPrefabGo);
+            var comp = newObject.GetComponent<ReturnRpcComponent_int>();
+            var identity = comp.Identity;
+            serverObjectManager.Spawn(identity, serverPlayer);
+
+            // Wait until it spawns on client
+            await UniTask.Yield();
+            await UniTask.Yield();
+            await UniTask.Yield();
+
+            // Get client version
+            var clientComp = _remoteClients[0].Get(comp);
+
+            // Note: ServerRpc requires authority by default
+            // Remove authority from the client on the server
+            identity.RemoveClientAuthority();
+
+            // Client attempts to make the RPC because it still assumes it has authority for this frame
+            // Expect the grace period warning because authority was removed very recently
+            LogAssert.Expect(LogType.Warning, new Regex(".*ServerRpc for object without authority.*but within grace period.*", RegexOptions.IgnoreCase));
+
+            try
+            {
+                _ = await clientComp.GetResultServer();
+                Assert.Fail("Should have thrown ReturnRpcException");
+            }
+            catch (ReturnRpcException e)
+            {
+                // Verify it actually is a ReturnRpcException sent by the handler!
+                Assert.That(e.Message, Does.Contain("Exception thrown from return RPC"));
+            }
+        });
+    }
 }

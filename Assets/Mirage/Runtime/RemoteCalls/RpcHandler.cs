@@ -53,7 +53,17 @@ namespace Mirage.RemoteCalls
         /// <param name="msg"></param>
         internal void OnRpcWithReplyMessage(INetworkPlayer player, RpcWithReplyMessage msg)
         {
-            HandleRpc(player, msg.NetId, msg.FunctionIndex, msg.Payload, msg.ReplyId);
+            var success = HandleRpc(player, msg.NetId, msg.FunctionIndex, msg.Payload, msg.ReplyId);
+            // if rpc failed to invoke (eg. rate limit, invalid rpc, no authority)
+            // then send failure reply to client so its async call won't hang forever
+            if (!success)
+            {
+                player.Send(new RpcReply
+                {
+                    ReplyId = msg.ReplyId,
+                    Success = false
+                });
+            }
         }
 
         internal void OnRpcMessage(INetworkPlayer player, RpcMessage msg)
@@ -62,13 +72,13 @@ namespace Mirage.RemoteCalls
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void HandleRpc(INetworkPlayer player, uint netId, int functionIndex, ArraySegment<byte> payload, int replyId)
+        private bool HandleRpc(INetworkPlayer player, uint netId, int functionIndex, ArraySegment<byte> payload, int replyId)
         {
             if (payload.Array == null)
             {
                 player.SetError(50, PlayerErrorFlags.DeserializationException);
                 if (logger.WarnEnabled()) logger.LogWarning($"HandleRpc was given null array");
-                return;
+                return false;
             }
 
             if (!_objectLocator.TryGetIdentity(netId, out var identity))
@@ -100,7 +110,7 @@ namespace Mirage.RemoteCalls
                     }
                 }
 
-                return;
+                return false;
             }
 
             var remoteCall = identity.RemoteCallCollection.GetAbsolute(functionIndex);
@@ -108,14 +118,14 @@ namespace Mirage.RemoteCalls
             {
                 player.SetError(50, PlayerErrorFlags.RpcSync);
                 if (logger.WarnEnabled()) logger.LogWarning($"Invalid Rpc for index. Out of bounds");
-                return;
+                return false;
             }
 
             if (remoteCall.InvokeType != _invokeType)
             {
                 player.SetError(50, PlayerErrorFlags.RpcSync);
                 if (logger.WarnEnabled()) logger.LogWarning($"Invalid Rpc for index {remoteCall.Name}. Expected {_invokeType} but was {remoteCall.InvokeType}");
-                return;
+                return false;
             }
 
             // for ServerRpc we need to check if the player has authority
@@ -140,7 +150,7 @@ namespace Mirage.RemoteCalls
                         player.SetError(10, PlayerErrorFlags.NoAuthority);
                     }
 
-                    return;
+                    return false;
                 }
             }
 
@@ -151,7 +161,7 @@ namespace Mirage.RemoteCalls
                 if (!allowed)
                 {
                     if (logger.WarnEnabled()) logger.LogWarning($"ServerRpc '{remoteCall.Name}' dropped for {player} due to rate limiting on {identity}");
-                    return;
+                    return false;
                 }
             }
 
@@ -169,6 +179,7 @@ namespace Mirage.RemoteCalls
 
                     // cost=50 because NetworkReader throwing means serialization mismatch, hard to recover from, likely need to kick player if it happens often.
                     player.SetError(50, PlayerErrorFlags.DeserializationException);
+                    return false;
                 }
                 catch (Exception e)
                 {
@@ -179,8 +190,11 @@ namespace Mirage.RemoteCalls
                         player.SetError(1, PlayerErrorFlags.RpcNullException);
                     else
                         player.SetError(2, PlayerErrorFlags.RpcException);
+                    return false;
                 }
             }
+
+            return true;
         }
 
         private bool CheckAuthority(RemoteCall remoteCall, NetworkIdentity identity, INetworkPlayer player)

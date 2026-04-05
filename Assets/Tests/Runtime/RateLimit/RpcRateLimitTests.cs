@@ -108,13 +108,37 @@ namespace Mirage.Tests.Runtime.RateLimit
 
             Assert.That(serverComponent.AsyncCount, Is.EqualTo(2));
 
-            // Third call should be dropped
+            // Third call should be dropped, which now correctly fails the UniTask.
+            // Since this test uses .Forget(), the unobserved failure is funneled to LogType.Exception.
+            UnityEngine.TestTools.LogAssert.Expect(UnityEngine.LogType.Exception, new System.Text.RegularExpressions.Regex(".*ReturnRpcException.*"));
             clientComponent.AsyncServerRpcWithRateLimit().Forget();
 
             await UniTask.Delay(100);
 
             Assert.That(serverComponent.AsyncCount, Is.EqualTo(2), "Third call should have been dropped");
             Assert.That(serverPlayer.ErrorFlags, Is.EqualTo(PlayerErrorFlags.RateLimit));
+        });
+
+        [UnityTest]
+        public IEnumerator AsyncRpcThrowsExceptionWhenRateLimitReached() => UniTask.ToCoroutine(async () =>
+        {
+            // First 2 calls should succeed
+            await clientComponent.AsyncServerRpcWithRateLimit();
+            await clientComponent.AsyncServerRpcWithRateLimit();
+
+            Assert.That(serverComponent.AsyncCount, Is.EqualTo(2));
+
+            // Third call should drop and throw instead of hanging forever
+            try
+            {
+                // Note: without our fix, this await will hang forever!
+                await clientComponent.AsyncServerRpcWithRateLimit();
+                Assert.Fail("Expected ReturnRpcException to be thrown when rate limit is exceeded");
+            }
+            catch (System.Exception e)
+            {
+                Assert.That(e.GetType().Name, Is.EqualTo("ReturnRpcException"), $"Expected ReturnRpcException, but got {e.GetType().Name}: {e.Message}");
+            }
         });
 
         [UnityTest]
