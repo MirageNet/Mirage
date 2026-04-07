@@ -1,3 +1,10 @@
+## [157.4.2](https://github.com/MirageNet/Mirage/compare/v157.4.1...v157.4.2) (2026-04-07)
+
+
+### Bug Fixes
+
+* changing errorFlags and rateLimit to use different loggers ([3d0497b](https://github.com/MirageNet/Mirage/commit/3d0497bac304a77d9ca7682a4642395bfa415fe5))
+
 ## [157.4.1](https://github.com/MirageNet/Mirage/compare/v157.4.0...v157.4.1) (2026-04-05)
 
 
