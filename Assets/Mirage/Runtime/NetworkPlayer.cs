@@ -32,6 +32,7 @@ namespace Mirage
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
         private static readonly ILogger errorLogger = LogFactory.GetLogger(typeof(PlayerErrorFlags));
+        private static readonly ILogger rateLimitLogger = LogFactory.GetLogger(typeof(RateLimitAttribute));
 
         private readonly HashSet<NetworkIdentity> _visList = new HashSet<NetworkIdentity>();
 
@@ -531,15 +532,18 @@ namespace Mirage
                 bucket = new RateLimitBucket(Time.unscaledTimeAsDouble, remoteCall.RateLimit.BucketConfig);
                 RpcRateLimit.Add(remoteCall.RpcId, bucket);
 
-                if (errorLogger.LogEnabled())
-                    errorLogger.Log($"{this} created RPC rate limit bucket for '{remoteCall.Name}' [maxTokens={remoteCall.RateLimit.BucketConfig.MaxTokens}, interval={remoteCall.RateLimit.BucketConfig.Interval}]");
+                if (rateLimitLogger.LogEnabled())
+                    rateLimitLogger.Log($"{this} created RPC rate limit bucket for '{remoteCall.Name}' [maxTokens={bucket.Config.MaxTokens}, interval={bucket.Config.Interval}]");
             }
 
             var exceeded = bucket.UseTokens(now: Time.unscaledTimeAsDouble, 1);
+            if (rateLimitLogger.LogEnabled())
+                rateLimitLogger.Log($"{this} CheckRateLimit for '{remoteCall.Name}' exceeded:{exceeded} tokens:{bucket.Tokens}/{bucket.Config.MaxTokens}");
+
             if (exceeded)
             {
-                if (errorLogger.WarnEnabled())
-                    errorLogger.LogWarning($"{this} RPC rate limit exceeded for '{remoteCall.Name}', dropping call [penalty={remoteCall.RateLimit.Penalty}]");
+                if (rateLimitLogger.WarnEnabled())
+                    rateLimitLogger.LogWarning($"{this} RPC rate limit exceeded for '{remoteCall.Name}', dropping call [penalty={remoteCall.RateLimit.Penalty}]");
 
                 SetError(remoteCall.RateLimit.Penalty, PlayerErrorFlags.RateLimit);
             }
