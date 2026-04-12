@@ -1,3 +1,11 @@
+## [157.4.3](https://github.com/MirageNet/Mirage/compare/v157.4.2...v157.4.3) (2026-04-12)
+
+
+### Bug Fixes
+
+* **SocketLayer:** adding checks for data packets to avoid exceptions from acksystem ([06ac6d5](https://github.com/MirageNet/Mirage/commit/06ac6d52684385893c32020f3e1a952433077247))
+* **SocketLayer:** adding safety try/catch so 1 connection can't stop update loop with bad packet ([e4f3089](https://github.com/MirageNet/Mirage/commit/e4f3089a40f715789f1c3ddf74f50319a5b55227))
+
 ## [157.4.2](https://github.com/MirageNet/Mirage/compare/v157.4.1...v157.4.2) (2026-04-07)
 
 
