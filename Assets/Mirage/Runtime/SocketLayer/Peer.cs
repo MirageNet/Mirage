@@ -279,7 +279,17 @@ namespace Mirage.SocketLayer
                             return;
                         }
 
-                        OnData(handle, new Packet(buffer.array.AsSpan(0, length)));
+                        try
+                        {
+                            OnData(handle, new Packet(buffer.array.AsSpan(0, length)));
+                        }
+                        catch (Exception e)
+                        {
+                            // unhandled exception should never be thrown by mirage code
+                            // but if they are is it likely an expliot so disconnect
+                            _logger.Error($"Error from OnData, disconnecting {handle}. Exception: {e}");
+                            SafeDisconnectFromError(handle);
+                        }
                     }
                 }
             }
@@ -345,7 +355,17 @@ namespace Mirage.SocketLayer
                 return;
             }
 
-            OnData(handle, new Packet(data));
+            try
+            {
+                OnData(handle, new Packet(data));
+            }
+            catch (Exception e)
+            {
+                // unhandled exception should never be thrown by mirage code
+                // but if they are is it likely an expliot so disconnect
+                _logger.Error($"Error from OnData, disconnecting {handle}. Exception: {e}");
+                SafeDisconnectFromError(handle);
+            }
         }
         private void OnDisconnectEvent(IConnectionHandle handle, ReadOnlySpan<byte> data, string reason)
         {
