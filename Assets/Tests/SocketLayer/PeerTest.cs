@@ -258,5 +258,33 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             socket.AsMock().AssertSendDidNotReceive();
             connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
         }
+
+        [Test]
+        public void ReceiveLoopContinuesIfHandlerThrows()
+        {
+            peer.Bind(Substitute.For<IBindEndPoint>());
+
+            var endPoint1 = TestEndPoint.CreateSubstitute(_handleBehavior);
+            var endPoint2 = TestEndPoint.CreateSubstitute(_handleBehavior);
+
+            socket.AsMock().QueueReceiveCall(connectRequest, endPoint1);
+            socket.AsMock().QueueReceiveCall(connectRequest, endPoint2);
+
+            // Throw when the first connection is accepted
+            peer.OnConnected += (conn) => {
+                if (conn.Handle == endPoint1)
+                    throw new Exception("Test Exception");
+            };
+
+            LogAssert.Expect(LogType.Error, new Regex("Error from OnData, disconnecting .*\\. Exception: System\\.Exception: Test Exception"));
+
+            peer.UpdateTest();
+
+            // Verify that the second connection still sent its Acceptance command
+            socket.AsMock().AssertSendCall(handle: endPoint2, validateLast: sent =>
+                sent[0] == (byte)PacketType.Command &&
+                sent[1] == (byte)Commands.ConnectionAccepted
+            );
+        }
     }
 }
