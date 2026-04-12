@@ -26,14 +26,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
             var sender = new AckTestInstance();
             sender.connection = new SubIRawConnection();
-            sender.ackSystem = new AckSystem(sender.connection, config, MAX_PACKET_SIZE, new Time(), bufferPool);
+            sender.ackSystem = new AckSystem(sender.connection, config, MAX_PACKET_SIZE, new Time(), bufferPool, onInvalidPacket: null);
             sender.ackSystem.SendReliable(message);
             packet1 = sender.packet(0);
             packet2 = sender.packet(1);
 
 
             var connection = new SubIRawConnection();
-            ackSystem = new AckSystem(connection, config, MAX_PACKET_SIZE, new Time(), bufferPool);
+            ackSystem = new AckSystem(connection, config, MAX_PACKET_SIZE, new Time(), bufferPool, onInvalidPacket: null);
         }
 
         private byte[] CreateBigData(int id, int size)

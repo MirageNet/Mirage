@@ -19,7 +19,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             {
                 connection = new SubIRawConnection()
             };
-            instance.ackSystem = new AckSystem(instance.connection, config, MAX_PACKET_SIZE, time, bufferPool);
+            instance.ackSystem = new AckSystem(instance.connection, config, MAX_PACKET_SIZE, time, bufferPool, onInvalidPacket: null);
 
             for (var i = 0; i < 50; i++)
             {
@@ -50,7 +50,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             {
                 connection = new SubIRawConnection()
             };
-            instance.ackSystem = new AckSystem(instance.connection, config, MAX_PACKET_SIZE, time, bufferPool);
+            instance.ackSystem = new AckSystem(instance.connection, config, MAX_PACKET_SIZE, time, bufferPool, onInvalidPacket: null);
 
             for (var i = 0; i < 255; i++)
             {

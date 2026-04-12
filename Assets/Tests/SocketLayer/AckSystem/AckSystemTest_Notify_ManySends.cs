@@ -16,12 +16,13 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [SetUp]
         public void SetUp()
         {
+            // create new config to get default value for SequenceSize
             var config = new Config();
             maxSequence = (ushort)((1 << config.SequenceSize) - 1);
 
             instance = new AckTestInstance();
             instance.connection = new SubIRawConnection();
-            instance.ackSystem = new AckSystem(instance.connection, new Config(), MAX_PACKET_SIZE, new Time(), bufferPool);
+            instance.ackSystem = new AckSystem(instance.connection, new Config(), MAX_PACKET_SIZE, new Time(), bufferPool, onInvalidPacket: null);
 
             // create and send n messages
             instance.messages = new List<byte[]>();

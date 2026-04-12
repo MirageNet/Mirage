@@ -135,12 +135,12 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
             instance1 = new AckTestInstance();
             instance1.connection = new SubIRawConnection();
-            instance1.ackSystem = new AckSystem(instance1.connection, config, MAX_PACKET_SIZE, time, bufferPool);
+            instance1.ackSystem = new AckSystem(instance1.connection, config, MAX_PACKET_SIZE, time, bufferPool, onInvalidPacket: null);
 
 
             instance2 = new AckTestInstance();
             instance2.connection = new SubIRawConnection();
-            instance2.ackSystem = new AckSystem(instance2.connection, config, MAX_PACKET_SIZE, time, bufferPool);
+            instance2.ackSystem = new AckSystem(instance2.connection, config, MAX_PACKET_SIZE, time, bufferPool, onInvalidPacket: null);
 
             badSocket = new BadSocket(instance1, instance2);
 
