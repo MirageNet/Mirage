@@ -145,6 +145,9 @@ namespace Mirage.SocketLayer
                 var next = _ackSystem.GetNextFragment();
                 var nextArray = next.Buffer.array;
 
+                // NOTE: only the index of the first fragment is used by code,
+                // so we only need to check the length here in debug builds to catch bugs during testing
+                // Malicious actors can already modify the packet data, changing the fragment index doesn't break anything extra
                 _logger?.Assert(i == (fragmentLength - 1 - nextArray[0]), "fragment index should decrement each time");
 
                 // +1 because first is copied above

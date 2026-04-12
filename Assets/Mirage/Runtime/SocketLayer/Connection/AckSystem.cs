@@ -188,8 +188,11 @@ namespace Mirage.SocketLayer
             // fragment will always be first byte of message
             uint fragmentIndex = packet.Buffer.array[0];
 
+            // NOTE: the fragmentIndex in fragments 2nd->nth is unused in release mode
+            // it is only used to debug/assert and in test code to make sure send code is correct
+            
             // if fragment Index is 3 we expect 4 packets total (3 more)
-            // so we check 0,1,2 packets in
+            // so we check i=0,1,2 packets in
             var fullMessage = true;
             for (uint i = 0; i < fragmentIndex; i++)
             {
