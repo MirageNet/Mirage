@@ -94,6 +94,19 @@ namespace Mirage
         /// The main object owned by this player, normally the player's character
         /// </summary>
         NetworkIdentity Identity { get; set; }
+        /// <summary>
+        /// The object used for visibility and interest management.
+        /// <para>Defaults to <see cref="Identity"/> if null.</para>
+        /// </summary>
+        NetworkIdentity Looker { get; set; }
+        /// <summary>
+        /// True if <see cref="Looker"/> is set.
+        /// </summary>
+        bool HasLooker { get; }
+        /// <summary>
+        /// Returns <see cref="Looker"/> if it is set, otherwise returns <see cref="Identity"/>.
+        /// </summary>
+        NetworkIdentity VisibilityIdentity { get; }
         bool HasCharacter { get; }
 
         /// <summary>

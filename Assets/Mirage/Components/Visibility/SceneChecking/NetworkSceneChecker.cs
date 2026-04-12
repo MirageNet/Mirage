@@ -93,7 +93,11 @@ namespace Mirage
             if (forceHidden)
                 return false;
 
-            return player.Identity.gameObject.scene == gameObject.scene;
+            var looker = player.VisibilityIdentity;
+            if (looker == null)
+                return false;
+
+            return looker.gameObject.scene == gameObject.scene;
         }
 
         /// <summary>

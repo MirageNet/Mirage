@@ -790,9 +790,9 @@ namespace Mirage
             // remove all, so that it will send spawn message for objects destroyed in scene change
             player.RemoveAllVisibleObjects();
 
-            if (!ignoreHasCharacter && !player.HasCharacter)
+            if (!ignoreHasCharacter && !player.HasCharacter && !player.HasLooker)
             {
-                if (logger.LogEnabled()) logger.Log($"SpawnVisibleObjects: not spawning objects for {player} because it does not have a character");
+                if (logger.LogEnabled()) logger.Log($"SpawnVisibleObjects: not spawning objects for {player} because it does not have a character or looker");
                 return;
             }
 

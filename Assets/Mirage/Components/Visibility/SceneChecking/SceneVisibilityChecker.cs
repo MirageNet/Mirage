@@ -11,14 +11,14 @@ namespace Mirage
 
         public override bool OnCheckObserver(INetworkPlayer player)
         {
-            var character = player.Identity;
-            if (character == null)
+            var looker = player.VisibilityIdentity;
+            if (looker == null)
             {
-                if (logger.LogEnabled()) logger.Log($"SceneChecker: {player} had no character");
+                if (logger.LogEnabled()) logger.Log($"SceneChecker: {player} had no character or looker");
                 return false;
             }
 
-            var playerScene = character.gameObject.scene;
+            var playerScene = looker.gameObject.scene;
             if (!playerScene.IsValid())
             {
                 if (logger.WarnEnabled()) logger.LogWarning($"SceneChecker: Could not find scene for {player}");

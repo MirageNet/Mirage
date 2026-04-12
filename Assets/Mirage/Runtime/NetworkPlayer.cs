@@ -62,6 +62,10 @@ namespace Mirage
         /// Backing field for <see cref="Identity"/>
         /// </summary>
         private NetworkIdentity _identity;
+        /// <summary>
+        /// Backing field for <see cref="Looker"/>
+        /// </summary>
+        private NetworkIdentity _looker;
 
         /// <summary>
         /// Authentication information for this NetworkPlayer
@@ -110,6 +114,8 @@ namespace Mirage
         /// Checks if this player has a <see cref="Identity"/>
         /// </summary>
         public bool HasCharacter => Identity != null;
+        public bool HasLooker => Looker != null;
+        public NetworkIdentity VisibilityIdentity => _looker != null ? _looker : _identity;
 
         public IConnection Connection => _connection;
 
@@ -204,6 +210,21 @@ namespace Mirage
 
                 _identity = value;
                 OnIdentityChanged?.Invoke(_identity);
+            }
+        }
+
+        /// <summary>
+        /// The NetworkIdentity used for visibility and interest management.
+        /// </summary>
+        public NetworkIdentity Looker
+        {
+            get => _looker;
+            set
+            {
+                if (_looker == value)
+                    return;
+
+                _looker = value;
             }
         }
 

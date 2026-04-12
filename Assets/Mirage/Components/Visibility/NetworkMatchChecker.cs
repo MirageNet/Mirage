@@ -108,7 +108,11 @@ namespace Mirage
             if (MatchId == Guid.Empty)
                 return false;
 
-            var networkMatchChecker = player.Identity.GetComponent<NetworkMatchChecker>();
+            var looker = player.VisibilityIdentity;
+            if (looker == null)
+                return false;
+
+            var networkMatchChecker = looker.GetComponent<NetworkMatchChecker>();
 
             if (networkMatchChecker == null)
                 return false;

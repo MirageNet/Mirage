@@ -64,7 +64,11 @@ namespace Mirage
             if (ForceHidden)
                 return false;
 
-            return Vector3.Distance(player.Identity.transform.position, transform.position) < VisibilityRange;
+            var looker = player.VisibilityIdentity;
+            if (looker == null)
+                return false;
+
+            return Vector3.Distance(looker.transform.position, transform.position) < VisibilityRange;
         }
 
         /// <summary>
@@ -92,7 +96,8 @@ namespace Mirage
             foreach (var player in Server.AuthenticatedPlayers)
             {
                 // check distance
-                if (player != null && player.HasCharacter && Vector3.Distance(player.Identity.transform.position, position) < VisibilityRange)
+                var looker = player.VisibilityIdentity;
+                if (looker != null && Vector3.Distance(looker.transform.position, position) < VisibilityRange)
                 {
                     observers.Add(player);
                 }
