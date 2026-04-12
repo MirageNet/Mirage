@@ -244,7 +244,24 @@ namespace Mirage.SocketLayer
                     return;
                 }
 
+                // check if enough bytes are left to read length
+                if (offset + 2 > packetLength)
+                {
+                    if (_logger.Enabled(LogType.Error)) _logger.Error($"Not enough bytes left to read message length. offset:{offset} packetLength:{packetLength}");
+                    DisconnectInternal(DisconnectReason.InvalidPacket);
+                    return;
+                }
+
                 var length = ByteUtils.ReadUShort(array, ref offset);
+
+                // check if length is valid
+                if (offset + length > packetLength)
+                {
+                    if (_logger.Enabled(LogType.Error)) _logger.Error($"Batched message length ({length}) exceeds packet length ({packetLength})");
+                    DisconnectInternal(DisconnectReason.InvalidPacket);
+                    return;
+                }
+
                 var message = new ArraySegment<byte>(array, offset, length);
                 offset += length;
 

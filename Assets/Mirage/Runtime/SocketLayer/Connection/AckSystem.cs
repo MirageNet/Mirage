@@ -43,6 +43,7 @@ namespace Mirage.SocketLayer
         private readonly int _maxPacketsInSendBufferPerConnection;
         private readonly int _maxPacketSize;
         private readonly float _ackTimeout;
+        private readonly Action _onInvalidPacket;
 
         /// <summary>how many empty acks to send</summary>
         private readonly int _emptyAckLimit;
@@ -75,7 +76,7 @@ namespace Mirage.SocketLayer
         /// <param name="connection"></param>
         /// <param name="ackTimeout">how long after last send before sending empty ack</param>
         /// <param name="time"></param>
-        public AckSystem(IRawConnection connection, Config config, int maxPacketSize, ITime time, Pool<ByteBuffer> bufferPool, ILogger logger = null, Metrics metrics = null)
+        public AckSystem(IRawConnection connection, Config config, int maxPacketSize, ITime time, Pool<ByteBuffer> bufferPool, Action onInvalidPacket, ILogger logger = null, Metrics metrics = null)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
 
@@ -107,6 +108,8 @@ namespace Mirage.SocketLayer
             // set lastest to value before 0 so that first packet will be received
             // max will be 1 less than 0
             _latestAckSequence = (ushort)_sentAckablePackets.Sequencer.MoveInBounds(ulong.MaxValue);
+
+            _onInvalidPacket = onInvalidPacket;
 
             OnSend();
         }
@@ -190,7 +193,7 @@ namespace Mirage.SocketLayer
 
             // NOTE: the fragmentIndex in fragments 2nd->nth is unused in release mode
             // it is only used to debug/assert and in test code to make sure send code is correct
-            
+
             // if fragment Index is 3 we expect 4 packets total (3 more)
             // so we check i=0,1,2 packets in
             var fullMessage = true;
@@ -448,6 +451,13 @@ namespace Mirage.SocketLayer
             var ackSequence = ByteUtils.ReadUShort(packet, ref offset);
             var ackMask = ByteUtils.ReadULong(packet, ref offset);
 
+            if (sequence >= _sentAckablePackets.Capacity || ackSequence >= _sentAckablePackets.Capacity)
+            {
+                if (_logger.Enabled(LogType.Error)) _logger.Error($"Invalid sequence in Notify packet. sequence:{sequence} ackSequence:{ackSequence}");
+                _onInvalidPacket?.Invoke();
+                return default;
+            }
+
             var distance = ProcessIncomingHeader(sequence, ackSequence, ackMask);
 
             // duplicate or arrived late
@@ -487,6 +497,13 @@ namespace Mirage.SocketLayer
             var ackMask = ByteUtils.ReadULong(packet, ref offset);
             var reliableSequence = ByteUtils.ReadUShort(packet, ref offset);
 
+            if (sequence >= _sentAckablePackets.Capacity || ackSequence >= _sentAckablePackets.Capacity || reliableSequence >= _reliableReceive.Capacity)
+            {
+                if (_logger.Enabled(LogType.Error)) _logger.Error($"Invalid sequence in Reliable packet. sequence:{sequence} ackSequence:{ackSequence} reliableSequence:{reliableSequence}");
+                _onInvalidPacket?.Invoke();
+                return;
+            }
+
             _ = ProcessIncomingHeader(sequence, ackSequence, ackMask);
 
             // checks acks, late message are allowed for reliable
@@ -522,6 +539,13 @@ namespace Mirage.SocketLayer
 
             var ackSequence = ByteUtils.ReadUShort(packet, ref offset);
             var ackMask = ByteUtils.ReadULong(packet, ref offset);
+
+            if (ackSequence >= _sentAckablePackets.Capacity)
+            {
+                if (_logger.Enabled(LogType.Error)) _logger.Error($"Invalid ackSequence in Ack packet. ackSequence:{ackSequence}");
+                _onInvalidPacket?.Invoke();
+                return;
+            }
 
             CheckSentQueue(ackSequence, ackMask);
         }
@@ -616,6 +640,7 @@ namespace Mirage.SocketLayer
             if (ackable.IsNotify)
             {
                 ackable.Token.Notify(!lost);
+                _logger.Assert(ackableSequence < _sentAckablePackets.Capacity, "ackableSequence should be less than _sentAckablePackets.Capacity");
                 _sentAckablePackets.RemoveAt(ackableSequence);
             }
             else
@@ -636,6 +661,7 @@ namespace Mirage.SocketLayer
         {
             foreach (var seq in reliablePacket.Sequences)
             {
+                _logger.Assert(seq < _sentAckablePackets.Capacity, "seq should be less than _sentAckablePackets.Capacity");
                 _sentAckablePackets.RemoveAt(seq);
             }
 

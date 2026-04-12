@@ -17,7 +17,7 @@ namespace Mirage.SocketLayer
         {
             _bufferPool = bufferPool;
             _unreliableBatch = new ArrayBatch(_maxPacketSize, SendBatchInternal, PacketType.Unreliable);
-            _ackSystem = new AckSystem(this, config, maxPacketSize, time, bufferPool, logger, metrics);
+            _ackSystem = new AckSystem(this, config, maxPacketSize, time, bufferPool, () => DisconnectInternal(DisconnectReason.InvalidPacket), logger, metrics);
         }
 
         private void SendBatchInternal(byte[] batch, int length)
@@ -134,6 +134,13 @@ namespace Mirage.SocketLayer
 
             // copy first
             var copyLength = received.Length - 1;
+            if (copyLength > _ackSystem.SizePerFragment)
+            {
+                if (_logger.Enabled(LogType.Error)) _logger.Error($"First fragment length ({copyLength}) exceeds SizePerFragment ({_ackSystem.SizePerFragment})");
+                received.Buffer.Release();
+                DisconnectInternal(DisconnectReason.InvalidPacket);
+                return;
+            }
             _logger?.Assert(copyLength == _ackSystem.SizePerFragment, "First should be max size");
             Buffer.BlockCopy(firstArray, 1, message, 0, copyLength);
             received.Buffer.Release();
@@ -152,6 +159,14 @@ namespace Mirage.SocketLayer
 
                 // +1 because first is copied above
                 copyLength = next.Length - 1;
+                if (copyLength > _ackSystem.SizePerFragment)
+                {
+                    if (_logger.Enabled(LogType.Error)) _logger.Error($"Fragment length ({copyLength}) exceeds SizePerFragment ({_ackSystem.SizePerFragment})");
+                    // also release buffer before returning
+                    next.Buffer.Release();
+                    DisconnectInternal(DisconnectReason.InvalidPacket);
+                    return;
+                }
                 Buffer.BlockCopy(nextArray, 1, message, _ackSystem.SizePerFragment * i, copyLength);
                 messageLength += copyLength;
                 next.Buffer.Release();
