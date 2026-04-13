@@ -1,3 +1,10 @@
+## [157.4.4](https://github.com/MirageNet/Mirage/compare/v157.4.3...v157.4.4) (2026-04-13)
+
+
+### Bug Fixes
+
+* **SocketLayer:** improving disconnect flow ([6e6c210](https://github.com/MirageNet/Mirage/commit/6e6c210f2563fe98ad50f201d590423b7cbc4417))
+
 ## [157.4.3](https://github.com/MirageNet/Mirage/compare/v157.4.2...v157.4.3) (2026-04-12)
 
 
