@@ -5,8 +5,8 @@ sidebar_position: 9
 
 Frequently the question comes up about how to handle objects that are attached as children of the player prefab that all clients need to know about and synchronize, such as which weapon is equipped, picking up networked scene objects, and players dropping objects into the scene.
 
-:::caution
-Mirage cannot support multiple Network Identity components within an object hierarchy. Since the character object must have a Network Identity, none of its descendant objects can have one.
+:::info
+Mirage supports synchronizing parent-child relationships between objects that each have their own `NetworkIdentity`. This is useful when the child object needs to be a first-class networked object with its own `NetworkBehaviour`s, `SyncVar`s, or RPCs.
 :::
 
 ## Child Objects
@@ -244,4 +244,33 @@ Since the SceneObject(Clone) is networked, we can pass it directly through to `C
 
 For this entire example, the only prefab that needs to be registered with Network Manager besides the Player is the SceneObject prefab.
 
-![Screenshot of inspector](/img/guides/game-objects/child-objects3.png)
+## Networked Child Objects
+
+If you need a child object to have its own networking logic (like its own SyncVars or RPCs), you can use Mirage's **Spawn Parenting** feature. This allows you to parent one `NetworkIdentity` to another and have that relationship synchronized to all clients.
+
+### 1. Configure the Child Prefab
+On the child prefab's `NetworkIdentity` component:
+1. Set **Send Parent** to `Auto` (to automatically find the parent NI in the hierarchy) or `Manual` (to explicitly set it).
+2. Configure **Send Position/Rotation** as needed (usually enabled for children).
+
+### 2. Spawning and Parenting
+When spawning the child on the server, you can use the `Spawn` extension method that takes a parent:
+
+```cs
+[ServerRpc]
+public void CmdEquipNetworkedItem(GameObject itemPrefab)
+{
+    // 1. Instantiate the item
+    GameObject itemGo = Instantiate(itemPrefab);
+    NetworkIdentity itemIdentity = itemGo.GetComponent<NetworkIdentity>();
+    
+    // 2. Spawn and parent it to the player's 'RightHand'
+    // This will set the transform parent on the server and sync it to clients
+    ServerObjectManager.Spawn(itemIdentity, this.Identity, Owner);
+    
+    // 3. Move to the specific attach point (optional, depends on your setup)
+    itemGo.transform.SetParent(rightHand.transform, false);
+}
+```
+
+This approach is more powerful than the art-swapping approach for complex items, but it comes with the overhead of an additional networked object.
