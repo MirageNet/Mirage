@@ -16,7 +16,7 @@ namespace Mirage.SocketLayer
         protected readonly ConnectingTracker _connectingTracker;
         protected readonly TimeoutTracker _timeoutTracker;
         protected readonly KeepAliveTracker _keepAliveTracker;
-        protected readonly DisconnectedTracker _disconnectedTracker;
+        protected internal readonly DisconnectedTracker _disconnectedTracker;
 
         protected readonly Metrics _metrics;
 
@@ -133,21 +133,26 @@ namespace Mirage.SocketLayer
         }
         internal void DisconnectInternal(DisconnectReason reason, bool sendToOther = true)
         {
-            if (_logger.Enabled(LogType.Log)) _logger.Log($"Disconnect with reason: {reason}");
             switch (State)
             {
+                // ignore if already disconnected
+                default:
+                case ConnectionState.Disconnected:
+                case ConnectionState.Removing:
+                case ConnectionState.Destroyed:
+                    return;
+
+
                 case ConnectionState.Connecting:
+                    if (_logger.Enabled(LogType.Log)) _logger.Log($"Disconnect while connecting, with reason: {reason}");
                     _peer.FailedToConnect(this, RejectReason.ClosedByPeer);
-                    break;
+                    return;
+
 
                 case ConnectionState.Connected:
-                    State = ConnectionState.Disconnected;
-                    _disconnectedTracker.OnDisconnect();
-                    _peer.OnConnectionDisconnected(this, reason, sendToOther);
-                    break;
-
-                default:
-                    break;
+                    if (_logger.Enabled(LogType.Log)) _logger.Log($"Disconnect with reason: {reason}");
+                    _peer.FinishDisconnect(this, reason, sendToOther);
+                    return;
             }
         }
 

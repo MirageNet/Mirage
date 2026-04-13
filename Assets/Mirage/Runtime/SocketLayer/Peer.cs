@@ -275,7 +275,7 @@ namespace Mirage.SocketLayer
                         if (length > _maxPacketSize)
                         {
                             _logger.Error($"Socket returned length above MTU. MaxPacketSize:{_maxPacketSize} length:{length}");
-                            SafeDisconnectFromError(handle);
+                            DisconnectFromReceiveError(handle);
                             return;
                         }
 
@@ -288,7 +288,7 @@ namespace Mirage.SocketLayer
                             // unhandled exception should never be thrown by mirage code
                             // but if they are is it likely an expliot so disconnect
                             _logger.Error($"Error from OnData, disconnecting {handle}. Exception: {e}");
-                            SafeDisconnectFromError(handle);
+                            DisconnectFromReceiveError(handle);
                         }
                     }
                 }
@@ -300,10 +300,10 @@ namespace Mirage.SocketLayer
         }
 
         /// <summary>
-        /// Called if receiving invalid packet
+        /// Called if receiving invalid packet, before we have done Connection lookup
         /// </summary>
         /// <param name="handle"></param>
-        private void SafeDisconnectFromError(IConnectionHandle handle)
+        private void DisconnectFromReceiveError(IConnectionHandle handle)
         {
             if (handle.IsStateful)
             {
@@ -311,7 +311,7 @@ namespace Mirage.SocketLayer
                 {
                     // connected and stateful
                     var connection = (Connection)handle.SocketLayerConnection;
-                    OnConnectionDisconnected(connection, DisconnectReason.InvalidPacket, true);
+                    connection.DisconnectInternal(DisconnectReason.InvalidPacket, true);
                 }
                 else
                 {
@@ -324,7 +324,7 @@ namespace Mirage.SocketLayer
                 if (_connectionLookup.TryGetValue(handle, out var connection))
                 {
                     // connected and stateless
-                    OnConnectionDisconnected(connection, DisconnectReason.InvalidPacket, true);
+                    connection.DisconnectInternal(DisconnectReason.InvalidPacket, true);
                 }
                 else
                 {
@@ -351,7 +351,7 @@ namespace Mirage.SocketLayer
             if (length > _maxPacketSize)
             {
                 _logger.Error($"Socket returned length above MTU. MaxPacketSize:{_maxPacketSize} length:{length}");
-                SafeDisconnectFromError(handle);
+                DisconnectFromReceiveError(handle);
                 return;
             }
 
@@ -364,7 +364,7 @@ namespace Mirage.SocketLayer
                 // unhandled exception should never be thrown by mirage code
                 // but if they are is it likely an expliot so disconnect
                 _logger.Error($"Error from OnData, disconnecting {handle}. Exception: {e}");
-                SafeDisconnectFromError(handle);
+                DisconnectFromReceiveError(handle);
             }
         }
         private void OnDisconnectEvent(IConnectionHandle handle, ReadOnlySpan<byte> data, string reason)
@@ -670,10 +670,8 @@ namespace Mirage.SocketLayer
             }
         }
 
-        /// <summary>
-        /// Called by connection when it is disconnected
-        /// </summary>
-        internal void OnConnectionDisconnected(Connection connection, DisconnectReason reason, bool sendToOther)
+        /// <summary>Finish disconnecting this connection</summary>
+        internal void FinishDisconnect(Connection connection, DisconnectReason reason, bool sendToOther)
         {
             if (sendToOther)
             {
@@ -684,12 +682,20 @@ namespace Mirage.SocketLayer
                 SendCommand(connection, Commands.Disconnect, byteReason);
             }
 
+            connection.State = ConnectionState.Disconnected;
+
             // tell high level
             OnDisconnected?.Invoke(connection, reason);
 
-            // tell stateful connections
             if (connection.Handle.IsStateful)
+            {
                 connection.Handle.Disconnect(null);
+                RemoveConnection(connection);
+            }
+            else
+            {
+                connection._disconnectedTracker.OnDisconnect();
+            }
         }
 
         internal void FailedToConnect(Connection connection, RejectReason reason)
@@ -715,6 +721,7 @@ namespace Mirage.SocketLayer
             _connectionsToRemove.Add(connection);
         }
 
+        /// <summary>Handles the Disconnect Command sent from other Peer</summary>
         private void HandleConnectionDisconnect(Connection connection, Packet packet)
         {
             DisconnectReason reason;
