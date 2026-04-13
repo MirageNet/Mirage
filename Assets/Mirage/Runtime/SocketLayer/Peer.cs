@@ -514,6 +514,74 @@ namespace Mirage.SocketLayer
             }
         }
 
+        private void HandleConnectionRequest(Connection connection)
+        {
+            switch (connection.State)
+            {
+                case ConnectionState.Created:
+                    // mark as connected, send message, then invoke event
+                    connection.State = ConnectionState.Connected;
+                    SendCommand(connection, Commands.ConnectionAccepted);
+                    OnConnected?.Invoke(connection);
+                    break;
+
+                case ConnectionState.Connected:
+                    // send command again, unreliable so first message could have been missed
+                    SendCommand(connection, Commands.ConnectionAccepted);
+                    break;
+
+                case ConnectionState.Connecting:
+                    _logger?.Error($"Server connections should not be in {nameof(ConnectionState.Connecting)} state");
+                    break;
+            }
+        }
+
+        private void HandleConnectionAccepted(Connection connection)
+        {
+            switch (connection.State)
+            {
+                case ConnectionState.Created:
+                    _logger?.Error($"Accepted Connections should not be in {nameof(ConnectionState.Created)} state");
+                    break;
+
+                case ConnectionState.Connected:
+                    // ignore this, command may have been re-sent or Received twice
+                    break;
+
+                case ConnectionState.Connecting:
+                    connection.State = ConnectionState.Connected;
+                    OnConnected?.Invoke(connection);
+                    break;
+            }
+        }
+
+        private void HandleConnectionRejected(Connection connection, Packet packet)
+        {
+            switch (connection.State)
+            {
+                case ConnectionState.Connecting:
+                    var reason = (RejectReason)packet.Span[2];
+                    FailedToConnect(connection, reason);
+                    break;
+
+                default:
+                    _logger?.Error($"Rejected Connections should not be in {nameof(ConnectionState.Created)} state");
+                    break;
+            }
+        }
+
+        /// <summary>Handles the Disconnect Command sent from other Peer</summary>
+        private void HandleConnectionDisconnect(Connection connection, Packet packet)
+        {
+            DisconnectReason reason;
+            if (packet.Length == 3)
+                reason = (DisconnectReason)packet.Span[2];
+            else
+                reason = DisconnectReason.None;
+
+            connection.DisconnectInternal(reason, false);
+        }
+
         private void HandleNewConnection(IConnectionHandle handle, Packet packet)
         {
             // if invalid, then reject without reason
@@ -608,66 +676,9 @@ namespace Mirage.SocketLayer
             return connection;
         }
 
-        private void HandleConnectionRequest(Connection connection)
-        {
-            switch (connection.State)
-            {
-                case ConnectionState.Created:
-                    // mark as connected, send message, then invoke event
-                    connection.State = ConnectionState.Connected;
-                    SendCommand(connection, Commands.ConnectionAccepted);
-                    OnConnected?.Invoke(connection);
-                    break;
-
-                case ConnectionState.Connected:
-                    // send command again, unreliable so first message could have been missed
-                    SendCommand(connection, Commands.ConnectionAccepted);
-                    break;
-
-                case ConnectionState.Connecting:
-                    _logger?.Error($"Server connections should not be in {nameof(ConnectionState.Connecting)} state");
-                    break;
-            }
-        }
-
-
         private void RejectConnectionWithReason(IConnectionHandle handle, RejectReason reason)
         {
             SendCommandUnconnected(handle, Commands.ConnectionRejected, (byte)reason);
-        }
-
-        private void HandleConnectionAccepted(Connection connection)
-        {
-            switch (connection.State)
-            {
-                case ConnectionState.Created:
-                    _logger?.Error($"Accepted Connections should not be in {nameof(ConnectionState.Created)} state");
-                    break;
-
-                case ConnectionState.Connected:
-                    // ignore this, command may have been re-sent or Received twice
-                    break;
-
-                case ConnectionState.Connecting:
-                    connection.State = ConnectionState.Connected;
-                    OnConnected?.Invoke(connection);
-                    break;
-            }
-        }
-
-        private void HandleConnectionRejected(Connection connection, Packet packet)
-        {
-            switch (connection.State)
-            {
-                case ConnectionState.Connecting:
-                    var reason = (RejectReason)packet.Span[2];
-                    FailedToConnect(connection, reason);
-                    break;
-
-                default:
-                    _logger?.Error($"Rejected Connections should not be in {nameof(ConnectionState.Created)} state");
-                    break;
-            }
         }
 
         /// <summary>Finish disconnecting this connection</summary>
@@ -719,18 +730,6 @@ namespace Mirage.SocketLayer
 
             connection.State = ConnectionState.Removing;
             _connectionsToRemove.Add(connection);
-        }
-
-        /// <summary>Handles the Disconnect Command sent from other Peer</summary>
-        private void HandleConnectionDisconnect(Connection connection, Packet packet)
-        {
-            DisconnectReason reason;
-            if (packet.Length == 3)
-                reason = (DisconnectReason)packet.Span[2];
-            else
-                reason = DisconnectReason.None;
-
-            connection.DisconnectInternal(reason, false);
         }
 
         private void UpdateConnections()
