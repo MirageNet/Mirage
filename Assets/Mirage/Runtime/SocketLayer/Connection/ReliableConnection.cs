@@ -97,6 +97,14 @@ namespace Mirage.SocketLayer
         {
             if (_ackSystem.InvalidFragment(packet.Span))
             {
+                if (_logger.Enabled(LogType.Error))
+                {
+                    if (_peer._fragmentBuffer == null)
+                        _logger.Log(LogType.Error, "Received fragmented message but fragmentation is disabled (MaxReliableFragments is 0 or less).");
+                    else
+                        _logger.Log(LogType.Error, "Received invalid fragment. Disconnecting.");
+                }
+
                 DisconnectInternal(DisconnectReason.InvalidPacket);
                 return;
             }
@@ -128,52 +136,108 @@ namespace Mirage.SocketLayer
             var firstArray = received.Buffer.array;
             // length +1 because zero indexed 
             var fragmentLength = firstArray[0] + 1;
+            var requiredSize = fragmentLength * _ackSystem.SizePerFragment;
 
-            // todo find way to remove allocation? (can't use buffers because they will be too small for this bigger message)
-            var message = new byte[fragmentLength * _ackSystem.SizePerFragment];
-
-            // copy first
-            var copyLength = received.Length - 1;
-            if (copyLength > _ackSystem.SizePerFragment)
+            // AckSystem.InvalidFragment should have already caught this, 
+            // but we check again here as a safety measure before using the shared buffer.
+            if (requiredSize > _peer._fragmentBuffer?.Length)
             {
-                if (_logger.Enabled(LogType.Error)) _logger.Error($"First fragment length ({copyLength}) exceeds SizePerFragment ({_ackSystem.SizePerFragment})");
-                received.Buffer.Release();
-                DisconnectInternal(DisconnectReason.InvalidPacket);
+                if (_logger.Enabled(LogType.Error))
+                    _logger.Log(LogType.Error, $"Fragment buffer size ({_peer._fragmentBuffer?.Length ?? 0}) is less than required size ({requiredSize}). This should have been caught by InvalidFragment check.");
+
+                CleanupAndDisconnect(received, nextIndex: 1);
                 return;
             }
-            _logger?.Assert(copyLength == _ackSystem.SizePerFragment, "First should be max size");
-            Buffer.BlockCopy(firstArray, 1, message, 0, copyLength);
-            received.Buffer.Release();
 
-            var messageLength = copyLength;
-            // start at 1 because first copied above
-            for (var i = 1; i < fragmentLength; i++)
+            // If fragmentation is disabled, we shouldn't have received this message
+            // Note: we have checks for this earlier, but also check here to be safe
+            if (_peer._fragmentBuffer == null)
             {
-                var next = _ackSystem.GetNextFragment();
-                var nextArray = next.Buffer.array;
-
-                // NOTE: only the index of the first fragment is used by code,
-                // so we only need to check the length here in debug builds to catch bugs during testing
-                // Malicious actors can already modify the packet data, changing the fragment index doesn't break anything extra
-                _logger?.Assert(i == (fragmentLength - 1 - nextArray[0]), "fragment index should decrement each time");
-
-                // +1 because first is copied above
-                copyLength = next.Length - 1;
-                if (copyLength > _ackSystem.SizePerFragment)
-                {
-                    if (_logger.Enabled(LogType.Error)) _logger.Error($"Fragment length ({copyLength}) exceeds SizePerFragment ({_ackSystem.SizePerFragment})");
-                    // also release buffer before returning
-                    next.Buffer.Release();
-                    DisconnectInternal(DisconnectReason.InvalidPacket);
-                    return;
-                }
-                Buffer.BlockCopy(nextArray, 1, message, _ackSystem.SizePerFragment * i, copyLength);
-                messageLength += copyLength;
-                next.Buffer.Release();
+                if (_logger.Enabled(LogType.Error))
+                    _logger.Log(LogType.Error, "Received fragmented message but fragmentation is disabled (MaxReliableFragments is 0 or less).");
+                CleanupAndDisconnect(received, nextIndex: 1);
+                return;
             }
 
-            _metrics?.OnReceiveMessageReliable(messageLength);
-            _dataHandler.ReceiveMessage(this, new ArraySegment<byte>(message, 0, messageLength));
+            byte[] message;
+            bool usedShared;
+            // Use shared buffer, 
+            // if it is in use (it shouldn't be), then fallback to creating new buffer
+            // Note: since this is single threaded and `_dataHandler.ReceiveMessage` should NOT hold onto array, 
+            //       we can just reuse the same buffer without issue
+            if (_peer._fragmentBufferInUse)
+            {
+                if (_logger.Enabled(LogType.Error))
+                    _logger.Log(LogType.Error, "Fragment buffer already in use, falling back to allocation. This should only happen during recursion.");
+                message = new byte[requiredSize];
+                usedShared = false;
+            }
+            else
+            {
+                _peer._fragmentBufferInUse = true;
+                usedShared = true;
+                message = _peer._fragmentBuffer;
+            }
+
+            try
+            {
+                // copy first
+                var copyLength = received.Length - 1;
+                if (copyLength > _ackSystem.SizePerFragment)
+                {
+                    if (_logger.Enabled(LogType.Error)) _logger.Error($"First fragment length ({copyLength}) exceeds SizePerFragment ({_ackSystem.SizePerFragment})");
+                    CleanupAndDisconnect(received, nextIndex: 1);
+                    return;
+                }
+                _logger?.Assert(copyLength == _ackSystem.SizePerFragment, "First should be max size");
+                Buffer.BlockCopy(firstArray, 1, message, 0, copyLength);
+                received.Buffer.Release();
+
+                var messageLength = copyLength;
+                // start at 1 because first copied above
+                for (var i = 1; i < fragmentLength; i++)
+                {
+                    var next = _ackSystem.GetNextFragment();
+                    var nextArray = next.Buffer.array;
+
+                    // NOTE: only the index of the first fragment is used by code,
+                    // so we only need to check the length here in debug builds to catch bugs during testing
+                    // Malicious actors can already modify the packet data, changing the fragment index doesn't break anything extra
+                    _logger?.Assert(i == (fragmentLength - 1 - nextArray[0]), "fragment index should decrement each time");
+
+                    // +1 because first is copied above
+                    copyLength = next.Length - 1;
+                    if (copyLength > _ackSystem.SizePerFragment)
+                    {
+                        if (_logger.Enabled(LogType.Error)) _logger.Error($"Fragment length ({copyLength}) exceeds SizePerFragment ({_ackSystem.SizePerFragment})");
+                        CleanupAndDisconnect(next, nextIndex: i + 1);
+                        return;
+                    }
+                    Buffer.BlockCopy(nextArray, 1, message, _ackSystem.SizePerFragment * i, copyLength);
+                    messageLength += copyLength;
+                    next.Buffer.Release();
+                }
+
+                _metrics?.OnReceiveMessageReliable(messageLength);
+                _dataHandler.ReceiveMessage(this, new ArraySegment<byte>(message, 0, messageLength));
+            }
+            finally
+            {
+                if (usedShared)
+                    _peer._fragmentBufferInUse = false;
+            }
+
+            // **Local cleanup function**
+            void CleanupAndDisconnect(AckSystem.ReliableReceived current, int nextIndex)
+            {
+                current.Buffer.Release();
+                for (var j = nextIndex; j < fragmentLength; j++)
+                {
+                    var leftover = _ackSystem.GetNextFragment();
+                    leftover.Buffer.Release();
+                }
+                DisconnectInternal(DisconnectReason.InvalidPacket);
+            }
         }
 
         private void HandleBatchedMessageInPacket(AckSystem.ReliableReceived received)

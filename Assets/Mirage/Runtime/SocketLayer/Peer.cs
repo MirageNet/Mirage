@@ -46,6 +46,8 @@ namespace Mirage.SocketLayer
         private readonly Time _time;
         private readonly ConnectKeyValidator _connectKeyValidator;
         internal readonly Pool<ByteBuffer> _bufferPool;
+        internal readonly byte[] _fragmentBuffer;
+        internal bool _fragmentBufferInUse;
         private readonly List<Connection> _connections = new List<Connection>();
         /// <summary>lookup for stateless connections</summary>
         private readonly Dictionary<IConnectionHandle, Connection> _connectionLookup = new Dictionary<IConnectionHandle, Connection>();
@@ -82,6 +84,12 @@ namespace Mirage.SocketLayer
             _connectKeyValidator = new ConnectKeyValidator(_config.key);
 
             _bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, maxPacketSize, _config.BufferPoolStartSize, _config.BufferPoolMaxSize, _logger);
+
+            if (_config.MaxReliableFragments > 0)
+            {
+                _fragmentBuffer = new byte[GetMaxReliableMessageSize()];
+            }
+
             socket.SetTickEvents(_maxPacketSize, OnDataEvent, OnDisconnectEvent);
 
             Application.quitting += Application_quitting;
@@ -824,7 +832,7 @@ namespace Mirage.SocketLayer
             {
                 // from AckSystem
                 // if fragmentation is enabled
-                if (_config.MaxReliableFragments >= 0)
+                if (_config.MaxReliableFragments > 0)
                 {
                     var sizePerFragment = _maxPacketSize - AckSystem.MIN_RELIABLE_FRAGMENT_HEADER_SIZE;
                     return _config.MaxReliableFragments * sizePerFragment;

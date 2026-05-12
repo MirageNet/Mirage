@@ -95,7 +95,7 @@ namespace Mirage.SocketLayer
             _maxPacketsInSendBufferPerConnection = config.MaxReliablePacketsInSendBufferPerConnection;
 
             _maxFragments = config.MaxReliableFragments;
-            _allowFragmented = _maxFragments >= 0;
+            _allowFragmented = _maxFragments > 0;
             SizePerFragment = maxPacketSize - MIN_RELIABLE_FRAGMENT_HEADER_SIZE;
             _maxFragmentsMessageSize = _maxFragments * SizePerFragment;
 
@@ -474,13 +474,12 @@ namespace Mirage.SocketLayer
         /// </summary>
         /// <param name="packet"></param>
         /// <returns></returns>
-        public bool InvalidFragment(ReadOnlySpan<byte> packet)
+        internal bool InvalidFragment(ReadOnlySpan<byte> packet)
         {
-            var offset = RELIABLE_HEADER_SIZE;
+            var offset = AckSystem.SEQUENCE_HEADER + sizeof(ushort); // type, sequence, ack, mask, order
             var fragmentIndex = ByteUtils.ReadByte(packet, ref offset);
 
-            // invalid if equal to (because it should be 0 indexed)
-            return fragmentIndex >= _maxFragments;
+            return _maxFragments <= 0 || fragmentIndex >= _maxFragments;
         }
 
         /// <summary>
