@@ -6,10 +6,34 @@ using Mirage.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
+using UnityEngine.Events;
 using InvalidEnumArgumentException = System.ComponentModel.InvalidEnumArgumentException;
 
 namespace Mirage
 {
+    public enum SceneOperation : byte
+    {
+        Normal,
+        LoadAdditive,
+        UnloadAdditive
+    }
+
+    /// <summary>
+    /// Event fires when a scene change finishes on either Server or Client.
+    /// <para>Scene - Loaded scene</para>
+    /// <para>SceneOperation - Scene change type (Normal, Additive Load, Additive Unload).</para>
+    /// </summary>
+    [Serializable] public class SceneChangeFinishedEvent : UnityEvent<Scene, SceneOperation> { }
+
+    /// <summary>
+    /// Event fires when a scene change begins on either Server or Client.
+    /// <para>Scene - Name or path of the scene that's about to be loaded</para>
+    /// <para>SceneOperation - Scene change type (Normal, Additive Load, Additive Unload).</para>
+    /// </summary>
+    [Serializable] public class SceneChangeStartedEvent : UnityEvent<string, SceneOperation> { }
+
+    [Serializable] public class PlayerSceneChangeEvent : UnityEvent<INetworkPlayer> { }
+
     /// <summary>
     /// NetworkSceneManager is an optional component that helps keep scene in sync between server and client.
     /// <para>The <see cref="NetworkClient">NetworkClient</see> loads scenes as instructed by the <see cref="NetworkServer">NetworkServer</see>.</para>
@@ -21,6 +45,15 @@ namespace Mirage
     [DisallowMultipleComponent]
     public class NetworkSceneManager : MonoBehaviour
     {
+        [NetworkMessage]
+        public struct SceneMessage
+        {
+            public string MainActivateScene;
+            // Normal = 0, LoadAdditive = 1, UnloadAdditive = 2
+            public SceneOperation SceneOperation;
+            public List<string> AdditiveScenes;
+        }
+
         #region Fields
 
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkSceneManager));
