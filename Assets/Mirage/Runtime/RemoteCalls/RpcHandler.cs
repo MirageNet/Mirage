@@ -278,9 +278,7 @@ namespace Mirage.RemoteCalls
             else
             {
                 logger.LogError($"Received RpcReply from {player} but no pending callbacks for id={reply.ReplyId}");
-                // TODO do we need a flag for errors like this?
-                //      for actions that are not allowed due to invalid state
-                player.SetError(10, PlayerErrorFlags.None);
+                player.SetError(10, PlayerErrorFlags.InvalidState);
             }
         }
     }

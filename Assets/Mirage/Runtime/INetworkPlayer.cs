@@ -215,6 +215,9 @@ namespace Mirage
         /// <summary>User hit a rate limit, rather than causing a direct error</summary>
         RateLimit = 1 << 4,
 
+        /// <summary>Player performed an action that is not allowed due to invalid state. e.g. sending a reply for an RPC that is no longer pending.</summary>
+        InvalidState = 1 << 9,
+
 
         //** Security/Malicious Intent **
 
