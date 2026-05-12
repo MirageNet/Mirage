@@ -37,7 +37,7 @@ namespace Mirage.RemoteCalls
             };
 
             var callInfo = collection.GetAbsolute(index);
-            (var task, var id) = behaviour.ClientObjectManager._rpcHandler.CreateReplyTask<T>(callInfo);
+            (var task, var id) = behaviour.ClientObjectManager._rpcHandler.CreateReplyTask<T>(callInfo, behaviour.Client.Player);
 
             message.ReplyId = id;
 

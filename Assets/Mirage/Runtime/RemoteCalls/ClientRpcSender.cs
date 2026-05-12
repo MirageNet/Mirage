@@ -44,7 +44,8 @@ namespace Mirage.RemoteCalls
             Validate(behaviour, index);
 
             var callInfo = collection.GetAbsolute(index);
-            (var task, var id) = behaviour.ServerObjectManager._rpcHandler.CreateReplyTask<T>(callInfo);
+            player = GetTarget(behaviour, player);
+            (var task, var id) = behaviour.ServerObjectManager._rpcHandler.CreateReplyTask<T>(callInfo, player);
             var message = new RpcWithReplyMessage
             {
                 NetId = behaviour.NetId,
@@ -52,8 +53,6 @@ namespace Mirage.RemoteCalls
                 ReplyId = id,
                 Payload = writer.ToArraySegment()
             };
-
-            player = GetTarget(behaviour, player);
 
             // reply rpcs are always reliable
             player.Send(message, Channel.Reliable);

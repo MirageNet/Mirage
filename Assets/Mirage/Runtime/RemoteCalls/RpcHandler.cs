@@ -18,7 +18,7 @@ namespace Mirage.RemoteCalls
         private delegate void ReplyCallbackSuccess(NetworkReader reader);
         private delegate void ReplyCallbackFail();
 
-        private readonly Dictionary<int, (ReplyCallbackSuccess success, ReplyCallbackFail fail)> _callbacks = new Dictionary<int, (ReplyCallbackSuccess success, ReplyCallbackFail fail)>();
+        private readonly Dictionary<int, (INetworkPlayer target, ReplyCallbackSuccess success, ReplyCallbackFail fail)> _callbacks = new Dictionary<int, (INetworkPlayer target, ReplyCallbackSuccess success, ReplyCallbackFail fail)>();
         private int _nextReplyId;
         /// <summary>
         /// Object locator required for deserializing the reply
@@ -216,8 +216,9 @@ namespace Mirage.RemoteCalls
         /// Creates a task that waits for a reply from the server
         /// </summary>
         /// <typeparam name="T"></typeparam>
+        /// <param name="expectedSender">The only player whose RpcReply is accepted for this id. Prevents reply spoofing by other authenticated players.</param>
         /// <returns>the task that will be completed when the result is in, and the id to use in the request</returns>
-        public (UniTask<T> task, int replyId) CreateReplyTask<T>(RemoteCall info)
+        public (UniTask<T> task, int replyId) CreateReplyTask<T>(RemoteCall info, INetworkPlayer expectedSender)
         {
             var newReplyId = _nextReplyId++;
             var completionSource = AutoResetUniTaskCompletionSource<T>.Create();
@@ -240,15 +241,28 @@ namespace Mirage.RemoteCalls
                 completionSource.TrySetException(new ReturnRpcException(message));
             }
 
-            _callbacks.Add(newReplyId, (CallbackSuccess, CallbackFail));
+            _callbacks.Add(newReplyId, (expectedSender, CallbackSuccess, CallbackFail));
             return (completionSource.Task, newReplyId);
         }
 
         internal void OnReply(INetworkPlayer player, RpcReply reply)
         {
             // find the callback that was waiting for this and invoke it.
-            if (_callbacks.Remove(reply.ReplyId, out var callbacks))
+            // peek first so that a spoofed reply from a non-target player does
+            // not consume the pending entry; the legitimate target must still
+            // be able to resolve the task.
+            if (_callbacks.TryGetValue(reply.ReplyId, out var callbacks))
             {
+                // Reject replies from anyone other than the original target.
+                if (callbacks.target != null && callbacks.target != player)
+                {
+                    logger.LogError($"Received RpcReply for id={reply.ReplyId} from {player} but expected sender was {callbacks.target}. Possible spoofing attempt; leaving pending entry in place.");
+                    player.SetError(50, PlayerErrorFlags.LikelyCheater);
+                    return;
+                }
+
+                // only remove if correct player+id
+                _callbacks.Remove(reply.ReplyId);
                 if (reply.Success)
                 {
                     using (var reader = NetworkReaderPool.GetReader(reply.Payload, _objectLocator))
