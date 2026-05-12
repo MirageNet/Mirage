@@ -19,7 +19,7 @@ namespace Mirage.RemoteCalls
         private delegate void ReplyCallbackFail();
 
         private readonly Dictionary<int, (INetworkPlayer target, ReplyCallbackSuccess success, ReplyCallbackFail fail)> _callbacks = new Dictionary<int, (INetworkPlayer target, ReplyCallbackSuccess success, ReplyCallbackFail fail)>();
-        private int _nextReplyId;
+        internal int _nextReplyId;
         /// <summary>
         /// Object locator required for deserializing the reply
         /// </summary>
