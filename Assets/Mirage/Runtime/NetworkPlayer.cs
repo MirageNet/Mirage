@@ -94,7 +94,7 @@ namespace Mirage
         /// Starts as true, when a client connects it is assumed that it is already in a ready scene.
         /// </para>
         /// <para>
-        /// It will be set to not ready if NetworkSceneManager loads a scene.
+        /// It will be set to not ready when a scene load is started.
         /// If you are controlling scene loading manually, you need to set this property to true or false before and after loading a scene.
         /// This is normally done using <see cref="SceneReadyMessage"/> and <see cref="SceneNotReadyMessage"/>
         /// </para>

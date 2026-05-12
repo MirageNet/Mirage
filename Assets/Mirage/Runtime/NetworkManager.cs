@@ -19,7 +19,6 @@ namespace Mirage
     {
         public NetworkServer Server;
         public NetworkClient Client;
-        public NetworkSceneManager NetworkSceneManager;
         public ServerObjectManager ServerObjectManager;
         public ClientObjectManager ClientObjectManager;
 
@@ -59,7 +58,6 @@ namespace Mirage
 
             FindIfNull(ref Server);
             FindIfNull(ref Client);
-            FindIfNull(ref NetworkSceneManager);
             FindIfNull(ref ServerObjectManager);
             FindIfNull(ref ClientObjectManager);
 
@@ -71,14 +69,6 @@ namespace Mirage
             if (Client != null)
             {
                 SetIfNull(ref Client.ObjectManager, ClientObjectManager);
-            }
-
-            if (NetworkSceneManager != null)
-            {
-                SetIfNull(ref NetworkSceneManager.Server, Server);
-                SetIfNull(ref NetworkSceneManager.Client, Client);
-                SetIfNull(ref NetworkSceneManager.ServerObjectManager, ServerObjectManager);
-                SetIfNull(ref NetworkSceneManager.ClientObjectManager, ClientObjectManager);
             }
         }
 

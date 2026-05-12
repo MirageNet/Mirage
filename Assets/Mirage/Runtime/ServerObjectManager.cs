@@ -733,7 +733,7 @@ namespace Mirage
         /// <summary>
         /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
         /// <para>
-        /// If there is a <see cref="Mirage.NetworkSceneManager"/> then this will be called after the client finishes loading the scene and sends <see cref="SceneReadyMessage"/>
+        /// If there is a scene helper (e.g. <see cref="Mirage.Components.NetworkSceneHelper"/>) then this will be called after the client finishes loading the scene and sends <see cref="SceneReadyMessage"/>
         /// </para>
         /// </summary>
         /// <param name="player">The player to spawn objects for</param>

@@ -18,10 +18,7 @@ namespace Mirage
     [NetworkMessage]
     public struct SceneMessage
     {
-        public string MainActivateScene;
-        // Normal = 0, LoadAdditive = 1, UnloadAdditive = 2
-        public SceneOperation SceneOperation;
-        public List<string> AdditiveScenes;
+        public string ScenePath;
     }
 
     /// <summary>

@@ -1,9 +1,10 @@
+using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
-namespace Mirage
+namespace Mirage.Components
 {
     public class OnlineOfflineScene : MonoBehaviour
     {
@@ -12,7 +13,7 @@ namespace Mirage
         [FormerlySerializedAs("server")]
         public NetworkServer Server;
 
-        public NetworkSceneManager NetworkSceneManager;
+        public NetworkSceneLoader SceneLoader;
 
         [Scene]
         [Tooltip("Assign the OnlineScene to load for this zone")]
@@ -22,7 +23,20 @@ namespace Mirage
         [Tooltip("Assign the OfflineScene to load for this zone")]
         public string OfflineScene;
 
-        // Start is called before the first frame update
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            void Check<T>(ref T field) where T : Component
+            {
+                if (field == null) TryGetComponent(out field);
+                if (field == null) Debug.LogError($"{typeof(T).Name} is missing on {name}", this);
+            }
+
+            Check(ref Server);
+            Check(ref SceneLoader);
+        }
+#endif
+
         private void Start()
         {
             if (string.IsNullOrEmpty(OnlineScene))
@@ -31,22 +45,21 @@ namespace Mirage
             if (string.IsNullOrEmpty(OfflineScene))
                 throw new MissingReferenceException("OfflineScene missing. Please assign to OnlineOfflineScene component.");
 
-            if (Server != null)
-            {
-                Server.Started.AddListener(OnServerStarted);
-                Server.Stopped.AddListener(OnServerStopped);
-            }
+            Server.Started.AddListener(OnServerStarted);
+            Server.Stopped.AddListener(OnServerStopped);
         }
 
         private void OnServerStarted()
         {
-            NetworkSceneManager.ServerLoadSceneNormal(OnlineScene);
+            SceneLoader.ServerLoadScene(OnlineScene).Forget();
         }
 
         private void OnServerStopped()
         {
-            Debug.Log("OnlineOfflineScene.OnServerStopped");
-            NetworkSceneManager.ServerLoadSceneNormal(OfflineScene);
+            if (logger.LogEnabled()) logger.Log("OnlineOfflineScene.OnServerStopped: Loading OfflineScene");
+
+            // Server has stopped, so we just load the scene locally
+            SceneManager.LoadSceneAsync(OfflineScene);
         }
     }
 }

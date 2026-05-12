@@ -1,4 +1,5 @@
 using System;
+using Mirage.Components;
 using Mirage.Logging;
 using Mirage.SocketLayer;
 using Mirage.Sockets.Udp;
@@ -33,10 +34,9 @@ namespace Mirage
                 typeof(NetworkManager),
                 typeof(NetworkServer),
                 typeof(NetworkClient),
-                typeof(NetworkSceneManager),
                 typeof(ServerObjectManager),
                 typeof(ClientObjectManager),
-                typeof(CharacterSpawner),
+                typeof(NetworkSceneLoader),
                 typeof(T),
                 typeof(LogSettings)
             };
@@ -56,7 +56,7 @@ namespace Mirage
             var clientObjectManager = go.GetComponent<ClientObjectManager>();
             networkClient.ObjectManager = clientObjectManager;
 
-            var nsm = go.GetComponent<NetworkSceneManager>();
+            var nsm = go.GetComponent<NetworkSceneLoader>();
             nsm.Server = networkServer;
             nsm.Client = networkClient;
             nsm.ServerObjectManager = serverObjectManager;
@@ -67,17 +67,7 @@ namespace Mirage
             networkManager.Server = networkServer;
             networkManager.ServerObjectManager = serverObjectManager;
             networkManager.ClientObjectManager = clientObjectManager;
-            networkManager.NetworkSceneManager = nsm;
 
-            var playerSpawner = go.GetComponent<CharacterSpawner>();
-            playerSpawner.Client = networkClient;
-            playerSpawner.Server = networkServer;
-            playerSpawner.SceneManager = nsm;
-            playerSpawner.ServerObjectManager = serverObjectManager;
-            playerSpawner.ClientObjectManager = clientObjectManager;
-
-            nsm.Client = networkClient;
-            nsm.Server = networkServer;
             return go;
         }
 

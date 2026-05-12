@@ -74,7 +74,7 @@ namespace Mirage
             RegisterPrefabs(NetworkPrefabs?.Prefabs, true);
 
             // prepare objects right away so objects in first scene can be spawned
-            // if user changes scenes without NetworkSceneManager then they will need to manually call it again
+            // if user changes scenes manually then they will need to call it again
             PrepareToSpawnSceneObjects();
 
             if (_client.IsHost)
