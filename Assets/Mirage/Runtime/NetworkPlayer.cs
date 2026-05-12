@@ -157,7 +157,7 @@ namespace Mirage
                 return;
 
             _connection.Disconnect();
-            _isDisconnected = true;
+            MarkAsDisconnected();
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace Mirage
                 return;
 
             _connection.Disconnect(reason);
-            _isDisconnected = true;
+            MarkAsDisconnected();
         }
 
         /// <summary>
@@ -184,6 +184,7 @@ namespace Mirage
         public void MarkAsDisconnected()
         {
             _isDisconnected = true;
+            SceneIsReady = false;
         }
 
         /// <summary>

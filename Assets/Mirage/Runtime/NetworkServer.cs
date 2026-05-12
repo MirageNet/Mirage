@@ -483,6 +483,13 @@ namespace Mirage
 
         private void AuthenticationSuccess(INetworkPlayer player, AuthenticationResult result)
         {
+            // Safety check incase developer calls player.Disconnect() from the Server.Connected event
+            if (!player.IsConnected)
+            {
+                logger.LogError($"AuthenticationSuccess called for disconnected player {player}. Make sure to not call player.Disconnect() from Server.Connected event, Use a NetworkAuthenticator instead.");
+                return;
+            }
+
             player.SetAuthentication(new PlayerAuthentication(result.Authenticator, result.Data));
 
             // send message to let client know
