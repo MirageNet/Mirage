@@ -135,9 +135,12 @@ namespace Mirage.Serialization
             // reset disposed bool, as it can be disposed again after reset
             _needsDisposing = true;
 
-            _bitPosition = position * 8;
-            _bitOffset = position * 8;
-            _bitLength = _bitPosition + (length * 8);
+            checked
+            {
+                _bitPosition = position * 8;
+                _bitOffset = position * 8;
+                _bitLength = _bitPosition + (length * 8);
+            }
             _managedBuffer = array;
             _handle = GCHandle.Alloc(_managedBuffer, GCHandleType.Pinned);
             _longPtr = (ulong*)_handle.AddrOfPinnedObject();
@@ -158,7 +161,8 @@ namespace Mirage.Serialization
         /// <returns></returns>
         public bool CanReadBits(int readCount)
         {
-            return (_bitPosition + readCount) <= _bitLength;
+            if (readCount < 0) throw new EndOfStreamException("readCount can't be negative");
+            return checked(_bitPosition + readCount) <= _bitLength;
         }
 
         /// <summary>
@@ -168,13 +172,14 @@ namespace Mirage.Serialization
         /// <returns></returns>
         public bool CanReadBytes(int readCount)
         {
-            return (_bitPosition + (readCount * 8)) <= _bitLength;
+            if (readCount < 0) throw new EndOfStreamException("readCount can't be negative");
+            return checked(_bitPosition + (readCount * 8)) <= _bitLength;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CheckNewLength(int newPosition)
         {
-            if (newPosition > _bitLength)
+            if (newPosition < 0 || newPosition > _bitLength)
             {
                 ThrowPositionOverLength(newPosition);
             }
@@ -347,7 +352,7 @@ namespace Mirage.Serialization
 
         public void Skip(int bits)
         {
-            MoveBitPosition(_bitPosition + bits);
+            MoveBitPosition(checked(_bitPosition + bits));
         }
 
         /// <summary>
@@ -400,7 +405,7 @@ namespace Mirage.Serialization
         {
             PadToByte();
             var length = span.Length;
-            var newPosition = _bitPosition + (8 * length);
+            var newPosition = checked(_bitPosition + (8 * length));
             CheckNewLength(newPosition);
 
             var startPtr = ((byte*)_longPtr) + BytePosition;
@@ -416,7 +421,8 @@ namespace Mirage.Serialization
         public ArraySegment<byte> ReadBytesSegment(int count)
         {
             PadToByte();
-            var newPosition = _bitPosition + (8 * count);
+            if (count < 0) throw new EndOfStreamException("count can't be negative");
+            var newPosition = checked(_bitPosition + (8 * count));
             CheckNewLength(newPosition);
 
             var result = new ArraySegment<byte>(_managedBuffer, BytePosition, count);

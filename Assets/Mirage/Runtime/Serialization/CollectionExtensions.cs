@@ -157,7 +157,7 @@ namespace Mirage.Serialization
         public static byte[] ReadBytes(this NetworkReader reader, int count)
         {
             // we know each element is 8 bits, so count*8 for max size
-            ValidateSize(reader, count * 8);
+            ValidateSize(reader, checked(count * 8));
 
             var bytes = new byte[count];
             reader.ReadBytes(bytes, 0, count);
