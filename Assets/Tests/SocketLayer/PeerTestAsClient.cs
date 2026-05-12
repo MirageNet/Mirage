@@ -25,7 +25,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         public void ConnectShouldSendMessageToSocket()
         {
             var handle = TestEndPoint.CreateSubstitute(_handleBehavior);
-            peer.Connect((IConnectEndPoint)handle);
+            peer.Connect(handle);
 
             var expected = connectRequest;
 
@@ -41,7 +41,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             config.DisableReliableLayer = disableReliable;
 
             var endPoint = TestEndPoint.CreateSubstitute(_handleBehavior);
-            var conn = peer.Connect((IConnectEndPoint)endPoint);
+            var conn = peer.Connect(endPoint);
             if (disableReliable)
                 Assert.That(conn, Is.TypeOf<NoReliableConnection>(), "returned type should be connection");
             else
@@ -54,7 +54,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         public void InvokesConnectEventAfterReceivingAccept()
         {
             var handle = TestEndPoint.CreateSubstitute(_handleBehavior);
-            var conn = peer.Connect((IConnectEndPoint)handle);
+            var conn = peer.Connect(handle);
 
             socket.AsMock().QueueReceiveCall(new byte[2] {
                 (byte) PacketType.Command,
@@ -71,7 +71,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         public IEnumerator ShouldResendConnectMessageIfNoReply()
         {
             var endPoint = TestEndPoint.CreateSubstitute(_handleBehavior);
-            _ = peer.Connect((IConnectEndPoint)endPoint);
+            _ = peer.Connect(endPoint);
 
             var expected = connectRequest;
 
@@ -106,7 +106,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         public IEnumerator ShouldInvokeConnectionFailedIfNoReplyAfterMax()
         {
             var endPoint = TestEndPoint.CreateSubstitute(_handleBehavior);
-            var conn = peer.Connect((IConnectEndPoint)endPoint);
+            var conn = peer.Connect(endPoint);
 
             // wait enough time so that  would have been called
             // make sure to call update so events are invoked
@@ -126,7 +126,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         public void ShouldInvokeConnectionFailedIfServerRejects()
         {
             var endPoint = TestEndPoint.CreateSubstitute(_handleBehavior);
-            var conn = peer.Connect((IConnectEndPoint)endPoint);
+            var conn = peer.Connect(endPoint);
             Debug.Assert(conn.Handle == endPoint, "Mock Socket should have returned the same connection");
 
             socket.AsMock().QueueReceiveCall(new byte[3] {
@@ -146,7 +146,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         public IEnumerator InvokesConnectFailedIfClosedBeforeConnect()
         {
             var endPoint = TestEndPoint.CreateSubstitute(_handleBehavior);
-            var conn = peer.Connect((IConnectEndPoint)endPoint);
+            var conn = peer.Connect(endPoint);
 
             peer.Close();
 
@@ -175,7 +175,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             Assert.Ignore("new NotImplementedException(What should happen if close / disconnect is called while still connecting)");
 
             var endPoint = TestEndPoint.CreateSubstitute(_handleBehavior);
-            var conn = peer.Connect((IConnectEndPoint)endPoint);
+            var conn = peer.Connect(endPoint);
 
             peer.Close();
 

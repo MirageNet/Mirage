@@ -160,7 +160,9 @@ namespace Mirage.Tests
         }
     }
 
-    public abstract class MockIConnectionHandle : IConnectionHandle, IBindEndPoint, IConnectEndPoint
+    public interface ITestConnectionHandle : IConnectionHandle, IBindEndPoint, IConnectEndPoint { }
+
+    public abstract class MockIConnectionHandle : ITestConnectionHandle
     {
         public bool IsStateful => true;
         public ISocketLayerConnection SocketLayerConnection { get; set; }
@@ -173,17 +175,17 @@ namespace Mirage.Tests
 
     public static class TestEndPoint
     {
-        public static IConnectionHandle CreateSubstitute(ConnectionHandleBehavior handleBehavior = ConnectionHandleBehavior.Stateless)
+        public static ITestConnectionHandle CreateSubstitute(ConnectionHandleBehavior handleBehavior = ConnectionHandleBehavior.Stateless)
         {
             if (handleBehavior == ConnectionHandleBehavior.Stateful)
             {
-                var endpoint = Substitute.ForPartsOf<MockIConnectionHandle>();
-                return endpoint;
+                return Substitute.ForPartsOf<MockIConnectionHandle>();
             }
             else
             {
-                var endpoint = Substitute.For<IConnectionHandle, IBindEndPoint, IConnectEndPoint>();
+                var endpoint = Substitute.For<ITestConnectionHandle>();
                 endpoint.CreateCopy().Returns(endpoint);
+                endpoint.IsStateful.Returns(false);
                 return endpoint;
             }
         }

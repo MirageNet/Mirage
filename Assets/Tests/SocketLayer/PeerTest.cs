@@ -271,7 +271,8 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             socket.AsMock().QueueReceiveCall(connectRequest, endPoint2);
 
             // Throw when the first connection is accepted
-            peer.OnConnected += (conn) => {
+            peer.OnConnected += (conn) =>
+            {
                 if (conn.Handle == endPoint1)
                     throw new Exception("Test Exception");
             };

@@ -32,7 +32,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             _peerInstance = new PeerInstance(SocketBehavior.PollReceive, _config, maxPacketSize: MAX_PACKET_SIZE);
             _bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, MAX_PACKET_SIZE, 0, 100);
 
-            _connection = _peerInstance.peer.Connect((IConnectEndPoint)TestEndPoint.CreateSubstitute());
+            _connection = _peerInstance.peer.Connect(TestEndPoint.CreateSubstitute());
             // Set connection state to Connected after creation
             ((NoReliableConnection)_connection).State = ConnectionState.Connected;
 
