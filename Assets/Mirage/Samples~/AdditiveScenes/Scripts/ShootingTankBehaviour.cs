@@ -2,20 +2,14 @@ using UnityEngine;
 
 namespace Mirage.Examples.Additive
 {
-    // This script demonstrates the NetworkAnimator and how to leverage
-    // the built-in observers system to track players.
-    // Note that all ProximityCheckers should be restricted to the Player layer.
+    // This script demonstrates how to trigger animations using ClientRpc
+    // as a modern alternative to the legacy NetworkAnimator.
     public class ShootingTankBehaviour : NetworkBehaviour
     {
         [SyncVar]
         public Quaternion rotation;
-        private NetworkAnimator networkAnimator;
-
-        [Server(error = false)]
-        private void Start()
-        {
-            networkAnimator = GetComponent<NetworkAnimator>();
-        }
+        
+        public Animator animator;
 
         [Range(0, 1)]
         public float turnSpeed = 0.1f;
@@ -51,8 +45,17 @@ namespace Mirage.Examples.Additive
             {
                 transform.LookAt(target.transform.position + Vector3.down);
                 rotation = transform.rotation;
-                networkAnimator.SetTrigger("Fire");
+                
+                // Modern approach: trigger animation via ClientRpc
+                RpcFire();
             }
+        }
+
+        [ClientRpc]
+        private void RpcFire()
+        {
+            if (animator != null)
+                animator.SetTrigger("Fire");
         }
     }
 }

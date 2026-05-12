@@ -11,6 +11,9 @@ namespace Mirage.Examples.MultipleAdditiveScenes
         [Header("MultiScene Setup")]
         public int instances = 3;
 
+        // legacy NetworkSceneManager
+        [SerializeField] private NetworkSceneManager NetworkSceneManager;
+
         [Scene]
         public string gameScene;
         private readonly List<Scene> subScenes = new List<Scene>();
@@ -80,7 +83,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
         public void OnStopServer()
         {
             // note: if in host mode you may not want to send SceneMessage to host player. In that case use the excludeLocalPlayer flag
-            var msg = new SceneMessage { MainActivateScene = gameScene, SceneOperation = SceneOperation.UnloadAdditive };
+            var msg = new NetworkSceneManager.SceneMessage { MainActivateScene = gameScene, SceneOperation = SceneOperation.UnloadAdditive };
             Server.SendToAll(msg, authenticatedOnly: true, excludeLocalPlayer: true);
             StartCoroutine(UnloadSubScenes());
         }

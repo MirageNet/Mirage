@@ -1,42 +1,149 @@
+using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Mirage.Examples.Basic
 {
-    public class CanvasCharacterSpawner : CharacterSpawner
+    /// <summary>
+    /// A self-contained spawner example using the "Join Any Time" pattern.
+    /// This demonstrates how to implement custom spawning logic (like parenting and naming) 
+    /// without relying on inheritance from a helper.
+    /// </summary>
+    public class CanvasCharacterSpawner : MonoBehaviour
     {
-        [Header("Character Parent")]
+        public NetworkServer Server;
+        public NetworkClient Client;
+        public ServerObjectManager ServerObjectManager;
+        public ClientObjectManager ClientObjectManager;
+
+        [Header("Character Spawning")]
+        public NetworkIdentity PlayerPrefab;
         public Transform Parent;
+
+        [Header("State")]
+        public string TargetScene;
+        public bool ServerLoading;
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            void Check<T>(ref T field) where T : Component
+            {
+                if (field == null) TryGetComponent(out field);
+                if (field == null) Debug.LogError($"{typeof(T).Name} is missing on {name}", this);
+            }
+
+            Check(ref Server);
+            Check(ref Client);
+            Check(ref ServerObjectManager);
+            Check(ref ClientObjectManager);
+        }
+#endif
+
         private int _playerCounter;
 
-        protected override void Awake()
+        private void Awake()
         {
-            base.Awake();
-            Server.Started.AddListener(ServerStarted);
+            Server.Started.AddListener(OnServerStarted);
+            Server.Authenticated.AddListener(OnServerAuthenticated);
+            Client.Started.AddListener(OnClientStarted);
         }
 
-        private void ServerStarted()
+        private void OnServerStarted()
         {
-            // reset counter to 1 when starting server
             _playerCounter = 0;
+            Server.MessageHandler.RegisterHandler<SceneReadyMessage>(HandleSceneReadyMessage);
         }
 
-        private int GetNextPlayerId()
+        private void OnClientStarted()
         {
-            _playerCounter++;
-            return _playerCounter;
+            Client.MessageHandler.RegisterHandler<SceneMessage>(HandleSceneMessage);
         }
 
-        public override void OnServerAddPlayer(INetworkPlayer player)
+        public async UniTask ServerLoadScene(string sceneName)
         {
-            var character = Instantiate(PlayerPrefab);
+            if (ServerLoading)
+                throw new InvalidOperationException("Server is already loading a scene.");
 
-            // We can set SyncVar here or in OnStartServer and they will be sent with first spawn message from AddCharacter
+            TargetScene = sceneName;
+            ServerLoading = true;
+
+            foreach (var player in Server.AllPlayers)
+            {
+                player.SceneIsReady = false;
+                player.Send(new SceneMessage { ScenePath = TargetScene });
+            }
+
+            await SceneManager.LoadSceneAsync(TargetScene);
+
+            if (Server.IsHost)
+            {
+                ClientObjectManager.PrepareToSpawnSceneObjects();
+                Server.LocalPlayer.SceneIsReady = true;
+            }
+
+            ServerLoading = false;
+            ServerObjectManager.SpawnSceneObjects();
+
+            foreach (var player in Server.AllPlayers)
+            {
+                if (player.SceneIsReady)
+                    SpawnCharacterForPlayer(player);
+            }
+        }
+
+        private void OnServerAuthenticated(INetworkPlayer player)
+        {
+            if (player.IsHost)
+                return;
+
+            if (!string.IsNullOrEmpty(TargetScene))
+            {
+                player.SceneIsReady = false;
+                player.Send(new SceneMessage { ScenePath = TargetScene });
+            }
+        }
+
+        private void HandleSceneReadyMessage(INetworkPlayer player, SceneReadyMessage message)
+        {
+            if (player.SceneIsReady)
+                return;
+
+            player.SceneIsReady = true;
+
+            if (!ServerLoading)
+                SpawnCharacterForPlayer(player);
+        }
+
+        private void SpawnCharacterForPlayer(INetworkPlayer player)
+        {
+            Debug.Assert(player.Identity == null, "Player already has a character spawned.");
+
+            var character = Instantiate(PlayerPrefab, Parent);
+
             var basicPlayer = character.GetComponent<BasicPlayer>();
-            basicPlayer.playerNo = GetNextPlayerId();
+            basicPlayer.playerNo = ++_playerCounter;
 
-
-            SetCharacterName(player, character);
             ServerObjectManager.AddCharacter(player, character.gameObject);
+        }
+
+        private void HandleSceneMessage(INetworkPlayer player, SceneMessage message)
+        {
+            if (Client.IsHost)
+                return;
+
+            OnClientSceneMessageAsync(player, message).Forget();
+        }
+
+        private async UniTaskVoid OnClientSceneMessageAsync(INetworkPlayer player, SceneMessage message)
+        {
+            player.SceneIsReady = false;
+            await SceneManager.LoadSceneAsync(message.ScenePath);
+
+            player.SceneIsReady = true;
+            ClientObjectManager.PrepareToSpawnSceneObjects();
+            player.Send(new SceneReadyMessage());
         }
     }
 }

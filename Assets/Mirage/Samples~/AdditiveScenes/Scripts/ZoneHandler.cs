@@ -1,5 +1,6 @@
 using Mirage.Logging;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Mirage.Examples.Additive
 {
@@ -21,10 +22,16 @@ namespace Mirage.Examples.Additive
         {
             if (logger.LogEnabled()) logger.LogFormat(LogType.Log, "Loading {0}", subScene);
 
+            // you may need to check if owner is the host player.
             var networkIdentity = other.gameObject.GetComponent<NetworkIdentity>();
-            // note: you may need to check if owner is the host player.
-            //       if they are the host, the scene will already be loaded on servere so does not need to be loaded
-            networkIdentity.Owner.Send(new SceneMessage { MainActivateScene = subScene, SceneOperation = SceneOperation.LoadAdditive });
+            var owner = networkIdentity.Owner;
+
+            // skip if host, server will already have scenes loaded
+            if (owner.IsHost)
+                return;
+
+            // we dont need to send the scene in this example, because the client also has the inspector field
+            TargetRpcLoadSubScene(networkIdentity.Owner);
         }
 
         [Server]
@@ -32,10 +39,27 @@ namespace Mirage.Examples.Additive
         {
             if (logger.LogEnabled()) logger.LogFormat(LogType.Log, "Unloading {0}", subScene);
 
+            // this is just the opposite of OnTriggerEnter
+
             var networkIdentity = other.gameObject.GetComponent<NetworkIdentity>();
-            // note: you may need to check if owner is the host player.
-            //       if they are the host, you do not want to be unloading scene on server
-            networkIdentity.Owner.Send(new SceneMessage { MainActivateScene = subScene, SceneOperation = SceneOperation.UnloadAdditive });
+            var owner = networkIdentity.Owner;
+            if (owner.IsHost)
+                return;
+            TargetRpcUnloadSubScene(networkIdentity.Owner);
+        }
+
+        // target rpc needs the INetworkPlayer parameter so server knows where to sent it,
+        // but we can use `INetworkPlayer _` because client does not need to use it
+        [ClientRpc(target = RpcTarget.Player)]
+        public void TargetRpcLoadSubScene(INetworkPlayer _)
+        {
+            SceneManager.LoadSceneAsync(subScene, LoadSceneMode.Additive);
+        }
+
+        [ClientRpc(target = RpcTarget.Player)]
+        public void TargetRpcUnloadSubScene(INetworkPlayer _)
+        {
+            SceneManager.UnloadSceneAsync(subScene);
         }
     }
 }
