@@ -21,7 +21,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             var config = new Config();
             var connection = new SubIRawConnection();
             // Using a local Time class just like other tests do
-            ackSystem = new AckSystem(connection, config, MAX_PACKET_SIZE, new Time(), bufferPool, onInvalidPacket: () => invokedCount++);
+            ackSystem = CreateAckSystem(connection, config, new Time(), () => invokedCount++);
         }
 
         [Test]

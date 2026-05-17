@@ -22,7 +22,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
             instance = new AckTestInstance();
             instance.connection = new SubIRawConnection();
-            instance.ackSystem = new AckSystem(instance.connection, new Config(), MAX_PACKET_SIZE, new Time(), bufferPool, onInvalidPacket: null);
+            instance.ackSystem = CreateAckSystem(instance.connection, new Config(), new Time(), null);
 
             // create and send n messages
             instance.messages = new List<byte[]>();

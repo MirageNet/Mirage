@@ -16,6 +16,19 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         // Use PollReceive for simpler synchronous testing
         public PeerFragmentBufferTests() : base(SocketBehavior.PollReceive) { }
 
+        protected Pool<AckSystem.ReliablePacket> reliablePool;
+        protected Pool<RingBuffer<AckSystem.AckablePacket>> ackablePacketPool;
+        protected Pool<RingBuffer<AckSystem.ReliableReceived>> reliableReceivePool;
+
+        [SetUp]
+        public override void SetUp()
+        {
+            base.SetUp();
+            reliablePool = new Pool<AckSystem.ReliablePacket>(AckSystem.ReliablePacket.CreateNew, 0, config.MaxReliablePacketsInSendBufferPerConnection);
+            ackablePacketPool = new Pool<RingBuffer<AckSystem.AckablePacket>>((p) => new RingBuffer<AckSystem.AckablePacket>(config.SequenceSize, null), 0, 10);
+            reliableReceivePool = new Pool<RingBuffer<AckSystem.ReliableReceived>>((p) => new RingBuffer<AckSystem.ReliableReceived>(config.SequenceSize, null), 0, 10);
+        }
+
         [Test]
         public void UsesSharedBufferForFragmentedMessage()
         {
@@ -30,9 +43,13 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             var payloadSize = mtu - AckSystem.MIN_RELIABLE_FRAGMENT_HEADER_SIZE;
             var message = Enumerable.Range(0, payloadSize * 2).Select(i => (byte)i).ToArray();
 
-            // Send from a "remote" to get the packets
             var remoteConnection = new SubIRawConnection();
-            var remoteAckSystem = new AckSystem(remoteConnection, config, mtu, time, peer._bufferPool, () => { });
+            var ackable = ackablePacketPool.Take();
+            ackable.Reset();
+            var receive = reliableReceivePool.Take();
+            receive.Reset();
+            var remoteAckSystem = new AckSystem(remoteConnection, config, mtu, time, peer._bufferPool,
+                reliablePool, ackable, receive, () => { });
             remoteAckSystem.SendReliable(message);
             remoteAckSystem.Update(); // Flush the batch to get packets in remoteConnection
 
@@ -65,7 +82,12 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             var message = Enumerable.Range(0, payloadSize * 2).Select(i => (byte)i).ToArray();
 
             var remoteConnection = new SubIRawConnection();
-            var remoteAckSystem = new AckSystem(remoteConnection, config, mtu, time, peer._bufferPool, () => { });
+            var ackable2 = ackablePacketPool.Take();
+            ackable2.Reset();
+            var receive2 = reliableReceivePool.Take();
+            receive2.Reset();
+            var remoteAckSystem = new AckSystem(remoteConnection, config, mtu, time, peer._bufferPool,
+                reliablePool, ackable2, receive2, () => { });
             remoteAckSystem.SendReliable(message);
             remoteAckSystem.Update();
 

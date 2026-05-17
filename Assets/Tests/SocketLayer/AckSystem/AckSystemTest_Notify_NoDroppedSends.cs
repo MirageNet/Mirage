@@ -26,13 +26,13 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
             instance1 = new AckTestInstance();
             instance1.connection = new SubIRawConnection();
-            instance1.ackSystem = new AckSystem(instance1.connection, config, MAX_PACKET_SIZE, new Time(), bufferPool, onInvalidPacket: null);
-            received1 = new List<ArraySegment<byte>>();
+            instance1.ackSystem = CreateAckSystem(instance1.connection, config, new Time(), null);
 
 
             instance2 = new AckTestInstance();
             instance2.connection = new SubIRawConnection();
-            instance2.ackSystem = new AckSystem(instance2.connection, config, MAX_PACKET_SIZE, new Time(), bufferPool, onInvalidPacket: null);
+            instance2.ackSystem = CreateAckSystem(instance2.connection, config, new Time(), null);
+            received1 = new List<ArraySegment<byte>>();
             received2 = new List<ArraySegment<byte>>();
 
             // create and send n messages

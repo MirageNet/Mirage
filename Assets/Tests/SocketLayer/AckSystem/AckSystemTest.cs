@@ -23,6 +23,58 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         public const int MAX_PACKET_SIZE = 1300;
         protected readonly Random rand = new Random();
         protected Pool<ByteBuffer> bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, MAX_PACKET_SIZE, 100, 1000);
+        protected Pool<AckSystem.ReliablePacket> reliablePool;
+        protected Pool<RingBuffer<AckSystem.AckablePacket>> ackablePacketPool;
+        protected Pool<RingBuffer<AckSystem.ReliableReceived>> reliableReceivePool;
+
+        private readonly List<RingBuffer<AckSystem.AckablePacket>> _takenAckables = new List<RingBuffer<AckSystem.AckablePacket>>();
+        private readonly List<RingBuffer<AckSystem.ReliableReceived>> _takenReceives = new List<RingBuffer<AckSystem.ReliableReceived>>();
+
+        public AckSystemTestBase()
+        {
+            var config = new Config();
+            reliablePool = new Pool<AckSystem.ReliablePacket>(AckSystem.ReliablePacket.CreateNew, 0, config.MaxReliablePacketsInSendBufferPerConnection);
+            ackablePacketPool = new Pool<RingBuffer<AckSystem.AckablePacket>>((p) => new RingBuffer<AckSystem.AckablePacket>(config.SequenceSize, null), 0, 10);
+            reliableReceivePool = new Pool<RingBuffer<AckSystem.ReliableReceived>>((p) => new RingBuffer<AckSystem.ReliableReceived>(config.SequenceSize, null), 0, 10);
+        }
+
+        [TearDown]
+        public void BaseTearDown()
+        {
+            foreach (var item in _takenAckables)
+                ackablePacketPool.Put(item);
+            _takenAckables.Clear();
+
+            foreach (var item in _takenReceives)
+                reliableReceivePool.Put(item);
+            _takenReceives.Clear();
+        }
+
+        protected AckSystem CreateAckSystem(IRawConnection connection, Config config, ITime time = null, Action onInvalidPacket = null)
+        {
+            var defaultSequenceSize = new Config().SequenceSize;
+            RingBuffer<AckSystem.AckablePacket> ackable;
+            RingBuffer<AckSystem.ReliableReceived> receive;
+
+            if (config.SequenceSize == defaultSequenceSize)
+            {
+                ackable = ackablePacketPool.Take();
+                ackable.Reset();
+                _takenAckables.Add(ackable);
+
+                receive = reliableReceivePool.Take();
+                receive.Reset();
+                _takenReceives.Add(receive);
+            }
+            else
+            {
+                ackable = new RingBuffer<AckSystem.AckablePacket>(config.SequenceSize, null);
+                receive = new RingBuffer<AckSystem.ReliableReceived>(config.SequenceSize, null);
+            }
+
+            return new AckSystem(connection, config, MAX_PACKET_SIZE, time ?? new Mirage.SocketLayer.Time(), bufferPool,
+                reliablePool, ackable, receive, onInvalidPacket);
+        }
 
         protected byte[] createRandomData(int id)
         {
