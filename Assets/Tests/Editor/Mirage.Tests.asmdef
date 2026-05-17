@@ -1,5 +1,6 @@
 {
     "name": "Mirage.Tests",
+    "rootNamespace": "",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
@@ -10,7 +11,8 @@
         "Mirage.Editor",
         "UniTask",
         "Unity.Mirage.CodeGen",
-        "Mirage.Sockets.Udp"
+        "Mirage.Sockets.Udp",
+        "Mirage.Examples"
     ],
     "includePlatforms": [
         "Editor"

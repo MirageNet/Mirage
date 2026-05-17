@@ -1,3 +1,4 @@
+using Mirage.Components;
 using Mirage.Sockets.Udp;
 using NUnit.Framework;
 using UnityEngine;
@@ -15,7 +16,7 @@ namespace Mirage.Tests.CustomGUI
             Assert.That(go.GetComponent<NetworkServer>(), Is.Not.Null);
             Assert.That(go.GetComponent<NetworkClient>(), Is.Not.Null);
             Assert.That(go.GetComponent<UdpSocketFactory>(), Is.Not.Null);
-            Assert.That(go.GetComponent<NetworkSceneManager>(), Is.Not.Null);
+            Assert.That(go.GetComponent<NetworkSceneLoader>(), Is.Not.Null);
 
             Object.DestroyImmediate(go);
         }

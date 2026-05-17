@@ -51,7 +51,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                clientSceneManager.ClientStartSceneMessage(null, new SceneMessage());
+                clientSceneManager.ClientStartSceneMessage(null, new NetworkSceneManager.SceneMessage());
             });
         }
 
@@ -75,7 +75,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                clientSceneManager.ClientStartSceneMessage(null, new SceneMessage());
+                clientSceneManager.ClientStartSceneMessage(null, new NetworkSceneManager.SceneMessage());
             });
         });
 
@@ -87,7 +87,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             clientSceneManager.OnClientStartedSceneChange.AddListener((_, __) => startInvoked++);
             clientSceneManager.OnClientFinishedSceneChange.AddListener((_, __) => endInvoked++);
-            clientSceneManager.ClientStartSceneMessage(null, new SceneMessage { MainActivateScene = TestScenes.Path });
+            clientSceneManager.ClientStartSceneMessage(null, new NetworkSceneManager.SceneMessage { MainActivateScene = TestScenes.Path });
 
             await AsyncUtil.WaitUntilWithTimeout(() => startInvoked == 1);
 
@@ -118,7 +118,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             var invalidOperation = (SceneOperation)10;
             var exception = Assert.Throws<InvalidEnumArgumentException>(() =>
             {
-                clientSceneManager.ClientStartSceneMessage(null, new SceneMessage
+                clientSceneManager.ClientStartSceneMessage(null, new NetworkSceneManager.SceneMessage
                 {
                     MainActivateScene = TestScenes.Path,
                     SceneOperation = invalidOperation
@@ -179,7 +179,7 @@ namespace Mirage.Tests.Runtime.ClientServer
                     noAdditiveScenesFound = true;
                 }
             });
-            clientSceneManager.ClientStartSceneMessage(client.Player, new SceneMessage { MainActivateScene = TestScenes.Path, AdditiveScenes = new List<string> { TestScenes.Path } });
+            clientSceneManager.ClientStartSceneMessage(client.Player, new NetworkSceneManager.SceneMessage { MainActivateScene = TestScenes.Path, AdditiveScenes = new List<string> { TestScenes.Path } });
             // mark scene as allowed to load, so that finished event will be called
             clientSceneManager.ClientFinishedLoadingSceneMessage(client.Player, new SceneReadyMessage());
 
@@ -200,7 +200,7 @@ namespace Mirage.Tests.Runtime.ClientServer
                     additiveSceneWasFound = true;
                 }
             });
-            clientSceneManager.ClientStartSceneMessage(client.Player, new SceneMessage { MainActivateScene = TestScenes.Path, AdditiveScenes = new List<string> { TestScenes.Path } });
+            clientSceneManager.ClientStartSceneMessage(client.Player, new NetworkSceneManager.SceneMessage { MainActivateScene = TestScenes.Path, AdditiveScenes = new List<string> { TestScenes.Path } });
 
             Assert.That(additiveSceneWasFound);
         }

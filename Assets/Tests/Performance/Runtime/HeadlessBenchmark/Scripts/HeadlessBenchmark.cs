@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
+using Mirage.Components;
 using Mirage.SocketLayer;
 using Mirage.Sockets.Udp;
 using UnityEngine;
@@ -105,16 +106,12 @@ namespace Mirage.HeadlessBenchmark
             server.SocketFactory = socketFactory;
             serverObjectManager = serverGo.GetComponent<ServerObjectManager>();
 
-            var networkSceneManager = serverGo.GetComponent<NetworkSceneManager>();
-            networkSceneManager.Server = server;
+            var sceneHelper = serverGo.GetComponent<NetworkSceneLoader>();
+            sceneHelper.Server = server;
+            sceneHelper.ServerObjectManager = serverObjectManager;
+            sceneHelper.PlayerPrefab = PlayerPrefab.GetComponent<NetworkIdentity>();
 
             server.ObjectManager = serverObjectManager;
-
-            networkSceneManager.ServerObjectManager = serverObjectManager;
-
-            var spawner = serverGo.GetComponent<CharacterSpawner>();
-            spawner.ServerObjectManager = serverObjectManager;
-            spawner.Server = server;
 
             server.Started.AddListener(OnServerStarted);
             server.Authenticated.AddListener(conn => serverObjectManager.SpawnVisibleObjects(conn, true));
@@ -161,21 +158,13 @@ namespace Mirage.HeadlessBenchmark
             clientGo.name = $"Client {i}";
             var client = clientGo.GetComponent<NetworkClient>();
             var objectManager = clientGo.GetComponent<ClientObjectManager>();
-            var spawner = clientGo.GetComponent<CharacterSpawner>();
-
-            client.ObjectManager = objectManager;
-
-            var networkSceneManager = clientGo.GetComponent<NetworkSceneManager>();
-            networkSceneManager.Client = client;
-            networkSceneManager.ClientObjectManager = objectManager;
+            var sceneHelper = clientGo.GetComponent<NetworkSceneLoader>();
+            sceneHelper.Client = client;
+            sceneHelper.ClientObjectManager = objectManager;
+            sceneHelper.PlayerPrefab = PlayerPrefab.GetComponent<NetworkIdentity>();
 
             objectManager.RegisterPrefab(MonsterPrefab.GetComponent<NetworkIdentity>());
             objectManager.RegisterPrefab(PlayerPrefab.GetComponent<NetworkIdentity>());
-
-            spawner.Client = client;
-            spawner.PlayerPrefab = PlayerPrefab.GetComponent<NetworkIdentity>();
-            spawner.ClientObjectManager = objectManager;
-            spawner.SceneManager = networkSceneManager;
 
             client.SocketFactory = socketFactory;
 
