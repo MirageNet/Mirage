@@ -61,14 +61,26 @@ namespace Mirage.Collections
 
         internal int ChangeCount => _changes.Count;
 
-        public SyncStack()
+        public readonly int? MaxElements;
+
+        public SyncStack() : this(new Stack<T>())
         {
-            _objects = new Stack<T>();
+        }
+
+        public SyncStack(int maxElements) : this(new Stack<T>(), maxElements)
+        {
         }
 
         public SyncStack(Stack<T> objects)
         {
             _objects = objects;
+            MaxElements = null;
+        }
+
+        public SyncStack(Stack<T> objects, int maxElements)
+        {
+            _objects = objects;
+            MaxElements = maxElements;
         }
 
         public bool IsDirty => _changes.Count > 0;
@@ -137,6 +149,9 @@ namespace Mirage.Collections
         {
             // if init,  write the full list content
             var count = (int)reader.ReadPackedUInt32();
+
+            if (MaxElements.HasValue && count > MaxElements.Value)
+                throw new InvalidOperationException($"SyncStack capacity would exceed MaxElements limit of {MaxElements.Value}");
 
             _objects.Clear();
             OnClear?.Invoke();
@@ -213,6 +228,9 @@ namespace Mirage.Collections
             var newItem = reader.Read<T>();
             if (apply)
             {
+                if (MaxElements.HasValue && _objects.Count >= MaxElements.Value)
+                    throw new InvalidOperationException($"SyncStack capacity would exceed MaxElements limit of {MaxElements.Value}");
+
                 _objects.Push(newItem);
                 OnPush?.Invoke(newItem);
             }
@@ -238,6 +256,9 @@ namespace Mirage.Collections
 
         public void Push(T item)
         {
+            if (MaxElements.HasValue && _objects.Count >= MaxElements.Value)
+                throw new InvalidOperationException($"SyncStack capacity would exceed MaxElements limit of {MaxElements.Value}");
+
             _objects.Push(item);
             OnPush?.Invoke(item);
             AddOperation(Operation.OP_PUSH, item);

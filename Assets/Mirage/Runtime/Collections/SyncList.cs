@@ -71,6 +71,8 @@ namespace Mirage.Collections
 
         internal int ChangeCount => _changes.Count;
 
+        public readonly int? MaxElements;
+
         public SyncList() : this(EqualityComparer<T>.Default)
         {
         }
@@ -79,12 +81,28 @@ namespace Mirage.Collections
         {
             _comparer = comparer ?? EqualityComparer<T>.Default;
             _objects = new List<T>();
+            MaxElements = null;
         }
 
         public SyncList(IList<T> objects, IEqualityComparer<T> comparer = null)
         {
             _comparer = comparer ?? EqualityComparer<T>.Default;
             _objects = objects;
+            MaxElements = null;
+        }
+
+        public SyncList(int maxElements, IEqualityComparer<T> comparer = null)
+        {
+            _comparer = comparer ?? EqualityComparer<T>.Default;
+            _objects = new List<T>();
+            MaxElements = maxElements;
+        }
+
+        public SyncList(IList<T> objects, int maxElements, IEqualityComparer<T> comparer = null)
+        {
+            _comparer = comparer ?? EqualityComparer<T>.Default;
+            _objects = objects;
+            MaxElements = maxElements;
         }
 
         public bool IsDirty => _changes.Count > 0;
@@ -171,6 +189,9 @@ namespace Mirage.Collections
             // if init,  write the full list content
             var count = (int)reader.ReadPackedUInt32();
 
+            if (MaxElements.HasValue && count > MaxElements.Value)
+                throw new InvalidOperationException($"SyncList capacity would exceed MaxElements limit of {MaxElements.Value}");
+
             _objects.Clear();
             OnClear?.Invoke();
             _changes.Clear();
@@ -247,6 +268,9 @@ namespace Mirage.Collections
             var newItem = reader.Read<T>();
             if (apply)
             {
+                if (MaxElements.HasValue && _objects.Count >= MaxElements.Value)
+                    throw new InvalidOperationException($"SyncList capacity would exceed MaxElements limit of {MaxElements.Value}");
+
                 _objects.Add(newItem);
                 OnInsert?.Invoke(_objects.Count - 1, newItem);
             }
@@ -267,6 +291,9 @@ namespace Mirage.Collections
             var newItem = reader.Read<T>();
             if (apply)
             {
+                if (MaxElements.HasValue && _objects.Count >= MaxElements.Value)
+                    throw new InvalidOperationException($"SyncList capacity would exceed MaxElements limit of {MaxElements.Value}");
+
                 _objects.Insert(index, newItem);
                 OnInsert?.Invoke(index, newItem);
             }
@@ -297,6 +324,9 @@ namespace Mirage.Collections
 
         public void Add(T item)
         {
+            if (MaxElements.HasValue && _objects.Count >= MaxElements.Value)
+                throw new InvalidOperationException($"SyncList capacity would exceed MaxElements limit of {MaxElements.Value}");
+
             _objects.Add(item);
             OnInsert?.Invoke(_objects.Count - 1, item);
             AddOperation(Operation.OP_ADD, _objects.Count - 1, item);
@@ -363,6 +393,9 @@ namespace Mirage.Collections
 
         public void Insert(int index, T item)
         {
+            if (MaxElements.HasValue && _objects.Count >= MaxElements.Value)
+                throw new InvalidOperationException($"SyncList capacity would exceed MaxElements limit of {MaxElements.Value}");
+
             _objects.Insert(index, item);
             OnInsert?.Invoke(index, item);
             AddOperation(Operation.OP_INSERT, index, item);

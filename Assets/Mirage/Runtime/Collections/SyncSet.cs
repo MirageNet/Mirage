@@ -61,9 +61,18 @@ namespace Mirage.Collections
         // so we need to skip them
         private int _changesAhead;
 
+        public readonly int? MaxElements;
+
         public SyncSet(ISet<T> objects)
         {
             this.objects = objects;
+            MaxElements = null;
+        }
+
+        public SyncSet(ISet<T> objects, int maxElements)
+        {
+            this.objects = objects;
+            MaxElements = maxElements;
         }
 
         public void Reset()
@@ -144,6 +153,9 @@ namespace Mirage.Collections
             // if init,  write the full list content
             var count = (int)reader.ReadPackedUInt32();
 
+            if (MaxElements.HasValue && count > MaxElements.Value)
+                throw new InvalidOperationException($"SyncSet capacity would exceed MaxElements limit of {MaxElements.Value}");
+
             objects.Clear();
             _changes.Clear();
             OnClear?.Invoke();
@@ -213,6 +225,9 @@ namespace Mirage.Collections
             var item = reader.Read<T>();
             if (apply)
             {
+                if (MaxElements.HasValue && !objects.Contains(item) && objects.Count >= MaxElements.Value)
+                    throw new InvalidOperationException($"SyncSet capacity would exceed MaxElements limit of {MaxElements.Value}");
+
                 objects.Add(item);
                 OnAdd?.Invoke(item);
             }
@@ -239,6 +254,9 @@ namespace Mirage.Collections
 
         public bool Add(T item)
         {
+            if (MaxElements.HasValue && !objects.Contains(item) && objects.Count >= MaxElements.Value)
+                throw new InvalidOperationException($"SyncSet capacity would exceed MaxElements limit of {MaxElements.Value}");
+
             if (objects.Add(item))
             {
                 OnAdd?.Invoke(item);
@@ -361,7 +379,9 @@ namespace Mirage.Collections
 
     public class SyncHashSet<T> : SyncSet<T>
     {
-        public SyncHashSet() : this(EqualityComparer<T>.Default) { }
+        public SyncHashSet() : base(new HashSet<T>(EqualityComparer<T>.Default)) { }
+
+        public SyncHashSet(int maxElements, IEqualityComparer<T> comparer = null) : base(new HashSet<T>(comparer ?? EqualityComparer<T>.Default), maxElements) { }
 
         public SyncHashSet(IEqualityComparer<T> comparer) : base(new HashSet<T>(comparer ?? EqualityComparer<T>.Default)) { }
 
@@ -371,7 +391,9 @@ namespace Mirage.Collections
 
     public class SyncSortedSet<T> : SyncSet<T>
     {
-        public SyncSortedSet() : this(Comparer<T>.Default) { }
+        public SyncSortedSet() : base(new SortedSet<T>(Comparer<T>.Default)) { }
+
+        public SyncSortedSet(int maxElements, IComparer<T> comparer = null) : base(new SortedSet<T>(comparer ?? Comparer<T>.Default), maxElements) { }
 
         public SyncSortedSet(IComparer<T> comparer) : base(new SortedSet<T>(comparer ?? Comparer<T>.Default)) { }
 

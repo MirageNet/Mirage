@@ -92,9 +92,18 @@ namespace Mirage.Collections
         // this should be called after a successfull sync
         public void Flush() => _changes.Clear();
 
+        public readonly int? MaxElements;
+
         public SyncIDictionary(IDictionary<TKey, TValue> objects)
         {
             this.objects = objects;
+            MaxElements = null;
+        }
+
+        public SyncIDictionary(IDictionary<TKey, TValue> objects, int maxElements)
+        {
+            this.objects = objects;
+            MaxElements = maxElements;
         }
 
         private void AddOperation(Operation op, TKey key, TValue item)
@@ -159,6 +168,9 @@ namespace Mirage.Collections
         {
             // if init,  write the full list content
             var count = (int)reader.ReadPackedUInt32();
+
+            if (MaxElements.HasValue && count > MaxElements.Value)
+                throw new InvalidOperationException($"SyncDictionary capacity would exceed MaxElements limit of {MaxElements.Value}");
 
             objects.Clear();
             _changes.Clear();
@@ -235,6 +247,9 @@ namespace Mirage.Collections
             var item = reader.Read<TValue>();
             if (apply)
             {
+                if (MaxElements.HasValue && !objects.ContainsKey(key) && objects.Count >= MaxElements.Value)
+                    throw new InvalidOperationException($"SyncDictionary capacity would exceed MaxElements limit of {MaxElements.Value}");
+
                 objects[key] = item;
                 OnInsert?.Invoke(key, item);
             }
@@ -306,6 +321,9 @@ namespace Mirage.Collections
                 }
                 else
                 {
+                    if (MaxElements.HasValue && objects.Count >= MaxElements.Value)
+                        throw new InvalidOperationException($"SyncDictionary capacity would exceed MaxElements limit of {MaxElements.Value}");
+
                     objects[i] = value;
                     OnInsert?.Invoke(i, value);
                     AddOperation(Operation.OP_ADD, i, value);
@@ -317,6 +335,9 @@ namespace Mirage.Collections
 
         public void Add(TKey key, TValue value)
         {
+            if (MaxElements.HasValue && objects.Count >= MaxElements.Value)
+                throw new InvalidOperationException($"SyncDictionary capacity would exceed MaxElements limit of {MaxElements.Value}");
+
             objects.Add(key, value);
             OnInsert?.Invoke(key, value);
             AddOperation(Operation.OP_ADD, key, value);
@@ -367,6 +388,10 @@ namespace Mirage.Collections
     public class SyncDictionary<TKey, TValue> : SyncIDictionary<TKey, TValue>
     {
         public SyncDictionary() : base(new Dictionary<TKey, TValue>())
+        {
+        }
+
+        public SyncDictionary(int maxElements, IEqualityComparer<TKey> eq = null) : base(new Dictionary<TKey, TValue>(eq), maxElements)
         {
         }
 
