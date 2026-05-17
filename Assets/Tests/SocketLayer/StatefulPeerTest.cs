@@ -116,7 +116,8 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             const int aboveMTU = MAX_PACKET_SIZE + 10;
             socket.AsMock().QueueReceiveCall(new byte[1000], clientStatefulHandle, length: aboveMTU);
 
-            LogAssert.Expect(LogType.Error, $"Socket returned length above MTU. MaxPacketSize:{MAX_PACKET_SIZE} length:{aboveMTU}");
+            // Expect error log because packet length above MTU is invalid and triggers safe disconnect
+            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex($".*Socket returned length above MTU. MaxPacketSize:{MAX_PACKET_SIZE} length:{aboveMTU}"));
             peer.UpdateTest();
 
             disconnectAction.Received(1).Invoke(conn, DisconnectReason.InvalidPacket);

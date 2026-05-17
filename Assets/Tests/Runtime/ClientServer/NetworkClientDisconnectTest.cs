@@ -85,6 +85,9 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
             (var clientSocket, var serverEndPoint) = GetSocketAndEndPoint();
             var badMessage = CreateInvalidPacket();
 
+            // Expect error log because invalid packet triggers server disconnect
+            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex(".*Received invalid fragment. Disconnecting.*"));
+
             clientSocket.Send(serverEndPoint, badMessage.AsSpan(0, 20));
 
             var called = 0;
