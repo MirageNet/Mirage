@@ -1,13 +1,15 @@
 ---
-title: Network Scene Manager
+title: (Legacy) Network Scene Manager
 ---
 # Using Network Scene Manager
 
-[NetworkSceneManager](/docs/reference/Mirage/NetworkSceneManager) contains methods and logic to help keep the scene in sync between server and client.
+:::warning Legacy Component
+`NetworkSceneManager` and `CharacterSpawner` are now considered legacy components and have been moved to the Examples folder. 
 
-:::caution Work In Progress
-This page is a work in progress
+For modern projects, we recommend using the **[NetworkSceneLoader](/docs/guides/scene-loading/network-scene-loader)** component or the **[Manual Scene Loading](/docs/guides/scene-loading/manual-scene-loading)** guide.
 :::
+
+[NetworkSceneManager](/docs/reference/Mirage/NetworkSceneManager) contains methods and logic to help keep the scene in sync between server and client.
 
 ### How to use
 

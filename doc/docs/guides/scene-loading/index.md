@@ -1,7 +1,7 @@
-# Loading scenes in Mirage
+# Loading Scenes in Mirage
 
-Use [NetworkSceneManager](/docs/guides/scene-loading/network-scene-manager) to help load scenes and sync them between server and client.
+There are several approaches to scene loading in Mirage, depending on how much control you need:
 
-To customize scene handling you can make a subclass and override the virtual methods.
-
-If you need more unique logic to load scenes you can have full control by following this [guide](/docs/guides/scene-loading/manual-scene-loading).
+- **[NetworkSceneLoader](/docs/guides/scene-loading/network-scene-loader)** — A ready-made component that implements the "Join Any Time" pattern. Recommended for most projects.
+- **[Manual Scene Loading](/docs/guides/scene-loading/manual-scene-loading)** — Full control over the scene loading flow using built-in messages. Use this if you need custom logic beyond what `NetworkSceneLoader` provides.
+- **[(Legacy) NetworkSceneManager](/docs/guides/scene-loading/network-scene-manager)** — Legacy component, kept for reference but not recommended for new projects.

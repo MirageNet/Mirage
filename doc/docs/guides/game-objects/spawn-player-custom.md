@@ -141,15 +141,21 @@ private CustomCharacter GetPrefab(CreateMMOCharacterMessage msg)
 
 ## Ready State
 
-:::danger Out of date!
-This is out of date and needs to be updated!
-:::
+In Mirage, players have a `SceneIsReady` state. The server uses this to determine if a player has finished loading the scene and is ready to receive spawned objects and state updates. 
 
-In addition to characters, players also have a "scene is ready" state. The server sends clients that are ready information about spawned game objects and state synchronization updates; clients which are not ready are not sent these updates. 
+### Server Authority
+By default, Mirage does not automatically spawn characters when a player connects. This is to prevent "Spawn Amplification" attacks and to give you full control over when a player enters the game.
 
-When a client initially connects to a server, their SceneIsReady property will be true. However initial spawning will not happen until a character has been added or you manually tell the server to send spawned objects.
+The recommended flow is the **"Join Any Time"** pattern:
+1. The Server tells the Client to load a scene using a `SceneMessage`.
+2. The Client loads the scene and sends back a `SceneReadyMessage`.
+3. The Server sets `player.SceneIsReady = true`.
+4. Only once the player is ready, the Server calls `ServerObjectManager.AddCharacter`.
 
-Once a client has completed all its pre-game setup, and all its Assets are loaded, it can send a character message. As seen in the example above this will tell the server to spawn the player's character using `ServerObjectManager.AddCharacter`. After the character is spawned mirage will automatically send a spawn message for the other spawned object to the client.
+### Using NetworkSceneLoader
+To simplify this process, you can use the [NetworkSceneLoader](/docs/guides/scene-loading/network-scene-loader) component provided in `Mirage.Components`. It implements this "Join Any Time" pattern for you, handling the messages and coordinating the character spawning once both the server and the client are synchronized on the same scene.
+
+If you are implementing your own spawner from scratch (like the example above), you should manually check `player.SceneIsReady` before spawning, or wait for the `SceneReadyMessage` handler as shown in the guides.
 
 ## Switching Characters
 

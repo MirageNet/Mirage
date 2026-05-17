@@ -1,6 +1,10 @@
 # Manual Scene Loading
 
-If [NetworkSceneManager](/docs/guides/scene-loading/network-scene-manager) doesn't work for your case you can control everything yourself.
+If [NetworkSceneLoader](/docs/guides/scene-loading/network-scene-loader) or [(Legacy) NetworkSceneManager](/docs/guides/scene-loading/network-scene-manager) don't work for your case you can control everything yourself.
+
+:::tip
+If you want a ready-made component that handles the common "join any time" pattern, see [NetworkSceneLoader](/docs/guides/scene-loading/network-scene-loader) before implementing your own.
+:::
 
 
 ## Using Messages
