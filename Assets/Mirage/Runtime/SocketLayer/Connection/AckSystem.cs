@@ -27,9 +27,9 @@ namespace Mirage.SocketLayer
 
         /// <summary>Smallest size a header for reliable packet, <see cref="RELIABLE_HEADER_SIZE"/> + 1 byte for fragment index</summary>
         public const int MIN_RELIABLE_FRAGMENT_HEADER_SIZE = RELIABLE_HEADER_SIZE + FRAGMENT_INDEX_SIZE;
-        private readonly RingBuffer<AckablePacket> _sentAckablePackets;
+        private RingBuffer<AckablePacket> _sentAckablePackets;
         private readonly Sequencer _reliableOrder;
-        private readonly RingBuffer<ReliableReceived> _reliableReceive;
+        private RingBuffer<ReliableReceived> _reliableReceive;
 
         // temp list for resending when processing sentqueue
         private readonly HashSet<ReliablePacket> _toResend = new HashSet<ReliablePacket>();
@@ -54,6 +54,9 @@ namespace Mirage.SocketLayer
 
         public readonly int SizePerFragment;
 
+        public RingBuffer<AckablePacket> SentAckablePackets => _sentAckablePackets;
+        public RingBuffer<ReliableReceived> ReliableReceive => _reliableReceive;
+
         /// <summary>
         /// most recent sequence received
         /// <para>will be sent with next message</para>
@@ -76,7 +79,9 @@ namespace Mirage.SocketLayer
         /// <param name="connection"></param>
         /// <param name="ackTimeout">how long after last send before sending empty ack</param>
         /// <param name="time"></param>
-        public AckSystem(IRawConnection connection, Config config, int maxPacketSize, ITime time, Pool<ByteBuffer> bufferPool, Action onInvalidPacket, ILogger logger = null, Metrics metrics = null)
+        public AckSystem(IRawConnection connection, Config config, int maxPacketSize, ITime time, Pool<ByteBuffer> bufferPool,
+            Pool<ReliablePacket> reliablePool, RingBuffer<AckablePacket> sentAckablePackets, RingBuffer<ReliableReceived> reliableReceive,
+            Action onInvalidPacket, ILogger logger = null, Metrics metrics = null)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
 
@@ -84,7 +89,7 @@ namespace Mirage.SocketLayer
             _connection = connection;
             _time = time;
             _bufferPool = bufferPool;
-            _reliablePool = new Pool<ReliablePacket>(ReliablePacket.CreateNew, 0, config.MaxReliablePacketsInSendBufferPerConnection);
+            _reliablePool = reliablePool;
             _metrics = metrics;
             _batch = new ReliableBatch(maxPacketSize, CreateReliableBuffer, SendReliablePacket);
 
@@ -101,9 +106,9 @@ namespace Mirage.SocketLayer
 
             var size = config.SequenceSize;
             if (size > 16) throw new ArgumentOutOfRangeException("SequenceSize", size, "SequenceSize has a max value of 16");
-            _sentAckablePackets = new RingBuffer<AckablePacket>(size, logger);
+            _sentAckablePackets = sentAckablePackets;
             _reliableOrder = new Sequencer(size);
-            _reliableReceive = new RingBuffer<ReliableReceived>(size, logger);
+            _reliableReceive = reliableReceive;
 
             // set lastest to value before 0 so that first packet will be received
             // max will be 1 less than 0
@@ -161,6 +166,10 @@ namespace Mirage.SocketLayer
 
                 SafeRelease(buffer);
             });
+
+            // clear so they can't be used after being put back into the pool in Peer.Dispose()
+            _sentAckablePackets = null;
+            _reliableReceive = null;
         }
 
 
@@ -730,7 +739,7 @@ namespace Mirage.SocketLayer
             return (receivedMask & ackBit) == 0u;
         }
 
-        private struct AckablePacket : IEquatable<AckablePacket>
+        public struct AckablePacket : IEquatable<AckablePacket>
         {
             public INotifyCallBack Token;
             public ReliablePacket ReliablePacket;

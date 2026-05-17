@@ -12,12 +12,19 @@ namespace Mirage.SocketLayer
         private readonly Batch _unreliableBatch;
         private readonly Pool<ByteBuffer> _bufferPool;
 
-        internal ReliableConnection(Peer peer, IConnectionHandle handle, IDataHandler dataHandler, Config config, int maxPacketSize, Time time, Pool<ByteBuffer> bufferPool, ILogger logger, Metrics metrics)
+        internal RingBuffer<AckSystem.AckablePacket> AckablePackets => _ackSystem.SentAckablePackets;
+        internal RingBuffer<AckSystem.ReliableReceived> ReliableReceive => _ackSystem.ReliableReceive;
+
+        internal ReliableConnection(Peer peer, IConnectionHandle handle, IDataHandler dataHandler, Config config, int maxPacketSize, Time time, Pool<ByteBuffer> bufferPool,
+            Pool<AckSystem.ReliablePacket> reliablePool, RingBuffer<AckSystem.AckablePacket> ackablePacket, RingBuffer<AckSystem.ReliableReceived> reliableReceive,
+            ILogger logger, Metrics metrics)
             : base(peer, handle, dataHandler, config, maxPacketSize, time, logger, metrics)
         {
             _bufferPool = bufferPool;
             _unreliableBatch = new ArrayBatch(_maxPacketSize, SendBatchInternal, PacketType.Unreliable);
-            _ackSystem = new AckSystem(this, config, maxPacketSize, time, bufferPool, () => DisconnectInternal(DisconnectReason.InvalidPacket), logger, metrics);
+            _ackSystem = new AckSystem(this, config, maxPacketSize, time, bufferPool,
+                reliablePool, ackablePacket, reliableReceive,
+                () => DisconnectInternal(DisconnectReason.InvalidPacket), logger, metrics);
         }
 
         private void SendBatchInternal(byte[] batch, int length)

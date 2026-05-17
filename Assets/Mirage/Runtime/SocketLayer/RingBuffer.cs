@@ -205,5 +205,18 @@ namespace Mirage.SocketLayer
             _read = 0;
             _write = 0;
         }
+
+        public void Reset()
+        {
+            for (var i = 0; i < _buffer.Length; i++)
+            {
+                _buffer[i] = Option.None();
+            }
+
+            _count = 0;
+            _read = 0;
+            _write = 0;
+            Sequencer.Reset();
+        }
     }
 }

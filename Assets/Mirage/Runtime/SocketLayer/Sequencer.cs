@@ -128,5 +128,10 @@ namespace Mirage.SocketLayer
             from <<= _shift;
             return ((long)(from - to)) >> _shift;
         }
+
+        public void Reset()
+        {
+            _sequence = 0;
+        }
     }
 }

@@ -46,6 +46,9 @@ namespace Mirage.SocketLayer
         private readonly Time _time;
         private readonly ConnectKeyValidator _connectKeyValidator;
         internal readonly Pool<ByteBuffer> _bufferPool;
+        private readonly Pool<AckSystem.ReliablePacket> _reliablePacketPool;
+        private readonly Pool<RingBuffer<AckSystem.AckablePacket>> _ackablePacketPool;
+        private readonly Pool<RingBuffer<AckSystem.ReliableReceived>> _reliableReceivePool;
         internal readonly byte[] _fragmentBuffer;
         internal bool _fragmentBufferInUse;
         private readonly List<Connection> _connections = new List<Connection>();
@@ -76,6 +79,8 @@ namespace Mirage.SocketLayer
                 throw new ArgumentException($"Max packet size too small for AckSystem header", nameof(maxPacketSize));
             if (_config.MaxReliableFragments > 255)
                 throw new ArgumentOutOfRangeException(nameof(_config.MaxReliableFragments), _config.MaxReliableFragments, "MaxReliableFragments must be less than or equal to 255");
+            if (_config.SequenceSize > 16)
+                throw new ArgumentOutOfRangeException("SequenceSize", _config.SequenceSize, "SequenceSize has a max value of 16");
 
             _socket = socket ?? throw new ArgumentNullException(nameof(socket));
             _dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
@@ -89,6 +94,10 @@ namespace Mirage.SocketLayer
             {
                 _fragmentBuffer = new byte[GetMaxReliableMessageSize()];
             }
+
+            _reliablePacketPool = new Pool<AckSystem.ReliablePacket>(AckSystem.ReliablePacket.CreateNew, 0, _config.MaxReliablePacketsInSendBufferPerConnection);
+            _ackablePacketPool = new Pool<RingBuffer<AckSystem.AckablePacket>>((p) => new RingBuffer<AckSystem.AckablePacket>(_config.SequenceSize, _logger), 0, _config.MaxConnections);
+            _reliableReceivePool = new Pool<RingBuffer<AckSystem.ReliableReceived>>((p) => new RingBuffer<AckSystem.ReliableReceived>(_config.SequenceSize, _logger), 0, _config.MaxConnections);
 
             socket.SetTickEvents(_maxPacketSize, OnDataEvent, OnDisconnectEvent);
 
@@ -669,9 +678,21 @@ namespace Mirage.SocketLayer
 
             Connection connection;
             if (_config.DisableReliableLayer)
+            {
                 connection = new NoReliableConnection(this, handle, _dataHandler, _config, _maxPacketSize, _time, _logger, _metrics);
+            }
             else
-                connection = new ReliableConnection(this, handle, _dataHandler, _config, _maxPacketSize, _time, _bufferPool, _logger, _metrics);
+            {
+                var ackablePacket = _ackablePacketPool.Take();
+                ackablePacket.Reset();
+
+                var reliableReceive = _reliableReceivePool.Take();
+                reliableReceive.Reset();
+
+                connection = new ReliableConnection(this, handle, _dataHandler, _config, _maxPacketSize, _time, _bufferPool,
+                    _reliablePacketPool, ackablePacket, reliableReceive,
+                    _logger, _metrics);
+            }
 
             connection.SetReceiveTime();
 
@@ -781,6 +802,14 @@ namespace Mirage.SocketLayer
                 }
 
 
+                RingBuffer<AckSystem.AckablePacket> ackablePackets = null;
+                RingBuffer<AckSystem.ReliableReceived> reliableReceive = null;
+                if (connection is ReliableConnection reliableConnection)
+                {
+                    ackablePackets = reliableConnection.AckablePackets;
+                    reliableReceive = reliableConnection.ReliableReceive;
+                }
+
                 // try/catch just incase something goes wrong
                 // if it does we dont want to be stuck running dispose every frame
                 try
@@ -791,6 +820,12 @@ namespace Mirage.SocketLayer
                 catch (Exception ex)
                 {
                     _logger?.Error($"Connection.Dispose threw: {ex}");
+                }
+
+                if (ackablePackets != null)
+                {
+                    _ackablePacketPool.Put(ackablePackets);
+                    _reliableReceivePool.Put(reliableReceive);
                 }
             }
 
