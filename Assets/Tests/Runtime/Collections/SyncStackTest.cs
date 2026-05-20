@@ -15,8 +15,8 @@ namespace Mirage.Tests.Runtime
         [SetUp]
         public void SetUp()
         {
-            serverSyncStack = new SyncStack<string>();
-            clientSyncStack = new SyncStack<string>();
+            serverSyncStack = new SyncStack<string>(100);
+            clientSyncStack = new SyncStack<string>(100);
 
             // add some data to the stack
             serverSyncStack.Push("Hello");
@@ -261,7 +261,7 @@ namespace Mirage.Tests.Runtime
 
             // make old client the host
             var hostList = clientSyncStack;
-            var clientList2 = new SyncStack<string>();
+            var clientList2 = new SyncStack<string>(100);
 
             Assert.That(hostList.IsReadOnly, Is.False);
 
@@ -302,8 +302,8 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void SyncStackIntTest()
         {
-            var serverList = new SyncStack<int>();
-            var clientList = new SyncStack<int>();
+            var serverList = new SyncStack<int>(100);
+            var clientList = new SyncStack<int>(100);
 
             serverList.Push(1);
             serverList.Push(2);
@@ -316,8 +316,8 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void SyncStackBoolTest()
         {
-            var serverList = new SyncStack<bool>();
-            var clientList = new SyncStack<bool>();
+            var serverList = new SyncStack<bool>(100);
+            var clientList = new SyncStack<bool>(100);
 
             serverList.Push(true);
             serverList.Push(false);
@@ -330,8 +330,8 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void SyncStackUIntTest()
         {
-            var serverList = new SyncStack<uint>();
-            var clientList = new SyncStack<uint>();
+            var serverList = new SyncStack<uint>(100);
+            var clientList = new SyncStack<uint>(100);
 
             serverList.Push(1U);
             serverList.Push(2U);
@@ -344,8 +344,8 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void SyncStackFloatTest()
         {
-            var serverList = new SyncStack<float>();
-            var clientList = new SyncStack<float>();
+            var serverList = new SyncStack<float>(100);
+            var clientList = new SyncStack<float>(100);
 
             serverList.Push(1.0F);
             serverList.Push(2.0F);
@@ -358,8 +358,8 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void TestStackOrder()
         {
-            var serverList = new SyncStack<int>();
-            var clientList = new SyncStack<int>();
+            var serverList = new SyncStack<int>(100);
+            var clientList = new SyncStack<int>(100);
 
             serverList.Push(1);
             serverList.Push(2);

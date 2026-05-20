@@ -10,7 +10,7 @@ namespace Mirage.Tests.Runtime.Syncing
 {
     public class MockPlayerWithList : MockPlayer
     {
-        public SyncList<int> MySyncList = new SyncList<int>();
+        public SyncList<int> MySyncList = new SyncList<int>(100);
     }
 
     // different Directions to test

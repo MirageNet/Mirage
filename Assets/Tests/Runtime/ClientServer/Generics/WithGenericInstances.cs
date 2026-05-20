@@ -23,7 +23,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         public event Action<MyStruct<int>, MyStruct<int>> syncEvent;
         public event Action<int, int> onSyncHook;
 
-        public readonly SyncList<MyStruct<int>> myList = new SyncList<MyStruct<int>>();
+        public readonly SyncList<MyStruct<int>> myList = new SyncList<MyStruct<int>>(100);
         [SyncVar]
         public MyStruct<int> myVar;
 

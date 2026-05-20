@@ -182,7 +182,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void InitSyncObject()
         {
-            ISyncObject syncObject = new SyncList<bool>();
+            ISyncObject syncObject = new SyncList<bool>(100);
             InitSyncObject(syncObject);
             Assert.That(syncObjects.Count, Is.EqualTo(1));
             Assert.That(syncObjects[0], Is.EqualTo(syncObject));

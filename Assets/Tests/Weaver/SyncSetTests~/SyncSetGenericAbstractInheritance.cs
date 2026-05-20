@@ -8,8 +8,14 @@ namespace SyncSetTests.SyncSetGenericAbstractInheritance
         readonly SomeSetInt superSyncSetString = new SomeSetInt();
 
 
-        public abstract class SomeSet<T> : SyncHashSet<T> { }
+        public abstract class SomeSet<T> : SyncHashSet<T>
+        {
+            protected SomeSet() : base(10) {}
+        }
 
-        public class SomeSetInt : SomeSet<int> { }
+        public class SomeSetInt : SomeSet<int>
+        {
+            public SomeSetInt() : base() {}
+        }
     }
 }

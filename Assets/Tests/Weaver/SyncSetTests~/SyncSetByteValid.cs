@@ -5,7 +5,10 @@ namespace SyncSetTests.SyncSetByteValid
 {
     class SyncSetByteValid : NetworkBehaviour
     {
-        class MyByteClass : SyncHashSet<byte> { };
+        class MyByteClass : SyncHashSet<byte>
+        {
+            public MyByteClass() : base(10) {}
+        }
 
         MyByteClass Foo;
     }

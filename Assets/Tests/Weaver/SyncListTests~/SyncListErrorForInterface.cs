@@ -11,5 +11,8 @@ namespace SyncListTests.SyncListErrorForInterface
     {
         int someNumber { get; set; }
     }
-    class MyInterfaceList : SyncList<MyInterface> { }
+    class MyInterfaceList : SyncList<MyInterface>
+    {
+        public MyInterfaceList() : base(10) {}
+    }
 }

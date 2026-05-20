@@ -8,7 +8,7 @@ namespace Mirage.Tests.Runtime
     {
         // note synclists must be a property of a NetworkBehavior so that
         // the weaver generates the reader and writer for the object
-        public readonly SyncList<TestObject> myList = new SyncList<TestObject>();
+        public readonly SyncList<TestObject> myList = new SyncList<TestObject>(100);
     }
 
     public class SyncListClassTest
@@ -16,8 +16,8 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void RemoveShouldRemoveItem()
         {
-            var serverList = new SyncList<TestObject>();
-            var clientList = new SyncList<TestObject>();
+            var serverList = new SyncList<TestObject>(100);
+            var clientList = new SyncList<TestObject>(100);
 
             SyncObjectHelper.SerializeAllTo(serverList, clientList);
 
@@ -43,8 +43,8 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void ClearShouldClearAll()
         {
-            var serverList = new SyncList<TestObject>();
-            var clientList = new SyncList<TestObject>();
+            var serverList = new SyncList<TestObject>(100);
+            var clientList = new SyncList<TestObject>(100);
 
             SyncObjectHelper.SerializeAllTo(serverList, clientList);
 

@@ -13,6 +13,9 @@ namespace SyncListTests.SyncListNestedStruct
             public float floatingpotato;
             public double givemetwopotatoes;
         }
-        class MyNestedStructList : SyncList<MyNestedStruct> { }
+        class MyNestedStructList : SyncList<MyNestedStruct>
+        {
+            public MyNestedStructList() : base(10) {}
+        }
     }
 }

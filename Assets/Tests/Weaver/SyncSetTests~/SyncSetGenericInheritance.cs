@@ -8,8 +8,14 @@ namespace SyncSetTests.SyncSetGenericInheritance
         readonly SomeSetInt someSet = new SomeSetInt();
 
 
-        public class SomeSet<T> : SyncHashSet<T> { }
+        public class SomeSet<T> : SyncHashSet<T>
+        {
+            public SomeSet() : base(10) {}
+        }
 
-        public class SomeSetInt : SomeSet<int> { }
+        public class SomeSetInt : SomeSet<int>
+        {
+            public SomeSetInt() : base() {}
+        }
     }
 }

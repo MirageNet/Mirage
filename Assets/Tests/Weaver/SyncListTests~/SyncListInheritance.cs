@@ -10,7 +10,7 @@ namespace SyncListTests.SyncListInheritance
 
         public class SuperSyncListString : SyncList<string>
         {
-
+            public SuperSyncListString() : base(10) {}
         }
     }
 }

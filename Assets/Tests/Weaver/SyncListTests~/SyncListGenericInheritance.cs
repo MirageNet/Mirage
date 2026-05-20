@@ -8,8 +8,14 @@ namespace SyncListTests.SyncListGenericInheritance
         readonly SomeListInt someList = new SomeListInt();
 
 
-        public class SomeList<T> : SyncList<T> { }
+        public class SomeList<T> : SyncList<T>
+        {
+            public SomeList() : base(10) {}
+        }
 
-        public class SomeListInt : SomeList<int> { }
+        public class SomeListInt : SomeList<int>
+        {
+            public SomeListInt() : base() {}
+        }
     }
 }

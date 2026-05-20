@@ -8,8 +8,14 @@ namespace SyncListTests.SyncListGenericAbstractInheritance
         readonly SomeListInt superSyncListString = new SomeListInt();
 
 
-        public abstract class SomeList<T> : SyncList<T> { }
+        public abstract class SomeList<T> : SyncList<T>
+        {
+            protected SomeList() : base(10) {}
+        }
 
-        public class SomeListInt : SomeList<int> { }
+        public class SomeListInt : SomeList<int>
+        {
+            public SomeListInt() : base() {}
+        }
     }
 }

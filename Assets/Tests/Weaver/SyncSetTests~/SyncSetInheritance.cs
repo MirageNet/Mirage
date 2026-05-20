@@ -8,8 +8,14 @@ namespace SyncSetTests.SyncSetInheritance
         readonly SuperSet superSet = new SuperSet();
 
 
-        public class SomeSet : SyncHashSet<string> { }
+        public class SomeSet : SyncHashSet<string>
+        {
+            public SomeSet() : base(10) {}
+        }
 
-        public class SuperSet : SomeSet { }
+        public class SuperSet : SomeSet
+        {
+            public SuperSet() : base() {}
+        }
     }
 }

@@ -1,11 +1,11 @@
-﻿using Mirage.Collections;
+using Mirage.Collections;
 
 namespace Mirage.Tests.GUiTests
 {
     public class SyncListGuiTest : NetworkBehaviour
     {
-        public readonly SyncList<int> SyncList = new SyncList<int>();
-        [ShowInInspector] private readonly SyncList<string> _strings = new SyncList<string>();
+        public readonly SyncList<int> SyncList = new SyncList<int>(100);
+        [ShowInInspector] private readonly SyncList<string> _strings = new SyncList<string>(100);
 
         public SyncListGuiTest()
         {

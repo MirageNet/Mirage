@@ -61,13 +61,7 @@ namespace Mirage.Collections
         // so we need to skip them
         private int _changesAhead;
 
-        public readonly int? MaxElements;
-
-        public SyncSet(ISet<T> objects)
-        {
-            this.objects = objects;
-            MaxElements = null;
-        }
+        public readonly int MaxElements;
 
         public SyncSet(ISet<T> objects, int maxElements)
         {
@@ -153,8 +147,8 @@ namespace Mirage.Collections
             // if init,  write the full list content
             var count = (int)reader.ReadPackedUInt32();
 
-            if (MaxElements.HasValue && count > MaxElements.Value)
-                throw new InvalidOperationException($"SyncSet capacity would exceed MaxElements limit of {MaxElements.Value}");
+            if (count > MaxElements)
+                throw new InvalidOperationException($"SyncSet capacity would exceed MaxElements limit of {MaxElements}");
 
             objects.Clear();
             _changes.Clear();
@@ -225,8 +219,8 @@ namespace Mirage.Collections
             var item = reader.Read<T>();
             if (apply)
             {
-                if (MaxElements.HasValue && !objects.Contains(item) && objects.Count >= MaxElements.Value)
-                    throw new InvalidOperationException($"SyncSet capacity would exceed MaxElements limit of {MaxElements.Value}");
+                if (!objects.Contains(item) && objects.Count >= MaxElements)
+                    throw new InvalidOperationException($"SyncSet capacity would exceed MaxElements limit of {MaxElements}");
 
                 objects.Add(item);
                 OnAdd?.Invoke(item);
@@ -254,8 +248,8 @@ namespace Mirage.Collections
 
         public bool Add(T item)
         {
-            if (MaxElements.HasValue && !objects.Contains(item) && objects.Count >= MaxElements.Value)
-                throw new InvalidOperationException($"SyncSet capacity would exceed MaxElements limit of {MaxElements.Value}");
+            if (!objects.Contains(item) && objects.Count >= MaxElements)
+                throw new InvalidOperationException($"SyncSet capacity would exceed MaxElements limit of {MaxElements}");
 
             if (objects.Add(item))
             {
@@ -379,11 +373,7 @@ namespace Mirage.Collections
 
     public class SyncHashSet<T> : SyncSet<T>
     {
-        public SyncHashSet() : base(new HashSet<T>(EqualityComparer<T>.Default)) { }
-
         public SyncHashSet(int maxElements, IEqualityComparer<T> comparer = null) : base(new HashSet<T>(comparer ?? EqualityComparer<T>.Default), maxElements) { }
-
-        public SyncHashSet(IEqualityComparer<T> comparer) : base(new HashSet<T>(comparer ?? EqualityComparer<T>.Default)) { }
 
         // allocation free enumerator
         public new HashSet<T>.Enumerator GetEnumerator() => ((HashSet<T>)objects).GetEnumerator();
@@ -391,11 +381,7 @@ namespace Mirage.Collections
 
     public class SyncSortedSet<T> : SyncSet<T>
     {
-        public SyncSortedSet() : base(new SortedSet<T>(Comparer<T>.Default)) { }
-
         public SyncSortedSet(int maxElements, IComparer<T> comparer = null) : base(new SortedSet<T>(comparer ?? Comparer<T>.Default), maxElements) { }
-
-        public SyncSortedSet(IComparer<T> comparer) : base(new SortedSet<T>(comparer ?? Comparer<T>.Default)) { }
 
         // allocation free enumerator
         public new SortedSet<T>.Enumerator GetEnumerator() => ((SortedSet<T>)objects).GetEnumerator();

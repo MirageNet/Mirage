@@ -17,8 +17,8 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void ListIsDirtyWhenModifingAndSettingStruct()
         {
-            var serverList = new SyncList<TestPlayer>();
-            var clientList = new SyncList<TestPlayer>();
+            var serverList = new SyncList<TestPlayer>(100);
+            var clientList = new SyncList<TestPlayer>(100);
             SyncObjectHelper.SerializeAllTo(serverList, clientList);
             serverList.Add(new TestPlayer { item = new TestItem { price = 10 } });
             SyncObjectHelper.SerializeDeltaTo(serverList, clientList);

@@ -9,7 +9,7 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
     #region No OnSerialize/OnDeserialize override
     internal abstract class AbstractBehaviour : NetworkBehaviour
     {
-        public readonly SyncList<bool> syncListInAbstract = new SyncList<bool>();
+        public readonly SyncList<bool> syncListInAbstract = new SyncList<bool>(100);
 
         [SyncVar]
         public int SyncFieldInAbstract;
@@ -17,7 +17,7 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
 
     internal class BehaviourWithSyncVar : NetworkBehaviour
     {
-        public readonly SyncList<bool> syncList = new SyncList<bool>();
+        public readonly SyncList<bool> syncList = new SyncList<bool>(100);
 
         [SyncVar]
         public int SyncField;
@@ -30,7 +30,7 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
 
     internal class OverrideBehaviourWithSyncVarFromSyncVar : AbstractBehaviour
     {
-        public readonly SyncList<bool> syncListInOverride = new SyncList<bool>();
+        public readonly SyncList<bool> syncListInOverride = new SyncList<bool>(100);
 
         [SyncVar]
         public int SyncFieldInOverride;
@@ -70,7 +70,7 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
 
     internal class BehaviourWithSyncVarWithOnSerialize : NetworkBehaviour
     {
-        public readonly SyncList<bool> syncList = new SyncList<bool>();
+        public readonly SyncList<bool> syncList = new SyncList<bool>(100);
 
         [SyncVar]
         public int SyncField;
@@ -107,7 +107,7 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
 
     internal class OverrideBehaviourWithSyncVarFromSyncVarWithOnSerialize : AbstractBehaviour
     {
-        public readonly SyncList<bool> syncListInOverride = new SyncList<bool>();
+        public readonly SyncList<bool> syncListInOverride = new SyncList<bool>(100);
 
         [SyncVar]
         public int SyncFieldInOverride;

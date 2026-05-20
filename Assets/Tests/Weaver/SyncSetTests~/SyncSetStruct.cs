@@ -13,6 +13,9 @@ namespace SyncSetTests.SyncSetStruct
             public float floatingpotato;
             public double givemetwopotatoes;
         }
-        class MyStructSet : SyncHashSet<MyStruct> { }
+        class MyStructSet : SyncHashSet<MyStruct>
+        {
+            public MyStructSet() : base(10) {}
+        }
     }
 }

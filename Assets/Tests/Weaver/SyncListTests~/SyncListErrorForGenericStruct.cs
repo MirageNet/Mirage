@@ -13,6 +13,9 @@ namespace SyncListTests.SyncListErrorForGenericStruct
             T genericpotato;
         }
 
-        class MyGenericStructList : SyncList<MyGenericStruct<float>> { };
+        class MyGenericStructList : SyncList<MyGenericStruct<float>>
+        {
+            public MyGenericStructList() : base(10) {}
+        }
     }
 }

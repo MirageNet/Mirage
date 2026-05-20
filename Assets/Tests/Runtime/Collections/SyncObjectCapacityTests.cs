@@ -6,12 +6,7 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
 {
     public class SyncListCapacityTests
     {
-        [Test]
-        public void SyncList_DefaultMaxElementsIsNull()
-        {
-            var list = new SyncList<int>();
-            Assert.That(list.MaxElements, Is.Null);
-        }
+
 
         [Test]
         public void SyncList_ConstructorSetsMaxElements()
@@ -43,7 +38,7 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
         [Test]
         public void SyncList_ReaderSide_AllAddPastLimitThrows()
         {
-            var serverList = new SyncList<int>();
+            var serverList = new SyncList<int>(100);
             serverList.Add(1);
             serverList.Add(2);
             serverList.Add(3);
@@ -56,7 +51,7 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
         [Test]
         public void SyncList_ReaderSide_DeltaAddPastLimitThrows()
         {
-            var serverList = new SyncList<int>();
+            var serverList = new SyncList<int>(100);
             var clientList = new SyncList<int>(2);
 
             SyncObjectHelper.SerializeAllTo(serverList, clientList);
@@ -72,12 +67,7 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
 
     public class SyncDictionaryCapacityTests
     {
-        [Test]
-        public void SyncDictionary_DefaultMaxElementsIsNull()
-        {
-            var dict = new SyncDictionary<int, string>();
-            Assert.That(dict.MaxElements, Is.Null);
-        }
+
 
         [Test]
         public void SyncDictionary_ConstructorSetsMaxElements()
@@ -119,7 +109,7 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
         [Test]
         public void SyncDictionary_ReaderSide_AllAddPastLimitThrows()
         {
-            var serverDict = new SyncDictionary<int, string>();
+            var serverDict = new SyncDictionary<int, string>(100);
             serverDict.Add(1, "one");
             serverDict.Add(2, "two");
             serverDict.Add(3, "three");
@@ -132,7 +122,7 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
         [Test]
         public void SyncDictionary_ReaderSide_DeltaAddPastLimitThrows()
         {
-            var serverDict = new SyncDictionary<int, string>();
+            var serverDict = new SyncDictionary<int, string>(100);
             var clientDict = new SyncDictionary<int, string>(2);
 
             SyncObjectHelper.SerializeAllTo(serverDict, clientDict);
@@ -148,12 +138,7 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
 
     public class SyncSetCapacityTests
     {
-        [Test]
-        public void SyncSet_DefaultMaxElementsIsNull()
-        {
-            var set = new SyncHashSet<int>();
-            Assert.That(set.MaxElements, Is.Null);
-        }
+
 
         [Test]
         public void SyncSet_ConstructorSetsMaxElements()
@@ -185,7 +170,7 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
         [Test]
         public void SyncSet_ReaderSide_AllAddPastLimitThrows()
         {
-            var serverSet = new SyncHashSet<int>();
+            var serverSet = new SyncHashSet<int>(100);
             serverSet.Add(1);
             serverSet.Add(2);
             serverSet.Add(3);
@@ -198,7 +183,7 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
         [Test]
         public void SyncSet_ReaderSide_DeltaAddPastLimitThrows()
         {
-            var serverSet = new SyncHashSet<int>();
+            var serverSet = new SyncHashSet<int>(100);
             var clientSet = new SyncHashSet<int>(2);
 
             SyncObjectHelper.SerializeAllTo(serverSet, clientSet);
@@ -214,12 +199,7 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
 
     public class SyncStackCapacityTests
     {
-        [Test]
-        public void SyncStack_DefaultMaxElementsIsNull()
-        {
-            var stack = new SyncStack<int>();
-            Assert.That(stack.MaxElements, Is.Null);
-        }
+
 
         [Test]
         public void SyncStack_ConstructorSetsMaxElements()
@@ -241,7 +221,7 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
         [Test]
         public void SyncStack_ReaderSide_AllAddPastLimitThrows()
         {
-            var serverStack = new SyncStack<int>();
+            var serverStack = new SyncStack<int>(100);
             serverStack.Push(1);
             serverStack.Push(2);
             serverStack.Push(3);
@@ -254,7 +234,7 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
         [Test]
         public void SyncStack_ReaderSide_DeltaPushPastLimitThrows()
         {
-            var serverStack = new SyncStack<int>();
+            var serverStack = new SyncStack<int>(100);
             var clientStack = new SyncStack<int>(2);
 
             SyncObjectHelper.SerializeAllTo(serverStack, clientStack);

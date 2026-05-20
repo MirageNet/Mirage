@@ -11,6 +11,7 @@ namespace Mirage.Tests.Runtime
     {
         public class SyncDictionaryIntString : SyncDictionary<int, string>
         {
+            public SyncDictionaryIntString() : base(100) {}
         }
 
         private SyncDictionaryIntString serverSyncDictionary;

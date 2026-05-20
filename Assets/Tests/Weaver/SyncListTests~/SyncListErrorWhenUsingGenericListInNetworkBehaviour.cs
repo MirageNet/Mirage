@@ -8,6 +8,9 @@ namespace SyncListTests.SyncListErrorWhenUsingGenericListInNetworkBehaviour
         readonly SomeList<int> someList;
 
 
-        public class SomeList<T> : SyncList<T> { }
+        public class SomeList<T> : SyncList<T>
+        {
+            public SomeList() : base(10) {}
+        }
     }
 }

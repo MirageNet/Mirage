@@ -5,7 +5,10 @@ namespace SyncDictionaryTests.SyncDictionary
 {
     class SyncDictionaryValid : NetworkBehaviour
     {
-        public class SyncDictionaryIntString : SyncDictionary<int, string> { }
+        public class SyncDictionaryIntString : SyncDictionary<int, string>
+        {
+            public SyncDictionaryIntString() : base(10) {}
+        }
 
         public SyncDictionaryIntString Foo;
     }

@@ -14,8 +14,8 @@ namespace Mirage.Tests.Runtime
         [SetUp]
         public void SetUp()
         {
-            serverSyncList = new SyncList<string>();
-            clientSyncList = new SyncList<string>();
+            serverSyncList = new SyncList<string>(100);
+            clientSyncList = new SyncList<string>(100);
 
             // add some data to the list
             serverSyncList.Add("Hello");
@@ -205,8 +205,8 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void SyncListIntest()
         {
-            var serverList = new SyncList<int>();
-            var clientList = new SyncList<int>();
+            var serverList = new SyncList<int>(100);
+            var clientList = new SyncList<int>(100);
 
             serverList.Add(1);
             serverList.Add(2);
@@ -219,8 +219,8 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void SyncListBoolTest()
         {
-            var serverList = new SyncList<bool>();
-            var clientList = new SyncList<bool>();
+            var serverList = new SyncList<bool>(100);
+            var clientList = new SyncList<bool>(100);
 
             serverList.Add(true);
             serverList.Add(false);
@@ -233,8 +233,8 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void SyncListUIntTest()
         {
-            var serverList = new SyncList<uint>();
-            var clientList = new SyncList<uint>();
+            var serverList = new SyncList<uint>(100);
+            var clientList = new SyncList<uint>(100);
 
             serverList.Add(1U);
             serverList.Add(2U);
@@ -247,8 +247,8 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void SyncListFloatTest()
         {
-            var serverList = new SyncList<float>();
-            var clientList = new SyncList<float>();
+            var serverList = new SyncList<float>(100);
+            var clientList = new SyncList<float>(100);
 
             serverList.Add(1.0F);
             serverList.Add(2.0F);
@@ -432,7 +432,7 @@ namespace Mirage.Tests.Runtime
 
             // make old client the host
             var hostList = clientSyncList;
-            var clientList2 = new SyncList<string>();
+            var clientList2 = new SyncList<string>(100);
 
             Assert.That(hostList.IsReadOnly, Is.False);
 
