@@ -222,7 +222,8 @@ namespace Mirage.Collections
                 // we just skipped this change
                 else
                 {
-                    _changesAhead--;
+                    if (_changesAhead > 0)
+                        _changesAhead--;
                 }
             }
 
@@ -252,6 +253,8 @@ namespace Mirage.Collections
                     OnPush?.Invoke(_temp[i]);
                 }
             }
+
+            _changesAhead = 0;
         }
 
         private void DeserializePush(NetworkReader reader, bool apply)

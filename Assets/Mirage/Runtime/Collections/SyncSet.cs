@@ -221,7 +221,8 @@ namespace Mirage.Collections
                 // we just skipped this change
                 else
                 {
-                    _changesAhead--;
+                    if (_changesAhead > 0)
+                        _changesAhead--;
                 }
             }
 
@@ -251,6 +252,8 @@ namespace Mirage.Collections
             else
                 for (var i = 0; i < count; i++)
                     reader.Read<T>();
+
+            _changesAhead = 0;
         }
 
         private void DeserializeAdd(NetworkReader reader, bool apply)

@@ -371,5 +371,32 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
                 Assert.That(clientStack.Pop(), Is.EqualTo(i));
             }
         }
+
+        [Test]
+        public void SyncList_FullSyncResetsChangesAhead()
+        {
+            var serverList = new SyncList<int>();
+            var clientList = new SyncList<int>();
+
+            for (var i = 0; i < 150; i++)
+            {
+                serverList.Add(i);
+            }
+
+            for (var i = 0; i < 100; i++)
+            {
+                serverList.RemoveAt(0);
+            }
+
+            SyncObjectHelper.SerializeAllTo(serverList, clientList);
+
+            SyncObjectHelper.SerializeDeltaTo(serverList, clientList);
+
+            serverList.Add(999);
+
+            SyncObjectHelper.SerializeDeltaTo(serverList, clientList);
+
+            Assert.That(clientList.Contains(999), Is.True);
+        }
     }
 }
