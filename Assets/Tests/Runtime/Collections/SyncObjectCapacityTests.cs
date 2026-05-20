@@ -247,4 +247,129 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
             Assert.Throws<InvalidOperationException>(() => SyncObjectHelper.SerializeDeltaTo(serverStack, clientStack));
         }
     }
+
+    public class SyncObjectFullSyncTests
+    {
+        [Test]
+        public void SyncList_DeltaCompressesLargeChangeCountToFullSync()
+        {
+            var serverList = new SyncList<int>();
+            var clientList = new SyncList<int>();
+
+            SyncObjectHelper.SerializeAllTo(serverList, clientList);
+
+            // Generate 150 changes, which is > 100 threshold
+            for (var i = 0; i < 150; i++)
+            {
+                serverList.Add(i);
+            }
+
+            var clearCalled = false;
+            var insertCount = 0;
+            clientList.OnClear += () => clearCalled = true;
+            clientList.OnInsert += (idx, val) => insertCount++;
+
+            SyncObjectHelper.SerializeDeltaTo(serverList, clientList);
+
+            // Verify that the changes were compressed and applied correctly
+            Assert.That(clearCalled, Is.True);
+            Assert.That(insertCount, Is.EqualTo(150));
+            Assert.That(clientList.Count, Is.EqualTo(150));
+            for (var i = 0; i < 150; i++)
+            {
+                Assert.That(clientList[i], Is.EqualTo(i));
+            }
+        }
+
+        [Test]
+        public void SyncDictionary_DeltaCompressesLargeChangeCountToFullSync()
+        {
+            var serverDict = new SyncDictionary<int, string>();
+            var clientDict = new SyncDictionary<int, string>();
+
+            SyncObjectHelper.SerializeAllTo(serverDict, clientDict);
+
+            // Generate 150 changes, which is > 100 threshold
+            for (var i = 0; i < 150; i++)
+            {
+                serverDict.Add(i, $"value-{i}");
+            }
+
+            var clearCalled = false;
+            var insertCount = 0;
+            clientDict.OnClear += () => clearCalled = true;
+            clientDict.OnInsert += (key, val) => insertCount++;
+
+            SyncObjectHelper.SerializeDeltaTo(serverDict, clientDict);
+
+            Assert.That(clearCalled, Is.True);
+            Assert.That(insertCount, Is.EqualTo(150));
+            Assert.That(clientDict.Count, Is.EqualTo(150));
+            for (var i = 0; i < 150; i++)
+            {
+                Assert.That(clientDict[i], Is.EqualTo($"value-{i}"));
+            }
+        }
+
+        [Test]
+        public void SyncSet_DeltaCompressesLargeChangeCountToFullSync()
+        {
+            var serverSet = new SyncHashSet<int>();
+            var clientSet = new SyncHashSet<int>();
+
+            SyncObjectHelper.SerializeAllTo(serverSet, clientSet);
+
+            // Generate 150 changes, which is > 100 threshold
+            for (var i = 0; i < 150; i++)
+            {
+                serverSet.Add(i);
+            }
+
+            var clearCalled = false;
+            var addCount = 0;
+            clientSet.OnClear += () => clearCalled = true;
+            clientSet.OnAdd += (val) => addCount++;
+
+            SyncObjectHelper.SerializeDeltaTo(serverSet, clientSet);
+
+            Assert.That(clearCalled, Is.True);
+            Assert.That(addCount, Is.EqualTo(150));
+            Assert.That(clientSet.Count, Is.EqualTo(150));
+            for (var i = 0; i < 150; i++)
+            {
+                Assert.That(clientSet.Contains(i), Is.True);
+            }
+        }
+
+        [Test]
+        public void SyncStack_DeltaCompressesLargeChangeCountToFullSync()
+        {
+            var serverStack = new SyncStack<int>();
+            var clientStack = new SyncStack<int>();
+
+            SyncObjectHelper.SerializeAllTo(serverStack, clientStack);
+
+            // Generate 150 changes, which is > 100 threshold
+            for (var i = 0; i < 150; i++)
+            {
+                serverStack.Push(i);
+            }
+
+            var clearCalled = false;
+            var pushCount = 0;
+            clientStack.OnClear += () => clearCalled = true;
+            clientStack.OnPush += (val) => pushCount++;
+
+            SyncObjectHelper.SerializeDeltaTo(serverStack, clientStack);
+
+            Assert.That(clearCalled, Is.True);
+            Assert.That(pushCount, Is.EqualTo(150));
+            Assert.That(clientStack.Count, Is.EqualTo(150));
+            // Stack is LIFO, so elements on popping: 149, 148, ..., 0
+            for (var i = 149; i >= 0; i--)
+            {
+                Assert.That(clientStack.Pop(), Is.EqualTo(i));
+            }
+        }
+    }
 }

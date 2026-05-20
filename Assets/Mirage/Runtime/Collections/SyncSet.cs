@@ -44,7 +44,8 @@ namespace Mirage.Collections
         {
             OP_ADD,
             OP_CLEAR,
-            OP_REMOVE
+            OP_REMOVE,
+            OP_FULL_SYNC
         }
 
         private struct Change
@@ -118,6 +119,18 @@ namespace Mirage.Collections
 
         public void OnSerializeDelta(NetworkWriter writer)
         {
+            // Syncing a massive count of individual changes is insecure and highly inefficient.
+            // We optimize and secure egress by sending a single full synchronization instead.
+            if (_changes.Count > 100 && _changes.Count > objects.Count)
+            {
+                writer.WritePackedUInt32(1);
+                writer.WriteByte((byte)Operation.OP_FULL_SYNC);
+                writer.WritePackedUInt32((uint)objects.Count);
+                foreach (var syncItem in objects)
+                    writer.Write(syncItem);
+                return;
+            }
+
             // write all the queued up changes
             writer.WritePackedUInt32((uint)_changes.Count);
 
@@ -195,6 +208,10 @@ namespace Mirage.Collections
                     case Operation.OP_REMOVE:
                         DeserializeRemove(reader, apply);
                         break;
+
+                    case Operation.OP_FULL_SYNC:
+                        DeserializeFullSync(reader, apply);
+                        break;
                 }
 
                 if (apply)
@@ -212,6 +229,28 @@ namespace Mirage.Collections
             {
                 OnChange?.Invoke();
             }
+        }
+
+        private void DeserializeFullSync(NetworkReader reader, bool apply)
+        {
+            var count = (int)reader.ReadPackedUInt32();
+            if (MaxElements.HasValue && count > MaxElements.Value)
+                throw new InvalidOperationException($"SyncSet capacity would exceed MaxElements limit of {MaxElements.Value}");
+
+            if (apply)
+            {
+                objects.Clear();
+                OnClear?.Invoke();
+                for (var i = 0; i < count; i++)
+                {
+                    var item = reader.Read<T>();
+                    objects.Add(item);
+                    OnAdd?.Invoke(item);
+                }
+            }
+            else
+                for (var i = 0; i < count; i++)
+                    reader.Read<T>();
         }
 
         private void DeserializeAdd(NetworkReader reader, bool apply)

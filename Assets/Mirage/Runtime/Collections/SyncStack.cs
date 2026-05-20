@@ -43,6 +43,7 @@ namespace Mirage.Collections
             OP_PUSH,
             OP_POP,
             OP_CLEAR,
+            OP_FULL_SYNC,
         }
 
         private struct Change
@@ -120,6 +121,18 @@ namespace Mirage.Collections
 
         public void OnSerializeDelta(NetworkWriter writer)
         {
+            // Syncing a massive count of individual changes is insecure and highly inefficient.
+            // We optimize and secure egress by sending a single full synchronization instead.
+            if (_changes.Count > 100 && _changes.Count > _objects.Count)
+            {
+                writer.WritePackedUInt32(1);
+                writer.WriteByte((byte)Operation.OP_FULL_SYNC);
+                writer.WritePackedUInt32((uint)_objects.Count);
+                foreach (var item in _objects)
+                    writer.Write(item);
+                return;
+            }
+
             // write all the queued up changes
             writer.WritePackedUInt32((uint)_changes.Count);
 
@@ -196,6 +209,10 @@ namespace Mirage.Collections
                     case Operation.OP_POP:
                         DeserializePop(apply);
                         break;
+
+                    case Operation.OP_FULL_SYNC:
+                        DeserializeFullSync(reader, apply);
+                        break;
                 }
 
                 if (apply)
@@ -211,6 +228,30 @@ namespace Mirage.Collections
 
             if (raiseOnChange)
                 OnChange?.Invoke();
+        }
+
+        private void DeserializeFullSync(NetworkReader reader, bool apply)
+        {
+            var count = (int)reader.ReadPackedUInt32();
+            if (MaxElements.HasValue && count > MaxElements.Value)
+                throw new InvalidOperationException($"SyncStack capacity would exceed MaxElements limit of {MaxElements.Value}");
+
+            if (_temp.Length < count)
+                Array.Resize(ref _temp, count);
+
+            for (var i = 0; i < count; i++)
+                _temp[i] = reader.Read<T>();
+
+            if (apply)
+            {
+                _objects.Clear();
+                OnClear?.Invoke();
+                for (var i = count - 1; i >= 0; i--)
+                {
+                    _objects.Push(_temp[i]);
+                    OnPush?.Invoke(_temp[i]);
+                }
+            }
         }
 
         private void DeserializePush(NetworkReader reader, bool apply)
