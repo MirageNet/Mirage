@@ -253,8 +253,8 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
         [Test]
         public void SyncList_DeltaCompressesLargeChangeCountToFullSync()
         {
-            var serverList = new SyncList<int>();
-            var clientList = new SyncList<int>();
+            var serverList = new SyncList<int>(1000);
+            var clientList = new SyncList<int>(1000);
 
             SyncObjectHelper.SerializeAllTo(serverList, clientList);
 
@@ -284,8 +284,8 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
         [Test]
         public void SyncDictionary_DeltaCompressesLargeChangeCountToFullSync()
         {
-            var serverDict = new SyncDictionary<int, string>();
-            var clientDict = new SyncDictionary<int, string>();
+            var serverDict = new SyncDictionary<int, string>(1000);
+            var clientDict = new SyncDictionary<int, string>(1000);
 
             SyncObjectHelper.SerializeAllTo(serverDict, clientDict);
 
@@ -314,8 +314,8 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
         [Test]
         public void SyncSet_DeltaCompressesLargeChangeCountToFullSync()
         {
-            var serverSet = new SyncHashSet<int>();
-            var clientSet = new SyncHashSet<int>();
+            var serverSet = new SyncHashSet<int>(1000);
+            var clientSet = new SyncHashSet<int>(1000);
 
             SyncObjectHelper.SerializeAllTo(serverSet, clientSet);
 
@@ -344,8 +344,8 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
         [Test]
         public void SyncStack_DeltaCompressesLargeChangeCountToFullSync()
         {
-            var serverStack = new SyncStack<int>();
-            var clientStack = new SyncStack<int>();
+            var serverStack = new SyncStack<int>(1000);
+            var clientStack = new SyncStack<int>(1000);
 
             SyncObjectHelper.SerializeAllTo(serverStack, clientStack);
 
@@ -375,8 +375,8 @@ namespace Mirage.Tests.Runtime.Collections.SyncObjectCapacityTests
         [Test]
         public void SyncList_FullSyncResetsChangesAhead()
         {
-            var serverList = new SyncList<int>();
-            var clientList = new SyncList<int>();
+            var serverList = new SyncList<int>(1000);
+            var clientList = new SyncList<int>(1000);
 
             for (var i = 0; i < 150; i++)
             {

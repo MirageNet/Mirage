@@ -44,8 +44,7 @@ namespace Mirage.Collections
         {
             OP_ADD,
             OP_CLEAR,
-            OP_REMOVE,
-            OP_FULL_SYNC
+            OP_REMOVE
         }
 
         private struct Change
@@ -119,12 +118,12 @@ namespace Mirage.Collections
 
         public void OnSerializeDelta(NetworkWriter writer)
         {
-            // Syncing a massive count of individual changes is insecure and highly inefficient.
-            // We optimize and secure egress by sending a single full synchronization instead.
-            if (_changes.Count > 100 && _changes.Count > objects.Count)
+            // sending full state is more efficient when changes outnumber elements
+            var fullSync = _changes.Count > 100 && _changes.Count > objects.Count;
+            writer.WriteBoolean(fullSync);
+
+            if (fullSync)
             {
-                writer.WritePackedUInt32(1);
-                writer.WriteByte((byte)Operation.OP_FULL_SYNC);
                 writer.WritePackedUInt32((uint)objects.Count);
                 foreach (var syncItem in objects)
                     writer.Write(syncItem);
@@ -183,6 +182,29 @@ namespace Mirage.Collections
 
         public void OnDeserializeDelta(NetworkReader reader)
         {
+            var fullSync = reader.ReadBoolean();
+
+            if (fullSync)
+            {
+                var count = (int)reader.ReadPackedUInt32();
+                if (count > MaxElements)
+                    throw new InvalidOperationException($"SyncSet capacity would exceed MaxElements limit of {MaxElements}");
+
+                objects.Clear();
+                OnClear?.Invoke();
+                for (var i = 0; i < count; i++)
+                {
+                    var item = reader.Read<T>();
+                    objects.Add(item);
+                    OnAdd?.Invoke(item);
+                }
+
+                // full sync replaces entire state, any pending skips are invalid
+                _changesAhead = 0;
+                OnChange?.Invoke();
+                return;
+            }
+
             var raiseOnChange = false;
 
             var changesCount = (int)reader.ReadPackedUInt32();
@@ -208,10 +230,6 @@ namespace Mirage.Collections
                     case Operation.OP_REMOVE:
                         DeserializeRemove(reader, apply);
                         break;
-
-                    case Operation.OP_FULL_SYNC:
-                        DeserializeFullSync(reader, apply);
-                        break;
                 }
 
                 if (apply)
@@ -221,8 +239,7 @@ namespace Mirage.Collections
                 // we just skipped this change
                 else
                 {
-                    if (_changesAhead > 0)
-                        _changesAhead--;
+                    _changesAhead--;
                 }
             }
 
@@ -232,29 +249,7 @@ namespace Mirage.Collections
             }
         }
 
-        private void DeserializeFullSync(NetworkReader reader, bool apply)
-        {
-            var count = (int)reader.ReadPackedUInt32();
-            if (MaxElements.HasValue && count > MaxElements.Value)
-                throw new InvalidOperationException($"SyncSet capacity would exceed MaxElements limit of {MaxElements.Value}");
 
-            if (apply)
-            {
-                objects.Clear();
-                OnClear?.Invoke();
-                for (var i = 0; i < count; i++)
-                {
-                    var item = reader.Read<T>();
-                    objects.Add(item);
-                    OnAdd?.Invoke(item);
-                }
-            }
-            else
-                for (var i = 0; i < count; i++)
-                    reader.Read<T>();
-
-            _changesAhead = 0;
-        }
 
         private void DeserializeAdd(NetworkReader reader, bool apply)
         {
