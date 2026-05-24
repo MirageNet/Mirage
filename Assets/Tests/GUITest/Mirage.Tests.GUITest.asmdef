@@ -1,0 +1,20 @@
+{
+    "name": "Mirage.Tests.GUITest",
+    "rootNamespace": "",
+    "references": [
+        "GUID:30817c1a0e6d646d99c048fc403f5979",
+        "GUID:4e9aca8a359ab48de906aedbfa1ffe21",
+        "GUID:bc6737b19bee94a798a182a84b660226"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "MIRAGE_EXAMPLES"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
