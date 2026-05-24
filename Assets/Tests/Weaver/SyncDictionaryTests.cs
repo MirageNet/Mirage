@@ -58,5 +58,12 @@ namespace Mirage.Tests.Weaver
         {
             IsSuccess();
         }
+
+        [Test]
+        public void SyncDictionaryErrorWhenNotInitialized()
+        {
+            HasError("SyncObject Foo must be initialized. Please assign a value where the field is declared or in the constructor.",
+                "Mirage.Collections.SyncDictionary`2<System.Int32,System.String> SyncDictionaryTests.SyncDictionaryErrorWhenNotInitialized.SyncDictionaryBehaviour::Foo");
+        }
     }
 }

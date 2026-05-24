@@ -1,10 +1,10 @@
 using Mirage;
 using Mirage.Collections;
 
-namespace SyncListTests.SyncList
+namespace SyncListTests.SyncListErrorWhenNotInitialized
 {
     class SyncListBehaviour : NetworkBehaviour
     {
-        public SyncList<int> Foo = new SyncList<int>(10);
+        public SyncList<int> Foo;
     }
 }

@@ -5,7 +5,7 @@ namespace SyncListTests.SyncListErrorWhenUsingGenericListInNetworkBehaviour
 {
     class SyncListErrorWhenUsingGenericListInNetworkBehaviour : NetworkBehaviour
     {
-        readonly SomeList<int> someList;
+        readonly SomeList<int> someList = new SomeList<int>();
 
 
         public class SomeList<T> : SyncList<T>

@@ -5,7 +5,7 @@ namespace SyncSetTests.SyncSetStruct
 {
     class SyncSetStruct : NetworkBehaviour
     {
-        MyStructSet Foo;
+        MyStructSet Foo = new MyStructSet();
 
         struct MyStruct
         {

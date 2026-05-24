@@ -8,8 +8,8 @@ namespace SyncDictionaryTests.SyncDictionaryGenericAbstractInheritance
         readonly SomeDictionaryIntString dictionary = new SomeDictionaryIntString();
 
 
-        public abstract class SomeDictionary<TKey, TItem> : SyncDictionary<TKey, TItem> { }
+        public abstract class SomeDictionary<TKey, TItem> : SyncDictionary<TKey, TItem> { protected SomeDictionary() : base(10) {} }
 
-        public class SomeDictionaryIntString : SomeDictionary<int, string> { }
+        public class SomeDictionaryIntString : SomeDictionary<int, string> { public SomeDictionaryIntString() : base() {} }
     }
 }

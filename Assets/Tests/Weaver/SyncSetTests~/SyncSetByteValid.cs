@@ -10,6 +10,6 @@ namespace SyncSetTests.SyncSetByteValid
             public MyByteClass() : base(10) {}
         }
 
-        MyByteClass Foo;
+        MyByteClass Foo = new MyByteClass();
     }
 }

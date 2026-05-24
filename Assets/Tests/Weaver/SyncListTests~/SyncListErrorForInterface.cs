@@ -5,7 +5,7 @@ namespace SyncListTests.SyncListErrorForInterface
 {
     class SyncListErrorForInterface : NetworkBehaviour
     {
-        MyInterfaceList Foo;
+        MyInterfaceList Foo = new MyInterfaceList();
     }
     interface MyInterface
     {

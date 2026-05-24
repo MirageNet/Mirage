@@ -10,9 +10,9 @@ namespace SyncDictionaryTests.SyncDictionaryErrorForGenericStructItem
             T genericpotato;
         }
 
-        class MyGenericStructDictionary : SyncDictionary<int, MyGenericStruct<float>> { };
+        class MyGenericStructDictionary : SyncDictionary<int, MyGenericStruct<float>> { public MyGenericStructDictionary() : base(10) {} };
 
-        MyGenericStructDictionary harpseals;
+        MyGenericStructDictionary harpseals = new MyGenericStructDictionary();
     }
 
 }

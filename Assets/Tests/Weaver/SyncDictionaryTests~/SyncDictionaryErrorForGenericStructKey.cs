@@ -5,7 +5,7 @@ namespace SyncDictionaryTests.SyncDictionaryErrorForGenericStructKey
 {
     class SyncDictionaryErrorForGenericStructKey : NetworkBehaviour
     {
-        MyGenericStructDictionary harpseals;
+        MyGenericStructDictionary harpseals = new MyGenericStructDictionary();
 
 
         struct MyGenericStruct<T>
@@ -13,6 +13,6 @@ namespace SyncDictionaryTests.SyncDictionaryErrorForGenericStructKey
             T genericpotato;
         }
 
-        class MyGenericStructDictionary : SyncDictionary<MyGenericStruct<float>, int> { };
+        class MyGenericStructDictionary : SyncDictionary<MyGenericStruct<float>, int> { public MyGenericStructDictionary() : base(10) {} };
     }
 }

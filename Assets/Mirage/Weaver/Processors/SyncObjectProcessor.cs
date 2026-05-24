@@ -25,38 +25,46 @@ namespace Mirage.Weaver
         /// Finds SyncObjects fields in a type
         /// <para>Type should be a NetworkBehaviour</para>
         /// </summary>
-        /// <param name="td"></param>
+        /// <param name="netBehaviourType"></param>
         /// <returns></returns>
-        public void ProcessSyncObjects(TypeDefinition td)
+        public void ProcessSyncObjects(TypeDefinition netBehaviourType)
         {
-            foreach (var fd in td.Fields)
+            foreach (var fieldDef in netBehaviourType.Fields)
             {
-                if (fd.FieldType.IsGenericParameter || fd.ContainsGenericParameter) // Just ignore all generic objects.
+                if (fieldDef.FieldType.IsGenericParameter || fieldDef.ContainsGenericParameter) // Just ignore all generic objects.
                 {
                     continue;
                 }
 
-                var tf = fd.FieldType.Resolve();
-                if (tf == null)
+                var fieldType = fieldDef.FieldType.Resolve();
+                if (fieldType == null)
                 {
                     continue;
                 }
 
-                if (tf.Implements<ISyncObject>())
+                if (fieldType.Implements<ISyncObject>())
                 {
-                    if (fd.IsStatic)
+                    if (fieldDef.IsStatic)
                     {
-                        logger.Error($"{fd.Name} cannot be static", fd);
+                        logger.Error($"{fieldDef.Name} cannot be static", fieldDef);
                         continue;
                     }
 
-                    GenerateReadersAndWriters(fd.FieldType);
+                    // SyncObjects must be instantiated before NetworkBehaviour runs its initialization,
+                    // otherwise the Weaver-generated registration will invoke methods on a null reference at runtime.
+                    if (!IsInitialized(netBehaviourType, fieldDef))
+                    {
+                        logger.Error($"SyncObject {fieldDef.Name} must be initialized. Please assign a value where the field is declared or in the constructor.", fieldDef);
+                        continue;
+                    }
 
-                    syncObjects.Add(fd);
+                    GenerateReadersAndWriters(fieldDef.FieldType);
+
+                    syncObjects.Add(fieldDef);
                 }
             }
 
-            RegisterSyncObjects(td);
+            RegisterSyncObjects(netBehaviourType);
         }
 
         /// <summary>
@@ -128,6 +136,61 @@ namespace Mirage.Weaver
 
             var initSyncObjectRef = worker.Body.Method.Module.ImportReference<NetworkBehaviour>(nb => nb.InitSyncObject(default));
             worker.Append(worker.Create(OpCodes.Call, initSyncObjectRef));
+        }
+
+        private bool IsInitialized(TypeDefinition netBehaviourType, FieldDefinition fieldDef)
+        {
+            var hasConstructors = false;
+
+            foreach (var method in netBehaviourType.Methods)
+            {
+                // skip non-constructor
+                if (!method.IsConstructor || method.IsStatic)
+                    continue;
+
+                hasConstructors = true;
+                // skip Delegating constructors (eg a constructor calling another constructor)
+                // they defer field initialization to the target constructor, so we skip checking them to avoid false negatives.
+                if (IsDelegatingConstructor(method, netBehaviourType))
+                    continue;
+
+                // if field is not assigned, then return false
+                // note: we will need to check all constructors. but for Monobehaviour this will almost always be the default constructor
+                if (!ConstructorAssignsField(method, fieldDef))
+                    return false;
+            }
+
+            // all constructors valid, or we did not find any
+            return hasConstructors;
+        }
+
+        private bool IsDelegatingConstructor(MethodDefinition ctor, TypeDefinition td)
+        {
+            if (!ctor.HasBody)
+                return false;
+
+            foreach (var instruction in ctor.Body.Instructions)
+            {
+                if (instruction.OpCode == OpCodes.Call && instruction.Operand is MethodReference mr && mr.Name == ".ctor" && mr.DeclaringType.Resolve() == td)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private bool ConstructorAssignsField(MethodDefinition ctor, FieldDefinition fd)
+        {
+            if (!ctor.HasBody)
+                return false;
+
+            foreach (var instruction in ctor.Body.Instructions)
+            {
+                // check if field as a store, if it does it almost certianly is assigned
+                if (instruction.OpCode == OpCodes.Stfld && instruction.Operand is FieldReference fr && fr.Resolve() == fd)
+                    return true;
+            }
+
+            return false;
         }
     }
 }

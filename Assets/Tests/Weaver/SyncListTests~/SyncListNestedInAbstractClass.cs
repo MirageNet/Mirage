@@ -5,7 +5,7 @@ namespace SyncListTests.SyncListNestedInAbstractClass
 {
     class SyncListNestedStruct : NetworkBehaviour
     {
-        SomeAbstractClass.MyNestedStructList Foo;
+        SomeAbstractClass.MyNestedStructList Foo = new SomeAbstractClass.MyNestedStructList();
 
 
         public abstract class SomeAbstractClass

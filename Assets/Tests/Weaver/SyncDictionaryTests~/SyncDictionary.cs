@@ -10,7 +10,7 @@ namespace SyncDictionaryTests.SyncDictionary
             public SyncDictionaryIntString() : base(10) {}
         }
 
-        public SyncDictionaryIntString Foo;
+        public SyncDictionaryIntString Foo = new SyncDictionaryIntString();
     }
 
 

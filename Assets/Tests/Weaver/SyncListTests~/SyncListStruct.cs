@@ -5,7 +5,7 @@ namespace SyncListTests.SyncListStruct
 {
     class SyncListStruct : NetworkBehaviour
     {
-        MyStructList Foo;
+        MyStructList Foo = new MyStructList();
 
         struct MyStruct
         {
@@ -13,6 +13,6 @@ namespace SyncListTests.SyncListStruct
             public float floatingpotato;
             public double givemetwopotatoes;
         }
-        class MyStructList : SyncList<MyStruct> { }
+        class MyStructList : SyncList<MyStruct> { public MyStructList() : base(10) {} }
     }
 }

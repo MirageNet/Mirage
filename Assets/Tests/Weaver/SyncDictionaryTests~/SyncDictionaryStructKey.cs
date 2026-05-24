@@ -5,7 +5,7 @@ namespace SyncDictionaryTests.SyncDictionaryStructKey
 {
     class SyncDictionaryStructKey : NetworkBehaviour
     {
-        MyStructDictionary Foo;
+        MyStructDictionary Foo = new MyStructDictionary();
 
         struct MyStruct
         {
@@ -13,6 +13,6 @@ namespace SyncDictionaryTests.SyncDictionaryStructKey
             public float floatingpotato;
             public double givemetwopotatoes;
         }
-        class MyStructDictionary : SyncDictionary<MyStruct, string> { }
+        class MyStructDictionary : SyncDictionary<MyStruct, string> { public MyStructDictionary() : base(10) {} }
     }
 }

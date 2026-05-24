@@ -6,7 +6,7 @@ namespace SyncListTests.SyncListNestedInStructWithInvalid
 {
     class SyncListNestedInStructWithInvalid : NetworkBehaviour
     {
-        SomeData.SyncList Foo;
+        SomeData.SyncList Foo = new SomeData.SyncList();
 
 
         public struct SomeData
@@ -14,7 +14,7 @@ namespace SyncListTests.SyncListNestedInStructWithInvalid
             public int usefulNumber;
             public Object target;
 
-            public class SyncList : Mirage.Collections.SyncList<SomeData> { }
+            public class SyncList : Mirage.Collections.SyncList<SomeData> { public SyncList() : base(10) {} }
         }
     }
 }

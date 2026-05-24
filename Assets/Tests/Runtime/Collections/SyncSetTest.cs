@@ -9,7 +9,10 @@ namespace Mirage.Tests.Runtime
     [TestFixture]
     public class SyncSetTest
     {
-        public class SyncSetString : SyncHashSet<string> { }
+        public class SyncSetString : SyncHashSet<string>
+        {
+            public SyncSetString() : base(maxElements: 1000) { } // just use 1000 max as default
+        }
 
         private SyncSetString serverSyncSet;
         private SyncSetString clientSyncSet;

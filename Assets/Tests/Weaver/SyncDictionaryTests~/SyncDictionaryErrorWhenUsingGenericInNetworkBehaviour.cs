@@ -5,9 +5,9 @@ namespace SyncDictionaryTests.SyncDictionaryErrorWhenUsingGenericInNetworkBehavi
 {
     class SyncDictionaryErrorWhenUsingGenericInNetworkBehaviour : NetworkBehaviour
     {
-        readonly SomeSyncDictionary<int, string> someDictionary;
+        readonly SomeSyncDictionary<int, string> someDictionary = new SomeSyncDictionary<int, string>();
 
 
-        public class SomeSyncDictionary<TKey, TItem> : SyncDictionary<TKey, TItem> { }
+        public class SomeSyncDictionary<TKey, TItem> : SyncDictionary<TKey, TItem> { public SomeSyncDictionary() : base(10) {} }
     }
 }

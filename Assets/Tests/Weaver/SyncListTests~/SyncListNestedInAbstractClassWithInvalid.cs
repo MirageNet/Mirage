@@ -6,7 +6,7 @@ namespace SyncListTests.SyncListNestedInAbstractClassWithInvalid
 {
     class SyncListNestedStructWithInvalid : NetworkBehaviour
     {
-        SomeAbstractClass.MyNestedStructList Foo;
+        SomeAbstractClass.MyNestedStructList Foo = new SomeAbstractClass.MyNestedStructList();
 
 
         public abstract class SomeAbstractClass
@@ -16,7 +16,7 @@ namespace SyncListTests.SyncListNestedInAbstractClassWithInvalid
                 public int potato;
                 public Object target;
             }
-            public class MyNestedStructList : SyncList<MyNestedStruct> { }
+            public class MyNestedStructList : SyncList<MyNestedStruct> { public MyNestedStructList() : base(10) {} }
         }
     }
 }

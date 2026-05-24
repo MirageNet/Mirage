@@ -5,7 +5,7 @@ namespace SyncListTests.SyncListNestedStruct
 {
     class SyncListNestedStruct : NetworkBehaviour
     {
-        MyNestedStructList Foo;
+        MyNestedStructList Foo = new MyNestedStructList();
 
         struct MyNestedStruct
         {

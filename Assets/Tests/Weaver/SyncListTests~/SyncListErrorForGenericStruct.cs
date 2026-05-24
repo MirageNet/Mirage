@@ -5,7 +5,7 @@ namespace SyncListTests.SyncListErrorForGenericStruct
 {
     class SyncListErrorForGenericStruct : NetworkBehaviour
     {
-        MyGenericStructList harpseals;
+        MyGenericStructList harpseals = new MyGenericStructList();
 
 
         struct MyGenericStruct<T>
