@@ -1,3 +1,43 @@
+# [158.0.0](https://github.com/MirageNet/Mirage/compare/v157.4.4...v158.0.0) (2026-05-24)
+
+
+* feat!: new NetworkSceneLoader as simple example for how to load scene and spawn characters ([e90bf7e](https://github.com/MirageNet/Mirage/commit/e90bf7efb9b89073687992c93c7886ea7c977e36))
+* refactor!: moving CharacterSpawner and NetworkSceneManager to samples folder ([0c03a49](https://github.com/MirageNet/Mirage/commit/0c03a496b8fb4031151ea3779850f212a898cc0b))
+* refactor!: moving NetworkAnimator to samples folder ([f9fde9b](https://github.com/MirageNet/Mirage/commit/f9fde9b44ea5c6e123cf19e57ddbe483f969acf8))
+* refactor!: moving scene events to legacy NetworkSceneManager ([4ac7d3f](https://github.com/MirageNet/Mirage/commit/4ac7d3f5a985708b07840c882fccec76df25749c))
+
+
+### Bug Fixes
+
+* adding checked for reader lengths ([293e4f2](https://github.com/MirageNet/Mirage/commit/293e4f2ad9e857ec0a373e24d974d19749432414))
+* fixing edge case where developer calls disconnected from server.connected ([0711f28](https://github.com/MirageNet/Mirage/commit/0711f286973243cc54dcf4a976bee80ee427d4fd))
+* fixing LoadSceneAsync await for unity 6 ([d51999f](https://github.com/MirageNet/Mirage/commit/d51999fac0240bd808043babe338cd91287dcab1))
+* fixing LoadSceneAsync await for unity 6 ([c93cf00](https://github.com/MirageNet/Mirage/commit/c93cf0031ac33280c464a00de64c9d7023450a29))
+* validating sender for return RPC ([7265e08](https://github.com/MirageNet/Mirage/commit/7265e088f2300830b14e3b77e2ef2ee9554c887f))
+
+
+### Features
+
+* adding PlayerErrorFlags.InvalidState for when state is incorrect and message can't be handled ([839b4e5](https://github.com/MirageNet/Mirage/commit/839b4e5566b71b18a045cee6fdf84ce14fccd8f1))
+
+
+### Performance Improvements
+
+* removing allocation when receiving fragmented packets ([b4db627](https://github.com/MirageNet/Mirage/commit/b4db627565d83378a827ef4266d6d52b97e02160))
+* reusing allocations from ackSystem ([8d983c5](https://github.com/MirageNet/Mirage/commit/8d983c53e348908e88c0fc34df1b75bdf68b00b8))
+
+
+### BREAKING CHANGES
+
+* - SceneChangeFinishedEvent moved to LegacySceneLoading Sample
+- SceneChangeStartedEvent moved to LegacySceneLoading Sample
+- PlayerSceneChangeEvent moved to LegacySceneLoading Sample
+* - NetworkSceneLoader is now added to NetworkManager instead of NetworkSceneManger
+- SceneMessage now only has ScenePath field
+* - CharacterSpawner is no longer in Components, and must be manually imported from Samples
+- NetworkSceneManager is no longer in Components, and must be manually imported from Samples
+* - NetworkAnimator is no longer in Components, and must be manually imported from Samples
+
 ## [157.4.4](https://github.com/MirageNet/Mirage/compare/v157.4.3...v157.4.4) (2026-04-13)
 
 
