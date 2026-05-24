@@ -9,6 +9,6 @@ It provides quick access to:
 
 - [NetworkServer](/docs/reference/Mirage/NetworkServer)
 - [NetworkClient](/docs/reference/Mirage/NetworkClient)
-- [NetworkSceneManager](/docs/reference/Mirage/NetworkSceneManager)
+- [NetworkSceneLoader](/docs/reference/Mirage.Components/NetworkSceneLoader)
 - [ServerObjectManager](/docs/reference/Mirage/ServerObjectManager)
 - [ClientObjectManager](/docs/reference/Mirage/ClientObjectManager)

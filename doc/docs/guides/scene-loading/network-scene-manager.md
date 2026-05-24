@@ -9,7 +9,7 @@ title: (Legacy) Network Scene Manager
 For modern projects, we recommend using the **[NetworkSceneLoader](/docs/guides/scene-loading/network-scene-loader)** component or the **[Manual Scene Loading](/docs/guides/scene-loading/manual-scene-loading)** guide.
 :::
 
-[NetworkSceneManager](/docs/reference/Mirage/NetworkSceneManager) contains methods and logic to help keep the scene in sync between server and client.
+NetworkSceneManager contains methods and logic to help keep the scene in sync between server and client.
 
 ### How to use
 
