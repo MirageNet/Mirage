@@ -576,7 +576,7 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Standalone: WEAVER_DEBUG_TIMER;MIRAGE_TESTS
+    Standalone: WEAVER_DEBUG_TIMER;MIRAGE_TESTS;MIRAGE_EXAMPLES
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
