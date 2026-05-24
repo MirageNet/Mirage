@@ -25,7 +25,7 @@ jobs:
       unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
       access_token: ${{ secrets.GITHUB_TOKEN }}
     with:
-      unity_container: unityci/editor:ubuntu-2022.3.62f2-base-3.1.0
+      unity_container: unityci/editor:ubuntu-2022.3.62f2-base-3.2.2
       cache_key: Library-2022.3.62
       cache_key_restore: Library-2022
       test_results_name: Test results 2022
@@ -38,15 +38,28 @@ jobs:
       unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
       access_token: ${{ secrets.GITHUB_TOKEN }}
     with:
-      unity_container: unityci/editor:ubuntu-6000.0.37f1-base-3.1.0
-      cache_key: Library-6000.0.37
+      unity_container: unityci/editor:ubuntu-6000.0.75f1-base-3.2.2
+      cache_key: Library-6000.0.75
       cache_key_restore: Library-6000
       test_results_name: Test results 6000
+  
+  Tests6000_3:
+    name: Run Tests 6000.3
+    uses: ./.github/workflows/run-test.yml
+    secrets:
+      # checking if same license will work
+      unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
+      access_token: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      unity_container: unityci/editor:ubuntu-6000.3.16f1-base-3.2.2
+      cache_key: Library-6000.3.16
+      cache_key_restore: Library-6000
+      test_results_name: Test results 6000.3
 
   BuildIL2CPP:
     name: BuildIL2CPP
     runs-on: ubuntu-latest
-    container: unityci/editor:ubuntu-2022.3.62f2-linux-il2cpp-3.1.0
+    container: unityci/editor:ubuntu-2022.3.62f2-linux-il2cpp-3.2.2
     
     steps:
       - name: Activate unity
@@ -76,7 +89,7 @@ jobs:
 
   Publish:
     # only run once both tests and il2cpp have passed
-    needs: [Tests2022, Tests6000, BuildIL2CPP]
+    needs: [Tests2022, Tests6000, Tests6000_3, BuildIL2CPP]
     # only run on main
     if: github.ref == 'refs/heads/main'
     name: Publish
