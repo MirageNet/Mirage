@@ -78,7 +78,7 @@ namespace Mirage.Examples.Pong
                 player.Send(new SceneMessage { ScenePath = TargetScene });
             }
 
-            await SceneManager.LoadSceneAsync(TargetScene);
+            await SceneManager.LoadSceneAsync(TargetScene).ToUniTask();
 
             if (Server.IsHost)
             {
@@ -153,7 +153,7 @@ namespace Mirage.Examples.Pong
         private async UniTaskVoid OnClientSceneMessageAsync(INetworkPlayer player, SceneMessage message)
         {
             player.SceneIsReady = false;
-            await SceneManager.LoadSceneAsync(message.ScenePath);
+            await SceneManager.LoadSceneAsync(message.ScenePath).ToUniTask();
 
             player.SceneIsReady = true;
             ClientObjectManager.PrepareToSpawnSceneObjects();
