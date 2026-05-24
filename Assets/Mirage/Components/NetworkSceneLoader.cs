@@ -85,7 +85,7 @@ namespace Mirage.Components
             }
 
             // Load the scene on the server
-            await SceneManager.LoadSceneAsync(TargetScene);
+            await SceneManager.LoadSceneAsync(TargetScene).ToUniTask();
 
             // If we are in host mode, the local player is already ready
             if (Server.IsHost)
@@ -160,7 +160,7 @@ namespace Mirage.Components
         {
             Debug.Assert(Client.Active);
             player.SceneIsReady = false;
-            await SceneManager.LoadSceneAsync(message.ScenePath);
+            await SceneManager.LoadSceneAsync(message.ScenePath).ToUniTask();
 
             player.SceneIsReady = true;
             ClientObjectManager.PrepareToSpawnSceneObjects();
