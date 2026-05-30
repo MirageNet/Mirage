@@ -19,14 +19,14 @@ namespace Mirage.Examples.Basic
         // These are set in OnStartServer and used in OnStartClient
 
         [SyncVar(initialOnly = true)] // playerNo is set on spawn so we can use initialOnly so it is only synced once
-        public int playerNo;
+        public int playerNo { get; set; }
 
         [SyncVar]
-        private Color playerColor;
+        private Color playerColor { get; set; }
 
         // This is updated by UpdateData which is called from OnStartServer via InvokeRepeating
         [SyncVar(hook = nameof(OnPlayerDataChanged))]
-        public int playerData;
+        public int playerData { get; set; }
 
         private void Awake()
         {

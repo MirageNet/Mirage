@@ -93,9 +93,9 @@ namespace Example.CustomCharacter
     }
     public class CustomCharacter : NetworkBehaviour
     {
-        [SyncVar] public string PlayerName;
-        [SyncVar] public Color hairColor;
-        [SyncVar] public Color eyeColor;
+        [SyncVar] public string PlayerName { get; set; }
+        [SyncVar] public Color hairColor { get; set; }
+        [SyncVar] public Color eyeColor { get; set; }
 
         private void Awake()
         {
