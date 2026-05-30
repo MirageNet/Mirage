@@ -4,7 +4,7 @@ namespace Mirage.Components
     {
         // todo update this to work with "invoke on sender" when syncvar has that setting
         [SyncVar(hook = nameof(ActiveChanged), invokeHookOnServer = true)]
-        private bool _active;
+        private bool _active { get; set; }
 
         private void ActiveChanged(bool nowActive)
         {
