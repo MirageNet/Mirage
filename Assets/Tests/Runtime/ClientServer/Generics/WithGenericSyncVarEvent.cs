@@ -11,7 +11,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         public event Action<T, T> hook;
 
         [SyncVar(hook = nameof(hook))]
-        public T value;
+        public T value { get; set; }
     }
 
     public class WithGenericSyncVarEvent_behaviourInt : WithGenericSyncVarEvent_behaviour<int>

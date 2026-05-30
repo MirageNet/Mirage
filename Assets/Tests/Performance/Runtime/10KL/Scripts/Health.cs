@@ -5,7 +5,7 @@ namespace Mirage.Examples.Light
 {
     public class Health : NetworkBehaviour
     {
-        [SyncVar] public int health = 10;
+        [SyncVar] public int health { get; set; } = 10;
         private void Awake()
         {
             Identity.OnStartServer.AddListener(OnStartServer);

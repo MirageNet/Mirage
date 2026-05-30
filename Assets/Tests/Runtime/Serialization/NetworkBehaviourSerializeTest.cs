@@ -12,7 +12,7 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         public readonly SyncList<bool> syncListInAbstract = new SyncList<bool>();
 
         [SyncVar]
-        public int SyncFieldInAbstract;
+        public int SyncFieldInAbstract { get; set; }
     }
 
     internal class BehaviourWithSyncVar : NetworkBehaviour
@@ -20,7 +20,7 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         public readonly SyncList<bool> syncList = new SyncList<bool>();
 
         [SyncVar]
-        public int SyncField;
+        public int SyncField { get; set; }
     }
 
     internal class OverrideBehaviourFromSyncVar : AbstractBehaviour
@@ -33,7 +33,7 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         public readonly SyncList<bool> syncListInOverride = new SyncList<bool>();
 
         [SyncVar]
-        public int SyncFieldInOverride;
+        public int SyncFieldInOverride { get; set; }
     }
 
     internal class MiddleClass : AbstractBehaviour
@@ -46,14 +46,14 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         // class with sync var
         // this is to make sure that override works correctly if base class doesnt have sync vars
         [SyncVar]
-        public Vector3 anotherSyncField;
+        public Vector3 anotherSyncField { get; set; }
     }
 
     internal class MiddleClassWithSyncVar : AbstractBehaviour
     {
         // class with sync var
         [SyncVar]
-        public string syncFieldInMiddle;
+        public string syncFieldInMiddle { get; set; }
     }
 
     internal class SubClassFromSyncVar : MiddleClassWithSyncVar
@@ -61,7 +61,7 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         // class with sync var
         // this is to make sure that override works correctly if base class doesnt have sync vars
         [SyncVar]
-        public Vector3 syncFieldInSub;
+        public Vector3 syncFieldInSub { get; set; }
     }
     #endregion
 
@@ -73,7 +73,7 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         public readonly SyncList<bool> syncList = new SyncList<bool>();
 
         [SyncVar]
-        public int SyncField;
+        public int SyncField { get; set; }
 
         public float customSerializeField;
 
@@ -110,7 +110,7 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         public readonly SyncList<bool> syncListInOverride = new SyncList<bool>();
 
         [SyncVar]
-        public int SyncFieldInOverride;
+        public int SyncFieldInOverride { get; set; }
 
         public float customSerializeField;
 

@@ -10,19 +10,19 @@ namespace Mirage.Tests.Runtime.Syncing
     public class MockPlayerInvokeHooks : NetworkBehaviour
     {
         [SyncVar(hook = nameof(EventServerOwner), invokeHookOnServer = true, invokeHookOnOwner = true)]
-        public int FieldServerOwner;
+        public int FieldServerOwner { get; set; }
         public event Action<int> EventServerOwner;
 
         [SyncVar(hook = nameof(EventServer), invokeHookOnServer = true, invokeHookOnOwner = false)]
-        public int FieldServer;
+        public int FieldServer { get; set; }
         public event Action<int> EventServer;
 
         [SyncVar(hook = nameof(EventOwner), invokeHookOnServer = false, invokeHookOnOwner = true)]
-        public int FieldOwner;
+        public int FieldOwner { get; set; }
         public event Action<int> EventOwner;
 
         [SyncVar(hook = nameof(EventNone), invokeHookOnServer = false, invokeHookOnOwner = false)]
-        public int FieldNone;
+        public int FieldNone { get; set; }
         public event Action<int> EventNone;
     }
 

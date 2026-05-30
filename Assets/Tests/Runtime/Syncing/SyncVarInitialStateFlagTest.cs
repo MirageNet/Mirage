@@ -10,7 +10,7 @@ namespace Mirage.Tests.Runtime.Syncing
         public event Action<int> Hook;
 
         [SyncVar(hook = nameof(Hook))]
-        public int number;
+        public int number { get; set; }
     }
     public class SyncVarInitialStateFlagTest : ClientServerSetup<SyncVarInitialStateFlagBehaviour>
     {

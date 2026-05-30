@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 
 namespace Mirage.Tests.Performance.Runtime
@@ -6,10 +6,10 @@ namespace Mirage.Tests.Performance.Runtime
     public class MonsterBehavior : NetworkBehaviour
     {
         [SyncVar]
-        public Vector3 position;
+        public Vector3 position { get; set; }
 
         [SyncVar]
-        public int MonsterId;
+        public int MonsterId { get; set; }
 
         public void Awake()
         {

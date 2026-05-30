@@ -8,7 +8,7 @@ namespace Mirage.Serialization
     /// <summary>
     /// Tells Weaver to ignore a field or Method
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class WeaverIgnoreAttribute : Attribute { }
 
     /// <summary>
@@ -43,7 +43,7 @@ namespace Mirage.Serialization
     /// </para>
     /// <para>Also See: <see href="https://miragenet.github.io/Mirage/docs/guides/bit-packing/bit-countl">Bit Packing Documentation</see></para>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Parameter)]
     public class BitCountAttribute : Attribute
     {
         /// <param name="bitCount">Value should be between 1 and 64</param>
@@ -54,7 +54,7 @@ namespace Mirage.Serialization
     /// Calculates bitcount from then given min/max values and then packs using <see cref="BitCountAttribute"/>
     /// <para>Also See: <see href="https://miragenet.github.io/Mirage/docs/guides/bit-packing/bit-count-from-range">Bit Packing Documentation</see></para>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Parameter)]
     public class BitCountFromRangeAttribute : Attribute
     {
         /// <param name="min">minimum possible int value</param>
@@ -66,7 +66,7 @@ namespace Mirage.Serialization
     /// Used along size <see cref="BitCountAttribute"/> to encodes a integer value using <see cref="ZigZag"/> so that both positive and negative values can be sent
     /// <para>Also See: <see href="https://miragenet.github.io/Mirage/docs/guides/bit-packing/bit-count-from-rangel">Bit Packing Documentation</see></para>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Parameter)]
     public class ZigZagEncodeAttribute : Attribute
     {
         public ZigZagEncodeAttribute() { }
@@ -76,7 +76,7 @@ namespace Mirage.Serialization
     /// Packs a float field, clamped from -max to +max, with
     /// <para>Also See: <see href="https://miragenet.github.io/Mirage/docs/guides/bit-packing/bit-count-from-range">Bit Packing Documentation</see></para>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Parameter)]
     public class FloatPackAttribute : Attribute
     {
         /// <param name="max">Max value of the float</param>
@@ -91,6 +91,7 @@ namespace Mirage.Serialization
     /// <summary>
     ///
     /// </summary>
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Parameter)]
     public class Vector3PackAttribute : Attribute
     {
         public Vector3PackAttribute(float xMax, float yMax, float zMax, float xPrecision, float yPrecision, float zPrecision) { }
@@ -103,6 +104,7 @@ namespace Mirage.Serialization
     /// <summary>
     ///
     /// </summary>
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Parameter)]
     public class Vector2PackAttribute : Attribute
     {
         public Vector2PackAttribute(float xMax, float yMax, float xPrecision, float yPrecision) { }
@@ -115,6 +117,7 @@ namespace Mirage.Serialization
     /// <summary>
     ///
     /// </summary>
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Parameter)]
     public class QuaternionPackAttribute : Attribute
     {
         public QuaternionPackAttribute(int bitPerElement = 9) { }
@@ -125,7 +128,7 @@ namespace Mirage.Serialization
     /// <para>Allows small values to be sent using less bits</para>
     /// <para>Only works with integer fields (byte, int, ulong, enums etc)</para>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Parameter)]
     public class VarIntAttribute : Attribute
     {
         public VarIntAttribute(ulong smallMax, ulong mediumMax) { }
@@ -139,7 +142,7 @@ namespace Mirage.Serialization
     /// <para>Allows small values to be sent using less bits</para>
     /// <para>Only works with integer fields (byte, int, ulong, enums etc)</para>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Parameter)]
     public class VarIntBlocksAttribute : Attribute
     {
         /// <summary>

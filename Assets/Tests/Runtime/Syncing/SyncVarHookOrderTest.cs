@@ -12,9 +12,9 @@ namespace Mirage.Tests.Runtime.Syncing
     public class HookOrderBehaviour : NetworkBehaviour
     {
         [SyncVar(hook = nameof(OnValue1Changed))]
-        public int value1;
+        public int value1 { get; set; }
         [SyncVar(hook = nameof(OnValue2Changed))]
-        public int value2;
+        public int value2 { get; set; }
 
         public Action<int, int> HookCalled1;
         public Action<int, int> HookCalled2;

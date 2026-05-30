@@ -10,17 +10,17 @@ namespace Mirage.Tests.Runtime.Syncing
     public class MockPlayerHook : NetworkBehaviour
     {
         [SyncVar(hook = nameof(MyNumberEventChanged), invokeHookOnServer = true)]
-        public int myNumberEvent;
+        public int myNumberEvent { get; set; }
 
         [SyncVar(hook = nameof(MyNumberEventChanged), invokeHookOnServer = false)]
-        public int myNumberEvent2;
+        public int myNumberEvent2 { get; set; }
 
 
         public event Action<int> MyNumberEventChanged;
 
 
         [SyncVar(hook = nameof(MyNumberMethodChanged), invokeHookOnServer = true)]
-        public int myNumberMethod;
+        public int myNumberMethod { get; set; }
 
         public event Action<int> MyNumberMethodChangedCalled;
         public void MyNumberMethodChanged(int newValue)
