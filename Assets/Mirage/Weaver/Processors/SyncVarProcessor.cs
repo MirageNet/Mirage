@@ -1,13 +1,11 @@
 using System;
+using System.Linq;
 using Mirage.CodeGen;
 using Mirage.Weaver.NetworkBehaviours;
 using Mirage.Weaver.Serialization;
 using Mirage.Weaver.SyncVars;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using FieldAttributes = Mono.Cecil.FieldAttributes;
-using MethodAttributes = Mono.Cecil.MethodAttributes;
-using PropertyAttributes = Mono.Cecil.PropertyAttributes;
 
 namespace Mirage.Weaver
 {
