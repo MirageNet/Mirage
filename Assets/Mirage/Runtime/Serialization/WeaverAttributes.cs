@@ -8,7 +8,7 @@ namespace Mirage.Serialization
     /// <summary>
     /// Tells Weaver to ignore a field or Method
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Field | AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Field)]
     public sealed class WeaverIgnoreAttribute : Attribute { }
 
     /// <summary>
