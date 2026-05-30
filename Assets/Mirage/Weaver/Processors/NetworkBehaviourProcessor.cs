@@ -32,14 +32,14 @@ namespace Mirage.Weaver
         private readonly SyncObjectProcessor syncObjectProcessor;
         private readonly ConstFieldTracker rpcCounter;
 
-        public NetworkBehaviourProcessor(TypeDefinition td, Readers readers, Writers writers, PropertySiteProcessor propertySiteProcessor, IWeaverLogger logger)
+        public NetworkBehaviourProcessor(TypeDefinition td, Readers readers, Writers writers, IWeaverLogger logger)
         {
             Weaver.DebugLog(td, "NetworkBehaviourProcessor");
             netBehaviourSubclass = td;
             this.logger = logger;
             serverRpcProcessor = new ServerRpcProcessor(netBehaviourSubclass.Module, readers, writers, logger);
             clientRpcProcessor = new ClientRpcProcessor(netBehaviourSubclass.Module, readers, writers, logger);
-            syncVarProcessor = new SyncVarProcessor(netBehaviourSubclass.Module, readers, writers, propertySiteProcessor);
+            syncVarProcessor = new SyncVarProcessor(netBehaviourSubclass.Module, readers, writers);
             syncObjectProcessor = new SyncObjectProcessor(readers, writers, logger);
 
             // no max for rpcs, index is sent as var int, so more rpc just means bigger header size (still smaller than 4 byte hash)

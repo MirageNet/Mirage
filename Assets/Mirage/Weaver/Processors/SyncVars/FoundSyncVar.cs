@@ -11,6 +11,7 @@ namespace Mirage.Weaver.SyncVars
         public readonly ModuleDefinition Module;
         public readonly FoundNetworkBehaviour Behaviour;
         public readonly FieldDefinition FieldDefinition;
+        public readonly PropertyDefinition PropertyDefinition;
         public readonly int DirtyIndex;
         public long DirtyBit => 1L << DirtyIndex;
 
@@ -20,10 +21,11 @@ namespace Mirage.Weaver.SyncVars
         /// </summary>
         public bool HasProcessed { get; set; } = false;
 
-        public FoundSyncVar(ModuleDefinition module, FoundNetworkBehaviour behaviour, FieldDefinition fieldDefinition, int dirtyIndex)
+        public FoundSyncVar(ModuleDefinition module, FoundNetworkBehaviour behaviour, PropertyDefinition propertyDefinition, FieldDefinition fieldDefinition, int dirtyIndex)
         {
             Module = module;
             Behaviour = behaviour;
+            PropertyDefinition = propertyDefinition;
             FieldDefinition = fieldDefinition;
             DirtyIndex = dirtyIndex;
         }
@@ -46,8 +48,8 @@ namespace Mirage.Weaver.SyncVars
         /// </summary>
         public void SetWrapType()
         {
-            OriginalName = FieldDefinition.Name;
-            OriginalType = FieldDefinition.FieldType;
+            OriginalName = PropertyDefinition.Name;
+            OriginalType = PropertyDefinition.PropertyType;
 
             if (CheckWrapType(OriginalType, out var wrapType))
             {
@@ -89,35 +91,35 @@ namespace Mirage.Weaver.SyncVars
         /// <param name="module"></param>
         public void ProcessAttributes(Writers writers, Readers readers)
         {
-            var hook = HookMethodFinder.GetHookMethod(FieldDefinition, OriginalType);
+            var hook = HookMethodFinder.GetHookMethod(PropertyDefinition, OriginalType);
             Hook = hook;
             HasHook = hook != null;
 
-            InitialOnly = GetInitialOnly(FieldDefinition);
-            InvokeHookOnServer = GetFireOnServer(FieldDefinition);
-            InvokeHookOnOwner = GetFireOnOwner(FieldDefinition);
+            InitialOnly = GetInitialOnly(PropertyDefinition);
+            InvokeHookOnServer = GetFireOnServer(PropertyDefinition);
+            InvokeHookOnOwner = GetFireOnOwner(PropertyDefinition);
 
             ValueSerializer = ValueSerializerFinder.GetSerializer(this, writers, readers);
 
             if (!HasHook && (InvokeHookOnServer || InvokeHookOnOwner))
-                throw new HookMethodException("'invokeHookOnServer' or 'InvokeHookOnOwner' is set to true but no hook was implemented. Please implement hook or set 'invokeHookOnServer' back to false or remove for default false.", FieldDefinition);
+                throw new HookMethodException("'invokeHookOnServer' or 'InvokeHookOnOwner' is set to true but no hook was implemented. Please implement hook or set 'invokeHookOnServer' back to false or remove for default false.", PropertyDefinition);
         }
 
-        private static bool GetInitialOnly(FieldDefinition fieldDefinition)
+        private static bool GetInitialOnly(PropertyDefinition propertyDefinition)
         {
-            var attr = fieldDefinition.GetCustomAttribute<SyncVarAttribute>();
+            var attr = propertyDefinition.GetCustomAttribute<SyncVarAttribute>();
             return attr.GetField(nameof(SyncVarAttribute.initialOnly), false);
         }
 
-        private static bool GetFireOnServer(FieldDefinition fieldDefinition)
+        private static bool GetFireOnServer(PropertyDefinition propertyDefinition)
         {
-            var attr = fieldDefinition.GetCustomAttribute<SyncVarAttribute>();
+            var attr = propertyDefinition.GetCustomAttribute<SyncVarAttribute>();
             return attr.GetField(nameof(SyncVarAttribute.invokeHookOnServer), false);
         }
 
-        private static bool GetFireOnOwner(FieldDefinition fieldDefinition)
+        private static bool GetFireOnOwner(PropertyDefinition propertyDefinition)
         {
-            var attr = fieldDefinition.GetCustomAttribute<SyncVarAttribute>();
+            var attr = propertyDefinition.GetCustomAttribute<SyncVarAttribute>();
             return attr.GetField(nameof(SyncVarAttribute.invokeHookOnOwner), false);
         }
     }

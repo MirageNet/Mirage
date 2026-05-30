@@ -28,7 +28,7 @@ namespace Mirage.Weaver.SyncVars
     {
         /// <returns>Found Hook method or null</returns>
         /// <exception cref="HookMethodException">Throws if users sets hook in attribute but method could not be found</exception>
-        public static SyncVarHook GetHookMethod(FieldDefinition syncVar, TypeReference originalType)
+        public static SyncVarHook GetHookMethod(PropertyDefinition syncVar, TypeReference originalType)
         {
             var syncVarAttr = syncVar.GetCustomAttribute<SyncVarAttribute>();
 
@@ -49,7 +49,7 @@ namespace Mirage.Weaver.SyncVars
                 throw new HookMethodException($"Could not find hook for '{syncVar.Name}', hook name '{hookFunctionName}', hook type {hookType}. See SyncHookType for valid signatures", syncVar);
         }
 
-        private static SyncVarHook FindHookMethod(FieldDefinition syncVar, string hookFunctionName, SyncHookType hookType, TypeReference originalType)
+        private static SyncVarHook FindHookMethod(PropertyDefinition syncVar, string hookFunctionName, SyncHookType hookType, TypeReference originalType)
         {
             switch (hookType)
             {
@@ -67,7 +67,7 @@ namespace Mirage.Weaver.SyncVars
             }
         }
 
-        private static SyncVarHook FindAutomatic(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType)
+        private static SyncVarHook FindAutomatic(PropertyDefinition syncVar, string hookFunctionName, TypeReference originalType)
         {
             SyncVarHook foundHook = null;
 
@@ -81,30 +81,24 @@ namespace Mirage.Weaver.SyncVars
             return foundHook;
         }
 
-        private static void CheckHook(FieldDefinition syncVar, string hookFunctionName, ref SyncVarHook foundHook, SyncVarHook newfound)
+        private static void CheckHook(PropertyDefinition syncVar, string hookFunctionName, ref SyncVarHook foundHook, SyncVarHook newfound)
         {
             // dont need to check anything if new one is null (not found)
             if (newfound == null)
                 return;
 
             if (foundHook == null)
-            {
                 foundHook = newfound;
-            }
             else
-            {
                 throw new HookMethodException($"Mutliple hooks found for '{syncVar.Name}', hook name '{hookFunctionName}'. Please set HookType or remove one of the overloads", syncVar);
-            }
         }
 
-        private static SyncVarHook FindMethod(FieldDefinition syncVar, TypeReference originalType, string hookFunctionName, int argCount)
+        private static SyncVarHook FindMethod(PropertyDefinition syncVar, TypeReference originalType, string hookFunctionName, int argCount)
         {
             var methods = syncVar.DeclaringType.GetMethods(hookFunctionName);
             var methodsWithParams = methods.Where(m => m.Parameters.Count == argCount).ToArray();
             if (methodsWithParams.Length == 0)
-            {
                 return null;
-            }
 
             // return method if matching args are found
             foreach (var method in methodsWithParams)
@@ -119,7 +113,7 @@ namespace Mirage.Weaver.SyncVars
             throw new HookMethodException($"Wrong type for Parameter in hook for '{syncVar.Name}', hook name '{hookFunctionName}'.", syncVar, methods.First());
         }
 
-        private static SyncVarHook FindEvent(FieldDefinition syncVar, TypeReference originalType, string hookFunctionName, int? argCount)
+        private static SyncVarHook FindEvent(PropertyDefinition syncVar, TypeReference originalType, string hookFunctionName, int? argCount)
         {
             // we can't have 2 events/fields with same name, so using `First` is ok here
             var @event = syncVar.DeclaringType.Events.FirstOrDefault(x => x.Name == hookFunctionName);
@@ -128,9 +122,7 @@ namespace Mirage.Weaver.SyncVars
 
             var eventType = @event.EventType;
             if (!eventType.FullName.Contains("System.Action"))
-            {
                 ThrowWrongHookType(syncVar, @event, eventType, "Not System.Action");
-            }
 
             // if it is not generic, then it has no args
             if (!eventType.IsGenericInstance)
@@ -161,14 +153,12 @@ namespace Mirage.Weaver.SyncVars
 
             // check param types
             if (!MatchesParameters(genericEvent, originalType, args.Count))
-            {
                 ThrowWrongHookType(syncVar, @event, eventType, "Param mismatch");
-            }
 
             return new SyncVarHook(@event, args.Count);
         }
 
-        private static void ThrowWrongHookType(FieldDefinition syncVar, EventDefinition @event, TypeReference eventType, string extra)
+        private static void ThrowWrongHookType(PropertyDefinition syncVar, EventDefinition @event, TypeReference eventType, string extra)
         {
             throw new HookMethodException($"Hook Event for '{syncVar.Name}' is invalid '{eventType.FullName}', Error Type: {extra}", @event);
         }

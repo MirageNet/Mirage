@@ -20,7 +20,6 @@ namespace Mirage.Weaver
     {
         private Readers readers;
         private Writers writers;
-        private PropertySiteProcessor propertySiteProcessor;
 
         [Conditional("WEAVER_DEBUG_LOGS")]
         public static void DebugLog(TypeDefinition td, string message)
@@ -43,7 +42,6 @@ namespace Mirage.Weaver
                 var module = assembly.MainModule;
                 readers = new Readers(module, logger);
                 writers = new Writers(module, logger);
-                propertySiteProcessor = new PropertySiteProcessor();
                 var rwProcessor = new ReaderWriterProcessor(module, readers, writers, logger);
 
                 var modified = false;
@@ -71,10 +69,7 @@ namespace Mirage.Weaver
 
                 if (modified)
                 {
-                    using (timer.Sample("propertySiteProcessor"))
-                    {
-                        propertySiteProcessor.Process(module);
-                    }
+
 
                     using (timer.Sample("InitializeReaderAndWriters"))
                     {
@@ -154,7 +149,7 @@ namespace Mirage.Weaver
                 var behaviour = behaviourClasses[i];
                 if (NetworkBehaviourProcessor.WasProcessed(behaviour)) { continue; }
 
-                modified |= new NetworkBehaviourProcessor(behaviour, readers, writers, propertySiteProcessor, logger).Process();
+                modified |= new NetworkBehaviourProcessor(behaviour, readers, writers, logger).Process();
             }
             return modified;
         }

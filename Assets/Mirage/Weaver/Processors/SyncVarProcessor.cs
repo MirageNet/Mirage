@@ -19,16 +19,14 @@ namespace Mirage.Weaver
         private readonly ModuleDefinition module;
         private readonly Readers readers;
         private readonly Writers writers;
-        private readonly PropertySiteProcessor propertySiteProcessor;
 
         private FoundNetworkBehaviour behaviour;
 
-        public SyncVarProcessor(ModuleDefinition module, Readers readers, Writers writers, PropertySiteProcessor propertySiteProcessor)
+        public SyncVarProcessor(ModuleDefinition module, Readers readers, Writers writers)
         {
             this.module = module;
             this.readers = readers;
             this.writers = writers;
-            this.propertySiteProcessor = propertySiteProcessor;
         }
 
         public void ProcessSyncVars(TypeDefinition td, IWeaverLogger logger)
@@ -38,23 +36,25 @@ namespace Mirage.Weaver
             // start assigning syncvars at the place the base class stopped, if any
 
             // find syncvars
-            // use ToArray to create copy, ProcessSyncVar might add new fields
-            foreach (var fd in td.Fields.ToArray())
+            // use ToArray to create copy
+            foreach (var pd in td.Properties.ToArray())
             {
-                // try/catch for each field, and log once
-                // we dont want to spam multiple logs for a single field
+                // try/catch for each property, and log once
+                // we dont want to spam multiple logs for a single property
                 try
                 {
-                    if (IsValidSyncVar(fd))
+                    if (IsValidSyncVar(pd, out var fd))
                     {
-                        var syncVar = behaviour.AddSyncVar(fd);
+                        InjectAndCopyAttributes(pd, fd);
+
+                        var syncVar = behaviour.AddSyncVar(pd, fd);
                         ProcessSyncVar(syncVar);
                         syncVar.HasProcessed = true;
                     }
                 }
                 catch (ValueSerializerException e)
                 {
-                    logger.Error(e.Message, fd);
+                    logger.Error(e.Message, pd);
                 }
                 catch (SyncVarException e)
                 {
@@ -62,8 +62,8 @@ namespace Mirage.Weaver
                 }
                 catch (SerializeFunctionException e)
                 {
-                    // use field as member referecne
-                    logger.Error(e.Message, fd);
+                    // use property as member reference
+                    logger.Error(e.Message, pd);
                 }
             }
 
@@ -73,30 +73,113 @@ namespace Mirage.Weaver
             GenerateDeserialization();
         }
 
-        private bool IsValidSyncVar(FieldDefinition field)
+        private bool IsValidSyncVar(PropertyDefinition property, out FieldDefinition backingField)
         {
-            if (!field.HasCustomAttribute<SyncVarAttribute>())
-            {
+            backingField = null;
+            if (!property.HasCustomAttribute<SyncVarAttribute>())
                 return false;
-            }
 
-            if ((field.Attributes & FieldAttributes.Static) != 0)
-            {
-                throw new SyncVarException($"{field.Name} cannot be static", field);
-            }
+            if (property.GetMethod == null || property.SetMethod == null)
+                throw new SyncVarException($"{property.Name} must have both get and set accessors", property);
 
-            if (field.FieldType.IsArray)
-            {
-                // todo should arrays really be blocked?
-                throw new SyncVarException($"{field.Name} has invalid type. Use SyncLists instead of arrays", field);
-            }
+            if (property.GetMethod.IsStatic || property.SetMethod.IsStatic)
+                throw new SyncVarException($"{property.Name} cannot be static", property);
 
-            if (SyncObjectProcessor.ImplementsSyncObject(field.FieldType))
-            {
-                throw new SyncVarException($"{field.Name} has [SyncVar] attribute. ISyncObject should not be marked with SyncVar", field);
-            }
+            var backingFieldName = $"<{property.Name}>k__BackingField";
+            backingField = property.DeclaringType.Fields.FirstOrDefault(f => f.Name == backingFieldName);
+            if (backingField == null)
+                throw new SyncVarException($"{property.Name} is not an auto-property (no backing field found)", property);
+
+            if (property.PropertyType.IsArray)
+                throw new SyncVarException($"{property.Name} has invalid type. Use SyncLists instead of arrays", property);
+
+            if (SyncObjectProcessor.ImplementsSyncObject(property.PropertyType))
+                throw new SyncVarException($"{property.Name} has [SyncVar] attribute. ISyncObject should not be marked with SyncVar", property);
+
+            if (!IsSimpleGetter(property, backingField))
+                throw new SyncVarException($"{property.Name} does not have a simple auto-property getter", property);
+
+            if (!IsSimpleSetter(property, backingField))
+                throw new SyncVarException($"{property.Name} does not have a simple auto-property setter", property);
 
             return true;
+        }
+
+        private bool IsSimpleGetter(PropertyDefinition property, FieldDefinition backingField)
+        {
+            if (property.GetMethod?.Body == null)
+                return false;
+
+            var ldfldCount = 0;
+            foreach (var inst in property.GetMethod.Body.Instructions)
+            {
+                if (inst.OpCode == OpCodes.Ldfld)
+                {
+                    if ((inst.Operand as FieldReference)?.Resolve() != backingField)
+                        return false;
+                    ldfldCount++;
+                }
+                else if (inst.OpCode == OpCodes.Stfld || inst.OpCode == OpCodes.Ldsfld || inst.OpCode == OpCodes.Stsfld)
+                    return false;
+            }
+
+            return ldfldCount == 1;
+        }
+
+        private bool IsSimpleSetter(PropertyDefinition property, FieldDefinition backingField)
+        {
+            if (property.SetMethod?.Body == null)
+                return false;
+
+            var stfldCount = 0;
+            foreach (var inst in property.SetMethod.Body.Instructions)
+            {
+                if (inst.OpCode == OpCodes.Stfld)
+                {
+                    if ((inst.Operand as FieldReference)?.Resolve() != backingField)
+                        return false;
+                    stfldCount++;
+                }
+                else if (inst.OpCode == OpCodes.Ldfld || inst.OpCode == OpCodes.Ldsfld || inst.OpCode == OpCodes.Stsfld)
+                    return false;
+            }
+
+            return stfldCount == 1;
+        }
+
+        private void InjectAndCopyAttributes(PropertyDefinition property, FieldDefinition backingField)
+        {
+            if (!backingField.CustomAttributes.Any(a => a.AttributeType.FullName == typeof(UnityEngine.SerializeField).FullName))
+            {
+                var serializeFieldConstructor = typeof(UnityEngine.SerializeField).GetConstructor(Type.EmptyTypes);
+                var serializeFieldAttribute = new CustomAttribute(module.ImportReference(serializeFieldConstructor));
+                backingField.CustomAttributes.Add(serializeFieldAttribute);
+            }
+
+            foreach (var attr in property.CustomAttributes)
+            {
+                var attrType = attr.AttributeType;
+                if (attrType.Is<SyncVarAttribute>() || attrType.Namespace == "UnityEngine")
+                {
+                    if (!backingField.CustomAttributes.Any(a => a.AttributeType.FullName == attrType.FullName))
+                        CopyAttribute(attr, backingField);
+                }
+            }
+        }
+
+        private void CopyAttribute(CustomAttribute source, FieldDefinition targetField)
+        {
+            var newAttr = new CustomAttribute(module.ImportReference(source.Constructor));
+            foreach (var arg in source.ConstructorArguments)
+                newAttr.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportReference(arg.Type), arg.Value));
+
+            foreach (var field in source.Fields)
+                newAttr.Fields.Add(new CustomAttributeNamedArgument(field.Name, new CustomAttributeArgument(module.ImportReference(field.Argument.Type), field.Argument.Value)));
+
+            foreach (var prop in source.Properties)
+                newAttr.Properties.Add(new CustomAttributeNamedArgument(prop.Name, new CustomAttributeArgument(module.ImportReference(prop.Argument.Type), prop.Argument.Value)));
+
+            targetField.CustomAttributes.Add(newAttr);
         }
 
         private void ProcessSyncVar(FoundSyncVar syncVar)
@@ -105,91 +188,49 @@ namespace Mirage.Weaver
             syncVar.SetWrapType();
             syncVar.ProcessAttributes(writers, readers);
 
-            var fd = syncVar.FieldDefinition;
+            var pd = syncVar.PropertyDefinition;
+            Weaver.DebugLog(pd.DeclaringType, $"Sync Var {pd.Name} {pd.PropertyType}");
 
-            var originalName = fd.Name;
-            Weaver.DebugLog(fd.DeclaringType, $"Sync Var {fd.Name} {fd.FieldType}");
-
-            var get = GenerateSyncVarGetter(syncVar);
-            var set = syncVar.InitialOnly
-                ? GenerateSyncVarSetterInitialOnly(syncVar)
-                : GenerateSyncVarSetter(syncVar);
-
-            //NOTE: is property even needed? Could just use a setter function?
-            //create the property
-            var propertyDefinition = new PropertyDefinition("Network" + originalName, PropertyAttributes.None, syncVar.OriginalType)
-            {
-                GetMethod = get,
-                SetMethod = set
-            };
-
-            propertyDefinition.DeclaringType = fd.DeclaringType;
-            //add the methods and property to the type.
-            fd.DeclaringType.Properties.Add(propertyDefinition);
-            propertySiteProcessor.Setters[fd] = set;
-
-            if (syncVar.IsWrapped)
-            {
-                propertySiteProcessor.Getters[fd] = get;
-            }
+            GenerateSyncVarGetter(syncVar);
+            if (syncVar.InitialOnly)
+                GenerateSyncVarSetterInitialOnly(syncVar);
+            else
+                GenerateSyncVarSetter(syncVar);
         }
 
-        private MethodDefinition GenerateSyncVarGetter(FoundSyncVar syncVar)
+        private void GenerateSyncVarGetter(FoundSyncVar syncVar)
         {
-            var fd = syncVar.FieldDefinition;
-            var originalType = syncVar.OriginalType;
-            var originalName = syncVar.OriginalName;
-
-            //Create the get method
-            var get = fd.DeclaringType.AddMethod(
-                    "get_Network" + originalName, MethodAttributes.Public |
-                    MethodAttributes.SpecialName |
-                    MethodAttributes.HideBySig,
-                    originalType);
+            var get = syncVar.PropertyDefinition.GetMethod;
+            get.Body.Instructions.Clear();
+            get.Body.Variables.Clear();
 
             var worker = get.Body.GetILProcessor();
             WriteLoadField(worker, syncVar);
 
             worker.Append(worker.Create(OpCodes.Ret));
-
-            get.SemanticsAttributes = MethodSemanticsAttributes.Getter;
-
-            return get;
         }
 
-        private MethodDefinition GenerateSyncVarSetterInitialOnly(FoundSyncVar syncVar)
+        private void GenerateSyncVarSetterInitialOnly(FoundSyncVar syncVar)
         {
-            // todo reduce duplicate code with this and GenerateSyncVarSetter
-            var fd = syncVar.FieldDefinition;
-            var originalType = syncVar.OriginalType;
-            var originalName = syncVar.OriginalName;
+            var set = syncVar.PropertyDefinition.SetMethod;
+            set.Body.Instructions.Clear();
+            set.Body.Variables.Clear();
 
-            //Create the set method
-            var set = fd.DeclaringType.AddMethod("set_Network" + originalName, MethodAttributes.Public |
-                    MethodAttributes.SpecialName |
-                    MethodAttributes.HideBySig);
-            var valueParam = set.AddParam(originalType, "value");
-            set.SemanticsAttributes = MethodSemanticsAttributes.Setter;
+            var valueParam = set.Parameters[0];
 
             var worker = set.Body.GetILProcessor();
             WriteStoreField(worker, valueParam, syncVar);
             worker.Append(worker.Create(OpCodes.Ret));
-
-            return set;
         }
 
-        private MethodDefinition GenerateSyncVarSetter(FoundSyncVar syncVar)
+        private void GenerateSyncVarSetter(FoundSyncVar syncVar)
         {
-            var fd = syncVar.FieldDefinition;
-            var originalType = syncVar.OriginalType;
-            var originalName = syncVar.OriginalName;
+            var set = syncVar.PropertyDefinition.SetMethod;
+            set.Body.Instructions.Clear();
+            set.Body.Variables.Clear();
 
-            //Create the set method
-            var set = fd.DeclaringType.AddMethod("set_Network" + originalName, MethodAttributes.Public |
-                    MethodAttributes.SpecialName |
-                    MethodAttributes.HideBySig);
-            var valueParam = set.AddParam(originalType, "value");
-            set.SemanticsAttributes = MethodSemanticsAttributes.Setter;
+            var originalType = syncVar.OriginalType;
+            var valueParam = set.Parameters[0];
 
             var worker = set.Body.GetILProcessor();
 
@@ -278,8 +319,6 @@ namespace Mirage.Weaver
             worker.Append(endOfMethod);
 
             worker.Append(worker.Create(OpCodes.Ret));
-
-            return set;
         }
 
         /// <summary>
