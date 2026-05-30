@@ -6,7 +6,7 @@ namespace SyncVarHookTests.ExplicitEvent1NotFound
     class ExplicitEvent1NotFound : NetworkBehaviour
     {
         [SyncVar(hook = nameof(onChangeHealth), hookType = SyncHookType.EventWith1Arg)]
-        int health;
+        int health { get; set; }
 
         event Action<int, int> onChangeHealth;
     }

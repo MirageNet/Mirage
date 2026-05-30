@@ -5,7 +5,7 @@ namespace SyncVarHookTests.ErrorForWrongTypeNewParameter
     class ErrorForWrongTypeNewParameter : NetworkBehaviour
     {
         [SyncVar(hook = nameof(onChangeHealth))]
-        int health;
+        int health { get; set; }
 
         void onChangeHealth(int oldValue, float wrongNewValue)
         {

@@ -9,7 +9,7 @@ namespace Mirage.Tests.Runtime.ClientServer.GenericBehaviours.NoMiddle
 {
     public class With3<A, B, C> : NetworkBehaviour
     {
-        [SyncVar] public int a;
+        [SyncVar] public int a { get; set; }
     }
 
     public class With2<D, E> : With3<int, E, D>
@@ -18,7 +18,7 @@ namespace Mirage.Tests.Runtime.ClientServer.GenericBehaviours.NoMiddle
 
     public class With0 : With2<Vector3, float>
     {
-        [SyncVar] public float b;
+        [SyncVar] public float b { get; set; }
     }
 
     public class GenericNetworkBehaviorSyncvarNoMiddleTest : ClientServerSetup<With0>
@@ -39,17 +39,17 @@ namespace Mirage.Tests.Runtime.ClientServer.GenericBehaviours.SyncVarMiddle
 {
     public class With3<A, B, C> : NetworkBehaviour
     {
-        [SyncVar] public int a;
+        [SyncVar] public int a { get; set; }
     }
 
     public class With2<D, E> : With3<int, E, D>
     {
-        [SyncVar] public int b;
+        [SyncVar] public int b { get; set; }
     }
 
     public class With0 : With2<Vector3, float>
     {
-        [SyncVar] public float c;
+        [SyncVar] public float c { get; set; }
     }
 
     public class GenericNetworkBehaviorSyncvarNoMiddleTest : ClientServerSetup<With0>

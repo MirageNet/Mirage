@@ -5,7 +5,7 @@ namespace SyncVarHookTests.ExplicitMethod1FoundWithOverLoad
     class ExplicitMethod1FoundWithOverLoad : NetworkBehaviour
     {
         [SyncVar(hook = nameof(onChangeHealth), hookType = SyncHookType.MethodWith1Arg)]
-        int health;
+        int health { get; set; }
 
         public void onChangeHealth(int newValue)
         {

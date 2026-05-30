@@ -5,6 +5,6 @@ namespace SyncVarTests.SyncVarGenericFields
     class SyncVarGenericFields<T> : NetworkBehaviour
     {
         [SyncVar]
-        T invalidVar;
+        T invalidVar { get; set; }
     }
 }

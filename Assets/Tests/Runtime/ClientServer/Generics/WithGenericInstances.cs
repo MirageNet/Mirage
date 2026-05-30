@@ -25,15 +25,15 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
 
         public readonly SyncList<MyStruct<int>> myList = new SyncList<MyStruct<int>>();
         [SyncVar]
-        public MyStruct<int> myVar;
+        public MyStruct<int> myVar { get; set; }
 
         [SyncVar(hook = nameof(syncHook))]
-        public MyStruct<int> varWithHook;
+        public MyStruct<int> varWithHook { get; set; }
 
         private void syncHook(MyStruct<int> _old, MyStruct<int> _new) => onSyncHook?.Invoke(_old.value, _new.value);
 
         [SyncVar(hook = nameof(syncEvent))]
-        public MyStruct<int> varWithEvent;
+        public MyStruct<int> varWithEvent { get; set; }
 
         [ClientRpc]
         public void MyRpc(MyStruct<int> value)

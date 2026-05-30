@@ -9,6 +9,6 @@ namespace SyncVarTests.SyncVarsInterface
             void interfaceMethod();
         }
         [SyncVar]
-        IMySyncVar invalidVar;
+        IMySyncVar invalidVar { get; set; }
     }
 }

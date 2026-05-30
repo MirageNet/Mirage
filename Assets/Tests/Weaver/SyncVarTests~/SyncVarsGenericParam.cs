@@ -10,6 +10,6 @@ namespace SyncVarTests.SyncVarsGenericParam
         }
 
         [SyncVar]
-        MySyncVar<int> invalidVar = new MySyncVar<int>();
+        MySyncVar<int> invalidVar { get; set; } = new MySyncVar<int>();
     }
 }

@@ -7,6 +7,6 @@ namespace SyncVarTests.SyncVarsSyncList
     class SyncVarsSyncList : NetworkBehaviour
     {
         [SyncVar]
-        SyncList<int> syncints;
+        SyncList<int> syncints { get; set; }
     }
 }

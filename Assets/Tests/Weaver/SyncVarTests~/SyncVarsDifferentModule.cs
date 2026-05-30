@@ -6,10 +6,10 @@ namespace SyncVarTests.SyncVarsDifferentModule
     class SyncVarsDifferentModule : NetworkBehaviour
     {
         [SyncVar(hook = nameof(OnChangeHealth))]
-        int health;
+        int health { get; set; }
 
         [SyncVar]
-        TextMesh invalidVar;
+        TextMesh invalidVar { get; set; }
 
         public void TakeDamage(int amount)
         {

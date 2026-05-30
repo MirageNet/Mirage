@@ -6,7 +6,7 @@ namespace SyncVarHookTests.SuccessGenericAction
     class SuccessGenericAction : NetworkBehaviour
     {
         [SyncVar(hook = nameof(OnChangeHealth))]
-        int health;
+        int health { get; set; }
 
         public event Action OnChangeHealth;
     }

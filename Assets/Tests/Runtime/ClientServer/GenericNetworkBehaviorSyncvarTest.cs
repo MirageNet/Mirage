@@ -9,13 +9,13 @@ namespace Mirage.Tests.Runtime.ClientServer
     public class GenericBehaviourWithSyncVar<T> : NetworkBehaviour
     {
         [SyncVar]
-        public int baseValue = 0;
+        public int baseValue { get; set; } = 0;
         [SyncVar(hook = nameof(OnSyncedBaseValueWithHook))]
-        public int baseValueWithHook = 0;
+        public int baseValueWithHook { get; set; } = 0;
         [SyncVar]
-        public NetworkBehaviour target;
+        public NetworkBehaviour target { get; set; }
         [SyncVar]
-        public NetworkIdentity targetIdentity;
+        public NetworkIdentity targetIdentity { get; set; }
 
         public Action<int, int> onBaseValueChanged;
 
@@ -32,13 +32,13 @@ namespace Mirage.Tests.Runtime.ClientServer
     public class GenericBehaviourWithSyncVarImplement : GenericBehaviourWithSyncVar<UnityEngine.Vector3>
     {
         [SyncVar]
-        public int childValue = 0;
+        public int childValue { get; set; } = 0;
         [SyncVar(hook = nameof(OnSyncedChildValueWithHook))]
-        public int childValueWithHook = 0;
+        public int childValueWithHook { get; set; } = 0;
         [SyncVar]
-        public NetworkBehaviour childTarget;
+        public NetworkBehaviour childTarget { get; set; }
         [SyncVar]
-        public NetworkIdentity childIdentity;
+        public NetworkIdentity childIdentity { get; set; }
 
         public Action<int, int> onChildValueChanged;
 

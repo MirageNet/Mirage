@@ -18,10 +18,10 @@ namespace Mirage.Tests.Runtime.Syncing
         }
 
         [SyncVar]
-        public Guild guild;
+        public Guild guild { get; set; }
 
         [SyncVar]
-        public NetworkIdentity target;
+        public NetworkIdentity target { get; set; }
 
 
         public event Action OnSerializeCalled;

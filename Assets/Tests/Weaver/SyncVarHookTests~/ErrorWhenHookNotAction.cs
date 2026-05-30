@@ -7,7 +7,7 @@ namespace SyncVarHookTests.ErrorWhenHookNotAction
     class ErrorWhenHookNotAction : NetworkBehaviour
     {
         [SyncVar(hook = nameof(OnChangeHealth))]
-        int health;
+        int health { get; set; }
 
         public event DoStuff OnChangeHealth;
     }

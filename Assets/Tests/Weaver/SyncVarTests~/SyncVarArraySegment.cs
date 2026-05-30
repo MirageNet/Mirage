@@ -6,6 +6,6 @@ namespace SyncVarTests.SyncVarArraySegment
     class SyncVarArraySegment : NetworkBehaviour
     {
        [SyncVar]
-       public ArraySegment<int> data;
+       public ArraySegment<int> data { get; set; }
     }
 }

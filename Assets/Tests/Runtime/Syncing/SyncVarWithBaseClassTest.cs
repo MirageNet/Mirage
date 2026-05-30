@@ -5,22 +5,22 @@ namespace Mirage.Tests.Runtime.Syncing.SyncVarWithBaseClass
 {
     public class A : NetworkBehaviour
     {
-        [SyncVar] public int i0;
-        [SyncVar] public int i1;
-        [SyncVar] public int i2;
-        [SyncVar] public int i3;
+        [SyncVar] public int i0 { get; set; }
+        [SyncVar] public int i1 { get; set; }
+        [SyncVar] public int i2 { get; set; }
+        [SyncVar] public int i3 { get; set; }
     }
     public class B : A
     {
-        [SyncVar] public int i4;
-        [SyncVar] public int i5;
-        [SyncVar] public int i6;
+        [SyncVar] public int i4 { get; set; }
+        [SyncVar] public int i5 { get; set; }
+        [SyncVar] public int i6 { get; set; }
     }
     public class C : B
     {
-        [SyncVar] public int i7;
-        [SyncVar] public int i8;
-        [SyncVar] public int i9;
+        [SyncVar] public int i7 { get; set; }
+        [SyncVar] public int i8 { get; set; }
+        [SyncVar] public int i9 { get; set; }
     }
 
     public class SyncVarWithBaseClassTest : TestBase

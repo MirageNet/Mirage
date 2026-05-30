@@ -6,13 +6,13 @@ namespace BitAttributeTests.ZigZag
     public class MyBehaviour : NetworkBehaviour
     {
         [BitCount(10), ZigZagEncode]
-        [SyncVar] public int value1;
+        [SyncVar] public int value1 { get; set; }
 
         [BitCount(4), ZigZagEncode]
-        [SyncVar] public MyIntEnum value2;
+        [SyncVar] public MyIntEnum value2 { get; set; }
 
         [BitCount(4), ZigZagEncode]
-        [SyncVar] public MyShortEnum value3;
+        [SyncVar] public MyShortEnum value3 { get; set; }
     }
 
     public enum MyIntEnum

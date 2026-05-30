@@ -6,34 +6,34 @@ namespace BitAttributeTests.VarInt
     public class MyBehaviour : NetworkBehaviour
     {
         [VarInt(10, 100)]
-        [SyncVar] public byte value1;
+        [SyncVar] public byte value1 { get; set; }
 
         [VarInt(10, 500)]
-        [SyncVar] public short value2;
+        [SyncVar] public short value2 { get; set; }
 
         [VarInt(10, 500)]
-        [SyncVar] public ushort value3;
+        [SyncVar] public ushort value3 { get; set; }
 
         [VarInt(10, 500)]
-        [SyncVar] public int value4;
+        [SyncVar] public int value4 { get; set; }
 
         [VarInt(10, 500, 10000)]
-        [SyncVar] public uint value5;
+        [SyncVar] public uint value5 { get; set; }
 
         [VarInt(10, 500, 10000, false)]
-        [SyncVar] public long value6;
+        [SyncVar] public long value6 { get; set; }
 
         [VarInt(10, 500, 10000, false)]
-        [SyncVar] public ulong value7;
+        [SyncVar] public ulong value7 { get; set; }
 
         [VarInt(3, 10, 60)]
-        [SyncVar] public MyByteEnum value8;
+        [SyncVar] public MyByteEnum value8 { get; set; }
 
         [VarInt(3, 10, 60)]
-        [SyncVar] public MyShortEnum value9;
+        [SyncVar] public MyShortEnum value9 { get; set; }
 
         [VarInt(3, 10, 60)]
-        [SyncVar] public MyIntEnum value10;
+        [SyncVar] public MyIntEnum value10 { get; set; }
     }
 
     public enum MyIntEnum

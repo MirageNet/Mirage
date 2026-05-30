@@ -6,6 +6,6 @@ namespace BadAttributeUseageTests.MonoBehaviourSyncVar
     class MonoBehaviourSyncVar : MonoBehaviour
     {
         [SyncVar]
-        int potato;
+        int potato { get; set; }
     }
 }

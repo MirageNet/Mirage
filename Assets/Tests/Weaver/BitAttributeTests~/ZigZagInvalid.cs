@@ -8,15 +8,15 @@ namespace BitAttributeTests.ZigZagInvalid
     {
         // error, ZigZag can't be used by itself
         [ZigZagEncode]
-        [SyncVar] public int value1;
+        [SyncVar] public int value1 { get; set; }
 
         // error, ZigZag should be used on signed fields
         [BitCount(8), ZigZagEncode]
-        [SyncVar] public uint value2;
+        [SyncVar] public uint value2 { get; set; }
 
         // error, ZigZag should be used on signed fields
         [BitCount(8), ZigZagEncode]
-        [SyncVar] public MyShortEnum value3;
+        [SyncVar] public MyShortEnum value3 { get; set; }
     }
 
     public enum MyShortEnum : ushort
