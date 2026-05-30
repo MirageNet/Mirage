@@ -21,7 +21,7 @@ A Position in bounds +-100 in all XYZ with 0.05 precision for all axis
 public class MyNetworkBehaviour : NetworkBehaviour 
 {
     [SyncVar, Vector3Pack(100f, 100f, 100f, 0.05f)]
-    public Vector3 Position;
+    public Vector3 Position { get; set; }
 }
 ```
 
@@ -33,7 +33,7 @@ A Position in bounds +-100 in all XZ with 0.05 precision, but with +-20 and prec
 public class MyNetworkBehaviour : NetworkBehaviour 
 {
     [SyncVar, Vector3Pack(100f, 20f, 100f, 0.05f, 0.1f, 0.05f)]
-    public Vector3 Position;
+    public Vector3 Position { get; set; }
 }
 ```
 
@@ -45,7 +45,7 @@ A position in a 2D map
 public class MyNetworkBehaviour : NetworkBehaviour 
 {
     [SyncVar, Vector2Pack(1000f, 80f, 0.05f)]
-    public Vector2 Position;
+    public Vector2 Position { get; set; }
 }
 ```
 
@@ -54,10 +54,10 @@ public class MyNetworkBehaviour : NetworkBehaviour
 Source:
 ```cs 
 [SyncVar, Vector3Pack(100f, 20f, 100f, 0.05f, 0.1f, 0.05f)]
-public int myValue1;
+public int myValue1 { get; set; }
 
 [SyncVar, Vector2Pack(1000f, 80f, 0.05f)]
-public int myValue2;
+public int myValue2 { get; set; }
 ```
 
 Generated:

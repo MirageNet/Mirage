@@ -27,7 +27,7 @@ using UnityEngine;
 public class Player : NetworkBehaviour
 {
     [SyncVar]
-    public int clickCount;
+    public int clickCount { get; set; }
 
     private void Update()
     {
@@ -55,13 +55,13 @@ SyncVars work with class inheritance. Consider this example:
 private class Pet : NetworkBehaviour
 {
     [SyncVar] 
-    private string name;
+    private string name { get; set; }
 }
 
 private class Cat : Pet
 {
     [SyncVar]
-    private Color32 color;
+    private Color32 color { get; set; }
 }
 ```
 
@@ -86,7 +86,7 @@ using Mirage;
 public class Player : NetworkBehaviour
 {
     [SyncVar(hook = nameof(UpdateColor))]
-    private Color playerColor = Color.black;
+    private Color playerColor { get; set; } = Color.black;
 
     private Renderer renderer;
 
@@ -133,7 +133,7 @@ using Mirage;
 public class Player : NetworkBehaviour
 {
     [SyncVar(hook = nameof(UpdateColor), invokeHookOnServer = true)]
-    private Color playerColor = Color.black;
+    private Color playerColor { get; set; } = Color.black;
 
     private Renderer renderer;
 
@@ -189,7 +189,7 @@ using UnityEngine;
 public class Player : NetworkBehaviour
 {
     [SyncVar(initialOnly = true)]
-    private int weaponId;
+    private int weaponId { get; set; }
 
     private void Awake()
     {

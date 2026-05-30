@@ -56,7 +56,7 @@ The precision of the smallest 3 can in increased or decreased to change the bit 
 public class MyNetworkBehaviour : NetworkBehaviour 
 {
     [SyncVar, QuaternionPack(9)]
-    public Quaternion direction;
+    public Quaternion direction { get; set; }
 }
 ```
 
@@ -65,7 +65,7 @@ public class MyNetworkBehaviour : NetworkBehaviour
 Source:
 ```cs 
 [SyncVar, QuaternionPack(9)]
-public int myValue;
+public int myValue { get; set; }
 ```
 
 Generated:

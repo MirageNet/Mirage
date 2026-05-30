@@ -32,7 +32,7 @@ A modifier that can be added to a character value to increase or decrease it
 public class MyNetworkBehaviour : NetworkBehaviour 
 {
     [SyncVar, BitCount(8), ZigZagEncode]
-    public int modifier;
+    public int modifier { get; set; }
 }
 ```
 
@@ -51,7 +51,7 @@ public class MyNetworkBehaviour : NetworkBehaviour
 Source:
 ```cs 
 [SyncVar, BitCount(8), ZigZagEncode]
-public int myValue;
+public int myValue { get; set; }
 ```
 
 Generated:

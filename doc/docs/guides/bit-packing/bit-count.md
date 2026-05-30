@@ -32,7 +32,7 @@ Health which is between 0 and 100
 public class MyNetworkBehaviour : NetworkBehaviour 
 {
     [SyncVar, BitCount(7)]
-    public int Health;
+    public int Health { get; set; }
 }
 ```
 
@@ -52,7 +52,7 @@ Weapon index in a list of 6 weapons
 public class MyNetworkBehaviour : NetworkBehaviour 
 {
     [SyncVar, BitCount(3)]
-    public int WeaponIndex;
+    public int WeaponIndex { get; set; }
 }
 ```
 
@@ -66,7 +66,7 @@ public class MyNetworkBehaviour : NetworkBehaviour
 Source:
 ```cs 
 [SyncVar, BitCount(7)]
-public int myValue;
+public int myValue { get; set; }
 ```
 
 Generated:

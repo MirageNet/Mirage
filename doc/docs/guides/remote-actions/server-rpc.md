@@ -74,7 +74,7 @@ public enum DoorState : byte
 public class Door : NetworkBehaviour
 {
     [SyncVar]
-    public DoorState doorState;
+    public DoorState doorState { get; set; }
 
     [ServerRpc(requireAuthority = false)]
     public void CmdSetDoorState(DoorState newDoorState, INetworkPlayer sender = null)

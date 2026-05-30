@@ -25,11 +25,11 @@ Create a prefab with just a `NetworkIdentity` and your `PlayerContext` script. T
 ```cs
 public class PlayerContext : NetworkBehaviour
 {
-    [SyncVar] public string PlayerName;
-    [SyncVar] public string Team;
+    [SyncVar] public string PlayerName { get; set; }
+    [SyncVar] public string Team { get; set; }
 
     // easy access to the gameplay character via NetworkPlayer.Identity
-    [SyncVar] public PlayerCharacter ActiveCharacter;
+    [SyncVar] public PlayerCharacter ActiveCharacter { get; set; }
 }
 ```
 

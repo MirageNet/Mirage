@@ -211,10 +211,10 @@ namespace QuickStart
         private Material playerMaterialClone;
 
         [SyncVar(hook = nameof(OnNameChanged))]
-        public string playerName;
+        public string playerName { get; set; }
 
         [SyncVar(hook = nameof(OnColorChanged))]
-        public Color playerColor = Color.white;
+        public Color playerColor { get; set; } = Color.white;
 
         [ServerRpc]
         public void CmdSetupPlayer(string _name, Color _col)
@@ -343,7 +343,7 @@ namespace QuickStart
         public PlayerScript playerScript;
 
         [SyncVar(hook = nameof(OnStatusTextChanged))]
-        public string statusText;
+        public string statusText { get; set; }
 
         void OnStatusTextChanged(string _Old, string _New)
         {
@@ -392,7 +392,7 @@ private int selectedWeaponLocal = 1;
 public GameObject[] weaponArray;
 
 [SyncVar(hook = nameof(OnWeaponChanged))]
-public int activeWeaponSynced;
+public int activeWeaponSynced { get; set; }
 
 void OnWeaponChanged(int _Old, int _New)
 {

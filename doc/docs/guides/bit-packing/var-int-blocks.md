@@ -25,7 +25,7 @@ A modifier that can be added to a character value to increase or decrease it
 public class MyNetworkBehaviour : NetworkBehaviour 
 {
     [SyncVar, VarIntBlocks(-100, 100)]
-    public int modifier;
+    public int modifier { get; set; }
 }
 ```
 
@@ -56,7 +56,7 @@ public enum MyDirection
 public class MyNetworkBehaviour : NetworkBehaviour 
 {
     [SyncVar, BitCount(-1, 1)]
-    public MyDirection direction;
+    public MyDirection direction { get; set; }
 }
 ```
 
@@ -72,7 +72,7 @@ public class MyNetworkBehaviour : NetworkBehaviour
 Source:
 ```cs 
 [SyncVar, BitCountFromRange(-100, 100)]
-public int myValue;
+public int myValue { get; set; }
 ```
 
 Generated:

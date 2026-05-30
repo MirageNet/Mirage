@@ -26,7 +26,7 @@ Health which is between 0 and 100
 public class MyNetworkBehaviour : NetworkBehaviour 
 {
     [SyncVar, FloatPack(100f, 0.02f)]
-    public int Health;
+    public int Health { get; set; }
 }
 ```
 
@@ -47,7 +47,7 @@ A Percent that where you only want to send 8 bits
 public class MyNetworkBehaviour : NetworkBehaviour 
 {
     [SyncVar, FloatPack(1f, 8)]
-    public int Percent;
+    public int Percent { get; set; }
 }
 ```
 
@@ -58,7 +58,7 @@ public class MyNetworkBehaviour : NetworkBehaviour
 Source:
 ```cs 
 [SyncVar, FloatPack(100f, 0.02f)]
-public int myValue;
+public int myValue { get; set; }
 ```
 
 Generated:

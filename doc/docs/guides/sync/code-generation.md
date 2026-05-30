@@ -11,13 +11,13 @@ using Mirage;
 public class Data : NetworkBehaviour
 {
     [SyncVar(hook = nameof(OnInt1Changed))]
-    public int int1 = 66;
+    public int int1 { get; set; } = 66;
 
     [SyncVar]
-    public int int2 = 23487;
+    public int int2 { get; set; } = 23487;
 
     [SyncVar]
-    public string MyString = "Example string";
+    public string MyString { get; set; } = "Example string";
 
     void OnInt1Changed(int oldValue, int newValue)
     {

@@ -13,7 +13,7 @@ Set a player's name from a client and have it synced to other players.
 public class Player : NetworkBehaviour
 {
     [SyncVar] 
-    public string PlayerName;
+    public string PlayerName { get; set; }
 
     [ServerRpc]
     public void RpcChangeName(string newName)
@@ -33,7 +33,7 @@ RPCs are registered using the classes static constructor with methods that will 
 public class Player : NetworkBehaviour
 {
     [SyncVar] 
-    public string PlayerName;
+    public string PlayerName { get; set; }
 
     [ServerRpc]
     public void RpcChangeName(string newName)

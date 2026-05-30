@@ -13,7 +13,7 @@ By making a [NetworkBehaviour](/docs/guides/game-objects/network-behaviour) gene
 public class MyGenericBehaviour<T> : NetworkBehaviour
 {
     [SyncVar]
-    public T Value;
+    public T Value { get; set; }
 
     public void MyRpc(T value) 
     {

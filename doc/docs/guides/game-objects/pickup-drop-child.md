@@ -47,7 +47,7 @@ public class PlayerEquip : NetworkBehaviour
     public GameObject cylinderPrefab;
 
     [SyncVar(hook = nameof(OnChangeEquipment))]
-    public EquippedItem equippedItem;
+    public EquippedItem equippedItem { get; set; }
 
     void OnChangeEquipment(EquippedItem oldEquippedItem, EquippedItem newEquippedItem)
     {
@@ -163,7 +163,7 @@ using Mirage;
 public class SceneObject : NetworkBehaviour
 {
     [SyncVar(hook = nameof(OnChangeEquipment))]
-    public EquippedItem equippedItem;
+    public EquippedItem equippedItem { get; set; }
 
     public GameObject ballPrefab;
     public GameObject boxPrefab;

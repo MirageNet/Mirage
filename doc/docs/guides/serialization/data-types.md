@@ -41,7 +41,7 @@ You may find that it's more robust to sync the `NetworkIdentity.NetID` (`uint`) 
     public GameObject target;
 
     [SyncVar(hook = nameof(OnTargetChanged))]
-    public uint targetID;
+    public uint targetID { get; set; }
 
     void OnTargetChanged(uint _, uint newValue)
     {

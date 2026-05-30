@@ -122,7 +122,7 @@ using Mirage;
 public class Tree : NetworkBehaviour
 {
     [SyncVar]
-    public int numLeaves;
+    public int numLeaves { get; set; }
 
     void Start()
     {
