@@ -157,7 +157,7 @@ namespace Mirage.Weaver
             foreach (var attr in property.CustomAttributes)
             {
                 var attrType = attr.AttributeType;
-                if (attrType.Is<SyncVarAttribute>() || attrType.Namespace == "UnityEngine")
+                if (attrType.Is<SyncVarAttribute>() || attrType.Namespace == "UnityEngine" || attrType.Namespace == "Mirage.Serialization")
                 {
                     if (!backingField.CustomAttributes.Any(a => a.AttributeType.FullName == attrType.FullName))
                         CopyAttribute(attr, backingField);

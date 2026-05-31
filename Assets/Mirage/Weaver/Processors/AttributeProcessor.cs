@@ -54,6 +54,11 @@ namespace Mirage.Weaver
                 {
                     ProcessFields(fd, foundType);
                 }
+
+                foreach (var pd in foundType.TypeDefinition.Properties)
+                {
+                    ProcessProperties(pd, foundType);
+                }
             }
         }
 
@@ -72,6 +77,12 @@ namespace Mirage.Weaver
             {
                 logger.Error($"{fd.Name} is a SyncObject and can not be used inside Monobehaviour. {foundType.TypeDefinition.Name} is not a NetworkBehaviour", fd);
             }
+        }
+
+        private void ProcessProperties(PropertyDefinition pd, FoundType foundType)
+        {
+            if (pd.HasCustomAttribute<SyncVarAttribute>())
+                logger.Error($"SyncVar {pd.Name} must be inside a NetworkBehaviour. {foundType.TypeDefinition.Name} is not a NetworkBehaviour", pd);
         }
 
         private void ProcessMethod(MethodDefinition md, FoundType foundType)
