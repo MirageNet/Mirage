@@ -17,6 +17,16 @@ The server automatically sends SyncVar updates when the value of a SyncVar chang
 SyncVars are not sent right away or in the order they are set. They will be sent as a group in the next sync update.
 :::
 
+## Why Properties Instead of Fields?
+Mirage uses properties `{ get; set; }` for `[SyncVar]` variables instead of fields to naturally intercept variable reads and writes without rewriting user code at all the access locations. 
+
+When a property is accessed, C# executes standard getter and setter methods under the hood. During compilation, Mirage's Weaver intercepts these methods, clears their compiler-generated bodies, and injects serialization, dirty tracking, and hook dispatching logic. This enables clean, transparent synchronization that behaves identically across all calling contexts.
+
+### Auto-Property Requirement
+`[SyncVar]` properties **must** be simple auto-properties. They cannot have custom `get` or `set` accessors. 
+
+Because the Weaver completely clears the compiled method body of the getter and setter to inject the synchronization logic, any custom logic written inside user-defined accessors would be lost. The Weaver verifies that only simple compiler-generated auto-properties (which only read/write directly to their backing field) are used, and will throw a `SyncVarException` at build time if any custom logic is detected.
+
 ## Example
 Let's have a simple `Player` class with the following code:
 

@@ -3,6 +3,12 @@ sidebar_position: 7
 ---
 # Code Generation 
 
+To synchronize variables, Mirage uses property-based `[SyncVar]` definitions. During the build process, the Weaver intercepts each auto-property, completely clearing its compiled getter and setter method bodies. It then injects custom IL directly into these accessors:
+- **Getter**: Directly returns the backing field (e.g. `ldfld`).
+- **Setter**: Injects an equality check (`SyncVarEqual`), a dirty flag update (`SetDirtyBit`), hook execution checks, and updates the backing field.
+
+The compiler also generates `SerializeSyncVars` and `DeserializeSyncVars` methods to serialize/deserialize these values.
+
 So for this script:
 
 ```cs
