@@ -6,6 +6,7 @@ using Mirage.Weaver.Serialization;
 using Mirage.Weaver.SyncVars;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using UnityEngine;
 
 namespace Mirage.Weaver
 {
@@ -43,6 +44,8 @@ namespace Mirage.Weaver
                 {
                     if (IsValidSyncVar(pd, out var fd))
                     {
+                        ValidateSyncVarType(pd, logger);
+
                         InjectAndCopyAttributes(pd, fd);
 
                         var syncVar = behaviour.AddSyncVar(pd, fd);
@@ -101,6 +104,28 @@ namespace Mirage.Weaver
                 throw new SyncVarException($"{property.Name} does not have a simple auto-property setter", property);
 
             return true;
+        }
+
+        private void ValidateSyncVarType(PropertyDefinition property, IWeaverLogger logger)
+        {
+            var type = property.PropertyType;
+            if (type.Is<NetworkIdentity>() || type.Is<GameObject>() || type.Is<NetworkBehaviour>())
+                return;
+
+            var resolved = type.Resolve();
+            if (resolved == null)
+                return;
+
+            if (resolved.IsDerivedFrom<NetworkBehaviour>())
+                return;
+
+            if (resolved.IsClass && !resolved.IsValueType && resolved.FullName != "System.String")
+            {
+                if (property.HasCustomAttribute<WeaverSyncVarSafeAttribute>() || resolved.HasCustomAttribute<WeaverSyncVarSafeAttribute>())
+                    return;
+
+                logger.Warning($"{property.Name} is a class. SyncVars that are classes can allocate and are difficult to track changes for. Consider using a struct instead, or mark the class or property with [WeaverSyncVarSafe] if it is custom serialized.", property);
+            }
         }
 
         private bool IsSimpleGetter(PropertyDefinition property, FieldDefinition backingField)

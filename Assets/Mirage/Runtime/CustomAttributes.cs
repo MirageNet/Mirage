@@ -36,6 +36,13 @@ namespace Mirage
         public SyncHookType hookType = SyncHookType.Automatic;
     }
 
+    /// <summary>
+    /// Prevents Weaver warnings for class-type SyncVars.
+    /// Apply to a class or SyncVar property to acknowledge that custom serialization handles safety and allocation concerns.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property)]
+    public class WeaverSyncVarSafeAttribute : Attribute { }
+
     public enum SyncHookType
     {
         /// <summary>

@@ -81,5 +81,13 @@ namespace Mirage.Tests.Weaver
             HasError("SyncVarsMoreThan63 has too many [SyncVar]. Consider refactoring your class into multiple components",
                 "SyncVarTests.SyncVarsMoreThan63.SyncVarsMoreThan63");
         }
+
+        [Test]
+        public void SyncVarClassWarning()
+        {
+            NoErrors();
+            HasWarning("warnedVar is a class. SyncVars that are classes can allocate and are difficult to track changes for. Consider using a struct instead, or mark the class or property with [WeaverSyncVarSafe] if it is custom serialized.",
+                "SyncVarTests.SyncVarClassWarning.SomeCustomClass SyncVarTests.SyncVarClassWarning.SyncVarClassWarning::warnedVar");
+        }
     }
 }
