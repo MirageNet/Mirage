@@ -37,11 +37,23 @@ namespace Mirage
     }
 
     /// <summary>
-    /// Prevents Weaver warnings for class-type SyncVars.
-    /// Apply to a class or SyncVar property to acknowledge that custom serialization handles safety and allocation concerns.
+    /// Prevents Weaver warnings when using class-type SyncVars, NetworkMessage fields, or RPC parameters/return values.
+    /// <para>A class-type is generally UNSAFE because:
+    /// <list type="bullet">
+    /// <item>It will allocate a new object upon deserialization.</item>
+    /// <item>Mirage cannot track internal changes to the class.</item>
+    /// <item>It will fail SyncVar equality checks if setting the same instance (preventing dirty bit setting).</item>
+    /// </list>
+    /// </para>
+    /// <para>Mark a type or member with this attribute to declare it SAFE because:
+    /// <list type="bullet">
+    /// <item>It utilizes custom serialization/deserialization that manages safety/allocations.</item>
+    /// <item>It is serialized by ID/reference (like NetworkBehaviour/NetworkIdentity/GameObject).</item>
+    /// </list>
+    /// </para>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property)]
-    public class WeaverSyncVarSafeAttribute : Attribute { }
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Method)]
+    public class WeaverSafeClassAttribute : Attribute { }
 
     public enum SyncHookType
     {

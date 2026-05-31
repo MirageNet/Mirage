@@ -108,23 +108,9 @@ namespace Mirage.Weaver
 
         private void ValidateSyncVarType(PropertyDefinition property, IWeaverLogger logger)
         {
-            var type = property.PropertyType;
-            if (type.Is<NetworkIdentity>() || type.Is<GameObject>() || type.Is<NetworkBehaviour>())
-                return;
-
-            var resolved = type.Resolve();
-            if (resolved == null)
-                return;
-
-            if (resolved.IsDerivedFrom<NetworkBehaviour>())
-                return;
-
-            if (resolved.IsClass && !resolved.IsValueType && resolved.FullName != "System.String")
+            if (property.PropertyType.IsUnsafeClass(property))
             {
-                if (property.HasCustomAttribute<WeaverSyncVarSafeAttribute>() || resolved.HasCustomAttribute<WeaverSyncVarSafeAttribute>())
-                    return;
-
-                logger.Warning($"{property.Name} is a class. SyncVars that are classes can allocate and are difficult to track changes for. Consider using a struct instead, or mark the class or property with [WeaverSyncVarSafe] if it is custom serialized.", property);
+                logger.Warning($"{property.Name} is a class. SyncVars that are classes can allocate and are difficult to track changes for. Consider using a struct instead, or mark the class or property with [WeaverSafeClass] if it is custom serialized.", property);
             }
         }
 

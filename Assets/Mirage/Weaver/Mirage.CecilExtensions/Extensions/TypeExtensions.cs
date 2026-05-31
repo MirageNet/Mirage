@@ -345,5 +345,53 @@ namespace Mirage.CodeGen
 
             return null;
         }
+
+        public static bool IsDerivedFrom(this TypeDefinition td, string baseClassFullName)
+        {
+            if (td == null)
+                return false;
+
+            if (!td.IsClass)
+                return false;
+
+            var parent = td.BaseType;
+            if (parent == null)
+                return false;
+
+            if (parent.FullName == baseClassFullName)
+                return true;
+
+            if (parent.CanBeResolved())
+                return IsDerivedFrom(parent.Resolve(), baseClassFullName);
+
+            return false;
+        }
+
+        public static bool IsUnsafeClass(this TypeReference type, ICustomAttributeProvider attributeProvider = null)
+        {
+            var fullName = type.FullName;
+            if (fullName == "Mirage.NetworkIdentity" || fullName == "UnityEngine.GameObject" || fullName == "Mirage.NetworkBehaviour")
+                return false;
+
+            var resolved = type.TryResolve();
+            if (resolved == null)
+                return false;
+
+            if (resolved.IsDerivedFrom("Mirage.NetworkBehaviour"))
+                return false;
+
+            if (resolved.IsClass && !resolved.IsValueType && resolved.FullName != "System.String")
+            {
+                if (resolved.CustomAttributes.Any(attr => attr.AttributeType.FullName == "Mirage.WeaverSafeClassAttribute"))
+                    return false;
+
+                if (attributeProvider != null && attributeProvider.CustomAttributes.Any(attr => attr.AttributeType.FullName == "Mirage.WeaverSafeClassAttribute"))
+                    return false;
+
+                return true;
+            }
+
+            return false;
+        }
     }
 }
