@@ -17,4 +17,11 @@
   <ItemGroup>
     <ProjectReference Include="..\Mirage.Analyzers\Mirage.Analyzers.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="TestData\**\*.cs" />
+    <None Include="TestData\**\*.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
