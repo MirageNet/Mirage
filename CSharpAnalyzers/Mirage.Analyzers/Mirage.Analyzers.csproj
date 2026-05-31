@@ -13,6 +13,6 @@
   </ItemGroup>
 
   <Target Name="CopyPlugin" AfterTargets="Build">
-    <Copy SourceFiles="$(OutputPath)Mirage.Analyzers.dll" DestinationFolder="..\Assets\Mirage\Analyzers\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(OutputPath)Mirage.Analyzers.dll" DestinationFolder="..\..\Assets\Mirage\Analyzers\" SkipUnchangedFiles="true" />
   </Target>
 </Project>
