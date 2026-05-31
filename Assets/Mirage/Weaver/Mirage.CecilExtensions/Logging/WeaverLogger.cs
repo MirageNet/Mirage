@@ -27,14 +27,25 @@ namespace Mirage.CodeGen
             AddMessage(message, null, DiagnosticType.Error);
         }
 
+        private string FormatMember(MemberReference mr)
+        {
+            if (mr == null)
+                return string.Empty;
+
+            if (mr is PropertyReference pr)
+                return $"{pr.PropertyType.FullName} {pr.DeclaringType.FullName}::{pr.Name}";
+
+            return mr.ToString();
+        }
+
         public void Error(string message, MemberReference mr)
         {
-            Error($"{message} (at {mr})");
+            Error($"{message} (at {FormatMember(mr)})");
         }
 
         public void Error(string message, MemberReference mr, SequencePoint sequencePoint)
         {
-            AddMessage($"{message} (at {mr})", sequencePoint, DiagnosticType.Error);
+            AddMessage($"{message} (at {FormatMember(mr)})", sequencePoint, DiagnosticType.Error);
         }
 
         public void Error(string message, MethodDefinition md)
@@ -50,12 +61,12 @@ namespace Mirage.CodeGen
 
         public void Warning(string message, MemberReference mr)
         {
-            Warning($"{message} (at {mr})");
+            Warning($"{message} (at {FormatMember(mr)})");
         }
 
         public void Warning(string message, MemberReference mr, SequencePoint sequencePoint)
         {
-            AddMessage($"{message} (at {mr})", sequencePoint, DiagnosticType.Warning);
+            AddMessage($"{message} (at {FormatMember(mr)})", sequencePoint, DiagnosticType.Warning);
         }
 
         public void Warning(string message, MethodDefinition md)
