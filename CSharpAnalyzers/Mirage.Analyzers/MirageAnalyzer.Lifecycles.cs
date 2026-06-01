@@ -33,7 +33,7 @@ namespace Mirage.Analyzers
             // MIRAGE1402: Missing base Call in OnSerialize/OnDeserialize
             if (methodSymbol.IsOverride && (methodSymbol.Name == "OnSerialize" || methodSymbol.Name == "OnDeserialize"))
             {
-                bool baseHierarchyHasSyncState = false;
+                var baseHierarchyHasSyncState = false;
                 var baseType = containingType.BaseType;
                 while (baseType != null && !MirageTypes.NetworkBehaviour.Is(baseType) && baseType.ToDisplayString() != "object")
                 {
@@ -94,7 +94,7 @@ namespace Mirage.Analyzers
 
                 if (symbol is IMethodSymbol methodSymbol)
                 {
-                    if (MirageAttributes.ServerRpc.Has(methodSymbol) || 
+                    if (MirageAttributes.ServerRpc.Has(methodSymbol) ||
                         MirageAttributes.ClientRpc.Has(methodSymbol) ||
                         MirageAttributes.Server.Has(methodSymbol) ||
                         MirageAttributes.Client.Has(methodSymbol) ||
@@ -128,6 +128,7 @@ namespace Mirage.Analyzers
                     }
                 }
             }
+        }
 
         private class BaseCallWalker : CSharpSyntaxWalker
         {
