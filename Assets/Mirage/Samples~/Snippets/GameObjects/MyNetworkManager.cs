@@ -1,69 +1,78 @@
 using UnityEngine;
-using Mirage;
 
 namespace Mirage.Snippets.GameObjects
 {
     // CodeEmbed-Start: spawning-without-network-manager-1
-    public class MyNetworkManager : MonoBehaviour 
+    public class MyNetworkManager : MonoBehaviour
     {
-        public GameObject treePrefab;
+        // Assign values in inspector
+        public NetworkIdentity treePrefab;
         public ClientObjectManager ClientObjectManager;
-        public NetworkClient NetworkClient;
-        public NetworkServer NetworkServer;
+        public NetworkClient Client;
+        public NetworkServer Server;
         public ServerObjectManager ServerObjectManager;
 
-        void Start()
+        private void Awake()
         {
-            ClientObjectManager = FindObjectOfType<ClientObjectManager>();
-            NetworkClient = FindObjectOfType<NetworkClient>();
-            NetworkServer = FindObjectOfType<NetworkServer>();
-            ServerObjectManager = FindObjectOfType<ServerObjectManager>();
+            // it is best to add events once in awake
+            // this avoids the need to remove or clean them up,
+            // which is ok for Manager classes that live as long as the NetworkServer/Client themselves
+
+            Server.Started.AddListener(OnServerStarted);
+            // use Authenticated instead of Connected to ensure that player is fully setup
+            Server.Authenticated.AddListener(OnServerConnect);
+            Client.Authenticated.AddListener(OnClientConnect);
         }
 
-        // Register prefab and connect to the server  
-        public void ClientConnect()
+        // Register prefab and connect to the server
+        // Call this from your UI or other code
+        public void StartClient(string address)
         {
             ClientObjectManager.spawnPrefabs.Add(treePrefab);
-            NetworkClient.Connect("localhost");
-            NetworkClient.MessageHandler.RegisterHandler<ConnectMessage>(OnClientConnect);
+
+            Client.Connect(address);
         }
 
-        void OnClientConnect(NetworkConnection conn, ConnectMessage msg)
+        private void OnClientConnect(INetworkPlayer player)
         {
-            Debug.Log("Connected to server: " + conn);
+            Debug.Log("Connected to server: " + player);
         }
         // CodeEmbed-End: spawning-without-network-manager-1
 
         // CodeEmbed-Start: spawning-without-network-manager-2
-        public void ServerListen()
+        public void StartServer()
         {
-            // start listening, and allow up to 4 connections
-            NetworkServer.StartServer();
+            // start listening
+            Server.StartServer();
+        }
 
-            NetworkServer.MessageHandler.RegisterHandler<ConnectMessage>(OnServerConnect);
-            NetworkServer.MessageHandler.RegisterHandler<ReadyMessage>(OnClientReady);
+        private void OnServerStarted()
+        {
+            // it is best to register message from .Started event
+            // this means they will be added early enough for host player to use them
+            Server.MessageHandler.RegisterHandler<SceneReadyMessage>(HandleSceneReadyMessage);
         }
 
         // When client is ready spawn a few trees  
-        void OnClientReady(NetworkConnection conn, ReadyMessage msg)
+        private void HandleSceneReadyMessage(INetworkPlayer player, SceneReadyMessage msg)
         {
-            Debug.Log("Client is ready to start: " + conn);
+            Debug.Log("Client is ready to start: " + player);
             SpawnTrees();
         }
 
-        void SpawnTrees()
+        private void SpawnTrees()
         {
-            int x = 0;
-            for (int i = 0; i < 5; ++i)
+            var x = 0;
+            for (var i = 0; i < 5; ++i)
             {
-                GameObject treeGo = Instantiate(treePrefab, new Vector3(x++, 0, 0), Quaternion.identity);
+                var treeGo = Instantiate(treePrefab, new Vector3(x++, 0, 0), Quaternion.identity);
                 ServerObjectManager.Spawn(treeGo);
             }
         }
 
-        void OnServerConnect(NetworkConnection conn, ConnectMessage msg)
+        private void OnServerConnect(INetworkPlayer player)
         {
-            Debug.Log("New client connected: " + conn);
+            Debug.Log("New client connected: " + player);
         }
         // CodeEmbed-End: spawning-without-network-manager-2
     }

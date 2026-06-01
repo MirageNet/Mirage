@@ -1,6 +1,3 @@
-using UnityEngine;
-using Mirage;
-
 namespace Mirage.Snippets.SceneLoading.OverrideOnServerAuthenticated
 {
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -24,7 +21,7 @@ namespace Mirage.Snippets.SceneLoading.OverrideStart
     // CodeEmbed-Start: custom-scene-manager-start
     public class MySceneManager : NetworkSceneManager
     {
-        protected internal override void Start()
+        public override void Start()
         {
             // add your stuff before.
 
@@ -43,7 +40,7 @@ namespace Mirage.Snippets.SceneLoading.OverrideOnDestroy
     // CodeEmbed-Start: custom-scene-manager-on-destroy
     public class MySceneManager : NetworkSceneManager
     {
-        protected internal override void OnDestroy()
+        public override void OnDestroy()
         {
             // add your stuff before.
 

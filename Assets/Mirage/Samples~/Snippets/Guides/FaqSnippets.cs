@@ -1,4 +1,3 @@
-using Mirage;
 using UnityEngine;
 
 namespace Mirage.Snippets.Guides
@@ -12,10 +11,10 @@ namespace Mirage.Snippets.Guides
             // do stuff here
         }
 
-        struct MyCustomStruct
+        public struct MyCustomStruct
         {
-            int someNumber;
-            Vector3 somePosition;
+            public int someNumber;
+            public Vector3 somePosition;
         }
         // CodeEmbed-End: faq-custom-data
     }

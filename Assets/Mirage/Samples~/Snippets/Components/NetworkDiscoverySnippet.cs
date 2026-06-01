@@ -21,9 +21,10 @@ namespace Mirage.Snippets.Components
         // in their broadcast messages that servers will consume.
     }
 
+    public enum GameMode { PvP, PvE }
+
     public class DiscoveryResponse
     {
-        public enum GameMode { PvP, PvE }
 
         // you probably want uri so clients know how to connect to the server
         public Uri uri;

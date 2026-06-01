@@ -1,4 +1,3 @@
-using Mirage;
 using Mirage.Serialization;
 
 namespace Mirage.Snippets.Analyzers
@@ -29,7 +28,7 @@ namespace Mirage.Snippets.Analyzers
             public int Health { get; set; }
 
             // Correct: Compress float with a defined range and precision
-            [SyncVar, FloatPack(-10f, 10f, 0.01f)]
+            [SyncVar, FloatPack(10f, 0.01f)]
             public float PlayerScale { get; set; }
         }
         // CodeEmbed-End: mirage1503-resolved

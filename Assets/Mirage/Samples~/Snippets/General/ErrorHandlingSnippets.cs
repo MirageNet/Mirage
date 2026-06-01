@@ -1,33 +1,7 @@
-using System;
 using UnityEngine;
 
 namespace Mirage.Snippets.General
 {
-    // CodeEmbed-Start: error-handling-flags
-    // see PlayerErrorFlags in the source code for most up-to-date values
-    [Flags]
-    public enum PlayerErrorFlags
-    {
-        None = 0,
-
-        // Likely developer bugs
-        RpcNullException = 1 << 0,
-        RpcException = 1 << 1,
-
-        // Connection/versioning issues
-        DeserializationException = 1 << 2,
-        RpcSync = 1 << 3,
-        RateLimit = 1 << 4,
-
-        // Security/Malicious Intent
-        Unauthorized = 1 << 5,
-        Critical = 1 << 6,
-        LikelyCheater = 1 << 7,
-
-        // Custom developer defined errors
-        CustomError = 1 << 16
-    }
-    // CodeEmbed-End: error-handling-flags
 
     // CodeEmbed-Start: error-handling-custom-flags
     public static class MyErrorFlags
@@ -48,7 +22,12 @@ namespace Mirage.Snippets.General.CustomError
     // CodeEmbed-Start: error-handling-custom-error-class
     public static class MyErrorFlags
     {
-        public const PlayerErrorFlags InvalidAction = PlayerErrorFlags.CustomError;
+        public static readonly PlayerErrorFlags InvalidAction = Custom(0);
+
+        private static PlayerErrorFlags Custom(int index)
+        {
+            return (PlayerErrorFlags)(((int)PlayerErrorFlags.CustomError) << index);
+        }
     }
     // CodeEmbed-End: error-handling-custom-error-class
 
@@ -145,7 +124,12 @@ namespace Mirage.Snippets.General.CustomErrorHandler
 {
     public static class MyErrorFlags
     {
-        public const PlayerErrorFlags InvalidAction = PlayerErrorFlags.CustomError << 0;
+        public static readonly PlayerErrorFlags InvalidAction = Custom(0);
+
+        private static PlayerErrorFlags Custom(int index)
+        {
+            return (PlayerErrorFlags)(((int)PlayerErrorFlags.CustomError) << index);
+        }
     }
 
     // CodeEmbed-Start: error-handling-custom-handler
