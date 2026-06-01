@@ -1,8 +1,12 @@
 using UnityEngine;
+using Mirage;
 
 namespace Mirage.Snippets.GameObjects
 {
     // CodeEmbed-Start: spawning-without-network-manager-1
+    [NetworkMessage]
+    public struct SpawnTreeMessage {}
+
     public class MyNetworkManager : MonoBehaviour
     {
         // Assign values in inspector
@@ -28,7 +32,8 @@ namespace Mirage.Snippets.GameObjects
         // Call this from your UI or other code
         public void StartClient(string address)
         {
-            ClientObjectManager.spawnPrefabs.Add(treePrefab);
+            if (!ClientObjectManager.spawnPrefabs.Contains(treePrefab))
+                ClientObjectManager.spawnPrefabs.Add(treePrefab);
 
             Client.Connect(address);
         }
@@ -36,6 +41,8 @@ namespace Mirage.Snippets.GameObjects
         private void OnClientConnect(INetworkPlayer player)
         {
             Debug.Log("Connected to server: " + player);
+            // Request the server to spawn trees
+            player.Send(new SpawnTreeMessage());
         }
         // CodeEmbed-End: spawning-without-network-manager-1
 
@@ -50,13 +57,13 @@ namespace Mirage.Snippets.GameObjects
         {
             // it is best to register message from .Started event
             // this means they will be added early enough for host player to use them
-            Server.MessageHandler.RegisterHandler<SceneReadyMessage>(HandleSceneReadyMessage);
+            Server.MessageHandler.RegisterHandler<SpawnTreeMessage>(HandleSpawnTreeMessage);
         }
 
-        // When client is ready spawn a few trees  
-        private void HandleSceneReadyMessage(INetworkPlayer player, SceneReadyMessage msg)
+        // When client requests to spawn trees
+        private void HandleSpawnTreeMessage(INetworkPlayer player, SpawnTreeMessage msg)
         {
-            Debug.Log("Client is ready to start: " + player);
+            Debug.Log("Client requested to spawn trees: " + player);
             SpawnTrees();
         }
 

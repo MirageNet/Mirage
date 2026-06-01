@@ -8,7 +8,7 @@ namespace Mirage.Snippets.Sync.VarHooks
         // CodeEmbed-Start: SyncVarHookAttribute
         [SyncVar(hook = nameof(HookName))]
         // CodeEmbed-End: SyncVarHookAttribute
-        public int myValue;
+        public int myValue { get; set; }
 
         void HookName(int oldValue, int newValue) {}
     }

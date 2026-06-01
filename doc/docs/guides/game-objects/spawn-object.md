@@ -28,7 +28,7 @@ This searches the entire project for prefabs/objects that have a network identit
 
 For more advanced users, you may find that you want to register Prefabs and spawn game objects without using the Network Manager component.
 
-To spawn game objects without using the Network Manager, you can handle the Prefab registration yourself via script. Use the `ClientScene.RegisterPrefab` method to register Prefabs to the Network Manager.
+To spawn game objects without using the Network Manager, you can handle the Prefab registration yourself via script. Add the Prefab to the `ClientObjectManager.spawnPrefabs` list, or register it using the `ClientObjectManager.RegisterPrefab` method.
 
 {{{ Path:'Snippets/GameObjects/MyNetworkManager.cs' Name:'spawning-without-network-manager-1' }}}
 
@@ -77,23 +77,23 @@ The actual flow of internal operations that takes place for spawning game object
 -   A network message of the type `ObjectDestroy` is sent to clients.
 -   `OnNetworkDestroy` is called on the instance on clients, then the instance is destroyed.
 
-### Player Game Objects
+### Character Game Objects
 
-Player game objects in the HLAPI work slightly differently from non-player game objects. The flow for spawning player game objects with the Network Manager is:
--   Prefab with `NetworkIdentity` is registered as the `PlayerPrefab`
--   The client connects to the server
--   Client calls `AddPlayer`, network message of type `MsgType.AddPlayer` is sent to the server
--   The server receives the message and calls `CharacterSpawner.OnServerAddPlayer`
--   A game object is instantiated from the Player Prefab on the server
--   `ServerObjectManager.AddCharacter` is called with the new player instance on the server
--   The player instance is spawned - you do not have to call `ServerObjectManager.Spawn` for the player instance. The spawn message is sent to all clients like on a normal spawn.
--   A network message of type `Owner` is sent to the client that added the player (only that client!)
--   The original client receives the network message
--   `OnStartLocalPlayer` is called on the player instance on the original client, and `IsLocalPlayer` is set to true
+Character game objects in Mirage represent the network identity associated with an active player connection. The flow for spawning character game objects is:
+-   Prefab with `NetworkIdentity` is registered as the `PlayerPrefab` on `CharacterSpawner`.
+-   The client connects and authenticates with the server.
+-   Client sends an `AddCharacterMessage` to the server.
+-   The server receives the message and calls `CharacterSpawner.OnServerAddPlayer` (or your custom spawn handler).
+-   A game object is instantiated from the Player Prefab on the server.
+-   `ServerObjectManager.AddCharacter` is called with the player and the new character instance on the server.
+-   The character instance is spawned - you do not have to call `ServerObjectManager.Spawn` for the character instance. The spawn message is sent to all clients like on a normal spawn.
+-   A message is sent to the client assigning ownership of the character.
+-   The client receives the spawn/ownership message.
+-   `OnStartLocalPlayer` is called on the character instance on the owning client, and `IsLocalPlayer` is set to `true`.
 
 :::note
-`OnStartLocalPlayer` is called after `OnStartClient`, because it only happens when the ownership message arrives from the server after the player game object is spawned, so `IsLocalPlayer` is not set in `OnStartClient`.  
-Because `OnStartLocalPlayer` is only called for the client’s local player game object, it is a good place to perform initialization that should only be done for the local player. This could include enabling input processing and enabling camera tracking for the player game object.
+`OnStartLocalPlayer` is called after `OnStartClient`, because it only happens when the ownership message arrives from the server after the character game object is spawned, so `IsLocalPlayer` is not set in `OnStartClient`.  
+Because `OnStartLocalPlayer` is only called for the client’s local character game object, it is a good place to perform initialization that should only be done for the local character. This could include enabling input processing and enabling camera tracking for the character game object.
 :::
 
 ## Spawning Game Objects with Client Authority
@@ -102,7 +102,7 @@ To spawn game objects and assign authority of those game objects to a particular
 
 For these game objects, the property `HasAuthority` is true on the client with authority, and `OnStartAuthority` is called on the client with authority. That client can issue Server RPCs for that game object. On other clients (and on the host), `HasAuthority` is false.
 
-For example, the tree spawn example above can be modified to allow the tree to have client authority like this (note that we now need to pass in a Network Player game object for the owning client’s connection):
+For example, the tree spawn example above can be modified to allow the tree to have client authority like this (note that we now need to pass in the `INetworkPlayer` representing the owning client’s connection):
 
 {{{ Path:'Snippets/GameObjects/SpawningExample.cs' Name:'spawn-trees-authority-example' }}}
 

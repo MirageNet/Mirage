@@ -49,21 +49,21 @@ namespace Mirage.Snippets.Sync
             else 
             {
                 // Writes which SyncVars have changed
-                writer.WritePackedUInt64(base.SyncVarDirtyBits);
+                writer.Write(base.SyncVarDirtyBits, 3);
 
-                if ((base.SyncVarDirtyBits & 1u) != 0u)
+                if ((base.SyncVarDirtyBits & 1uL) != 0uL)
                 {
                     writer.WritePackedUInt32((uint)this.int1);
                     written = true;
                 }
 
-                if ((base.SyncVarDirtyBits & 2u) != 0u)
+                if ((base.SyncVarDirtyBits & 2uL) != 0uL)
                 {
                     writer.WritePackedUInt32((uint)this.int2);
                     written = true;  
                 }
 
-                if ((base.SyncVarDirtyBits & 4u) != 0u)
+                if ((base.SyncVarDirtyBits & 4uL) != 0uL)
                 {
                     writer.Write(this.MyString);
                     written = true;     
@@ -87,39 +87,33 @@ namespace Mirage.Snippets.Sync
                 this.int1 = (int)reader.ReadPackedUInt32();
                 // if old and new values are not equal, call hook
                 if (!base.SyncVarEqual<int>(oldInt1, this.int1))
-                {
                     this.OnInt1Changed(oldInt1, this.int1);
-                }
 
                 this.int2 = (int)reader.ReadPackedUInt32();
                 this.MyString = reader.ReadString();
                 return;
             }
 
-            int dirtySyncVars = (int)reader.ReadPackedUInt32();
+            ulong dirtySyncVars = reader.Read(3);
+            base.SetDeserializeMask(dirtySyncVars, 0);
+
             // is 1st SyncVar dirty
-            if ((dirtySyncVars & 1) != 0)
+            if ((dirtySyncVars & 1uL) != 0uL)
             {
                 int oldInt1 = this.int1;
                 this.int1 = (int)reader.ReadPackedUInt32();
                 // if old and new values are not equal, call hook
                 if (!base.SyncVarEqual<int>(oldInt1, this.int1))
-                {
                     this.OnInt1Changed(oldInt1, this.int1);
-                }
             }
 
             // is 2nd SyncVar dirty
-            if ((dirtySyncVars & 2) != 0)
-            {
+            if ((dirtySyncVars & 2uL) != 0uL)
                 this.int2 = (int)reader.ReadPackedUInt32();
-            }
 
             // is 3rd SyncVar dirty
-            if ((dirtySyncVars & 4) != 0)
-            {
+            if ((dirtySyncVars & 4uL) != 0uL)
                 this.MyString = reader.ReadString();
-            }
         }
         // CodeEmbed-End: DeserializeSyncVarsExample
     }

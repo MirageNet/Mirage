@@ -1,7 +1,8 @@
 using System;
 using System.Collections;
-using UnityEngine;
 using Mirage.Serialization;
+using UnityEngine;
+using Cysharp.Threading.Tasks;
 
 namespace Mirage.Snippets.Serialization.GameObjectLookup
 {
@@ -10,24 +11,25 @@ namespace Mirage.Snippets.Serialization.GameObjectLookup
         // CodeEmbed-Start: game-object-lookup
         public GameObject target;
 
-        [SyncVar(hook = nameof(OnTargetChanged))]
-        public uint targetID { get; set; }
-
-        void OnTargetChanged(uint _, uint newValue)
+        [ClientRpc]
+        public void SetTargetRpc(uint targetID)
         {
-            if (NetworkIdentity.World.Spawned.TryGetValue(targetID, out NetworkIdentity identity))
-                target = identity.gameObject;
-            else
-                StartCoroutine(SetTarget());
+            SetTargetAsync(targetID).Forget();
         }
 
-        IEnumerator SetTarget()
+        private async UniTaskVoid SetTargetAsync(uint targetID)
         {
-            while (target == null)
+            var token = destroyCancellationToken;
+
+            // Wait until the target object is spawned on the client
+            while (!token.IsCancellationRequested)
             {
-                yield return null;
-                if (NetworkIdentity.World.SpawnedObjects.TryGetValue(targetID, out NetworkIdentity identity))
+                if (Identity.World.TryGetIdentity(targetID, out var identity))
+                {
                     target = identity.gameObject;
+                    return;
+                }
+                await UniTask.Yield();
             }
         }
         // CodeEmbed-End: game-object-lookup
@@ -43,7 +45,7 @@ namespace Mirage.Snippets.Serialization.DateTimeSerializer
         {
             writer.WriteInt64(dateTime.Ticks);
         }
-       
+
         public static DateTime ReadDateTime(this NetworkReader reader)
         {
             return new DateTime(reader.ReadInt64());
@@ -55,26 +57,26 @@ namespace Mirage.Snippets.Serialization.DateTimeSerializer
 namespace Mirage.Snippets.Serialization.PolymorphicEquip
 {
     // CodeEmbed-Start: polymorphic-equip
-    class Item 
+    public class Item
     {
         public string name;
     }
 
-    class Weapon : Item
+    public class Weapon : Item
     {
         public int hitPoints;
     }
 
-    class Armor : Item
+    public class Armor : Item
     {
         public int hitPoints;
         public int level;
     }
 
-    class Player : NetworkBehaviour
+    public class Player : NetworkBehaviour
     {
         [ServerRpc]
-        void ServerRpcEquip(Item item)
+        private void ServerRpcEquip(Item item)
         {
             // IMPORTANT: this does not work. Mirage will pass you an object of type item
             // even if you pass a weapon or an armor.
@@ -90,7 +92,7 @@ namespace Mirage.Snippets.Serialization.PolymorphicEquip
         }
 
         [ServerRpc]
-        void ServerEquipArmor(Armor armor)
+        private void ServerEquipArmor(Armor armor)
         {
             // IMPORTANT: this does not work either, you will receive an armor, but 
             // the armor will not have a valid Item.name, even if you passed an armor with name
@@ -104,10 +106,10 @@ namespace Mirage.Snippets.Serialization.PolymorphicSerializer
     using PolymorphicEquip;
 
     // CodeEmbed-Start: polymorphic-serializer
-    public static class ItemSerializer 
+    public static class ItemSerializer
     {
-        const byte WEAPON = 1;
-        const byte ARMOR = 2;
+        private const byte WEAPON = 1;
+        private const byte ARMOR = 2;
 
         public static void WriteItem(this NetworkWriter writer, Item item)
         {
@@ -129,7 +131,7 @@ namespace Mirage.Snippets.Serialization.PolymorphicSerializer
         public static Item ReadItem(this NetworkReader reader)
         {
             byte type = reader.ReadByte();
-            switch(type)
+            switch (type)
             {
                 case WEAPON:
                     return new Weapon
@@ -156,7 +158,7 @@ namespace Mirage.Snippets.Serialization.ScriptableObjectSerializer
 {
     // CodeEmbed-Start: scriptable-object-serializer
     [CreateAssetMenu(fileName = "New Armor", menuName = "Armor Data")]
-    class Armor : ScriptableObject
+    public class Armor : ScriptableObject
     {
         public int Hitpoints;
         public int Weight;
@@ -165,12 +167,12 @@ namespace Mirage.Snippets.Serialization.ScriptableObjectSerializer
         // ...
     }
 
-    public static class ArmorSerializer 
+    public static class ArmorSerializer
     {
         public static void WriteArmor(this NetworkWriter writer, Armor armor)
         {
-           // No need to serialize the data, just the name of the armor.
-           writer.WriteString(armor.name);
+            // No need to serialize the data, just the name of the armor.
+            writer.WriteString(armor.name);
         }
 
         public static Armor ReadArmor(this NetworkReader reader)

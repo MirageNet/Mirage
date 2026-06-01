@@ -27,15 +27,10 @@ Mirage supports a number of data types you can use with these, including:
 
 Game Objects in SyncVars, SyncLists, and SyncDictionaries are fragile in some cases and should be used with caution.
 
-- As long as the game object *already exists* on both the server and the client, the reference should be fine.
+*   **For SyncVars**: Weaver uses `NetworkIdentitySyncvar.cs` internally to manage object references automatically. Therefore, you should sync `GameObject` or `NetworkIdentity` references directly rather than manually syncing `uint` (NetId).
+*   **For RPCs**: RPCs are executed instantly. If the referenced game object does not yet exist on the client when the RPC payload is received (e.g. if the object hasn't spawned on the client yet or is excluded due to network visibility), passing a `GameObject` or `NetworkIdentity` reference directly will result in a null value.
 
-When the sync data arrives at the client, the referenced game object may not yet exist on that client, resulting in null values in the sync data. This is because internally Mirage passes the `NetId` from the `NetworkIdentity` and tries to look it up on the client's `NetworkIdentity.World.Spawned` dictionary.
-
-If the object hasn't been spawned on the client yet, no match will be found. It could be in the same payload, especially for joining clients, but after the sync data from another object.  
-It could also be null because the game object is excluded from a client due to network visibility, e.g. `NetworkProximityChecker`.  
-
-You may find that it's more robust to sync the `NetworkIdentity.NetID` (`uint`) instead, and do your own lookup in 
-`NetworkIdentity.World.Spawned` to get the object, perhaps in a coroutine:
+For RPCs, it is more robust to pass the `NetworkIdentity.NetID` (`uint`) and perform your own lookup on the client, using `UniTask` to wait for the object to spawn:
 
 {{{ Path:'Snippets/Serialization/DataTypesSnippets.cs' Name:'game-object-lookup' }}}
 

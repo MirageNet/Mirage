@@ -13,8 +13,8 @@ namespace Mirage.Snippets.Sync.SortedSets.Basic
 
         int skillPoints = 10;
 
-        [Command]
-        public void CmdLearnSkill(string skillName)
+        [ServerRpc]
+        public void LearnSkill(string skillName)
         {
             if (skillPoints > 1)
             {
@@ -38,25 +38,31 @@ namespace Mirage.Snippets.Sync.SortedSets.Callbacks
 
         // This will add the delegate on the client.
         // Use OnStartServer instead if you want it on the server
-        public override void OnStartClient()
+        private void Awake()
         {
-            buffs.Callback += OnBuffsChanged;
+            Identity.OnStartClient.AddListener(OnStartClient);
         }
 
-        private void OnBuffsChanged(SyncSetBuffs.Operation op, string buff)
+        private void OnStartClient()
         {
-            switch (op) 
-            {
-                case SyncSetBuffs.Operation.OP_ADD:
-                    // we added a buff, draw an icon on the character
-                    break;
-                case SyncSetBuffs.Operation.OP_CLEAR:
-                    // clear all buffs from the character
-                    break;
-                case SyncSetBuffs.Operation.OP_REMOVE:
-                    // We removed a buff from the character
-                    break;
-            }
+            buffs.OnAdd += OnBuffAdded;
+            buffs.OnRemove += OnBuffRemoved;
+            buffs.OnClear += OnBuffsCleared;
+        }
+
+        private void OnBuffAdded(string buff)
+        {
+            // we added a buff, draw an icon on the character
+        }
+
+        private void OnBuffRemoved(string buff)
+        {
+            // We removed a buff from the character
+        }
+
+        private void OnBuffsCleared()
+        {
+            // clear all buffs from the character
         }
     }
     // CodeEmbed-End: SyncSortedSetCallbackExample
