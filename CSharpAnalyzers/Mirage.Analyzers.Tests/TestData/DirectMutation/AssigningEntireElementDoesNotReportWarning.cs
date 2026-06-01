@@ -2,7 +2,7 @@ using Mirage;
 using Mirage.Collections;
 
 [WeaverSafeClass]
-public struct MyStruct
+public class MyStruct
 {
     public int Value;
 }

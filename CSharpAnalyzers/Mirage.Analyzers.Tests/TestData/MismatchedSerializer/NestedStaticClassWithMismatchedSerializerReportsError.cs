@@ -2,7 +2,7 @@ using Mirage.Serialization;
 
 public struct CustomType {}
 
-public static class OuterClass
+namespace OuterNamespace
 {
     public static class InnerClass
     {

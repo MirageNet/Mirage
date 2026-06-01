@@ -6,7 +6,7 @@ public class ValidBehaviour : NetworkBehaviour
     public int Health { get; set; }
 
     [SyncVar]
-    public int Points;
+    public int Points { get; set; }
 
     public void Update()
     {
