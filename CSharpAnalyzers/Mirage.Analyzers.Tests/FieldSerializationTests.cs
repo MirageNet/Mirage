@@ -134,5 +134,38 @@ namespace Mirage.Analyzers.Tests
 
             await VerifyCS.VerifyAnalyzerAsync(code, expected);
         }
+
+        [Test]
+        public async Task WeaverSafeClassOnFieldSuppressesClassWarning()
+        {
+            var code = VerifyCS.LoadTestData("FieldSerialization/WeaverSafeClassOnFieldSuppressesClassWarning.cs");
+            var expected = VerifyCS.Diagnostic("MIRAGE1302")
+                .WithLocation(0)
+                .WithArguments("Thread", "NetworkMessage field");
+
+            await VerifyCS.VerifyAnalyzerAsync(code, expected);
+        }
+
+        [Test]
+        public async Task WeaverSafeClassOnPropertySuppressesClassWarning()
+        {
+            var code = VerifyCS.LoadTestData("FieldSerialization/WeaverSafeClassOnPropertySuppressesClassWarning.cs");
+            var expected = VerifyCS.Diagnostic("MIRAGE1302")
+                .WithLocation(0)
+                .WithArguments("Thread", "NetworkMessage property");
+
+            await VerifyCS.VerifyAnalyzerAsync(code, expected);
+        }
+
+        [Test]
+        public async Task WeaverSafeClassOnParameterSuppressesClassWarning()
+        {
+            var code = VerifyCS.LoadTestData("FieldSerialization/WeaverSafeClassOnParameterSuppressesClassWarning.cs");
+            var expected = VerifyCS.Diagnostic("MIRAGE1302")
+                .WithLocation(0)
+                .WithArguments("Thread", "RPC parameter");
+
+            await VerifyCS.VerifyAnalyzerAsync(code, expected);
+        }
     }
 }
