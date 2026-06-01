@@ -8,19 +8,7 @@ RPCs (Remote Procedure Calls) serialize arguments and send them over the network
 ---
 
 ## Example of Triggering Code
-```csharp
-using Mirage;
-
-public class Player : NetworkBehaviour
-{
-    // Error: ServerRpc method 'CmdTakeDamage' cannot have ref/out parameters
-    [ServerRpc]
-    public void CmdTakeDamage(ref int health)
-    {
-        health -= 10;
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1202.cs' Name:'mirage1202-triggering' }}}
 
 ---
 
@@ -28,19 +16,4 @@ public class Player : NetworkBehaviour
 
 Pass parameters by value. If you need to communicate updated state back to the caller, either use an asynchronous RPC with a `UniTask<T>` return value or update a synchronized property (such as a `[SyncVar]`).
 
-```csharp
-using Mirage;
-
-public class Player : NetworkBehaviour
-{
-    [SyncVar]
-    public int Health { get; set; }
-
-    // Correct: Pass by value and synchronize via SyncVar
-    [ServerRpc]
-    public void CmdTakeDamage(int damage)
-    {
-        Health -= damage;
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1202.cs' Name:'mirage1202-resolved' }}}

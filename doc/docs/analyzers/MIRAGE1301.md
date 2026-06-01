@@ -12,22 +12,7 @@ Class-based types are generally risky for network messaging because:
 ---
 
 ## Example of Triggering Code
-```csharp
-using Mirage;
-
-public class TargetInfo
-{
-    public int x;
-    public int y;
-}
-
-[NetworkMessage]
-public struct FireMessage
-{
-    // Warns: NetworkMessage field 'info' is a class type 'TargetInfo'.
-    public TargetInfo info;
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1301.cs' Name:'mirage1301-triggering' }}}
 
 ---
 
@@ -35,38 +20,12 @@ public struct FireMessage
 
 ### Option 1: Use a struct (Recommended)
 Structs (value types) avoid memory allocations and guarantee safe copy-by-value semantics.
-```csharp
-public struct TargetInfo
-{
-    public int x;
-    public int y;
-}
-
-[NetworkMessage]
-public struct FireMessage
-{
-    public TargetInfo info;
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1301.cs' Name:'mirage1301-struct-option' }}}
 
 ### Option 2: Implement Custom Serialization and mark the class as safe
 If you want to use the class type and manage performance/reference safety yourself, write custom `Write` and `Read` extension methods for the class, and decorate the class with `[WeaverSafeClass]` to suppress the warning globally.
-```csharp
-[WeaverSafeClass]
-public class TargetInfo
-{
-    public int x;
-    public int y;
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1301.cs' Name:'mirage1301-class-option' }}}
 
 ### Option 3: Suppress the warning on the member or parameter
 If you want to disable the warning only on a specific field, property, or parameter, decorate it with `[WeaverSafeClass]`.
-```csharp
-[NetworkMessage]
-public struct FireMessage
-{
-    [WeaverSafeClass]
-    public TargetInfo info;
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1301.cs' Name:'mirage1301-suppress-option' }}}

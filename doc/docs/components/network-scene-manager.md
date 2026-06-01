@@ -38,16 +38,7 @@ If the scene change involves network objects then it is strongly recommended to 
 
 To do a network scene change you initiate the process via the server NetworkSceneManager via:
 
-```cs
-// For normal scene changes
-sceneManager.ServerLoadSceneNormal("Assets/GameScene.unity");
-
-// For additive scene loading
-sceneManager.ServerLoadSceneAdditively("Assets/AdditiveScene.unity", players);
-
-// For additive scene unloading
-sceneManager.ServerUnloadSceneAdditively(scene, players);
-```
+{{{ Path:'Snippets/Components/NetworkSceneManagerSnippet.cs' Name:'scene-change-examples' }}}
 
 :::note
 You don't have to provide the full scene path when initiating a scene change. But the 'NetworkSceneName' will be saved as the full path.

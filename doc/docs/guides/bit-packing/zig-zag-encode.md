@@ -28,13 +28,7 @@ The sign of a value will take up 1 bit, so if the value is in the range -+100 it
 
 A modifier that can be added to a character value to increase or decrease it
 
-```cs
-public class MyNetworkBehaviour : NetworkBehaviour 
-{
-    [SyncVar, BitCount(8), ZigZagEncode]
-    public int modifier { get; set; }
-}
-```
+{{{ Path:'Snippets/BitPacking/ZigZagEncodeSnippets.cs' Name:'zig-zag-encode-example-1' }}}
 
 `Range = 200` so bit count is 8, causing the real range to be -128 to 127
 
@@ -49,50 +43,9 @@ public class MyNetworkBehaviour : NetworkBehaviour
 ### Generated Code
 
 Source:
-```cs 
-[SyncVar, BitCount(8), ZigZagEncode]
-public int myValue { get; set; }
-```
+{{{ Path:'Snippets/BitPacking/ZigZagEncodeSnippets.cs' Name:'zig-zag-encode-generated-source' }}}
 
 Generated:
-```cs
-public override bool SerializeSyncVars(NetworkWriter writer, bool initialState)
-{
-    ulong syncVarDirtyBits = base.SyncVarDirtyBits;
-    bool result = base.SerializeSyncVars(writer, initialize);
-
-    if (initialState) 
-    {
-        writer.Write((ulong)ZigZag.Encode(this.myValue), 8);
-        return true;
-    }
-
-    writer.Write(syncVarDirtyBits, 1);
-    if ((syncVarDirtyBits & 1UL) != 0UL)
-    {
-        writer.Write((ulong)ZigZag.Encode(this.myValue), 8);
-        result = true;
-    }
-
-    return result;
-}
-
-public override void DeserializeSyncVars(NetworkReader reader, bool initialState)
-{
-    base.DeserializeSyncVars(reader, initialState);
-
-    if (initialState)
-    {
-        this.myValue = ZigZag.Decode(reader.Read(8));
-        return;
-    }
-
-    ulong dirtyMask = reader.Read(1);
-    if ((dirtyMask & 1UL) != 0UL)
-    {
-        this.myValue = ZigZag.Decode(reader.Read(8));
-    }
-}
-```
+{{{ Path:'Snippets/BitPacking/ZigZagEncodeSnippets.cs' Name:'zig-zag-encode-generated-code' }}}
 
 *last updated for Mirage v101.8.0*

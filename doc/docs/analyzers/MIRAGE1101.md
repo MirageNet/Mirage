@@ -8,29 +8,11 @@ These attributes control network synchronization or inject runtime active checks
 ---
 
 ## Example of Triggering Code
-```csharp
-using UnityEngine;
-using Mirage;
-
-public class GameManager : MonoBehaviour
-{
-    // Errors: Attribute 'SyncVarAttribute' cannot be used on 'score'...
-    [SyncVar]
-    public int score { get; set; }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1101.cs' Name:'mirage1101-triggering' }}}
 
 ---
 
 ## How to Resolve
 
 Ensure that the declaring class inherits from `NetworkBehaviour` instead of `MonoBehaviour` or other base classes.
-```csharp
-using Mirage;
-
-public class GameManager : NetworkBehaviour
-{
-    [SyncVar]
-    public int score { get; set; }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1101.cs' Name:'mirage1101-resolved' }}}

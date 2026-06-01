@@ -8,20 +8,7 @@ Standard uncompressed primitives write their full bit-width (e.g. 32 bits for `i
 ---
 
 ## Example of Triggering Code
-```csharp
-using Mirage;
-
-public class Player : NetworkBehaviour
-{
-    // Warning: 'Health' uses uncompressed int which has high bit-overhead.
-    [SyncVar]
-    public int Health { get; set; }
-
-    // Warning: 'PlayerScale' uses uncompressed float which has high bit-overhead.
-    [SyncVar]
-    public float PlayerScale { get; set; }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1503.cs' Name:'mirage1503-triggering' }}}
 
 ---
 
@@ -29,18 +16,4 @@ public class Player : NetworkBehaviour
 
 Decorate the fields/properties with appropriate compression attributes like `[BitCount]`, `[VarInt]`, `[FloatPack]`, or `[BitCountFromRange]` to minimize the serialized bit size.
 
-```csharp
-using Mirage;
-using Mirage.Serialization;
-
-public class Player : NetworkBehaviour
-{
-    // Correct: Restrict Health to 7 bits (0-127 range)
-    [SyncVar, BitCount(7)]
-    public int Health { get; set; }
-
-    // Correct: Compress float with a defined range and precision
-    [SyncVar, FloatPack(-10f, 10f, 0.01f)]
-    public float PlayerScale { get; set; }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1503.cs' Name:'mirage1503-resolved' }}}

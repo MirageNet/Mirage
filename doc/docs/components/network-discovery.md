@@ -59,65 +59,10 @@ Sometimes you want to provide more information in the discovery messages. Some u
 
 The message classes define what is sent between the client and server. As long as you keep your messages simple using the [Data Types](/docs/guides/serialization/data-types) that Mirage can serialize, you won't need to write custom serializers for them.
 
-```cs
-public class DiscoveryRequest
-{
-    public string language="en";
-
-    // Add properties for whatever information you want sent by clients
-    // in their broadcast messages that servers will consume.
-}
-
-public class DiscoveryResponse
-{
-    enum GameMode {PvP, PvE};
-
-    // you probably want uri so clients know how to connect to the server
-    public Uri uri;
-
-    public GameMode GameMode;
-    public int TotalPlayers;
-    public int HostPlayerName;
-
-    // Add properties for whatever information you want the server to return to
-    // clients for them to display or consume for establishing a connection.
-}
-```
+{{{ Path:'Snippets/Components/NetworkDiscoverySnippet.cs' Name:'discovery-messages' }}}
 
 The custom NetworkDiscovery class contains the overrides for handling the messages above.
 
 You may want to refer to the NetworkDiscovery.cs script in the Components/Discovery folder to see how these should be implemented.
 
-```cs
-public class NewNetworkDiscovery: NetworkDiscoveryBase<DiscoveryRequest, DiscoveryResponse> 
-{
-    #region Server
-
-    protected override void ProcessClientRequest(DiscoveryRequest request, IPEndPoint endpoint)
-    {
-        base.ProcessClientRequest(request, endpoint);
-    }
-
-    protected override DiscoveryResponse ProcessRequest(DiscoveryRequest request, IPEndPoint endpoint) 
-    {
-        // TODO: Create your response and return it   
-        return new DiscoveryResponse();
-    }
-
-    #endregion
-
-    #region Client
-
-    protected override DiscoveryRequest GetRequest()
-    {
-        return new DiscoveryRequest();
-    }
-
-    protected override void ProcessResponse(DiscoveryResponse response, IPEndPoint endpoint)
-    {
-        // TODO: a server replied,  do something with the response such as invoking a unityevent
-    }
-
-    #endregion
-}
-```
+{{{ Path:'Snippets/Components/NetworkDiscoverySnippet.cs' Name:'discovery-custom' }}}

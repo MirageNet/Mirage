@@ -45,37 +45,15 @@ All character objects are always first spawned in the main scene, which may or m
 
 **Loading the sub-scene(s) on the server:**
 
-```cs
-SceneManager.LoadSceneAsync(subScene, LoadSceneMode.Additive);
-```
+{{{ Path:'Snippets/Components/NetworkSceneCheckerSnippet.cs' Name:'load-scene-async' }}}
 
 **Sending a `SceneMessage` to the client to load a sub-scene additively:**
 
-```cs
-SceneMessage msg = new SceneMessage
-{
-    sceneName = subScene,
-    sceneOperation = SceneOperation.LoadAdditive
-};
-
-Owner.Send(msg);
-```
+{{{ Path:'Snippets/Components/NetworkSceneCheckerSnippet.cs' Name:'send-scene-message' }}}
 
 **Moving the character object to the sub-scene using `SceneVisibilityChecker.MoveToScene`:**
 
-```cs
-// Get the SceneVisibilityChecker component
-SceneVisibilityChecker sceneChecker = player.GetComponent<SceneVisibilityChecker>();
-if (sceneChecker != null)
-{
-    // Position the character object in world space first (if needed)
-    // This assumes it has a NetworkTransform component that will update clients
-    player.transform.position = new Vector3(100, 1, 100);
-
-    // Then move the character object to the subscene using the checker's method
-    sceneChecker.MoveToScene(subScene);
-}
-```
+{{{ Path:'Snippets/Components/NetworkSceneCheckerSnippet.cs' Name:'move-player-to-scene' }}}
 
 Optionally you can send another `SceneMessage` to the client with `SceneOperation.UnloadAdditive` to remove any previous additive scene the client no longer needs. This would apply to a game that has levels after a level change. A short delay may be necessary before removal to allow the client to get fully synced.
 

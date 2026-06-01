@@ -13,8 +13,6 @@ After performing these steps, the inspector should look like this:
 
 You can authenticate with the server by calling the `SendCode` method provided by the authenticator. This method allows you to send a server code to the server for authentication.
 
-```csharp
-public void SendCode(NetworkClient client, string serverCode = null)
-```
+{{{ Path:'Snippets/Authentication/BasicAuthenticatorSnippets.cs' Name:'basic-authenticator-sendcode' }}}
 
 If the `serverCode` parameter is `null`, the method will use the value specified in the public `ServerCode` field of the Basic Authenticator component.

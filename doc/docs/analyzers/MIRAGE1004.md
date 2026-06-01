@@ -8,21 +8,7 @@ Fields implementing `ISyncObject` must be initialized once when the class is con
 ---
 
 ## Example of Triggering Code
-```csharp
-using Mirage;
-using Mirage.Collections;
-
-public class Player : NetworkBehaviour
-{
-    // Error: ISyncObject field 'playerList' must be marked readonly and cannot be reassigned
-    public SyncList<int> playerList = new SyncList<int>();
-
-    public void ResetList()
-    {
-        playerList = new SyncList<int>();
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1004.cs' Name:'mirage1004-triggering' }}}
 
 ---
 
@@ -30,19 +16,4 @@ public class Player : NetworkBehaviour
 
 Mark the field as `readonly` to ensure it cannot be reassigned. To clear or reset the collection, use the collection's `.Clear()` method instead of instantiating a new object.
 
-```csharp
-using Mirage;
-using Mirage.Collections;
-
-public class Player : NetworkBehaviour
-{
-    // Correct: Marked as readonly
-    public readonly SyncList<int> playerList = new SyncList<int>();
-
-    public void ResetList()
-    {
-        // Correct: Clear the list instead of reassigning it
-        playerList.Clear();
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1004.cs' Name:'mirage1004-resolved' }}}

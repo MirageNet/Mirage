@@ -8,17 +8,7 @@ Mirage uses compile-time IL weaving to generate serialization code for NetworkMe
 ---
 
 ## Example of Triggering Code
-```csharp
-using Mirage;
-using System.Threading;
-
-[NetworkMessage]
-public struct StartSessionMessage
-{
-    // Error: Field type 'Thread' is not serializable by Mirage.
-    public Thread executionThread;
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1302.cs' Name:'mirage1302-triggering' }}}
 
 ---
 
@@ -26,13 +16,4 @@ public struct StartSessionMessage
 
 Ensure all fields are of serializable types. If you need to send a custom type, make sure it is a struct/class with only serializable fields, or implement custom `Write` and `Read` extension methods for the custom type so that Mirage knows how to serialize it.
 
-```csharp
-using Mirage;
-
-[NetworkMessage]
-public struct StartSessionMessage
-{
-    // Correct: Pass a serializable identifier instead of the raw thread object
-    public string threadName;
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1302.cs' Name:'mirage1302-resolved' }}}

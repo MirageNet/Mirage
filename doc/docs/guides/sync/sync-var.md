@@ -30,50 +30,14 @@ Because the Weaver completely clears the compiled method body of the getter and 
 ## Example
 Let's have a simple `Player` class with the following code:
 
-``` cs
-using Mirage;
-using UnityEngine;
-
-public class Player : NetworkBehaviour
-{
-    [SyncVar]
-    public int clickCount { get; set; }
-
-    private void Update()
-    {
-        if (IsLocalPlayer && Input.GetMouseButtonDown(0))
-        {
-            ServerRpc_IncreaseClicks();
-        }
-    }
-
-    [ServerRpc]
-    public void ServerRpc_IncreaseClicks()
-    {
-        // This is executed on the server
-        clickCount++;
-    }
-}
-```
+{{{ Path:'Snippets/Sync/SyncVarExamples.cs' Name:'SyncVarBasicExample' }}}
 
 In this example, when Player A clicks the left mouse button, he sends a [ServerRpc](/docs/guides/remote-actions/server-rpc) to the server where the `clickCount` SyncVar is incremented. All other visible players will be informed about Player A's new `clickCount` value.
 
 ## Class inheritance
 SyncVars work with class inheritance. Consider this example:
 
-```cs
-private class Pet : NetworkBehaviour
-{
-    [SyncVar] 
-    private string name { get; set; }
-}
-
-private class Cat : Pet
-{
-    [SyncVar]
-    private Color32 color { get; set; }
-}
-```
+{{{ Path:'Snippets/Sync/SyncVarExamples.cs' Name:'SyncVarInheritanceExample' }}}
 
 You can attach the Cat component to your cat prefab, and it will synchronize both its `name` and `color`.
 
@@ -89,96 +53,12 @@ For more information on SyncVar hooks see [Sync Var Hooks](/docs/guides/sync/syn
 ### Example Client Only
 Below is a simple example of assigning a random color to each player when they're spawned on the server.  All clients will see all players in the correct colors, even if they join later.
 
-```cs
-using UnityEngine;
-using Mirage;
-
-public class Player : NetworkBehaviour
-{
-    [SyncVar(hook = nameof(UpdateColor))]
-    private Color playerColor { get; set; } = Color.black;
-
-    private Renderer renderer;
-
-    // Unity makes a clone of the Material every time renderer.material is used.
-    // Cache it here and Destroy it in OnDestroy to prevent a memory leak.
-    private Material cachedMaterial;
-
-    private void Awake()
-    {
-        renderer = GetComponent<Renderer>();
-        Identity.OnStartServer.AddListener(OnStartServer);
-    }
-
-    private void OnStartServer()
-    {
-        playerColor = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
-    }
-
-    private void UpdateColor(Color oldColor, Color newColor)
-    {
-        // this is executed on this player for each client
-        if (cachedMaterial == null)
-        {
-            cachedMaterial = renderer.material;
-        }
-
-        cachedMaterial.color = newColor;
-    }
-
-    private void OnDestroy()
-    {
-        Destroy(cachedMaterial);
-    }
-}
-```
+{{{ Path:'Snippets/Sync/SyncVarExamples.cs' Name:'SyncVarClientOnlyHookExample' }}}
 
 ### Example Client & Server
 Below is a simple example of assigning a random color to each player when they're spawned on the server. All clients will see all players in the correct colors, even if they join later, the server will also fire the event.
 
-```cs
-using UnityEngine;
-using Mirage;
-
-public class Player : NetworkBehaviour
-{
-    [SyncVar(hook = nameof(UpdateColor), invokeHookOnServer = true)]
-    private Color playerColor { get; set; } = Color.black;
-
-    private Renderer renderer;
-
-    // Unity makes a clone of the Material every time renderer.material is used.
-    // Cache it here and Destroy it in OnDestroy to prevent a memory leak.
-    private Material cachedMaterial;
-
-    private void Awake()
-    {
-        renderer = GetComponent<Renderer>();
-        Identity.OnStartServer.AddListener(OnStartServer);
-    }
-
-    private void OnStartServer()
-    {
-        playerColor = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
-    }
-
-    private void UpdateColor(Color oldColor, Color newColor)
-    {
-        // this is executed on this player for each client
-        if (cachedMaterial == null)
-        {
-            cachedMaterial = renderer.material;
-        }
-
-        cachedMaterial.color = newColor;
-    }
-
-    private void OnDestroy()
-    {
-        Destroy(cachedMaterial);
-    }
-}
-```
+{{{ Path:'Snippets/Sync/SyncVarExamples.cs' Name:'SyncVarServerClientHookExample' }}}
 
 ## SyncVar Initialize Only
 
@@ -192,65 +72,7 @@ Syncvar Hooks become redundant, as you are setting the state of the Syncvar dire
 
 ### Example
 
-``` cs
-using Mirage;
-using UnityEngine;
-
-public class Player : NetworkBehaviour
-{
-    [SyncVar(initialOnly = true)]
-    private int weaponId { get; set; }
-
-    private void Awake()
-    {
-        Identity.OnStartClient.AddListener(OnStartClient);
-    }
-
-    private void OnStartClient()
-    {
-        // Update weapon using id from syncvar (sent to client via spawn message
-        UpdateWeapon(weaponId);
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            // Client Request weapon change
-            ServerRpc_SetSyncVarWeaponId(7);
-        }
-    }
-
-    [ServerRpc]
-    private void ServerRpc_SetSyncVarWeaponId(int weaponId)
-    {
-        // Set weapon id on server so new players get it
-        this.weaponId = weaponId;
-
-        // Tell current players about it
-        ClientRpc_SetSyncVarWeaponId(weaponId);
-
-        // Update weapon on server
-        UpdateWeapon(weaponId);
-    }
-
-    [ClientRpc]
-    private void ClientRpc_SetSyncVarWeaponId(int weaponId)
-    {
-        // Set id on client
-        this.weaponId = weaponId;
-
-        // Update weapon on client
-        UpdateWeapon(weaponId);
-    }
-
-    public void UpdateWeapon(int weaponId)
-    {
-        // Do stuff to update weapon here
-        // For example, its spawning model
-    }
-}
-```
+{{{ Path:'Snippets/Sync/SyncVarExamples.cs' Name:'SyncVarInitialOnlyExample' }}}
 
 ## Protecting SyncVars from Allocation Attacks
 
@@ -266,9 +88,8 @@ public class Player : NetworkBehaviour
 {
     // Restricts the display name to a maximum of 32 characters
     [SyncVar, MaxLength(32)]
-    public string displayName;
+    public string displayName { get; set; }
 }
 ```
 
 Applying `[MaxLength(N)]` ensures that if a serialized update exceeds the maximum character count for strings or the maximum element count for collections, Mirage throws a `SerializationLimitException` before the allocation occurs. This aborts deserialization, flags the sender with `PlayerErrorFlags.SerializationLimit`, and applies an error rate-limit penalty of 100 on the connection.
-

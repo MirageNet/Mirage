@@ -11,19 +11,7 @@ Rate limiting buckets require positive numbers for intervals, refill rates, and 
 ---
 
 ## Example of Triggering Code
-```csharp
-using Mirage;
-
-public class Player : NetworkBehaviour
-{
-    // Error: RateLimit interval must be greater than zero, and MaxTokens must be >= Refill
-    [ServerRpc]
-    [RateLimit(Interval = -0.5f, Refill = 10, MaxTokens = 5)]
-    public void CmdSpammyAction()
-    {
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1205.cs' Name:'mirage1205-triggering' }}}
 
 ---
 
@@ -31,16 +19,4 @@ public class Player : NetworkBehaviour
 
 Correct the parameters of the `[RateLimit]` attribute to ensure they are positive, valid values. Ensure `MaxTokens` is at least equal to the `Refill` value.
 
-```csharp
-using Mirage;
-
-public class Player : NetworkBehaviour
-{
-    // Correct: Positive interval and MaxTokens >= Refill
-    [ServerRpc]
-    [RateLimit(Interval = 1.0f, Refill = 10, MaxTokens = 20)]
-    public void CmdSpammyAction()
-    {
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1205.cs' Name:'mirage1205-resolved' }}}

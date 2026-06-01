@@ -8,16 +8,7 @@ If a single message size exceeds the MTU, it must be fragmented at the transport
 ---
 
 ## Example of Triggering Code
-```csharp
-using Mirage;
-
-[NetworkMessage]
-public struct HugeMessage
-{
-    // Warning: Array size and primitives exceed the safe MTU threshold
-    public byte[] largeBuffer; // e.g. filled with 2048 bytes of data
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1501.cs' Name:'mirage1501-triggering' }}}
 
 ---
 
@@ -25,14 +16,4 @@ public struct HugeMessage
 
 Break large messages down into smaller chunks, use compression, or send raw bulk data using a streaming/chunking API instead of a single massive NetworkMessage.
 
-```csharp
-using Mirage;
-
-[NetworkMessage]
-public struct ChunkMessage
-{
-    public int chunkIndex;
-    // Correct: Small buffer sizes that fit comfortably within a single MTU packet
-    public byte[] smallBuffer; // e.g. limited to 512 bytes per chunk
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1501.cs' Name:'mirage1501-resolved' }}}

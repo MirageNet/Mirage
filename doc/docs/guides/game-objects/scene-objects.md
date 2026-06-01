@@ -33,37 +33,4 @@ In some cases, like when running multiple server or client instances in the same
 To solve this, you can provide a custom filter by setting the `SceneObjectFilter` property on the `ServerObjectManager` and `ClientObjectManager`. This allows you to control exactly which `NetworkIdentity` components are included. If the filter is left `null`, the default behavior is used.
 
 **Example: Only include objects from a specific scene**
-```csharp
-using Mirage;
-using UnityEngine;
-using UnityEngine.SceneManagement;
-
-public class MySceneManager : MonoBehaviour
-{
-    public ServerObjectManager serverObjectManager;
-    public ClientObjectManager clientObjectManager;
-    public Scene myScene;
-
-    // Set the scene to use for filtering
-    public void SetScene(Scene scene) 
-    {
-        myScene = scene;
-    }
-
-    void Awake()
-    {
-        // Set the filter before spawning scene objects
-        var filter = (NetworkIdentity identity) =>
-        {
-            return identity.gameObject.scene == myScene;
-        };
-
-        serverObjectManager.SceneObjectFilter = filter;
-        clientObjectManager.SceneObjectFilter = filter;
-
-        // Now when SpawnSceneObjects is called, it will only
-        // consider objects from `myScene`.
-        serverObjectManager.SpawnSceneObjects();
-    }
-}
-```
+{{{ Path:'Snippets/GameObjects/SceneObjectFilterExample.cs' Name:'scene-object-filter-example' }}}

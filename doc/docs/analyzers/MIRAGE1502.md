@@ -8,16 +8,7 @@ Allowing unbounded strings or collections in network messages introduces securit
 ---
 
 ## Example of Triggering Code
-```csharp
-using Mirage;
-
-[NetworkMessage]
-public struct ChatMessage
-{
-    // Warning: Unbounded string can be exploited to send megabytes of text
-    public string text;
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1502.cs' Name:'mirage1502-triggering' }}}
 
 ---
 
@@ -25,15 +16,4 @@ public struct ChatMessage
 
 Use size-limiting attributes (such as `[BitCount]` or other string/collection size limiters) to restrict the collection size at serialization time, or enforce maximum limits during deserialization (such as setting `MaxDeltaCount` or `MaxElements` on SyncObjects).
 
-```csharp
-using Mirage;
-using Mirage.Serialization;
-
-[NetworkMessage]
-public struct ChatMessage
-{
-    // Correct: Restrict the maximum string length using BitCount or other validation attributes
-    [BitCount(8)]
-    public string text;
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1502.cs' Name:'mirage1502-resolved' }}}

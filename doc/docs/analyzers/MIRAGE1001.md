@@ -12,20 +12,7 @@ Class-based types are generally risky for network synchronization because:
 ---
 
 ## Example of Triggering Code
-```csharp
-public class PlayerData
-{
-    public int health;
-    public string name;
-}
-
-public class Player : NetworkBehaviour
-{
-    // Warns: SyncVar 'data' is a class type 'PlayerData'.
-    [SyncVar]
-    public PlayerData data { get; set; }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1001.cs' Name:'mirage1001-triggering' }}}
 
 ---
 
@@ -33,38 +20,12 @@ public class Player : NetworkBehaviour
 
 ### Option 1: Use a struct (Recommended)
 Structs (value types) avoid memory allocation, support standard change tracking, and guarantee safe value-copy semantics.
-```csharp
-public struct PlayerData
-{
-    public int health;
-    public string name;
-}
-
-public class Player : NetworkBehaviour
-{
-    [SyncVar]
-    public PlayerData data { get; set; }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1001.cs' Name:'mirage1001-struct-option' }}}
 
 ### Option 2: Implement Custom Serialization and mark the class as safe
 If you want to use the class type and manage performance/reference safety yourself, write custom `Write` and `Read` extension methods for the class, and decorate the class with `[WeaverSafeClass]` to suppress the warning globally.
-```csharp
-[WeaverSafeClass]
-public class PlayerData
-{
-    public int health;
-    public string name;
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1001.cs' Name:'mirage1001-class-option' }}}
 
 ### Option 3: Suppress the warning on the property
 If you want to disable the warning only on a specific property, decorate the property with `[WeaverSafeClass]`.
-```csharp
-public class Player : NetworkBehaviour
-{
-    [SyncVar]
-    [WeaverSafeClass]
-    public PlayerData data { get; set; }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1001.cs' Name:'mirage1001-suppress-option' }}}

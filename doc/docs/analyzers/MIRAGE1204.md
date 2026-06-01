@@ -10,26 +10,7 @@ Broadcast RPCs (where the target is `Observers`) cannot collect return values si
 ---
 
 ## Example of Triggering Code
-```csharp
-using Mirage;
-using Cysharp.Threading.Tasks;
-
-public class Player : NetworkBehaviour
-{
-    // Error: [ClientRpc] must return void when target is Observers.
-    [ClientRpc(target = RpcTarget.Observers)]
-    public UniTask<int> RpcGetHealth()
-    {
-        return UniTask.FromResult(100);
-    }
-
-    // Error: ClientRpc method with target = Player requires first parameter to be INetworkPlayer
-    [ClientRpc(target = RpcTarget.Player)]
-    public void RpcGiveItem(int itemId)
-    {
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1204.cs' Name:'mirage1204-triggering' }}}
 
 ---
 
@@ -38,23 +19,4 @@ public class Player : NetworkBehaviour
 1. If the RPC returns values, change the target to `RpcTarget.Owner` or `RpcTarget.Player`.
 2. If the RPC targets `RpcTarget.Player`, ensure the first parameter is of type `INetworkPlayer` (or `NetworkConnection`).
 
-```csharp
-using Mirage;
-using Cysharp.Threading.Tasks;
-
-public class Player : NetworkBehaviour
-{
-    // Correct: Targeted RPC returning value to the Owner
-    [ClientRpc(target = RpcTarget.Owner)]
-    public UniTask<int> RpcGetHealth()
-    {
-        return UniTask.FromResult(100);
-    }
-
-    // Correct: First parameter is the target player connection
-    [ClientRpc(target = RpcTarget.Player)]
-    public void RpcGiveItem(INetworkPlayer targetPlayer, int itemId)
-    {
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1204.cs' Name:'mirage1204-resolved' }}}

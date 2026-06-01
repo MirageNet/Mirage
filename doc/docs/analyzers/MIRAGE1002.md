@@ -8,30 +8,11 @@ Mirage's IL Weaver post-processes compiled assemblies by intercepting property w
 ---
 
 ## Example of Triggering Code
-```csharp
-public class Player : NetworkBehaviour
-{
-    private int _health;
-
-    // Errors: SyncVar property 'health' must be a non-static auto-property...
-    [SyncVar]
-    public int health
-    {
-        get => _health;
-        set => _health = value;
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1002.cs' Name:'mirage1002-triggering' }}}
 
 ---
 
 ## How to Resolve
 
 Change the property to a standard auto-property with both `get` and `set` accessors.
-```csharp
-public class Player : NetworkBehaviour
-{
-    [SyncVar]
-    public int health { get; set; }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1002.cs' Name:'mirage1002-resolved' }}}

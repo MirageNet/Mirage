@@ -9,13 +9,9 @@ In most cases, the use of SyncVars is enough for your game scripts to serialize 
 
 To perform your own custom serialization, you can implement virtual functions on [NetworkBehaviour](/docs/reference/Mirage/NetworkBehaviour) to be used for SyncVar serialization. These functions are:
 
-```cs
-public virtual bool OnSerialize(NetworkWriter writer, bool initialState);
-```
+{{{ Path:'Snippets/Sync/CustomSerialization.cs' Name:'OnSerializeSignature' }}}
 
-```cs
-public virtual void OnDeserialize(NetworkReader reader, bool initialState);
-```
+{{{ Path:'Snippets/Sync/CustomSerialization.cs' Name:'OnDeserializeSignature' }}}
 
 Use the `initialState` flag to differentiate between the first time a game object is serialized and when incremental updates can be sent. The first time a game object is sent to a client, it must include a full state snapshot, but subsequent updates can save on bandwidth by including only incremental changes.
 

@@ -37,30 +37,7 @@ It could also be null because the game object is excluded from a client due to n
 You may find that it's more robust to sync the `NetworkIdentity.NetID` (`uint`) instead, and do your own lookup in 
 `NetworkIdentity.World.Spawned` to get the object, perhaps in a coroutine:
 
-```cs
-    public GameObject target;
-
-    [SyncVar(hook = nameof(OnTargetChanged))]
-    public uint targetID { get; set; }
-
-    void OnTargetChanged(uint _, uint newValue)
-    {
-        if (NetworkIdentity.World.Spawned.TryGetValue(targetID, out NetworkIdentity identity))
-            target = identity.gameObject;
-        else
-            StartCoroutine(SetTarget());
-    }
-
-    IEnumerator SetTarget()
-    {
-        while (target == null)
-        {
-            yield return null;
-            if (NetworkIdentity.World.SpawnedObjects.TryGetValue(targetID, out NetworkIdentity identity))
-                target = identity.gameObject;
-        }
-    }
-```
+{{{ Path:'Snippets/Serialization/DataTypesSnippets.cs' Name:'game-object-lookup' }}}
 
 ## Custom Data Types
 
@@ -70,20 +47,7 @@ Sometimes you may want to serialize data that uses a different type not supporte
 
 You can add support for any type by adding extension methods to `NetworkWriter` and `NetworkReader`. For example, to add support for `DateTime`, add this somewhere in your project:
 
-```cs
-public static class DateTimeReaderWriter
-{
-      public static void WriteDateTime(this NetworkWriter writer, DateTime dateTime)
-      {
-          writer.WriteInt64(dateTime.Ticks);
-      }
-     
-      public static DateTime ReadDateTime(this NetworkReader reader)
-      {
-          return new DateTime(reader.ReadInt64());
-      }
-}
-```
+{{{ Path:'Snippets/Serialization/DataTypesSnippets.cs' Name:'datetime-serializer' }}}
 
 ...then you can use `DateTime` in your `[ServerRpc]` or `SyncList`
 
@@ -95,100 +59,11 @@ Sometimes you might want to send a polymorphic data type to your commands. Mirag
 This code does not work out of the box.
 :::
 
-```cs
-class Item 
-{
-    public string name;
-}
-
-class Weapon : Item
-{
-    public int hitPoints;
-}
-
-class Armor : Item
-{
-    public int hitPoints;
-    public int level;
-}
-
-class Player : NetworkBehaviour
-{
-    [ServerRpc]
-    void ServerRpcEquip(Item item)
-    {
-        // IMPORTANT: this does not work. Mirage will pass you an object of type item
-        // even if you pass a weapon or an armor.
-        if (item is Weapon weapon)
-        {
-            // The item is a weapon, 
-            // maybe you need to equip it in the hand
-        }
-        else if (item is Armor armor)
-        {
-            // you might want to equip armor in the body
-        }
-    }
-
-    [ServerRpc]
-    void ServerEquipArmor(Armor armor)
-    {
-        // IMPORTANT: this does not work either, you will receive an armor, but 
-        // the armor will not have a valid Item.name, even if you passed an armor with name
-    }
-}
-```
+{{{ Path:'Snippets/Serialization/DataTypesSnippets.cs' Name:'polymorphic-equip' }}}
 
 `ServerRpcEquip` will work if you provide a custom serializer for the `Item` type. For example:
 
-```cs
-
-public static class ItemSerializer 
-{
-    const byte WEAPON = 1;
-    const byte ARMOR = 2;
-
-    public static void WriteItem(this NetworkWriter writer, Item item)
-    {
-        if (item is Weapon weapon)
-        {
-            writer.WriteByte(WEAPON);
-            writer.WriteString(weapon.name);
-            writer.WritePackedInt32(weapon.hitPoints);
-        }
-        else if (item is Armor armor)
-        {
-            writer.WriteByte(ARMOR);
-            writer.WriteString(armor.name);
-            writer.WritePackedInt32(armor.hitPoints);
-            writer.WritePackedInt32(armor.level);
-        }
-    }
-
-    public static Item ReadItem(this NetworkReader reader)
-    {
-        byte type = reader.ReadByte();
-        switch(type)
-        {
-            case WEAPON:
-                return new Weapon
-                {
-                    name = reader.ReadString(),
-                    hitPoints = reader.ReadPackedInt32()
-                };
-            case ARMOR:
-                return new Armor
-                {
-                    name = reader.ReadString(),
-                    hitPoints = reader.ReadPackedInt32(),
-                    level = reader.ReadPackedInt32()
-                };
-            default:
-                throw new Exception($"Invalid weapon type {type}");
-        }
-    }
-}
-```
+{{{ Path:'Snippets/Serialization/DataTypesSnippets.cs' Name:'polymorphic-serializer' }}}
 
 ## Scriptable Objects
 
@@ -199,30 +74,5 @@ However, the generated reader and writer are not suitable for every occasion. Sc
 Instead of passing the scriptable object data, you can pass the name and the other side can look up the same object by name. This way you can have any kind of data in your scriptable object. You can do that by providing a custom reader and writer.  
 Here is an example:
 
-```cs
-[CreateAssetMenu(fileName = "New Armor", menuName = "Armor Data")]
-class Armor : ScriptableObject
-{
-    public int Hitpoints;
-    public int Weight;
-    public string Description;
-    public Texture2D Icon;
-    // ...
-}
-
-public static class ArmorSerializer 
-{
-    public static void WriteArmor(this NetworkWriter writer, Armor armor)
-    {
-       // No need to serialize the data, just the name of the armor.
-       writer.WriteString(armor.name);
-    }
-
-    public static Armor ReadArmor(this NetworkReader reader)
-    {
-        // Load the same armor by name. The data will come from the asset in Resources folder.
-        return Resources.Load<Armor>(reader.ReadString());
-    }
-}
-```
+{{{ Path:'Snippets/Serialization/DataTypesSnippets.cs' Name:'scriptable-object-serializer' }}}
 

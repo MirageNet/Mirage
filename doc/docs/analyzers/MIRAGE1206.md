@@ -8,18 +8,7 @@ To prevent denial of service (DoS) attacks, server CPU strain, and memory bloat 
 ---
 
 ## Example of Triggering Code
-```csharp
-using Mirage;
-
-public class Player : NetworkBehaviour
-{
-    // Warning: ServerRpc 'CmdFireWeapon' should have a [RateLimit] attribute to prevent spam
-    [ServerRpc]
-    public void CmdFireWeapon()
-    {
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1206.cs' Name:'mirage1206-triggering' }}}
 
 ---
 
@@ -27,16 +16,4 @@ public class Player : NetworkBehaviour
 
 Add a `[RateLimit]` attribute to the `[ServerRpc]` method with appropriate parameters for the expected rate of call.
 
-```csharp
-using Mirage;
-
-public class Player : NetworkBehaviour
-{
-    // Correct: ServerRpc decorated with [RateLimit] to throttle client requests
-    [ServerRpc]
-    [RateLimit(Interval = 0.2f, Refill = 5, MaxTokens = 10)]
-    public void CmdFireWeapon()
-    {
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1206.cs' Name:'mirage1206-resolved' }}}

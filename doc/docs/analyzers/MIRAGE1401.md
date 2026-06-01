@@ -8,24 +8,7 @@ Unity's `Awake` and `Start` methods are called during GameObject initialization.
 ---
 
 ## Example of Triggering Code
-```csharp
-using Mirage;
-
-public class PlayerHealth : NetworkBehaviour
-{
-    [SyncVar]
-    public int Health { get; set; }
-
-    private void Start()
-    {
-        // Warning: Accessing Network State (IsServer/SyncVar) in Start
-        if (IsServer)
-        {
-            Health = 100;
-        }
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1401.cs' Name:'mirage1401-triggering' }}}
 
 ---
 
@@ -33,18 +16,4 @@ public class PlayerHealth : NetworkBehaviour
 
 Override `OnStartServer`, `OnStartClient`, `OnStartLocalPlayer`, or `OnStartAuthority` to run network initialization code when the network state is fully ready.
 
-```csharp
-using Mirage;
-
-public class PlayerHealth : NetworkBehaviour
-{
-    [SyncVar]
-    public int Health { get; set; }
-
-    // Correct: Run server initialization when the network server has started
-    public override void OnStartServer()
-    {
-        Health = 100;
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1401.cs' Name:'mirage1401-resolved' }}}

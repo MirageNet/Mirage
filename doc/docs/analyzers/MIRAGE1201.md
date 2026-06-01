@@ -10,26 +10,7 @@ Remote procedure calls must serialize their arguments and return values across t
 ---
 
 ## Example of Triggering Code
-```csharp
-using Mirage;
-using Cysharp.Threading.Tasks;
-
-public class Player : NetworkBehaviour
-{
-    // Errors: RPC method 'CmdTakeDamage' is invalid: cannot have generic parameters.
-    [ServerRpc]
-    public void CmdTakeDamage<T>(T damage)
-    {
-    }
-
-    // Errors: RPC method 'CmdGetStats' is invalid: cannot return 'PlayerStats'...
-    [ServerRpc]
-    public PlayerStats CmdGetStats()
-    {
-        return new PlayerStats();
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-triggering' }}}
 
 ---
 
@@ -38,22 +19,4 @@ public class Player : NetworkBehaviour
 1. Make the method non-generic.
 2. Ensure the return type is `void` or a valid async task wrapper like `UniTask` (or `UniTask<T>` for asynchronous RPCs).
 
-```csharp
-using Mirage;
-using Cysharp.Threading.Tasks;
-
-public class Player : NetworkBehaviour
-{
-    [ServerRpc]
-    public void CmdTakeDamage(int damage)
-    {
-    }
-
-    [ServerRpc]
-    public async UniTask<PlayerStats> CmdGetStats()
-    {
-        await UniTask.Yield();
-        return new PlayerStats();
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-resolved' }}}

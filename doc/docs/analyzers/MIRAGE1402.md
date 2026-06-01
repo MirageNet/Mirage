@@ -8,29 +8,7 @@ Derived classes that inherit from another `NetworkBehaviour` which has its own s
 ---
 
 ## Example of Triggering Code
-```csharp
-using Mirage;
-using Mirage.Serialization;
-
-public class BasePlayer : NetworkBehaviour
-{
-    [SyncVar]
-    public string PlayerName { get; set; }
-}
-
-public class HeroPlayer : BasePlayer
-{
-    [SyncVar]
-    public int HeroId { get; set; }
-
-    // Warning: Overriding OnSerialize without calling base.OnSerialize
-    public override bool OnSerialize(NetworkWriter writer, bool initialState)
-    {
-        writer.WritePackedInt32(HeroId);
-        return true;
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1402.cs' Name:'mirage1402-triggering' }}}
 
 ---
 
@@ -38,27 +16,4 @@ public class HeroPlayer : BasePlayer
 
 Add the call to `base.OnSerialize` or `base.OnDeserialize` inside the overridden method and combine its return value with the derived class's serialization status.
 
-```csharp
-using Mirage;
-using Mirage.Serialization;
-
-public class BasePlayer : NetworkBehaviour
-{
-    [SyncVar]
-    public string PlayerName { get; set; }
-}
-
-public class HeroPlayer : BasePlayer
-{
-    [SyncVar]
-    public int HeroId { get; set; }
-
-    // Correct: Calls base.OnSerialize and combines dirty states
-    public override bool OnSerialize(NetworkWriter writer, bool initialState)
-    {
-        bool baseDirty = base.OnSerialize(writer, initialState);
-        writer.WritePackedInt32(HeroId);
-        return baseDirty || true;
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1402.cs' Name:'mirage1402-resolved' }}}

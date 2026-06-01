@@ -8,19 +8,7 @@ RPC methods must execute on a specific instance of a `NetworkBehaviour` on a spe
 ---
 
 ## Example of Triggering Code
-```csharp
-using Mirage;
-
-public class Player : NetworkBehaviour
-{
-    // Error: ServerRpc method 'CmdSpawnGlobal' must not be static
-    [ServerRpc]
-    public static void CmdSpawnGlobal()
-    {
-        // Static context has no NetworkIdentity
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1203.cs' Name:'mirage1203-triggering' }}}
 
 ---
 
@@ -28,16 +16,4 @@ public class Player : NetworkBehaviour
 
 Remove the `static` modifier from the RPC method declaration so it runs within the instance context of a spawned `NetworkBehaviour`.
 
-```csharp
-using Mirage;
-
-public class Player : NetworkBehaviour
-{
-    // Correct: Instance method has access to the NetworkBehaviour state
-    [ServerRpc]
-    public void CmdSpawn()
-    {
-        // Normal instance context
-    }
-}
-```
+{{{ Path:'Snippets/Analyzers/Mirage1203.cs' Name:'mirage1203-resolved' }}}

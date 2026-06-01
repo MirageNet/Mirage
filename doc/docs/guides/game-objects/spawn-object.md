@@ -7,10 +7,7 @@ title: Spawn Object
 In Unity, you usually “spawn” (that is, create) new game objects with `Instantiate`. However, in Mirage, the word “spawn” means something more specific. In the server-authoritative model of the Mirage, to “spawn” a game object on the server means that the game object is created on clients connected to the server, and is managed by the spawning system.
 
 To spawn an object on the server you need to `Instantiate` the prefab and then call `Spawn` on the new object. This will assign a `NetId` to the object and send a `SpawnMessage` to clients.
-```cs
-var boxGo = Instantiate(boxPrefab);
-ServerObjectManager.Spawn(boxGo);
-```
+{{{ Path:'Snippets/GameObjects/SpawningExample.cs' Name:'spawn-box-example' }}}
 
 Once the game object is spawned using this system, state updates are sent to clients whenever the game object changes on the server. When Mirage destroys the game object on the server, it also destroys it on the clients. The server manages spawned game objects alongside all other networked game objects so that if another client joins the game later, the server can spawn the game objects on that client. These spawned game objects have a unique network instance ID called `NetId` that is the same on the server and clients for each game object. The unique network instance ID is used to route messages sent across the network to game objects and to identify game objects.
 
@@ -33,40 +30,7 @@ For more advanced users, you may find that you want to register Prefabs and spaw
 
 To spawn game objects without using the Network Manager, you can handle the Prefab registration yourself via script. Use the `ClientScene.RegisterPrefab` method to register Prefabs to the Network Manager.
 
-``` cs
-using UnityEngine;
-using Mirage;
-
-public class MyNetworkManager : MonoBehaviour 
-{
-    public GameObject treePrefab;
-    public ClientObjectManager;
-    public NetworkClient;
-    public NetworkServer;
-    public ServerObjectManager;
-
-    void Start()
-    {
-        ClientObjectManager = FindObjectOfType<ClientObjectManager>();
-        NetworkClient = FindObjectOfType<NetworkClient>();
-        NetworkServer = FindObjectOfType<NetworkServer>();
-        ServerObjectManager = FindObjectOfType<NetworkServer>();
-    }
-
-    // Register prefab and connect to the server  
-    public void ClientConnect()
-    {
-        ClientObjectManager.spawnPrefabs.Add(treePrefab);
-        NetworkClient.Connect("localhost");
-        NetworkClient.MessageHandler.RegisterHandler<ConnectMessage>(OnClientConnect);
-    }
-
-    void OnClientConnect(NetworkConnection conn, ConnectMessage msg)
-    {
-        Debug.Log("Connected to server: " + conn);
-    }
-}
-```
+{{{ Path:'Snippets/GameObjects/MyNetworkManager.cs' Name:'spawning-without-network-manager-1' }}}
 
 In this example, you create an empty game object to act as the Network Manager, then create and attach the `MyNetworkManager` script (above) to that game object. Create a prefab that has a Network Identity component attached to it, and drag that onto the `treePrefab` slot on the `MyNetworkManager` component in the Inspector. This ensures that when the server spawns the tree game object, it also creates the same kind of game object on the clients.
 
@@ -74,38 +38,7 @@ Registering prefabs ensures that there is no stalling or loading time for creati
 
 For the script to work, you also need to add code for the server. Add this to the `MyNetworkManager` script:
 
-``` cs
-public void ServerListen()
-{
-    // start listening, and allow up to 4 connections
-    NetworkServer.StartServer();
-
-    NetworkServer.MessageHandler.RegisterHandler<ConnectMessage>(OnServerConnect);
-    NetworkServer.MessageHandler.RegisterHandler<ReadyMessage>(OnClientReady);
-}
-
-// When client is ready spawn a few trees  
-void OnClientReady(NetworkConnection conn, ReadyMessage msg)
-{
-    Debug.Log("Client is ready to start: " + conn);
-    SpawnTrees();
-}
-
-void SpawnTrees()
-{
-    int x = 0;
-    for (int i = 0; i < 5; ++i)
-    {
-        GameObject treeGo = Instantiate(treePrefab, new Vector3(x++, 0, 0), Quaternion.identity);
-        ServerObjectManager.Spawn(treeGo);
-    }
-}
-
-void OnServerConnect(NetworkConnection conn, ConnectMessage msg)
-{
-    Debug.Log("New client connected: " + conn);
-}
-```
+{{{ Path:'Snippets/GameObjects/MyNetworkManager.cs' Name:'spawning-without-network-manager-2' }}}
 
 The server does not need to register anything, as it knows what game object is being spawned (and the asset ID is sent in the spawn message). The client needs to be able to look up the game object, so it must be registered on the client.
 
@@ -115,43 +48,11 @@ For more advanced uses, such as object pools or dynamically created Assets, you 
 
 If the game object has a network state like synchronized variables, then that state is synchronized with the spawn message. In the following example, this script is attached to the tree Prefab:
 
-``` cs
-using UnityEngine;
-using Mirage;
-
-public class Tree : NetworkBehaviour
-{
-    [SyncVar]
-    public int numLeaves { get; set; }
-
-    void Start()
-    {
-        Identity.OnStartClient.AddLisenter(OnStartClient);
-    }
-
-    public override void OnStartClient()
-    {
-        Debug.Log("Tree spawned with leaf count " + numLeaves);
-    }
-}
-```
+{{{ Path:'Snippets/GameObjects/Tree.cs' Name:'tree-syncvar-example' }}}
 
 With this script attached, you can change the `numLeaves` variable and modify the `SpawnTrees` function to see it accurately reflected on the client:
 
-``` cs
-void SpawnTrees()
-{
-    int x = 0;
-    for (int i = 0; i < 5; ++i)
-    {
-        GameObject treeGo = Instantiate(treePrefab, new Vector3(x++, 0, 0), Quaternion.identity);
-        Tree tree = treeGo.GetComponent<Tree>();
-        tree.numLeaves = Random.Range(10,200);
-        Debug.Log("Spawning leaf with leaf count " + tree.numLeaves);
-        ServerObjectManager.Spawn(treeGo);
-    }
-}
-```
+{{{ Path:'Snippets/GameObjects/SpawningExample.cs' Name:'spawn-trees-example' }}}
 
 Attach the `Tree` script to the `treePrefab` script created earlier to see this in action.
 
@@ -203,43 +104,10 @@ For these game objects, the property `HasAuthority` is true on the client with a
 
 For example, the tree spawn example above can be modified to allow the tree to have client authority like this (note that we now need to pass in a Network Player game object for the owning client’s connection):
 
-``` cs
-void SpawnTrees(INetworkPlayer player)
-{
-    int x = 0;
-    for (int i = 0; i < 5; ++i)
-    {
-        GameObject treeGo = Instantiate(treePrefab, new Vector3(x++, 0, 0), Quaternion.identity);
-        Tree tree = treeGo.GetComponent<Tree>();
-        tree.numLeaves = Random.Range(10,200);
-        Debug.Log("Spawning leaf with leaf count " + tree.numLeaves);
-        ServerObjectManager.Spawn(treeGo, player);
-    }
-}
-```
+{{{ Path:'Snippets/GameObjects/SpawningExample.cs' Name:'spawn-trees-authority-example' }}}
 
 The Tree script can now be modified to send a Server RPC Call to the server:
 
-``` cs
-    public void ClientConnect()
-    {
-        ClientObjectManager.spawnPrefabs.Add(treePrefab);
-        NetworkClient.Connect("localhost");
-        NetworkClient.MessageHandler.RegisterHandler<ConnectMessage>(OnClientConnect);
-
-        NetworkClient.Player.Identity.OnAuthorityChanged.AddListener(OnStartAuthority);
-    }
-
-public override void OnStartAuthority(bool changed)
-{
-    CmdMessageFromTree("Tree with " + numLeaves + " reporting in");
-}
-
-[ServerRpc]
-void CmdMessageFromTree(string msg)
-{
-    Debug.Log("Client sent a tree message: " + msg);
-}
-```
+{{{ Path:'Snippets/GameObjects/Tree.cs' Name:'tree-client-authority' }}}
 
 Note that you can’t just add the `CmdMessageFromTree` call into `OnStartClient`, because at that point the authority has not been set yet, so the call would fail.

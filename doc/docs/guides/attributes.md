@@ -53,22 +53,9 @@ These attributes can be used for Unity game loop methods like `Start`, `Update` 
 
 #### Examples:
 
-```cs
-[Server]
-void SpawnCoin() 
-{
-    // This method is only allowed to be invoked on the server.
-}
-```
+{{{ Path:'Snippets/General/AttributesSnippets.cs' Name:'attributes-server' }}}
 
-```cs
-[NetworkMethod(NetworkFlags.Server | NetworkFlags.NotActive)]
-public void StartGame()
-{
-    // This method will run on the server or in single-player mode.
-    // It will only be blocked if the client is active.
-}
-```
+{{{ Path:'Snippets/General/AttributesSnippets.cs' Name:'attributes-network-method' }}}
 
 ## Max Length Attribute
 
