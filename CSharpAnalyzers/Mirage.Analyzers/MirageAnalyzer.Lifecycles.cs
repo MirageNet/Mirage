@@ -92,38 +92,42 @@ namespace Mirage.Analyzers
                 if (symbol == null)
                     return;
 
-                if (symbol is IPropertySymbol propertySymbol)
+                if (symbol is IMethodSymbol methodSymbol)
                 {
-                    var name = propertySymbol.Name;
-                    if (name == "IsServer" || name == "IsClient" || name == "HasAuthority" ||
-                        name == "IsLocalPlayer" || name == "IsOwner" || name == "IsHost")
+                    if (MirageAttributes.ServerRpc.Has(methodSymbol) || 
+                        MirageAttributes.ClientRpc.Has(methodSymbol) ||
+                        MirageAttributes.Server.Has(methodSymbol) ||
+                        MirageAttributes.Client.Has(methodSymbol) ||
+                        MirageAttributes.HasAuthority.Has(methodSymbol) ||
+                        MirageAttributes.LocalPlayer.Has(methodSymbol) ||
+                        MirageAttributes.NetworkMethod.Has(methodSymbol))
                     {
-                        if (MirageTypes.NetworkBehaviour.IsOrInherits(propertySymbol.ContainingType))
+                        var diagnostic = Diagnostic.Create(MirageRules.LifecycleNetworkStateRule, node.GetLocation(), methodSymbol.Name, _context.ContainingSymbol?.Name ?? "Unknown");
+                        _context.ReportDiagnostic(diagnostic);
+                        return;
+                    }
+                }
+                else if (symbol is IPropertySymbol || symbol is IFieldSymbol)
+                {
+                    var name = symbol.Name;
+                    if (name == "IsServer" || name == "IsClient" || name == "HasAuthority" ||
+                        name == "IsLocalPlayer" || name == "IsOwner" || name == "IsHost" ||
+                        name == "Server" || name == "World" || name == "SyncVarSender" ||
+                        name == "ServerObjectManager" || name == "Client" || name == "ClientObjectManager" ||
+                        name == "Visibility")
+                    {
+                        var containingType = symbol.ContainingType;
+                        if (containingType != null &&
+                            (MirageTypes.NetworkBehaviour.IsOrInherits(containingType) ||
+                             MirageTypes.NetworkIdentity.IsOrInherits(containingType)))
                         {
                             var diagnostic = Diagnostic.Create(MirageRules.LifecycleNetworkStateRule, node.GetLocation(), name, _context.ContainingSymbol?.Name ?? "Unknown");
                             _context.ReportDiagnostic(diagnostic);
                             return;
                         }
                     }
-
-                    if (MirageAttributes.SyncVar.Has(propertySymbol))
-                    {
-                        var diagnostic = Diagnostic.Create(MirageRules.LifecycleNetworkStateRule, node.GetLocation(), propertySymbol.Name, _context.ContainingSymbol?.Name ?? "Unknown");
-                        _context.ReportDiagnostic(diagnostic);
-                        return;
-                    }
-                }
-                else if (symbol is IFieldSymbol fieldSymbol)
-                {
-                    if (MirageAttributes.SyncVar.Has(fieldSymbol))
-                    {
-                        var diagnostic = Diagnostic.Create(MirageRules.LifecycleNetworkStateRule, node.GetLocation(), fieldSymbol.Name, _context.ContainingSymbol?.Name ?? "Unknown");
-                        _context.ReportDiagnostic(diagnostic);
-                        return;
-                    }
                 }
             }
-        }
 
         private class BaseCallWalker : CSharpSyntaxWalker
         {

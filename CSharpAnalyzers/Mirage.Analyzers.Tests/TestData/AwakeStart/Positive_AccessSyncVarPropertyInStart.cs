@@ -7,6 +7,6 @@ public class MyBehaviour : NetworkBehaviour
 
     private void Start()
     {
-        {|#0:Health|} = 100;
+        Health = 100;
     }
 }

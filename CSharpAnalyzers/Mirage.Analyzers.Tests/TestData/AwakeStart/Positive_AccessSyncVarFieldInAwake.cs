@@ -7,6 +7,6 @@ public class MyBehaviour : NetworkBehaviour
 
     private void Awake()
     {
-        var p = {|#0:points|};
+        var p = points;
     }
 }

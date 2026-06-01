@@ -6,7 +6,19 @@ public class ValidBehaviour : NetworkBehaviour
     public int Health { get; set; }
 
     [SyncVar]
-    public int Points { get; set; }
+    public int Points;
+
+    public void Awake()
+    {
+        Health = 100;
+        Points = 10;
+    }
+
+    public void Start()
+    {
+        var h = Health;
+        var p = Points;
+    }
 
     public void Update()
     {

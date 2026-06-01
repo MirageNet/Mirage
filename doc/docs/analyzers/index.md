@@ -22,7 +22,7 @@ Mirage uses Roslyn Analyzers to provide compile-time validation for network code
 | [MIRAGE1301](MIRAGE1301.md) | Message or RPC Class Warning | Warning | Warns about class types used inside network messages or RPC parameters because they cause GC allocations. |
 | [MIRAGE1302](MIRAGE1302.md) | Field Type Serialization Validation | Error | Confirms all fields in network messages/RPCs are serializable by Mirage or have registered custom serializers. |
 | [MIRAGE1303](MIRAGE1303.md) | Mismatched Custom Serialization Methods | Error | Requires custom serializers to contain matching, properly-signed reader and writer extension methods. |
-| [MIRAGE1401](MIRAGE1401.md) | Accessing Network State in Awake/Start | Warning | Warns against accessing network states like `IsServer` or `SyncVars` during early Unity lifecycle phases. |
+| [MIRAGE1401](MIRAGE1401.md) | Accessing Network State in Awake/Start | Warning | Warns against accessing network states like `IsServer` during early Unity lifecycle phases. |
 | [MIRAGE1402](MIRAGE1402.md) | Missing base Call in OnSerialize/OnDeserialize | Warning | Ensures overriding `OnSerialize` or `OnDeserialize` in derived classes calls the base implementation. |
 | [MIRAGE1501](MIRAGE1501.md) | Network Message Exceeds Safe MTU | Warning | Warns when a message exceeds the safe Maximum Transmission Unit (MTU) to prevent IP fragmentation. |
 | [MIRAGE1502](MIRAGE1502.md) | Unbounded String or Collection | Warning | Warns about unbounded strings/collections in network messages that could trigger memory exploitation. |
