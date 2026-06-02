@@ -63,14 +63,12 @@ namespace Mirage.Analyzers
         {
             AnalyzeFieldSyncVars(context);
             AnalyzeFieldSerialization(context, serializers);
-            AnalyzeFieldPerformance(context);
         }
 
         private static void AnalyzeProperty(SymbolAnalysisContext context, CustomSerializers serializers)
         {
             AnalyzePropertySyncVars(context);
             AnalyzePropertySerialization(context, serializers);
-            AnalyzePropertyPerformance(context);
         }
 
         private static void AnalyzeMethod(SymbolAnalysisContext context, CustomSerializers serializers)
@@ -83,7 +81,6 @@ namespace Mirage.Analyzers
         {
             AnalyzeParameterRpcs(context);
             AnalyzeParameterSerialization(context, serializers);
-            AnalyzeParameterPerformance(context);
         }
 
         private static void AnalyzeNamedType(SymbolAnalysisContext context)

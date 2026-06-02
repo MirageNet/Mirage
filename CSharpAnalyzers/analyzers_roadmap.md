@@ -57,11 +57,9 @@ IMPORTANT: if boxes arn't checked here, assume existing files are out-of-date an
 ---
 
 ## Group 6: Network Performance & Size Estimation (`MIRAGE1500 – MIRAGE1599`)
-*Note: These rules are designated as `DiagnosticSeverity.Warning` to warn about security/performance issues, and output a parser-friendly format (e.g. JSON-like summary of size calculations) to facilitate future CodeLens or editor tooling integration.*
+*Note: These rules are designated as `DiagnosticSeverity.Info` to provide size estimation feedback for messages.*
 
-* [x][x][x] **`MIRAGE1501`**: Network Message Exceeds Safe MTU (Warning if estimated serialization size exceeds 1200 bytes).
-* [x][x][x] **`MIRAGE1502`**: Unbounded String or Collection (Warning if string/collection has no defined size bounds).
-* [x][x][x] **`MIRAGE1503`**: High Bit-Over-Head Primitive Type (Warning on uncompressed float/vector transfers).
+* [x][x][x] **`MIRAGE1501`**: Network Message Serialized Size Estimation (Info diagnostic reporting the estimated serialization size of all NetworkMessage structs/classes).
 
 ---
 

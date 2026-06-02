@@ -1,19 +1,16 @@
-# MIRAGE1501: Network Message Exceeds Safe MTU
+# MIRAGE1501: Network Message Serialized Size Estimation
 
-## The Problem
-A `[NetworkMessage]` struct/class has a static or maximum serialized size that exceeds the safe Maximum Transmission Unit (MTU) of the transport layer (typically 1200 - 1400 bytes).
-
-If a single message size exceeds the MTU, it must be fragmented at the transport or IP layer. IP fragmentation increases packet loss rates, latency, and connection instability. Designing messages that stay within the safe MTU boundary improves network reliability and performance.
+## Description
+This diagnostic runs on all `[NetworkMessage]` types to report their estimated serialized size. This helps developers analyze and optimize the bandwidth footprint of their network messages directly in the editor.
 
 ---
 
-## Example of Triggering Code
-{{{ Path:'Snippets/Analyzers/Mirage1501.cs' Name:'mirage1501-triggering' }}}
+## Example
+{{{ Path:'Snippets/Analyzers/Mirage1501.cs' Name:'mirage1501-example' }}}
 
 ---
 
-## How to Resolve
-
-Break large messages down into smaller chunks, use compression, or send raw bulk data using a streaming/chunking API instead of a single massive NetworkMessage.
-
-{{{ Path:'Snippets/Analyzers/Mirage1501.cs' Name:'mirage1501-resolved' }}}
+## Size Estimation Details
+- Primitives (int, float, double, etc.) are estimated based on their standard bit-packing or serialization footprint.
+- Unity structs like `Vector3` and `Quaternion` are evaluated at their full uncompressed precision unless decorated with packing attributes.
+- Dynamic types (strings, arrays, lists) are treated as variable and skipped in the static size calculation (evaluated as `0` bytes).

@@ -7,61 +7,6 @@ namespace Mirage.Analyzers
 {
     public partial class MirageAnalyzer
     {
-        private static void AnalyzeFieldPerformance(SymbolAnalysisContext context)
-        {
-            var fieldSymbol = (IFieldSymbol)context.Symbol;
-
-            if (fieldSymbol.ContainingType != null && MirageAttributes.NetworkMessage.Has(fieldSymbol.ContainingType))
-            {
-                if (IsUnboundedCollectionOrString(fieldSymbol, fieldSymbol.Type))
-                {
-                    var diagnostic = Diagnostic.Create(MirageRules.PerformanceUnboundedCollectionRule, fieldSymbol.Locations[0], fieldSymbol.Name, fieldSymbol.Type.Name);
-                    context.ReportDiagnostic(diagnostic);
-                }
-
-                CheckHighOverhead(context, fieldSymbol, fieldSymbol.Type);
-            }
-
-            if (MirageAttributes.SyncVar.Has(fieldSymbol))
-                CheckHighOverhead(context, fieldSymbol, fieldSymbol.Type);
-        }
-
-        private static void AnalyzePropertyPerformance(SymbolAnalysisContext context)
-        {
-            var propertySymbol = (IPropertySymbol)context.Symbol;
-
-            if (propertySymbol.ContainingType != null && MirageAttributes.NetworkMessage.Has(propertySymbol.ContainingType))
-            {
-                if (IsUnboundedCollectionOrString(propertySymbol, propertySymbol.Type))
-                {
-                    var diagnostic = Diagnostic.Create(MirageRules.PerformanceUnboundedCollectionRule, propertySymbol.Locations[0], propertySymbol.Name, propertySymbol.Type.Name);
-                    context.ReportDiagnostic(diagnostic);
-                }
-
-                CheckHighOverhead(context, propertySymbol, propertySymbol.Type);
-            }
-
-            if (MirageAttributes.SyncVar.Has(propertySymbol))
-                CheckHighOverhead(context, propertySymbol, propertySymbol.Type);
-        }
-
-        private static void AnalyzeParameterPerformance(SymbolAnalysisContext context)
-        {
-            var parameterSymbol = (IParameterSymbol)context.Symbol;
-            var containingMethod = parameterSymbol.ContainingSymbol as IMethodSymbol;
-
-            if (containingMethod != null && IsRpcMethod(containingMethod))
-            {
-                if (IsUnboundedCollectionOrString(parameterSymbol, parameterSymbol.Type))
-                {
-                    var diagnostic = Diagnostic.Create(MirageRules.PerformanceUnboundedCollectionRule, parameterSymbol.Locations[0], parameterSymbol.Name, parameterSymbol.Type.Name);
-                    context.ReportDiagnostic(diagnostic);
-                }
-
-                CheckHighOverhead(context, parameterSymbol, parameterSymbol.Type);
-            }
-        }
-
         private static void AnalyzeNamedTypePerformance(SymbolAnalysisContext context)
         {
             var typeSymbol = (INamedTypeSymbol)context.Symbol;
@@ -70,44 +15,7 @@ namespace Mirage.Analyzers
             {
                 var visited = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
                 int estimatedSize = EstimateSerializedSize(typeSymbol, visited);
-                if (estimatedSize > 1200)
-                {
-                    var diagnostic = Diagnostic.Create(MirageRules.PerformanceMtuExceededRule, typeSymbol.Locations[0], typeSymbol.Name, estimatedSize, 1200);
-                    context.ReportDiagnostic(diagnostic);
-                }
-            }
-        }
-
-        private static bool IsUnboundedCollectionOrString(ISymbol symbol, ITypeSymbol type)
-        {
-            bool isString = type.SpecialType == SpecialType.System_String;
-            bool isCollection = type.TypeKind == TypeKind.Array ||
-                                (type is INamedTypeSymbol namedType && MirageTypes.IEnumerable.Implements(namedType));
-
-            if (!isString && !isCollection)
-                return false;
-
-            if (MirageAttributes.HasCompressionAttribute(symbol, type))
-                return false;
-
-            return true;
-        }
-
-        private static void CheckHighOverhead(SymbolAnalysisContext context, ISymbol symbol, ITypeSymbol type)
-        {
-            bool isOverheadType = type.SpecialType == SpecialType.System_Int32 ||
-                                  type.SpecialType == SpecialType.System_UInt32 ||
-                                  type.SpecialType == SpecialType.System_Int64 ||
-                                  type.SpecialType == SpecialType.System_UInt64 ||
-                                  type.SpecialType == SpecialType.System_Single ||
-                                  type.SpecialType == SpecialType.System_Double ||
-                                  MirageTypes.Vector2.Is(type) ||
-                                  MirageTypes.Vector3.Is(type) ||
-                                  MirageTypes.Quaternion.Is(type);
-
-            if (isOverheadType && !MirageAttributes.HasCompressionAttribute(symbol, type))
-            {
-                var diagnostic = Diagnostic.Create(MirageRules.PerformanceHighOverheadRule, symbol.Locations[0], symbol.Name, type.Name);
+                var diagnostic = Diagnostic.Create(MirageRules.PerformanceMessageSizeRule, typeSymbol.Locations[0], typeSymbol.Name, estimatedSize);
                 context.ReportDiagnostic(diagnostic);
             }
         }
@@ -151,7 +59,7 @@ namespace Mirage.Analyzers
                 case SpecialType.System_Decimal:
                     return 16;
                 case SpecialType.System_String:
-                    return 32;
+                    return 0; // Dynamic type: skip/treat as variable
             }
 
             if (type.ContainingNamespace?.ToDisplayString() == "UnityEngine")
@@ -176,15 +84,13 @@ namespace Mirage.Analyzers
             }
 
             if (type is IArrayTypeSymbol arrayType)
-                return 128 * EstimateSerializedSize(arrayType.ElementType, visited);
+                return 0; // Dynamic type: skip/treat as variable
 
             if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
             {
                 if (MirageTypes.IEnumerable.Implements(namedType))
                 {
-                    var elemType = namedType.TypeArguments.Length > 0 ? namedType.TypeArguments[0] : null;
-                    if (elemType != null)
-                        return 128 * EstimateSerializedSize(elemType, visited);
+                    return 0; // Dynamic type: skip/treat as variable
                 }
             }
 

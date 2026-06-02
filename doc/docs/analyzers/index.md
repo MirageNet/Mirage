@@ -29,9 +29,7 @@ Mirage uses Roslyn Analyzers to provide compile-time validation for network code
 | [MIRAGE1305](MIRAGE1305.md) | Missing NetworkMessage Attribute | Warning | Warns if a type is sent or registered as a message, but lacks the `[NetworkMessage]` attribute. |
 | [MIRAGE1401](MIRAGE1401.md) | Accessing Network State in Awake/Start | Warning | Warns against accessing network states like `IsServer` during early Unity lifecycle phases. |
 | [MIRAGE1402](MIRAGE1402.md) | Missing base Call in OnSerialize/OnDeserialize | Warning | Ensures overriding `OnSerialize` or `OnDeserialize` in derived classes calls the base implementation. |
-| [MIRAGE1501](MIRAGE1501.md) | Network Message Exceeds Safe MTU | Warning | Warns when a message exceeds the safe Maximum Transmission Unit (MTU) to prevent IP fragmentation. |
-| [MIRAGE1502](MIRAGE1502.md) | Unbounded String or Collection | Warning | Warns about unbounded strings/collections in network messages that could trigger memory exploitation. |
-| [MIRAGE1503](MIRAGE1503.md) | High Bit-Overhead Primitive Type | Warning | Recommends bit-packing/compression attributes on primitive types to optimize network bandwidth. |
+| [MIRAGE1501](MIRAGE1501.md) | Network Message Serialized Size Estimation | Info | Estimates the serialized size of all `[NetworkMessage]` types to help analyze bandwidth usage. |
 
 ---
 
@@ -120,13 +118,7 @@ Derived classes overriding custom `OnSerialize` or `OnDeserialize` methods must 
 
 ---
 
-### Group 6: Performance & Size Estimation
+### Group 6: Performance & Size Estimation (`MIRAGE1500 – MIRAGE1599`)
 
-#### [MIRAGE1501: Network Message Exceeds Safe MTU](MIRAGE1501.md)
-If a network message's maximum serialized size exceeds the safe Maximum Transmission Unit (MTU) threshold (typically 1200 - 1400 bytes), this warning is triggered. Large packets require IP fragmentation, which dramatically increases network packet loss. To resolve, compress data fields or split large payloads across multiple chunk messages.
-
-#### [MIRAGE1502: Unbounded String or Collection](MIRAGE1502.md)
-Declaring string or collection fields in network messages without a size limit introduces security risks, allowing malicious clients to cause memory exhaustion on the server. To resolve, use validation attributes like `[BitCount]` to limit serialization size, or define max sizes on collections.
-
-#### [MIRAGE1503: High Bit-Overhead Primitive Type](MIRAGE1503.md)
-Using uncompressed primitive types (such as standard `int`, `long`, or `float`) inside `[SyncVar]` properties or network message fields consumes unnecessary bandwidth. This warning suggests using compression attributes to minimize serialized bit sizes. To resolve this, apply attributes such as `[BitCount]`, `[VarInt]`, or `[FloatPack]`.
+#### [MIRAGE1501: Network Message Serialized Size Estimation](MIRAGE1501.md)
+Estimates the serialized size of all `[NetworkMessage]` structs/classes and outputs it as an Info diagnostic to help track and optimize bandwidth usage. Dynamic types like strings, arrays, and lists are treated as variable (skipped in size calculation).

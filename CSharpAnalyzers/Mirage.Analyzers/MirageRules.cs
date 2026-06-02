@@ -21,9 +21,7 @@ namespace Mirage.Analyzers
         public const string MismatchedSerializationDiagnosticId = "MIRAGE1303";
         public const string LifecycleNetworkStateDiagnosticId = "MIRAGE1401";
         public const string LifecycleMissingBaseCallDiagnosticId = "MIRAGE1402";
-        public const string PerformanceMtuExceededDiagnosticId = "MIRAGE1501";
-        public const string PerformanceUnboundedCollectionDiagnosticId = "MIRAGE1502";
-        public const string PerformanceHighOverheadDiagnosticId = "MIRAGE1503";
+        public const string PerformanceMessageSizeDiagnosticId = "MIRAGE1501";
 
         public static readonly DiagnosticDescriptor SyncVarRule = new DiagnosticDescriptor(
             SyncVarDiagnosticId,
@@ -185,35 +183,15 @@ namespace Mirage.Analyzers
             description: "Overriding OnSerialize or OnDeserialize in a class that inherits from a class with synchronized state must call the base method.",
             helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1402");
 
-        public static readonly DiagnosticDescriptor PerformanceMtuExceededRule = new DiagnosticDescriptor(
-            PerformanceMtuExceededDiagnosticId,
-            "Network Message Exceeds Safe MTU",
-            "NetworkMessage '{0}' has an estimated serialized size of {1} bytes, which exceeds the safe MTU of {2} bytes",
+        public static readonly DiagnosticDescriptor PerformanceMessageSizeRule = new DiagnosticDescriptor(
+            PerformanceMessageSizeDiagnosticId,
+            "Network Message Serialized Size Estimation",
+            "NetworkMessage '{0}' has an estimated serialized size of {1} bytes.",
             "Performance",
-            DiagnosticSeverity.Warning,
+            DiagnosticSeverity.Info,
             isEnabledByDefault: true,
-            description: "Network messages should remain within the safe MTU to avoid fragmentation.",
+            description: "Estimated serialized size of NetworkMessage.",
             helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1501");
-
-        public static readonly DiagnosticDescriptor PerformanceUnboundedCollectionRule = new DiagnosticDescriptor(
-            PerformanceUnboundedCollectionDiagnosticId,
-            "Unbounded String or Collection",
-            "Field/property/parameter '{0}' of type '{1}' is unbounded. Restrict its size using [BitCount] or another packing attribute.",
-            "Performance",
-            DiagnosticSeverity.Warning,
-            isEnabledByDefault: true,
-            description: "Unbounded strings or collections can be exploited to cause memory exhaustion.",
-            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1502");
-
-        public static readonly DiagnosticDescriptor PerformanceHighOverheadRule = new DiagnosticDescriptor(
-            PerformanceHighOverheadDiagnosticId,
-            "High Bit-Overhead Primitive Type",
-            "Field/property/parameter '{0}' of type '{1}' is uncompressed. Consider applying a bit-packing or compression attribute.",
-            "Performance",
-            DiagnosticSeverity.Warning,
-            isEnabledByDefault: true,
-            description: "Uncompressed primitives or vectors consume unnecessary bandwidth.",
-            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1503");
 
         public static readonly ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics = ImmutableArray.Create(
             SyncVarRule,
@@ -232,9 +210,7 @@ namespace Mirage.Analyzers
             MismatchedSerializationRule,
             LifecycleNetworkStateRule,
             LifecycleMissingBaseCallRule,
-            PerformanceMtuExceededRule,
-            PerformanceUnboundedCollectionRule,
-            PerformanceHighOverheadRule
+            PerformanceMessageSizeRule
         );
     }
 }
