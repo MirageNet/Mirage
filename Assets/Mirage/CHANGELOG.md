@@ -1,3 +1,17 @@
+# [158.1.0](https://github.com/MirageNet/Mirage/compare/v158.0.0...v158.1.0) (2026-06-02)
+
+
+### Bug Fixes
+
+* disconnecting stateful connections if rejected ([3b2470f](https://github.com/MirageNet/Mirage/commit/3b2470f447b1878eea57d58555abb82bb46f89cc))
+* fixing Config.Create switch ([5c9f470](https://github.com/MirageNet/Mirage/commit/5c9f470d9cda82684f18e5332af7408ed0575360))
+* fixing OnDisconnectEvent if called before connection is made ([31aed24](https://github.com/MirageNet/Mirage/commit/31aed242fdb3fb4e34d774f3d7e8478e220f386e))
+
+
+### Features
+
+* adding PeerConfigProfile to help pre-configure Peer.Config based on target Socket ([839a568](https://github.com/MirageNet/Mirage/commit/839a5680a32006cbb148716790d2811436930801))
+
 # [158.0.0](https://github.com/MirageNet/Mirage/compare/v157.4.4...v158.0.0) (2026-05-24)
 
 
