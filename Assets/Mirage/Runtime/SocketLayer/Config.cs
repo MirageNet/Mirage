@@ -122,14 +122,13 @@ namespace Mirage.SocketLayer
         #region profiles
         public static Config Create(PeerConfigProfile profile)
         {
-            return profile switch
+            switch (profile)
             {
-                PeerConfigProfile.RawUdp => RawUdp(),
-                PeerConfigProfile.WebSocket => WebSocket(),
-                PeerConfigProfile.StatefulUdp => StatefulUdp(),
-                PeerConfigProfile.Custom => new Config(),
-                _ => throw new ArgumentOutOfRangeException(nameof(profile), profile, null)
-            };
+                case PeerConfigProfile.RawUdp: return RawUdp();
+                case PeerConfigProfile.WebSocket: return WebSocket();
+                case PeerConfigProfile.StatefulUdp: return StatefulUdp();
+                default: return new Config();
+            }
         }
 
         public static Config RawUdp()
