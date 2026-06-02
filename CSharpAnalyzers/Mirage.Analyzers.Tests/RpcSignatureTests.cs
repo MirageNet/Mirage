@@ -10,7 +10,7 @@ namespace Mirage.Analyzers.Tests
         public async Task GenericRpcReportsError()
         {
             var code = VerifyCS.LoadTestData("Rpcs/GenericRpc.cs");
-            var expected = VerifyCS.Diagnostic("MIRAGE1201")
+            var expected = VerifyCS.Diagnostic("MIRAGE1202")
                 .WithLocation(0)
                 .WithArguments("CmdGeneric", "cannot have generic parameters");
             await VerifyCS.VerifyAnalyzerAsync(code, expected);
@@ -20,7 +20,7 @@ namespace Mirage.Analyzers.Tests
         public async Task RpcWithInvalidReturnTypeReportsError()
         {
             var code = VerifyCS.LoadTestData("Rpcs/RpcWithInvalidReturnType.cs");
-            var expected = VerifyCS.Diagnostic("MIRAGE1201")
+            var expected = VerifyCS.Diagnostic("MIRAGE1202")
                 .WithLocation(0)
                 .WithArguments("CmdReturnsInt", "cannot return 'int' (must return void or UniTask)");
             await VerifyCS.VerifyAnalyzerAsync(code, expected);

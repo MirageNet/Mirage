@@ -1,9 +1,15 @@
-using Mirage;
-
-public class MyBehaviour : NetworkBehaviour
+namespace CustomNamespace
 {
-    [ClientRpc(target = RpcTarget.Player)]
-    public void RpcMessage(NetworkConnection conn, string msg)
+    public class ClientRpcAttribute : System.Attribute
+    {
+        public int target { get; set; }
+    }
+}
+
+public class MyBehaviour
+{
+    [CustomNamespace.ClientRpc(target = 2)]
+    public void RpcMessage(int connectionId)
     {
     }
 }

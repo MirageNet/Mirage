@@ -3,7 +3,7 @@ using Mirage;
 public class MyBehaviour : NetworkBehaviour
 {
     [ClientRpc(target = RpcTarget.Player)]
-    public void RpcMessage(NetworkConnection conn, string msg)
+    public void {|#0:RpcMessage|}(int connectionId, string msg)
     {
     }
 }

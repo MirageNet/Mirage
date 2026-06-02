@@ -10,14 +10,14 @@ namespace Mirage.Analyzers
         public const string DirectMutationDiagnosticId = "MIRAGE1003";
         public const string ReassignmentDiagnosticId = "MIRAGE1004";
         public const string NetworkBehaviourAttributeDiagnosticId = "MIRAGE1101";
-        public const string RpcSignatureDiagnosticId = "MIRAGE1201";
-        public const string RpcRefOutDiagnosticId = "MIRAGE1202";
-        public const string RpcStaticDiagnosticId = "MIRAGE1203";
-        public const string ClientRpcTargetDiagnosticId = "MIRAGE1204";
-        public const string RateLimitSettingsDiagnosticId = "MIRAGE1205";
-        public const string ServerRpcMissingRateLimitDiagnosticId = "MIRAGE1206";
-        public const string MessageOrRpcDiagnosticId = "MIRAGE1301";
-        public const string FieldTypeSerializationDiagnosticId = "MIRAGE1302";
+        public const string MessageOrRpcDiagnosticId = "MIRAGE1201";
+        public const string RpcSignatureDiagnosticId = "MIRAGE1202";
+        public const string RpcRefOutDiagnosticId = "MIRAGE1203";
+        public const string RpcStaticDiagnosticId = "MIRAGE1204";
+        public const string ClientRpcTargetDiagnosticId = "MIRAGE1205";
+        public const string RateLimitSettingsDiagnosticId = "MIRAGE1206";
+        public const string ServerRpcMissingRateLimitDiagnosticId = "MIRAGE1207";
+        public const string FieldTypeSerializationDiagnosticId = "MIRAGE1301";
         public const string MismatchedSerializationDiagnosticId = "MIRAGE1303";
         public const string LifecycleNetworkStateDiagnosticId = "MIRAGE1401";
         public const string LifecycleMissingBaseCallDiagnosticId = "MIRAGE1402";
@@ -75,6 +75,16 @@ namespace Mirage.Analyzers
             description: "Network attributes like SyncVar, Server, Client, HasAuthority, LocalPlayer, ServerRpc, ClientRpc, and NetworkMethod are only valid inside NetworkBehaviour classes.",
             helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1101");
 
+        public static readonly DiagnosticDescriptor MessageOrRpcRule = new DiagnosticDescriptor(
+            MessageOrRpcDiagnosticId,
+            "Class type used in NetworkMessage or RPC without WeaverSafeClass attribute",
+            "{0} '{1}' is a class type '{2}'. Class-based types allocate memory upon deserialization and do not support polymorphism (only declared fields serialize). Consider using a struct, implementing custom serialization and marking the class with [WeaverSafeClass], or decorating this member/parameter with [WeaverSafeClass] to ignore.",
+            "Usage",
+            DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "Class types used as NetworkMessage fields or RPC parameters/returns should be value types or marked with [WeaverSafeClass] to avoid allocations and polymorphism bugs.",
+            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1201");
+
         public static readonly DiagnosticDescriptor RpcSignatureRule = new DiagnosticDescriptor(
             RpcSignatureDiagnosticId,
             "RPC method must be non-generic and return void or UniTask",
@@ -83,7 +93,7 @@ namespace Mirage.Analyzers
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
             description: "Methods marked with ServerRpc or ClientRpc cannot be generic and must return void or UniTask.",
-            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1201");
+            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1202");
 
         public static readonly DiagnosticDescriptor RpcRefOutRule = new DiagnosticDescriptor(
             RpcRefOutDiagnosticId,
@@ -93,7 +103,7 @@ namespace Mirage.Analyzers
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
             description: "RPC parameters cannot be pass-by-reference (ref/out).",
-            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1202");
+            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1203");
 
         public static readonly DiagnosticDescriptor RpcStaticRule = new DiagnosticDescriptor(
             RpcStaticDiagnosticId,
@@ -103,7 +113,7 @@ namespace Mirage.Analyzers
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
             description: "RPC methods cannot be static.",
-            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1203");
+            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1204");
 
         public static readonly DiagnosticDescriptor ClientRpcTargetRule = new DiagnosticDescriptor(
             ClientRpcTargetDiagnosticId,
@@ -113,7 +123,7 @@ namespace Mirage.Analyzers
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
             description: "ClientRpc target configurations must be valid.",
-            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1204");
+            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1205");
 
         public static readonly DiagnosticDescriptor RateLimitSettingsRule = new DiagnosticDescriptor(
             RateLimitSettingsDiagnosticId,
@@ -123,7 +133,7 @@ namespace Mirage.Analyzers
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
             description: "RateLimit parameters must be positive and MaxTokens >= Refill.",
-            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1205");
+            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1206");
 
         public static readonly DiagnosticDescriptor ServerRpcMissingRateLimitRule = new DiagnosticDescriptor(
             ServerRpcMissingRateLimitDiagnosticId,
@@ -133,17 +143,7 @@ namespace Mirage.Analyzers
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
             description: "Every ServerRpc should be protected by a [RateLimit] attribute.",
-            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1206");
-
-        public static readonly DiagnosticDescriptor MessageOrRpcRule = new DiagnosticDescriptor(
-            MessageOrRpcDiagnosticId,
-            "Class type used in NetworkMessage or RPC without WeaverSafeClass attribute",
-            "{0} '{1}' is a class type '{2}'. Class-based types allocate memory upon deserialization and do not support polymorphism (only declared fields serialize). Consider using a struct, implementing custom serialization and marking the class with [WeaverSafeClass], or decorating this member/parameter with [WeaverSafeClass] to ignore.",
-            "Usage",
-            DiagnosticSeverity.Warning,
-            isEnabledByDefault: true,
-            description: "Class types used as NetworkMessage fields or RPC parameters/returns should be value types or marked with [WeaverSafeClass] to avoid allocations and polymorphism bugs.",
-            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1301");
+            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1207");
 
         public static readonly DiagnosticDescriptor FieldTypeSerializationRule = new DiagnosticDescriptor(
             FieldTypeSerializationDiagnosticId,
@@ -153,7 +153,7 @@ namespace Mirage.Analyzers
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
             description: "All fields in NetworkMessages and parameters in RPCs must be serializable by Mirage.",
-            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1302");
+            helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1301");
 
         public static readonly DiagnosticDescriptor MismatchedSerializationRule = new DiagnosticDescriptor(
             MismatchedSerializationDiagnosticId,
@@ -221,13 +221,13 @@ namespace Mirage.Analyzers
             DirectMutationRule,
             ReassignmentRule,
             NetworkBehaviourAttributeRule,
+            MessageOrRpcRule,
             RpcSignatureRule,
             RpcRefOutRule,
             RpcStaticRule,
             ClientRpcTargetRule,
             RateLimitSettingsRule,
             ServerRpcMissingRateLimitRule,
-            MessageOrRpcRule,
             FieldTypeSerializationRule,
             MismatchedSerializationRule,
             LifecycleNetworkStateRule,

@@ -24,7 +24,7 @@ namespace Mirage.Analyzers.Tests
         public async Task InvalidRateLimitInterval()
         {
             var code = VerifyCS.LoadTestData("RateLimitSettings/InvalidRateLimitInterval.cs");
-            var expected = VerifyCS.Diagnostic("MIRAGE1205")
+            var expected = VerifyCS.Diagnostic("MIRAGE1206")
                 .WithLocation(0)
                 .WithArguments("CmdFire", "Interval must be greater than zero");
             await VerifyCS.VerifyAnalyzerAsync(code, expected);
@@ -34,7 +34,7 @@ namespace Mirage.Analyzers.Tests
         public async Task InvalidRateLimitRefillAndMaxTokens()
         {
             var code = VerifyCS.LoadTestData("RateLimitSettings/InvalidRateLimitRefillAndMaxTokens.cs");
-            var expected = VerifyCS.Diagnostic("MIRAGE1205")
+            var expected = VerifyCS.Diagnostic("MIRAGE1206")
                 .WithLocation(0)
                 .WithArguments("CmdFire", "Refill must be greater than zero, MaxTokens must be greater than zero");
             await VerifyCS.VerifyAnalyzerAsync(code, expected);
@@ -44,7 +44,7 @@ namespace Mirage.Analyzers.Tests
         public async Task InvalidRateLimitMaxTokensLessThanRefill()
         {
             var code = VerifyCS.LoadTestData("RateLimitSettings/InvalidRateLimitMaxTokensLessThanRefill.cs");
-            var expected = VerifyCS.Diagnostic("MIRAGE1205")
+            var expected = VerifyCS.Diagnostic("MIRAGE1206")
                 .WithLocation(0)
                 .WithArguments("CmdFire", "MaxTokens must be greater than or equal to Refill");
             await VerifyCS.VerifyAnalyzerAsync(code, expected);
@@ -61,7 +61,7 @@ namespace Mirage.Analyzers.Tests
         public async Task CustomRateLimitAttributeIgnored()
         {
             var code = VerifyCS.LoadTestData("RateLimitSettings/CustomRateLimitAttributeIgnored.cs");
-            var expected = VerifyCS.Diagnostic("MIRAGE1206")
+            var expected = VerifyCS.Diagnostic("MIRAGE1207")
                 .WithLocation(0)
                 .WithArguments("CmdFire");
             await VerifyCS.VerifyAnalyzerAsync(code, expected);
