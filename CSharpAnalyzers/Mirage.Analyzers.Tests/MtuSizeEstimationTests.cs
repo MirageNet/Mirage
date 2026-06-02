@@ -12,7 +12,7 @@ namespace Mirage.Analyzers.Tests
             var code = VerifyCS.LoadTestData("MtuSizeEstimation/Positive_SmallMessageDoesNotTriggerWarning.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1501")
                 .WithLocation(0)
-                .WithArguments("SmallMessage", "13");
+                .WithArguments("SmallMessage", "14+ (Average ~15 + dynamic content)");
             await VerifyCS.VerifyAnalyzerAsync(code, expected);
         }
 
@@ -32,7 +32,7 @@ namespace Mirage.Analyzers.Tests
             var code = VerifyCS.LoadTestData("MtuSizeEstimation/Negative_LargeMessageExceedsMtu.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1501")
                 .WithLocation(0)
-                .WithArguments("HugeMessage", "0");
+                .WithArguments("HugeMessage", "10+ (Average ~10 + dynamic content)");
 
             await VerifyCS.VerifyAnalyzerAsync(code, expected);
         }
@@ -43,7 +43,7 @@ namespace Mirage.Analyzers.Tests
             var code = VerifyCS.LoadTestData("MtuSizeEstimation/Edge_RecursiveStructOrClassRef.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1501")
                 .WithLocation(0)
-                .WithArguments("RecursiveMessage", "1");
+                .WithArguments("RecursiveMessage", "2 to 6 (Average ~3)");
             await VerifyCS.VerifyAnalyzerAsync(code, expected);
         }
     }
