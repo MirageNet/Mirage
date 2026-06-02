@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Mirage.CodeGen;
+using Mirage.Serialization;
 using Mono.Cecil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
 using UnityEngine;
@@ -40,6 +41,13 @@ namespace Mirage.Weaver
             Log($"Starting weaver on {compiledAssembly.Name}");
             try
             {
+                var hasIgnore = assembly.HasCustomAttribute<WeaverIgnoreAttribute>();
+                if (hasIgnore)
+                {
+                    Log($"Skipping {compiledAssembly.Name} because it has WeaverIgnoreAttribute");
+                    return ResultType.NoChanges;
+                }
+
                 var module = assembly.MainModule;
                 readers = new Readers(module, logger);
                 writers = new Writers(module, logger);
