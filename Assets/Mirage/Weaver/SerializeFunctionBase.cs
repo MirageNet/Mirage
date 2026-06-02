@@ -101,14 +101,14 @@ namespace Mirage.Weaver
         /// </summary>
         /// <param name="typeReference"></param>
         /// <param name="sequencePoint"></param>
-        /// <returns>found methohd or null</returns>
+        /// <returns>found method or null</returns>
         public MethodReference TryGetFunction(TypeReference typeReference, SequencePoint sequencePoint)
         {
             try
             {
                 return GetFunction_Throws(typeReference);
             }
-            catch (SerializeFunctionException e)
+            catch (WeaverException e)
             {
                 logger.Error(e, sequencePoint);
                 return null;

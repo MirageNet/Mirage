@@ -79,6 +79,11 @@ namespace Mirage.Weaver
 
                 return ResultType.Success;
             }
+            catch (WeaverException e)
+            {
+                logger.Error(e);
+                return ResultType.Failed;
+            }
             catch (Exception e)
             {
                 logger.Error("Exception :" + e);

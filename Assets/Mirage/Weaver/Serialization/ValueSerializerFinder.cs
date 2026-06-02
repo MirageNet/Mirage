@@ -1,8 +1,10 @@
 using System;
+using System.Linq;
 using Mirage.CodeGen;
 using Mirage.Serialization;
 using Mirage.Weaver.SyncVars;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver.Serialization
 {
@@ -67,15 +69,58 @@ namespace Mirage.Weaver.Serialization
             // if user adds 2 attributes that dont work together weaver should then throw error
             ValueSerializer valueSerializer = null;
 
-            // attributeProvider is null for generic fields,
-            // but that is find because they wont have any of these attributes anyway
-            if (attributeProvider != null)
-                valueSerializer = GetUsingAttribute(module, holder, attributeProvider, fieldType, fieldName, writers, readers, valueSerializer);
+            try
+            {
+                // attributeProvider is null for generic fields,
+                // but that is find because they wont have any of these attributes anyway
+                if (attributeProvider != null)
+                    valueSerializer = GetUsingAttribute(module, holder, attributeProvider, fieldType, fieldName, writers, readers, valueSerializer);
 
-            if (valueSerializer == null)
-                valueSerializer = FindSerializeFunctions(writers, readers, fieldType);
+                if (valueSerializer == null)
+                    valueSerializer = FindSerializeFunctions(writers, readers, fieldType);
 
-            return valueSerializer;
+                return valueSerializer;
+            }
+            catch (WeaverException e)
+            {
+                if (e.MemberReference == null && attributeProvider != null)
+                {
+                    var (mr, sp) = GetContext(attributeProvider);
+                    e.MemberReference = mr;
+                    e.SequencePoint = sp;
+                }
+                throw;
+            }
+        }
+
+        private static (MemberReference, SequencePoint) GetContext(ICustomAttributeProvider provider)
+        {
+            if (provider is MemberReference mr)
+            {
+                var sp = GetSequencePoint(mr);
+                return (mr, sp);
+            }
+            if (provider is ParameterDefinition pd)
+            {
+                var method = pd.Method as MethodDefinition;
+                if (method == null && pd.Method is MethodReference methodRef)
+                    method = methodRef.Resolve();
+
+                var sp = method?.GetFirstSequencePoint();
+                return (method, sp);
+            }
+            return (null, null);
+        }
+
+        private static SequencePoint GetSequencePoint(MemberReference mr)
+        {
+            if (mr is MethodDefinition md)
+                return md.GetFirstSequencePoint();
+            if (mr is PropertyDefinition pd)
+                return pd.GetMethod?.GetFirstSequencePoint() ?? pd.SetMethod?.GetFirstSequencePoint();
+            if (mr is TypeDefinition td)
+                return td.Methods.FirstOrDefault(m => m.DebugInformation.SequencePoints.Any())?.GetFirstSequencePoint();
+            return null;
         }
 
         private static ValueSerializer GetUsingAttribute(ModuleDefinition module, TypeDefinition holder, ICustomAttributeProvider attributeProvider, TypeReference fieldType, string fieldName, Writers writers, Readers readers, ValueSerializer valueSerializer)

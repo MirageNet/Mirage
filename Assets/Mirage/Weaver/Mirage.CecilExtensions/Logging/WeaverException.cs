@@ -17,8 +17,8 @@ namespace Mirage.CodeGen
     // should be caught within weaver and returned to user using DiagnosticMessage
     public class WeaverException : Exception
     {
-        public readonly SequencePoint SequencePoint;
-        public readonly MemberReference MemberReference;
+        public SequencePoint SequencePoint { get; set; }
+        public MemberReference MemberReference { get; set; }
 
         public WeaverException(string message, MemberReference memberReference, SequencePoint sequencePoint) : base(message)
         {
