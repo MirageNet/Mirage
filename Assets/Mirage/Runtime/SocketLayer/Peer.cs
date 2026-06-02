@@ -709,6 +709,9 @@ namespace Mirage.SocketLayer
         private void RejectConnectionWithReason(IConnectionHandle handle, RejectReason reason)
         {
             SendCommandUnconnected(handle, Commands.ConnectionRejected, (byte)reason);
+
+            if (handle.IsStateful)
+                handle.Disconnect(null);
         }
 
         /// <summary>Finish disconnecting this connection</summary>
