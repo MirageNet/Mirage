@@ -1,31 +1,8 @@
-using System;
-using Mirage;
-using Mirage.Serialization;
 using Mirage.RemoteCalls;
+using Mirage.Serialization;
 
 namespace Mirage.Snippets.RemoteActions.RpcExamplesGenerated
 {
-    using NetworkBehaviour = DummyNetworkBehaviour;
-    // Dummy classes/aliases to make the snippet code compile in Unity
-    public class DummyNetworkBehaviour
-    {
-        public bool IsServer { get; set; }
-        public DummyRemoteCallCollection remoteCallCollection { get; set; } = new DummyRemoteCallCollection();
-        protected virtual int GetRpcCount() => 0;
-    }
-
-    public class DummyRemoteCallCollection
-    {
-        public void Register(int id, Type type, string name, RpcInvokeType invokeType, CmdDelegate cmdDelegate, bool requireAuthority) {}
-    }
-
-    public delegate void CmdDelegate(NetworkReader reader, INetworkPlayer senderConnection, int replyId);
-
-    public static class ServerRpcSender
-    {
-        public static void Send(DummyNetworkBehaviour behaviour, int index, PooledNetworkWriter writer, int channel, bool requireAuthority) {}
-    }
-
     // CodeEmbed-Start: rpc-example-change-name-generated
     public class Player : NetworkBehaviour
     {
@@ -35,11 +12,14 @@ namespace Mirage.Snippets.RemoteActions.RpcExamplesGenerated
         [ServerRpc]
         public void RpcChangeName(string newName)
         {
-            if (this.IsServer)
+            if (IsServer)
+            {
+                // direct call, skips NetworkWriter
                 UserCode_RpcChangeName_123456789(newName);
+            }
             else
             {
-                using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+                using (var writer = NetworkWriterPool.GetWriter())
                 {
                     writer.WriteString(newName);
                     ServerRpcSender.Send(this, 123456789, writer, 0, true);
@@ -52,17 +32,18 @@ namespace Mirage.Snippets.RemoteActions.RpcExamplesGenerated
             PlayerName = newName;
         }
 
-        protected void Skeleton_RpcChangeName_123456789(NetworkReader reader, INetworkPlayer senderConnection, int replyId)
+        protected static void Skeleton_RpcChangeName_123456789(NetworkBehaviour behaviour, NetworkReader reader, INetworkPlayer senderConnection, int replyId)
         {
-            this.UserCode_RpcChangeName_123456789(reader.ReadString());
+            ((Player)behaviour).UserCode_RpcChangeName_123456789(reader.ReadString());
         }
 
-        public Player()
+        protected void RegisterRpc_1(RemoteCallCollection collection)
         {
-            this.remoteCallCollection.Register(0, typeof(Player), "Player.RpcChangeName", RpcInvokeType.ServerRpc, new CmdDelegate(Skeleton_RpcChangeName_123456789), true);
+            base.RegisterRpc(collection);
+            collection.Register(0, "Mirage.Snippets.RemoteActions.RpcExamplesGenerated.Player.RpcChangeName", true, RpcInvokeType.ServerRpc, this, new RpcDelegate(Player.Skeleton_RpcChangeName_123456789), RpcRateLimitConfig.Disabled());
         }
 
-        protected override int GetRpcCount()
+        protected int GetRpcCount_1()
         {
             return 1;
         }

@@ -1,5 +1,4 @@
 using UnityEngine;
-using Mirage;
 
 namespace Mirage.Snippets.RemoteActions.ClientRpcSimple
 {
@@ -7,7 +6,7 @@ namespace Mirage.Snippets.RemoteActions.ClientRpcSimple
     public class MyClientRpcExampleBehaviour : NetworkBehaviour
     {
         [ClientRpc]
-        public void MyRpcFunction() 
+        public void MyRpcFunction()
         {
             // Code to invoke on client
         }
@@ -21,7 +20,7 @@ namespace Mirage.Snippets.RemoteActions.ClientRpcPlayer
     public class MyClientRpcExampleBehaviour : NetworkBehaviour
     {
         [ClientRpc(target = RpcTarget.Player)]
-        public void MyRpcFunction(NetworkPlayer target) 
+        public void MyRpcFunction(INetworkPlayer target)
         {
             // Code to invoke on client
         }
@@ -66,7 +65,7 @@ namespace Mirage.Snippets.RemoteActions.ClientRpcMagic
         {
             target.GetComponent<Player>().health -= damage;
 
-            NetworkIdentity opponentIdentity = target.GetComponent<NetworkIdentity>();
+            var opponentIdentity = target.GetComponent<NetworkIdentity>();
             DoMagic(opponentIdentity.Owner, damage);
         }
 
