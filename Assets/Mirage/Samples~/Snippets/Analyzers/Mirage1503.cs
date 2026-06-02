@@ -1,3 +1,4 @@
+using Mirage;
 using Mirage.Serialization;
 
 namespace Mirage.Snippets.Analyzers

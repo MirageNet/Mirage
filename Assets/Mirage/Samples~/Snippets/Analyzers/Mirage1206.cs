@@ -7,9 +7,10 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1206-triggering
         public class Player : NetworkBehaviour
         {
-            // Warning: ServerRpc 'CmdFireWeapon' should have a [RateLimit] attribute to prevent spam
+            // Error: RateLimit interval must be greater than zero, and MaxTokens must be >= Refill
             [ServerRpc]
-            public void CmdFireWeapon()
+            [RateLimit(Interval = -0.5f, Refill = 10, MaxTokens = 5)]
+            public void CmdSpammyAction()
             {
             }
         }
@@ -21,10 +22,10 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1206-resolved
         public class Player : NetworkBehaviour
         {
-            // Correct: ServerRpc decorated with [RateLimit] to throttle client requests
+            // Correct: Positive interval and MaxTokens >= Refill
             [ServerRpc]
-            [RateLimit(Interval = 0.2f, Refill = 5, MaxTokens = 10)]
-            public void CmdFireWeapon()
+            [RateLimit(Interval = 1.0f, Refill = 10, MaxTokens = 20)]
+            public void CmdSpammyAction()
             {
             }
         }

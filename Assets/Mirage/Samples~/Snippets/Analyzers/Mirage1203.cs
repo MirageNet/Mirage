@@ -7,11 +7,11 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1203-triggering
         public class Player : NetworkBehaviour
         {
-            // Error: ServerRpc method 'CmdSpawnGlobal' must not be static
+            // Error: ServerRpc method 'CmdTakeDamage' cannot have ref/out parameters
             [ServerRpc]
-            public static void CmdSpawnGlobal()
+            public void CmdTakeDamage(ref int health)
             {
-                // Static context has no NetworkIdentity
+                health -= 10;
             }
         }
         // CodeEmbed-End: mirage1203-triggering
@@ -22,11 +22,14 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1203-resolved
         public class Player : NetworkBehaviour
         {
-            // Correct: Instance method has access to the NetworkBehaviour state
+            [SyncVar]
+            public int Health { get; set; }
+
+            // Correct: Pass by value and synchronize via SyncVar
             [ServerRpc]
-            public void CmdSpawn()
+            public void CmdTakeDamage(int damage)
             {
-                // Normal instance context
+                Health -= damage;
             }
         }
         // CodeEmbed-End: mirage1203-resolved

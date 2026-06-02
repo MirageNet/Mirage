@@ -1,11 +1,13 @@
-# MIRAGE1201: RPC Signature Error
+# MIRAGE1201: NetworkMessage/RPC Class Warning
 
 ## The Problem
-A method decorated with `[ServerRpc]` or `[ClientRpc]` violates remote procedure call rules:
-1. **Generic Methods:** The method cannot have generic parameters (e.g. `void MyRpc<T>()`).
-2. **Invalid Return Type:** The method must return `void`, `UniTask`, or `UniTask<T>`. Returning standard tasks, custom classes, or primitive values is invalid.
+A field or property in a class/struct marked with `[NetworkMessage]`, or a parameter/return type argument in a method marked with `[ServerRpc]` or `[ClientRpc]`, uses a class type instead of a value type/struct.
 
-Remote procedure calls must serialize their arguments and return values across the network. Non-generic signatures and async return wrappers (`UniTask`) are required for the Mirage Weaver to generate remote execution logic correctly.
+Class-based types are generally risky for network messaging because:
+1. **Allocations:** Mirage must allocate a new object instance upon deserialization, which causes garbage collection (GC) spikes and performance overhead.
+2. **Polymorphism Limitations:** Mirage's standard serialization only serializes fields of the declared member type, not the concrete derived subclass type.
+
+*Note: Standard collections (such as `List<T>` or `Dictionary<K, V>` in `System.Collections.Generic`) are automatically ignored by this rule as they are natively supported by Mirage's Weaver and serialization system.*
 
 ---
 
@@ -16,7 +18,14 @@ Remote procedure calls must serialize their arguments and return values across t
 
 ## How to Resolve
 
-1. Make the method non-generic.
-2. Ensure the return type is `void` or a valid async task wrapper like `UniTask` (or `UniTask<T>` for asynchronous RPCs).
+### Option 1: Use a struct (Recommended)
+Structs (value types) avoid memory allocations and guarantee safe copy-by-value semantics.
+{{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-struct-option' }}}
 
-{{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-resolved' }}}
+### Option 2: Implement Custom Serialization and mark the class as safe
+If you want to use the class type and manage performance/reference safety yourself, write custom `Write` and `Read` extension methods for the class, and decorate the class with `[WeaverSafeClass]` to suppress the warning globally.
+{{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-class-option' }}}
+
+### Option 3: Suppress the warning on the member or parameter
+If you want to disable the warning only on a specific field, property, or parameter, decorate it with `[WeaverSafeClass]`.
+{{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-suppress-option' }}}

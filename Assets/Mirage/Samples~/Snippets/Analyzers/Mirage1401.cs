@@ -1,3 +1,5 @@
+using Mirage;
+
 namespace Mirage.Snippets.Analyzers
 {
     namespace M1401.Triggering

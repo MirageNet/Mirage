@@ -1,9 +1,12 @@
-# MIRAGE1206: Missing RateLimit on ServerRpc
+# MIRAGE1206: Invalid RateLimit Attribute Settings
 
 ## The Problem
-A `[ServerRpc]` method is declared without a `[RateLimit]` attribute.
+The `[RateLimit]` attribute contains invalid configurations. This includes:
+1. `Interval` is less than or equal to zero.
+2. `Refill` is less than or equal to zero.
+3. `MaxTokens` is less than or equal to zero, or is less than the `Refill` rate.
 
-To prevent denial of service (DoS) attacks, server CPU strain, and memory bloat from client RPC spam, it is highly recommended to apply a `[RateLimit]` attribute to every `[ServerRpc]` method. Without a rate limit, a malicious client could flood the server with requests, leading to server performance degradation or player disconnects.
+Rate limiting buckets require positive numbers for intervals, refill rates, and max tokens to correctly configure token replenishment cycles. If any of these values are zero or negative, or if `MaxTokens` is set to a value less than `Refill`, the rate limiting logic will fail to function or cause infinite loops/resource starvation on the server.
 
 ---
 
@@ -14,6 +17,6 @@ To prevent denial of service (DoS) attacks, server CPU strain, and memory bloat 
 
 ## How to Resolve
 
-Add a `[RateLimit]` attribute to the `[ServerRpc]` method with appropriate parameters for the expected rate of call.
+Correct the parameters of the `[RateLimit]` attribute to ensure they are positive, valid values. Ensure `MaxTokens` is at least equal to the `Refill` value.
 
 {{{ Path:'Snippets/Analyzers/Mirage1206.cs' Name:'mirage1206-resolved' }}}

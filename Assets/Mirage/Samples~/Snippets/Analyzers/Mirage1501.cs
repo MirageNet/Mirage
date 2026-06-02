@@ -1,4 +1,5 @@
 using Mirage;
+using UnityEngine;
 
 namespace Mirage.Snippets.Analyzers
 {
@@ -6,10 +7,10 @@ namespace Mirage.Snippets.Analyzers
     {
         // CodeEmbed-Start: mirage1501-triggering
         [NetworkMessage]
-        public struct HugeMessage
+        public struct LargeTelemetryMessage
         {
-            // Warning: Array size and primitives exceed the safe MTU threshold
-            public byte[] largeBuffer; // e.g. filled with 2048 bytes of data
+            // Warning: Array of Vector3 has estimated size of 1536 bytes, exceeding the 1200-byte MTU limit.
+            public Vector3[] historicalTransforms;
         }
         // CodeEmbed-End: mirage1501-triggering
     }
@@ -18,11 +19,12 @@ namespace Mirage.Snippets.Analyzers
     {
         // CodeEmbed-Start: mirage1501-resolved
         [NetworkMessage]
-        public struct ChunkMessage
+        public struct TelemetryUpdateMessage
         {
-            public int chunkIndex;
-            // Correct: Small buffer sizes that fit comfortably within a single MTU packet
-            public byte[] smallBuffer; // e.g. limited to 512 bytes per chunk
+            public int sequenceNumber;
+            // Correct: Send individual updates frequently instead of a large history array.
+            public Vector3 position;
+            public Quaternion rotation;
         }
         // CodeEmbed-End: mirage1501-resolved
     }

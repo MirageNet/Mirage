@@ -1,12 +1,11 @@
-# MIRAGE1205: Invalid RateLimit Attribute Settings
+# MIRAGE1205: Invalid ClientRpc Target Configurations
 
 ## The Problem
-The `[RateLimit]` attribute contains invalid configurations. This includes:
-1. `Interval` is less than or equal to zero.
-2. `Refill` is less than or equal to zero.
-3. `MaxTokens` is less than or equal to zero, or is less than the `Refill` rate.
+A `[ClientRpc]` target configuration is invalid for one of the following reasons:
+1. The method return type is `UniTask` or `UniTask<T>` (it returns values) but the target is configured as `RpcTarget.Observers`.
+2. The target is set to `RpcTarget.Player` but the first parameter of the method is not an `INetworkPlayer` (or `NetworkConnection`) to specify the recipient.
 
-Rate limiting buckets require positive numbers for intervals, refill rates, and max tokens to correctly configure token replenishment cycles. If any of these values are zero or negative, or if `MaxTokens` is set to a value less than `Refill`, the rate limiting logic will fail to function or cause infinite loops/resource starvation on the server.
+Broadcast RPCs (where the target is `Observers`) cannot collect return values since multiple clients would respond. Returning values requires a single, specific destination (e.g. `RpcTarget.Owner` or `RpcTarget.Player`). Furthermore, when targeting a specific `Player`, Mirage needs to know which connection to send the RPC to, so the method's first parameter must be the player connection.
 
 ---
 
@@ -17,6 +16,7 @@ Rate limiting buckets require positive numbers for intervals, refill rates, and 
 
 ## How to Resolve
 
-Correct the parameters of the `[RateLimit]` attribute to ensure they are positive, valid values. Ensure `MaxTokens` is at least equal to the `Refill` value.
+1. If the RPC returns values, change the target to `RpcTarget.Owner` or `RpcTarget.Player`.
+2. If the RPC targets `RpcTarget.Player`, ensure the first parameter is of type `INetworkPlayer` (or `NetworkConnection`).
 
 {{{ Path:'Snippets/Analyzers/Mirage1205.cs' Name:'mirage1205-resolved' }}}

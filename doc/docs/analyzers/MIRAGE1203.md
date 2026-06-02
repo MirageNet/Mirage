@@ -1,9 +1,9 @@
-# MIRAGE1203: Static RPC Methods
+# MIRAGE1203: Pass-by-Reference Modifiers in RPCs
 
 ## The Problem
-An RPC method decorated with `[ServerRpc]` or `[ClientRpc]` is declared as `static`.
+An RPC method contains parameters with `ref` or `out` parameter modifiers.
 
-RPC methods must execute on a specific instance of a `NetworkBehaviour` on a specific `GameObject` so that Mirage knows which network identity the message is targeted at. Static methods lack an instance context (`this`), making it impossible to route the message to the correct network object.
+RPCs (Remote Procedure Calls) serialize arguments and send them over the network. Pass-by-reference modifiers (`ref` or `out`) imply that the method can modify the argument and pass the changes back to the caller in-place, which is impossible over a one-way network serialization boundary.
 
 ---
 
@@ -14,6 +14,6 @@ RPC methods must execute on a specific instance of a `NetworkBehaviour` on a spe
 
 ## How to Resolve
 
-Remove the `static` modifier from the RPC method declaration so it runs within the instance context of a spawned `NetworkBehaviour`.
+Pass parameters by value. If you need to communicate updated state back to the caller, either use an asynchronous RPC with a `UniTask<T>` return value or update a synchronized property (such as a `[SyncVar]`).
 
 {{{ Path:'Snippets/Analyzers/Mirage1203.cs' Name:'mirage1203-resolved' }}}

@@ -1,9 +1,11 @@
-# MIRAGE1302: Field Type Serialization Validation
+# MIRAGE1302: Unserialized Private Field Warning
 
 ## The Problem
-A field or property in a class/struct marked with `[NetworkMessage]`, or a parameter in a method marked with `[ServerRpc]` or `[ClientRpc]`, uses a type that Mirage does not know how to serialize, and no custom writer/reader has been registered or generated for it.
+A private field or property is declared inside a `[NetworkMessage]` struct or class. 
 
-Mirage uses compile-time IL weaving to generate serialization code for NetworkMessages and RPCs. If a field or parameter type is not a primitive type, an existing supported type, or a type that can be auto-weaved (like a simple struct/class with only serializable fields), and there are no custom `NetworkWriter` or `NetworkReader` extension methods for it, the Weaver will fail because it cannot serialize the data.
+In Mirage, private fields and properties are ignored by the Weaver during automatic serialization. Only public fields are serialized and sent over the network. If a developer declares private fields expecting them to be networked, it can lead to confusion and logic bugs because they will remain uninitialized or hold default values on the receiving end.
+
+*Note: This is a placeholder warning designated for future release (skipped for now until source generation is fully integrated).*
 
 ---
 
@@ -14,6 +16,6 @@ Mirage uses compile-time IL weaving to generate serialization code for NetworkMe
 
 ## How to Resolve
 
-Ensure all fields are of serializable types. If you need to send a custom type, make sure it is a struct/class with only serializable fields, or implement custom `Write` and `Read` extension methods for the custom type so that Mirage knows how to serialize it.
+Make the field public so it is automatically picked up by the Weaver for serialization. If the field is intended to be purely local and not serialized, you can ignore this warning, or mark it as static if applicable.
 
 {{{ Path:'Snippets/Analyzers/Mirage1302.cs' Name:'mirage1302-resolved' }}}

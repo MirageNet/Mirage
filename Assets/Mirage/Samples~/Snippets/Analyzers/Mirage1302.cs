@@ -1,5 +1,4 @@
 using Mirage;
-using System.Threading;
 
 namespace Mirage.Snippets.Analyzers
 {
@@ -7,10 +6,12 @@ namespace Mirage.Snippets.Analyzers
     {
         // CodeEmbed-Start: mirage1302-triggering
         [NetworkMessage]
-        public struct StartSessionMessage
+        public struct StatusMessage
         {
-            // Error: Field type 'Thread' is not serializable by Mirage.
-            public Thread executionThread;
+            public string playerName;
+            
+            // Warning: Private fields are not serialized by the Weaver
+            private int playerHash;
         }
         // CodeEmbed-End: mirage1302-triggering
     }
@@ -19,10 +20,10 @@ namespace Mirage.Snippets.Analyzers
     {
         // CodeEmbed-Start: mirage1302-resolved
         [NetworkMessage]
-        public struct StartSessionMessage
+        public struct StatusMessage
         {
-            // Correct: Pass a serializable identifier instead of the raw thread object
-            public string threadName;
+            public string playerName;
+            public int playerHash;
         }
         // CodeEmbed-End: mirage1302-resolved
     }

@@ -1,4 +1,5 @@
 using Mirage;
+using Cysharp.Threading.Tasks;
 
 namespace Mirage.Snippets.Analyzers
 {
@@ -7,10 +8,16 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1205-triggering
         public class Player : NetworkBehaviour
         {
-            // Error: RateLimit interval must be greater than zero, and MaxTokens must be >= Refill
-            [ServerRpc]
-            [RateLimit(Interval = -0.5f, Refill = 10, MaxTokens = 5)]
-            public void CmdSpammyAction()
+            // Error: [ClientRpc] must return void when target is Observers.
+            [ClientRpc(target = RpcTarget.Observers)]
+            public UniTask<int> RpcGetHealth()
+            {
+                return UniTask.FromResult(100);
+            }
+
+            // Error: ClientRpc method with target = Player requires first parameter to be INetworkPlayer
+            [ClientRpc(target = RpcTarget.Player)]
+            public void RpcGiveItem(int itemId)
             {
             }
         }
@@ -22,10 +29,16 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1205-resolved
         public class Player : NetworkBehaviour
         {
-            // Correct: Positive interval and MaxTokens >= Refill
-            [ServerRpc]
-            [RateLimit(Interval = 1.0f, Refill = 10, MaxTokens = 20)]
-            public void CmdSpammyAction()
+            // Correct: Targeted RPC returning value to the Owner
+            [ClientRpc(target = RpcTarget.Owner)]
+            public UniTask<int> RpcGetHealth()
+            {
+                return UniTask.FromResult(100);
+            }
+
+            // Correct: First parameter is the target player connection
+            [ClientRpc(target = RpcTarget.Player)]
+            public void RpcGiveItem(INetworkPlayer targetPlayer, int itemId)
             {
             }
         }

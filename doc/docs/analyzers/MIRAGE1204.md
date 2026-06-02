@@ -1,11 +1,9 @@
-# MIRAGE1204: Invalid ClientRpc Target Configurations
+# MIRAGE1204: Static RPC Methods
 
 ## The Problem
-A `[ClientRpc]` target configuration is invalid for one of the following reasons:
-1. The method return type is `UniTask` or `UniTask<T>` (it returns values) but the target is configured as `RpcTarget.Observers`.
-2. The target is set to `RpcTarget.Player` but the first parameter of the method is not an `INetworkPlayer` (or `NetworkConnection`) to specify the recipient.
+An RPC method decorated with `[ServerRpc]` or `[ClientRpc]` is declared as `static`.
 
-Broadcast RPCs (where the target is `Observers`) cannot collect return values since multiple clients would respond. Returning values requires a single, specific destination (e.g. `RpcTarget.Owner` or `RpcTarget.Player`). Furthermore, when targeting a specific `Player`, Mirage needs to know which connection to send the RPC to, so the method's first parameter must be the player connection.
+RPC methods must execute on a specific instance of a `NetworkBehaviour` on a specific `GameObject` so that Mirage knows which network identity the message is targeted at. Static methods lack an instance context (`this`), making it impossible to route the message to the correct network object.
 
 ---
 
@@ -16,7 +14,6 @@ Broadcast RPCs (where the target is `Observers`) cannot collect return values si
 
 ## How to Resolve
 
-1. If the RPC returns values, change the target to `RpcTarget.Owner` or `RpcTarget.Player`.
-2. If the RPC targets `RpcTarget.Player`, ensure the first parameter is of type `INetworkPlayer` (or `NetworkConnection`).
+Remove the `static` modifier from the RPC method declaration so it runs within the instance context of a spawned `NetworkBehaviour`.
 
 {{{ Path:'Snippets/Analyzers/Mirage1204.cs' Name:'mirage1204-resolved' }}}

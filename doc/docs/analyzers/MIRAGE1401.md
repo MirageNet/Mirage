@@ -20,6 +20,7 @@ Unity's `Awake` and `Start` methods are called during GameObject initialization 
 
 ## How to Resolve
 
-Override `OnStartServer`, `OnStartClient`, `OnStartLocalPlayer`, or `OnStartAuthority` to run network initialization code when the network state is fully ready.
+Subscribe to lifecycle events on `Identity` (such as `Identity.OnStartServer`, `Identity.OnStartClient`, `Identity.OnStartLocalPlayer`, or `Identity.OnAuthorityChanged`) during `Awake()` to execute your network initialization code when the network state is fully ready.
 
 {{{ Path:'Snippets/Analyzers/Mirage1401.cs' Name:'mirage1401-resolved' }}}
+

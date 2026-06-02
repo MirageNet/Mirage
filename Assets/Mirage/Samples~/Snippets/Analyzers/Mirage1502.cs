@@ -21,10 +21,9 @@ namespace Mirage.Snippets.Analyzers
         [NetworkMessage]
         public struct ChatMessage
         {
-            // Correct: Restrict the maximum string length using custom validation or setting MaxStringLength
-#pragma warning disable MIRAGE1502
+            // Correct: Bounded string using [BitCount] to limit length
+            [BitCount(8)]
             public string text;
-#pragma warning restore MIRAGE1502
         }
         // CodeEmbed-End: mirage1502-resolved
     }

@@ -1,9 +1,11 @@
-# MIRAGE1202: Pass-by-Reference Modifiers in RPCs
+# MIRAGE1202: RPC Signature Error
 
 ## The Problem
-An RPC method contains parameters with `ref` or `out` parameter modifiers.
+A method decorated with `[ServerRpc]` or `[ClientRpc]` violates remote procedure call rules:
+1. **Generic Methods:** The method cannot have generic parameters (e.g. `void MyRpc<T>()`).
+2. **Invalid Return Type:** The method must return `void`, `UniTask`, or `UniTask<T>`. Returning standard tasks, custom classes, or primitive values is invalid.
 
-RPCs (Remote Procedure Calls) serialize arguments and send them over the network. Pass-by-reference modifiers (`ref` or `out`) imply that the method can modify the argument and pass the changes back to the caller in-place, which is impossible over a one-way network serialization boundary.
+Remote procedure calls must serialize their arguments and return values across the network. Non-generic signatures and async return wrappers (`UniTask`) are required for the Mirage Weaver to generate remote execution logic correctly.
 
 ---
 
@@ -14,6 +16,7 @@ RPCs (Remote Procedure Calls) serialize arguments and send them over the network
 
 ## How to Resolve
 
-Pass parameters by value. If you need to communicate updated state back to the caller, either use an asynchronous RPC with a `UniTask<T>` return value or update a synchronized property (such as a `[SyncVar]`).
+1. Make the method non-generic.
+2. Ensure the return type is `void` or a valid async task wrapper like `UniTask` (or `UniTask<T>` for asynchronous RPCs).
 
 {{{ Path:'Snippets/Analyzers/Mirage1202.cs' Name:'mirage1202-resolved' }}}

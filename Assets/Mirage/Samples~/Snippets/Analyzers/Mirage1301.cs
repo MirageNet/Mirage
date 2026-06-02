@@ -1,69 +1,29 @@
 using Mirage;
+using System.Threading;
 
 namespace Mirage.Snippets.Analyzers
 {
     namespace M1301.Triggering
     {
         // CodeEmbed-Start: mirage1301-triggering
-        public class TargetInfo
-        {
-            public int x;
-            public int y;
-        }
-
         [NetworkMessage]
-        public struct FireMessage
+        public struct StartSessionMessage
         {
-            // Warns: NetworkMessage field 'info' is a class type 'TargetInfo'.
-            public TargetInfo info;
+            // Error: Field type 'Thread' is not serializable by Mirage.
+            public Thread executionThread;
         }
         // CodeEmbed-End: mirage1301-triggering
     }
 
-    namespace M1301.StructOption
+    namespace M1301.Resolved
     {
-        // CodeEmbed-Start: mirage1301-struct-option
-        public struct TargetInfo
-        {
-            public int x;
-            public int y;
-        }
-
+        // CodeEmbed-Start: mirage1301-resolved
         [NetworkMessage]
-        public struct FireMessage
+        public struct StartSessionMessage
         {
-            public TargetInfo info;
+            // Correct: Pass a serializable identifier instead of the raw thread object
+            public string threadName;
         }
-        // CodeEmbed-End: mirage1301-struct-option
-    }
-
-    namespace M1301.ClassOption
-    {
-        // CodeEmbed-Start: mirage1301-class-option
-        [WeaverSafeClass]
-        public class TargetInfo
-        {
-            public int x;
-            public int y;
-        }
-        // CodeEmbed-End: mirage1301-class-option
-    }
-
-    namespace M1301.SuppressOption
-    {
-        // CodeEmbed-Start: mirage1301-suppress-option
-        [NetworkMessage]
-        public struct FireMessage
-        {
-            [WeaverSafeClass]
-            public TargetInfo info;
-        }
-        // CodeEmbed-End: mirage1301-suppress-option
-
-        public class TargetInfo
-        {
-            public int x;
-            public int y;
-        }
+        // CodeEmbed-End: mirage1301-resolved
     }
 }
