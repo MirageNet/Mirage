@@ -28,7 +28,7 @@ namespace Mirage.Snippets.RemoteActions.ServerRpcDoor
         [ServerRpc(requireAuthority = false)]
         public void CmdSetDoorState(DoorState newDoorState, INetworkPlayer sender = null)
         {
-            if (sender.identity.GetComponent<Player>().hasDoorKey)
+            if (sender.Identity.GetComponent<Player>().hasDoorKey)
                 doorState = newDoorState;
         }
     }

@@ -144,7 +144,7 @@ namespace Mirage.Snippets.GameObjects
             ServerObjectManager.ReplaceCharacter(player, newCharacter, keepAuthority: true);
 
             // Remove the previous character object that's now been replaced
-            Server.Destroy(oldPlayer);
+            ServerObjectManager.Destroy(oldPlayer);
         }
     }
     // CodeEmbed-End: custom-character-spawner-respawn

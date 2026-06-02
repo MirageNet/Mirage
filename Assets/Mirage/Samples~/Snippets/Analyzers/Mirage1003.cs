@@ -6,7 +6,7 @@ namespace Mirage.Snippets.Analyzers
     namespace M1003.Triggering
     {
         // CodeEmbed-Start: mirage1003-triggering
-        public struct PlayerData
+        public class PlayerData
         {
             public int health;
         }

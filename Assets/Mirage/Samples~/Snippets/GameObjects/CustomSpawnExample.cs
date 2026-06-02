@@ -6,7 +6,7 @@ namespace Mirage.Snippets.GameObjects
     public class CustomSpawnExample : MonoBehaviour
     {
         public ClientObjectManager ClientObjectManager;
-        public NetworkServer NetworkServer;
+        public ServerObjectManager ServerObjectManager;
         public NetworkIdentity coin;
         public NetworkIdentity m_CoinPrefab;
         public NetworkIdentity prefab;
@@ -51,14 +51,14 @@ namespace Mirage.Snippets.GameObjects
 
             // spawn a coin - SpawnCoin is called on client
             // pass in coinHash so that it is set on the Identity before it is sent to client
-            NetworkServer.Spawn(gameObject, coinHash);
+            ServerObjectManager.Spawn(gameObject, coinHash);
             // CodeEmbed-End: spawn-on-server
         }
 
         // CodeEmbed-Start: spawn-coin-methods
         public NetworkIdentity SpawnCoin(SpawnMessage msg)
         {
-            return Instantiate(m_CoinPrefab, msg.position, msg.rotation);
+            return Instantiate(m_CoinPrefab, msg.SpawnValues.Position ?? m_CoinPrefab.transform.position, msg.SpawnValues.Rotation ?? m_CoinPrefab.transform.rotation);
         }
         public void UnSpawnCoin(NetworkIdentity spawned)
         {
@@ -75,7 +75,7 @@ namespace Mirage.Snippets.GameObjects
         // used by clientObjectManager.RegisterPrefab
         NetworkIdentity PoolSpawnHandler(SpawnMessage msg)
         {
-            return GetFromPool(msg.position, msg.rotation);
+            return GetFromPool(msg.SpawnValues.Position ?? prefab.transform.position, msg.SpawnValues.Rotation ?? prefab.transform.rotation);
         }
 
         // used by clientObjectManager.RegisterPrefab

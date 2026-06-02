@@ -1,0 +1,21 @@
+{
+    "name": "Mirage.Examples.Snippets",
+    "rootNamespace": "",
+    "references": [
+        "GUID:30817c1a0e6d646d99c048fc403f5979",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:96f081f4a0d214ee39e3aa34e9d43109",
+        "GUID:c0b2064c294eb174c9f3f7da398eb677",
+        "GUID:db69876fcdb4de041b3adaeefa87b6a6",
+        "GUID:bc6737b19bee94a798a182a84b660226"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

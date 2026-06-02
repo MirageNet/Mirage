@@ -2,10 +2,10 @@ using System;
 using Mirage;
 using Mirage.Serialization;
 using Mirage.RemoteCalls;
-using NetworkBehaviour = Mirage.Snippets.RemoteActions.RpcExamplesGenerated.DummyNetworkBehaviour;
 
 namespace Mirage.Snippets.RemoteActions.RpcExamplesGenerated
 {
+    using NetworkBehaviour = DummyNetworkBehaviour;
     // Dummy classes/aliases to make the snippet code compile in Unity
     public class DummyNetworkBehaviour
     {

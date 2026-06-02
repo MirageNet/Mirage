@@ -4,7 +4,7 @@ namespace Mirage.Snippets.SceneLoading.OverrideOnServerAuthenticated
     // CodeEmbed-Start: custom-scene-manager-on-server-authenticated
     public class MySceneManager : NetworkSceneManager
     {
-        protected internal override void OnServerAuthenticated(INetworkPlayer player)
+        protected override void OnServerAuthenticated(INetworkPlayer player)
         {
             // just load server's active scene instead of all additive scenes as well
             player.Send(new SceneMessage { MainActivateScene = ActiveScenePath });

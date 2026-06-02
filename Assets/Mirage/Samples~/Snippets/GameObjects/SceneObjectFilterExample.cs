@@ -20,7 +20,7 @@ namespace Mirage.Snippets.GameObjects
         void Awake()
         {
             // Set the filter before spawning scene objects
-            var filter = (NetworkIdentity identity) =>
+            System.Func<NetworkIdentity, bool> filter = (NetworkIdentity identity) =>
             {
                 return identity.gameObject.scene == myScene;
             };

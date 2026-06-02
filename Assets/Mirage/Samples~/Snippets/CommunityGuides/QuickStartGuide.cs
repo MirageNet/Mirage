@@ -55,7 +55,7 @@ namespace Mirage.Snippets.CommunityGuides
         public class SceneScript : NetworkBehaviour
         {
             public Text canvasStatusText;
-            public PlayerScript playerScript;
+            public PlayerScriptPart11 playerScript;
 
             [SyncVar(hook = nameof(OnStatusTextChanged))]
             public string statusText { get; set; }
