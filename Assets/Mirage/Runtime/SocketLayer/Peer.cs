@@ -400,7 +400,8 @@ namespace Mirage.SocketLayer
                 disconnectReason = DisconnectReason.None;
 
             var connection = (Connection)handle.SocketLayerConnection;
-            connection.DisconnectInternal(disconnectReason, false);
+            if (connection != null)
+                connection.DisconnectInternal(disconnectReason, false);
         }
         private void OnData(IConnectionHandle handle, Packet packet)
         {
