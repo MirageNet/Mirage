@@ -39,6 +39,9 @@ namespace Mirage
         /// </summary>
         public Config PeerConfig { get; set; }
 
+        [Tooltip("Config profile to use if PeerConfig is null.")]
+        public PeerConfigProfile PeerConfigProfile = PeerConfigProfile.RawUdp;
+
         [Tooltip("Creates Socket for Peer to use")]
         public SocketFactory SocketFactory;
 
@@ -146,7 +149,7 @@ namespace Mirage
 
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
 
-            var config = PeerConfig ?? new Config();
+            var config = PeerConfig ?? Config.Create(PeerConfigProfile);
 
             NetworkWriterPool.Configure(maxPacketSize);
 

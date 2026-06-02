@@ -1,5 +1,13 @@
 namespace Mirage.SocketLayer
 {
+    public enum PeerConfigProfile
+    {
+        RawUdp,
+        WebSocket,
+        StatefulUdp,
+        Custom
+    }
+
     // todo add validation for this config
     public class Config
     {
@@ -109,6 +117,42 @@ namespace Mirage.SocketLayer
         /// Enable if the Socket you are using has its own Reliable layer. For example using Websocket, which is TCP.
         /// </summary>
         public bool DisableReliableLayer = false;
+        #endregion
+
+        #region profiles
+        public static Config Create(PeerConfigProfile profile)
+        {
+            return profile switch
+            {
+                PeerConfigProfile.RawUdp => RawUdp(),
+                PeerConfigProfile.WebSocket => WebSocket(),
+                PeerConfigProfile.StatefulUdp => StatefulUdp(),
+                PeerConfigProfile.Custom => new Config(),
+                _ => throw new ArgumentOutOfRangeException(nameof(profile), profile, null)
+            };
+        }
+
+        public static Config RawUdp()
+        {
+            return new Config();
+        }
+
+        public static Config WebSocket()
+        {
+            return new Config
+            {
+                SendRejectIfUnconnectedPacketIsInvalid = true,
+                DisableReliableLayer = true
+            };
+        }
+
+        public static Config StatefulUdp()
+        {
+            return new Config
+            {
+                SendRejectIfUnconnectedPacketIsInvalid = true
+            };
+        }
         #endregion
     }
 }

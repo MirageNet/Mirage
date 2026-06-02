@@ -38,6 +38,9 @@ namespace Mirage
         /// </summary>
         public Config PeerConfig { get; set; }
 
+        [Tooltip("Config profile to use if PeerConfig is null.")]
+        public PeerConfigProfile PeerConfigProfile = PeerConfigProfile.RawUdp;
+
         /// <summary>
         /// The maximum number of concurrent network connections to support. Excluding the host player.
         /// <para>This field is only used if the <see cref="PeerConfig"/> property is null</para>
@@ -315,11 +318,9 @@ namespace Mirage
             var config = PeerConfig;
             if (config == null)
             {
-                config = new Config
-                {
-                    // only use MaxConnections if config was null
-                    MaxConnections = MaxConnections,
-                };
+                config = Config.Create(PeerConfigProfile);
+                // only use MaxConnections if config was null
+                config.MaxConnections = MaxConnections;
             }
 
             // Are we listening for incoming connections?
