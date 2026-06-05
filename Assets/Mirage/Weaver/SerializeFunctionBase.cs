@@ -17,17 +17,26 @@ namespace Mirage.Weaver
             Console.Write($"[Weaver.SerializeFunction] {msg}\n");
         }
 
-        protected readonly Dictionary<TypeReference, MethodReference> funcs = new Dictionary<TypeReference, MethodReference>(new TypeReferenceComparer());
-        protected readonly Dictionary<TypeDefinition, MethodReference> collectionMethods = new Dictionary<TypeDefinition, MethodReference>(new TypeReferenceComparer());
+        /// <summary>Concrete type serialization function lookup.</summary>
+        protected readonly Dictionary<TypeReference, MethodReference> functionLookup = new Dictionary<TypeReference, MethodReference>(new TypeReferenceComparer());
+        /// <summary>Open generic serialization helper method lookup.</summary>
+        protected readonly Dictionary<TypeDefinition, MethodReference> genericLookup = new Dictionary<TypeDefinition, MethodReference>(new TypeReferenceComparer());
+        /// <summary>Concrete type length-limited serialization function lookup.</summary>
+        protected readonly Dictionary<TypeReference, MethodReference> functionWithLengthLookup = new Dictionary<TypeReference, MethodReference>(new TypeReferenceComparer());
+        /// <summary>Open generic length-limited serialization helper method lookup.</summary>
+        protected readonly Dictionary<TypeDefinition, MethodReference> genericWithLengthLookup = new Dictionary<TypeDefinition, MethodReference>(new TypeReferenceComparer());
         private readonly IWeaverLogger logger;
         protected readonly ModuleDefinition module;
 
-        public int Count => funcs.Count;
+        /// <summary>Count used to see if we generated any new ones, meaning the dll is changed and needs writing</summary>
+        public int Count => functionLookup.Count;
+        public int CountWithLength => functionWithLengthLookup.Count;
 
         /// <summary>
         /// Type used for logging, eg write or read
         /// </summary>
         protected abstract string FunctionTypeLog { get; }
+        protected abstract string FunctionTypeWithLengthLog { get; }
 
         protected SerializeFunctionBase(ModuleDefinition module, IWeaverLogger logger)
         {
@@ -35,41 +44,48 @@ namespace Mirage.Weaver
             this.module = module;
         }
 
-        public void Register(TypeReference dataType, MethodReference methodReference)
+        public void Register(TypeReference dataType, MethodReference methodReference) => RegisterInternal(dataType, methodReference, false);
+        public void RegisterWithLength(TypeReference dataType, MethodReference methodReference) => RegisterInternal(dataType, methodReference, true);
+        private void RegisterInternal(TypeReference dataType, MethodReference methodReference, bool withLength)
         {
-            if (funcs.ContainsKey(dataType))
+            var lookup = withLength ? functionWithLengthLookup : functionLookup;
+            var functionTypeLog = withLength ? FunctionTypeWithLengthLog : FunctionTypeLog;
+            if (lookup.ContainsKey(dataType))
             {
                 logger.Warning(
-                    $"Registering a {FunctionTypeLog} for {dataType.FullName} when one already exists\n" +
-                    $"  old:{funcs[dataType].FullName}\n" +
+                    $"Registering a {functionTypeLog} for {dataType.FullName} when one already exists\n" +
+                    $"  old:{lookup[dataType].FullName}\n" +
                     $"  new:{methodReference.FullName}",
                     methodReference.Resolve());
             }
 
-            Log($"Register {FunctionTypeLog} for {dataType.FullName}, method:{methodReference.FullName}");
-
+            Log($"Register {functionTypeLog} for {dataType.FullName}, method:{methodReference.FullName}");
 
             // we need to import type when we Initialize Writers so import here in case it is used anywhere else
             var imported = module.ImportReference(dataType);
-            funcs[imported] = methodReference;
+            lookup[imported] = methodReference;
 
             // mark type as generated,
             //MarkAsGenerated(dataType); <---  broken in unity2021
         }
 
-        public void RegisterCollectionMethod(TypeDefinition dataType, MethodReference methodReference)
+        public void RegisterCollectionMethod(TypeDefinition dataType, MethodReference methodReference) => RegisterCollectionInternal(dataType, methodReference, withLength: false);
+        public void RegisterCollectionMethodWithLength(TypeDefinition dataType, MethodReference methodReference) => RegisterCollectionInternal(dataType, methodReference, withLength: true);
+        private void RegisterCollectionInternal(TypeDefinition dataType, MethodReference methodReference, bool withLength)
         {
-            if (collectionMethods.ContainsKey(dataType))
+            var lookup = withLength ? genericWithLengthLookup : genericLookup;
+            var functionTypeLog = withLength ? FunctionTypeWithLengthLog : FunctionTypeLog;
+            if (lookup.ContainsKey(dataType))
             {
                 logger.Warning(
-                    $"Registering a {FunctionTypeLog} for {dataType.FullName} when one already exists\n" +
-                    $"  old:{collectionMethods[dataType].FullName}\n" +
+                    $"Registering a {functionTypeLog} for {dataType.FullName} when one already exists\n" +
+                    $"  old:{lookup[dataType].FullName}\n" +
                     $"  new:{methodReference.FullName}",
                     methodReference.Resolve());
             }
 
-            Log($"Register Collection Method {FunctionTypeLog} for {dataType.FullName}, method:{methodReference.FullName}");
-            collectionMethods[dataType] = methodReference;
+            Log($"Register Collection Method {functionTypeLog} for {dataType.FullName}, method:{methodReference.FullName}");
+            lookup[dataType] = methodReference;
         }
 
         /// <summary>
@@ -108,31 +124,40 @@ namespace Mirage.Weaver
         /// <returns></returns>
         /// <exception cref="SerializeFunctionException">Throws if unable to find or create function</exception>
         // todo rename this to GetFunction once other classes are able to catch Exception
-        public MethodReference GetFunction_Throws(TypeReference typeReference)
+        public MethodReference GetFunction_Throws(TypeReference typeReference) => GetFunctionInternal(typeReference, withLength: false);
+
+        /// <summary>
+        /// checks if function exists for type, if it does not exist it trys to generate it with length limit
+        /// </summary>
+        /// <param name="typeReference"></param>
+        /// <returns></returns>
+        /// <exception cref="SerializeFunctionException">Throws if unable to find or create function</exception>
+        // todo rename this to GetFunction once other classes are able to catch Exception
+        public MethodReference GetFunctionWithLength_Throws(TypeReference typeReference) => GetFunctionInternal(typeReference, withLength: true);
+
+        private MethodReference GetFunctionInternal(TypeReference typeReference, bool withLength)
         {
             // if is <T> then  just return generic write./read with T as the generic argument
             if (typeReference.IsGenericParameter || HasAsGenericAttribute(typeReference))
-            {
-                return CreateGenericFunction(typeReference);
-            }
+                return CreateGenericFunction(typeReference, withLength);
 
             // check if there is already a known function for type
-            // this will find extention methods within this module
-            if (funcs.TryGetValue(typeReference, out var foundFunc))
-            {
+            // this will find extension methods within this module
+            var lookup = withLength ? functionWithLengthLookup : functionLookup;
+            if (lookup.TryGetValue(typeReference, out var foundFunc))
                 return foundFunc;
-            }
-            else
-            {
-                //// before generating new function, check if one was generated for type in its own module
-                //if (HasGeneratedFunctionInAnotherModule(typeReference)) < ---broken in unity2021
-                //{
-                //    return CreateGenericFunction(typeReference);
-                //}
 
-                Log($"Trying to generate {FunctionTypeLog} for {typeReference.FullName}");
-                return GenerateFunction(module.ImportReference(typeReference));
-            }
+            //// before generating new function, check if one was generated for type in its own module
+            //if (HasGeneratedFunctionInAnotherModule(typeReference)) < ---broken in unity2021
+            //{
+            //    return CreateGenericFunction(typeReference);
+            //}
+
+            var functionTypeLog = withLength ? FunctionTypeWithLengthLog : FunctionTypeLog;
+            Log($"Trying to generate {functionTypeLog} for {typeReference.FullName}");
+            return withLength
+                ? GenerateFunctionWithLength(module.ImportReference(typeReference))
+                : GenerateFunction(module.ImportReference(typeReference));
         }
 
         private bool HasAsGenericAttribute(TypeReference typeReference)
@@ -178,7 +203,7 @@ namespace Mirage.Weaver
             var typeDefinition = typeReference.Resolve();
 
             // check for collections
-            if (collectionMethods.TryGetValue(typeDefinition, out var collectionMethod))
+            if (genericLookup.TryGetValue(typeDefinition, out var collectionMethod))
             {
                 var genericInstance = (GenericInstanceType)typeReference;
                 var elementTypes = new List<TypeReference>();
@@ -246,16 +271,56 @@ namespace Mirage.Weaver
             return new SerializeFunctionException($"Cannot generate {FunctionTypeLog} for {reasonStr}{typeReference.Name}. Use a supported type or provide a custom {FunctionTypeLog}", typeReference);
         }
 
+        private MethodReference GenerateFunctionWithLength(TypeReference typeReference)
+        {
+            // Unlike standard GenerateFunction which recursively compiles custom serializers,
+            // This only generates function that will use the registered generic collection/array serializer (eg writers/readers that are tagged with WeaverSerializeCollectionAttribute).
+            // we can't and dont need to generate recursively for and add withlength, fields/params that need MaxLength should be tagged with it themselves
+            if (typeReference.IsByReference)
+                throw new SerializeFunctionException($"Cannot pass {typeReference.Name} by reference", typeReference);
+
+            if (typeReference.IsArray)
+            {
+                if (typeReference.IsMultidimensionalArray())
+                    throw new SerializeFunctionException($"{typeReference.Name} is an unsupported type. Multidimensional arrays are not supported", typeReference);
+
+                TypeReference elementType;
+                if (typeReference is ArrayType arrayType)
+                    elementType = arrayType.ElementType;
+                else
+                    elementType = typeReference.GetElementType();
+
+                var arrayMethod = module.ImportReference(ArrayExpressionWithLength);
+                return GenerateCollectionFunctionWithLength(typeReference, new List<TypeReference> { elementType }, arrayMethod);
+            }
+
+            var typeDefinition = typeReference.Resolve();
+
+            if (typeDefinition != null && genericWithLengthLookup.TryGetValue(typeDefinition, out var collectionMethod))
+            {
+                var genericInstance = (GenericInstanceType)typeReference;
+                var elementTypes = new List<TypeReference>();
+                foreach (var type in genericInstance.GenericArguments)
+                    elementTypes.Add(type);
+
+                return GenerateCollectionFunctionWithLength(typeReference, elementTypes, collectionMethod);
+            }
+
+            throw new SerializeFunctionException($"Cannot generate {FunctionTypeWithLengthLog} for {typeReference.Name}. Limit attributes can only be used on types with a registered length-limited serializer.", typeReference);
+        }
+
         /// <summary>
         /// Creates Generic instance for Write{T} or Read{T} with <paramref name="argument"/> as then generic argument
         /// <para>Can also create Write{int} if real type is given instead of generic argument</para>
         /// </summary>
         /// <param name="argument"></param>
         /// <returns></returns>
-        private GenericInstanceMethod CreateGenericFunction(TypeReference argument)
+        private GenericInstanceMethod CreateGenericFunction(TypeReference argument, bool withLength)
         {
-            var method = GetGenericFunction();
+            // gets Writer<T>.Write method
+            var method = withLength ? GetGenericFunctionWithLength() : GetGenericFunction();
 
+            // makes method generic 
             var generic = new GenericInstanceMethod(method);
             generic.GenericArguments.Add(argument);
 
@@ -267,13 +332,16 @@ namespace Mirage.Weaver
         /// </summary>
         /// <returns></returns>
         protected abstract MethodReference GetGenericFunction();
+        protected abstract MethodReference GetGenericFunctionWithLength();
 
         protected abstract MethodReference GetNetworkBehaviourFunction(TypeReference typeReference);
 
         protected abstract MethodReference GenerateEnumFunction(TypeReference typeReference);
         protected abstract MethodReference GenerateCollectionFunction(TypeReference typeReference, List<TypeReference> elementTypes, MethodReference collectionMethod);
+        protected abstract MethodReference GenerateCollectionFunctionWithLength(TypeReference typeReference, List<TypeReference> elementTypes, MethodReference collectionMethod);
 
         protected abstract Expression<Action> ArrayExpression { get; }
+        protected abstract Expression<Action> ArrayExpressionWithLength { get; }
 
         protected abstract MethodReference GenerateClassOrStructFunction(TypeReference typeReference);
     }

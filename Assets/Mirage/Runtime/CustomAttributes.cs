@@ -292,4 +292,20 @@ namespace Mirage
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class ShowSyncSettingsAttribute : Attribute { }
+
+    /// <summary>
+    /// Restricts the serialization and deserialization size of strings, collections (arrays, lists), 
+    /// or any custom type that has read/write overloads accepting an integer limit.
+    /// <para>This will use the Write/Read with length functions and will work on any type that has writers/readers for those.</para>
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field)]
+    public class MaxLengthAttribute : Attribute
+    {
+        public readonly int maxLength;
+
+        public MaxLengthAttribute(int maxLength)
+        {
+            this.maxLength = maxLength;
+        }
+    }
 }

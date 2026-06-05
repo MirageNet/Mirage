@@ -60,9 +60,6 @@ namespace Mirage.Serialization
         public static void WriteString(this NetworkWriter writer, string value, Encoding encoding)
         {
             // write 0 for null support, increment real size by 1
-            // (note: original HLAPI would write "" for null strings, but if a
-            //        string is null on the server then it should also be null
-            //        on the client)
             if (value == null)
             {
                 writer.WriteUInt16(0);
@@ -90,20 +87,80 @@ namespace Mirage.Serialization
         public static string ReadString(this NetworkReader reader, Encoding encoding)
         {
             // read number of bytes
-            var size = reader.ReadUInt16();
+            var sizePlusOne = reader.ReadUInt16();
 
-            if (size == 0)
+            if (sizePlusOne == 0)
                 return null;
 
-            var realSize = size - 1;
+            var size = sizePlusOne - 1;
 
             // make sure it's within limits to avoid allocation attacks etc.
-            if (realSize >= MaxStringLength)
+            if (size >= MaxStringLength)
             {
-                throw new EndOfStreamException($"ReadString too long: {realSize}. Limit is: {MaxStringLength}");
+                throw new EndOfStreamException($"ReadString too long: {size}. Limit is: {MaxStringLength}");
             }
 
-            var data = reader.ReadBytesSegment(realSize);
+            var data = reader.ReadBytesSegment(size);
+
+            // convert directly from buffer to string via encoding
+            return encoding.GetString(data.Array, data.Offset, data.Count);
+        }
+
+        public static void WriteString(this NetworkWriter writer, string value, int maxLength)
+        {
+            if (value != null && value.Length > maxLength)
+                throw new SerializationLimitException($"String length {value.Length} exceeds maximum limit of {maxLength}");
+
+            WriteString(writer, value);
+        }
+
+        public static void WriteString(this NetworkWriter writer, string value, int maxLength, Encoding encoding)
+        {
+            if (value != null && value.Length > maxLength)
+                throw new SerializationLimitException($"String length {value.Length} exceeds maximum limit of {maxLength}");
+
+            WriteString(writer, value, encoding);
+        }
+
+        public static string ReadString(this NetworkReader reader, int maxLength)
+        {
+            if (reader.StringStore != null)
+            {
+                var result = reader.StringStore.ReadString(reader);
+                if (result != null && result.Length > maxLength)
+                    throw new SerializationLimitException($"String exceeds maximum length: {result.Length}. Limit: {maxLength}");
+
+                return result;
+            }
+            else
+            {
+                return ReadString(reader, maxLength, defaultEncoding);
+            }
+        }
+
+        public static string ReadString(this NetworkReader reader, int maxLength, Encoding encoding)
+        {
+            // read number of bytes
+            var sizePlusOne = reader.ReadUInt16();
+            if (sizePlusOne == 0)
+                return null;
+
+            var size = sizePlusOne - 1;
+
+            // first checks if incoming bytes realSize > max byte count (fast fail early)
+            if (size > encoding.GetMaxByteCount(maxLength))
+                throw new SerializationLimitException($"ReadString byte size {size} is larger than maximum possible for character limit {maxLength}");
+
+            // make sure it's within limits to avoid allocation attacks etc.
+            if (size >= MaxStringLength)
+                throw new EndOfStreamException($"ReadString too long: {size}. Limit is: {MaxStringLength}");
+
+            var data = reader.ReadBytesSegment(size);
+
+            // check character count to avoid allocating a string that exceeds the limit
+            var charCount = encoding.GetCharCount(data.Array, data.Offset, data.Count);
+            if (charCount > maxLength)
+                throw new SerializationLimitException($"ReadString character count {charCount} exceeds limit of {maxLength}");
 
             // convert directly from buffer to string via encoding
             return encoding.GetString(data.Array, data.Offset, data.Count);

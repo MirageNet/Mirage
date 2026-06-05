@@ -59,7 +59,8 @@ namespace Mirage.Weaver.Serialization
         /// <exception cref="InvalidOperationException">Throws when <paramref name="holder"/> is not in <paramref name="module"/></exception>
         public static ValueSerializer GetSerializer(ModuleDefinition module, TypeDefinition holder, ICustomAttributeProvider attributeProvider, TypeReference fieldType, string fieldName, Writers writers, Readers readers)
         {
-            if (holder.Module != module) throw new InvalidOperationException($"{holder.Name} was not in the weaving module, holderModule: {holder.Module}, weaver Module: {module}");
+            if (holder.Module != module)
+                throw new InvalidOperationException($"{holder.Name} was not in the weaving module, holderModule: {holder.Module}, weaver Module: {module}");
 
             // Store result in variable but DONT return early
             // We need to check if other attributes are also used
@@ -69,17 +70,15 @@ namespace Mirage.Weaver.Serialization
             // attributeProvider is null for generic fields,
             // but that is find because they wont have any of these attributes anyway
             if (attributeProvider != null)
-                valueSerializer = GetUsingAttribute(module, holder, attributeProvider, fieldType, fieldName, valueSerializer);
+                valueSerializer = GetUsingAttribute(module, holder, attributeProvider, fieldType, fieldName, writers, readers, valueSerializer);
 
             if (valueSerializer == null)
-            {
                 valueSerializer = FindSerializeFunctions(writers, readers, fieldType);
-            }
 
             return valueSerializer;
         }
 
-        private static ValueSerializer GetUsingAttribute(ModuleDefinition module, TypeDefinition holder, ICustomAttributeProvider attributeProvider, TypeReference fieldType, string fieldName, ValueSerializer valueSerializer)
+        private static ValueSerializer GetUsingAttribute(ModuleDefinition module, TypeDefinition holder, ICustomAttributeProvider attributeProvider, TypeReference fieldType, string fieldName, Writers writers, Readers readers, ValueSerializer valueSerializer)
         {
             if (attributeProvider.HasCustomAttribute<BitCountAttribute>())
                 valueSerializer = BitCountFinder.GetSerializer(attributeProvider, fieldType);
@@ -121,6 +120,31 @@ namespace Mirage.Weaver.Serialization
 
             if (attributeProvider.HasCustomAttribute<QuaternionPackAttribute>())
                 valueSerializer = new QuaternionFinder().GetSerializer(module, holder, attributeProvider, fieldType, fieldName);
+
+            if (attributeProvider.HasCustomAttribute<MaxLengthAttribute>())
+            {
+                if (valueSerializer != null)
+                    throw new MaxLengthException("[MaxLength] cannot be combined with other serialization attributes.");
+
+                valueSerializer = CreateMaxLengthSerializer(attributeProvider, fieldType, writers, readers);
+            }
+
+            return valueSerializer;
+        }
+
+        private static ValueSerializer CreateMaxLengthSerializer(ICustomAttributeProvider attributeProvider, TypeReference fieldType, Writers writers, Readers readers)
+        {
+            ValueSerializer valueSerializer;
+            var attribute = attributeProvider.GetCustomAttribute<MaxLengthAttribute>();
+            var maxLength = (int)attribute.ConstructorArguments[0].Value;
+
+            if (maxLength <= 0)
+                throw new MaxLengthException("MaxLength must be greater than 0.");
+
+            var writeFunction = writers?.GetFunctionWithLength_Throws(fieldType);
+            var readFunction = readers?.GetFunctionWithLength_Throws(fieldType);
+
+            valueSerializer = new LengthLimitedSerializer(writeFunction, readFunction, maxLength);
             return valueSerializer;
         }
 

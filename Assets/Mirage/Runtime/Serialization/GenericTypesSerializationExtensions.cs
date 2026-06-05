@@ -14,6 +14,7 @@ namespace Mirage.Serialization
     public static class Writer<T>
     {
         public static Action<NetworkWriter, T> Write { internal get; set; }
+        public static Action<NetworkWriter, T, int> WriteWithLength { internal get; set; }
     }
 
     /// <summary>
@@ -26,6 +27,7 @@ namespace Mirage.Serialization
     public static class Reader<T>
     {
         public static Func<NetworkReader, T> Read { internal get; set; }
+        public static Func<NetworkReader, int, T> ReadWithLength { internal get; set; }
     }
 
     public static class GenericTypesSerializationExtensions
@@ -44,6 +46,19 @@ namespace Mirage.Serialization
                 ThrowIfWriterNotFound<T>();
 
             Writer<T>.Write(writer, value);
+        }
+
+        /// <summary>
+        /// Writes any type that mirage supports with a maximum limit constraint
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [WeaverIgnore]
+        public static void WriteWithLength<T>(this NetworkWriter writer, T value, int maxLength)
+        {
+            if (Writer<T>.WriteWithLength == null)
+                ThrowIfWriterNotFound<T>();
+
+            Writer<T>.WriteWithLength(writer, value, maxLength);
         }
 
         private static void ThrowIfWriterNotFound<T>()
@@ -65,6 +80,19 @@ namespace Mirage.Serialization
                 ThrowIfReaderNotFound<T>();
 
             return Reader<T>.Read(reader);
+        }
+
+        /// <summary>
+        /// Reads any data type that mirage supports with a maximum limit constraint
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [WeaverIgnore]
+        public static T ReadWithLength<T>(this NetworkReader reader, int maxLength)
+        {
+            if (Reader<T>.ReadWithLength == null)
+                ThrowIfReaderNotFound<T>();
+
+            return Reader<T>.ReadWithLength(reader, maxLength);
         }
 
         private static void ThrowIfReaderNotFound<T>()

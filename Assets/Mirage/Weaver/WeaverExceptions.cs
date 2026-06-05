@@ -89,4 +89,8 @@ namespace Mirage.Weaver.Serialization
     {
         public QuaternionPackException(string message) : base(message) { }
     }
+    internal class MaxLengthException : ValueSerializerException
+    {
+        public MaxLengthException(string message) : base(message) { }
+    }
 }

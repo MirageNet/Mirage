@@ -173,6 +173,13 @@ namespace Mirage.RemoteCalls
                 {
                     remoteCall.Invoke(reader, player, replyId);
                 }
+                catch (SerializationLimitException e)
+                {
+                    logger.LogError($"RPC threw SerializationLimitException: {e}");
+
+                    player.SetError(100, PlayerErrorFlags.SerializationLimit);
+                    return false;
+                }
                 catch (System.IO.EndOfStreamException e)
                 {
                     logger.LogError($"RPC threw EndOfStreamException: {e}");

@@ -16,12 +16,21 @@ namespace Mirage.Weaver
         public Readers(ModuleDefinition module, IWeaverLogger logger) : base(module, logger) { }
 
         protected override string FunctionTypeLog => "read function";
-        protected override Expression<Action> ArrayExpression => () => Mirage.Serialization.CollectionExtensions.ReadArray<byte>(default);
+        protected override string FunctionTypeWithLengthLog => "read function with length";
+        protected override Expression<Action> ArrayExpression => () => Mirage.Serialization.CollectionExtensions.ReadArray<byte>(default(NetworkReader));
+        protected override Expression<Action> ArrayExpressionWithLength => () => Mirage.Serialization.CollectionExtensions.ReadArray<byte>(default(NetworkReader), default(int));
 
         protected override MethodReference GetGenericFunction()
         {
             var genericType = module.ImportReference(typeof(GenericTypesSerializationExtensions)).Resolve();
             var method = genericType.GetMethod(nameof(GenericTypesSerializationExtensions.Read));
+            return module.ImportReference(method);
+        }
+
+        protected override MethodReference GetGenericFunctionWithLength()
+        {
+            var genericType = module.ImportReference(typeof(GenericTypesSerializationExtensions)).Resolve();
+            var method = genericType.GetMethod(nameof(GenericTypesSerializationExtensions.ReadWithLength));
             return module.ImportReference(method);
         }
 
@@ -104,6 +113,53 @@ namespace Mirage.Weaver
 
             var worker = readMethod.worker;
             worker.Append(worker.Create(OpCodes.Ldarg_0)); // reader
+            worker.Append(worker.Create(OpCodes.Call, methodRef)); // Read
+
+            worker.Append(worker.Create(OpCodes.Ret));
+
+            return readMethod.definition;
+        }
+
+        private ReadMethod GenerateReaderFunctionWithLength(TypeReference variable)
+        {
+            var functionName = "_Read_" + variable.FullName + "_WithLength";
+
+            // create new reader for this type
+            var definition = module.GeneratedClass().AddMethod(functionName,
+                    MethodAttributes.Public |
+                    MethodAttributes.Static |
+                    MethodAttributes.HideBySig,
+                    variable);
+
+            var readParameter = definition.AddParam<NetworkReader>("reader");
+            definition.AddParam<int>("maxLength");
+            definition.Body.InitLocals = true;
+            RegisterWithLength(variable, definition);
+
+            var worker = definition.Body.GetILProcessor();
+            return new ReadMethod(definition, readParameter, worker);
+        }
+
+        protected override MethodReference GenerateCollectionFunctionWithLength(TypeReference typeReference, List<TypeReference> elementTypes, MethodReference collectionMethod)
+        {
+            // generate readers for the element
+            foreach (var elementType in elementTypes)
+                _ = GetFunction_Throws(elementType);
+
+            var readMethod = GenerateReaderFunctionWithLength(typeReference);
+
+            var collectionReader = collectionMethod.GetElementMethod();
+
+            var methodRef = new GenericInstanceMethod(collectionReader);
+            foreach (var elementType in elementTypes)
+                methodRef.GenericArguments.Add(elementType);
+
+            // generates
+            // return reader.ReadList<T>(maxLength)
+
+            var worker = readMethod.worker;
+            worker.Append(worker.Create(OpCodes.Ldarg_0)); // reader
+            worker.Append(worker.Create(OpCodes.Ldarg_1)); // maxLength
             worker.Append(worker.Create(OpCodes.Call, methodRef)); // Read
 
             worker.Append(worker.Create(OpCodes.Ret));
@@ -218,28 +274,57 @@ namespace Mirage.Weaver
         internal void InitializeReaders(ILProcessor worker)
         {
             var genericReaderClassRef = module.ImportReference(typeof(Reader<>));
-
-            var readProperty = typeof(Reader<>).GetProperty(nameof(Reader<object>.Read));
-            var fieldRef = module.ImportReference(readProperty.GetSetMethod());
             var networkReaderRef = module.ImportReference(typeof(NetworkReader));
-            var funcRef = module.ImportReference(typeof(Func<,>));
-            var funcConstructorRef = module.ImportReference(typeof(Func<,>).GetConstructors()[0]);
 
-            foreach (var readFunc in funcs.Values)
+            // add set all normal readers
             {
-                var dataType = readFunc.ReturnType;
+                var readProperty = typeof(Reader<>).GetProperty(nameof(Reader<object>.Read));
+                var fieldRef = module.ImportReference(readProperty.GetSetMethod());
+                var funcRef = module.ImportReference(typeof(Func<,>));
+                var funcConstructorRef = module.ImportReference(typeof(Func<,>).GetConstructors()[0]);
 
-                // create a Func<NetworkReader, T> delegate
-                worker.Append(worker.Create(OpCodes.Ldnull));
-                worker.Append(worker.Create(OpCodes.Ldftn, readFunc));
-                var funcGenericInstance = funcRef.MakeGenericInstanceType(networkReaderRef, dataType);
-                var funcConstructorInstance = funcConstructorRef.MakeHostInstanceGeneric(funcGenericInstance);
-                worker.Append(worker.Create(OpCodes.Newobj, funcConstructorInstance));
+                foreach (var readFunc in functionLookup.Values)
+                {
+                    var dataType = readFunc.ReturnType;
 
-                // save it in Reader<T>.Read
-                var genericInstance = genericReaderClassRef.MakeGenericInstanceType(dataType);
-                var specializedField = fieldRef.MakeHostInstanceGeneric(genericInstance);
-                worker.Append(worker.Create(OpCodes.Call, specializedField));
+                    // create a Func<NetworkReader, T> delegate
+                    worker.Append(worker.Create(OpCodes.Ldnull));
+                    worker.Append(worker.Create(OpCodes.Ldftn, readFunc));
+                    var funcGenericInstance = funcRef.MakeGenericInstanceType(networkReaderRef, dataType);
+                    var funcConstructorInstance = funcConstructorRef.MakeHostInstanceGeneric(funcGenericInstance);
+                    worker.Append(worker.Create(OpCodes.Newobj, funcConstructorInstance));
+
+                    // save it in Reader<T>.Read
+                    var genericInstance = genericReaderClassRef.MakeGenericInstanceType(dataType);
+                    var specializedField = fieldRef.MakeHostInstanceGeneric(genericInstance);
+                    worker.Append(worker.Create(OpCodes.Call, specializedField));
+                }
+            }
+
+            // add set all readers with length
+            {
+                var readWithLengthProperty = typeof(Reader<>).GetProperty(nameof(Reader<object>.ReadWithLength));
+                var fieldWithLengthRef = module.ImportReference(readWithLengthProperty.GetSetMethod());
+                var func3Ref = module.ImportReference(typeof(Func<,,>));
+                var func3ConstructorRef = module.ImportReference(typeof(Func<,,>).GetConstructors()[0]);
+                var intRef = module.ImportReference(typeof(int));
+
+                foreach (var readFunc in functionWithLengthLookup.Values)
+                {
+                    var dataType = readFunc.ReturnType;
+
+                    // create a Func<NetworkReader, int, T> delegate
+                    worker.Append(worker.Create(OpCodes.Ldnull));
+                    worker.Append(worker.Create(OpCodes.Ldftn, readFunc));
+                    var funcGenericInstance = func3Ref.MakeGenericInstanceType(networkReaderRef, intRef, dataType);
+                    var funcConstructorInstance = func3ConstructorRef.MakeHostInstanceGeneric(funcGenericInstance);
+                    worker.Append(worker.Create(OpCodes.Newobj, funcConstructorInstance));
+
+                    // save it in Reader<T>.ReadWithLength
+                    var genericInstance = genericReaderClassRef.MakeGenericInstanceType(dataType);
+                    var specializedField = fieldWithLengthRef.MakeHostInstanceGeneric(genericInstance);
+                    worker.Append(worker.Create(OpCodes.Call, specializedField));
+                }
             }
         }
     }

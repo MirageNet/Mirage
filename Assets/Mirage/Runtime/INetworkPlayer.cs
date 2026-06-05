@@ -218,6 +218,9 @@ namespace Mirage
         /// <summary>Player performed an action that is not allowed due to invalid state. e.g. sending a reply for an RPC that is no longer pending.</summary>
         InvalidState = 1 << 9,
 
+        /// <summary>Player sent a payload exceeding maximum size limit for string or collection.</summary>
+        SerializationLimit = 1 << 10,
+
 
         //** Security/Malicious Intent **
 

@@ -143,8 +143,10 @@ namespace Mirage
             var disconnectMessage = _disconnectOnException ? $", Closed connection: {player}" : "";
             logger.LogError($"{e.GetType()} in NetworkReader (see stack below){disconnectMessage}\n{e}");
 
-            // cost=50 because NetworkReader throwing means serialization mismatch, hard to recover from, likely need to kick player if it happens often.
-            player.SetError(50, PlayerErrorFlags.DeserializationException);
+            if (e is SerializationLimitException)
+                player.SetError(100, PlayerErrorFlags.SerializationLimit);
+            else
+                player.SetError(50, PlayerErrorFlags.DeserializationException);
 
             if (_disconnectOnException)
                 player.Disconnect();
@@ -155,8 +157,12 @@ namespace Mirage
             var disconnectMessage = _disconnectOnException ? $", Closed connection: {player}" : "";
             logger.LogError($"{e.GetType()} in Message handler (see stack below){disconnectMessage}\n{e}");
 
-            // use cost=10 for this because NetworkMessage handler should almost never be throwing
-            player.SetError(10, PlayerErrorFlags.RpcException);
+            // If the message handler fails due to a serialization limit (e.g. SyncVar deserialization limit),
+            // we want to mark the player with a SerializationLimit error instead of a generic RpcException.
+            if (e is SerializationLimitException || e.InnerException is SerializationLimitException)
+                player.SetError(100, PlayerErrorFlags.SerializationLimit);
+            else
+                player.SetError(10, PlayerErrorFlags.RpcException);
 
             if (_disconnectOnException)
                 player.Disconnect();
