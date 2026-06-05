@@ -1,3 +1,10 @@
+# [158.2.0](https://github.com/MirageNet/Mirage/compare/v158.1.0...v158.2.0) (2026-06-05)
+
+
+### Features
+
+* adding [MaxLength] for string and collection serializing ([f4a3a81](https://github.com/MirageNet/Mirage/commit/f4a3a81fb43431ec78cba633d457f282714e12f4))
+
 # [158.1.0](https://github.com/MirageNet/Mirage/compare/v158.0.0...v158.1.0) (2026-06-02)
 
 
