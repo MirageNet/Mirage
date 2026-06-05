@@ -2,23 +2,71 @@
 [![Discord](https://img.shields.io/discord/809535064551456888.svg)](https://discordapp.com/invite/DTBPBYvexy)
 [![release](https://img.shields.io/github/release/MirageNet/Mirage.svg)](https://github.com/MirageNet/Mirage/releases/latest)
 [![openupm](https://img.shields.io/npm/v/com.miragenet.mirage?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.miragenet.mirage/)
-
-[![Build](https://github.com/MirageNet/Mirage/workflows/CI/badge.svg)](https://github.com/MirageNet/Mirage/actions?query=workflow%3ACI)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=alert_status)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
-[![SonarCloud Coverage](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=coverage)](https://sonarcloud.io/component_measures?id=MirageNet_Mirage&metric=coverage)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=ncloc)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=sqale_index)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=code_smells)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
+[![Build](https://github.com/MirageNet/Mirage/actions/workflows/main.yml/badge.svg)](https://github.com/MirageNet/Mirage/actions/workflows/main.yml)
 
 ## What is Mirage?
 
-Mirage is a rolling-release **high-level** API for the Unity Game Engine that provides a **powerful, yet easy to use** networking API. Be it an online MMO, co-op adventure game or, a first-person shooter, Mirage improves your networked projects' **probability of success** significantly. With its modular structure and "use only what you need" approach, Mirage lets you unleash maximum performance out of your networking. 
+Mirage is a high-level networking library for Unity. It's modular, performant, and designed to be easy to use, whether you're building an MMO, a co-op game, or an FPS.
 
-Networked objects in the client are mirror images of the objects in the server, and the API provides all the tools necessary to keep them in sync and pass messages between them.
+Mirage is battle-tested in released games and built with security in mind, with many tools to help prevent multiplayer exploits.
 
-Mirage is a rolling-release network stack. With every update, you get the latest features and bug fixes. You are **encouraged** to diagnose, report, and help fix bugs that you find: Issue tickets will be investigated, feature requests are considered, and pull requests are regularly reviewed.
+Mirage is open source. Bug reports and feedback are welcome, either open an issue on Github or join the Discord.
 
-Mirage is built by passionate network engineers and is backed by a friendly community.
+## Quick Look
+
+```csharp
+// Server/Client events — listen from anywhere, no central manager needed
+public class GameSetup : MonoBehaviour
+{
+    public NetworkServer Server;
+    public NetworkClient Client;
+
+    private void Awake()
+    {
+        Server.Authenticated.AddListener(OnPlayerJoined);
+        Server.Disconnected.AddListener(OnPlayerLeft);
+        Client.Authenticated.AddListener(OnConnected);
+    }
+
+    private void OnPlayerJoined(INetworkPlayer player) { /* spawn logic */ }
+    private void OnPlayerLeft(INetworkPlayer player) { /* cleanup logic */ }
+    private void OnConnected(INetworkPlayer player) { /* client ready */ }
+}
+
+// NetworkBehaviour — SyncVars, RPCs, and Identity events
+public class PlayerCombat : NetworkBehaviour
+{
+    [SyncVar]
+    public int health = 100;
+
+    private void Awake()
+    {
+        Identity.OnStartServer.AddListener(OnStartServer);
+    }
+
+    private void OnStartServer() { /* server-side init */ }
+
+    [ServerRpc]
+    // Rate limit to block spam
+    [RateLimit(Refill = 1, MaxTokens = 5, Penalty = 10)]
+    public void CmdAttack(NetworkIdentity target)
+    {
+        // validate and apply damage
+    }
+
+    [ServerRpc]
+    [RateLimit(Refill = 1, MaxTokens = 5, Penalty = 50)]
+    // return values so client can await result to know if they were successful or not
+    public UniTask<bool> CmdBuyItem(int itemId)
+    {
+        if (!HasEnoughGold(itemId))
+            return UniTask.FromResult(false);
+
+        AddItemToInventory(itemId);
+        return UniTask.FromResult(true);
+    }
+}
+```
 
 ## Installation
 
@@ -55,39 +103,38 @@ If you've got a project already using Mirror and you want to migrate it to Mirag
 
 ## Comparison with Mirror
 
-Mirage has some notable differences from its distant sister, Mirror. The table below briefly details them:
+Mirage is a hard fork of Mirror, with many added features, performance improvements, and security improvements.
 
 | Mirage                                              | Mirror                                 |
 | --------------------------------------------------- | -------------------------------------- |
-| Installs via OpenUPM UPM repository                 | Installs from the Unity Asset Store    |
+| Installs via Package Manager (OpenUPM or GitHub URL) | Installs from the Unity Asset Store    |
 | Errors are thrown as exceptions                     | Errors are logged                      |
 | `[ServerRpc]`                                       | `[Command]`                            |
 | `[ClientRpc(target = RpcTarget.Owner)]`             | `[TargetRpc]`                          |
-| Subscribe to events in `NetworkServer`              | Override methods in `NetworkManager`   |
-| Subscribe to events in `NetworkClient`              | Override methods in `NetworkManager`   |
-| Subscribe to events in `NetworkIdentity`            | Override methods in `NetworkBehaviour` |
-| Methods use PascalCase (C# guidelines)              | No consistency                         |
+| Events: listen from any script, no central manager  | Override methods: large `NetworkManager` class with single overrides |
+| Follows C# code style and conventions               | No consistency                         |
 | `NetworkTime` available in `NetworkBehaviour`       | `NetworkTime` is global static         |
 | Send any data as messages                           | Messages must implement NetworkMessage |
-| Supports Unity 2022.3 LTS or later                  | Supports Unity 2022.3 LTS or later     |
-| Offers simple Socket API to implement new protocols | Each protocol requires a new transport |
+| Structured SocketLayer with consistent connection flow for all transports | Each transport implements its own connection logic |
 
 **Some notable features that Mirage has:**
 
-* Modular API: You only use the components you need
-* Network components can be added to child objects
-* Clients can connect to multiple servers - for example, be connected to a chat server while connected to a game server
-* [Fast play mode support](https://blogs.unity3d.com/2019/11/05/enter-play-mode-faster-in-unity-2019-3/)
-* Error handling
+* Well-structured codebase — clear boundaries between systems make it easy to navigate and understand
+* No static state — multiple server/client instances can run in the same Unity process
+* Strict error handling — invalid calls throw exceptions so bugs surface immediately instead of silently corrupting state
+* Network Behaviours can be on root or child GameObject
+* Server RPCs can [return values](https://miragenet.github.io/Mirage/docs/guides/remote-actions/server-rpc)
+* [Bit packing](https://miragenet.github.io/Mirage/docs/guides/bit-packing) to easily optimize network messages and reduce bandwidth
+* [Rate limiting](https://miragenet.github.io/Mirage/docs/guides/remote-actions/rate-limiting) and [max length](https://miragenet.github.io/Mirage/docs/guides/attributes#max-length-attribute) validation via attributes
+* [ErrorFlags](https://miragenet.github.io/Mirage/docs/guides/error-handling) to track misbehaving clients and what errors they are causing
 * [Version defines](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html#define-symbols)
-* Server Rpcs can [return values](https://miragenet.github.io/Mirage/docs/guides/remote-actions/server-rpc)
-* Bit packing to help compress values and reduce bandwidth
+* [Fast play mode support](https://blogs.unity3d.com/2019/11/05/enter-play-mode-faster-in-unity-2019-3/)
 
-Peeking under the hood, Mirage is built upon fundamental pillars: 
+Mirage is built upon fundamental pillars: 
 
-* Mirage avoids singletons and static states in general
-* Mirage follows the [SOLID principles](https://en.wikipedia.org/wiki/SOLID)
-* Mirage has high [![Test Coverage](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=coverage)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage) and low [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=sqale_index)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
+* Clean, readable codebase that follows C# conventions
+* No singletons or global static state
+* High test coverage
 
 ## Development environment setup
 
@@ -95,23 +142,18 @@ If you want to contribute to Mirage, follow these steps:
 
 ### Linux and Mac
 
-1) Ensure the git client is installed. On Linux, you can install it via your Package Manager. MacOS should have it included with the Xcode command-line tools, available from Apple.
+1) Ensure git is installed. On Linux, install via your package manager. On macOS, it's included with the Xcode command-line tools.
 2) Clone the Mirage repository:
     ```sh
-    cd /path/to/somewhere/on/your/disk
-    mkdir MirageNetworking
-    git clone https://github.com/MirageNet/Mirage.git MirageNetworking
+    git clone https://github.com/MirageNet/Mirage.git
     ```
-3) Open the newly cloned repo in Unity 2022.3 LTS or later.
+3) Open the cloned repo in Unity 2022.3 LTS or later.
 
 ### Windows
 
-1) Install the [git Windows Client](https://git-scm.com/download/win) or use your favorite git client (Fork, SourceTree, etc). 
-    Note that cloning the repository using a GUI tool should be fairly straightforward, we'll omit this for a command line example.
-3) As an administrator, clone this repo with symbolic links support using Git Bash:
-    ```sh 
-    cd C:\UnityProjects\DontReallyUseThisExamplePath
-    mkdir MirageNetworking
+1) Install [git](https://git-scm.com/download/win) or use your preferred git client.
+2) As an administrator, clone with symbolic links support:
+    ```sh
     git clone -c core.symlinks=true https://github.com/MirageNet/Mirage.git
     ```
     If you don't want to use administrator, [add symlink support](https://www.joshkel.com/2018/01/18/symlinks-in-windows/) to your account.
@@ -121,9 +163,16 @@ If you want to contribute to Mirage, follow these steps:
 ## Transport and Sockets
 
 Mirage supports multiple ways of transporting data:
-- Native UDP socket (default on Windows and Linux) with fallback to C# UDP Sockets (default on MacOS and other platforms)
-- Steam (via [Facepunch Steamworks](https://github.com/MirageNet/SteamyFaceNG))
+- Native UDP socket (default on Windows and Linux) with fallback to C# UDP Sockets (default on macOS and other platforms)
+- Steam (via [MirageSteamworks](https://github.com/MirageNet/MirageSteamworks))
+- Epic Online Services (via [EpicSocket](https://github.com/MirageNet/EpicSocket))
 - WebSocket for WebGL clients (via [SimpleWebSocket](https://github.com/James-Frowen/SimpleWebSocket))
+
+## Related Projects
+
+- [MirageStandalone](https://github.com/MirageNet/MirageStandalone) — Run Mirage servers without Unity
+- [Mirage.Core](https://github.com/James-Frowen/Mirage.Core) — Core serialization and networking, framework-independent
+- [Mirage.Godot](https://github.com/James-Frowen/Mirage.Godot) — Mirage networking for Godot
 
 ## Contributing
 
