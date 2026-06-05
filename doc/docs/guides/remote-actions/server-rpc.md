@@ -86,3 +86,36 @@ public class Door : NetworkBehaviour
     }
 }
 ```
+
+## Protecting Against Memory Allocation Attacks (MaxLength Attribute)
+
+When receiving data from untrusted clients, malicious users could send a serialized payload that specifies an extremely large size for strings or collections (such as arrays or lists). By default, network libraries read this length header first and immediately allocate an array or string of that size in memory (e.g., `new T[size]`). This can result in Out of Memory (OOM) crashes or high CPU overhead on the server, acting as a Denial of Service (DoS) attack vector.
+
+To protect against this, Mirage provides the `[MaxLength(int)]` attribute which can be applied directly to `ServerRpc` parameters:
+
+```cs
+[ServerRpc]
+public void CmdSendPlayerName([MaxLength(32)] string newName)
+{
+    // The name is guaranteed to be 32 characters or fewer
+    playerName = newName;
+}
+
+[ServerRpc]
+public void CmdSendInventory([MaxLength(100)] int[] itemIds)
+{
+    // The array is guaranteed to contain 100 elements or fewer
+    ProcessInventory(itemIds);
+}
+```
+
+### How It Works
+
+1. **Early Size Verification:**
+   - For collections (arrays/lists), Mirage reads the count from the network stream. If the count exceeds the specified `maxLength`, it throws a `SerializationLimitException` **before** allocating memory for the elements.
+   - For strings, Mirage checks if the incoming byte size (`realSize`) is greater than `maxLength * 4` (since a UTF-8 character is at most 4 bytes). If this check fails, or if the decoded character length exceeds `maxLength`, a `SerializationLimitException` is thrown.
+2. **Flagging and Penalty:**
+   - When a `SerializationLimitException` is thrown, the server catches it in the RPC/message handler.
+   - The connection is flagged with `PlayerErrorFlags.SerializationLimit`.
+   - A penalty cost of `100` is applied to the player's error rate limit budget. By default, exceeding the budget triggers an automatic disconnection, disconnecting the malicious client.
+

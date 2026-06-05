@@ -228,6 +228,57 @@ public static class CustomReadWriteFunctions
 }
 ```
 
+### Supporting MaxLength in Custom Functions
+
+If you want your custom type to support the `[MaxLength(int)]` attribute (to enforce size limits during deserialization, preventing memory allocation attacks), you can provide overloaded custom functions that accept a `maxLength` parameter. 
+
+When a field or parameter of your custom type is decorated with `[MaxLength(N)]`, the Weaver will automatically detect and bind these overloads.
+
+```cs
+using Mirage.Serialization;
+
+public static class CustomReadWriteFunctions
+{
+    // Normal serialization (delegates to length-limited version with max limit)
+    public static void WriteMyCustomList(this NetworkWriter writer, MyCustomList value)
+    {
+        writer.WriteMyCustomList(value, int.MaxValue);
+    }
+
+    // Length-limited serialization
+    public static void WriteMyCustomList(this NetworkWriter writer, MyCustomList value, int maxLength)
+    {
+        if (value.Count > maxLength)
+            throw new SerializationLimitException($"Count {value.Count} exceeds max length {maxLength}.");
+
+        writer.WriteInt32(value.Count);
+        for (var i = 0; i < value.Count; i++)
+            writer.WriteInt32(value[i]);
+    }
+
+    // Normal deserialization
+    public static MyCustomList ReadMyCustomList(this NetworkReader reader)
+    {
+        return reader.ReadMyCustomList(int.MaxValue);
+    }
+
+    // Length-limited deserialization
+    public static MyCustomList ReadMyCustomList(this NetworkReader reader, int maxLength)
+    {
+        var count = reader.ReadInt32();
+        if (count > maxLength)
+            throw new SerializationLimitException($"Serialized count {count} exceeds limit {maxLength}.");
+
+        // Allocating the collection is now safe
+        var list = new MyCustomList(count);
+        for (var i = 0; i < count; i++)
+            list.Add(reader.ReadInt32());
+
+        return list;
+    }
+}
+```
+
 ## Debugging
 
 You can use tools like [dnSpy](https://github.com/0xd4d/dnSpy) or [ILSpy](https://github.com/icsharpcode/ILSpy) to view the complied code after Weaver has altered it. This can help with understanding and debug what Mirage and Weaver does.

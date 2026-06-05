@@ -37,13 +37,17 @@ public enum PlayerErrorFlags
     Unauthorized = 1 << 5,
     Critical = 1 << 6,
     LikelyCheater = 1 << 7,
+    SerializationLimit = 1 << 10,
 
     // Custom developer defined errors
     CustomError = 1 << 16
 }
 ```
 
+*   **`SerializationLimit`**: Triggered when a client sends a payload (like a string, list, or array) whose size exceeds the limit defined by the `[MaxLength]` attribute, throwing a `SerializationLimitException`. This carries a cost of `100` to quickly penalize and disconnect potentially malicious clients.
+
 You can use these flags to identify an error's cause when implementing custom logic. You can also define your own flags using the `CustomError` bit as a starting point:
+
 
 ```csharp
 public static class MyErrorFlags 

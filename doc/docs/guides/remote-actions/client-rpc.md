@@ -133,3 +133,8 @@ public class Player : NetworkBehaviour
     }
 }
 ```
+
+## Parameter Size Limits (MaxLength Attribute)
+
+Just like ServerRpcs, you can use the `[MaxLength(int)]` attribute on `ClientRpc` string and collection parameters to restrict the maximum allowed size of incoming payloads during deserialization. See the [Server Rpc MaxLength documentation](/docs/guides/remote-actions/server-rpc#protecting-against-memory-allocation-attacks-maxlength-attribute) for details.
+

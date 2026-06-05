@@ -241,3 +241,24 @@ public class Player : NetworkBehaviour
     }
 }
 ```
+
+## Protecting SyncVars from Allocation Attacks
+
+When synchronizing strings or collections (such as custom types with length-restricted reader/writer) inside `SyncVars`, you can restrict their deserialization size using the `[MaxLength(int)]` attribute to protect against memory allocation attacks.
+
+Memory allocation attacks occur when a client receives a sync payload with a maliciously crafted length header, forcing the receiver to pre-allocate a massive array or string, leading to Out of Memory (OOM) crashes.
+
+```cs
+using Mirage;
+using UnityEngine;
+
+public class Player : NetworkBehaviour
+{
+    // Restricts the display name to a maximum of 32 characters
+    [SyncVar, MaxLength(32)]
+    public string displayName;
+}
+```
+
+Applying `[MaxLength(N)]` ensures that if a serialized update exceeds the maximum character count for strings or the maximum element count for collections, Mirage throws a `SerializationLimitException` before the allocation occurs. This aborts deserialization, flags the sender with `PlayerErrorFlags.SerializationLimit`, and applies an error rate-limit penalty of 100 on the connection.
+
