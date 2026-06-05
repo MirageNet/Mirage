@@ -1,0 +1,42 @@
+using System.Collections.Generic;
+using Mirage.Logging;
+using UnityEngine;
+
+namespace Mirage.Visibility.SpatialHash
+{
+
+    public class SpatialHashVisibility_Nov21 : NetworkVisibility
+    {
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(SpatialHashVisibility_Nov21));
+
+        [Tooltip("How many grid away the player can be to see this object. Real distance is this mutlipled by SpatialHashSystem")]
+        public int GridVisibleRange = 1;
+
+        public SpatialHashSystem_Nov21 System;
+
+        /// <param name="player">Network connection of a player.</param>
+        /// <returns>True if the player can see this object.</returns>
+        public override bool OnCheckObserver(INetworkPlayer player)
+        {
+            if (player.Identity == null)
+                return false;
+
+
+            var thisPosition = transform.position.ToXZ();
+            var playerPosition = player.Identity.transform.position.ToXZ();
+
+            return System.Grid.IsVisible(thisPosition, playerPosition, GridVisibleRange);
+        }
+
+        /// <summary>
+        /// Callback used by the visibility system to (re)construct the set of observers that can see this object.
+        /// <para>Implementations of this callback should add network connections of players that can see this object to the observers set.</para>
+        /// </summary>
+        /// <param name="newObservers">The new set of observers for this object.</param>
+        /// <param name="initialize">True if the set of observers is being built for the first time.</param>
+        public override void OnRebuildObservers(HashSet<INetworkPlayer> newObservers, bool initialize)
+        {
+            System.Grid.BuildObservers(newObservers, transform.position.ToXZ(), GridVisibleRange);
+        }
+    }
+}
