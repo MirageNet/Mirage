@@ -123,12 +123,12 @@ Mirage is a hard fork of Mirror, with many added features, performance improveme
 * No static state — multiple server/client instances can run in the same Unity process
 * Strict error handling — invalid calls throw exceptions so bugs surface immediately instead of silently corrupting state
 * Network Behaviours can be on root or child GameObject
-* Server RPCs can [return values](https://miragenet.github.io/Mirage/docs/guides/remote-actions/server-rpc)
-* [Bit packing](https://miragenet.github.io/Mirage/docs/guides/bit-packing) to easily optimize network messages and reduce bandwidth
-* [Rate limiting](https://miragenet.github.io/Mirage/docs/guides/remote-actions/rate-limiting) and [max length](https://miragenet.github.io/Mirage/docs/guides/attributes#max-length-attribute) validation via attributes
-* [ErrorFlags](https://miragenet.github.io/Mirage/docs/guides/error-handling) to track misbehaving clients and what errors they are causing
-* [Version defines](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html#define-symbols)
-* [Fast play mode support](https://blogs.unity3d.com/2019/11/05/enter-play-mode-faster-in-unity-2019-3/)
+* Server RPCs can [Return Values](https://miragenet.github.io/Mirage/docs/guides/remote-actions/server-rpc)
+* [Bit Packing](https://miragenet.github.io/Mirage/docs/guides/bit-packing) to easily optimize network messages and reduce bandwidth
+* [Rate Limiting](https://miragenet.github.io/Mirage/docs/guides/remote-actions/rate-limiting) and [Max Length](https://miragenet.github.io/Mirage/docs/guides/attributes#max-length-attribute) validation via attributes
+* [Error Flags](https://miragenet.github.io/Mirage/docs/guides/error-handling) to track misbehaving clients and what errors they are causing
+* [Version Defines](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html#define-symbols)
+* [Fast Play Mode support](https://blogs.unity3d.com/2019/11/05/enter-play-mode-faster-in-unity-2019-3/)
 
 Mirage is built upon fundamental pillars: 
 
