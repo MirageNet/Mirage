@@ -142,11 +142,13 @@ namespace Mirage.RemoteCalls
 
                     if (inGracePeriod)
                     {
-                        if (logger.WarnEnabled()) logger.LogWarning($"ServerRpc for object without authority {identity} but within grace period");
+                        if (logger.WarnEnabled())
+                            logger.LogWarning($"ServerRpc for object without authority {identity} but within grace period. Method: {remoteCall.Name}, Sent by: {player}, Current owner: {identity.Owner?.ToString() ?? "None"}.");
                     }
                     else
                     {
-                        if (logger.ErrorEnabled()) logger.LogError($"ServerRpc for object without authority {identity}");
+                        if (logger.ErrorEnabled())
+                            logger.LogError($"ServerRpc for object without authority {identity}. Method: {remoteCall.Name}, Sent by: {player}, Current owner: {identity.Owner?.ToString() ?? "None"}.");
                         player.SetError(10, PlayerErrorFlags.NoAuthority);
                     }
 

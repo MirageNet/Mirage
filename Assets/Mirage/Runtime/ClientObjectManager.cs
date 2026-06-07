@@ -753,8 +753,6 @@ namespace Mirage
                 return;
             }
 
-            if (logger.LogEnabled()) logger.Log($"Client remove auth handler");
-
             // was the object already spawned?
             var existing = _client.World.TryGetIdentity(msg.NetId, out var identity);
 
@@ -763,6 +761,9 @@ namespace Mirage
                 logger.LogWarning($"Could not find object with id {msg.NetId}");
                 return;
             }
+
+            if (logger.LogEnabled())
+                logger.Log($"Client remove auth handler for {identity}");
 
             identity.HasAuthority = false;
 
