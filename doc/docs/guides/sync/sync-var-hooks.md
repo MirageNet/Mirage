@@ -56,3 +56,11 @@ The following is a list of rules that SyncVar hooks follows for when and where t
   - Invoked after the variable is updated with the deserialized value.
   - `invokeHookOnServer`
     - Invokes on server (eg when an change is send from owner)
+  - When a client spawns an object, any SyncVar hooks are invoked during the initial deserialization of the spawn payload, which happens **before** the `OnStartClient` event is raised.
+
+### Hook Invocation on Host
+
+On the host, the server and client share the same instance of the component, meaning `OnDeserializeAll` is not called on the host client during spawn. Instead, the hook invocation behavior when modifying a SyncVar is as follows:
+- **Before Spawn:** If you modify a SyncVar before the object is spawned, the hook **is not** invoked (since `IsSpawned` is false, making both `IsServer` and `IsHost` evaluate to false).
+- **In `OnStartServer`:** If you modify a SyncVar inside `OnStartServer` on host, the hook **is** invoked immediately.
+- **In `OnStartClient`:** If you modify a SyncVar inside `OnStartClient` on host, the hook **is** invoked immediately.
