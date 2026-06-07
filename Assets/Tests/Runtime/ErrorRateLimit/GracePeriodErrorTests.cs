@@ -106,8 +106,8 @@ namespace Mirage.Tests.Runtime.ErrorRateLimit
             Assert.That(serverPlayer.ErrorFlags, Is.EqualTo(PlayerErrorFlags.None));
             Assert.That(serverPlayer.ErrorRateLimit.Tokens, Is.EqualTo(initialTokens));
 
-            // Wait for grace period to end. Grace period is 1.5s in RpcHandler.
-            await UniTask.Delay(2000);
+            // Wait for grace period to end.
+            await UniTask.Delay(TimeSpan.FromSeconds(RpcHandler.DESTROY_GRACE_PERIOD + 1.0));
 
             // Immediately send RPC for destroyed object
             LogAssert.Expect(LogType.Error, new Regex(".*ServerRpc for object without authority.*"));
@@ -148,8 +148,8 @@ namespace Mirage.Tests.Runtime.ErrorRateLimit
             Assert.That(serverPlayer.ErrorFlags, Is.EqualTo(PlayerErrorFlags.None));
             Assert.That(serverPlayer.ErrorRateLimit.Tokens, Is.EqualTo(initialTokens));
 
-            // Wait for grace period to end. Grace period is 1.5s in RpcHandler.
-            await UniTask.Delay(2000);
+            // Wait for grace period to end.
+            await UniTask.Delay(TimeSpan.FromSeconds(RpcHandler.DESTROY_GRACE_PERIOD + 1.0));
 
             // Send RPC again
             LogAssert.Expect(LogType.Error, new Regex(".*Spawned object not found when handling ServerRpc message.*"));

@@ -10,8 +10,8 @@ namespace Mirage.RemoteCalls
 {
     internal class RpcHandler
     {
-        // 1 second should be more than enough time for client to receive message and stop sending RPC to previously owned and destroyed objects
-        public const double DESTROY_GRACE_PERIOD = 1f;
+        // 5 seconds should be more than enough time for client to receive message and stop sending RPC to previously owned and destroyed objects
+        public const double DESTROY_GRACE_PERIOD = 5f;
 
         private static readonly ILogger logger = LogFactory.GetLogger<RpcHandler>();
 
