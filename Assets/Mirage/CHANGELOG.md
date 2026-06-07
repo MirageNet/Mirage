@@ -1,3 +1,11 @@
+## [158.2.1](https://github.com/MirageNet/Mirage/compare/v158.2.0...v158.2.1) (2026-06-07)
+
+
+### Bug Fixes
+
+* improving logs from HandleRpc without authority ([d0add3c](https://github.com/MirageNet/Mirage/commit/d0add3ca04d6a8cdc47e91db50ec6c197aea0b95))
+* increasing no authority grace period to 5 seconds instead of 1 second ([b5da980](https://github.com/MirageNet/Mirage/commit/b5da980b38a54f77dd2fe23a6d294cd285ec6919))
+
 # [158.2.0](https://github.com/MirageNet/Mirage/compare/v158.1.0...v158.2.0) (2026-06-05)
 
 
