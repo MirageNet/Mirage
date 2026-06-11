@@ -1,4 +1,3 @@
-using Mirage;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -9,13 +8,13 @@ namespace Mirage.Tests.Performance.Runtime.SpatialHashBenchmark
         public float SpawnRadius;
 
         [SyncVar]
-        public float Speed = 3;
+        public float Speed { get; set; } = 3;
         [SyncVar]
-        public int Damage = 1;
+        public int Damage { get; set; } = 1;
         [SyncVar]
-        public int Level = 1;
+        public int Level { get; set; } = 1;
         [SyncVar]
-        public int XP;
+        public int XP { get; set; }
 
 
         private void Awake()

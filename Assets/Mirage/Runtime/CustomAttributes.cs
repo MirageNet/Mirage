@@ -317,7 +317,7 @@ namespace Mirage
     /// or any custom type that has read/write overloads accepting an integer limit.
     /// <para>This will use the Write/Read with length functions and will work on any type that has writers/readers for those.</para>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property)]
     public class MaxLengthAttribute : Attribute
     {
         public readonly int maxLength;

@@ -54,7 +54,7 @@ namespace Mirage.Tests.Runtime.Serialization
     public class SyncVarBehaviour : NetworkBehaviour
     {
         [SyncVar, MaxLength(6)]
-        public string Content;
+        public string Content { get; set; }
     }
 
     public class DummyBehaviour : NetworkBehaviour
