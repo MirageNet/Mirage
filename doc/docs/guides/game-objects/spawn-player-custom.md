@@ -16,128 +16,25 @@ In this case, you will need to create your own CharacterSpawner.  Follow these s
 
 1) Create your player prefabs (as many as you need) and add them to the Spawnable Prefabs in your ClientObjectManager.
 2) Create a message that describes your player. For example:
-``` cs
-public struct CreateMMOCharacterMessage
-{
-    public Race race;
-    public string name;
-    public Color hairColor;
-    public Color eyeColor;
-}
-
-public enum Race
-{
-    Human,
-    Elvish,
-    Dwarvish,
-}
-```
+{{{ Path:'Snippets/GameObjects/CustomPlayerSpawning.cs' Name:'create-mmo-character-message' }}}
 3) Create Player Spawner class and add it to some GameObject in your scene
-``` cs
-public class CustomCharacterSpawner : MonoBehaviour
-{
-    [Header("References")]
-    public NetworkClient Client;
-    public NetworkServer Server;
-    public ClientObjectManager ClientObjectManager;
-    public ServerObjectManager ServerObjectManager;
-
-    [Header("Prefabs")]
-    // Different prefabs based on the Race the player picks
-    public CustomCharacter HumanPrefab;
-    public CustomCharacter ElvishPrefab;
-    public CustomCharacter DwarvishPrefab;
-}
-```
+{{{ Path:'Snippets/GameObjects/CustomPlayerSpawning.cs' Name:'custom-character-spawner-class' }}}
 4) Drag the NetworkClient and NetworkServer and Scene manager to the fields
 
 5) Hook into events:
 
-```cs
-public void Start()
-{
-    Client.Started.AddListener(OnClientStarted);
-    Client.Authenticated.AddListener(OnClientAuthenticated);
-    Server.Started.AddListener(OnServerStarted);
-}
-```
+{{{ Path:'Snippets/GameObjects/CustomPlayerSpawning.cs' Name:'custom-character-spawner-start' }}}
 
 6) register the prefabs when the client starts
 
-```cs
-private void OnClientStarted()
-{
-    // Make sure all prefabs are Register so mirage can spawn the character for this client and for other players
-    ClientObjectManager.RegisterPrefab(HumanPrefab.Identity);
-    ClientObjectManager.RegisterPrefab(ElvishPrefab.Identity);
-    ClientObjectManager.RegisterPrefab(DwarvishPrefab.Identity);
-}
-```
+{{{ Path:'Snippets/GameObjects/CustomPlayerSpawning.cs' Name:'custom-character-spawner-client-started' }}}
 
 7) Send your message with your character data when your client connects, or after the user submits his preferences.
 
-``` cs
-// You can send the message here if you already know
-// everything about the character at the time of player
-// or at a later time when the user submits his preferences
-private void OnClientAuthenticated(INetworkPlayer player)
-{
-    var mmoCharacter = new CreateMMOCharacterMessage
-    {
-        // populate the message with your data
-        name = "player user name",
-        race = Race.Human,
-        eyeColor = Color.red,
-        hairColor = Color.black,
-    };
-    player.Send(mmoCharacter);
-}
-```
+{{{ Path:'Snippets/GameObjects/CustomPlayerSpawning.cs' Name:'custom-character-spawner-client-authenticated' }}}
 8) Receive your message in the server and spawn the player
 
-```cs
-private void OnServerStarted()
-{
-    // Wait for client to send us an AddPlayerMessage
-    Server.MessageHandler.RegisterHandler<CreateMMOCharacterMessage>(OnCreateCharacter);
-}
-
-private void OnCreateCharacter(INetworkPlayer player, CreateMMOCharacterMessage msg)
-{
-    CustomCharacter prefab = GetPrefab(msg);
-
-    // Create your character object
-    // Use the data in msg to configure it
-    CustomCharacter character = Instantiate(prefab);
-
-    // Set syncVars before telling Mirage to spawn character
-    // This will cause them to be sent to client in the spawn message
-    character.PlayerName = msg.name;
-    character.hairColor = msg.hairColor;
-    character.eyeColor = msg.eyeColor;
-
-    // Spawn it as the character object
-    ServerObjectManager.AddCharacter(player, character.Identity);
-}
-
-private CustomCharacter GetPrefab(CreateMMOCharacterMessage msg)
-{
-    // Get prefab based on race
-    CustomCharacter prefab;
-    switch (msg.race)
-    {
-        case Race.Human: prefab = HumanPrefab; break;
-        case Race.Elvish: prefab = ElvishPrefab; break;
-        case Race.Dwarvish: prefab = DwarvishPrefab; break;
-        // Default case to check that client sent valid race.
-        // The only reason it should be invalid is if the client's code was modified by an attacker
-        // Throw will cause the client to be kicked
-        default: throw new InvalidEnumArgumentException("Invalid race given");
-    }
-
-    return prefab;
-}
-```
+{{{ Path:'Snippets/GameObjects/CustomPlayerSpawning.cs' Name:'custom-character-spawner-server-started' }}}
 
 ## Ready State
 
@@ -163,39 +60,13 @@ To replace the character game object for a player, use `ServerObjectManager.Repl
 
 You can also use `ReplaceCharacter` to respawn a player or change the object that represents the player. In some cases, it is better to just disable a game object and reset its game attributes on respawn. The following code sample demonstrates how to replace the player game object with a new game object:
 
-``` cs
-public class CustomCharacterSpawner : MonoBehaviour
-{
-    public NetworkServer Server;
-    public ServerObjectManager ServerObjectManager;
-
-    public void Respawn(NetworkPlayer player, GameObject newPrefab)
-    {
-        // Cache a reference to the current character object
-        GameObject oldPlayer = player.Identity.gameObject;
-
-        var newCharacter = Instantiate(newPrefab);
-
-        // Instantiate the new character object and broadcast to clients
-        // NOTE: here we can use `keepAuthority: true` because we are calling Destroy on the old prefab immediately after.
-        ServerObjectManager.ReplaceCharacter(player, newCharacter, keepAuthority: true);
-
-        // Remove the previous character object that's now been replaced
-        Server.Destroy(oldPlayer);
-    }
-}
-```
+{{{ Path:'Snippets/GameObjects/CustomPlayerSpawning.cs' Name:'custom-character-spawner-respawn' }}}
 
 
 ## Destroying Characters
 
 Once the character is finished (eg game over, or player died) you can remove the character using `ServerObjectManager.DestroyCharacter`.
 
-```cs
-public void OnPlayerDeath(INetworkPlayer player)
-{
-    ServerObjectManager.DestroyCharacter(player);
-}
-```
+{{{ Path:'Snippets/GameObjects/CustomPlayerSpawning.cs' Name:'custom-character-spawner-death' }}}
 
 Alternatively, you can use `ServerObjectManager.RemoveCharacter` to remove it as the player's character without destroying it.

@@ -60,27 +60,7 @@ You can set `MirageLogHandler` as the default log handler for all Mirage loggers
 
 Here's an example of how to set `MirageLogHandler` with default settings:
 
-```csharp
-using Mirage.Logging;
-using UnityEngine;
-
-public class CustomLogSetup : MonoBehaviour
-{
-    void Awake()
-    {
-        // Create default settings for MirageLogHandler
-        var settings = new MirageLogHandler.Settings(
-            timePrefix: MirageLogHandler.TimePrefix.DateTimeMilliSeconds,
-            coloredLabel: true,
-            label: true
-        );
-
-        // Replace the default log handler with MirageLogHandler
-        // This will apply to all existing and future loggers
-        LogFactory.ReplaceLogHandler((loggerName) => new MirageLogHandler(settings, loggerName));
-    }
-}
-```
+{{{ Path:'Snippets/Components/NetworkLogSettingsSnippet.cs' Name:'custom-log-setup' }}}
 
 ### `MirageLogHandler` Settings
 
@@ -103,31 +83,7 @@ Mirage's logging system is designed to be easily integrated into your own game c
 
 To get an `ILogger` for your class, you typically declare a `static readonly` field at the top of your class. **`LogFactory.GetLogger<T>()` (or `LogFactory.GetLogger("YourCustomLoggerName")`) will always return the same `ILogger` instance for a given logger name, ensuring that any modifications to its settings (e.g., `filterLogType`) will apply consistently across your application.** Here's how:
 
-```csharp
-using Mirage.Logging; // Make sure to include this namespace
-using UnityEngine;
-
-public class MyGameManager : MonoBehaviour
-{
-    // Obtain a logger for this class.
-    // The LogFactory will automatically manage its log level based on your LogSettingsSO.
-    private static readonly ILogger logger = LogFactory.GetLogger<MyGameManager>();
-
-    void Start()
-    {
-        // Example usage of the logger
-        logger.Log("MyGameManager started!");
-        logger.LogWarning("Something might be wrong here.");
-        logger.LogError("Critical error occurred!");
-
-        // You can also check if a log type is enabled before logging to avoid unnecessary string formatting
-        if (logger.LogEnabled())
-        {
-            logger.Log($"Current time: {Time.time}");
-        }
-    }
-}
-```
+{{{ Path:'Snippets/Components/NetworkLogSettingsSnippet.cs' Name:'my-game-manager' }}}
 
 ### Benefits
 

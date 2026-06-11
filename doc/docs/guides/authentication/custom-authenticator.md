@@ -14,10 +14,10 @@ To create a custom Authenticator, follow these steps:
 
 
 **Step 1: Inherit from `NetworkAuthenticatorBase<T>`**
-{{{ Path:'Snippets/CustomAuthenticator.cs' Name:'authenticator-def' }}}
+{{{ Path:'Snippets/Authentication/CustomAuthenticator.cs' Name:'authenticator-def' }}}
 
 **Step 2: Create a Network Message**
-{{{ Path:'Snippets/CustomAuthenticator.cs' Name:'auth-message' }}}
+{{{ Path:'Snippets/Authentication/CustomAuthenticator.cs' Name:'auth-message' }}}
 
 Clients should use the `SendAuthentication(NetworkClient client, T msg)` method to correctly send the authentication message.
 
@@ -26,10 +26,10 @@ Using `player.Send` directly will not work because the authenticator message is 
 :::
 
 **Step 3: Implement the Authenticator**
-{{{ Path:'Snippets/CustomAuthenticator.cs' Name:'authenticator' }}}
+{{{ Path:'Snippets/Authentication/CustomAuthenticator.cs' Name:'authenticator' }}}
 
 **Step 4: Return Additional Data (Optional)**
-{{{ Path:'Snippets/CustomAuthenticator.cs' Name:'auth-data' }}}
+{{{ Path:'Snippets/Authentication/CustomAuthenticator.cs' Name:'auth-data' }}}
 
 **Step 5: Retrieve Custom Data**
-{{{ Path:'Snippets/CustomAuthenticator.cs' Name:'use-data' }}}
+{{{ Path:'Snippets/Authentication/CustomAuthenticator.cs' Name:'use-data' }}}

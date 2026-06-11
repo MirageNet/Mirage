@@ -14,37 +14,7 @@ You need to initialize the SyncDictionary immediately after the definition for t
 :::
 
 ### Basic example
-```cs
-using UnityEngine;
-using Mirage;
-using Mirage.Collections;
-
-[System.Serializable]
-public struct Item
-{
-    public string name;
-    public int hitPoints;
-    public int durability;
-}
-
-public class Player : NetworkBehaviour
-{
-    public readonly SyncDictionary<stirng, Item> equipment = new SyncDictionary<string, Item>();
-
-    private void Awake() 
-    {
-        Identity.OnStartServer.AddListener(OnStartServer);
-    }
-
-    private void OnStartServer()
-    {
-        equipment.Add("head", new Item { name = "Helmet", hitPoints = 10, durability = 20 });
-        equipment.Add("body", new Item { name = "Epic Armor", hitPoints = 50, durability = 50 });
-        equipment.Add("feet", new Item { name = "Sneakers", hitPoints = 3, durability = 40 });
-        equipment.Add("hands", new Item { name = "Sword", hitPoints = 30, durability = 15 });
-    }
-}
-```
+{{{ Path:'Snippets/Sync/SyncDictionaryExamples.cs' Name:'SyncDictionaryBasicExample' }}}
 
 ## Callbacks
 You can detect when a SyncDictionary changes on the client and/or server. This is especially useful for refreshing your UI, character appearance, etc.
@@ -61,42 +31,8 @@ By the time you subscribe, the dictionary will already be initialized, so you wi
 :::
 
 ### Example
-```cs
-using Mirage;
-using Mirage.Collections;
-
-public class Player : NetworkBehaviour 
-{
-    public readonly SyncDictionary<stirng, Item> equipment = new SyncDictionary<string, Item>();
-    public readonly SyncDictionary<stirng, Item> hotbar = new SyncDictionary<string, Item>();
-
-    // This will hook the callback on both server and client
-    private void Awake()
-    {
-        equipment.OnChange += UpdateEquipment;
-        Identity.OnStartClient.AddListener(OnStartClient);
-    }
-
-    // Hotbar changes will only be invoked on clients
-    private void OnStartClient() 
-    {
-        hotbar.OnChange += UpdateHotbar;
-    }
-
-    private void UpdateEquipment()
-    {
-        // Here you can refresh your UI for instance
-    }
-
-    private void UpdateHotbar()
-    {
-        // Here you can refresh your UI for instance
-    }
-}
-```
+{{{ Path:'Snippets/Sync/SyncDictionaryExamples.cs' Name:'SyncDictionaryCallbackExample' }}}
 
 By default, `SyncDictionary` uses a [`Dictionary`](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2?view=netstandard-2.0) to store its data. If you want to use a different dictionary implementation, add a constructor and pass the dictionary implementation to the parent constructor. For example:
 
-```cs
-public SyncDictionary<string, Item> myDict = new SyncIDictionary<string, Item>(new MyDictionary<string, Item>());
-```
+{{{ Path:'Snippets/Sync/SyncDictionaryExamples.cs' Name:'SyncDictionaryCustomImplementation' }}}

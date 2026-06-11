@@ -9,38 +9,7 @@ To make a function into a Server RPC call, add the [ServerRpc] custom attribute 
 
 Server RPC Calls functions cannot be static. 
 
-``` cs
-public class Player : NetworkBehaviour
-{
-    // Assigned in inspector
-    public GameObject cubePrefab;
-
-    private void Update()
-    {
-        if (!IsLocalPlayer) 
-        {
-            return;
-        }
-
-        if (Input.GetKey(KeyCode.X))
-        {
-            DropCube();
-        }
-    }
-
-    [ServerRpc]
-    private void DropCube()
-    {
-        if (cubePrefab != null)
-        {
-            Vector3 spawnPos = transform.position + transform.forward * 2;
-            Quaternion spawnRot = transform.rotation;
-            GameObject cube = Instantiate(cubePrefab, spawnPos, spawnRot);
-            NetworkServer.Spawn(cube);
-        }
-    }
-}
-```
+{{{ Path:'Snippets/RemoteActions/ServerRpcDropCube.cs' Name:'server-rpc-drop-cube' }}}
 
 :::caution
 Be careful of sending ServerRpcs from the client every frame! This can cause a lot of network traffic.
@@ -51,7 +20,7 @@ Be careful of sending ServerRpcs from the client every frame! This can cause a l
 ServerRpcs can return values. It can take a long time for the server to reply, so they must return a UniTask which the client can await.
 To return a value, add a return value using `UniTask<MyReturnType>` where `MyReturnType` is any [supported Mirage type](/docs/guides/serialization/data-types). In the server, you can make your method async,  or you can use `UniTask.FromResult(myResult);`. For example:
 
-{{{ Path:'Snippets/RpcReply.cs' Name:'server-rpc-reply' }}}
+{{{ Path:'Snippets/Rpc/RpcReply.cs' Name:'server-rpc-reply' }}}
 
 ### ServerRpc and Authority
 
@@ -65,27 +34,7 @@ It is possible to invoke ServerRpcs on non-character objects if any of the follo
 
 Server RPC Calls sent from these objects are run on the server instance of the object, not on the associated character object for the client.
 
-```cs
-public enum DoorState : byte
-{
-    Open, Closed
-}
-
-public class Door : NetworkBehaviour
-{
-    [SyncVar]
-    public DoorState doorState;
-
-    [ServerRpc(requireAuthority = false)]
-    public void CmdSetDoorState(DoorState newDoorState, INetworkPlayer sender = null)
-    {
-        if (sender.identity.GetComponent<Player>().hasDoorKey)
-        {
-            doorState = newDoorState;
-        }
-    }
-}
-```
+{{{ Path:'Snippets/RemoteActions/ServerRpcDoor.cs' Name:'server-rpc-door' }}}
 
 ## Protecting Against Memory Allocation Attacks (MaxLength Attribute)
 
@@ -118,4 +67,3 @@ public void CmdSendInventory([MaxLength(100)] int[] itemIds)
    - When a `SerializationLimitException` is thrown, the server catches it in the RPC/message handler.
    - The connection is flagged with `PlayerErrorFlags.SerializationLimit`.
    - A penalty cost of `100` is applied to the player's error rate limit budget. By default, exceeding the budget triggers an automatic disconnection, disconnecting the malicious client.
-

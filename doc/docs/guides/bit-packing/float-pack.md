@@ -22,13 +22,7 @@ Values are clamped so values out of range will be packed as min/max values inste
 
 Health which is between 0 and 100
 
-```cs
-public class MyNetworkBehaviour : NetworkBehaviour 
-{
-    [SyncVar, FloatPack(100f, 0.02f)]
-    public int Health;
-}
-```
+{{{ Path:'Snippets/BitPacking/FloatPackSnippets.cs' Name:'float-pack-example-1' }}}
 
 `Max = 100`, `resolution = 0.02f` so bit count is 14
 
@@ -43,66 +37,16 @@ public class MyNetworkBehaviour : NetworkBehaviour
 
 A Percent that where you only want to send 8 bits
 
-```cs
-public class MyNetworkBehaviour : NetworkBehaviour 
-{
-    [SyncVar, FloatPack(1f, 8)]
-    public int Percent;
-}
-```
+{{{ Path:'Snippets/BitPacking/FloatPackSnippets.cs' Name:'float-pack-example-2' }}}
 
 `Max = 1f`, `bitCount = 8` so resolution will be `0.00787f`
 
 ### Generated Code
 
 Source:
-```cs 
-[SyncVar, FloatPack(100f, 0.02f)]
-public int myValue;
-```
+{{{ Path:'Snippets/BitPacking/FloatPackSnippets.cs' Name:'float-pack-generated-source' }}}
 
 Generated:
-```cs
-
-private FloatPacker myValue__Packer = new FloatPacker(100f, 0.02f);
-
-public override bool SerializeSyncVars(NetworkWriter writer, bool initialState)
-{
-    ulong syncVarDirtyBits = base.SyncVarDirtyBits;
-    bool result = base.SerializeSyncVars(writer, initialize);
-
-    if (initialState) 
-    {
-        myValue__Packer.Pack(writer, this.myValue);
-        return true;
-    }
-
-    writer.Write(syncVarDirtyBits, 1);
-    if ((syncVarDirtyBits & 1UL) != 0UL)
-    {
-        myValue__Packer.Pack(writer, this.myValue);
-        result = true;
-    }
-
-    return result;
-}
-
-public override void DeserializeSyncVars(NetworkReader reader, bool initialState)
-{
-    base.DeserializeSyncVars(reader, initialState);
-
-    if (initialState)
-    {
-        this.myValue = myValue__Packer.Unpack(reader);
-        return;
-    }
-
-    ulong dirtyMask = reader.Read(1);
-    if ((dirtyMask & 1UL) != 0UL)
-    {
-        this.myValue = myValue__Packer.Unpack(reader);
-    }
-}
-```
+{{{ Path:'Snippets/BitPacking/FloatPackSnippets.cs' Name:'float-pack-generated-code' }}}
 
 *last updated for Mirage v101.8.0*

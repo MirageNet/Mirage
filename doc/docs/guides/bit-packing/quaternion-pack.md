@@ -52,64 +52,14 @@ The precision of the smallest 3 can in increased or decreased to change the bit 
 
 ### Example 1
 
-```cs
-public class MyNetworkBehaviour : NetworkBehaviour 
-{
-    [SyncVar, QuaternionPack(9)]
-    public Quaternion direction;
-}
-```
+{{{ Path:'Snippets/BitPacking/QuaternionPackSnippets.cs' Name:'quaternion-pack-example-1' }}}
 
 ### Generated Code
 
 Source:
-```cs 
-[SyncVar, QuaternionPack(9)]
-public int myValue;
-```
+{{{ Path:'Snippets/BitPacking/QuaternionPackSnippets.cs' Name:'quaternion-pack-generated-source' }}}
 
 Generated:
-```cs
-
-private QuaternionPacker myValue__Packer = new QuaternionPacker(9);
-
-public override bool SerializeSyncVars(NetworkWriter writer, bool initialState)
-{
-    ulong syncVarDirtyBits = base.SyncVarDirtyBits;
-    bool result = base.SerializeSyncVars(writer, initialize);
-
-    if (initialState) 
-    {
-        myValue__Packer.Pack(writer, this.myValue);
-        return true;
-    }
-
-    writer.Write(syncVarDirtyBits, 1);
-    if ((syncVarDirtyBits & 1UL) != 0UL)
-    {
-        myValue__Packer.Pack(writer, this.myValue);
-        result = true;
-    }
-
-    return result;
-}
-
-public override void DeserializeSyncVars(NetworkReader reader, bool initialState)
-{
-    base.DeserializeSyncVars(reader, initialState);
-
-    if (initialState)
-    {
-        this.myValue = myValue__Packer.Unpack(reader);
-        return;
-    }
-
-    ulong dirtyMask = reader.Read(1);
-    if ((dirtyMask & 1UL) != 0UL)
-    {
-        this.myValue = myValue__Packer.Unpack(reader);
-    }
-}
-```
+{{{ Path:'Snippets/BitPacking/QuaternionPackSnippets.cs' Name:'quaternion-pack-generated-code' }}}
 
 *last updated for Mirage v101.8.0*

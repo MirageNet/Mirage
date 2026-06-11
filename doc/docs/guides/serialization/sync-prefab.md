@@ -24,4 +24,4 @@ On the client side, the `RpcShoot` method finds the prefab from `ClientObjectMan
 Add `[NetworkedPrefab]` attribute to your inspector field to show if it is set up correctly.
 :::
 
-{{{ Path:'Snippets/UsingSyncPrefab.cs' Name:'shoot' }}}
+{{{ Path:'Snippets/Serialization/UsingSyncPrefab.cs' Name:'shoot' }}}

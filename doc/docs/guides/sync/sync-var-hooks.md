@@ -7,9 +7,7 @@ sidebar_position: 3
 
 Hooks are set using the `hook` option on the `SyncVar` attribute, the hook needs to be in the same class as the `SyncVar`
 
-```cs
-[SyncVar(hook = nameof(HookName))]
-```
+{{{ Path:'Snippets/Sync/SyncVarHookExamples.cs' Name:'SyncVarHookAttribute' }}}
 
 
 A hook can be a method or a event, when using an event it should use `System.Action`. 
@@ -18,19 +16,7 @@ The hook can have 0, 1 or 2 args.
 
 
 
-```cs
-void hook0() { }
-
-void hook1(int newValue) { }
-
-void hook2(int oldValue, int newValue) { }
-
-event Action event0;
-
-event Action<int> event1;
-
-event Action<int, int> event2;
-```
+{{{ Path:'Snippets/Sync/SyncVarHookExamples.cs' Name:'HookSignatures' }}}
 
 
 ## When is hook invoked?

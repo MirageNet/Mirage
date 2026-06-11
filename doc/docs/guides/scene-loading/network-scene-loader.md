@@ -27,17 +27,7 @@ These references will be auto-found via `OnValidate` if they are on the same Gam
 
 To load a new scene for all connected players:
 
-```cs
-public class MyGameManager : MonoBehaviour
-{
-    public NetworkSceneLoader SceneLoader;
-
-    public void StartGame()
-    {
-        SceneLoader.ServerLoadScene("BattleMap").Forget();
-    }
-}
-```
+{{{ Path:'Snippets/SceneLoading/LoaderUsage.cs' Name:'loader-usage' }}}
 
 ## How It Works
 
@@ -84,29 +74,5 @@ For games where all players must start at the exact same time (e.g., a competiti
 
 Instead of immediately spawning a character when *one* player is ready, check if *all* players are ready first:
 
-```cs
-// Modify this inside your duplicated class
-private void HandleSceneReadyMessage(INetworkPlayer player, SceneReadyMessage message)
-{
-    player.SceneIsReady = true;
-
-    // Check if everyone has finished loading
-    bool allReady = true;
-    foreach (var p in Server.AllPlayers)
-    {
-        if (!p.SceneIsReady)
-        {
-            allReady = false;
-            break;
-        }
-    }
-
-    // Only spawn characters once everyone is fully loaded
-    if (allReady)
-    {
-        foreach (var p in Server.AllPlayers)
-            SpawnCharacterForPlayer(p);
-    }
-}
-```
+{{{ Path:'Snippets/SceneLoading/FixedMatchSize.cs' Name:'fixed-match-size' }}}
 
