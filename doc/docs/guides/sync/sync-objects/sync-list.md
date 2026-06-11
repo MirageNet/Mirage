@@ -14,43 +14,7 @@ You need to initialize the SyncList immediately after the definition for them to
 :::
 
 ### Basic example
-```cs
-using Mirage;
-using Mirage.Collections;
-
-[System.Serializable]
-public struct Item
-{
-    public string name;
-    public int amount;
-    public Color32 color;
-}
-
-public class Player : NetworkBehaviour
-{
-    private readonly SyncList<Item> inventory = new SyncList<Item>();
-
-    public int coins = 100;
-
-    [ServerRpc]
-    public void Purchase(string itemName)
-    {
-        if (coins > 10)
-        {
-            coins -= 10;
-            Item item = new Item
-            {
-                name = "Sword",
-                amount = 3,
-                color = new Color32(125, 125, 125, 255)
-            };
-
-            // During next synchronization, all clients will see the item
-            inventory.Add(item);
-        }
-    }
-}
-```
+{{{ Path:'Snippets/Sync/SyncListExamples.cs' Name:'SyncListBasicExample' }}}
 
 ## Callbacks
 You can detect when a `SyncList` changes on the client and/or server. This is especially useful for refreshing your UI, character appearance, etc.
@@ -67,42 +31,8 @@ By the time you subscribe, the list will already be initialized, so you will not
 :::
 
 ### Example
-```cs
-using Mirage;
-using Mirage.Collections;
-
-public class Player : NetworkBehaviour 
-{
-    private readonly SyncList<Item> inventory = new SyncList<Item>();
-    private readonly SyncList<Item> hotbar = new SyncList<Item>();
-
-    // This will hook the callback on both server and client
-    private void Awake()
-    {
-        inventory.OnChange += UpdateInventory;
-        Identity.OnStartClient.AddListener(OnStartClient);
-    }
-
-    // Hotbar changes will only be invoked on clients
-    private void OnStartClient() 
-    {
-        hotbar.OnChange += UpdateHotbar;
-    }
-
-    private void UpdateInventory()
-    {
-        // Here you can refresh your UI for instance
-    }
-
-    private void UpdateHotbar()
-    {
-        // Here you can refresh your UI for instance
-    }
-}
-```
+{{{ Path:'Snippets/Sync/SyncListExamples.cs' Name:'SyncListCallbackExample' }}}
 
 By default, `SyncList` uses a [`List`](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1?view=netstandard-2.0) to store its data. If you want to use a different list implementation, add a constructor and pass the list implementation to the parent constructor. For example:
 
-```cs
-public SyncList<Item> myList = new SyncList<Item>(new MyIList<Item>());
-```
+{{{ Path:'Snippets/Sync/SyncListExamples.cs' Name:'SyncListCustomImplementation' }}}

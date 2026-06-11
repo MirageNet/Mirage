@@ -23,82 +23,7 @@ Below is the Player Equip script to handle the changing of the equipped item, an
 -   While we could just have all the art items attached at design time and just enable/disable them based on the enum, this doesn't scale well to a lot of items and if they have scripts on them for how they behave in the game, such as animations, special effects, etc. it could get ugly pretty fast, so this example locally instantiates and destroys instead as a design choice.
 -   The example makes no effort to deal with position offset between the item and the attach point, e.g. having the grip or handle of an item aligns with the hand. This is best dealt with in a MonoBehaviour script on the item that has public fields for the local position and rotation that can be set in the designer and a bit of code in Start to apply those values in local coordinates relative to the parent attach point.
 
-``` cs
-using UnityEngine;
-using System.Collections;
-using Mirage;
-
-public enum EquippedItem : byte
-{
-    nothing,
-    ball,
-    box,
-    cylinder
-}
-
-public class PlayerEquip : NetworkBehaviour
-{
-    public GameObject sceneObjectPrefab;
-
-    public GameObject rightHand;
-
-    public GameObject ballPrefab;
-    public GameObject boxPrefab;
-    public GameObject cylinderPrefab;
-
-    [SyncVar(hook = nameof(OnChangeEquipment))]
-    public EquippedItem equippedItem;
-
-    void OnChangeEquipment(EquippedItem oldEquippedItem, EquippedItem newEquippedItem)
-    {
-        StartCoroutine(ChangeEquipment(newEquippedItem));
-    }
-
-    // Since Destroy is delayed to the end of the current frame, we use a coroutine
-    // to clear out any child objects before instantiating the new one
-    IEnumerator ChangeEquipment(EquippedItem newEquippedItem)
-    {
-        while (rightHand.transform.childCount > 0)
-        {
-            Destroy(rightHand.transform.GetChild(0).gameObject);
-            yield return null;
-        }
-
-        switch (newEquippedItem)
-        {
-            case EquippedItem.ball:
-                Instantiate(ballPrefab, rightHand.transform);
-                break;
-            case EquippedItem.box:
-                Instantiate(boxPrefab, rightHand.transform);
-                break;
-            case EquippedItem.cylinder:
-                Instantiate(cylinderPrefab, rightHand.transform);
-                break;
-        }
-    }
-
-    void Update()
-    {
-        if (!IsLocalPlayer) return;
-
-        if (Input.GetKeyDown(KeyCode.Alpha0) && equippedItem != EquippedItem.nothing)
-            CmdChangeEquippedItem(EquippedItem.nothing);
-        if (Input.GetKeyDown(KeyCode.Alpha1) && equippedItem != EquippedItem.ball)
-            CmdChangeEquippedItem(EquippedItem.ball);
-        if (Input.GetKeyDown(KeyCode.Alpha2) && equippedItem != EquippedItem.box)
-            CmdChangeEquippedItem(EquippedItem.box);
-        if (Input.GetKeyDown(KeyCode.Alpha3) && equippedItem != EquippedItem.cylinder)
-            CmdChangeEquippedItem(EquippedItem.cylinder);
-    }
-
-    [ServerRpc]
-    void CmdChangeEquippedItem(EquippedItem selectedItem)
-    {
-        equippedItem = selectedItem;
-    }
-}
-```
+{{{ Path:'Snippets/GameObjects/PlayerEquipInitial.cs' Name:'player-equip-initial' }}}
 
 ## Dropping Items
 
@@ -106,107 +31,13 @@ Now that we can equip the items, we need a way to drop the current item into the
 
 First, let's add one more Input to the Update method above and a `CmdDropItem` method:
 
-``` cs
-void Update()
-{
-    if (!IsLocalPlayer) return;
+{{{ Path:'Snippets/GameObjects/PlayerEquip.cs' Name:'player-equip-update' }}}
 
-    if (Input.GetKeyDown(KeyCode.Alpha0) && equippedItem != EquippedItem.nothing)
-        CmdChangeEquippedItem(EquippedItem.nothing);
-    if (Input.GetKeyDown(KeyCode.Alpha1) && equippedItem != EquippedItem.ball)
-        CmdChangeEquippedItem(EquippedItem.ball);
-    if (Input.GetKeyDown(KeyCode.Alpha2) && equippedItem != EquippedItem.box)
-        CmdChangeEquippedItem(EquippedItem.box);
-    if (Input.GetKeyDown(KeyCode.Alpha3) && equippedItem != EquippedItem.cylinder)
-        CmdChangeEquippedItem(EquippedItem.cylinder);
-
-    if (Input.GetKeyDown(KeyCode.X) && equippedItem != EquippedItem.nothing)
-        CmdDropItem();
-}
-```
-
-``` cs
-[ServerRpc]
-void CmdDropItem()
-{
-    // Instantiate the scene object on the server
-    Vector3 pos = rightHand.transform.position;
-    Quaternion rot = rightHand.transform.rotation;
-    GameObject newSceneObject = Instantiate(sceneObjectPrefab, pos, rot);
-
-    // set the RigidBody as non-kinematic on the server only (isKinematic = true in prefab)
-    newSceneObject.GetComponent<Rigidbody>().isKinematic = false;
-
-    SceneObject sceneObject = newSceneObject.GetComponent<SceneObject>();
-
-    // set the child object on the server
-    sceneObject.SetEquippedItem(equippedItem);
-
-    // set the SyncVar on the scene object for clients
-    sceneObject.equippedItem = equippedItem;
-
-    // set the player's SyncVar to nothing so clients will destroy the equipped child item
-    equippedItem = EquippedItem.nothing;
-
-    // Spawn the scene object on the network for all to see
-    ServerObjectManager.Spawn(newSceneObject);
-}
-```
+{{{ Path:'Snippets/GameObjects/PlayerEquip.cs' Name:'player-equip-drop' }}}
 
 In the image above, there's a `sceneObjectPrefab` field that is assigned to a prefab that will act as a container for our item prefabs. The SceneObject prefab has a SceneObject script with a SyncVar like the Player Equip script, and a SetEquippedItem method that takes the shared enum value as a parameter.
 
-``` cs
-using UnityEngine;
-using System.Collections;
-using Mirage;
-
-public class SceneObject : NetworkBehaviour
-{
-    [SyncVar(hook = nameof(OnChangeEquipment))]
-    public EquippedItem equippedItem;
-
-    public GameObject ballPrefab;
-    public GameObject boxPrefab;
-    public GameObject cylinderPrefab;
-
-    void OnChangeEquipment(EquippedItem oldEquippedItem, EquippedItem newEquippedItem)
-    {
-        StartCoroutine(ChangeEquipment(newEquippedItem));
-    }
-
-    // Since Destroy is delayed to the end of the current frame, we use a coroutine
-    // to clear out any child objects before instantiating the new one
-    IEnumerator ChangeEquipment(EquippedItem newEquippedItem)
-    {
-        while (transform.childCount > 0)
-        {
-            Destroy(transform.GetChild(0).gameObject);
-            yield return null;
-        }
-
-        // Use the new value, not the SyncVar property value
-        SetEquippedItem(newEquippedItem);
-    }
-
-    // SetEquippedItem is called on the client from OnChangeEquipment (above),
-    // and on the server from CmdDropItem in the PlayerEquip script.
-    public void SetEquippedItem(EquippedItem newEquippedItem)
-    {
-        switch (newEquippedItem)
-        {
-            case EquippedItem.ball:
-                Instantiate(ballPrefab, transform);
-                break;
-            case EquippedItem.box:
-                Instantiate(boxPrefab, transform);
-                break;
-            case EquippedItem.cylinder:
-                Instantiate(cylinderPrefab, transform);
-                break;
-        }
-    }
-}
-```
+{{{ Path:'Snippets/GameObjects/SceneObject.cs' Name:'scene-object-class' }}}
 
 In the run-time image below, the Ball(Clone) is attached to the `RightHand` object, and the Box(Clone) is attached to the SceneObject(Clone), which is shown in the inspector.
 
@@ -218,27 +49,11 @@ The art prefabs have simple colliders on them (sphere, box, capsule).  If your a
 
 Now that we have a box dropped in the scene, we need to pick it up again. To do that, a `CmdPickupItem` method is added to the Player Equip script:
 
-``` cs
-// CmdPickupItem is public because it's called from a script on the SceneObject
-[ServerRpc]
-public void CmdPickupItem(GameObject sceneObject)
-{
-    // set the player's SyncVar so clients can show the equipped item
-    equippedItem = sceneObject.GetComponent<SceneObject>().equippedItem;
-
-    // Destroy the scene object
-    ServerObjectManager.Destroy(sceneObject);
-}
-```
+{{{ Path:'Snippets/GameObjects/PlayerEquip.cs' Name:'player-equip-pickup' }}}
 
 This method is simply called from `OnMouseDown` in the Scene Object script:
 
-```cs
-private void OnMouseDown()
-{
-    Client.Player.Identity.GetComponent<PlayerEquip>().CmdPickupItem(gameObject);
-}
-```
+{{{ Path:'Snippets/GameObjects/SceneObject.cs' Name:'scene-object-mousedown' }}}
 
 Since the SceneObject(Clone) is networked, we can pass it directly through to `CmdPickupItem` on the character object to set the equipped item SyncVar and destroy the scene object.
 

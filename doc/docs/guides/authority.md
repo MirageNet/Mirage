@@ -27,36 +27,22 @@ If you spawn a character object using `ServerObjectManager.AddCharacter` then it
 ### Using NetworkServer.Spawn
 
 You can give authority to a client when an object is spawned. This is done by passing in the connection to the spawn message
-```cs
-GameObject go = Instantiate(prefab);
-ServerObjectManager.Spawn(go, owner);
-```
+{{{ Path:'Snippets/General/AuthoritySnippets.cs' Name:'authority-spawn-with-owner' }}}
 
 ### Using identity.AssignClientAuthority
 
 You can give authority to a client at any time using `AssignClientAuthority`. This can be done by calling `AssignClientAuthority` on the object you want to give authority too
-```cs
-Identity.AssignClientAuthority(conn);
-```
+{{{ Path:'Snippets/General/AuthoritySnippets.cs' Name:'authority-assign-client-authority' }}}
 
 You may want to do this when a player picks up an item
 
-```cs
-// Command on character object
-[ServerRpc]
-void PickupItem(NetworkIdentity item)
-{
-    item.AssignClientAuthority(connectionToClient); 
-}
-```
+{{{ Path:'Snippets/General/AuthoritySnippets.cs' Name:'authority-pickup-item' }}}
 
 ## How to remove authority
 
 You can use `Identity.RemoveClientAuthority` to remove client authority from an object. 
 
-```cs
-Identity.RemoveClientAuthority();
-```
+{{{ Path:'Snippets/General/AuthoritySnippets.cs' Name:'authority-remove-client-authority' }}}
 
 Authority can't be removed from the character object. Instead, you will have to replace the character object using `NetworkServer.ReplaceCharacter`.
 

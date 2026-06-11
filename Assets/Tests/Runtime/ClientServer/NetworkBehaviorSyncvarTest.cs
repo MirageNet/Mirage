@@ -11,7 +11,7 @@ namespace Mirage.Tests.Runtime.ClientServer
     public class SampleBehaviorWithNB : NetworkBehaviour
     {
         [SyncVar]
-        public SampleBehaviorWithNB target;
+        public SampleBehaviorWithNB target { get; set; }
     }
 
     public class NetworkBehaviorSyncvarTest : ClientServerSetup<SampleBehaviorWithNB>

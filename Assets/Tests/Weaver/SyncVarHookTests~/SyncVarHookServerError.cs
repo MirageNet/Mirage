@@ -5,6 +5,6 @@ namespace SyncVarHookTests.SyncVarHookServerError
     class SyncVarHookServerError : NetworkBehaviour
     {
         [SyncVar(invokeHookOnServer = true)]
-        int health;
+        int health { get; set; }
     }
 }

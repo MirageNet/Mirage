@@ -2,7 +2,7 @@ namespace Mirage.Examples
 {
     public class Health : NetworkBehaviour
     {
-        [SyncVar] public int health = 10;
+        [SyncVar] public int health { get; set; } = 10;
 
         [Server(error = false)]
         public void Update()

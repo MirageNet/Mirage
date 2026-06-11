@@ -10,29 +10,7 @@ There are a number of events relating to network behaviours that can occur over 
 
 To use an event you must add a function as a listener, this function will then be called when the event occurs. Some events, like `OnStartServer`, will call the listener immediately if the event was previously called. This allows you to add the listeners at any point without worrying about missing the Invoke.
 
-```cs
-void Awake()
-{
-    Identity.OnStartServer.AddListener(MyStartServer);
-    Identity.OnStartClient.AddListener(MyStartClient);
-    Identity.OnStartLocalPlayer.AddListener(MyStartLocalPlayer);
-}
-
-void MyStartServer() 
-{
-    // ...
-}
-
-void MyStartClient() 
-{
-    // ...
-}
-
-void MyStartLocalPlayer() 
-{
-    // ...
-}
-```
+{{{ Path:'Snippets/Callbacks/NetworkBehaviourCallbacks.cs' Name:'network-behaviour-callbacks' }}}
 
 This is a full list of virtual methods (callbacks) that you can implement on `NetworkBehaviour`, and where they are called
 

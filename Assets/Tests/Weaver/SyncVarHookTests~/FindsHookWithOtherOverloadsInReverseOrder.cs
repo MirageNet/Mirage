@@ -6,7 +6,7 @@ namespace SyncVarHookTests.FindsHookWithOtherOverloadsInReverseOrder
     class FindsHookWithOtherOverloadsInReverseOrder : NetworkBehaviour
     {
         [SyncVar(hook = nameof(onChangeHealth))]
-        int health;
+        int health { get; set; }
 
         void onChangeHealth(Vector3 anotherValue, bool secondArg)
         {

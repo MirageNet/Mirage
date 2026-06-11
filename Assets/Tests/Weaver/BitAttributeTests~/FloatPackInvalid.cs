@@ -7,38 +7,38 @@ namespace BitAttributeTests.FloatPackInvalid
     {
         // error, unsupported type
         [FloatPack(100f, 0.1f)]
-        [SyncVar] public double value1;
+        [SyncVar] public double value1 { get; set; }
 
         // error, unsupported type
         [FloatPack(1000f, 1f)]
-        [SyncVar] public int value2;
+        [SyncVar] public int value2 { get; set; }
 
         // error, unsupported type
         [FloatPack(10000f, 8)]
-        [SyncVar] public UnityEngine.Vector3 value3;
+        [SyncVar] public UnityEngine.Vector3 value3 { get; set; }
 
         // error, bit count out of range
         [FloatPack(1f, 31)]
-        [SyncVar] public float value4;
+        [SyncVar] public float value4 { get; set; }
 
         // error, bit count out of range
         [FloatPack(1f, 0)]
-        [SyncVar] public float value5;
+        [SyncVar] public float value5 { get; set; }
 
         // error, max can't be zero
         [FloatPack(0, 10)]
-        [SyncVar] public float value6;
+        [SyncVar] public float value6 { get; set; }
 
         // error, max can't be zero
         [FloatPack(-5, 10)]
-        [SyncVar] public float value7;
+        [SyncVar] public float value7 { get; set; }
 
         // error, precision too low
         [FloatPack(1f, float.Epsilon)]
-        [SyncVar] public float value8;
+        [SyncVar] public float value8 { get; set; }
 
         // error, precision negative
         [FloatPack(1f, -0.1f)]
-        [SyncVar] public float value9;
+        [SyncVar] public float value9 { get; set; }
     }
 }

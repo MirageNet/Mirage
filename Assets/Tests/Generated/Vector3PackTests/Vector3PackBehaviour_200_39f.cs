@@ -14,7 +14,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector3PackAttributeTests._200_39f
     public class BitPackBehaviour : NetworkBehaviour
     {
         [Vector3Pack(200f, 200f, 200f, 0.05f)]
-        [SyncVar] public Vector3 myValue;
+        [SyncVar] public Vector3 MyValue { get; set; }
 
         public event Action<Vector3> onRpc;
 
@@ -36,14 +36,14 @@ namespace Mirage.Tests.Runtime.Generated.Vector3PackAttributeTests._200_39f
     public struct BitPackMessage 
     {
         [Vector3Pack(200f, 200f, 200f, 0.05f)] 
-        public Vector3 myValue;
+        public Vector3 MyValue;
     }
 
     [Serializable]
     public struct BitPackStruct
     {
         [Vector3Pack(200f, 200f, 200f, 0.05f)] 
-        public Vector3 myValue;
+        public Vector3 MyValue;
     }
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
@@ -61,7 +61,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector3PackAttributeTests._200_39f
         [Test]
         public void SyncVarIsBitPacked()
         {
-            serverComponent.myValue = value;
+            serverComponent.MyValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
@@ -74,9 +74,9 @@ namespace Mirage.Tests.Runtime.Generated.Vector3PackAttributeTests._200_39f
                     clientComponent.DeserializeSyncVars(reader, true);
                     Assert.That(reader.BitPosition, Is.EqualTo(39));
 
-                    Assert.That(clientComponent.myValue.x, Is.EqualTo(value.x).Within(within));
-                    Assert.That(clientComponent.myValue.y, Is.EqualTo(value.y).Within(within));
-                    Assert.That(clientComponent.myValue.z, Is.EqualTo(value.z).Within(within));
+                    Assert.That(clientComponent.MyValue.x, Is.EqualTo(value.x).Within(within));
+                    Assert.That(clientComponent.MyValue.y, Is.EqualTo(value.y).Within(within));
+                    Assert.That(clientComponent.MyValue.z, Is.EqualTo(value.z).Within(within));
                 }
             }
         }
@@ -115,7 +115,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector3PackAttributeTests._200_39f
         {
             var inMessage = new BitPackMessage 
             {
-                myValue = value,
+                MyValue = value,
             };
 
             int payloadSize = 0;
@@ -145,7 +145,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector3PackAttributeTests._200_39f
             // +2 for message header
             int expectedPayLoadSize = ((39 + 7) / 8) + 2;
             Assert.That(payloadSize, Is.EqualTo(expectedPayLoadSize), $"39 bits is {expectedPayLoadSize - 2} bytes in payload");
-            AssertValue(outMessage.myValue);
+            AssertValue(outMessage.MyValue);
         }
 
         [Test]
@@ -153,7 +153,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector3PackAttributeTests._200_39f
         {
             var inStruct = new BitPackStruct 
             {
-                myValue = value,
+                MyValue = value,
             };
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
@@ -168,7 +168,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector3PackAttributeTests._200_39f
                     var outStruct = reader.Read<BitPackStruct>();
                     Assert.That(reader.BitPosition, Is.EqualTo(39));
 
-                    AssertValue(outStruct.myValue);
+                    AssertValue(outStruct.MyValue);
                 }
             }
         }

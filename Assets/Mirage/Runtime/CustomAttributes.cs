@@ -7,7 +7,7 @@ namespace Mirage
     /// SyncVars are used to synchronize a variable from the server to all clients automatically.
     /// <para>Value must be changed on server, not directly by clients.  Hook parameter allows you to define a client-side method to be invoked when the client gets an update from the server.</para>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Property)]
     public class SyncVarAttribute : PropertyAttribute
     {
         ///<summary>A function that should be called on the client when the value changes.</summary>
@@ -35,6 +35,25 @@ namespace Mirage
         /// </summary>
         public SyncHookType hookType = SyncHookType.Automatic;
     }
+
+    /// <summary>
+    /// Prevents Weaver warnings when using class-type SyncVars, NetworkMessage fields, or RPC parameters/return values.
+    /// <para>A class-type is generally UNSAFE because:
+    /// <list type="bullet">
+    /// <item>It will allocate a new object upon deserialization.</item>
+    /// <item>Mirage cannot track internal changes to the class.</item>
+    /// <item>It will fail SyncVar equality checks if setting the same instance (preventing dirty bit setting).</item>
+    /// </list>
+    /// </para>
+    /// <para>Mark a type or member with this attribute to declare it SAFE because:
+    /// <list type="bullet">
+    /// <item>It utilizes custom serialization/deserialization that manages safety/allocations.</item>
+    /// <item>It is serialized by ID/reference (like NetworkBehaviour/NetworkIdentity/GameObject).</item>
+    /// </list>
+    /// </para>
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Method)]
+    public class WeaverSafeClassAttribute : Attribute { }
 
     public enum SyncHookType
     {
@@ -298,7 +317,7 @@ namespace Mirage
     /// or any custom type that has read/write overloads accepting an integer limit.
     /// <para>This will use the Write/Read with length functions and will work on any type that has writers/readers for those.</para>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property)]
     public class MaxLengthAttribute : Attribute
     {
         public readonly int maxLength;

@@ -15,7 +15,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.int_N21
     public class BitPackBehaviour : NetworkBehaviour
     {
         [BitCountFromRange(-2147483648, 2147483647)]
-        [SyncVar] public int myValue;
+        [SyncVar] public int MyValue { get; set; }
 
         public event Action<int> onRpc;
 
@@ -37,14 +37,14 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.int_N21
     public struct BitPackMessage 
     {
         [BitCountFromRange(-2147483648, 2147483647)]
-        public int myValue;
+        public int MyValue;
     }
 
     [Serializable]
     public struct BitPackStruct
     {
         [BitCountFromRange(-2147483648, 2147483647)]
-        public int myValue;
+        public int MyValue;
     }
     
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
@@ -54,7 +54,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.int_N21
         [Test]
         public void SyncVarIsBitPacked()
         {
-            serverComponent.myValue = value;
+            serverComponent.MyValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
@@ -67,7 +67,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.int_N21
                     clientComponent.DeserializeSyncVars(reader, true);
                     Assert.That(reader.BitPosition, Is.EqualTo(32));
 
-                    Assert.That(clientComponent.myValue, Is.EqualTo(value));
+                    Assert.That(clientComponent.MyValue, Is.EqualTo(value));
                 }
             }
         }
@@ -106,7 +106,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.int_N21
         {
             var inMessage = new BitPackMessage 
             {
-                myValue = value,
+                MyValue = value,
             };
 
             int payloadSize = 0;
@@ -144,7 +144,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.int_N21
         {
             var inStruct = new BitPackStruct 
             {
-                myValue = value,
+                MyValue = value,
             };
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())

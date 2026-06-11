@@ -5,7 +5,7 @@ namespace Mirage.Examples.Chat
     public class Player : NetworkBehaviour
     {
         [SyncVar]
-        public string playerName;
+        public string playerName { get; set; }
 
         public static event Action<Player, string> OnMessage;
 

@@ -15,9 +15,7 @@ This rate-limiting system is server-side only and replaces the old `DisconnectOn
 
 ## Player Error Flags
 
-The `PlayerErrorFlags` enum helps categorize the types of errors a player can cause, allowing for more granular tracking and response.
-
-```csharp
+```cs
 // see PlayerErrorFlags in the source code for most up-to-date values
 [Flags]
 public enum PlayerErrorFlags
@@ -32,12 +30,13 @@ public enum PlayerErrorFlags
     DeserializationException = 1 << 2,
     RpcSync = 1 << 3,
     RateLimit = 1 << 4,
+    InvalidState = 1 << 9,
 
     // Security/Malicious Intent
-    Unauthorized = 1 << 5,
-    Critical = 1 << 6,
-    LikelyCheater = 1 << 7,
-    SerializationLimit = 1 << 10,
+    NoAuthority = 1 << 5,
+    Unauthenticated = 1 << 6,
+    Critical = 1 << 7,
+    LikelyCheater = 1 << 8,
 
     // Custom developer defined errors
     CustomError = 1 << 16
@@ -48,14 +47,7 @@ public enum PlayerErrorFlags
 
 You can use these flags to identify an error's cause when implementing custom logic. You can also define your own flags using the `CustomError` bit as a starting point:
 
-
-```csharp
-public static class MyErrorFlags 
-{
-    public const PlayerErrorFlags InvalidTrade = PlayerErrorFlags.CustomError << 0;
-    public const PlayerErrorFlags AnotherCustom = PlayerErrorFlags.CustomError << 1;
-}
-```
+{{{ Path:'Snippets/General/ErrorHandlingSnippets.cs' Name:'error-handling-custom-flags' }}}
 
 ## Server Configuration
 
@@ -86,86 +78,22 @@ The `cost` parameter specifies how many tokens to subtract from the player's err
 
 ### Custom Error Example
 
-```csharp
-public static class MyErrorFlags 
-{
-    public const PlayerErrorFlags InvalidAction = PlayerErrorFlags.CustomError << 0;
-}
+{{{ Path:'Snippets/General/ErrorHandlingSnippets.cs' Name:'error-handling-custom-error-class' }}}
 
 // ... inside a NetworkBehaviour
-[ServerRpc]
-void CmdDoSomething(int data)
-{
-    // The IsActionValid method would contain your custom validation logic.
-    if (!IsActionValid(data))
-    {
-        // Penalize the player with a moderate cost for sending invalid data.
-        Owner.SetError(10, MyErrorFlags.InvalidAction);
-        return;
-    }
-
-    // ... process valid data
-}
-```
+{{{ Path:'Snippets/General/ErrorHandlingSnippets.cs' Name:'error-handling-custom-error-method' }}}
 
 ### Critical Error Example
 
 For severe violations, use `PlayerErrorFlags.Critical` with a high cost to trigger the handler instantly.
 
-```csharp
-[ServerRpc]
-void CmdTryAdminAction(string command)
-{
-    // The IsAdmin method would check if the player has admin privileges.
-    if (!IsAdmin(Owner))
-    {
-        // A non-admin tried to use an admin command.
-        // Set cost higher than MaxTokens (default 200) to trigger the limit immediately.
-        Owner.SetError(10000, PlayerErrorFlags.Critical);
-        return;
-    }
-
-    // ... execute admin command
-}
-```
+{{{ Path:'Snippets/General/ErrorHandlingSnippets.cs' Name:'error-handling-admin-action' }}}
 
 ### ServerRpc Without Authority (with Sender)
 
 Sometimes you need a `ServerRpc` to be callable from any client, not just the owner of the `NetworkBehaviour`, and you need to know which client sent the RPC. Use `requireAuthority = false` and include `INetworkPlayer sender = null` as a parameter.
 
-```csharp
-[Client]
-public void SendPublicMessage(string message) 
-{
-    // client side check before sending message
-    if (string.IsNullOrWhiteSpace(message) || message.Length > 100)
-        return;
-
-    CmdSendPublicMessage(message)
-}
-
-[ServerRpc(requireAuthority = false)]
-void CmdSendPublicMessage(string message, INetworkPlayer sender = null)
-{
-    if (string.IsNullOrWhiteSpace(message) || message.Length > 100)
-    {
-        // Invalid message length. this is very likely a cheat because message length is checked on client before
-        // how ever this is just chat message nothing not critical gameplay
-        // for example could be from chat mod with higher size that they left on after playing on a modded server
-        sender.SetError(50, PlayerErrorFlags.LikelyCheater); 
-        return;
-    }
-
-    if (CheckMessageRateLimit(sender)) 
-    {
-        // player sent more message than chat rate limit, just use low cost
-        sender.SetError(1, PlayerErrorFlags.None); 
-        return;
-    }
-
-    // ...
-}
-```
+{{{ Path:'Snippets/General/ErrorHandlingSnippets.cs' Name:'error-handling-public-message' }}}
 
 ## Custom Error Handling
 
@@ -175,42 +103,4 @@ This callback is best used alongside `NetworkAuthenticator` so that you can ban 
 
 You can check `player.ErrorFlags` to see how important the errors have been.
 
-```csharp
-using Mirage;
-using UnityEngine;
-
-public class MyGameServer : MonoBehaviour
-{
-    public NetworkServer server;
-
-    void Start()
-    {
-        server.SetErrorRateLimitReachedCallback(OnPlayerErrorLimitReached);
-    }
-
-    void OnPlayerErrorLimitReached(INetworkPlayer player)
-    {
-        Debug.LogWarning($"Player {player} reached error limit with flags: {player.ErrorFlags}");
-
-        if ((player.ErrorFlags & PlayerErrorFlags.Critical) != 0)
-        {
-            // For critical errors, always disconnect.
-            player.Disconnect();
-            
-            // ... add player to ban or timeout list here so they can't reconnect
-            
-            return;
-        }
-        else if ((player.ErrorFlags & MyErrorFlags.InvalidAction) != 0)
-        {
-            // For our custom action, maybe just send a warning.
-            // Note: You would need to implement the ChatMessage struct and its handler.
-            // player.Send(new ChatMessage("You are performing too many invalid actions."));
-        }
-        // ... other custom logic
-
-        // Reset flags after handling
-        player.ResetErrorFlag();
-    }
-}
-```
+{{{ Path:'Snippets/General/ErrorHandlingSnippets.cs' Name:'error-handling-custom-handler' }}}

@@ -17,27 +17,7 @@ Create a class that derives from SyncSortedSet for your specific type. This is n
 You need to initialize the SyncSortedSet immediately after the definition for them to work. You can mark them as `readonly` to enforce proper usage.
 :::
 
-```cs
-class Player : NetworkBehaviour {
-
-    class SyncSkillSet : SyncSortedSet<string> {}
-
-    readonly SyncSkillSet skills = new SyncSkillSet();
-
-    int skillPoints = 10;
-
-    [Command]
-    public void CmdLearnSkill(string skillName)
-    {
-        if (skillPoints > 1)
-        {
-            skillPoints--;
-
-            skills.Add(skillName);
-        }
-    }
-}
-```
+{{{ Path:'Snippets/Sync/SyncSortedSetExamples.cs' Name:'SyncSortedSetBasicExample' }}}
 
 You can also detect when a SyncSortedSet changes. This is useful for refreshing your character in the client or determining when you need to update your database. Subscribe to the Callback event typically during `Start`, `OnClientStart`, or `OnServerStart` for that. 
 
@@ -45,34 +25,4 @@ You can also detect when a SyncSortedSet changes. This is useful for refreshing 
 That by the time you subscribe, the set will already be initialized, so you will not get a call for the initial data, only updates.
 :::
 
-```cs
-public class Player : NetworkBehaviour
-{
-    private class SyncSetBuffs : SyncSortedSet<string> {};
-
-    private readonly SyncSetBuffs buffs = new SyncSetBuffs();
-
-    // This will add the delegate on the client.
-    // Use OnStartServer instead if you want it on the server
-    public override void OnStartClient()
-    {
-        buffs.Callback += OnBuffsChanged;
-    }
-
-    private void OnBuffsChanged(SyncSetBuffs.Operation op, string buff)
-    {
-        switch (op) 
-        {
-            case SyncSetBuffs.Operation.OP_ADD:
-                // we added a buff, draw an icon on the character
-                break;
-            case SyncSetBuffs.Operation.OP_CLEAR:
-                // clear all buffs from the character
-                break;
-            case SyncSetBuffs.Operation.OP_REMOVE:
-                // We removed a buff from the character
-                break;
-        }
-    }
-}
-```
+{{{ Path:'Snippets/Sync/SyncSortedSetExamples.cs' Name:'SyncSortedSetCallbackExample' }}}

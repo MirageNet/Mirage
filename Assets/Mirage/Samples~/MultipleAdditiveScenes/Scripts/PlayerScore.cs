@@ -5,16 +5,16 @@ namespace Mirage.Examples.MultipleAdditiveScenes
     public class PlayerScore : NetworkBehaviour
     {
         [SyncVar]
-        public int playerNumber;
+        public int playerNumber { get; set; }
 
         [SyncVar]
-        public int scoreIndex;
+        public int scoreIndex { get; set; }
 
         [SyncVar]
-        public int matchIndex;
+        public int matchIndex { get; set; }
 
         [SyncVar]
-        public uint score;
+        public uint score { get; set; }
 
         public int clientMatchIndex = -1;
 

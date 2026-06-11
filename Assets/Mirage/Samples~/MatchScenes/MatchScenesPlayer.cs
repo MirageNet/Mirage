@@ -5,7 +5,7 @@ namespace Mirage.Examples.MatchScenes
     public class MatchScenesPlayer : NetworkBehaviour
     {
         [SyncVar]
-        public Color color;
+        public Color color { get; set; }
 
         private void Awake()
         {

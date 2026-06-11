@@ -20,10 +20,10 @@ namespace Mirage.Weaver.NetworkBehaviours
 
         public List<FoundSyncVar> SyncVars { get; private set; } = new List<FoundSyncVar>();
 
-        public FoundSyncVar AddSyncVar(FieldDefinition fd)
+        public FoundSyncVar AddSyncVar(PropertyDefinition pd, FieldDefinition fd)
         {
             var dirtyIndex = syncVarCounter.GetInBase() + SyncVars.Count;
-            var syncVar = new FoundSyncVar(Module, this, fd, dirtyIndex);
+            var syncVar = new FoundSyncVar(Module, this, pd, fd, dirtyIndex);
             SyncVars.Add(syncVar);
             return syncVar;
         }

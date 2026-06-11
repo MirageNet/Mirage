@@ -7,7 +7,7 @@ namespace Mirage.Tests.Performance
 {
     public class Health : NetworkBehaviour
     {
-        [SyncVar] public int health = 10;
+        [SyncVar] public int health { get; set; } = 10;
 
         public void Update()
         {

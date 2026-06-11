@@ -9,7 +9,7 @@ namespace Mirage.Tests.Runtime.ClientServer
     public class SampleBehaviorWithGO : NetworkBehaviour
     {
         [SyncVar]
-        public GameObject target;
+        public GameObject target { get; set; }
     }
 
     public class GameObjectSyncvarTest : ClientServerSetup<SampleBehaviorWithGO>

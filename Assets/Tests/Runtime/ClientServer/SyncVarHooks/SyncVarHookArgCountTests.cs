@@ -10,7 +10,7 @@ namespace Mirage.Tests.Runtime.ClientServer.SyncVarHooks
     {
         public event Action onChangedCalled;
 
-        [SyncVar(hook = nameof(OnChange))] public int var;
+        [SyncVar(hook = nameof(OnChange))] public int var { get; set; }
 
         private void OnChange()
         {
@@ -21,14 +21,14 @@ namespace Mirage.Tests.Runtime.ClientServer.SyncVarHooks
     public class SyncVarHookWith0ArgEventBehaviour : NetworkBehaviour
     {
         public event Action OnChange;
-        [SyncVar(hook = nameof(OnChange))] public int var;
+        [SyncVar(hook = nameof(OnChange))] public int var { get; set; }
     }
 
     public class SyncVarHookWith1ArgBehaviour : NetworkBehaviour
     {
         public event Action<int> onChangedCalled;
 
-        [SyncVar(hook = nameof(OnChange))] public int var;
+        [SyncVar(hook = nameof(OnChange))] public int var { get; set; }
 
         private void OnChange(int newValue)
         {
@@ -39,7 +39,7 @@ namespace Mirage.Tests.Runtime.ClientServer.SyncVarHooks
     public class SyncVarHookWith1ArgEventBehaviour : NetworkBehaviour
     {
         public event Action<int> OnChange;
-        [SyncVar(hook = nameof(OnChange))] public int var;
+        [SyncVar(hook = nameof(OnChange))] public int var { get; set; }
     }
 
     public class SyncVarHookMethod0ArgWithOverLoadBehaviour : NetworkBehaviour
@@ -47,7 +47,7 @@ namespace Mirage.Tests.Runtime.ClientServer.SyncVarHooks
         public event Action onChangedCalled;
 
         [SyncVar(hook = nameof(OnChange), hookType = SyncHookType.MethodWith0Arg)]
-        public int var;
+        public int var { get; set; }
 
         private void OnChange()
         {
@@ -72,7 +72,7 @@ namespace Mirage.Tests.Runtime.ClientServer.SyncVarHooks
         public event Action<int> onChangedCalled;
 
         [SyncVar(hook = nameof(OnChange), hookType = SyncHookType.MethodWith1Arg)]
-        public int var;
+        public int var { get; set; }
 
         private void OnChange(int newValue)
         {
@@ -90,7 +90,7 @@ namespace Mirage.Tests.Runtime.ClientServer.SyncVarHooks
         public event Action<int> onChangedCalled;
 
         [SyncVar(hook = nameof(OnChange), hookType = SyncHookType.MethodWith2Arg)]
-        public int var;
+        public int var { get; set; }
 
         private void OnChange(int newValue)
         {

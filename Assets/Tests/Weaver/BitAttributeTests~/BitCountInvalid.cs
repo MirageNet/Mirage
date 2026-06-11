@@ -7,43 +7,43 @@ namespace BitAttributeTests.BitCountInvalid
     public class MyBehaviour : NetworkBehaviour
     {
         [BitCount(9)]
-        [SyncVar] public byte value1;
+        [SyncVar] public byte value1 { get; set; }
 
         [BitCount(17)]
-        [SyncVar] public short value2;
+        [SyncVar] public short value2 { get; set; }
 
         [BitCount(17)]
-        [SyncVar] public ushort value3;
+        [SyncVar] public ushort value3 { get; set; }
 
         [BitCount(33)]
-        [SyncVar] public int value4;
+        [SyncVar] public int value4 { get; set; }
 
         [BitCount(33)]
-        [SyncVar] public uint value5;
+        [SyncVar] public uint value5 { get; set; }
 
         [BitCount(65)]
-        [SyncVar] public long value6;
+        [SyncVar] public long value6 { get; set; }
 
         [BitCount(65)]
-        [SyncVar] public ulong value7;
+        [SyncVar] public ulong value7 { get; set; }
 
         [BitCount(9)]
-        [SyncVar] public MyByteEnum value8;
+        [SyncVar] public MyByteEnum value8 { get; set; }
 
         [BitCount(17)]
-        [SyncVar] public MyShortEnum value9;
+        [SyncVar] public MyShortEnum value9 { get; set; }
 
         [BitCount(33)]
-        [SyncVar] public MyIntEnum value10;
+        [SyncVar] public MyIntEnum value10 { get; set; }
 
         [BitCount(20)]
-        [SyncVar] public UnityEngine.Vector3 value11;
+        [SyncVar] public UnityEngine.Vector3 value11 { get; set; }
 
         [BitCount(0)]
-        [SyncVar] public int value12;
+        [SyncVar] public int value12 { get; set; }
 
         [BitCount(-1)]
-        [SyncVar] public int value13;
+        [SyncVar] public int value13 { get; set; }
     }
 
     public enum MyIntEnum

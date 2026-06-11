@@ -18,9 +18,8 @@ namespace Mirage
         private static readonly Dictionary<Guid, HashSet<NetworkIdentity>> matchPlayers = new Dictionary<Guid, HashSet<NetworkIdentity>>();
         private Guid currentMatch = Guid.Empty;
 
-        [Header("Diagnostics")]
         [SyncVar]
-        public string currentMatchDebug;
+        public string currentMatchDebug { get; set; }
 
         /// <summary>
         /// Set this to the same value on all networked objects that belong to a given match

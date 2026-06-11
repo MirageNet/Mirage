@@ -17,17 +17,16 @@ namespace Mirage.Examples.Tanks
         public GameObject projectilePrefab;
         public Transform projectileMount;
 
-        [Header("Game Stats")]
         [SyncVar]
-        public int health;
+        public int health { get; set; }
         [SyncVar]
-        public int score;
+        public int score { get; set; }
         [SyncVar]
-        public string playerName;
+        public string playerName { get; set; }
         [SyncVar]
-        public bool allowMovement;
+        public bool allowMovement { get; set; }
         [SyncVar]
-        public bool isReady;
+        public bool isReady { get; set; }
 
         public bool IsDead => health <= 0;
         public TextMesh nameText;

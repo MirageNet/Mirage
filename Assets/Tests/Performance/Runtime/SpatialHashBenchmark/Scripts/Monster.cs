@@ -1,5 +1,4 @@
 using System;
-using Mirage;
 using Mirage.SocketLayer;
 
 namespace Mirage.Tests.Performance.Runtime.SpatialHashBenchmark
@@ -7,9 +6,9 @@ namespace Mirage.Tests.Performance.Runtime.SpatialHashBenchmark
     public class Monster : NetworkBehaviour
     {
         [SyncVar]
-        public float Speed;
+        public float Speed { get; set; }
         [SyncVar]
-        public int Health;
+        public int Health { get; set; }
 
 
         public bool TakeDamage(int damage)

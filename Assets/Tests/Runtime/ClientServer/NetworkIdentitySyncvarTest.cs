@@ -8,7 +8,7 @@ namespace Mirage.Tests.Runtime.ClientServer
     public class SampleBehaviorWithNI : NetworkBehaviour
     {
         [SyncVar(hook = nameof(OnTargetChange))]
-        public NetworkIdentity target;
+        public NetworkIdentity target { get; set; }
 
         public void OnTargetChange(NetworkIdentity _, NetworkIdentity networkIdentity)
         {

@@ -14,7 +14,7 @@ namespace Mirage.Tests.Runtime.Generated.QuaternionPackAttributeTests._10_0
     public class BitPackBehaviour : NetworkBehaviour
     {
         [QuaternionPack(10)]
-        [SyncVar] public Quaternion myValue;
+        [SyncVar] public Quaternion MyValue { get; set; }
 
         public event Action<Quaternion> onRpc;
 
@@ -36,14 +36,14 @@ namespace Mirage.Tests.Runtime.Generated.QuaternionPackAttributeTests._10_0
     public struct BitPackMessage 
     {
         [QuaternionPack(10)] 
-        public Quaternion myValue;
+        public Quaternion MyValue;
     }
 
     [Serializable]
     public struct BitPackStruct
     {
         [QuaternionPack(10)] 
-        public Quaternion myValue;
+        public Quaternion MyValue;
     }
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
@@ -65,7 +65,7 @@ namespace Mirage.Tests.Runtime.Generated.QuaternionPackAttributeTests._10_0
         [Test]
         public void SyncVarIsBitPacked()
         {
-            serverComponent.myValue = value;
+            serverComponent.MyValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
@@ -78,7 +78,7 @@ namespace Mirage.Tests.Runtime.Generated.QuaternionPackAttributeTests._10_0
                     clientComponent.DeserializeSyncVars(reader, true);
                     Assert.That(reader.BitPosition, Is.EqualTo(32));
 
-                    AssertValue(clientComponent.myValue);
+                    AssertValue(clientComponent.MyValue);
                 }
             }
         }
@@ -117,7 +117,7 @@ namespace Mirage.Tests.Runtime.Generated.QuaternionPackAttributeTests._10_0
         {
             var inMessage = new BitPackMessage 
             {
-                myValue = value,
+                MyValue = value,
             };
 
             int payloadSize = 0;
@@ -147,7 +147,7 @@ namespace Mirage.Tests.Runtime.Generated.QuaternionPackAttributeTests._10_0
             // +2 for message header
             int expectedPayLoadSize = ((32 + 7) / 8) + 2;
             Assert.That(payloadSize, Is.EqualTo(expectedPayLoadSize), $"32 bits is {expectedPayLoadSize - 2} bytes in payload");
-            AssertValue(outMessage.myValue);
+            AssertValue(outMessage.MyValue);
         }
 
         [Test]
@@ -155,7 +155,7 @@ namespace Mirage.Tests.Runtime.Generated.QuaternionPackAttributeTests._10_0
         {
             var inStruct = new BitPackStruct 
             {
-                myValue = value,
+                MyValue = value,
             };
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
@@ -170,7 +170,7 @@ namespace Mirage.Tests.Runtime.Generated.QuaternionPackAttributeTests._10_0
                     var outStruct = reader.Read<BitPackStruct>();
                     Assert.That(reader.BitPosition, Is.EqualTo(32));
 
-                    AssertValue(outStruct.myValue);
+                    AssertValue(outStruct.MyValue);
                 }
             }
         }

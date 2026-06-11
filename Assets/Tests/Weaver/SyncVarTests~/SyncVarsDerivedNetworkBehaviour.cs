@@ -9,6 +9,6 @@ namespace SyncVarTests.SyncVarsDerivedNetworkBehaviour
     class SyncVarsDerivedNetworkBehaviour : NetworkBehaviour
     {
         [SyncVar]
-        MyBehaviour invalidVar;
+        MyBehaviour invalidVar { get; set; }
     }
 }

@@ -17,6 +17,6 @@ namespace GeneralTests.RecursionCount
         }
 
         [SyncVar]
-        Potato0 recursionTime;
+        Potato0 recursionTime { get; set; }
     }
 }

@@ -16,19 +16,7 @@ This page is a work in progress
 
   For example, Mirage will automatically create a function for `MyCustomStruct` so that it can be sent without any extra work.
 
-  ```cs
-  [ClientRpc]
-  public void RpcDoSomething(MyCustomStruct data)
-  {
-      // do stuff here
-  }
-
-  struct MyCustomStruct
-  {
-      int someNumber;
-      Vector3 somePosition;
-  }
-  ```
+{{{ Path:'Snippets/Guides/FaqSnippets.cs' Name:'faq-custom-data' }}}
 
   For More details 
   - [Data Types](/docs/guides/serialization/data-types)

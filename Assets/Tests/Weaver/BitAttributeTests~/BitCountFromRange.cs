@@ -7,25 +7,25 @@ namespace BitAttributeTests.BitCountFromRange
     public class MyBehaviour : NetworkBehaviour
     {
         [BitCountFromRange(-100, 100)]
-        [SyncVar] public int value1;
+        [SyncVar] public int value1 { get; set; }
 
         [BitCountFromRange(100, 1000)]
-        [SyncVar] public int value2;
+        [SyncVar] public int value2 { get; set; }
 
         [BitCountFromRange(0, 1000)]
-        [SyncVar] public uint value3;
+        [SyncVar] public uint value3 { get; set; }
 
         [BitCountFromRange(0, 250)]
-        [SyncVar] public byte value4;
+        [SyncVar] public byte value4 { get; set; }
 
         [BitCountFromRange(-1, 1)]
-        [SyncVar] public MyDirection value5;
+        [SyncVar] public MyDirection value5 { get; set; }
 
         [BitCountFromRange(0, 1)]
-        [SyncVar] public MyShortEnum value6;
+        [SyncVar] public MyShortEnum value6 { get; set; }
 
         [BitCountFromRange(0, 6)]
-        [SyncVar] public System.DayOfWeek value7;
+        [SyncVar] public System.DayOfWeek value7 { get; set; }
     }
 
     public enum MyDirection  {

@@ -15,7 +15,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.ulong_9
     public class BitPackBehaviour : NetworkBehaviour
     {
         [VarIntBlocks(9)]
-        [SyncVar] public ulong myValue;
+        [SyncVar] public ulong MyValue { get; set; }
 
         public event Action<ulong> onRpc;
 
@@ -37,14 +37,14 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.ulong_9
     public struct BitPackMessage 
     {
         [VarIntBlocks(9)] 
-        public ulong myValue;
+        public ulong MyValue;
     }
 
     [Serializable]
     public struct BitPackStruct
     {
         [VarIntBlocks(9)] 
-        public ulong myValue;
+        public ulong MyValue;
     }
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
@@ -70,7 +70,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.ulong_9
             ulong value = TestCase.value; 
             int expectedBitCount = TestCase.expectedBits;
 
-            serverComponent.myValue = value;
+            serverComponent.MyValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
@@ -83,7 +83,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.ulong_9
                     clientComponent.DeserializeSyncVars(reader, true);
                     Assert.That(reader.BitPosition, Is.EqualTo(expectedBitCount));
 
-                    Assert.That(clientComponent.myValue, Is.EqualTo(value));
+                    Assert.That(clientComponent.MyValue, Is.EqualTo(value));
                 }
             }
         }
@@ -128,7 +128,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.ulong_9
 
             var inMessage = new BitPackMessage 
             {
-                myValue = value,
+                MyValue = value,
             };
 
             int payloadSize = 0;
@@ -169,7 +169,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.ulong_9
 
             var inStruct = new BitPackStruct 
             {
-                myValue = value,
+                MyValue = value,
             };
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())

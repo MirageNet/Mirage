@@ -7,7 +7,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
     public class WithGenericSyncVar_behaviour<T> : NetworkBehaviour
     {
         [SyncVar]
-        public T value;
+        public T value { get; set; }
     }
 
     public class WithGenericSyncVar_behaviourInt : WithGenericSyncVar_behaviour<int>

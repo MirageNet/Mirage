@@ -28,13 +28,7 @@ This means that `BitCount` should not be used with values that can be negative b
 
 Health which is between 0 and 100
 
-```cs
-public class MyNetworkBehaviour : NetworkBehaviour 
-{
-    [SyncVar, BitCount(7)]
-    public int Health;
-}
-```
+{{{ Path:'Snippets/BitPacking/BitCountSnippets.cs' Name:'bit-count-example-1' }}}
 
 `BitCount = 7` so max value of Health is `127`
 
@@ -48,13 +42,7 @@ public class MyNetworkBehaviour : NetworkBehaviour
 ### Example 2
 
 Weapon index in a list of 6 weapons
-```cs
-public class MyNetworkBehaviour : NetworkBehaviour 
-{
-    [SyncVar, BitCount(3)]
-    public int WeaponIndex;
-}
-```
+{{{ Path:'Snippets/BitPacking/BitCountSnippets.cs' Name:'bit-count-example-2' }}}
 
 `BitCount = 3` so max value of Health is 7
 
@@ -64,50 +52,9 @@ public class MyNetworkBehaviour : NetworkBehaviour
 ### Generated Code
 
 Source:
-```cs 
-[SyncVar, BitCount(7)]
-public int myValue;
-```
+{{{ Path:'Snippets/BitPacking/BitCountSnippets.cs' Name:'bit-count-generated-source' }}}
 
 Generated:
-```cs
-public override bool SerializeSyncVars(NetworkWriter writer, bool initialState)
-{
-    ulong syncVarDirtyBits = base.SyncVarDirtyBits;
-    bool result = base.SerializeSyncVars(writer, initialize);
-
-    if (initialState) 
-    {
-        writer.Write((ulong)this.myValue, 7);
-        return true;
-    }
-
-    writer.Write(syncVarDirtyBits, 1);
-    if ((syncVarDirtyBits & 1UL) != 0UL)
-    {
-        writer.Write((ulong)this.myValue, 7);
-        result = true;
-    }
-
-    return result;
-}
-
-public override void DeserializeSyncVars(NetworkReader reader, bool initialState)
-{
-    base.DeserializeSyncVars(reader, initialState);
-
-    if (initialState)
-    {
-        this.myValue = reader.Read(7);
-        return;
-    }
-
-    ulong dirtyMask = reader.Read(1);
-    if ((dirtyMask & 1UL) != 0UL)
-    {
-        this.myValue = reader.Read(7);
-    }
-}
-```
+{{{ Path:'Snippets/BitPacking/BitCountSnippets.cs' Name:'bit-count-generated-code' }}}
 
 *Last updated for Mirage v101.8.0.*

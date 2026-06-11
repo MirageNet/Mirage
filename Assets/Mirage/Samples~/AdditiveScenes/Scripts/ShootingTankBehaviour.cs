@@ -7,7 +7,7 @@ namespace Mirage.Examples.Additive
     public class ShootingTankBehaviour : NetworkBehaviour
     {
         [SyncVar]
-        public Quaternion rotation;
+        public Quaternion rotation { get; set; }
         
         public Animator animator;
 

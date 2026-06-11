@@ -7,7 +7,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         public const Colors DefaultValue = Colors.Red;
 
         [SyncVar]
-        public Colors myColor = DefaultValue;
+        public Colors myColor { get; set; } = DefaultValue;
     }
 
     public enum Colors

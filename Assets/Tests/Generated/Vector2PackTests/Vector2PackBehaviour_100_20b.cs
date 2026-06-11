@@ -14,7 +14,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector2PackAttributeTests._100_20b
     public class BitPackBehaviour : NetworkBehaviour
     {
         [Vector2Pack(100f, 100f, 10)]
-        [SyncVar] public Vector2 myValue;
+        [SyncVar] public Vector2 MyValue { get; set; }
 
         public event Action<Vector2> onRpc;
 
@@ -36,14 +36,14 @@ namespace Mirage.Tests.Runtime.Generated.Vector2PackAttributeTests._100_20b
     public struct BitPackMessage 
     {
          [Vector2Pack(100f, 100f, 10)] 
-        public Vector2 myValue;
+        public Vector2 MyValue;
     }
 
     [Serializable]
     public struct BitPackStruct
     {
          [Vector2Pack(100f, 100f, 10)] 
-        public Vector2 myValue;
+        public Vector2 MyValue;
     }
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
@@ -60,7 +60,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector2PackAttributeTests._100_20b
         [Test]
         public void SyncVarIsBitPacked()
         {
-            serverComponent.myValue = value;
+            serverComponent.MyValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
@@ -73,7 +73,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector2PackAttributeTests._100_20b
                     clientComponent.DeserializeSyncVars(reader, true);
                     Assert.That(reader.BitPosition, Is.EqualTo(20));
 
-                    AssertValue(clientComponent.myValue);
+                    AssertValue(clientComponent.MyValue);
                 }
             }
         }
@@ -112,7 +112,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector2PackAttributeTests._100_20b
         {
             var inMessage = new BitPackMessage 
             {
-                myValue = value,
+                MyValue = value,
             };
 
             int payloadSize = 0;
@@ -142,7 +142,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector2PackAttributeTests._100_20b
             // +2 for message header
             int expectedPayLoadSize = ((20 + 7) / 8) + 2;
             Assert.That(payloadSize, Is.EqualTo(expectedPayLoadSize), $"20 bits is {expectedPayLoadSize - 2} bytes in payload");
-            AssertValue(outMessage.myValue);
+            AssertValue(outMessage.MyValue);
         }
 
         [Test]
@@ -150,7 +150,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector2PackAttributeTests._100_20b
         {
             var inStruct = new BitPackStruct 
             {
-                myValue = value,
+                MyValue = value,
             };
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
@@ -165,7 +165,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector2PackAttributeTests._100_20b
                     var outStruct = reader.Read<BitPackStruct>();
                     Assert.That(reader.BitPosition, Is.EqualTo(20));
 
-                    AssertValue(outStruct.myValue);
+                    AssertValue(outStruct.MyValue);
                 }
             }
         }

@@ -221,7 +221,7 @@ namespace Mirage.Tests.Weaver
         public void ExplicitEvent2NotFound()
         {
             HasError("Could not find hook for 'health', hook name 'onChangeHealth', hook type EventWith2Arg. See SyncHookType for valid signatures",
-                 $"System.Int32 {TypeName()}::health");
+                $"System.Int32 {TypeName()}::health");
         }
     }
 }

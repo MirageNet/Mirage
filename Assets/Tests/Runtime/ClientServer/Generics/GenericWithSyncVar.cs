@@ -7,21 +7,21 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
     // note, this can't be a behaviour by itself, it must have a child class in order to be used
     public class GenericWithSyncVarBase_behaviour<T> : NetworkBehaviour
     {
-        [SyncVar] public int baseValue;
+        [SyncVar] public int baseValue { get; set; }
 
     }
     public class GenericWithSyncVar_behaviour<T> : GenericWithSyncVarBase_behaviour<T>
     {
-        [SyncVar] public int value;
+        [SyncVar] public int value { get; set; }
     }
 
     public class GenericWithSyncVar_behaviourInt : GenericWithSyncVar_behaviour<int>
     {
-        [SyncVar] public int moreValue;
+        [SyncVar] public int moreValue { get; set; }
     }
     public class GenericWithSyncVar_behaviourObject : GenericWithSyncVar_behaviour<object>
     {
-        [SyncVar] public int moreValue;
+        [SyncVar] public int moreValue { get; set; }
     }
 
     public class GenericWithSyncVarInt : ClientServerSetup<GenericWithSyncVar_behaviourInt>

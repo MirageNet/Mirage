@@ -6,6 +6,6 @@ namespace SyncVarTests.SyncVarsUnityComponent
     class SyncVarsUnityComponent : NetworkBehaviour
     {
         [SyncVar]
-        TextMesh invalidVar;
+        TextMesh invalidVar { get; set; }
     }
 }

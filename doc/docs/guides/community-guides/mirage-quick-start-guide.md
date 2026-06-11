@@ -96,37 +96,7 @@ So this is very easy, just go to your `NetworkManager` GO and open (if it is not
 The last step we will need to do is simple: go to the script we created before (you can go into the assets folder and it will be there) and double click it and it will open your IDE. So what we will need to do is simple: tell how we are moving the user, and also to set the camera as a child of the player.
 
 We can do that simply like this:
-```cs
-using Mirage;
-using UnityEngine;
-
-namespace GettingStarted
-{
-    public class PlayerScript : NetworkBehaviour
-    {
-        private void Awake() {
-            Identity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
-        }
-
-        private void OnStartLocalPlayer()
-        {
-            Camera.main.transform.SetParent(transform);
-            Camera.main.transform.localPosition = new Vector3(0, 0, 0);
-        }
-
-        private void Update()
-        {
-            if (!IsLocalPlayer) { return; }
-
-            float moveX = Input.GetAxis("Horizontal") * Time.deltaTime * 110.0f;
-            float moveZ = Input.GetAxis("Vertical") * Time.deltaTime * 4f;
-
-            transform.Rotate(0, moveX, 0);
-            transform.Translate(0, 0, moveZ);
-        }
-    }
-}
-```
+{{{ Path:'Snippets/CommunityGuides/QuickStartGuide.cs' Name:'quickstart-playerscript-base' }}}
 
 Press play in Unity editor and... what happened? Why is our player don't spawning? 
 Well, the question is very simple. You need to start the server somehow, and that's what coming next, but before...
@@ -154,25 +124,7 @@ This one is pretty simple, we just need to go to our `NetworkManager` GO then
 - Create a new script, we can call it `StartServer`
 - Then server starts should look like this:
 
-```cs
-using Mirage;
-using UnityEngine;
-
-namespace GettingStarted
-{
-    public class StartServer : MonoBehaviour
-    {
-        [SerializeField] private NetworkManager networkManager;
-
-        private void Start() 
-        {
-            if (!networkManager) { return; }
-            
-            networkManager.Server.StartServer(networkManager.Client);
-        }
-    }
-}
-```
+{{{ Path:'Snippets/CommunityGuides/QuickStartGuide.cs' Name:'quickstart-startserver' }}}
 
 After we save the file, we go back into our `NetworkManager` GO, and assign the NetworkManager field to the script.
 
@@ -197,81 +149,7 @@ Player name above heads
 ![](/img/guides/community-guides/mirage-quick-start-guide/image--008.jpg)
 
 Update your PlayerScript.cs with this:
-```cs
-using Mirage;
-using UnityEngine;
-
-namespace QuickStart
-{
-    public class PlayerScript : NetworkBehaviour
-    {
-        public TextMesh playerNameText;
-        public GameObject floatingInfo;
-
-        private Material playerMaterialClone;
-
-        [SyncVar(hook = nameof(OnNameChanged))]
-        public string playerName;
-
-        [SyncVar(hook = nameof(OnColorChanged))]
-        public Color playerColor = Color.white;
-
-        [ServerRpc]
-        public void CmdSetupPlayer(string _name, Color _col)
-        {
-            // player info sent to server, then server updates sync vars which handles it on all clients
-            playerName = _name;
-            playerColor = _col;
-        }
-
-        private void Awake() {
-            Identity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
-        }
-
-        private void OnStartLocalPlayer()
-        {
-            Camera.main.transform.SetParent(transform);
-            Camera.main.transform.localPosition = new Vector3(0, 0, 0);
-            
-            floatingInfo.transform.localPosition = new Vector3(0, -0.3f, 0.6f);
-            floatingInfo.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-
-            string name = "Player" + Random.Range(100, 999);
-            Color color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f))
-            CmdSetupPlayer(name, color);
-        }
-
-        private void OnNameChanged(string _Old, string _New)
-        {
-            playerNameText.text = playerName;
-        }
-
-        private void OnColorChanged(Color _Old, Color _New)
-        {
-            playerNameText.color = _New;
-            playerMaterialClone = new Material(GetComponent<Renderer>().material);
-            playerMaterialClone.color = _New;
-            GetComponent<Renderer>().material = playerMaterialClone;
-        }
-
-        private void Update()
-        {
-            if (!IsLocalPlayer)
-            {
-                // make non-local players run this
-                floatingInfo.transform.LookAt(Camera.main.transform);
-                return;
-            }
-
-            float moveX = Input.GetAxis("Horizontal") * Time.deltaTime * 110.0f;
-            float moveZ = Input.GetAxis("Vertical") * Time.deltaTime * 4f;
-
-            transform.Rotate(0, moveX, 0);
-            transform.Translate(0, 0, moveZ);
-        }
-    }
-}
-```
+{{{ Path:'Snippets/CommunityGuides/QuickStartGuide.cs' Name:'quickstart-playerscript-names' }}}
 
 Add the `PlayerNameText` and `FloatingInfo` objects into the script on the player prefab, as shown below.
 
@@ -297,70 +175,11 @@ Then create a Canvas with text and a button, similar to the image below.
 
 Add the sceneScript variable, Awake function, and CmdSendPlayerMessage to PlayerScript.cs
 Also add the new playerName joined line to CmdSetupPlayer();
-```cs
-private SceneScript sceneScript;
-
-void Awake()
-{
-    //allow all players to run this
-    sceneScript = GameObject.FindObjectOfType<SceneScript>();
-    Identity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
-}
-[ServerRpc]
-public void CmdSendPlayerMessage()
-{
-    if (sceneScript) 
-    { 
-        sceneScript.statusText = $"{playerName} says hello {Random.Range(10, 99)}";
-    }
-}
-[ServerRpc]
-public void CmdSetupPlayer(string _name, Color _col)
-{
-    //player info sent to server, then server updates sync vars which handles it on all clients
-    playerName = _name;
-    playerColor = _col;
-    sceneScript.statusText = $"{playerName} joined.";
-}
-public void OnStartLocalPlayer()
-{
-    sceneScript.playerScript = this;
-    //. . . . ^ new line to add here
-```
+{{{ Path:'Snippets/CommunityGuides/QuickStartGuide.cs' Name:'quickstart-playerscript-part11' }}}
 
 Add this code to SceneScript.cs
 
-```cs
-using Mirage;
-using UnityEngine;
-using UnityEngine.UI;
-
-namespace QuickStart
-{
-    public class SceneScript : NetworkBehaviour
-    {
-        public Text canvasStatusText;
-        public PlayerScript playerScript;
-
-        [SyncVar(hook = nameof(OnStatusTextChanged))]
-        public string statusText;
-
-        void OnStatusTextChanged(string _Old, string _New)
-        {
-            //called from sync var hook, to update info on screen for all players
-            canvasStatusText.text = statusText;
-        }
-
-        public void ButtonSendMessage()
-        {
-            if (playerScript != null)  
-            {
-                playerScript.CmdSendPlayerMessage();
-            }
-        }
-    }
-}
-```
+{{{ Path:'Snippets/CommunityGuides/QuickStartGuide.cs' Name:'quickstart-scenescript' }}}
 
 
 - Attach the ButtonSendMessage function to your Canvas Button.
@@ -387,78 +206,9 @@ Experiment and adjust, have fun!
 Weapon switching! The code bits.
 
 Add the following to your PlayerScript.cs
-```cs
-private int selectedWeaponLocal = 1;
-public GameObject[] weaponArray;
-
-[SyncVar(hook = nameof(OnWeaponChanged))]
-public int activeWeaponSynced;
-
-void OnWeaponChanged(int _Old, int _New)
-{
-    // disable old weapon
-    // in range and not null
-    if (0 < _Old && _Old < weaponArray.Length && weaponArray[_Old] != null)
-    {
-        weaponArray[_Old].SetActive(false);
-    }
-    
-    // enable new weapon
-    // in range and not null
-    if (0 < _New && _New < weaponArray.Length && weaponArray[_New] != null)
-    {
-        weaponArray[_New].SetActive(true);
-    }
-}
-
-[ServerRpc]
-public void CmdChangeActiveWeapon(int newIndex)
-{
-    activeWeaponSynced = newIndex;
-}
-
-void Awake() 
-{
-    // disable all weapons
-    foreach (var item in weaponArray)
-    {
-        if (item != null)
-        { 
-            item.SetActive(false); 
-        }
-    }
-}
-```
+{{{ Path:'Snippets/CommunityGuides/QuickStartGuide.cs' Name:'quickstart-playerscript-weaponswitch' }}}
 Add the weapon switch button in `Update`. Only the local player switches its own weapon, so it goes below the `!IsLocalPlayer` check.
-```cs
-void Update()
-{
-    if (!IsLocalPlayer)
-    {
-        // make non-local players run this
-        floatingInfo.transform.LookAt(Camera.main.transform);
-        return;
-    }
-
-    float moveX = Input.GetAxis("Horizontal") * Time.deltaTime * 110.0f;
-    float moveZ = Input.GetAxis("Vertical") * Time.deltaTime * 4f;
-
-    transform.Rotate(0, moveX, 0);
-    transform.Translate(0, 0, moveZ);
-
-    if (Input.GetButtonDown("Fire2")) //Fire2 is mouse 2nd click and left alt
-    {
-        selectedWeaponLocal += 1;
-
-        if (selectedWeaponLocal > weaponArray.Length) 
-        {
-            selectedWeaponLocal = 1; 
-        }
-
-        CmdChangeActiveWeapon(selectedWeaponLocal);
-    }
-}
-```
+{{{ Path:'Snippets/CommunityGuides/QuickStartGuide.cs' Name:'quickstart-playerscript-weaponswitch-update' }}}
 
 Weapon models
 

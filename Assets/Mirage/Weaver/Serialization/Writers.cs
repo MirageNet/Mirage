@@ -156,6 +156,11 @@ namespace Mirage.Weaver
                 var fieldType = fieldDef.GetFieldTypeIncludingGeneric(type);
                 var fieldRef = module.ImportField(fieldDef, type);
 
+                if (fieldType.IsUnsafeClass(fieldDef))
+                {
+                    logger.Warning($"{fieldDef.Name} is a class. Serializing classes in messages can allocate and are difficult to track changes for. Consider using a struct instead, or mark the class or field with [WeaverSafeClass] if it is custom serialized.", fieldDef);
+                }
+
                 var valueSerialize = ValueSerializerFinder.GetSerializer(module, fieldDef, fieldType, this, null);
                 valueSerialize.AppendWriteField(module, writerFunc.worker, writerFunc.writerParameter, writerFunc.typeParameter, fieldRef);
             }

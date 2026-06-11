@@ -7,12 +7,12 @@ namespace NetworkBehaviourTests.NetworkBehaviourAbstractBaseValid
     public class EntityConcrete : EntityBase
     {
         [SyncVar]
-        public int abstractDerivedSync;
+        public int abstractDerivedSync { get; set; }
     }
 
     public class NetworkBehaviourAbstractBaseValid : EntityConcrete
     {
         [SyncVar]
-        public int concreteDerivedSync;
+        public int concreteDerivedSync { get; set; }
     }
 }

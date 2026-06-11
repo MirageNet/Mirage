@@ -16,7 +16,6 @@ namespace Mirage.Weaver
         {
             Console.Write($"[Weaver.SerializeFunction] {msg}\n");
         }
-
         /// <summary>Concrete type serialization function lookup.</summary>
         protected readonly Dictionary<TypeReference, MethodReference> functionLookup = new Dictionary<TypeReference, MethodReference>(new TypeReferenceComparer());
         /// <summary>Open generic serialization helper method lookup.</summary>
@@ -25,7 +24,7 @@ namespace Mirage.Weaver
         protected readonly Dictionary<TypeReference, MethodReference> functionWithLengthLookup = new Dictionary<TypeReference, MethodReference>(new TypeReferenceComparer());
         /// <summary>Open generic length-limited serialization helper method lookup.</summary>
         protected readonly Dictionary<TypeDefinition, MethodReference> genericWithLengthLookup = new Dictionary<TypeDefinition, MethodReference>(new TypeReferenceComparer());
-        private readonly IWeaverLogger logger;
+        protected readonly IWeaverLogger logger;
         protected readonly ModuleDefinition module;
 
         /// <summary>Count used to see if we generated any new ones, meaning the dll is changed and needs writing</summary>
@@ -102,14 +101,14 @@ namespace Mirage.Weaver
         /// </summary>
         /// <param name="typeReference"></param>
         /// <param name="sequencePoint"></param>
-        /// <returns>found methohd or null</returns>
+        /// <returns>found method or null</returns>
         public MethodReference TryGetFunction(TypeReference typeReference, SequencePoint sequencePoint)
         {
             try
             {
                 return GetFunction_Throws(typeReference);
             }
-            catch (SerializeFunctionException e)
+            catch (WeaverException e)
             {
                 logger.Error(e, sequencePoint);
                 return null;

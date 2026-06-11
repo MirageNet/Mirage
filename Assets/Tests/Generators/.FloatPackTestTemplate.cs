@@ -14,7 +14,7 @@ namespace Mirage.Tests.Runtime.Generated.FloatPackAttributeTests.%%NAME%%
     public class BitPackBehaviour : NetworkBehaviour
     {
         [FloatPack(%%PACKER_ATTRIBUTE%%)]
-        [SyncVar] public float myValue;
+        [SyncVar] public float MyValue { get; set; }
 
         public event Action<float> onRpc;
 
@@ -36,14 +36,14 @@ namespace Mirage.Tests.Runtime.Generated.FloatPackAttributeTests.%%NAME%%
     public struct BitPackMessage 
     {
         [FloatPack(%%PACKER_ATTRIBUTE%%)] 
-        public float myValue;
+        public float MyValue;
     }
 
     [Serializable]
     public struct BitPackStruct
     {
         [FloatPack(%%PACKER_ATTRIBUTE%%)] 
-        public float myValue;
+        public float MyValue;
     }
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
@@ -54,7 +54,7 @@ namespace Mirage.Tests.Runtime.Generated.FloatPackAttributeTests.%%NAME%%
         [Test]
         public void SyncVarIsBitPacked()
         {
-            serverComponent.myValue = value;
+            serverComponent.MyValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
@@ -67,7 +67,7 @@ namespace Mirage.Tests.Runtime.Generated.FloatPackAttributeTests.%%NAME%%
                     clientComponent.DeserializeSyncVars(reader, true);
                     Assert.That(reader.BitPosition, Is.EqualTo(%%BIT_COUNT%%));
 
-                    Assert.That(clientComponent.myValue, Is.EqualTo(value).Within(within));
+                    Assert.That(clientComponent.MyValue, Is.EqualTo(value).Within(within));
                 }
             }
         }
@@ -106,7 +106,7 @@ namespace Mirage.Tests.Runtime.Generated.FloatPackAttributeTests.%%NAME%%
         {
             var inMessage = new BitPackMessage 
             {
-                myValue = value,
+                MyValue = value,
             };
 
             int payloadSize = 0;
@@ -136,7 +136,7 @@ namespace Mirage.Tests.Runtime.Generated.FloatPackAttributeTests.%%NAME%%
             // +2 for message header
             int expectedPayLoadSize = ((%%BIT_COUNT%% + 7) / 8) + 2;
             Assert.That(payloadSize, Is.EqualTo(expectedPayLoadSize), $"%%BIT_COUNT%% bits is {expectedPayLoadSize - 2} bytes in payload");
-            Assert.That(outMessage.myValue, Is.EqualTo(inMessage.myValue).Within(within));
+            Assert.That(outMessage.MyValue, Is.EqualTo(inMessage.MyValue).Within(within));
         }
 
         [Test]
@@ -144,7 +144,7 @@ namespace Mirage.Tests.Runtime.Generated.FloatPackAttributeTests.%%NAME%%
         {
             var inStruct = new BitPackStruct 
             {
-                myValue = value,
+                MyValue = value,
             };
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
@@ -159,7 +159,7 @@ namespace Mirage.Tests.Runtime.Generated.FloatPackAttributeTests.%%NAME%%
                     var outStruct = reader.Read<BitPackStruct>();
                     Assert.That(reader.BitPosition, Is.EqualTo(%%BIT_COUNT%%));
 
-                    Assert.That(outStruct.myValue, Is.EqualTo(inStruct.myValue).Within(within));
+                    Assert.That(outStruct.MyValue, Is.EqualTo(inStruct.MyValue).Within(within));
                 }
             }
         }

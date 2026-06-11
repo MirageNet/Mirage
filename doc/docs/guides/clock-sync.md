@@ -6,9 +6,7 @@ sidebar_position: 5
 For many features, you need the clock to be synchronized between the client and the server. Mirage does that automatically for you.
 
 To get the current time use this code:
-```cs
-double now = NetworkTime.Time;
-```
+{{{ Path:'Snippets/General/ClockSyncSnippets.cs' Name:'clock-sync-time' }}}
 
 It will return the same value on the client and the server. It starts at 0 when the server starts. 
 
@@ -23,9 +21,7 @@ The time is a double and should never be cast to a float. Casting this down to a
 
 Mirage will also calculate the **Return Trip Time** as seen by the application:
 
-```cs
-double rtt = NetworkTime.Rtt;
-```
+{{{ Path:'Snippets/General/ClockSyncSnippets.cs' Name:'clock-sync-rtt' }}}
 
 :::note
 Return RTT will also be affected by the frame rate. A higher frame rate will mean less delay before the server reads the ping message and replies. 
@@ -33,23 +29,17 @@ Return RTT will also be affected by the frame rate. A higher frame rate will mea
 
 You can check the precision using:
 
-```cs
-double timeStandardDeviation = NetworkTime.TimeSd;
-```
+{{{ Path:'Snippets/General/ClockSyncSnippets.cs' Name:'clock-sync-time-sd' }}}
 
 For example, if this returns 0.2, it means the time measurements swing up and down roughly 0.2 seconds.
 
 Network time is smoothing out the values using [Exponential moving average](https://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average). 
 You can configure how often you want the client to send pings using:
 
-```cs
-NetworkTime.PingInterval = 2.0f;
-```
+{{{ Path:'Snippets/General/ClockSyncSnippets.cs' Name:'clock-sync-ping-interval' }}}
 
 You can configure how quickly results will change using:
 
-```cs
-NetworkTime.PingWindowSize = 10;
-```
+{{{ Path:'Snippets/General/ClockSyncSnippets.cs' Name:'clock-sync-ping-window-size' }}}
 
 A higher number will result in smoother results, but a longer time to adjust to changes.

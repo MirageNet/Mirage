@@ -9,13 +9,13 @@ namespace Mirage.Tests.Runtime.ClientServer
     public class GenericBehaviourWithSyncVarNoMiddleBase<T> : NetworkBehaviour
     {
         [SyncVar]
-        public int baseValue = 0;
+        public int baseValue { get; set; } = 0;
         [SyncVar(hook = nameof(OnSyncedBaseValueWithHook))]
-        public int baseValueWithHook = 0;
+        public int baseValueWithHook { get; set; } = 0;
         [SyncVar]
-        public NetworkBehaviour target;
+        public NetworkBehaviour target { get; set; }
         [SyncVar]
-        public NetworkIdentity targetIdentity;
+        public NetworkIdentity targetIdentity { get; set; }
 
         public Action<int, int> onBaseValueChanged;
 
@@ -39,13 +39,13 @@ namespace Mirage.Tests.Runtime.ClientServer
     public class GenericBehaviourWithSyncVarNoMiddleImplement : GenericBehaviourWithSyncVarNoMiddleMiddle<UnityEngine.Vector3>
     {
         [SyncVar]
-        public int implementValue = 0;
+        public int implementValue { get; set; } = 0;
         [SyncVar(hook = nameof(OnSyncedImplementValueWithHook))]
-        public int implementValueWithHook = 0;
+        public int implementValueWithHook { get; set; } = 0;
         [SyncVar]
-        public NetworkBehaviour implementTarget;
+        public NetworkBehaviour implementTarget { get; set; }
         [SyncVar]
-        public NetworkIdentity implementIdentity;
+        public NetworkIdentity implementIdentity { get; set; }
 
         public Action<int, int> onImplementValueChanged;
 

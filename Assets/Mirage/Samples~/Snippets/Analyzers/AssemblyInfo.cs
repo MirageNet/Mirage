@@ -1,0 +1,1 @@
+[assembly: Mirage.Serialization.WeaverIgnore]

@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.5.11716.220
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mirage.Analyzers", "Mirage.Analyzers\Mirage.Analyzers.csproj", "{F8AD7409-6FB0-5775-D080-236CB9B32B00}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mirage.Analyzers.Tests", "Mirage.Analyzers.Tests\Mirage.Analyzers.Tests.csproj", "{848E7273-08A6-A8DF-F745-3425A250804B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F8AD7409-6FB0-5775-D080-236CB9B32B00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8AD7409-6FB0-5775-D080-236CB9B32B00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8AD7409-6FB0-5775-D080-236CB9B32B00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8AD7409-6FB0-5775-D080-236CB9B32B00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{848E7273-08A6-A8DF-F745-3425A250804B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{848E7273-08A6-A8DF-F745-3425A250804B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{848E7273-08A6-A8DF-F745-3425A250804B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{848E7273-08A6-A8DF-F745-3425A250804B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FDC630C9-3AAE-4DEC-9F37-4C43126676EB}
+	EndGlobalSection
+EndGlobal

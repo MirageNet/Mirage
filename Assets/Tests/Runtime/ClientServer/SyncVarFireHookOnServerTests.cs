@@ -9,7 +9,7 @@ namespace Mirage.Tests.Runtime.ClientServer
     public class BehaviourWithSyncVarOnServerEvent : NetworkBehaviour
     {
         [SyncVar(hook = nameof(OnHealthChanged), invokeHookOnServer = true)]
-        public int health;
+        public int health { get; set; }
 
         public event Action<int, int> OnHealthChanged;
     }
@@ -17,7 +17,7 @@ namespace Mirage.Tests.Runtime.ClientServer
     public class BehaviourWithSyncVarOnServerMethod : NetworkBehaviour
     {
         [SyncVar(hook = nameof(OnHealthChanged), invokeHookOnServer = true)]
-        public int health;
+        public int health { get; set; }
 
         public int called = 0;
 

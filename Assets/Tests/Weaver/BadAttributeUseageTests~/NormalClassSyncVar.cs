@@ -6,6 +6,6 @@ namespace BadAttributeUseageTests.NormalClassSyncVar
     class NormalClassSyncVar
     {
         [SyncVar]
-        int potato;
+        int potato { get; set; }
     }
 }

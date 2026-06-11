@@ -11,7 +11,7 @@ For the most part, we recommend the high-level [ServerRpc](/docs/guides/remote-a
 4. Use the `Send()` method on the [NetworkClient](/docs/reference/Mirage/NetworkClient), [NetworkServer](/docs/reference/Mirage/NetworkServer), or [NetworkPlayer](/docs/reference/Mirage/NetworkPlayer) classes depending on which way you want to send the message.
 
 ## Example
-{{{ Path:'Snippets/SendNetworkMessage.cs' Name:'send-score' }}}
+{{{ Path:'Snippets/Messaging/SendNetworkMessage.cs' Name:'send-score' }}}
 
 Note that there is no serialization code for the `ScoreMessage` struct in this source code example. Mirage will generate a reader and writer for ScoreMessage when it sees that it is being sent.
 

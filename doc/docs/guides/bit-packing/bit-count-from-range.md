@@ -29,13 +29,7 @@ Values are written using `Write(value - min, bitCount)` and read using `value = 
 
 A modifier that can add to a character value to increase or decrease it
 
-```cs
-public class MyNetworkBehaviour : NetworkBehaviour 
-{
-    [SyncVar, BitCountFromRange(-100, 100)]
-    public int modifier;
-}
-```
+{{{ Path:'Snippets/BitPacking/BitCountFromRangeSnippets.cs' Name:'bit-count-from-range-example-1' }}}
 
 `Range = 200` so bit count is 8, causing the real range to be -100 to 155
 
@@ -54,19 +48,7 @@ public class MyNetworkBehaviour : NetworkBehaviour
 
 A Direction enum to say which way a model is facing
 
-```cs
-public enum MyDirection
-{
-    Backwards = -1,
-    None = 0,
-    Forwards = 1,
-}
-public class MyNetworkBehaviour : NetworkBehaviour 
-{
-    [SyncVar, BitCount(-1, 1)]
-    public MyDirection direction;
-}
-```
+{{{ Path:'Snippets/BitPacking/BitCountFromRangeSnippets.cs' Name:'bit-count-from-range-example-2' }}}
 
 `Range = 3` so bit count is `2`, causing the real range to be -1 to 2
 
@@ -78,50 +60,9 @@ public class MyNetworkBehaviour : NetworkBehaviour
 ### Generated Code
 
 Source:
-```cs 
-[SyncVar, BitCountFromRange(-100, 100)]
-public int myValue;
-```
+{{{ Path:'Snippets/BitPacking/BitCountFromRangeSnippets.cs' Name:'bit-count-from-range-generated-source' }}}
 
 Generated:
-```cs
-public override bool SerializeSyncVars(NetworkWriter writer, bool initialState)
-{
-    ulong syncVarDirtyBits = base.SyncVarDirtyBits;
-    bool result = base.SerializeSyncVars(writer, initialize);
-
-    if (initialState) 
-    {
-        writer.Write((ulong)(this.myValue - (-100)), 8);
-        return true;
-    }
-
-    writer.Write(syncVarDirtyBits, 1);
-    if ((syncVarDirtyBits & 1UL) != 0UL)
-    {
-        writer.Write((ulong)(this.myValue - (-100)), 8);
-        result = true;
-    }
-
-    return result;
-}
-
-public override void DeserializeSyncVars(NetworkReader reader, bool initialState)
-{
-    base.DeserializeSyncVars(reader, initialState);
-
-    if (initialState)
-    {
-        this.myValue = reader.Read(8) + (-100);
-        return;
-    }
-    
-    ulong dirtyMask = reader.Read(1);
-    if ((dirtyMask & 1UL) != 0UL)
-    {
-        this.myValue = reader.Read(8) + (-100);
-    }
-}
-```
+{{{ Path:'Snippets/BitPacking/BitCountFromRangeSnippets.cs' Name:'bit-count-from-range-generated-code' }}}
 
 *last updated for Mirage v101.8.0*

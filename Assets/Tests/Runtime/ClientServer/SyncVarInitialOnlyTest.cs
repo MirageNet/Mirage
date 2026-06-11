@@ -9,13 +9,13 @@ namespace Mirage.Tests.Runtime.ClientServer
     public class SyncVarInitialOnly : NetworkBehaviour
     {
         [SyncVar(initialOnly = true)]
-        public int weaponIndex = 1;
+        public int weaponIndex { get; set; } = 1;
 
         [SyncVar]
-        public int health = 100;
+        public int health { get; set; } = 100;
 
         [SyncVar(initialOnly = true)]
-        public float otherValue = 13f;
+        public float otherValue { get; set; } = 13f;
     }
 
     public class SyncVarInitialOnlyTest : ClientServerSetup<SyncVarInitialOnly>

@@ -22,62 +22,25 @@ With a proxy object, the player's persistent state lives on a simple `NetworkBeh
 
 Create a prefab with just a `NetworkIdentity` and your `PlayerContext` script. This prefab does not need any visual representation.
 
-```cs
-public class PlayerContext : NetworkBehaviour
-{
-    [SyncVar] public string PlayerName;
-    [SyncVar] public string Team;
-
-    // easy access to the gameplay character via NetworkPlayer.Identity
-    [SyncVar] public PlayerCharacter ActiveCharacter;
-}
-```
+{{{ Path:'Snippets/GameObjects/PlayerContext.cs' Name:'player-proxy-context' }}}
 
 ### 2. Create the Gameplay Character Prefab
 
 This is your normal player character with movement, visuals, etc. It does not use `IsLocalPlayer` — instead it uses `HasAuthority` to check for local control.
 
-```cs
-public class PlayerCharacter : NetworkBehaviour
-{
-    void Update()
-    {
-        // use HasAuthority, not IsLocalPlayer
-        if (!HasAuthority)
-            return;
-
-        // handle input and movement
-    }
-}
-```
+{{{ Path:'Snippets/GameObjects/PlayerCharacter.cs' Name:'player-proxy-character' }}}
 
 ### 3. Spawn the Proxy on Connect
 
 When a player connects, spawn the proxy as their character using `AddCharacter`. This proxy persists for the entire session.
 
-```cs
-private void OnServerAuthenticated(INetworkPlayer player)
-{
-    var proxy = Instantiate(PlayerProxyPrefab);
-    ServerObjectManager.AddCharacter(player, proxy.gameObject);
-}
-```
+{{{ Path:'Snippets/GameObjects/PlayerProxyManager.cs' Name:'player-proxy-spawn-proxy' }}}
 
 ### 4. Spawn the Gameplay Character Separately
 
 When entering gameplay (e.g. after scene load, match start), spawn the gameplay character and grant authority to the player.
 
-```cs
-private void SpawnGameplayCharacter(INetworkPlayer player)
-{
-    var proxy = player.Identity.GetComponent<PlayerContext>();
-
-    var character = Instantiate(CharacterPrefab, spawnPoint.position, spawnPoint.rotation);
-    ServerObjectManager.Spawn(character.Identity, player);
-
-    proxy.ActiveCharacter = character;
-}
-```
+{{{ Path:'Snippets/GameObjects/PlayerProxyManager.cs' Name:'player-proxy-spawn-character' }}}
 
 :::note
 The gameplay character is spawned with `Spawn(identity, owner)` which grants authority to the player, rather than `AddCharacter` which would replace the proxy.
@@ -87,17 +50,4 @@ The gameplay character is spawned with `Spawn(identity, owner)` which grants aut
 
 Because the proxy is the player's `Identity`, you can destroy and re-create gameplay characters without affecting the player's connection or persistent state.
 
-```cs
-private void RespawnCharacter(INetworkPlayer player)
-{
-    var proxy = player.Identity.GetComponent<PlayerContext>();
-
-    if (proxy.ActiveCharacter != null)
-    {
-        Server.Destroy(proxy.ActiveCharacter.gameObject);
-        proxy.ActiveCharacter = null;
-    }
-
-    SpawnGameplayCharacter(player);
-}
-```
+{{{ Path:'Snippets/GameObjects/PlayerProxyManager.cs' Name:'player-proxy-respawn' }}}

@@ -4,7 +4,7 @@ public class AddChild : NetworkBehaviour
 {
     public NetworkIdentity prefab;
     [SyncVar]
-    private NetworkIdentity clone;
+    private NetworkIdentity clone { get; set; }
 
     private void Awake()
     {

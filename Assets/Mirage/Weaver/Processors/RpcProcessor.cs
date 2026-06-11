@@ -308,6 +308,10 @@ namespace Mirage.Weaver
             {
                 var genericReturnType = (GenericInstanceType)returnType;
                 var genericArg = genericReturnType.GenericArguments[0];
+
+                if (genericArg.IsUnsafeClass(md))
+                    logger.Warning($"Return type UniTask<{genericArg.Name}> is a class. RPC return values that are classes can allocate. Consider using a struct instead, or mark the class or method with [WeaverSafeClass] if it is custom serialized.", md);
+
                 // ensure serialize functions exist
                 _ = writers.GetFunction_Throws(genericArg);
                 _ = readers.GetFunction_Throws(genericArg);
@@ -349,6 +353,9 @@ namespace Mirage.Weaver
             {
                 throw new RpcException($"{method.Name} cannot have optional parameters", method);
             }
+
+            if (param.ParameterType.IsUnsafeClass(param))
+                logger.Warning($"{param.Name} is a class. RPC parameters that are classes can allocate. Consider using a struct instead, or mark the class or parameter with [WeaverSafeClass] if it is custom serialized.", method);
         }
 
 

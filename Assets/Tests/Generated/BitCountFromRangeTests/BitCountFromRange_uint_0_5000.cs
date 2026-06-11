@@ -15,7 +15,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.uint_0_
     public class BitPackBehaviour : NetworkBehaviour
     {
         [BitCountFromRange(0, 5000)]
-        [SyncVar] public uint myValue;
+        [SyncVar] public uint MyValue { get; set; }
 
         public event Action<uint> onRpc;
 
@@ -37,14 +37,14 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.uint_0_
     public struct BitPackMessage 
     {
         [BitCountFromRange(0, 5000)]
-        public uint myValue;
+        public uint MyValue;
     }
 
     [Serializable]
     public struct BitPackStruct
     {
         [BitCountFromRange(0, 5000)]
-        public uint myValue;
+        public uint MyValue;
     }
     
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
@@ -54,7 +54,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.uint_0_
         [Test]
         public void SyncVarIsBitPacked()
         {
-            serverComponent.myValue = value;
+            serverComponent.MyValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
@@ -67,7 +67,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.uint_0_
                     clientComponent.DeserializeSyncVars(reader, true);
                     Assert.That(reader.BitPosition, Is.EqualTo(13));
 
-                    Assert.That(clientComponent.myValue, Is.EqualTo(value));
+                    Assert.That(clientComponent.MyValue, Is.EqualTo(value));
                 }
             }
         }
@@ -106,7 +106,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.uint_0_
         {
             var inMessage = new BitPackMessage 
             {
-                myValue = value,
+                MyValue = value,
             };
 
             int payloadSize = 0;
@@ -144,7 +144,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.uint_0_
         {
             var inStruct = new BitPackStruct 
             {
-                myValue = value,
+                MyValue = value,
             };
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())

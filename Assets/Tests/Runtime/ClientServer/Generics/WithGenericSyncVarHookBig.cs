@@ -12,7 +12,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         public event Action<T, T> hookMethod;
 
         [SyncVar(hook = nameof(onValueChanged))]
-        public T value1;
+        public T value1 { get; set; }
 
         private void onValueChanged(T oldValue, T newValue)
         {
@@ -22,11 +22,11 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         public event Action<T, T> hookEvent;
 
         [SyncVar(hook = nameof(hookEvent))]
-        public T value2;
+        public T value2 { get; set; }
         [SyncVar]
-        public int value3;
+        public int value3 { get; set; }
         [SyncVar]
-        public T value4;
+        public T value4 { get; set; }
 
         public T valueNotVar;
     }
