@@ -48,7 +48,7 @@ namespace Mirage
         public ClientObjectManager ObjectManager;
 
         public bool DisconnectOnException = true;
-        [Tooltip("Should the message handler rethrow the exception after logging. This should only be used when deubgging as it may stop other Mirage functions from running after messages handling")]
+        [Tooltip("Should the message handler rethrow the exception after logging. This should only be used when debugging as it may stop other Mirage functions from running after messages handling")]
         public bool RethrowException = false;
 
         [Tooltip("If true will set Application.runInBackground")]

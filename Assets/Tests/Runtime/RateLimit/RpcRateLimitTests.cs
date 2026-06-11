@@ -1,5 +1,6 @@
 using System.Collections;
 using Cysharp.Threading.Tasks;
+using Mirage.RemoteCalls;
 using Mirage.Tests.Runtime.Host;
 using NUnit.Framework;
 using UnityEngine.TestTools;
@@ -76,19 +77,56 @@ namespace Mirage.Tests.Runtime.RateLimit
             };
         }
 
+        private void CallServerRpcRaw(NetworkBehaviour behaviour, string rpcName)
+        {
+            var collection = behaviour.Identity.RemoteCallCollection;
+            var rpc = System.Linq.Enumerable.First(collection.RemoteCalls, r => r != null && r.Name.Contains(rpcName));
+            var index = System.Array.IndexOf(collection.RemoteCalls, rpc);
+
+            var message = new RpcMessage
+            {
+                NetId = behaviour.NetId,
+                FunctionIndex = index,
+                Payload = new System.ArraySegment<byte>(new byte[0])
+            };
+
+            client.Send(message);
+        }
+
+        private UniTask<T> CallReturnRpcRaw<T>(NetworkBehaviour behaviour, string rpcName)
+        {
+            var collection = behaviour.Identity.RemoteCallCollection;
+            var rpc = System.Linq.Enumerable.First(collection.RemoteCalls, r => r != null && r.Name.Contains(rpcName));
+            var index = System.Array.IndexOf(collection.RemoteCalls, rpc);
+
+            var message = new RpcWithReplyMessage
+            {
+                NetId = behaviour.NetId,
+                FunctionIndex = index,
+                Payload = new System.ArraySegment<byte>(new byte[0])
+            };
+
+            (var task, var id) = clientObjectManager._rpcHandler.CreateReplyTask<T>(rpc, client.Player);
+            message.ReplyId = id;
+
+            client.Send(message, Channel.Reliable);
+
+            return task;
+        }
+
         [UnityTest]
         public IEnumerator RpcIsThrottledWhenCalledTooFast() => UniTask.ToCoroutine(async () =>
         {
             // First 2 calls should succeed (MaxTokens = 2)
-            clientComponent.ServerRpcWithRateLimit();
-            clientComponent.ServerRpcWithRateLimit();
+            CallServerRpcRaw(clientComponent, nameof(clientComponent.ServerRpcWithRateLimit));
+            CallServerRpcRaw(clientComponent, nameof(clientComponent.ServerRpcWithRateLimit));
 
             await UniTask.Delay(100);
 
             Assert.That(serverComponent.Count, Is.EqualTo(2));
 
-            // Third call should be dropped
-            clientComponent.ServerRpcWithRateLimit();
+            // Third call should be dropped on server
+            CallServerRpcRaw(clientComponent, nameof(clientComponent.ServerRpcWithRateLimit));
 
             await UniTask.Delay(100);
 
@@ -101,8 +139,8 @@ namespace Mirage.Tests.Runtime.RateLimit
         {
             // First 2 calls should succeed (MaxTokens = 2)
             // Fire and forget since we expect the third to drop and not respond, meaning awaiting it would just timeout
-            clientComponent.AsyncServerRpcWithRateLimit().Forget();
-            clientComponent.AsyncServerRpcWithRateLimit().Forget();
+            CallReturnRpcRaw<int>(clientComponent, nameof(clientComponent.AsyncServerRpcWithRateLimit)).Forget();
+            CallReturnRpcRaw<int>(clientComponent, nameof(clientComponent.AsyncServerRpcWithRateLimit)).Forget();
 
             await UniTask.Delay(100);
 
@@ -111,7 +149,7 @@ namespace Mirage.Tests.Runtime.RateLimit
             // Third call should be dropped, which now correctly fails the UniTask.
             // Since this test uses .Forget(), the unobserved failure is funneled to LogType.Exception.
             UnityEngine.TestTools.LogAssert.Expect(UnityEngine.LogType.Exception, new System.Text.RegularExpressions.Regex(".*ReturnRpcException.*"));
-            clientComponent.AsyncServerRpcWithRateLimit().Forget();
+            CallReturnRpcRaw<int>(clientComponent, nameof(clientComponent.AsyncServerRpcWithRateLimit)).Forget();
 
             await UniTask.Delay(100);
 
@@ -122,23 +160,23 @@ namespace Mirage.Tests.Runtime.RateLimit
         [UnityTest]
         public IEnumerator AsyncRpcThrowsExceptionWhenRateLimitReached() => UniTask.ToCoroutine(async () =>
         {
-            // First 2 calls should succeed
-            await clientComponent.AsyncServerRpcWithRateLimit();
-            await clientComponent.AsyncServerRpcWithRateLimit();
-
-            Assert.That(serverComponent.AsyncCount, Is.EqualTo(2));
+            // First 2 calls should succeed (fired in same frame to avoid refill time dependency)
+            var task1 = CallReturnRpcRaw<int>(clientComponent, nameof(clientComponent.AsyncServerRpcWithRateLimit));
+            var task2 = CallReturnRpcRaw<int>(clientComponent, nameof(clientComponent.AsyncServerRpcWithRateLimit));
 
             // Third call should drop and throw instead of hanging forever
             try
             {
-                // Note: without our fix, this await will hang forever!
-                await clientComponent.AsyncServerRpcWithRateLimit();
-                Assert.Fail("Expected ReturnRpcException to be thrown when rate limit is exceeded");
+                await CallReturnRpcRaw<int>(clientComponent, nameof(clientComponent.AsyncServerRpcWithRateLimit));
+                Assert.Fail("Expected ReturnRpcException to be thrown when rate limit is exceeded on server");
             }
             catch (System.Exception e)
             {
                 Assert.That(e.GetType().Name, Is.EqualTo("ReturnRpcException"), $"Expected ReturnRpcException, but got {e.GetType().Name}: {e.Message}");
             }
+
+            await UniTask.WhenAll(task1, task2);
+            Assert.That(serverComponent.AsyncCount, Is.EqualTo(2));
         });
 
         [UnityTest]
@@ -148,12 +186,12 @@ namespace Mirage.Tests.Runtime.RateLimit
             var initialTokens = serverPlayer.ErrorRateLimit.Tokens;
 
             // Exhaust the RPC limit
-            clientComponent.ServerRpcWithRateLimit();
-            clientComponent.ServerRpcWithRateLimit();
+            CallServerRpcRaw(clientComponent, nameof(clientComponent.ServerRpcWithRateLimit));
+            CallServerRpcRaw(clientComponent, nameof(clientComponent.ServerRpcWithRateLimit));
             await UniTask.Delay(100);
 
             // This call is dropped and applies penalty
-            clientComponent.ServerRpcWithRateLimit();
+            CallServerRpcRaw(clientComponent, nameof(clientComponent.ServerRpcWithRateLimit));
             await UniTask.Delay(100);
 
             // Penalty is 10
@@ -164,16 +202,16 @@ namespace Mirage.Tests.Runtime.RateLimit
         public IEnumerator DifferentRpcsHaveSeparateBuckets() => UniTask.ToCoroutine(async () =>
         {
             // Exhaust first RPC limit
-            clientComponent.ServerRpcWithRateLimit();
-            clientComponent.ServerRpcWithRateLimit();
-            clientComponent.ServerRpcWithRateLimit(); // Dropped
+            CallServerRpcRaw(clientComponent, nameof(clientComponent.ServerRpcWithRateLimit));
+            CallServerRpcRaw(clientComponent, nameof(clientComponent.ServerRpcWithRateLimit));
+            CallServerRpcRaw(clientComponent, nameof(clientComponent.ServerRpcWithRateLimit)); // Dropped
 
             await UniTask.Delay(100);
 
             Assert.That(serverComponent.Count, Is.EqualTo(2));
 
             // Call another RPC, should still work
-            clientComponent.AnotherRateLimitedRpc();
+            CallServerRpcRaw(clientComponent, nameof(clientComponent.AnotherRateLimitedRpc));
 
             await UniTask.Delay(100);
 
@@ -184,8 +222,8 @@ namespace Mirage.Tests.Runtime.RateLimit
         public IEnumerator RpcRefillsOverTime() => UniTask.ToCoroutine(async () =>
         {
             // Exhaust limit
-            clientComponent.ServerRpcWithRateLimit();
-            clientComponent.ServerRpcWithRateLimit();
+            CallServerRpcRaw(clientComponent, nameof(clientComponent.ServerRpcWithRateLimit));
+            CallServerRpcRaw(clientComponent, nameof(clientComponent.ServerRpcWithRateLimit));
 
             await UniTask.Delay(100);
 
@@ -195,7 +233,7 @@ namespace Mirage.Tests.Runtime.RateLimit
             await UniTask.Delay(600);
 
             // Should be able to call again
-            clientComponent.ServerRpcWithRateLimit();
+            CallServerRpcRaw(clientComponent, nameof(clientComponent.ServerRpcWithRateLimit));
 
             await UniTask.Delay(100);
 
@@ -206,8 +244,8 @@ namespace Mirage.Tests.Runtime.RateLimit
         public IEnumerator RpcDoesNotRefillBeforeInterval() => UniTask.ToCoroutine(async () =>
         {
             // Exhaust limit
-            clientComponent.ServerRpcWithRateLimit();
-            clientComponent.ServerRpcWithRateLimit();
+            CallServerRpcRaw(clientComponent, nameof(clientComponent.ServerRpcWithRateLimit));
+            CallServerRpcRaw(clientComponent, nameof(clientComponent.ServerRpcWithRateLimit));
 
             await UniTask.Delay(100);
 
@@ -217,7 +255,7 @@ namespace Mirage.Tests.Runtime.RateLimit
             await UniTask.Delay(200);
 
             // Should still be unable to call because it hasn't refilled
-            clientComponent.ServerRpcWithRateLimit();
+            CallServerRpcRaw(clientComponent, nameof(clientComponent.ServerRpcWithRateLimit));
 
             await UniTask.Delay(100);
 
@@ -274,6 +312,49 @@ namespace Mirage.Tests.Runtime.RateLimit
             // Defaults
             Assert.That(rpc.RateLimit.BucketConfig.Interval, Is.EqualTo(RateLimitAttribute.DEFAULT_INTERVAL));
             Assert.That(rpc.RateLimit.Penalty, Is.EqualTo(RateLimitAttribute.DEFAULT_PENALTY));
+        });
+
+        [UnityTest]
+        public IEnumerator ClientSideRateLimitingThrowsAndDrops() => UniTask.ToCoroutine(async () =>
+        {
+            // First 2 calls should succeed (MaxTokens = 2)
+            clientComponent.ServerRpcWithRateLimit();
+            clientComponent.ServerRpcWithRateLimit();
+
+            await UniTask.Delay(100);
+
+            Assert.That(serverComponent.Count, Is.EqualTo(2));
+
+            // Third call should throw client-side and not reach the server
+            Assert.Throws<ReturnRpcException>(() => clientComponent.ServerRpcWithRateLimit());
+
+            await UniTask.Delay(100);
+
+            Assert.That(serverComponent.Count, Is.EqualTo(2), "Third call should have been blocked on the client");
+            Assert.That(serverPlayer.ErrorFlags, Is.EqualTo(PlayerErrorFlags.None), "Legitimate client should not trigger server penalty");
+        });
+
+        [UnityTest]
+        public IEnumerator AsyncClientSideRateLimitingThrowsAndDrops() => UniTask.ToCoroutine(async () =>
+        {
+            // First 2 calls should succeed (fired in same frame to avoid refill time dependency)
+            var task1 = clientComponent.AsyncServerRpcWithRateLimit();
+            var task2 = clientComponent.AsyncServerRpcWithRateLimit();
+
+            // Third call should drop and throw client-side instead of hanging or sending to server
+            try
+            {
+                await clientComponent.AsyncServerRpcWithRateLimit();
+                Assert.Fail("Expected ReturnRpcException to be thrown when rate limit is exceeded on client");
+            }
+            catch (System.Exception e)
+            {
+                Assert.That(e.GetType().Name, Is.EqualTo("ReturnRpcException"), $"Expected ReturnRpcException, but got {e.GetType().Name}: {e.Message}");
+            }
+
+            await UniTask.WhenAll(task1, task2);
+            Assert.That(serverComponent.AsyncCount, Is.EqualTo(2));
+            Assert.That(serverPlayer.ErrorFlags, Is.EqualTo(PlayerErrorFlags.None), "Legitimate client should not trigger server penalty");
         });
     }
 

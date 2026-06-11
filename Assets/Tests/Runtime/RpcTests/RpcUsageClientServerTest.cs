@@ -707,4 +707,33 @@ namespace Mirage.Tests.Runtime.RpcTests
             _serverStub.DidNotReceiveWithAnyArgs().Invoke(default);
         }
     }
+
+    public class RpcUsageClientServerTest_MultipleComponents : ClientServerSetup<RpcUsageBehaviour_IgnoreAuthority, RpcUsageBehaviour_RequireAuthority>
+    {
+        [UnityTest]
+        public IEnumerator ThrowsWhenCalledWithoutAuthorityOnSecondComponent() => UniTask.ToCoroutine(async () =>
+        {
+            var identity = UnityEngine.Object.Instantiate(_characterPrefab);
+            identity.gameObject.SetActive(true);
+            serverObjectManager.Spawn(identity);
+
+            // Wait for spawning to sync to client
+            await UniTask.Delay(100);
+
+            var success = client.World.TryGetIdentity(identity.NetId, out var clientIdentity);
+            Assert.That(success, Is.True, "Client should have spawned the object");
+
+            var clientCompB = clientIdentity.GetComponent<RpcUsageBehaviour_RequireAuthority>();
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+            {
+                clientCompB.RpcRequireAuthority(52);
+            });
+
+            Assert.That(exception, Has.Message.EqualTo("Trying to send ServerRpc for object without authority. Mirage.Tests.Runtime.RpcTests.RpcUsageBehaviour_RequireAuthority.RpcRequireAuthority"));
+
+            // Cleanup
+            serverObjectManager.Destroy(identity.gameObject);
+        });
+    }
 }

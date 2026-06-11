@@ -40,15 +40,15 @@ namespace Mirage.RemoteCalls
             }
         }
 
-        public void Register(int index, string name, bool cmdRequireAuthority, RpcInvokeType invokerType, NetworkBehaviour behaviour, RpcDelegate func, RpcRateLimitConfig rateLimit)
+        public void Register(int relativeIndex, string name, bool cmdRequireAuthority, RpcInvokeType invokerType, NetworkBehaviour behaviour, RpcDelegate func, RpcRateLimitConfig rateLimit)
         {
             var indexOffset = GetIndexOffset(behaviour);
             // weaver gives index, so should never give 2 indexes that are the same
-            if (RemoteCalls[indexOffset + index] != null)
+            if (RemoteCalls[indexOffset + relativeIndex] != null)
                 throw new InvalidOperationException("2 Rpc has same index");
 
-            var call = new RemoteCall(behaviour, index, invokerType, func, cmdRequireAuthority, name, rateLimit);
-            RemoteCalls[indexOffset + index] = call;
+            var call = new RemoteCall(behaviour, relativeIndex, invokerType, func, cmdRequireAuthority, name, rateLimit);
+            RemoteCalls[indexOffset + relativeIndex] = call;
 
             if (logger.LogEnabled())
             {
@@ -57,7 +57,7 @@ namespace Mirage.RemoteCalls
             }
         }
 
-        public void RegisterRequest<T>(int index, string name, bool cmdRequireAuthority, RpcInvokeType invokerType, NetworkBehaviour behaviour, RequestDelegate<T> func, RpcRateLimitConfig rateLimit)
+        public void RegisterRequest<T>(int relativeIndex, string name, bool cmdRequireAuthority, RpcInvokeType invokerType, NetworkBehaviour behaviour, RequestDelegate<T> func, RpcRateLimitConfig rateLimit)
         {
             async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
             {
@@ -117,7 +117,7 @@ namespace Mirage.RemoteCalls
                 Wrapper(obj, reader, senderPlayer, replyId).Forget();
             }
 
-            Register(index, name, cmdRequireAuthority, invokerType, behaviour, CmdWrapper, rateLimit);
+            Register(relativeIndex, name, cmdRequireAuthority, invokerType, behaviour, CmdWrapper, rateLimit);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -127,16 +127,16 @@ namespace Mirage.RemoteCalls
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public RemoteCall GetRelative(NetworkBehaviour behaviour, int index)
+        public RemoteCall GetRelative(NetworkBehaviour behaviour, int relativeIndex)
         {
-            return RemoteCalls[GetIndexOffset(behaviour) + index];
+            return RemoteCalls[GetIndexOffset(behaviour) + relativeIndex];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public RemoteCall GetAbsolute(int index)
+        public RemoteCall GetAbsolute(int absoluteIndex)
         {
-            if (0 <= index && index < RemoteCalls.Length)
-                return RemoteCalls[index];
+            if (0 <= absoluteIndex && absoluteIndex < RemoteCalls.Length)
+                return RemoteCalls[absoluteIndex];
             else
                 return null;
         }
