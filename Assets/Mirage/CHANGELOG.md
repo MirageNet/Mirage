@@ -1,3 +1,10 @@
+# [158.3.0](https://github.com/MirageNet/Mirage/compare/v158.2.1...v158.3.0) (2026-06-11)
+
+
+### Features
+
+* client-side checks for ServerRpc rate limiting ([43edfd5](https://github.com/MirageNet/Mirage/commit/43edfd57f9ce5588b1d61b80e5b3bfd30eef619c))
+
 ## [158.2.1](https://github.com/MirageNet/Mirage/compare/v158.2.0...v158.2.1) (2026-06-07)
 
 
