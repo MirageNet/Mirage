@@ -1,3 +1,11 @@
+## [158.3.1](https://github.com/MirageNet/Mirage/compare/v158.3.0...v158.3.1) (2026-06-27)
+
+
+### Bug Fixes
+
+* adding missing try/catch for AddLateEventUnity ([76088bd](https://github.com/MirageNet/Mirage/commit/76088bdbd4329d1cc13d8ff3cf994b0301f39846))
+* adding try/catch around event invoke ([ac43382](https://github.com/MirageNet/Mirage/commit/ac43382d24585a679c1130430bccded527f90d79))
+
 # [158.3.0](https://github.com/MirageNet/Mirage/compare/v158.2.1...v158.3.0) (2026-06-11)
 
 
