@@ -241,47 +241,53 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
         [Test]
         public void OnStartServerCallsComponentsAndCatchesExceptions()
         {
-            // make a mock delegate
+            // make mock delegates
             var func = Substitute.For<Action>();
+            var func2 = Substitute.For<Action>();
 
-            // add it to the listener
+            // add them to the listener
             identity.OnStartServer.AddListener(func);
+            identity.OnStartServer.AddListener(func2);
 
-            // Since we are testing that exceptions are not swallowed,
-            // when the mock is invoked, throw an exception 
+            // When the mock is invoked, throw an exception 
             func
                 .When(f => f.Invoke())
                 .Do(f => { throw new Exception("Some exception"); });
 
-            // Make sure that the exception is not swallowed
-            Assert.Throws<Exception>(() =>
+            UnityEngine.TestTools.LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex(".*Some exception.*"));
+
+            // Make sure that the exception is caught, logged, and does not stop execution
+            Assert.DoesNotThrow(() =>
             {
                 identity.StartServer();
             });
 
-            // ask the mock if it got invoked
-            // if the mock is not invoked,  then this fails
-            // This is a type of assert
-            func.Received().Invoke();
+            func.Received(1).Invoke();
+            func2.Received(1).Invoke();
         }
 
         [Test]
         public void OnStartClientCallsComponentsAndCatchesExceptions()
         {
-            // add component
+            // add components
             var func = Substitute.For<Action>();
+            var func2 = Substitute.For<Action>();
             identity.OnStartClient.AddListener(func);
+            identity.OnStartClient.AddListener(func2);
 
             func
                 .When(f => f.Invoke())
                 .Do(f => { throw new Exception("Some exception"); });
 
-            // make sure exceptions are not swallowed
-            Assert.Throws<Exception>(() =>
+            UnityEngine.TestTools.LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex(".*Some exception.*"));
+
+            // make sure exceptions are caught and logged
+            Assert.DoesNotThrow(() =>
             {
                 identity.StartClient();
             });
-            func.Received().Invoke();
+            func.Received(1).Invoke();
+            func2.Received(1).Invoke();
 
             // we have checks to make sure that it's only called once.
             Assert.DoesNotThrow(() =>
@@ -289,25 +295,33 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
                 identity.StartClient();
             });
             func.Received(1).Invoke();
+            func2.Received(1).Invoke();
         }
 
         [Test]
         public void OnAuthorityChangedCallsComponentsAndCatchesExceptions()
         {
-            // add component
+            // add components
             var func = Substitute.For<Action<bool>>();
+            var func2 = Substitute.For<Action<bool>>();
             identity.OnAuthorityChanged.AddListener(func);
+            identity.OnAuthorityChanged.AddListener(func2);
+
+            identity.World = new NetworkWorld();
 
             func
                 .When(f => f.Invoke(Arg.Any<bool>()))
                 .Do(f => { throw new Exception("Some exception"); });
 
-            // make sure exceptions are not swallowed
-            Assert.Throws<Exception>(() =>
+            UnityEngine.TestTools.LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex(".*Some exception.*"));
+
+            // make sure exceptions are caught and logged
+            Assert.DoesNotThrow(() =>
             {
                 identity.CallStartAuthority();
             });
             func.Received(1).Invoke(Arg.Any<bool>());
+            func2.Received(1).Invoke(Arg.Any<bool>());
         }
 
         [Test]
@@ -492,17 +506,18 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
                 .When(f => f.Invoke())
                 .Do(f => { throw new Exception("Some exception"); });
 
+            UnityEngine.TestTools.LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex(".*Some exception.*"));
 
             // make sure that comp.OnStartServer was called
             // the exception was caught and not thrown in here.
-            Assert.Throws<Exception>(() =>
+            Assert.DoesNotThrow(() =>
             {
                 identity.StartLocalPlayer();
             });
 
             funcEx.Received(1).Invoke();
-            //Due to the order the listeners are added the one without exception is never called
-            func.Received(0).Invoke();
+            // Under the new try/catch behavior, the exception does not stop the loop
+            func.Received(1).Invoke();
 
             // we have checks to make sure that it's only called once.
             // let's see if they work.
@@ -510,10 +525,9 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
             {
                 identity.StartLocalPlayer();
             });
-            // same as before?
+            // same as before (still only called once)
             funcEx.Received(1).Invoke();
-            //Due to the order the listeners are added the one without exception is never called
-            func.Received(0).Invoke();
+            func.Received(1).Invoke();
         }
 
         [Test]
@@ -542,16 +556,23 @@ namespace Mirage.Tests.NetworkIdentityCallbacks
         public void OnStopServerEx()
         {
             var mockCallback = Substitute.For<Action>();
+            var mockCallback2 = Substitute.For<Action>();
             mockCallback
                 .When(f => f.Invoke())
                 .Do(f => { throw new Exception("Some exception"); });
 
             identity.OnStopServer.AddListener(mockCallback);
+            identity.OnStopServer.AddListener(mockCallback2);
 
-            Assert.Throws<Exception>(() =>
+            UnityEngine.TestTools.LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex(".*Some exception.*"));
+
+            Assert.DoesNotThrow(() =>
             {
                 identity.StopServer();
             });
+
+            mockCallback.Received(1).Invoke();
+            mockCallback2.Received(1).Invoke();
         }
 
         [Test]

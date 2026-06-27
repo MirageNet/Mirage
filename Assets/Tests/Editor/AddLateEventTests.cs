@@ -1,5 +1,7 @@
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.TestTools;
 
 namespace Mirage.Events.Tests
 {
@@ -14,6 +16,7 @@ namespace Mirage.Events.Tests
         protected abstract void RemoveListener();
         protected abstract void Reset();
         protected abstract void RemoveAllListeners();
+        protected abstract void AddThrowingListener();
 
 
         [SetUp]
@@ -133,6 +136,35 @@ namespace Mirage.Events.Tests
             // listener removed so no increase to count
             Assert.That(listenerCallCount, Is.EqualTo(1));
         }
+
+        [Test]
+        public void InvokeCatchesExceptionAndLogsIt()
+        {
+            AddListener();
+            AddThrowingListener();
+
+            LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex(".*Test exception.*"));
+
+            Assert.DoesNotThrow(() =>
+            {
+                Invoke();
+            });
+
+            Assert.That(listenerCallCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void AddListenerLateCatchesExceptionAndLogsIt()
+        {
+            Invoke();
+
+            LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex(".*Test exception.*"));
+
+            Assert.DoesNotThrow(() =>
+            {
+                AddThrowingListener();
+            });
+        }
     }
 
 
@@ -167,6 +199,11 @@ namespace Mirage.Events.Tests
         protected override void RemoveAllListeners()
         {
             allLate.RemoveAllListeners();
+        }
+
+        protected override void AddThrowingListener()
+        {
+            allLate.AddListener(() => throw new System.Exception("Test exception"));
         }
     }
 
@@ -210,6 +247,11 @@ namespace Mirage.Events.Tests
         protected override void RemoveAllListeners()
         {
             allLate.RemoveAllListeners();
+        }
+
+        protected override void AddThrowingListener()
+        {
+            allLate.AddListener(a => throw new System.Exception("Test exception"));
         }
 
         [Test]
@@ -290,6 +332,11 @@ namespace Mirage.Events.Tests
         protected override void RemoveAllListeners()
         {
             allLate.RemoveAllListeners();
+        }
+
+        protected override void AddThrowingListener()
+        {
+            allLate.AddListener((a, b) => throw new System.Exception("Test exception"));
         }
 
         [Test]
