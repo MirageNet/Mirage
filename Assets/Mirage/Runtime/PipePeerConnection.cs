@@ -135,7 +135,6 @@ namespace Mirage
             public override string ToString() => "LocalPipe";
 
             public bool IsStateful => false;
-            public bool AcceptCallbackInvoked => false;
             public ISocketLayerConnection SocketLayerConnection
             {
                 get => throw new NotSupportedException();
@@ -143,6 +142,7 @@ namespace Mirage
             }
 
             public bool SupportsGracefulDisconnect => false;
+            public bool SkipAcceptCallback => false;
             public void Disconnect(string gracefulDisconnectReason) => throw new NotSupportedException();
 
             IConnectionHandle IConnectionHandle.CreateCopy()

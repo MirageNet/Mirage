@@ -3,28 +3,6 @@ using System;
 namespace Mirage.SocketLayer
 {
     /// <summary>
-    /// Represents a pending connection that can be accepted or rejected.
-    /// Sockets wrap connecting peers into this (e.g. SteamConnectionRequest carrying CSteamID),
-    /// allowing early rejection before a full connection is established.
-    /// </summary>
-    public interface IConnectionRequest { }
-
-    /// <summary>
-    /// Callback to accept or reject a new connection.
-    /// <para>Return true to accept, false to reject. Set <paramref name="reasonCode"/> when rejecting.</para>
-    /// </summary>
-    public delegate bool AcceptConnectionDelegate(IConnectionRequest connection, out int reasonCode);
-
-    /// <summary>
-    /// Implemented by sockets that can invoke the accept callback early (e.g. stateful transports like Steamworks).
-    /// <para>When set, Peer registers its internal callback on the socket so it can reject connections before creating a handle.</para>
-    /// </summary>
-    public interface ISocketAcceptCallback
-    {
-        void SetAcceptCallback(AcceptConnectionDelegate acceptCallback);
-    }
-
-    /// <summary>
     /// Delegate for handling incoming data from a connection.
     /// <para>Should only be invoked from within <see cref="ISocket.Tick"/>.</para>
     /// </summary>
@@ -110,6 +88,15 @@ namespace Mirage.SocketLayer
     public interface IBindEndPoint { }
     public interface IConnectEndPoint { }
 
+    public interface IConnectionRequest { }
+
+    public delegate bool SocketAcceptDelegate(IConnectionRequest connection, out int reasonCode);
+
+    public interface ISocketAcceptCallback
+    {
+        void SetAcceptCallback(SocketAcceptDelegate acceptCallback);
+    }
+
     /// <summary>
     /// Object that can be used as an endPoint or handle for <see cref="Peer"/> and <see cref="ISocket"/>
     /// <para>
@@ -125,12 +112,6 @@ namespace Mirage.SocketLayer
         bool IsStateful { get; }
 
         /// <summary>
-        /// True if the socket already invoked the AcceptConnection callback for this handle.
-        /// <para>Peer will skip the callback in HandleNewConnection if this is true.</para>
-        /// </summary>
-        bool AcceptCallbackInvoked { get; }
-
-        /// <summary>
         /// Used by stateful connections, stores a direct reference to avoid lookup
         /// </summary>
         ISocketLayerConnection SocketLayerConnection { get; set; }
@@ -140,6 +121,8 @@ namespace Mirage.SocketLayer
         /// </summary>
         /// <param name="reason"></param>
         bool SupportsGracefulDisconnect { get; }
+
+        bool SkipAcceptCallback { get; }
 
         /// <summary>
         /// disconnect for stateful connections. Should be made safe to call multiple times
