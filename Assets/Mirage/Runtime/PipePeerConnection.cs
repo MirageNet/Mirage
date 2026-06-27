@@ -135,6 +135,7 @@ namespace Mirage
             public override string ToString() => "LocalPipe";
 
             public bool IsStateful => false;
+            public bool AcceptCallbackInvoked => false;
             public ISocketLayerConnection SocketLayerConnection
             {
                 get => throw new NotSupportedException();

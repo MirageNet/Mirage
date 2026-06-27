@@ -22,6 +22,7 @@ namespace Mirage.Sockets.Udp
         }
 
         bool IConnectionHandle.IsStateful => false;
+        bool IConnectionHandle.AcceptCallbackInvoked => false;
         bool IConnectionHandle.SupportsGracefulDisconnect => false;
         void IConnectionHandle.Disconnect(string gracefulDisconnectReason) { /* not supported */ }
         ISocketLayerConnection IConnectionHandle.SocketLayerConnection { get; set; }

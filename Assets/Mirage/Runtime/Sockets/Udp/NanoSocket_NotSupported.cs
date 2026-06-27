@@ -33,6 +33,7 @@ namespace Mirage.Sockets.Udp
         public NanoConnectionHandle(string host, ushort port) => throw new NotSupportedException();
 
         bool IConnectionHandle.IsStateful => throw new NotSupportedException();
+        bool IConnectionHandle.AcceptCallbackInvoked => throw new NotSupportedException();
         bool IConnectionHandle.SupportsGracefulDisconnect => throw new NotSupportedException();
         void IConnectionHandle.Disconnect(string gracefulDisconnectReason) => throw new NotSupportedException();
         ISocketLayerConnection IConnectionHandle.SocketLayerConnection

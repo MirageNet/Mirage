@@ -22,6 +22,7 @@ namespace Mirage.SocketLayer
         void Bind(IBindEndPoint endPoint);
         IConnection Connect(IConnectEndPoint endPoint);
         void Close();
+        void SetAcceptCallback(AcceptConnectionDelegate callback, bool allowReplace = false);
         /// <summary>
         /// Call this at the start of the frame to receive new messages
         /// </summary>
@@ -61,6 +62,8 @@ namespace Mirage.SocketLayer
         public event Action<IConnection> OnConnected;
         public event Action<IConnection, DisconnectReason> OnDisconnected;
         public event Action<IConnection, RejectReason> OnConnectionFailed;
+
+        private AcceptConnectionDelegate _acceptConnectionCallback;
 
         /// <summary>
         /// is server listening on or connected to endPoint
@@ -102,6 +105,42 @@ namespace Mirage.SocketLayer
             socket.SetTickEvents(_maxPacketSize, OnDataEvent, OnDisconnectEvent);
 
             Application.quitting += Application_quitting;
+
+            if (socket is ISocketAcceptCallback socketAccept)
+                socketAccept.SetAcceptCallback(AcceptConnectionInternal);
+        }
+
+        public void SetAcceptCallback(AcceptConnectionDelegate callback, bool allowReplace = false)
+        {
+            if (_acceptConnectionCallback != null && !allowReplace)
+                throw new InvalidOperationException("AcceptConnectionCallback is already set. Use allowReplace = true to overwrite.");
+
+            _acceptConnectionCallback = callback;
+        }
+
+        /// <summary>
+        /// Checks the accept callback. Returns true if connection is accepted.
+        /// </summary>
+        public bool AcceptConnection(IConnectionRequest connection, out DisconnectReason reason)
+        {
+            if (_acceptConnectionCallback != null)
+            {
+                var accepted = _acceptConnectionCallback(connection, out var reasonCode);
+                reason = (DisconnectReason)reasonCode;
+                return accepted;
+            }
+            reason = DisconnectReason.None;
+            return true;
+        }
+
+        /// <summary>
+        /// Wrapper that converts DisconnectReason to int for the socket-level delegate
+        /// </summary>
+        internal bool AcceptConnectionInternal(IConnectionRequest connection, out int reasonCode)
+        {
+            var accepted = AcceptConnection(connection, out var reason);
+            reasonCode = (int)reason;
+            return accepted;
         }
 
         private void Application_quitting()
@@ -628,6 +667,13 @@ namespace Mirage.SocketLayer
             // (maybe a callback for developers to use?)
             else
             {
+                // if socket already called accept callback, skip it here
+                if (!handle.AcceptCallbackInvoked && !AcceptConnection(handle, out var rejectReason))
+                {
+                    RejectConnectionWithReason(handle, rejectReason);
+                    return;
+                }
+
                 AcceptNewConnection(handle);
             }
         }
@@ -707,6 +753,14 @@ namespace Mirage.SocketLayer
         }
 
         private void RejectConnectionWithReason(IConnectionHandle handle, RejectReason reason)
+        {
+            SendCommandUnconnected(handle, Commands.ConnectionRejected, (byte)reason);
+
+            if (handle.IsStateful)
+                handle.Disconnect(null);
+        }
+
+        private void RejectConnectionWithReason(IConnectionHandle handle, DisconnectReason reason)
         {
             SendCommandUnconnected(handle, Commands.ConnectionRejected, (byte)reason);
 
