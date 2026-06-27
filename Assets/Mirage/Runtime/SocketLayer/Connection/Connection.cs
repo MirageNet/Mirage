@@ -145,7 +145,7 @@ namespace Mirage.SocketLayer
 
                 case ConnectionState.Connecting:
                     if (_logger.Enabled(LogType.Log)) _logger.Log($"Disconnect while connecting, with reason: {reason}");
-                    _peer.FailedToConnect(this, RejectReason.ClosedByPeer);
+                    _peer.FailedToConnect(this, DisconnectReason.ConnectingCancel);
                     return;
 
 
@@ -165,7 +165,7 @@ namespace Mirage.SocketLayer
             {
                 if (_connectingTracker.MaxAttempts())
                 {
-                    _peer.FailedToConnect(this, RejectReason.Timeout);
+                    _peer.FailedToConnect(this, DisconnectReason.ConnectingTimeout);
                 }
                 else
                 {

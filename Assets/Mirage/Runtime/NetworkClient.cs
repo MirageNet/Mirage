@@ -199,7 +199,7 @@ namespace Mirage
             _connected.Invoke(Player);
         }
 
-        private void Peer_OnConnectionFailed(IConnection conn, RejectReason reason)
+        private void Peer_OnConnectionFailed(IConnection conn, DisconnectReason reason)
         {
             if (logger.WarnEnabled()) logger.LogWarning($"Failed to connect to {conn.Handle} with reason {reason}");
             Player?.MarkAsDisconnected();

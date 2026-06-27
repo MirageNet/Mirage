@@ -88,6 +88,15 @@ namespace Mirage.SocketLayer
     public interface IBindEndPoint { }
     public interface IConnectEndPoint { }
 
+    public interface IConnectionRequest { }
+
+    public delegate bool SocketAcceptDelegate(IConnectionRequest connection, out int reasonCode);
+
+    public interface ISocketAcceptCallback
+    {
+        void SetAcceptCallback(SocketAcceptDelegate acceptCallback);
+    }
+
     /// <summary>
     /// Object that can be used as an endPoint or handle for <see cref="Peer"/> and <see cref="ISocket"/>
     /// <para>
@@ -98,7 +107,7 @@ namespace Mirage.SocketLayer
     /// On future received the incoming endPoint will be compared to active connections inside a dictionary
     /// </para>
     /// </summary>
-    public interface IConnectionHandle
+    public interface IConnectionHandle : IConnectionRequest
     {
         bool IsStateful { get; }
 
@@ -112,6 +121,8 @@ namespace Mirage.SocketLayer
         /// </summary>
         /// <param name="reason"></param>
         bool SupportsGracefulDisconnect { get; }
+
+        bool SkipAcceptCallback { get; }
 
         /// <summary>
         /// disconnect for stateful connections. Should be made safe to call multiple times

@@ -34,6 +34,7 @@ namespace Mirage.Sockets.Udp
 
         bool IConnectionHandle.IsStateful => throw new NotSupportedException();
         bool IConnectionHandle.SupportsGracefulDisconnect => throw new NotSupportedException();
+        bool IConnectionHandle.SkipAcceptCallback => throw new NotSupportedException();
         void IConnectionHandle.Disconnect(string gracefulDisconnectReason) => throw new NotSupportedException();
         ISocketLayerConnection IConnectionHandle.SocketLayerConnection
         {

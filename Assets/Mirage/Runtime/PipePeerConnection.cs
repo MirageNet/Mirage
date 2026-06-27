@@ -142,6 +142,7 @@ namespace Mirage
             }
 
             public bool SupportsGracefulDisconnect => false;
+            public bool SkipAcceptCallback => false;
             public void Disconnect(string gracefulDisconnectReason) => throw new NotSupportedException();
 
             IConnectionHandle IConnectionHandle.CreateCopy()

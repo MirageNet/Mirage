@@ -16,7 +16,7 @@ namespace Mirage.SocketLayer
     public interface IPeer
     {
         event Action<IConnection> OnConnected;
-        event Action<IConnection, RejectReason> OnConnectionFailed;
+        event Action<IConnection, DisconnectReason> OnConnectionFailed;
         event Action<IConnection, DisconnectReason> OnDisconnected;
 
         void Bind(IBindEndPoint endPoint);
@@ -60,7 +60,36 @@ namespace Mirage.SocketLayer
 
         public event Action<IConnection> OnConnected;
         public event Action<IConnection, DisconnectReason> OnDisconnected;
-        public event Action<IConnection, RejectReason> OnConnectionFailed;
+        public event Action<IConnection, DisconnectReason> OnConnectionFailed;
+
+        public delegate bool AcceptConnectionDelegate(IConnectionRequest connection, out DisconnectReason reason);
+
+        private AcceptConnectionDelegate _acceptConnectionCallback;
+
+        public void SetAcceptCallback(AcceptConnectionDelegate callback, bool allowReplace = false)
+        {
+            if (_acceptConnectionCallback != null && !allowReplace)
+                throw new InvalidOperationException("AcceptConnectionCallback is already set. Use allowReplace = true to overwrite.");
+
+            _acceptConnectionCallback = callback;
+        }
+
+        public bool AcceptConnection(IConnectionRequest connection, out DisconnectReason reason)
+        {
+            if (_acceptConnectionCallback != null)
+            {
+                return _acceptConnectionCallback(connection, out reason);
+            }
+            reason = DisconnectReason.None;
+            return true;
+        }
+
+        internal bool AcceptConnectionInternal(IConnectionRequest connection, out int reasonCode)
+        {
+            var accepted = AcceptConnection(connection, out var reason);
+            reasonCode = (int)reason;
+            return accepted;
+        }
 
         /// <summary>
         /// is server listening on or connected to endPoint
@@ -98,6 +127,11 @@ namespace Mirage.SocketLayer
             _reliablePacketPool = new Pool<AckSystem.ReliablePacket>(AckSystem.ReliablePacket.CreateNew, 0, _config.MaxReliablePacketsInSendBufferPerConnection);
             _ackablePacketPool = new Pool<RingBuffer<AckSystem.AckablePacket>>((p) => new RingBuffer<AckSystem.AckablePacket>(_config.SequenceSize, _logger), 0, _config.MaxConnections);
             _reliableReceivePool = new Pool<RingBuffer<AckSystem.ReliableReceived>>((p) => new RingBuffer<AckSystem.ReliableReceived>(_config.SequenceSize, _logger), 0, _config.MaxConnections);
+
+            if (socket is ISocketAcceptCallback socketAccept)
+            {
+                socketAccept.SetAcceptCallback(AcceptConnectionInternal);
+            }
 
             socket.SetTickEvents(_maxPacketSize, OnDataEvent, OnDisconnectEvent);
 
@@ -578,7 +612,7 @@ namespace Mirage.SocketLayer
             switch (connection.State)
             {
                 case ConnectionState.Connecting:
-                    var reason = (RejectReason)packet.Span[2];
+                    var reason = (DisconnectReason)packet.Span[2];
                     FailedToConnect(connection, reason);
                     break;
 
@@ -606,7 +640,7 @@ namespace Mirage.SocketLayer
             if (!Validate(packet))
             {
                 if (_config.SendRejectIfUnconnectedPacketIsInvalid)
-                    RejectConnectionWithReason(handle, RejectReason.InvalidUnconnectedPacket);
+                    RejectConnectionWithReason(handle, DisconnectReason.InvalidUnconnectedPacket);
                 // else ignore
             }
             else if (AtMaxConnections())
@@ -614,14 +648,18 @@ namespace Mirage.SocketLayer
                 if (_logger.Enabled(LogType.Warning))
                     _logger.Log(LogType.Warning, $"Reject Connection: At max connections");
 
-                RejectConnectionWithReason(handle, RejectReason.ServerFull);
+                RejectConnectionWithReason(handle, DisconnectReason.ServerFull);
             }
             else if (!_connectKeyValidator.Validate(packet.Span))
             {
                 if (_logger.Enabled(LogType.Warning))
                     _logger.Log(LogType.Warning, $"Reject Connection: Invalid key");
 
-                RejectConnectionWithReason(handle, RejectReason.KeyInvalid);
+                RejectConnectionWithReason(handle, DisconnectReason.KeyInvalid);
+            }
+            else if (!handle.SkipAcceptCallback && !AcceptConnection(handle, out var reason))
+            {
+                RejectConnectionWithReason(handle, reason);
             }
             // todo do other security stuff here:
             // - white/black list for endPoint?
@@ -706,7 +744,7 @@ namespace Mirage.SocketLayer
             return connection;
         }
 
-        private void RejectConnectionWithReason(IConnectionHandle handle, RejectReason reason)
+        private void RejectConnectionWithReason(IConnectionHandle handle, DisconnectReason reason)
         {
             SendCommandUnconnected(handle, Commands.ConnectionRejected, (byte)reason);
 
@@ -742,7 +780,7 @@ namespace Mirage.SocketLayer
             }
         }
 
-        internal void FailedToConnect(Connection connection, RejectReason reason)
+        internal void FailedToConnect(Connection connection, DisconnectReason reason)
         {
             if (_logger.Enabled(LogType.Warning)) _logger.Log(LogType.Warning, $"Connection Failed to connect: {reason}");
 

@@ -62,22 +62,11 @@ namespace Mirage
                 case DisconnectReason.InvalidPacket: return ClientStoppedReason.InvalidPacket;
                 case DisconnectReason.SendBufferFull: return ClientStoppedReason.SendBufferFull;
 
-                default:
-                    // just hard cast, it could be custom number from transport
-                    return (ClientStoppedReason)reason;
-            }
-        }
-
-        public static ClientStoppedReason ToClientStoppedReason(this RejectReason reason)
-        {
-            switch (reason)
-            {
-                case RejectReason.None: return ClientStoppedReason.None;
-                case RejectReason.Timeout: return ClientStoppedReason.ConnectingTimeout;
-                case RejectReason.ServerFull: return ClientStoppedReason.ServerFull;
-                case RejectReason.KeyInvalid: return ClientStoppedReason.KeyInvalid;
-                case RejectReason.ClosedByPeer: return ClientStoppedReason.ConnectingCancel;
-                case RejectReason.InvalidUnconnectedPacket: return ClientStoppedReason.InvalidUnconnectedPacket;
+                case DisconnectReason.ServerFull: return ClientStoppedReason.ServerFull;
+                case DisconnectReason.ConnectingTimeout: return ClientStoppedReason.ConnectingTimeout;
+                case DisconnectReason.ConnectingCancel: return ClientStoppedReason.ConnectingCancel;
+                case DisconnectReason.KeyInvalid: return ClientStoppedReason.KeyInvalid;
+                case DisconnectReason.InvalidUnconnectedPacket: return ClientStoppedReason.InvalidUnconnectedPacket;
 
                 default:
                     // just hard cast, it could be custom number from transport
