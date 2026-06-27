@@ -76,7 +76,14 @@ namespace Mirage.Events
             // invoke handler if event has been invoked atleast once
             if (HasInvoked)
             {
-                handler.Invoke();
+                try
+                {
+                    handler.Invoke();
+                }
+                catch (Exception e)
+                {
+                    UnityEngine.Debug.LogException(e);
+                }
             }
 
             // add handler to inner event so that it can be invoked again
@@ -95,7 +102,16 @@ namespace Mirage.Events
             tmp.Clear();
             tmp.AddRange(_listeners);
             foreach (var handler in tmp)
-                handler.Invoke();
+            {
+                try
+                {
+                    handler.Invoke();
+                }
+                catch (Exception e)
+                {
+                    UnityEngine.Debug.LogException(e);
+                }
+            }
             tmp.Clear();
         }
 
@@ -127,7 +143,14 @@ namespace Mirage.Events
             // invoke handler if event has been invoked atleast once
             if (HasInvoked)
             {
-                handler.Invoke(_arg0);
+                try
+                {
+                    handler.Invoke(_arg0);
+                }
+                catch (Exception e)
+                {
+                    UnityEngine.Debug.LogException(e);
+                }
             }
 
             // add handler to inner event so that it can be invoked again
@@ -148,7 +171,16 @@ namespace Mirage.Events
             tmp.Clear();
             tmp.AddRange(_listeners);
             foreach (var handler in tmp)
-                handler.Invoke(arg0);
+            {
+                try
+                {
+                    handler.Invoke(arg0);
+                }
+                catch (Exception e)
+                {
+                    UnityEngine.Debug.LogException(e);
+                }
+            }
             tmp.Clear();
         }
 
@@ -181,7 +213,14 @@ namespace Mirage.Events
             // invoke handler if event has been invoked atleast once
             if (HasInvoked)
             {
-                handler.Invoke(_arg0, _arg1);
+                try
+                {
+                    handler.Invoke(_arg0, _arg1);
+                }
+                catch (Exception e)
+                {
+                    UnityEngine.Debug.LogException(e);
+                }
             }
 
             // add handler to inner event so that it can be invoked again
@@ -203,7 +242,16 @@ namespace Mirage.Events
             tmp.Clear();
             tmp.AddRange(_listeners);
             foreach (var handler in tmp)
-                handler.Invoke(arg0, arg1);
+            {
+                try
+                {
+                    handler.Invoke(arg0, arg1);
+                }
+                catch (Exception e)
+                {
+                    UnityEngine.Debug.LogException(e);
+                }
+            }
             tmp.Clear();
         }
 
