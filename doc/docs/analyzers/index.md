@@ -29,6 +29,7 @@ Mirage uses Roslyn Analyzers to provide compile-time validation for network code
 | [MIRAGE1305](MIRAGE1305.md) | Missing NetworkMessage Attribute | Warning | Warns if a type is sent or registered as a message, but lacks the `[NetworkMessage]` attribute. |
 | [MIRAGE1401](MIRAGE1401.md) | Accessing Network State in Awake/Start | Warning | Warns against accessing network states like `IsServer` during early Unity lifecycle phases. |
 | [MIRAGE1402](MIRAGE1402.md) | Missing base Call in OnSerialize/OnDeserialize | Warning | Ensures overriding `OnSerialize` or `OnDeserialize` in derived classes calls the base implementation. |
+| [MIRAGE1403](MIRAGE1403.md) | Enabled property check on NetworkServer/Client | Warning | Warns if checking/setting .enabled on NetworkServer/Client instead of using .Active. |
 | [MIRAGE1501](MIRAGE1501.md) | Network Message Serialized Size Estimation | Info | Estimates the serialized size of all `[NetworkMessage]` types to help analyze bandwidth usage. |
 
 ---
@@ -115,6 +116,9 @@ Accessing network properties like `IsServer`, `IsClient`, or authority states in
 
 #### [MIRAGE1402: Missing base Call in OnSerialize/OnDeserialize](MIRAGE1402.md)
 Derived classes overriding custom `OnSerialize` or `OnDeserialize` methods must call their base class implementations if the base class also synchronizes state. Failing to call the base method prevents base `SyncVars` and properties from synchronizing properly. Fix this by calling the base method and combining their return values.
+
+#### [MIRAGE1403: Enabled property check on NetworkServer/Client](MIRAGE1403.md)
+Warns if a developer tries to check whether `NetworkServer` or `NetworkClient` is running by accessing its `.enabled` property. Since both inherit from `MonoBehaviour`, `.enabled` is just Unity's component active flag, which is not synchronized with the active server/client state. Use the `.Active` property instead.
 
 ---
 
