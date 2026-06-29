@@ -15,7 +15,7 @@ namespace Mirage.Snippets.SceneLoading
 
             // Check if everyone has finished loading
             bool allReady = true;
-            foreach (var p in Server.AllPlayers)
+            foreach (var p in Server.AuthenticatedPlayers)
             {
                 if (!p.SceneIsReady)
                 {
@@ -26,7 +26,7 @@ namespace Mirage.Snippets.SceneLoading
 
             // Only spawn characters once everyone is fully loaded
             if (allReady)
-                foreach (var p in Server.AllPlayers)
+                foreach (var p in Server.AuthenticatedPlayers)
                     SpawnCharacterForPlayer(p);
         }
         // CodeEmbed-End: fixed-match-size

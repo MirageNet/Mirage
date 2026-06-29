@@ -25,7 +25,7 @@ These references will be auto-found via `OnValidate` if they are on the same Gam
 
 ## Usage
 
-To load a new scene for all connected players:
+To load a new scene for all authenticated players:
 
 {{{ Path:'Snippets/SceneLoading/LoaderUsage.cs' Name:'loader-usage' }}}
 
@@ -35,7 +35,7 @@ To load a new scene for all connected players:
 
 **ServerLoadScene**
 1. Sets `ServerLoading = true` and stores the `TargetScene`
-2. Loops over all connected players, marks them as not ready, and sends a `SceneMessage`
+2. Loops over all authenticated players, marks them as not ready, and sends a `SceneMessage`
 3. Loads the scene on the server
 4. In host mode, calls `PrepareToSpawnSceneObjects` and marks the local player as ready
 5. Sets `ServerLoading = false` and calls `SpawnSceneObjects`
