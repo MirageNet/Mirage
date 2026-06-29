@@ -78,7 +78,7 @@ namespace Mirage.Components
 
             // Notify all players to load the scene
             // Note: SceneMessage can be replaced with a custom message if you need to send extra data.
-            foreach (var player in Server.AllPlayers)
+            foreach (var player in Server.AuthenticatedPlayers)
             {
                 player.SceneIsReady = false;
                 player.Send(new SceneMessage { ScenePath = TargetScene });
@@ -98,7 +98,7 @@ namespace Mirage.Components
             ServerObjectManager.SpawnSceneObjects();
 
             // Spawn characters for everyone who is ready
-            foreach (var player in Server.AllPlayers)
+            foreach (var player in Server.AuthenticatedPlayers)
             {
                 if (player.SceneIsReady)
                     SpawnCharacterForPlayer(player);
