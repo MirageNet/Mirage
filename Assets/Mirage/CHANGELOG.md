@@ -1,3 +1,10 @@
+## [158.3.2](https://github.com/MirageNet/Mirage/compare/v158.3.1...v158.3.2) (2026-06-29)
+
+
+### Bug Fixes
+
+* changing NetworkSceneLoader to use `AuthenticatedPlayers` instead of AllPlayers ([1264d03](https://github.com/MirageNet/Mirage/commit/1264d03454bd0e023ef47908f5a25e35dc995a6f))
+
 ## [158.3.1](https://github.com/MirageNet/Mirage/compare/v158.3.0...v158.3.1) (2026-06-27)
 
 
