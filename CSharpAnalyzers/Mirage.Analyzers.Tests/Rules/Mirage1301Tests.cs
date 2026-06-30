@@ -24,7 +24,10 @@ namespace Mirage.Analyzers.Tests
         public async Task PrivateFieldsAreIgnored()
         {
             var code = VerifyCS.LoadTestData("Mirage1301Tests/Negative_PrivateFieldsAreIgnored.cs");
-            await VerifyCS.VerifyAnalyzerAsync(code);
+            var expectedPrivateWarning = VerifyCS.Diagnostic("MIRAGE1302")
+                .WithLocation(0)
+                .WithArguments("executionThread", "MessageWithPrivateField");
+            await VerifyCS.VerifyAnalyzerAsync(code, expectedPrivateWarning);
         }
 
         [Test]
@@ -54,7 +57,11 @@ namespace Mirage.Analyzers.Tests
                 .WithLocation(0)
                 .WithArguments("NetworkMessage property", "ExecutionThread", "Thread");
 
-            await VerifyCS.VerifyAnalyzerAsync(code, expected, expectedClassWarning);
+            var expectedPrivateWarning = VerifyCS.Diagnostic("MIRAGE1302")
+                .WithLocation(0)
+                .WithArguments("ExecutionThread", "StartSessionMessage");
+
+            await VerifyCS.VerifyAnalyzerAsync(code, expected, expectedClassWarning, expectedPrivateWarning);
         }
 
         [Test]
@@ -128,11 +135,15 @@ namespace Mirage.Analyzers.Tests
         public async Task WeaverSafeClassWithUnserializableFieldReportsError()
         {
             var code = VerifyCS.LoadTestData("Mirage1301Tests/Positive_WeaverSafeClassWithUnserializableFieldReportsError.cs");
-            var expected = VerifyCS.Diagnostic("MIRAGE1301")
+            var expected1 = VerifyCS.Diagnostic("MIRAGE1301")
                 .WithLocation(0)
+                .WithArguments("Thread", "NetworkMessage field");
+
+            var expected2 = VerifyCS.Diagnostic("MIRAGE1301")
+                .WithLocation(1)
                 .WithArguments("SafeClassWithThread", "NetworkMessage field");
 
-            await VerifyCS.VerifyAnalyzerAsync(code, expected);
+            await VerifyCS.VerifyAnalyzerAsync(code, expected1, expected2);
         }
 
         [Test]
@@ -154,7 +165,11 @@ namespace Mirage.Analyzers.Tests
                 .WithLocation(0)
                 .WithArguments("Thread", "NetworkMessage property");
 
-            await VerifyCS.VerifyAnalyzerAsync(code, expected);
+            var expectedPrivateWarning = VerifyCS.Diagnostic("MIRAGE1302")
+                .WithLocation(0)
+                .WithArguments("ExecutionThread", "StartSessionMessage");
+
+            await VerifyCS.VerifyAnalyzerAsync(code, expected, expectedPrivateWarning);
         }
 
         [Test]

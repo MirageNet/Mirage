@@ -17,7 +17,8 @@ namespace Mirage.Analyzers
         {
             var typeSymbol = (INamedTypeSymbol)context.Symbol;
 
-            if (symbols.HasAttribute(typeSymbol, symbols.NetworkMessageAttribute))
+            if (symbols.HasAttribute(typeSymbol, symbols.NetworkMessageAttribute) ||
+                symbols.HasAttribute(typeSymbol, symbols.WeaverSafeClassAttribute))
             {
 
                 foreach (var member in typeSymbol.GetMembers())
@@ -223,7 +224,7 @@ namespace Mirage.Analyzers
                     return isElemSerializable;
                 }
 
-                if (namedType.TypeKind == TypeKind.Struct)
+                if (namedType.TypeKind == TypeKind.Struct || (namedType.TypeKind == TypeKind.Class && symbols.HasAttribute(namedType, symbols.WeaverSafeClassAttribute)))
                 {
                     visited.Add(type);
                     foreach (var member in namedType.GetMembers())
