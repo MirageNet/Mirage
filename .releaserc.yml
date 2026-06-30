@@ -32,3 +32,4 @@ plugins:
         - 'Assets/Mirage/package.json'
         - 'Assets/Mirage/CHANGELOG.md'
         - 'Assets/Mirage/LICENSE'
+        - 'Assets/Mirage/Analyzers/Mirage.Analyzers.dll'
