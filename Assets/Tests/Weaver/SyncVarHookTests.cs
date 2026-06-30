@@ -32,6 +32,12 @@ namespace Mirage.Tests.Weaver
         }
 
         [Test, BatchSafe(BatchType.Success)]
+        public void FindsStaticHookEvent()
+        {
+            IsSuccess();
+        }
+
+        [Test, BatchSafe(BatchType.Success)]
         public void FindsHookWithNetworkIdentity()
         {
             IsSuccess();
