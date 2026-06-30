@@ -9,7 +9,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task SyncVarOnNonNetworkBehaviourReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1101Tests/SyncVarOnNonNetworkBehaviour.cs");
+            var code = VerifyCS.LoadTestData("Mirage1101Tests/Positive_SyncVarOnNonNetworkBehaviour.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1101")
                 .WithLocation(0)
                 .WithArguments("SyncVarAttribute", "MySyncVar");
@@ -19,7 +19,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task ServerOnNonNetworkBehaviourReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1101Tests/ServerOnNonNetworkBehaviour.cs");
+            var code = VerifyCS.LoadTestData("Mirage1101Tests/Positive_ServerOnNonNetworkBehaviour.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1101")
                 .WithLocation(0)
                 .WithArguments("ServerAttribute", "MyMethod");
@@ -29,7 +29,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task ClientOnNonNetworkBehaviourReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1101Tests/ClientOnNonNetworkBehaviour.cs");
+            var code = VerifyCS.LoadTestData("Mirage1101Tests/Positive_ClientOnNonNetworkBehaviour.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1101")
                 .WithLocation(0)
                 .WithArguments("ClientAttribute", "MyMethod");
@@ -39,7 +39,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task ServerRpcOnNonNetworkBehaviourReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1101Tests/ServerRpcOnNonNetworkBehaviour.cs");
+            var code = VerifyCS.LoadTestData("Mirage1101Tests/Positive_ServerRpcOnNonNetworkBehaviour.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1101")
                 .WithLocation(0)
                 .WithArguments("ServerRpcAttribute", "MyMethod");
@@ -49,7 +49,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task ClientRpcOnNonNetworkBehaviourReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1101Tests/ClientRpcOnNonNetworkBehaviour.cs");
+            var code = VerifyCS.LoadTestData("Mirage1101Tests/Positive_ClientRpcOnNonNetworkBehaviour.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1101")
                 .WithLocation(0)
                 .WithArguments("ClientRpcAttribute", "MyMethod");

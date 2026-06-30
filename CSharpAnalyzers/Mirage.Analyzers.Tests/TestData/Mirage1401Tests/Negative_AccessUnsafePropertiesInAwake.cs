@@ -30,7 +30,7 @@ public class MyBehaviour : NetworkBehaviour
         var world = {|#2:World|};
         var som = {|#3:ServerObjectManager|};
         var com = {|#4:ClientObjectManager|};
-        var visibility = {|#5:Visibility|};
+        var visibility = Identity.{|#5:Visibility|};
         var svs = Identity.{|#6:SyncVarSender|};
 
         {|#7:MyServerRpc|}();

@@ -9,14 +9,14 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task CheckingActiveOrIsSpawnedDoesNotReportWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1403Tests/CheckingActiveOrIsSpawnedDoesNotReportWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1403Tests/Negative_CheckingActiveOrIsSpawnedDoesNotReportWarning.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task CheckingEnabledReportsWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1403Tests/CheckingEnabledReportsWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1403Tests/Positive_CheckingEnabledReportsWarning.cs");
             var expected0 = VerifyCS.Diagnostic("MIRAGE1403").WithLocation(0).WithArguments("NetworkServer");
             var expected1 = VerifyCS.Diagnostic("MIRAGE1403").WithLocation(1).WithArguments("NetworkClient");
             var expected2 = VerifyCS.Diagnostic("MIRAGE1403").WithLocation(2).WithArguments("NetworkIdentity");

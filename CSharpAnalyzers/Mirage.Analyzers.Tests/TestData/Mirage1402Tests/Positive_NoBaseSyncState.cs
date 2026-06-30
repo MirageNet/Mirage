@@ -9,7 +9,7 @@ public class EmptyBase : NetworkBehaviour
 public class DerivedPlayer : EmptyBase
 {
     [SyncVar]
-    public int HeroId { get; set; }
+    public int HeroId;
 
     public override bool OnSerialize(NetworkWriter writer, bool initialState)
     {

@@ -1,17 +1,17 @@
+using System;
 using Mirage;
 using Mirage.Collections;
 
 public class MyBehaviour : NetworkBehaviour
 {
-    public readonly SyncList<int> mySyncList = new SyncList<int>();
+    public SyncList<int> mySyncList = new SyncList<int>();
 
     public MyBehaviour()
     {
-        void LocalMethod()
-        {
+        Action act = () => {
             {|#0:mySyncList|} = new SyncList<int>();
-        }
-        LocalMethod();
+        };
+        act();
     }
 }
 

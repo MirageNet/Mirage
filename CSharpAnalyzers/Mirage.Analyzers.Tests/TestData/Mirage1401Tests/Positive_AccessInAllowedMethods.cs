@@ -3,7 +3,7 @@ using Mirage;
 public class ValidBehaviour : NetworkBehaviour
 {
     [SyncVar]
-    public int Health { get; set; }
+    public int Health;
 
     [SyncVar]
     public int Points;
