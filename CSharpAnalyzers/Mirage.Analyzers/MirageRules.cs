@@ -252,7 +252,7 @@ namespace Mirage.Analyzers
         public static readonly DiagnosticDescriptor PerformanceMessageSizeRule = new DiagnosticDescriptor(
             PerformanceMessageSizeDiagnosticId,
             "Network Message Serialized Size Estimation",
-            "NetworkMessage '{0}' has an estimated serialized size of {1} bytes.",
+            "NetworkMessage '{0}' has an estimated serialized size of {1} bytes",
             "Performance",
             DiagnosticSeverity.Info,
             isEnabledByDefault: true,
