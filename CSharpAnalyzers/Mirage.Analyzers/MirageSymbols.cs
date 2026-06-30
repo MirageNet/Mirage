@@ -28,7 +28,11 @@ namespace Mirage.Analyzers
         // Types
         public INamedTypeSymbol? NetworkBehaviour { get; }
         public INamedTypeSymbol? GameObject { get; }
+        public INamedTypeSymbol? Transform { get; }
+        public INamedTypeSymbol? MonoBehaviour { get; }
         public INamedTypeSymbol? NetworkIdentity { get; }
+        public INamedTypeSymbol? NetworkServer { get; }
+        public INamedTypeSymbol? NetworkClient { get; }
         public INamedTypeSymbol? ISyncObject { get; }
         public INamedTypeSymbol? NetworkWriter { get; }
         public INamedTypeSymbol? NetworkReader { get; }
@@ -43,6 +47,10 @@ namespace Mirage.Analyzers
         public INamedTypeSymbol? Vector2 { get; }
         public INamedTypeSymbol? Vector3 { get; }
         public INamedTypeSymbol? Quaternion { get; }
+
+        public System.Collections.Generic.Dictionary<ITypeSymbol, IMethodSymbol> CustomWriters { get; } = new System.Collections.Generic.Dictionary<ITypeSymbol, IMethodSymbol>(SymbolEqualityComparer.Default);
+        public System.Collections.Generic.Dictionary<ITypeSymbol, IMethodSymbol> CustomReaders { get; } = new System.Collections.Generic.Dictionary<ITypeSymbol, IMethodSymbol>(SymbolEqualityComparer.Default);
+        public System.Collections.Generic.HashSet<ITypeSymbol> CustomSerializableTypes { get; } = new System.Collections.Generic.HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
 
         public MirageSymbols(Compilation compilation)
         {
@@ -70,7 +78,10 @@ namespace Mirage.Analyzers
             // Resolve types
             NetworkBehaviour = compilation.GetTypeByMetadataName("Mirage.NetworkBehaviour");
             GameObject = compilation.GetTypeByMetadataName("UnityEngine.GameObject");
+            Transform = compilation.GetTypeByMetadataName("UnityEngine.Transform");
             NetworkIdentity = compilation.GetTypeByMetadataName("Mirage.NetworkIdentity");
+            NetworkServer = compilation.GetTypeByMetadataName("Mirage.NetworkServer");
+            NetworkClient = compilation.GetTypeByMetadataName("Mirage.NetworkClient");
             ISyncObject = compilation.GetTypeByMetadataName("Mirage.Collections.ISyncObject");
             NetworkWriter = compilation.GetTypeByMetadataName("Mirage.Serialization.NetworkWriter");
             NetworkReader = compilation.GetTypeByMetadataName("Mirage.Serialization.NetworkReader");
@@ -79,12 +90,60 @@ namespace Mirage.Analyzers
             NetworkConnection = compilation.GetTypeByMetadataName("Mirage.NetworkConnection");
             IEnumerable = compilation.GetTypeByMetadataName("System.Collections.IEnumerable");
             UniTask = compilation.GetTypeByMetadataName("Cysharp.Threading.Tasks.UniTask");
-            SyncList = compilation.GetTypeByMetadataName("Mirage.Collections.SyncList");
-            SyncDictionary = compilation.GetTypeByMetadataName("Mirage.Collections.SyncDictionary");
-            SyncIDictionary = compilation.GetTypeByMetadataName("Mirage.Collections.SyncIDictionary");
+            SyncList = compilation.GetTypeByMetadataName("Mirage.Collections.SyncList`1");
+            SyncDictionary = compilation.GetTypeByMetadataName("Mirage.Collections.SyncDictionary`2");
+            SyncIDictionary = compilation.GetTypeByMetadataName("Mirage.Collections.SyncIDictionary`2");
             Vector2 = compilation.GetTypeByMetadataName("UnityEngine.Vector2");
             Vector3 = compilation.GetTypeByMetadataName("UnityEngine.Vector3");
             Quaternion = compilation.GetTypeByMetadataName("UnityEngine.Quaternion");
+            MonoBehaviour = compilation.GetTypeByMetadataName("UnityEngine.MonoBehaviour");
+
+            FindCustomSerializers(compilation);
+        }
+
+        private void FindCustomSerializers(Compilation compilation)
+        {
+            FindCustomSerializersInNamespace(compilation.GlobalNamespace);
+        }
+
+        private void FindCustomSerializersInNamespace(INamespaceSymbol ns)
+        {
+            foreach (var member in ns.GetMembers())
+            {
+                if (member is INamespaceSymbol nestedNs)
+                {
+                    FindCustomSerializersInNamespace(nestedNs);
+                }
+                else if (member is INamedTypeSymbol typeSymbol && typeSymbol.IsStatic)
+                {
+                    foreach (var method in typeSymbol.GetMembers().OfType<IMethodSymbol>())
+                    {
+                        if (method.IsStatic && method.IsExtensionMethod)
+                        {
+                            if (method.Parameters.Length == 2 && 
+                                NetworkWriter != null && 
+                                SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, NetworkWriter))
+                            {
+                                var type = method.Parameters[1].Type;
+                                if (!CustomWriters.ContainsKey(type))
+                                    CustomWriters.Add(type, method);
+                                
+                                CustomSerializableTypes.Add(type);
+                            }
+                            else if (method.Parameters.Length == 1 && 
+                                     NetworkReader != null && 
+                                     SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, NetworkReader))
+                            {
+                                var type = method.ReturnType;
+                                if (!CustomReaders.ContainsKey(type))
+                                    CustomReaders.Add(type, method);
+                                
+                                CustomSerializableTypes.Add(type);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public bool HasAttribute(ISymbol? symbol, INamedTypeSymbol? attributeSymbol)

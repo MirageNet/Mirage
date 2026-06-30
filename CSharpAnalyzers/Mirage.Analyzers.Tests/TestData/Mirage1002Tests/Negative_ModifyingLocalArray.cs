@@ -1,5 +1,6 @@
 using Mirage;
 
+[WeaverSafeClass]
 public class MyClass
 {
     public int Value;

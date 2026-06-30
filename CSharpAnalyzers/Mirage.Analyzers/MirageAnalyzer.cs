@@ -25,6 +25,24 @@ namespace Mirage.Analyzers
                 Mirage1003.Register(compilationContext, symbols);
                 Mirage1004.Register(compilationContext, symbols);
                 Mirage1005.Register(compilationContext, symbols);
+                Mirage1101.Register(compilationContext, symbols);
+                Mirage1102.Register(compilationContext, symbols);
+                Mirage1201.Register(compilationContext, symbols);
+                Mirage1202.Register(compilationContext, symbols);
+                Mirage1203.Register(compilationContext, symbols);
+                Mirage1204.Register(compilationContext, symbols);
+                Mirage1205.Register(compilationContext, symbols);
+                Mirage1206.Register(compilationContext, symbols);
+                Mirage1207.Register(compilationContext, symbols);
+                Mirage1301.Register(compilationContext, symbols);
+                Mirage1302.Register(compilationContext, symbols);
+                Mirage1303.Register(compilationContext, symbols);
+                Mirage1304.Register(compilationContext, symbols);
+                Mirage1305.Register(compilationContext, symbols);
+                Mirage1401.Register(compilationContext, symbols);
+                Mirage1402.Register(compilationContext, symbols);
+                Mirage1403.Register(compilationContext, symbols);
+                Mirage1501.Register(compilationContext, symbols);
             });
         }
     }

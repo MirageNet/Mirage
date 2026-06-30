@@ -5,7 +5,7 @@ public class MyNetworkBehaviour : NetworkBehaviour {}
 
 public class PlayerCombat : NetworkBehaviour
 {
-    [ServerRpc]
+    [ServerRpc, RateLimit]
     public void CmdInteract(MyNetworkBehaviour target)
     {
     }

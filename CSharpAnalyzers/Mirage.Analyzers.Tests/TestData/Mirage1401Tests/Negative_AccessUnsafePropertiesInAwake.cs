@@ -2,7 +2,7 @@ using Mirage;
 
 public class MyBehaviour : NetworkBehaviour
 {
-    [ServerRpc]
+    [ServerRpc, RateLimit]
     private void MyServerRpc() {}
 
     [ClientRpc]

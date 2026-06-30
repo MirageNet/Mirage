@@ -39,24 +39,36 @@ namespace Mirage.Analyzers.Tests
         public async Task SyncObjectReassignmentInMethodReportsError()
         {
             var code = VerifyCS.LoadTestData("Mirage1003Tests/Positive_SyncObjectReassignmentInMethodReportsError.cs");
-            var expected = VerifyCS.Diagnostic("MIRAGE1003").WithLocation(0).WithArguments("mySyncList");
-            await VerifyCS.VerifyAnalyzerAsync(code, expected);
+            var expectedField = VerifyCS.Diagnostic("MIRAGE1003").WithLocation(0).WithArguments("mySyncList");
+            var expectedReassignment = VerifyCS.Diagnostic("MIRAGE1003").WithLocation(1).WithArguments("mySyncList");
+            await VerifyCS.VerifyAnalyzerAsync(code, expectedField, expectedReassignment);
         }
 
         [Test]
         public async Task SyncObjectReassignmentInLocalFunctionInConstructorReportsError()
         {
             var code = VerifyCS.LoadTestData("Mirage1003Tests/Positive_SyncObjectReassignmentInLocalFunctionInConstructorReportsError.cs");
-            var expected = VerifyCS.Diagnostic("MIRAGE1003").WithLocation(0).WithArguments("mySyncList");
-            await VerifyCS.VerifyAnalyzerAsync(code, expected);
+            var expectedField = VerifyCS.Diagnostic("MIRAGE1003").WithLocation(0).WithArguments("mySyncList");
+            var expectedReassignment = VerifyCS.Diagnostic("MIRAGE1003").WithLocation(1).WithArguments("mySyncList");
+            await VerifyCS.VerifyAnalyzerAsync(code, expectedField, expectedReassignment);
         }
 
         [Test]
         public async Task SyncObjectReassignmentInLambdaInConstructorReportsError()
         {
             var code = VerifyCS.LoadTestData("Mirage1003Tests/Positive_SyncObjectReassignmentInLambdaInConstructorReportsError.cs");
-            var expected = VerifyCS.Diagnostic("MIRAGE1003").WithLocation(0).WithArguments("mySyncList");
-            await VerifyCS.VerifyAnalyzerAsync(code, expected);
+            var expectedField = VerifyCS.Diagnostic("MIRAGE1003").WithLocation(0).WithArguments("mySyncList");
+            var expectedReassignment = VerifyCS.Diagnostic("MIRAGE1003").WithLocation(1).WithArguments("mySyncList");
+            await VerifyCS.VerifyAnalyzerAsync(code, expectedField, expectedReassignment);
+        }
+
+        [Test]
+        public async Task SyncObjectNotReadonlyAndReassignedInMethodReportsMultipleErrors()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1003Tests/Positive_SyncObjectNotReadonlyAndReassignedInMethodReportsMultipleErrors.cs");
+            var expectedFieldWarning = VerifyCS.Diagnostic("MIRAGE1003").WithLocation(0).WithArguments("mySyncList");
+            var expectedReassignmentError = VerifyCS.Diagnostic("MIRAGE1003").WithLocation(1).WithArguments("mySyncList");
+            await VerifyCS.VerifyAnalyzerAsync(code, expectedFieldWarning, expectedReassignmentError);
         }
     }
 }
