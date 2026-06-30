@@ -4,19 +4,20 @@ using Cysharp.Threading.Tasks;
 namespace Mirage.Snippets.Analyzers
 {
     public struct PlayerStats {}
+    public struct DamageContainer<T> { public T Value; }
 
     namespace M1202.Triggering
     {
         // CodeEmbed-Start: mirage1202-triggering
         public class Player : NetworkBehaviour
         {
-            // Errors: RPC method 'CmdTakeDamage' is invalid: cannot have generic parameters.
+            // Error: RPC methods cannot define their own generic parameters.
             [ServerRpc]
             public void CmdTakeDamage<T>(T damage)
             {
             }
 
-            // Errors: RPC method 'CmdGetStats' is invalid: cannot return 'PlayerStats' (must return void or UniTask).
+            // Error: RPC methods must return void, UniTask, or UniTask<T>.
             [ServerRpc]
             public PlayerStats CmdGetStats()
             {
@@ -29,10 +30,18 @@ namespace Mirage.Snippets.Analyzers
     namespace M1202.Resolved
     {
         // CodeEmbed-Start: mirage1202-resolved
-        public class Player : NetworkBehaviour
+        // Allowed: NetworkBehaviours can be generic classes.
+        public class Player<T> : NetworkBehaviour
         {
+            // Allowed: RPC methods can use generic parameters from the enclosing class.
             [ServerRpc]
-            public void CmdTakeDamage(int damage)
+            public void CmdProcessGenericArg(T data)
+            {
+            }
+
+            // Allowed: RPC methods can use closed generic types (e.g. DamageContainer<int>).
+            [ServerRpc]
+            public void CmdTakeDamage(DamageContainer<int> damage)
             {
             }
 
