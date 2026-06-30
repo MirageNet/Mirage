@@ -27,25 +27,16 @@ namespace Mirage.Analyzers
                     return;
                 }
 
-                if (!methodSymbol.ReturnsVoid && !IsUniTask(methodSymbol.ReturnType))
+                if (!methodSymbol.ReturnsVoid && !Helpers.IsGenericUniTask(methodSymbol.ReturnType, out _))
                 {
                     var diagnostic = Diagnostic.Create(
                         MirageRules.RpcSignatureRule,
                         methodSymbol.Locations[0],
                         methodSymbol.Name,
-                        $"cannot return '{methodSymbol.ReturnType.ToDisplayString()}' (must return void or UniTask)");
+                        $"cannot return '{methodSymbol.ReturnType.ToDisplayString()}' (must return void or UniTask<T>)");
                     context.ReportDiagnostic(diagnostic);
                 }
             }
-        }
-
-        private static bool IsUniTask(ITypeSymbol type)
-        {
-            if (type == null)
-                return false;
-
-            var containingNamespace = type.ContainingNamespace?.ToDisplayString();
-            return type.Name == "UniTask" && containingNamespace == "Cysharp.Threading.Tasks";
         }
     }
 }
