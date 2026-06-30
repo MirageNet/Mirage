@@ -20,7 +20,7 @@ namespace Mirage.Analyzers
                 {
                     if (member is IFieldSymbol field && !field.IsStatic && !field.IsImplicitlyDeclared)
                     {
-                        if (field.DeclaredAccessibility != Accessibility.Public && field.DeclaredAccessibility != Accessibility.Internal)
+                        if (field.DeclaredAccessibility != Accessibility.Public)
                         {
                             if (HasNonSerializedAttribute(field))
                                 continue;
@@ -35,18 +35,15 @@ namespace Mirage.Analyzers
                     }
                     else if (member is IPropertySymbol property && !property.IsStatic && Helpers.IsAutoProperty(property))
                     {
-                        if (property.DeclaredAccessibility != Accessibility.Public && property.DeclaredAccessibility != Accessibility.Internal)
-                        {
-                            if (HasNonSerializedAttribute(property))
-                                continue;
+                        if (HasNonSerializedAttribute(property))
+                            continue;
 
-                            var diagnostic = Diagnostic.Create(
-                                MirageRules.UnserializedPrivateFieldRule,
-                                property.Locations[0],
-                                property.Name,
-                                typeSymbol.Name);
-                            context.ReportDiagnostic(diagnostic);
-                        }
+                        var diagnostic = Diagnostic.Create(
+                            MirageRules.UnserializedPrivateFieldRule,
+                            property.Locations[0],
+                            property.Name,
+                            typeSymbol.Name);
+                        context.ReportDiagnostic(diagnostic);
                     }
                 }
             }
