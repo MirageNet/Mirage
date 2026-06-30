@@ -9,14 +9,14 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task MessageWithAttributeDoesNotReportWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1305Tests/MessageWithAttributeDoesNotReportWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1305Tests/Negative_MessageWithAttributeDoesNotReportWarning.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task MessageWithoutAttributeReportsWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1305Tests/MessageWithoutAttributeReportsWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1305Tests/Positive_MessageWithoutAttributeReportsWarning.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1305")
                 .WithLocation(0)
                 .WithArguments("UnattributedMessage");
@@ -26,14 +26,14 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task BuiltInTypesAllowed()
         {
-            var code = VerifyCS.LoadTestData("Mirage1305Tests/BuiltInTypesAllowed.cs");
+            var code = VerifyCS.LoadTestData("Mirage1305Tests/Negative_BuiltInTypesAllowed.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task MessageWithoutAttributeInRegisterHandlerReportsWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1305Tests/MessageWithoutAttributeInRegisterHandlerReportsWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1305Tests/Positive_MessageWithoutAttributeInRegisterHandlerReportsWarning.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1305")
                 .WithLocation(0)
                 .WithArguments("UnattributedMessage");

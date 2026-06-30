@@ -3,7 +3,7 @@ using Mirage;
 public class MyBehaviour : NetworkBehaviour
 {
     [SyncVar]
-    public int Health { get; set; }
+    public int Health;
 
     private void Start()
     {
