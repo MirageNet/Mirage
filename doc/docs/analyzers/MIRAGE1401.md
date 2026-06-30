@@ -11,6 +11,8 @@ Reading, writing, or invoking any of the following network properties, fields, o
 
 Unity's `Awake` and `Start` methods are called during GameObject initialization before Mirage's network identity is spawned or initialized. At this point, properties and fields representing the network state or references are not set (they are null or default). Accessing them, invoking RPC methods, or calling attribute-guarded methods inside `Awake` or `Start` leads to incorrect behavior, `NullReferenceException` at runtime, default values, or race conditions.
 
+Specifically, accessing `Visibility` (via `Identity.Visibility` or `NetworkBehaviour.Identity.Visibility`) on a network identity that does not have a custom `NetworkVisibility` component attached will try to retrieve the `DefaultVisibility` from the `ServerObjectManager`. Since the `ServerObjectManager` is null before the identity is spawned, this will throw an `InvalidOperationException`.
+
 ---
 
 ## Example of Triggering Code
