@@ -20,6 +20,10 @@ namespace Mirage.Analyzers
                 if (symbols.NetworkBehaviour == null)
                     return;
 
+                Mirage1001.Register(compilationContext, symbols);
+                Mirage1002.Register(compilationContext, symbols);
+                Mirage1003.Register(compilationContext, symbols);
+                Mirage1004.Register(compilationContext, symbols);
                 Mirage1005.Register(compilationContext, symbols);
             });
         }
