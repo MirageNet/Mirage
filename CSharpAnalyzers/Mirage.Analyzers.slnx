@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Mirage.Analyzers.Tests/Mirage.Analyzers.Tests.csproj" />
+  <Project Path="Mirage.Analyzers/Mirage.Analyzers.csproj" />
+</Solution>
