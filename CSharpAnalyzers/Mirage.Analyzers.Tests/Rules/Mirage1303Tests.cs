@@ -1,5 +1,5 @@
-using NUnit.Framework;
 using System.Threading.Tasks;
+using NUnit.Framework;
 
 namespace Mirage.Analyzers.Tests
 {
@@ -18,6 +18,35 @@ namespace Mirage.Analyzers.Tests
         {
             var code = VerifyCS.LoadTestData("Mirage1303Tests/Valid_NonExtensionMethodsAreIgnored.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
+        }
+
+        [Test]
+        public async Task GenericWeaverSerializeCollectionMethodsAreValid()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1303Tests/Valid_GenericCollectionWriter.cs");
+            await VerifyCS.VerifyAnalyzerAsync(code);
+        }
+
+        [Test]
+        public async Task GenericCollectionWriterOnlyReportsError()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1303Tests/Invalid_GenericCollectionWriterOnly.cs");
+            var expected = VerifyCS.Diagnostic("MIRAGE1303")
+                .WithLocation(0)
+                .WithArguments("MyGenericStruct<T>", "Custom writer defined for 'MyGenericStruct<T>' but matching custom reader is missing.");
+
+            await VerifyCS.VerifyAnalyzerAsync(code, expected);
+        }
+
+        [Test]
+        public async Task GenericCollectionReaderOnlyReportsError()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1303Tests/Invalid_GenericCollectionReaderOnly.cs");
+            var expected = VerifyCS.Diagnostic("MIRAGE1303")
+                .WithLocation(0)
+                .WithArguments("MyGenericStruct<T>", "Custom reader defined for 'MyGenericStruct<T>' but matching custom writer is missing.");
+
+            await VerifyCS.VerifyAnalyzerAsync(code, expected);
         }
 
         [Test]
