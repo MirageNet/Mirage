@@ -43,6 +43,25 @@ namespace Mirage.Snippets.Analyzers
                 return new CustomType { value = reader.ReadPackedInt32() };
             }
         }
+
+        public struct LengthCustomType
+        {
+            public byte[] data;
+        }
+
+        public static class LengthCustomSerialization
+        {
+            // Correct: Length-based custom writer and reader signatures are also supported
+            public static void WriteLengthCustomType(this NetworkWriter writer, LengthCustomType value, int length)
+            {
+                writer.WriteBytes(value.data, 0, length);
+            }
+
+            public static LengthCustomType ReadLengthCustomType(this NetworkReader reader, int length)
+            {
+                return new LengthCustomType { data = reader.ReadBytes(length) };
+            }
+        }
         // CodeEmbed-End: mirage1303-resolved
     }
 }

@@ -23,7 +23,7 @@ Mirage uses Roslyn Analyzers to provide compile-time validation for network code
 | [MIRAGE1206](MIRAGE1206.md) | Invalid RateLimit Attribute Settings | Error | Enforces valid positive configurations for interval, refill, and max tokens inside `[RateLimit]` attributes. |
 | [MIRAGE1207](MIRAGE1207.md) | Missing RateLimit on ServerRpc | Warning | Recommends decorating `[ServerRpc]` methods with `[RateLimit]` to prevent server denial of service (DoS) attacks. |
 | [MIRAGE1301](MIRAGE1301.md) | Field Type Serialization Validation | Error | Confirms all fields in network messages/RPCs are serializable by Mirage or have registered custom serializers. |
-| [MIRAGE1302](MIRAGE1302.md) | Unserialized Private Field Warning | Warning | Warns if a private field or property in a NetworkMessage will not be serialized. |
+| [MIRAGE1302](MIRAGE1302.md) | Unserialized Member Warning | Warning | Warns if a property, or a private/internal/protected field in a NetworkMessage is ignored by the Weaver. |
 | [MIRAGE1303](MIRAGE1303.md) | Mismatched Custom Serialization Methods | Error | Requires custom serializers to contain matching, properly-signed reader and writer extension methods. |
 | [MIRAGE1304](MIRAGE1304.md) | Non-Serializable MonoBehaviour Parameter | Error | Prohibits passing a plain `MonoBehaviour` (not inheriting from `NetworkBehaviour`) in RPCs or message fields. |
 | [MIRAGE1305](MIRAGE1305.md) | Missing NetworkMessage Attribute | Warning | Warns if a type is sent or registered as a message, but lacks the `[NetworkMessage]` attribute. |
@@ -95,8 +95,8 @@ To protect servers against client RPC spamming and potential denial of service (
 #### [MIRAGE1301: Field Type Serialization Validation](MIRAGE1301.md)
 All fields in a `[NetworkMessage]` or parameters in RPCs must be serializable by Mirage. If a type cannot be automatically serialized by the Weaver and lacks registered custom read/write extension methods, compile-time errors occur. Make sure fields use serializable types or implement custom `NetworkWriter` and `NetworkReader` extensions.
 
-#### [MIRAGE1302: Unserialized Private Field Warning](MIRAGE1302.md)
-Private fields and properties in a `[NetworkMessage]` are ignored by the Weaver during serialization. This warning alerts developers that these fields will not be synced over the network, helping avoid confusion. Fix this by making the field public or utilizing public properties with backing fields if custom serialization is implemented.
+#### [MIRAGE1302: Unserialized Member Warning](MIRAGE1302.md)
+Properties (including public ones) and non-public fields (private/protected/internal) in a `[NetworkMessage]` are ignored by the Weaver during serialization. This warning alerts developers that these members will not be synced over the network, helping avoid confusion. Fix this by making the fields public.
 
 #### [MIRAGE1303: Mismatched Custom Serialization Methods](MIRAGE1303.md)
 Custom serialization requires registering both a writer extension method and a reader extension method with matching signatures. If one of them is missing or has signature differences, Mirage cannot pair them up, causing compilation failure. To resolve this, ensure both matching methods are fully defined.
@@ -125,4 +125,4 @@ Warns if a developer tries to check whether `NetworkServer`, `NetworkClient`, or
 ### Group 6: Performance & Size Estimation (`MIRAGE1500 – MIRAGE1599`)
 
 #### [MIRAGE1501: Network Message Serialized Size Estimation](MIRAGE1501.md)
-Estimates the serialized size of all `[NetworkMessage]` structs/classes and outputs it as an Info diagnostic to help track and optimize bandwidth usage. Dynamic types like strings, arrays, and lists are treated as variable (skipped in size calculation).
+Estimates the serialized size of all `[NetworkMessage]` structs/classes and outputs it as an Info diagnostic to help track and optimize bandwidth usage. Dynamic types like strings, arrays, and lists are treated as variable (evaluating the length/header prefix as 1 byte).

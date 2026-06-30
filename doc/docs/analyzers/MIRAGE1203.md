@@ -1,9 +1,9 @@
 # MIRAGE1203: Pass-by-Reference Modifiers in RPCs
 
 ## The Problem
-An RPC method contains parameters with `ref` or `out` parameter modifiers.
+An RPC method contains parameters with `ref`, `out`, or `in` parameter modifiers.
 
-RPCs (Remote Procedure Calls) serialize arguments and send them over the network. Pass-by-reference modifiers (`ref` or `out`) imply that the method can modify the argument and pass the changes back to the caller in-place, which is impossible over a one-way network serialization boundary.
+RPCs (Remote Procedure Calls) serialize arguments and send them over the network. Pass-by-reference modifiers (`ref`, `out`, or `in`) pass values by reference under the hood (which triggers the Weaver's `IsByReference` check). Since RPC arguments must be serialized over a one-way network serialization boundary, pass-by-reference is not supported.
 
 ---
 

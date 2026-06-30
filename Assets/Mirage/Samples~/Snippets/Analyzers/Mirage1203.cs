@@ -7,11 +7,11 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1203-triggering
         public class Player : NetworkBehaviour
         {
-            // Error: ServerRpc method 'CmdTakeDamage' cannot have ref/out parameters
+            // Error: ServerRpc method 'CmdTakeDamage' cannot have ref/out/in parameters
             [ServerRpc]
-            public void CmdTakeDamage(ref int health)
+            public void CmdTakeDamage(ref int health, in int damage)
             {
-                health -= 10;
+                health -= damage;
             }
         }
         // CodeEmbed-End: mirage1203-triggering

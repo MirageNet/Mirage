@@ -18,6 +18,13 @@ namespace Mirage.Snippets.Analyzers
 
                 // Warning: Accessing Visibility before the object is spawned will throw an exception if no custom NetworkVisibility component is attached
                 var visibility = Identity.Visibility;
+
+                // Warning: Accessing Owner, IsHost, IsLocalClient, IsServerOnly, and IsClientOnly in Awake/Start is unsafe
+                var owner = Owner;
+                var isHost = IsHost;
+                var isLocalClient = IsLocalClient;
+                var isServerOnly = IsServerOnly;
+                var isClientOnly = IsClientOnly;
             }
         }
         // CodeEmbed-End: mirage1401-triggering
