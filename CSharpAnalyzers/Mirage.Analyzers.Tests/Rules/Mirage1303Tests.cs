@@ -9,21 +9,21 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task MatchingReaderAndWriterDoesNotReportError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1303Tests/Negative_MatchingReaderAndWriterDoesNotReportError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1303Tests/Valid_MatchingReaderAndWriterDoesNotReportError.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task NonExtensionMethodsAreIgnored()
         {
-            var code = VerifyCS.LoadTestData("Mirage1303Tests/Negative_NonExtensionMethodsAreIgnored.cs");
+            var code = VerifyCS.LoadTestData("Mirage1303Tests/Valid_NonExtensionMethodsAreIgnored.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task WriterOnlyReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1303Tests/Positive_WriterOnlyReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1303Tests/Invalid_WriterOnlyReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1303")
                 .WithLocation(0)
                 .WithArguments("CustomType", "Custom writer defined for 'CustomType' but matching custom reader is missing.");
@@ -34,7 +34,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task ReaderOnlyReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1303Tests/Positive_ReaderOnlyReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1303Tests/Invalid_ReaderOnlyReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1303")
                 .WithLocation(0)
                 .WithArguments("CustomType", "Custom reader defined for 'CustomType' but matching custom writer is missing.");
@@ -45,7 +45,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task NestedStaticClassWithMismatchedSerializerReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1303Tests/Positive_NestedStaticClassWithMismatchedSerializerReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1303Tests/Invalid_NestedStaticClassWithMismatchedSerializerReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1303")
                 .WithLocation(0)
                 .WithArguments("CustomType", "Custom writer defined for 'CustomType' but matching custom reader is missing.");
@@ -56,7 +56,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task MismatchedArraySerializerReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1303Tests/Positive_MismatchedArraySerializerReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1303Tests/Invalid_MismatchedArraySerializerReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1303")
                 .WithLocation(0)
                 .WithArguments("CustomType[]", "Custom writer defined for 'CustomType[]' but matching custom reader is missing.");

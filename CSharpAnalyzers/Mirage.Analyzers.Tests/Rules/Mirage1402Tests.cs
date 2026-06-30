@@ -7,23 +7,23 @@ namespace Mirage.Analyzers.Tests
     public class Mirage1402Tests
     {
         [Test]
-        public async Task Positive_BaseCallIncluded()
+        public async Task Invalid_BaseCallIncluded()
         {
-            var code = VerifyCS.LoadTestData("Mirage1402Tests/Positive_BaseCallIncluded.cs");
+            var code = VerifyCS.LoadTestData("Mirage1402Tests/Invalid_BaseCallIncluded.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
-        public async Task Positive_NoBaseSyncState()
+        public async Task Invalid_NoBaseSyncState()
         {
-            var code = VerifyCS.LoadTestData("Mirage1402Tests/Positive_NoBaseSyncState.cs");
+            var code = VerifyCS.LoadTestData("Mirage1402Tests/Invalid_NoBaseSyncState.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
-        public async Task Negative_MissingBaseOnSerialize()
+        public async Task Valid_MissingBaseOnSerialize()
         {
-            var code = VerifyCS.LoadTestData("Mirage1402Tests/Negative_MissingBaseOnSerialize.cs");
+            var code = VerifyCS.LoadTestData("Mirage1402Tests/Valid_MissingBaseOnSerialize.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1402")
                 .WithLocation(0)
                 .WithArguments("OnSerialize");
@@ -32,9 +32,9 @@ namespace Mirage.Analyzers.Tests
         }
 
         [Test]
-        public async Task Negative_MissingBaseOnDeserialize()
+        public async Task Valid_MissingBaseOnDeserialize()
         {
-            var code = VerifyCS.LoadTestData("Mirage1402Tests/Negative_MissingBaseOnDeserialize.cs");
+            var code = VerifyCS.LoadTestData("Mirage1402Tests/Valid_MissingBaseOnDeserialize.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1402")
                 .WithLocation(0)
                 .WithArguments("OnDeserialize");
@@ -45,7 +45,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task Edge_BaseSyncStateFromISyncObject()
         {
-            var code = VerifyCS.LoadTestData("Mirage1402Tests/Positive_Edge_BaseSyncStateFromISyncObject.cs");
+            var code = VerifyCS.LoadTestData("Mirage1402Tests/Invalid_Edge_BaseSyncStateFromISyncObject.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1402")
                 .WithLocation(0)
                 .WithArguments("OnSerialize");
