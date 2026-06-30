@@ -18,7 +18,10 @@ namespace Mirage.Analyzers
             var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation);
             if (symbolInfo.Symbol is IMethodSymbol methodSymbol && methodSymbol.IsGenericMethod)
             {
-                if (methodSymbol.Name == "Send" || methodSymbol.Name == "RegisterHandler")
+                if (methodSymbol.Name == "Send" || methodSymbol.Name == "RegisterHandler" ||
+                    methodSymbol.Name == "UnregisterHandler" || methodSymbol.Name == "SendToAll" ||
+                    methodSymbol.Name == "SendToMany" || methodSymbol.Name == "Pack" ||
+                    methodSymbol.Name == "Unpack" || methodSymbol.Name == "GetId")
                 {
                     var typeArgument = methodSymbol.TypeArguments[0];
                     if (IsCustomType(typeArgument) && !symbols.HasAttribute(typeArgument, symbols.NetworkMessageAttribute))

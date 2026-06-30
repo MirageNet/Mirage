@@ -32,6 +32,12 @@ public class MyBehaviour : NetworkBehaviour
         var com = {|#4:ClientObjectManager|};
         var visibility = Identity.{|#5:Visibility|};
         var svs = Identity.{|#6:SyncVarSender|};
+        var owner = {|#14:Owner|};
+        var isHost = {|#15:IsHost|};
+        var isLocalClient = {|#16:IsLocalClient|};
+        var isServerOnly = {|#17:IsServerOnly|};
+        var isClientOnly = {|#18:IsClientOnly|};
+        var hasAuthority = {|#19:HasAuthority|};
 
         {|#7:MyServerRpc|}();
         {|#8:MyClientRpc|}();
