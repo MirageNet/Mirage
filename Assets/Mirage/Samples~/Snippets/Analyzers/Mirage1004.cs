@@ -12,20 +12,23 @@ namespace Mirage.Snippets.Analyzers
             [SyncVar(hook = "OnHealthChanged")]
             public int health;
 
-            // Case 2: Hook method parameter types do not match the SyncVar's type (int vs float)
-            [SyncVar(hook = nameof(OnManaChanged))]
-            public int mana;
+            // Case 2: Hook method parameter types do not match the SyncVar's type (double vs float)
+            // Note: Hook method can be static or instance
+            [SyncVar(hook = nameof(OnMatchStartTimeChanged))]
+            public double matchStartTime;
 
-            public void OnManaChanged(float oldMana, float newMana)
+            public static void OnMatchStartTimeChanged(float oldTime, float newTime)
             {
                 // Wrong parameter types
             }
 
-            // Case 3: A static event hook is declared (unsupported, causes invalid IL in weaver)
+            // Case 3: An event hook is declared with an invalid delegate type (not System.Action)
+            // Note: Hook event can be static or instance
             [SyncVar(hook = nameof(OnScoreChanged))]
             public int score;
 
-            public static event Action<int, int> OnScoreChanged;
+            public delegate void ScoreChangedDelegate(int oldScore, int newScore);
+            public static event ScoreChangedDelegate OnScoreChanged;
 
             // Case 4: Multiple matching overloads exist under automatic hook type resolving
             [SyncVar(hook = nameof(OnGoldChanged))]
@@ -51,20 +54,22 @@ namespace Mirage.Snippets.Analyzers
                 // Correct instance method hook
             }
 
-            // Case 2: Hook method is a static method (fully supported by Mirage Weaver)
-            [SyncVar(hook = nameof(OnManaChanged))]
-            public int mana;
+            // Case 2: Hook method parameter types match the SyncVar's type exactly
+            // Note: Hook method can be static or instance
+            [SyncVar(hook = nameof(OnMatchStartTimeChanged))]
+            public double matchStartTime;
 
-            public static void OnManaChanged(int oldMana, int newMana)
+            public static void OnMatchStartTimeChanged(double oldTime, double newTime)
             {
                 // Correct static method hook
             }
 
-            // Case 3: Hook can be an instance event of type System.Action
+            // Case 3: Hook event is declared using a System.Action delegate
+            // Note: Hook event can be static or instance
             [SyncVar(hook = nameof(OnScoreChanged))]
             public int score;
 
-            public event Action<int, int> OnScoreChanged;
+            public static event Action<int, int> OnScoreChanged;
 
             // Case 4: Multiple overloads resolved by explicitly specifying hookType
             [SyncVar(hook = nameof(OnGoldChanged), hookType = SyncHookType.MethodWith2Arg)]
