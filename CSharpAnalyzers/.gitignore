@@ -1,0 +1,6 @@
+# Unignore project file in this directory
+!*.csproj
+
+# Ignore build outputs
+bin/
+obj/
