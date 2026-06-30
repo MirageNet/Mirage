@@ -6,6 +6,7 @@ public class NestedClass
     public int Value;
 }
 
+[WeaverSafeClass]
 public class MyClass
 {
     public NestedClass Nested = new NestedClass();
