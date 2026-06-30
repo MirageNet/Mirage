@@ -7,23 +7,23 @@ namespace Mirage.Analyzers.Tests
     public class Mirage1401Tests
     {
         [Test]
-        public async Task Positive_AccessInAllowedMethods()
+        public async Task Invalid_AccessInAllowedMethods()
         {
-            var code = VerifyCS.LoadTestData("Mirage1401Tests/Positive_AccessInAllowedMethods.cs");
+            var code = VerifyCS.LoadTestData("Mirage1401Tests/Invalid_AccessInAllowedMethods.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
-        public async Task Positive_NonNetworkBehaviourClass()
+        public async Task Invalid_NonNetworkBehaviourClass()
         {
-            var code = VerifyCS.LoadTestData("Mirage1401Tests/Positive_NonNetworkBehaviourClass.cs");
+            var code = VerifyCS.LoadTestData("Mirage1401Tests/Invalid_NonNetworkBehaviourClass.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
-        public async Task Negative_AccessIsServerInAwake()
+        public async Task Valid_AccessIsServerInAwake()
         {
-            var code = VerifyCS.LoadTestData("Mirage1401Tests/Negative_AccessIsServerInAwake.cs");
+            var code = VerifyCS.LoadTestData("Mirage1401Tests/Valid_AccessIsServerInAwake.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1401")
                 .WithLocation(0)
                 .WithArguments("IsServer", "Awake");
@@ -32,9 +32,9 @@ namespace Mirage.Analyzers.Tests
         }
 
         [Test]
-        public async Task Negative_AccessUnsafePropertiesInAwake()
+        public async Task Valid_AccessUnsafePropertiesInAwake()
         {
-            var code = VerifyCS.LoadTestData("Mirage1401Tests/Negative_AccessUnsafePropertiesInAwake.cs");
+            var code = VerifyCS.LoadTestData("Mirage1401Tests/Valid_AccessUnsafePropertiesInAwake.cs");
             var expected0 = VerifyCS.Diagnostic("MIRAGE1401").WithLocation(0).WithArguments("Server", "Awake");
             var expected1 = VerifyCS.Diagnostic("MIRAGE1401").WithLocation(1).WithArguments("Client", "Awake");
             var expected2 = VerifyCS.Diagnostic("MIRAGE1401").WithLocation(2).WithArguments("World", "Awake");
@@ -59,23 +59,23 @@ namespace Mirage.Analyzers.Tests
             await VerifyCS.VerifyAnalyzerAsync(code, expected0, expected1, expected2, expected3, expected4, expected5, expected6, expected7, expected8, expected9, expected10, expected11, expected12, expected13, expected14, expected15, expected16, expected17, expected18, expected19);
         }
         [Test]
-        public async Task Positive_AccessSyncVarPropertyInStart()
+        public async Task Invalid_AccessSyncVarPropertyInStart()
         {
-            var code = VerifyCS.LoadTestData("Mirage1401Tests/Positive_AccessSyncVarPropertyInStart.cs");
+            var code = VerifyCS.LoadTestData("Mirage1401Tests/Invalid_AccessSyncVarPropertyInStart.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
-        public async Task Positive_AccessSyncVarFieldInAwake()
+        public async Task Invalid_AccessSyncVarFieldInAwake()
         {
-            var code = VerifyCS.LoadTestData("Mirage1401Tests/Positive_AccessSyncVarFieldInAwake.cs");
+            var code = VerifyCS.LoadTestData("Mirage1401Tests/Invalid_AccessSyncVarFieldInAwake.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task Edge_NonSyncVarAccessInAwakeStart()
         {
-            var code = VerifyCS.LoadTestData("Mirage1401Tests/Negative_Edge_NonSyncVarAccessInAwakeStart.cs");
+            var code = VerifyCS.LoadTestData("Mirage1401Tests/Valid_Edge_NonSyncVarAccessInAwakeStart.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
     }

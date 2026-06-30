@@ -9,14 +9,14 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task MutableSyncVarDoesNotReportError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1005Tests/Negative_MutableSyncVarDoesNotReportError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1005Tests/Valid_MutableSyncVarDoesNotReportError.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task ReadonlySyncVarReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1005Tests/Positive_ReadonlySyncVarReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1005Tests/Invalid_ReadonlySyncVarReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1005")
                 .WithLocation(0)
                 .WithArguments("health");

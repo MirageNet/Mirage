@@ -9,21 +9,21 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task ValidRateLimitSettings()
         {
-            var code = VerifyCS.LoadTestData("Mirage1206Tests/Negative_ValidRateLimitSettings.cs");
+            var code = VerifyCS.LoadTestData("Mirage1206Tests/Valid_ValidRateLimitSettings.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task ValidRateLimitDefaultSettings()
         {
-            var code = VerifyCS.LoadTestData("Mirage1206Tests/Negative_ValidRateLimitDefaultSettings.cs");
+            var code = VerifyCS.LoadTestData("Mirage1206Tests/Valid_ValidRateLimitDefaultSettings.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task InvalidRateLimitInterval()
         {
-            var code = VerifyCS.LoadTestData("Mirage1206Tests/Positive_InvalidRateLimitInterval.cs");
+            var code = VerifyCS.LoadTestData("Mirage1206Tests/Invalid_InvalidRateLimitInterval.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1206")
                 .WithLocation(0)
                 .WithArguments("CmdFire", "Interval must be greater than zero");
@@ -33,7 +33,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task InvalidRateLimitRefillAndMaxTokens()
         {
-            var code = VerifyCS.LoadTestData("Mirage1206Tests/Positive_InvalidRateLimitRefillAndMaxTokens.cs");
+            var code = VerifyCS.LoadTestData("Mirage1206Tests/Invalid_InvalidRateLimitRefillAndMaxTokens.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1206")
                 .WithLocation(0)
                 .WithArguments("CmdFire", "Refill must be greater than zero, MaxTokens must be greater than zero");
@@ -43,7 +43,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task InvalidRateLimitMaxTokensLessThanRefill()
         {
-            var code = VerifyCS.LoadTestData("Mirage1206Tests/Positive_InvalidRateLimitMaxTokensLessThanRefill.cs");
+            var code = VerifyCS.LoadTestData("Mirage1206Tests/Invalid_InvalidRateLimitMaxTokensLessThanRefill.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1206")
                 .WithLocation(0)
                 .WithArguments("CmdFire", "MaxTokens must be greater than or equal to Refill");
@@ -53,14 +53,14 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task RateLimitOnNonRpcMethodIgnored()
         {
-            var code = VerifyCS.LoadTestData("Mirage1206Tests/Negative_RateLimitOnNonRpcMethodIgnored.cs");
+            var code = VerifyCS.LoadTestData("Mirage1206Tests/Valid_RateLimitOnNonRpcMethodIgnored.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task CustomRateLimitAttributeIgnored()
         {
-            var code = VerifyCS.LoadTestData("Mirage1206Tests/Positive_CustomRateLimitAttributeIgnored.cs");
+            var code = VerifyCS.LoadTestData("Mirage1206Tests/Invalid_CustomRateLimitAttributeIgnored.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1207")
                 .WithLocation(0)
                 .WithArguments("CmdFire");
