@@ -9,21 +9,21 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task ServerRpcWithRateLimitDoesNotReportWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1207Tests/Negative_ServerRpcWithRateLimitDoesNotReportWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1207Tests/Valid_ServerRpcWithRateLimitDoesNotReportWarning.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task ClientRpcWithoutRateLimitDoesNotReportWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1207Tests/Negative_ClientRpcWithoutRateLimitDoesNotReportWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1207Tests/Valid_ClientRpcWithoutRateLimitDoesNotReportWarning.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task ServerRpcWithoutRateLimitReportsWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1207Tests/Positive_ServerRpcWithoutRateLimitReportsWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1207Tests/Invalid_ServerRpcWithoutRateLimitReportsWarning.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1207")
                 .WithLocation(0)
                 .WithArguments("CmdInteract");
@@ -33,7 +33,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task ServerRpcWithCustomRateLimitReportsWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1207Tests/Positive_ServerRpcWithCustomRateLimitReportsWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1207Tests/Invalid_ServerRpcWithCustomRateLimitReportsWarning.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1207")
                 .WithLocation(0)
                 .WithArguments("CmdInteract");

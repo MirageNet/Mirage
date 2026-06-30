@@ -9,21 +9,21 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task PrimitiveAndSupportedTypesDoNotReportError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1301Tests/Negative_PrimitiveAndSupportedTypesDoNotReportError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Valid_PrimitiveAndSupportedTypesDoNotReportError.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task CustomTypeWithSerializerDoesNotReportError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1301Tests/Negative_CustomTypeWithSerializerDoesNotReportError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Valid_CustomTypeWithSerializerDoesNotReportError.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task PrivateFieldsAreIgnored()
         {
-            var code = VerifyCS.LoadTestData("Mirage1301Tests/Negative_PrivateFieldsAreIgnored.cs");
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Valid_PrivateFieldsAreIgnored.cs");
             var expectedPrivateWarning = VerifyCS.Diagnostic("MIRAGE1302")
                 .WithLocation(0)
                 .WithArguments("executionThread", "MessageWithPrivateField");
@@ -33,7 +33,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task UnserializableFieldReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1301Tests/Positive_UnserializableFieldReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Invalid_UnserializableFieldReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1301")
                 .WithLocation(0)
                 .WithArguments("Thread", "NetworkMessage field");
@@ -48,7 +48,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task UnserializablePropertyReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1301Tests/Positive_UnserializablePropertyReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Invalid_UnserializablePropertyReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1301")
                 .WithLocation(0)
                 .WithArguments("Thread", "NetworkMessage property");
@@ -67,7 +67,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task UnserializableRpcParameterReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1301Tests/Positive_UnserializableRpcParameterReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Invalid_UnserializableRpcParameterReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1301")
                 .WithLocation(0)
                 .WithArguments("Thread", "RPC parameter");
@@ -82,7 +82,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task UnserializableRpcReturnTypeReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1301Tests/Positive_UnserializableRpcReturnTypeReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Invalid_UnserializableRpcReturnTypeReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1301")
                 .WithLocation(0)
                 .WithArguments("Thread", "RPC return type");
@@ -97,7 +97,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task StructWithUnserializableFieldReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1301Tests/Positive_StructWithUnserializableFieldReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Invalid_StructWithUnserializableFieldReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1301")
                 .WithLocation(0)
                 .WithArguments("NestedUnserializable", "NetworkMessage field");
@@ -108,7 +108,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task RecursiveTypeReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1301Tests/Positive_RecursiveTypeReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Invalid_RecursiveTypeReportsError.cs");
             var expected1 = VerifyCS.Diagnostic("MIRAGE1301")
                 .WithLocation(0)
                 .WithArguments("RecursiveClass", "NetworkMessage field");
@@ -123,7 +123,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task MultiDimensionalArrayReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1301Tests/Positive_MultiDimensionalArrayReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Invalid_MultiDimensionalArrayReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1301")
                 .WithLocation(0)
                 .WithArguments("Int32", "NetworkMessage field");
@@ -134,7 +134,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task WeaverSafeClassWithUnserializableFieldReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1301Tests/Positive_WeaverSafeClassWithUnserializableFieldReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Invalid_WeaverSafeClassWithUnserializableFieldReportsError.cs");
             var expected1 = VerifyCS.Diagnostic("MIRAGE1301")
                 .WithLocation(0)
                 .WithArguments("Thread", "NetworkMessage field");
@@ -149,7 +149,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task WeaverSafeClassOnFieldSuppressesClassWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1301Tests/Positive_WeaverSafeClassOnFieldSuppressesClassWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Invalid_WeaverSafeClassOnFieldSuppressesClassWarning.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1301")
                 .WithLocation(0)
                 .WithArguments("Thread", "NetworkMessage field");
@@ -160,7 +160,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task WeaverSafeClassOnPropertySuppressesClassWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1301Tests/Positive_WeaverSafeClassOnPropertySuppressesClassWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Invalid_WeaverSafeClassOnPropertySuppressesClassWarning.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1301")
                 .WithLocation(0)
                 .WithArguments("Thread", "NetworkMessage property");
@@ -175,7 +175,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task WeaverSafeClassOnParameterSuppressesClassWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1301Tests/Positive_WeaverSafeClassOnParameterSuppressesClassWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Invalid_WeaverSafeClassOnParameterSuppressesClassWarning.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1301")
                 .WithLocation(0)
                 .WithArguments("Thread", "RPC parameter");
