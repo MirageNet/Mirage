@@ -116,7 +116,7 @@ namespace Mirage.Analyzers
             "Usage",
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
-            description: "Disallows generic parameters on RPC methods and enforces valid return types (void, UniTask, or UniTask<T>).",
+            description: "Disallows generic parameters on RPC methods and enforces valid return types (void or UniTask<T>).",
             helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1202");
 
         public static readonly DiagnosticDescriptor RpcRefOutRule = new DiagnosticDescriptor(

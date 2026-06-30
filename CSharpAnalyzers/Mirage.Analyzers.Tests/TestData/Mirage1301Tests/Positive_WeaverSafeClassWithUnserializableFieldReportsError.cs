@@ -4,11 +4,11 @@ using System.Threading;
 [WeaverSafeClass]
 public class SafeClassWithThread
 {
-    public Thread threadField;
+    public Thread {|#0:threadField|};
 }
 
 [NetworkMessage]
 public struct Message
 {
-    public SafeClassWithThread {|#0:safeClassField|};
+    public SafeClassWithThread {|#1:safeClassField|};
 }
