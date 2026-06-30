@@ -9,14 +9,14 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task SafeTypeDoesNotReportWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1001Tests/SafeTypeDoesNotReportWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1001Tests/Negative_SafeType.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task ClassTypeReportsWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1001Tests/ClassTypeReportsWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1001Tests/Positive_ClassType.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1001").WithLocation(0).WithArguments("MySyncVar", "MyClass");
             await VerifyCS.VerifyAnalyzerAsync(code, expected);
         }
@@ -24,14 +24,14 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task ClassLevelSuppressionDoesNotReportWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1001Tests/ClassLevelSuppression.cs");
+            var code = VerifyCS.LoadTestData("Mirage1001Tests/Negative_ClassLevelSuppression.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task PropertyLevelSuppressionDoesNotReportWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1001Tests/PropertyLevelSuppression.cs");
+            var code = VerifyCS.LoadTestData("Mirage1001Tests/Negative_PropertyLevelSuppression.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
     }

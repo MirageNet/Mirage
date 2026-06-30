@@ -6,5 +6,5 @@ public class MyClass {}
 public class MyBehaviour : NetworkBehaviour
 {
     [SyncVar]
-    public MyClass MySyncVar { get; set; }
+    public MyClass MySyncVar;
 }

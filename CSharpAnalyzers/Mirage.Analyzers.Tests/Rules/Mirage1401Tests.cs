@@ -69,7 +69,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task Edge_NonSyncVarAccessInAwakeStart()
         {
-            var code = VerifyCS.LoadTestData("Mirage1401Tests/Edge_NonSyncVarAccessInAwakeStart.cs");
+            var code = VerifyCS.LoadTestData("Mirage1401Tests/Negative_Edge_NonSyncVarAccessInAwakeStart.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
     }

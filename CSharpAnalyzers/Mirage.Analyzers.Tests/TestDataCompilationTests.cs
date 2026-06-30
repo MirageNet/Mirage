@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -9,6 +8,10 @@ using NUnit.Framework;
 
 namespace Mirage.Analyzers.Tests
 {
+    /// <summary>
+    /// This tests checks all the TestData (c# files) do not have compile errors without checking any of the Mirage rules.
+    /// This helps us make sure our tests are only checking for the Mirage Rules fails and not other c# issues
+    /// </summary>
     [TestFixture]
     public class TestDataCompilationTests
     {

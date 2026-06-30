@@ -9,21 +9,21 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task NetworkBehaviourInMessageFieldDoesNotReportError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1304Tests/NetworkBehaviourInMessageFieldDoesNotReportError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1304Tests/Negative_NetworkBehaviourInMessageFieldDoesNotReportError.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task NetworkBehaviourInRpcParameterDoesNotReportError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1304Tests/NetworkBehaviourInRpcParameterDoesNotReportError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1304Tests/Negative_NetworkBehaviourInRpcParameterDoesNotReportError.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task MonoBehaviourInMessageFieldReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1304Tests/MonoBehaviourInMessageFieldReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1304Tests/Positive_MonoBehaviourInMessageFieldReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1304")
                 .WithLocation(0)
                 .WithArguments("PlainMonoBehaviour", "NetworkMessage field");
@@ -38,7 +38,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task MonoBehaviourInRpcParameterReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1304Tests/MonoBehaviourInRpcParameterReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1304Tests/Positive_MonoBehaviourInRpcParameterReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1304")
                 .WithLocation(0)
                 .WithArguments("PlainMonoBehaviour", "RPC parameter");

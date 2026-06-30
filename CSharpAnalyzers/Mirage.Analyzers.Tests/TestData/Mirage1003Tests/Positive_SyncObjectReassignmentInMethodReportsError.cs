@@ -3,7 +3,7 @@ using Mirage.Collections;
 
 public class MyBehaviour : NetworkBehaviour
 {
-    public readonly SyncList<int> mySyncList = new SyncList<int>();
+    public SyncList<int> mySyncList = new SyncList<int>();
 
     public void ResetList()
     {

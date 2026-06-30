@@ -9,7 +9,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task GenericRpcReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1202Tests/GenericRpc.cs");
+            var code = VerifyCS.LoadTestData("Mirage1202Tests/Positive_GenericRpc.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1202")
                 .WithLocation(0)
                 .WithArguments("CmdGeneric", "cannot have generic parameters");
@@ -19,7 +19,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task RpcWithInvalidReturnTypeReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1202Tests/RpcWithInvalidReturnType.cs");
+            var code = VerifyCS.LoadTestData("Mirage1202Tests/Positive_RpcWithInvalidReturnType.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1202")
                 .WithLocation(0)
                 .WithArguments("CmdReturnsInt", "cannot return 'int' (must return void or UniTask)");
@@ -29,21 +29,21 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task ValidVoidRpcDoesNotReportError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1202Tests/ValidVoidRpc.cs");
+            var code = VerifyCS.LoadTestData("Mirage1202Tests/Negative_ValidVoidRpc.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task ValidUniTaskRpcDoesNotReportError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1202Tests/ValidUniTaskRpc.cs");
+            var code = VerifyCS.LoadTestData("Mirage1202Tests/Negative_ValidUniTaskRpc.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task ValidGenericUniTaskRpcDoesNotReportError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1202Tests/ValidGenericUniTaskRpc.cs");
+            var code = VerifyCS.LoadTestData("Mirage1202Tests/Negative_ValidGenericUniTaskRpc.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
     }

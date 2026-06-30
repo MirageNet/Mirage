@@ -45,7 +45,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task Edge_BaseSyncStateFromISyncObject()
         {
-            var code = VerifyCS.LoadTestData("Mirage1402Tests/Edge_BaseSyncStateFromISyncObject.cs");
+            var code = VerifyCS.LoadTestData("Mirage1402Tests/Positive_Edge_BaseSyncStateFromISyncObject.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1402")
                 .WithLocation(0)
                 .WithArguments("OnSerialize");

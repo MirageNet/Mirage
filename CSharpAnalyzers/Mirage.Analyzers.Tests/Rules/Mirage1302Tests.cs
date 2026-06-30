@@ -9,14 +9,14 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task PublicFieldInNetworkMessageDoesNotReportWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1302Tests/PublicFieldInNetworkMessageDoesNotReportWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1302Tests/Negative_PublicFieldInNetworkMessageDoesNotReportWarning.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task PrivateFieldInNetworkMessageReportsWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1302Tests/PrivateFieldInNetworkMessageReportsWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1302Tests/Positive_PrivateFieldInNetworkMessageReportsWarning.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1302")
                 .WithLocation(0)
                 .WithArguments("secretCode", "MyMessage");
@@ -26,14 +26,14 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task StaticPrivateFieldDoesNotWarn()
         {
-            var code = VerifyCS.LoadTestData("Mirage1302Tests/StaticPrivateFieldDoesNotWarn.cs");
+            var code = VerifyCS.LoadTestData("Mirage1302Tests/Negative_StaticPrivateFieldDoesNotWarn.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task ExplicitNonSerializedPrivateFieldDoesNotWarn()
         {
-            var code = VerifyCS.LoadTestData("Mirage1302Tests/ExplicitNonSerializedPrivateFieldDoesNotWarn.cs");
+            var code = VerifyCS.LoadTestData("Mirage1302Tests/Negative_ExplicitNonSerializedPrivateFieldDoesNotWarn.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
     }

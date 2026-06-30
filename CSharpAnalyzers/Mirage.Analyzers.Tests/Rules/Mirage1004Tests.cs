@@ -9,21 +9,21 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task ValidHookSignatureDoesNotReportError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1004Tests/ValidHookSignatureDoesNotReportError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1004Tests/Negative_ValidHookSignatureDoesNotReportError.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task HookSignatureWithSingleParameterDoesNotReportError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1004Tests/HookSignatureWithSingleParameterDoesNotReportError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1004Tests/Negative_HookSignatureWithSingleParameterDoesNotReportError.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task HookSignatureMismatchReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1004Tests/HookSignatureMismatchReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1004Tests/Positive_HookSignatureMismatchReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1004")
                 .WithLocation(0)
                 .WithArguments("OnHealthChanged", "parameter type mismatch (must be 'Int32' or 'Int32, Int32')");
@@ -33,7 +33,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task HookMethodNotFoundReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1004Tests/HookMethodNotFoundReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1004Tests/Positive_HookMethodNotFoundReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1004")
                 .WithLocation(0)
                 .WithArguments("SomeNonExistentMethod", "could not find hook method with name 'SomeNonExistentMethod'");
@@ -41,13 +41,24 @@ namespace Mirage.Analyzers.Tests
         }
 
         [Test]
-        public async Task HookMethodIsStaticReportsError()
+        public async Task HookEventCanBeStaticDoesNotReportError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1004Tests/HookMethodIsStaticReportsError.cs");
-            var expected = VerifyCS.Diagnostic("MIRAGE1004")
-                .WithLocation(0)
-                .WithArguments("OnHealthChanged", "hook method cannot be static");
-            await VerifyCS.VerifyAnalyzerAsync(code, expected);
+            var code = VerifyCS.LoadTestData("Mirage1004Tests/Negative_HookEventCanBeStaticDoesNotReportError.cs");
+            await VerifyCS.VerifyAnalyzerAsync(code);
+        }
+
+        [Test]
+        public async Task HookMethodCanBeStaticDoesNotReportError()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1004Tests/Negative_HookMethodCanBeStaticDoesNotReportError.cs");
+            await VerifyCS.VerifyAnalyzerAsync(code);
+        }
+
+        [Test]
+        public async Task EventHookSignatureDoesNotReportError()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1004Tests/Negative_EventHookSignatureDoesNotReportError.cs");
+            await VerifyCS.VerifyAnalyzerAsync(code);
         }
     }
 }
