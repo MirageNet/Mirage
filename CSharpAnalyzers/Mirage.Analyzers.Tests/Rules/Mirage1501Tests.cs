@@ -40,7 +40,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task RecursiveStructOrClassRefTriggersInfo()
         {
-            var code = VerifyCS.LoadTestData("Mirage1501Tests/Edge_RecursiveStructOrClassRef.cs");
+            var code = VerifyCS.LoadTestData("Mirage1501Tests/Positive_Edge_RecursiveStructOrClassRef.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1501")
                 .WithLocation(0)
                 .WithArguments("RecursiveMessage", "2 to 6 (Average ~3)");

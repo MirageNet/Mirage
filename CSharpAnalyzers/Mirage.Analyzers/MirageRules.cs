@@ -66,7 +66,7 @@ namespace Mirage.Analyzers
             "Usage",
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
-            description: "Ensures [SyncVar] hook methods or events are correctly declared, matched by parameter type, and that hook events are non-static.",
+            description: "Ensures [SyncVar] hook methods or events are correctly declared and matched by parameter type.",
             helpLinkUri: "https://miragenet.github.io/Mirage/docs/analyzers/MIRAGE1004");
 
         public static readonly DiagnosticDescriptor ReadonlySyncVarRule = new DiagnosticDescriptor(
