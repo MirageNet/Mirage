@@ -9,7 +9,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task GenericRpcReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1202Tests/Positive_GenericRpc.cs");
+            var code = VerifyCS.LoadTestData("Mirage1202Tests/Invalid_GenericRpc.cs");
             var expected1 = VerifyCS.Diagnostic("MIRAGE1202")
                 .WithLocation(0)
                 .WithArguments("CmdGeneric", "cannot have generic parameters");
@@ -24,7 +24,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task RpcWithInvalidReturnTypeReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1202Tests/Positive_RpcWithInvalidReturnType.cs");
+            var code = VerifyCS.LoadTestData("Mirage1202Tests/Invalid_RpcWithInvalidReturnType.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1202")
                 .WithLocation(0)
                 .WithArguments("CmdReturnsInt", "cannot return 'int' (must return void or UniTask<T>)");
@@ -34,7 +34,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task UniTaskRpcReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1202Tests/Positive_UniTaskRpc.cs");
+            var code = VerifyCS.LoadTestData("Mirage1202Tests/Invalid_UniTaskRpc.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1202")
                 .WithLocation(0)
                 .WithArguments("CmdReturnsUniTask", "cannot return 'Cysharp.Threading.Tasks.UniTask' (must return void or UniTask<T>)");
@@ -44,21 +44,21 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task ValidVoidRpcDoesNotReportError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1202Tests/Negative_ValidVoidRpc.cs");
+            var code = VerifyCS.LoadTestData("Mirage1202Tests/Valid_ValidVoidRpc.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task GenericBehaviourWithRpcDoesNotReportError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1202Tests/Negative_GenericBehaviourWithRpc.cs");
+            var code = VerifyCS.LoadTestData("Mirage1202Tests/Valid_GenericBehaviourWithRpc.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task ValidGenericUniTaskRpcDoesNotReportError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1202Tests/Negative_ValidGenericUniTaskRpc.cs");
+            var code = VerifyCS.LoadTestData("Mirage1202Tests/Valid_ValidGenericUniTaskRpc.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
     }

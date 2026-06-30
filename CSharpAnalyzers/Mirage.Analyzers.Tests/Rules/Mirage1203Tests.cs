@@ -9,35 +9,35 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task RpcWithValueAndRefParametersDoesNotReportWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1203Tests/Negative_RpcWithValueAndRefParametersDoesNotReportWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1203Tests/Valid_RpcWithValueAndRefParametersDoesNotReportWarning.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task RpcWithInParameterDoesNotReportWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1203Tests/Negative_RpcWithInParameterDoesNotReportWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1203Tests/Valid_RpcWithInParameterDoesNotReportWarning.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task NonRpcMethodWithRefOrOutDoesNotReportWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1203Tests/Negative_NonRpcMethodWithRefOrOutDoesNotReportWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1203Tests/Valid_NonRpcMethodWithRefOrOutDoesNotReportWarning.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task FakeRpcWithRefParameterDoesNotReportWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1203Tests/Negative_FakeRpcWithRefParameterDoesNotReportWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1203Tests/Valid_FakeRpcWithRefParameterDoesNotReportWarning.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task ServerRpcWithRefParameterReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1203Tests/Positive_ServerRpcWithRefParameterReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1203Tests/Invalid_ServerRpcWithRefParameterReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1203").WithLocation(0).WithArguments("CmdDoSomething", "value");
             await VerifyCS.VerifyAnalyzerAsync(code, expected);
         }
@@ -45,7 +45,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task ServerRpcWithOutParameterReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1203Tests/Positive_ServerRpcWithOutParameterReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1203Tests/Invalid_ServerRpcWithOutParameterReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1203").WithLocation(0).WithArguments("CmdDoSomething", "value");
             await VerifyCS.VerifyAnalyzerAsync(code, expected);
         }
@@ -53,7 +53,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task ClientRpcWithRefParameterReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1203Tests/Positive_ClientRpcWithRefParameterReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1203Tests/Invalid_ClientRpcWithRefParameterReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1203").WithLocation(0).WithArguments("RpcDoSomething", "value");
             await VerifyCS.VerifyAnalyzerAsync(code, expected);
         }
@@ -61,7 +61,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task ClientRpcWithOutParameterReportsError()
         {
-            var code = VerifyCS.LoadTestData("Mirage1203Tests/Positive_ClientRpcWithOutParameterReportsError.cs");
+            var code = VerifyCS.LoadTestData("Mirage1203Tests/Invalid_ClientRpcWithOutParameterReportsError.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1203").WithLocation(0).WithArguments("RpcDoSomething", "value");
             await VerifyCS.VerifyAnalyzerAsync(code, expected);
         }

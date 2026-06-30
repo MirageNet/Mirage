@@ -9,14 +9,14 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task PublicFieldInNetworkMessageDoesNotReportWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1302Tests/Negative_PublicFieldInNetworkMessageDoesNotReportWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1302Tests/Valid_PublicFieldInNetworkMessageDoesNotReportWarning.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task PrivateFieldInNetworkMessageReportsWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1302Tests/Positive_PrivateFieldInNetworkMessageReportsWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1302Tests/Invalid_PrivateFieldInNetworkMessageReportsWarning.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1302")
                 .WithLocation(0)
                 .WithArguments("secretCode", "MyMessage");
@@ -26,21 +26,21 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task StaticPrivateFieldDoesNotWarn()
         {
-            var code = VerifyCS.LoadTestData("Mirage1302Tests/Negative_StaticPrivateFieldDoesNotWarn.cs");
+            var code = VerifyCS.LoadTestData("Mirage1302Tests/Valid_StaticPrivateFieldDoesNotWarn.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task ExplicitNonSerializedPrivateFieldDoesNotWarn()
         {
-            var code = VerifyCS.LoadTestData("Mirage1302Tests/Negative_ExplicitNonSerializedPrivateFieldDoesNotWarn.cs");
+            var code = VerifyCS.LoadTestData("Mirage1302Tests/Valid_ExplicitNonSerializedPrivateFieldDoesNotWarn.cs");
             await VerifyCS.VerifyAnalyzerAsync(code);
         }
 
         [Test]
         public async Task InternalAndProtectedFieldsReportWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1302Tests/Positive_InternalAndProtectedFieldsReportWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1302Tests/Invalid_InternalAndProtectedFieldsReportWarning.cs");
             var expected0 = VerifyCS.Diagnostic("MIRAGE1302")
                 .WithLocation(0)
                 .WithArguments("internalCode", "MyMessage");
@@ -53,7 +53,7 @@ namespace Mirage.Analyzers.Tests
         [Test]
         public async Task PublicPropertyReportsWarning()
         {
-            var code = VerifyCS.LoadTestData("Mirage1302Tests/Positive_PublicPropertyReportsWarning.cs");
+            var code = VerifyCS.LoadTestData("Mirage1302Tests/Invalid_PublicPropertyReportsWarning.cs");
             var expected = VerifyCS.Diagnostic("MIRAGE1302")
                 .WithLocation(0)
                 .WithArguments("MyProperty", "MyMessage");
