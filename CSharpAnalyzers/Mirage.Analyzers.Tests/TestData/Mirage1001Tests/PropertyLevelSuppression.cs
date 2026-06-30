@@ -6,5 +6,5 @@ public class MyBehaviour : NetworkBehaviour
 {
     [SyncVar]
     [WeaverSafeClass]
-    public MyClass MySyncVar { get; set; }
+    public MyClass MySyncVar;
 }

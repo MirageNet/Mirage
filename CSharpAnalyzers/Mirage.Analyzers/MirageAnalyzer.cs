@@ -14,7 +14,14 @@ namespace Mirage.Analyzers
             context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
             context.EnableConcurrentExecution();
 
-            // Todo: Register compilation / syntax / symbol analysis actions here
+            context.RegisterCompilationStartAction(compilationContext =>
+            {
+                var symbols = new MirageSymbols(compilationContext.Compilation);
+                if (symbols.NetworkBehaviour == null)
+                    return;
+
+                Mirage1005.Register(compilationContext, symbols);
+            });
         }
     }
 }

@@ -2,110 +2,154 @@ using Microsoft.CodeAnalysis;
 
 namespace Mirage.Analyzers
 {
-    public static class MirageAttributes
+    public class MirageSymbols
     {
-        public class AttributeInfo
+        // Attributes
+        public INamedTypeSymbol? SyncVarAttribute { get; }
+        public INamedTypeSymbol? ServerAttribute { get; }
+        public INamedTypeSymbol? ClientAttribute { get; }
+        public INamedTypeSymbol? HasAuthorityAttribute { get; }
+        public INamedTypeSymbol? LocalPlayerAttribute { get; }
+        public INamedTypeSymbol? ServerRpcAttribute { get; }
+        public INamedTypeSymbol? ClientRpcAttribute { get; }
+        public INamedTypeSymbol? NetworkMethodAttribute { get; }
+        public INamedTypeSymbol? WeaverSafeClassAttribute { get; }
+        public INamedTypeSymbol? NetworkMessageAttribute { get; }
+        public INamedTypeSymbol? BitCountAttribute { get; }
+        public INamedTypeSymbol? BitCountFromRangeAttribute { get; }
+        public INamedTypeSymbol? VarIntAttribute { get; }
+        public INamedTypeSymbol? VarIntBlocksAttribute { get; }
+        public INamedTypeSymbol? FloatPackAttribute { get; }
+        public INamedTypeSymbol? Vector2PackAttribute { get; }
+        public INamedTypeSymbol? Vector3PackAttribute { get; }
+        public INamedTypeSymbol? QuaternionPackAttribute { get; }
+        public INamedTypeSymbol? RateLimitAttribute { get; }
+
+        // Types
+        public INamedTypeSymbol? NetworkBehaviour { get; }
+        public INamedTypeSymbol? GameObject { get; }
+        public INamedTypeSymbol? NetworkIdentity { get; }
+        public INamedTypeSymbol? ISyncObject { get; }
+        public INamedTypeSymbol? NetworkWriter { get; }
+        public INamedTypeSymbol? NetworkReader { get; }
+        public INamedTypeSymbol? INetworkPlayer { get; }
+        public INamedTypeSymbol? NetworkPlayer { get; }
+        public INamedTypeSymbol? NetworkConnection { get; }
+        public INamedTypeSymbol? IEnumerable { get; }
+        public INamedTypeSymbol? UniTask { get; }
+        public INamedTypeSymbol? SyncList { get; }
+        public INamedTypeSymbol? SyncDictionary { get; }
+        public INamedTypeSymbol? SyncIDictionary { get; }
+        public INamedTypeSymbol? Vector2 { get; }
+        public INamedTypeSymbol? Vector3 { get; }
+        public INamedTypeSymbol? Quaternion { get; }
+
+        public MirageSymbols(Compilation compilation)
         {
-            public string FullName { get; }
-            public string ShortName { get; }
+            // Resolve attributes
+            SyncVarAttribute = compilation.GetTypeByMetadataName("Mirage.SyncVarAttribute");
+            ServerAttribute = compilation.GetTypeByMetadataName("Mirage.ServerAttribute");
+            ClientAttribute = compilation.GetTypeByMetadataName("Mirage.ClientAttribute");
+            HasAuthorityAttribute = compilation.GetTypeByMetadataName("Mirage.HasAuthorityAttribute");
+            LocalPlayerAttribute = compilation.GetTypeByMetadataName("Mirage.LocalPlayerAttribute");
+            ServerRpcAttribute = compilation.GetTypeByMetadataName("Mirage.ServerRpcAttribute");
+            ClientRpcAttribute = compilation.GetTypeByMetadataName("Mirage.ClientRpcAttribute");
+            NetworkMethodAttribute = compilation.GetTypeByMetadataName("Mirage.NetworkMethodAttribute");
+            WeaverSafeClassAttribute = compilation.GetTypeByMetadataName("Mirage.WeaverSafeClassAttribute");
+            NetworkMessageAttribute = compilation.GetTypeByMetadataName("Mirage.NetworkMessageAttribute");
+            BitCountAttribute = compilation.GetTypeByMetadataName("Mirage.Serialization.BitCountAttribute");
+            BitCountFromRangeAttribute = compilation.GetTypeByMetadataName("Mirage.Serialization.BitCountFromRangeAttribute");
+            VarIntAttribute = compilation.GetTypeByMetadataName("Mirage.Serialization.VarIntAttribute");
+            VarIntBlocksAttribute = compilation.GetTypeByMetadataName("Mirage.Serialization.VarIntBlocksAttribute");
+            FloatPackAttribute = compilation.GetTypeByMetadataName("Mirage.Serialization.FloatPackAttribute");
+            Vector2PackAttribute = compilation.GetTypeByMetadataName("Mirage.Serialization.Vector2PackAttribute");
+            Vector3PackAttribute = compilation.GetTypeByMetadataName("Mirage.Serialization.Vector3PackAttribute");
+            QuaternionPackAttribute = compilation.GetTypeByMetadataName("Mirage.Serialization.QuaternionPackAttribute");
+            RateLimitAttribute = compilation.GetTypeByMetadataName("Mirage.RateLimitAttribute");
 
-            public AttributeInfo(string fullyQualifiedName)
-            {
-                FullName = fullyQualifiedName;
-                var lastDot = fullyQualifiedName.LastIndexOf('.');
-                ShortName = lastDot >= 0 ? fullyQualifiedName.Substring(lastDot + 1) : fullyQualifiedName;
-            }
-
-            public bool Has(ISymbol symbol)
-            {
-                if (symbol == null)
-                    return false;
-
-                foreach (var attr in symbol.GetAttributes())
-                    if (attr.AttributeClass != null && attr.AttributeClass.Name == ShortName && attr.AttributeClass.ToDisplayString() == FullName)
-                        return true;
-
-                return false;
-            }
-
-            public bool TryGet(ISymbol symbol, out AttributeData attributeData)
-            {
-                attributeData = null!;
-                if (symbol == null)
-                    return false;
-
-                foreach (var attr in symbol.GetAttributes())
-                    if (attr.AttributeClass != null && attr.AttributeClass.Name == ShortName && attr.AttributeClass.ToDisplayString() == FullName)
-                    {
-                        attributeData = attr;
-                        return true;
-                    }
-
-                return false;
-            }
-
-            public bool TryGetNamedArgument<T>(AttributeData attributeData, string name, out T value)
-            {
-                value = default!;
-                if (attributeData == null)
-                    return false;
-
-                foreach (var arg in attributeData.NamedArguments)
-                    if (arg.Key == name)
-                    {
-                        if (arg.Value.Value is T val)
-                        {
-                            value = val;
-                            return true;
-                        }
-                        return false;
-                    }
-
-                return false;
-            }
-
-            public bool Matches(INamedTypeSymbol? attributeClass)
-            {
-                if (attributeClass == null)
-                    return false;
-
-                return attributeClass.Name == ShortName && attributeClass.ToDisplayString() == FullName;
-            }
+            // Resolve types
+            NetworkBehaviour = compilation.GetTypeByMetadataName("Mirage.NetworkBehaviour");
+            GameObject = compilation.GetTypeByMetadataName("UnityEngine.GameObject");
+            NetworkIdentity = compilation.GetTypeByMetadataName("Mirage.NetworkIdentity");
+            ISyncObject = compilation.GetTypeByMetadataName("Mirage.Collections.ISyncObject");
+            NetworkWriter = compilation.GetTypeByMetadataName("Mirage.Serialization.NetworkWriter");
+            NetworkReader = compilation.GetTypeByMetadataName("Mirage.Serialization.NetworkReader");
+            INetworkPlayer = compilation.GetTypeByMetadataName("Mirage.INetworkPlayer");
+            NetworkPlayer = compilation.GetTypeByMetadataName("Mirage.NetworkPlayer");
+            NetworkConnection = compilation.GetTypeByMetadataName("Mirage.NetworkConnection");
+            IEnumerable = compilation.GetTypeByMetadataName("System.Collections.IEnumerable");
+            UniTask = compilation.GetTypeByMetadataName("Cysharp.Threading.Tasks.UniTask");
+            SyncList = compilation.GetTypeByMetadataName("Mirage.Collections.SyncList");
+            SyncDictionary = compilation.GetTypeByMetadataName("Mirage.Collections.SyncDictionary");
+            SyncIDictionary = compilation.GetTypeByMetadataName("Mirage.Collections.SyncIDictionary");
+            Vector2 = compilation.GetTypeByMetadataName("UnityEngine.Vector2");
+            Vector3 = compilation.GetTypeByMetadataName("UnityEngine.Vector3");
+            Quaternion = compilation.GetTypeByMetadataName("UnityEngine.Quaternion");
         }
 
-        public static readonly AttributeInfo SyncVar = new AttributeInfo("Mirage.SyncVarAttribute");
-        public static readonly AttributeInfo Server = new AttributeInfo("Mirage.ServerAttribute");
-        public static readonly AttributeInfo Client = new AttributeInfo("Mirage.ClientAttribute");
-        public static readonly AttributeInfo HasAuthority = new AttributeInfo("Mirage.HasAuthorityAttribute");
-        public static readonly AttributeInfo LocalPlayer = new AttributeInfo("Mirage.LocalPlayerAttribute");
-        public static readonly AttributeInfo ServerRpc = new AttributeInfo("Mirage.ServerRpcAttribute");
-        public static readonly AttributeInfo ClientRpc = new AttributeInfo("Mirage.ClientRpcAttribute");
-        public static readonly AttributeInfo NetworkMethod = new AttributeInfo("Mirage.NetworkMethodAttribute");
-        public static readonly AttributeInfo WeaverSafeClass = new AttributeInfo("Mirage.WeaverSafeClassAttribute");
-        public static readonly AttributeInfo NetworkMessage = new AttributeInfo("Mirage.NetworkMessageAttribute");
-        public static readonly AttributeInfo BitCount = new AttributeInfo("Mirage.Serialization.BitCountAttribute");
-        public static readonly AttributeInfo BitCountFromRange = new AttributeInfo("Mirage.Serialization.BitCountFromRangeAttribute");
-        public static readonly AttributeInfo VarInt = new AttributeInfo("Mirage.Serialization.VarIntAttribute");
-        public static readonly AttributeInfo VarIntBlocks = new AttributeInfo("Mirage.Serialization.VarIntBlocksAttribute");
-        public static readonly AttributeInfo FloatPack = new AttributeInfo("Mirage.Serialization.FloatPackAttribute");
-        public static readonly AttributeInfo Vector2Pack = new AttributeInfo("Mirage.Serialization.Vector2PackAttribute");
-        public static readonly AttributeInfo Vector3Pack = new AttributeInfo("Mirage.Serialization.Vector3PackAttribute");
-        public static readonly AttributeInfo QuaternionPack = new AttributeInfo("Mirage.Serialization.QuaternionPackAttribute");
-        public static readonly AttributeInfo RateLimit = new AttributeInfo("Mirage.RateLimitAttribute");
-
-        public static readonly AttributeInfo[] NetworkAttributes = new[]
+        public bool HasAttribute(ISymbol? symbol, INamedTypeSymbol? attributeSymbol)
         {
-            SyncVar,
-            Server,
-            Client,
-            HasAuthority,
-            LocalPlayer,
-            ServerRpc,
-            ClientRpc,
-            NetworkMethod
-        };
+            if (symbol == null || attributeSymbol == null)
+                return false;
 
-        public static bool HasCompressionAttribute(ISymbol symbol, ITypeSymbol type)
+            foreach (var attr in symbol.GetAttributes())
+                if (SymbolEqualityComparer.Default.Equals(attr.AttributeClass, attributeSymbol))
+                    return true;
+
+            return false;
+        }
+
+        public bool TryGetAttribute(ISymbol? symbol, INamedTypeSymbol? attributeSymbol, out AttributeData attributeData)
+        {
+            attributeData = null!;
+            if (symbol == null || attributeSymbol == null)
+                return false;
+
+            foreach (var attr in symbol.GetAttributes())
+            {
+                if (SymbolEqualityComparer.Default.Equals(attr.AttributeClass, attributeSymbol))
+                {
+                    attributeData = attr;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool IsOrInherits(ITypeSymbol? type, INamedTypeSymbol? targetType)
+        {
+            if (type == null || targetType == null)
+                return false;
+
+            var current = type;
+            while (current != null)
+            {
+                if (SymbolEqualityComparer.Default.Equals(current.OriginalDefinition, targetType))
+                    return true;
+
+                current = current.BaseType;
+            }
+
+            return false;
+        }
+
+        public bool Implements(ITypeSymbol? type, INamedTypeSymbol? interfaceType)
+        {
+            if (type == null || interfaceType == null)
+                return false;
+
+            if (SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, interfaceType))
+                return true;
+
+            foreach (var iface in type.AllInterfaces)
+                if (SymbolEqualityComparer.Default.Equals(iface.OriginalDefinition, interfaceType))
+                    return true;
+
+            return false;
+        }
+
+        public bool HasCompressionAttribute(ISymbol symbol, ITypeSymbol type)
         {
             if (symbol == null || type == null)
                 return false;
@@ -116,107 +160,31 @@ namespace Mirage.Analyzers
                 type.SpecialType == SpecialType.System_UInt64 ||
                 type.SpecialType == SpecialType.System_String ||
                 type.TypeKind == TypeKind.Array ||
-                MirageTypes.IEnumerable.Implements(type))
-                return BitCount.Has(symbol) ||
-                       BitCountFromRange.Has(symbol) ||
-                       VarInt.Has(symbol) ||
-                       VarIntBlocks.Has(symbol);
+                Implements(type, IEnumerable))
+            {
+                return HasAttribute(symbol, BitCountAttribute) ||
+                       HasAttribute(symbol, BitCountFromRangeAttribute) ||
+                       HasAttribute(symbol, VarIntAttribute) ||
+                       HasAttribute(symbol, VarIntBlocksAttribute);
+            }
 
             if (type.SpecialType == SpecialType.System_Single ||
                 type.SpecialType == SpecialType.System_Double)
-                return FloatPack.Has(symbol);
+                return HasAttribute(symbol, FloatPackAttribute);
 
-            if (MirageTypes.Vector2.Is(type))
-                return Vector2Pack.Has(symbol);
+            if (IsOrInherits(type, Vector2))
+                return HasAttribute(symbol, Vector2PackAttribute);
 
-            if (MirageTypes.Vector3.Is(type))
-                return Vector3Pack.Has(symbol);
+            if (IsOrInherits(type, Vector3))
+                return HasAttribute(symbol, Vector3PackAttribute);
 
-            if (MirageTypes.Quaternion.Is(type))
-                return QuaternionPack.Has(symbol);
+            if (IsOrInherits(type, Quaternion))
+                return HasAttribute(symbol, QuaternionPackAttribute);
 
             return false;
         }
-    }
 
-    public static class MirageTypes
-    {
-        public class TypeInfo
-        {
-            public string FullName { get; }
-            public string ShortName { get; }
-
-            public TypeInfo(string fullyQualifiedName)
-            {
-                FullName = fullyQualifiedName;
-                var lastDot = fullyQualifiedName.LastIndexOf('.');
-                ShortName = lastDot >= 0 ? fullyQualifiedName.Substring(lastDot + 1) : fullyQualifiedName;
-            }
-
-            public bool Is(ITypeSymbol typeSymbol)
-            {
-                if (typeSymbol == null)
-                    return false;
-
-                var displayString = typeSymbol.OriginalDefinition.ToDisplayString();
-                var index = displayString.IndexOf('<');
-                if (index >= 0)
-                    displayString = displayString.Substring(0, index);
-
-                return typeSymbol.Name == ShortName && displayString == FullName;
-            }
-
-            public bool IsOrInherits(ITypeSymbol typeSymbol)
-            {
-                if (typeSymbol == null)
-                    return false;
-
-                var current = typeSymbol;
-                while (current != null)
-                {
-                    if (Is(current))
-                        return true;
-
-                    current = current.BaseType;
-                }
-                return false;
-            }
-
-            public bool Implements(ITypeSymbol typeSymbol)
-            {
-                if (typeSymbol == null)
-                    return false;
-
-                if (typeSymbol is INamedTypeSymbol namedType && namedType.TypeKind == TypeKind.Interface && Is(namedType))
-                    return true;
-
-                foreach (var iface in typeSymbol.AllInterfaces)
-                    if (Is(iface))
-                        return true;
-
-                return false;
-            }
-        }
-
-        public static readonly TypeInfo NetworkBehaviour = new TypeInfo("Mirage.NetworkBehaviour");
-        public static readonly TypeInfo GameObject = new TypeInfo("UnityEngine.GameObject");
-        public static readonly TypeInfo NetworkIdentity = new TypeInfo("Mirage.NetworkIdentity");
-        public static readonly TypeInfo ISyncObject = new TypeInfo("Mirage.Collections.ISyncObject");
-        public static readonly TypeInfo NetworkWriter = new TypeInfo("Mirage.Serialization.NetworkWriter");
-        public static readonly TypeInfo NetworkReader = new TypeInfo("Mirage.Serialization.NetworkReader");
-        public static readonly TypeInfo INetworkPlayer = new TypeInfo("Mirage.INetworkPlayer");
-        public static readonly TypeInfo NetworkPlayer = new TypeInfo("Mirage.NetworkPlayer");
-        public static readonly TypeInfo NetworkConnection = new TypeInfo("Mirage.NetworkConnection");
-        public static readonly TypeInfo IEnumerable = new TypeInfo("System.Collections.IEnumerable");
-        public static readonly TypeInfo UniTask = new TypeInfo("Cysharp.Threading.Tasks.UniTask");
-        public static readonly TypeInfo SyncList = new TypeInfo("Mirage.Collections.SyncList");
-        public static readonly TypeInfo SyncDictionary = new TypeInfo("Mirage.Collections.SyncDictionary");
-        public static readonly TypeInfo SyncIDictionary = new TypeInfo("Mirage.Collections.SyncIDictionary");
-        public static readonly TypeInfo Vector2 = new TypeInfo("UnityEngine.Vector2");
-        public static readonly TypeInfo Vector3 = new TypeInfo("UnityEngine.Vector3");
-        public static readonly TypeInfo Quaternion = new TypeInfo("UnityEngine.Quaternion");
-
-        public static bool HasSynchronizedState(INamedTypeSymbol typeSymbol)
+        public bool HasSynchronizedState(INamedTypeSymbol typeSymbol)
         {
             if (typeSymbol == null)
                 return false;
@@ -224,26 +192,48 @@ namespace Mirage.Analyzers
             foreach (var member in typeSymbol.GetMembers())
             {
                 if (member is IFieldSymbol field)
-                    if (MirageAttributes.SyncVar.Has(field) || MirageTypes.ISyncObject.Implements(field.Type))
+                    if (HasAttribute(field, SyncVarAttribute) || Implements(field.Type, ISyncObject))
                         return true;
 
                 if (member is IPropertySymbol prop)
-                    if (MirageAttributes.SyncVar.Has(prop) || MirageTypes.ISyncObject.Implements(prop.Type))
+                    if (HasAttribute(prop, SyncVarAttribute) || Implements(prop.Type, ISyncObject))
                         return true;
             }
 
             return false;
         }
 
-        public static bool IsNetworkPlayerOrConnection(ITypeSymbol typeSymbol)
+        public bool IsNetworkPlayerOrConnection(ITypeSymbol typeSymbol)
         {
             if (typeSymbol == null)
                 return false;
 
-            return INetworkPlayer.IsOrInherits(typeSymbol) ||
-                   NetworkPlayer.IsOrInherits(typeSymbol) ||
-                   NetworkConnection.IsOrInherits(typeSymbol) ||
-                   INetworkPlayer.Implements(typeSymbol);
+            return IsOrInherits(typeSymbol, INetworkPlayer) ||
+                   IsOrInherits(typeSymbol, NetworkPlayer) ||
+                   IsOrInherits(typeSymbol, NetworkConnection) ||
+                   Implements(typeSymbol, INetworkPlayer);
+        }
+
+        public static bool TryGetNamedArgument<T>(AttributeData attributeData, string name, out T value)
+        {
+            value = default!;
+            if (attributeData == null)
+                return false;
+
+            foreach (var arg in attributeData.NamedArguments)
+            {
+                if (arg.Key == name)
+                {
+                    if (arg.Value.Value is T val)
+                    {
+                        value = val;
+                        return true;
+                    }
+                    return false;
+                }
+            }
+
+            return false;
         }
     }
 }

@@ -39,7 +39,7 @@ namespace Mirage.Analyzers
             return null;
         }
 
-        public static bool IsBasicSafeType(ITypeSymbol typeSymbol)
+        public static bool IsBasicSafeType(ITypeSymbol typeSymbol, MirageSymbols symbols)
         {
             if (typeSymbol == null)
                 return true;
@@ -50,38 +50,38 @@ namespace Mirage.Analyzers
             if (typeSymbol.SpecialType == SpecialType.System_String)
                 return true;
 
-            if (MirageTypes.NetworkIdentity.IsOrInherits(typeSymbol))
+            if (symbols.IsOrInherits(typeSymbol, symbols.NetworkIdentity))
                 return true;
 
-            if (MirageTypes.GameObject.IsOrInherits(typeSymbol))
+            if (symbols.IsOrInherits(typeSymbol, symbols.GameObject))
                 return true;
 
-            if (MirageTypes.NetworkBehaviour.IsOrInherits(typeSymbol))
-                return true;
-
-            return false;
-        }
-
-        public static bool IsExplicitlyMarkedSafe(ISymbol symbol, ITypeSymbol typeSymbol)
-        {
-            if (MirageAttributes.WeaverSafeClass.Has(symbol))
-                return true;
-
-            if (typeSymbol != null && MirageAttributes.WeaverSafeClass.Has(typeSymbol))
-                return true;
-
-            if (symbol.ContainingType != null && MirageAttributes.WeaverSafeClass.Has(symbol.ContainingType))
+            if (symbols.IsOrInherits(typeSymbol, symbols.NetworkBehaviour))
                 return true;
 
             return false;
         }
 
-        public static bool IsRpcMethod(IMethodSymbol methodSymbol)
+        public static bool IsExplicitlyMarkedSafe(ISymbol symbol, ITypeSymbol typeSymbol, MirageSymbols symbols)
         {
-            return MirageAttributes.ServerRpc.Has(methodSymbol) || MirageAttributes.ClientRpc.Has(methodSymbol);
+            if (symbols.HasAttribute(symbol, symbols.WeaverSafeClassAttribute))
+                return true;
+
+            if (typeSymbol != null && symbols.HasAttribute(typeSymbol, symbols.WeaverSafeClassAttribute))
+                return true;
+
+            if (symbol.ContainingType != null && symbols.HasAttribute(symbol.ContainingType, symbols.WeaverSafeClassAttribute))
+                return true;
+
+            return false;
         }
 
-        public static bool IsVoidOrUniTask(ITypeSymbol typeSymbol)
+        public static bool IsRpcMethod(IMethodSymbol methodSymbol, MirageSymbols symbols)
+        {
+            return symbols.HasAttribute(methodSymbol, symbols.ServerRpcAttribute) || symbols.HasAttribute(methodSymbol, symbols.ClientRpcAttribute);
+        }
+
+        public static bool IsVoidOrUniTask(ITypeSymbol typeSymbol, MirageSymbols symbols)
         {
             if (typeSymbol == null)
                 return false;
@@ -89,7 +89,7 @@ namespace Mirage.Analyzers
             if (typeSymbol.SpecialType == SpecialType.System_Void)
                 return true;
 
-            if (MirageTypes.UniTask.Is(typeSymbol))
+            if (symbols.UniTask != null && SymbolEqualityComparer.Default.Equals(typeSymbol.OriginalDefinition, symbols.UniTask))
                 return true;
 
             return false;
@@ -106,21 +106,21 @@ namespace Mirage.Analyzers
             return false;
         }
 
-        public static bool IsSyncListOrDictionary(ITypeSymbol typeSymbol)
+        public static bool IsSyncListOrDictionary(ITypeSymbol typeSymbol, MirageSymbols symbols)
         {
-            return MirageTypes.SyncList.IsOrInherits(typeSymbol) ||
-                   MirageTypes.SyncDictionary.IsOrInherits(typeSymbol) ||
-                   MirageTypes.SyncIDictionary.IsOrInherits(typeSymbol);
+            return symbols.IsOrInherits(typeSymbol, symbols.SyncList) ||
+                   symbols.IsOrInherits(typeSymbol, symbols.SyncDictionary) ||
+                   symbols.IsOrInherits(typeSymbol, symbols.SyncIDictionary);
         }
 
-        public static bool IsNetworkWriter(ITypeSymbol type)
+        public static bool IsNetworkWriter(ITypeSymbol type, MirageSymbols symbols)
         {
-            return MirageTypes.NetworkWriter.Is(type);
+            return symbols.IsOrInherits(type, symbols.NetworkWriter);
         }
 
-        public static bool IsNetworkReader(ITypeSymbol type)
+        public static bool IsNetworkReader(ITypeSymbol type, MirageSymbols symbols)
         {
-            return MirageTypes.NetworkReader.Is(type);
+            return symbols.IsOrInherits(type, symbols.NetworkReader);
         }
     }
 }
