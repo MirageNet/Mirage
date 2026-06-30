@@ -21,6 +21,13 @@ namespace Mirage.Analyzers.Tests
         }
 
         [Test]
+        public async Task CustomTypeWithLengthSerializerDoesNotReportError()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Valid_CustomTypeWithLengthSerializerDoesNotReportError.cs");
+            await VerifyCS.VerifyAnalyzerAsync(code);
+        }
+
+        [Test]
         public async Task PrivateFieldsAreIgnored()
         {
             var code = VerifyCS.LoadTestData("Mirage1301Tests/Valid_PrivateFieldsAreIgnored.cs");
@@ -181,6 +188,57 @@ namespace Mirage.Analyzers.Tests
                 .WithArguments("Thread", "RPC parameter");
 
             await VerifyCS.VerifyAnalyzerAsync(code, expected);
+        }
+
+        [Test]
+        public async Task ClientRpcObserversWithINetworkPlayerArgReportsError()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Invalid_ClientRpcObserversWithINetworkPlayerArg.cs");
+            var expected = VerifyCS.Diagnostic("MIRAGE1301")
+                .WithLocation(0)
+                .WithArguments("INetworkPlayer", "RPC parameter");
+            await VerifyCS.VerifyAnalyzerAsync(code, expected);
+        }
+
+        [Test]
+        public async Task ClientRpcOwnerWithINetworkPlayerArgReportsError()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Invalid_ClientRpcOwnerWithINetworkPlayerArg.cs");
+            var expected = VerifyCS.Diagnostic("MIRAGE1301")
+                .WithLocation(0)
+                .WithArguments("INetworkPlayer", "RPC parameter");
+            await VerifyCS.VerifyAnalyzerAsync(code, expected);
+        }
+
+        [Test]
+        public async Task RpcWithTargetWithDoubleNetworkPlayerReportsError()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Invalid_RpcWithTargetWithDoubleNetworkPlayer.cs");
+            var expected = VerifyCS.Diagnostic("MIRAGE1301")
+                .WithLocation(0)
+                .WithArguments("INetworkPlayer", "RPC parameter");
+            await VerifyCS.VerifyAnalyzerAsync(code, expected);
+        }
+
+        [Test]
+        public async Task ClientRpcWithTargetDoesNotReportError()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Valid_ClientRpcWithTarget.cs");
+            await VerifyCS.VerifyAnalyzerAsync(code);
+        }
+
+        [Test]
+        public async Task ServerRpcWithSenderDoesNotReportError()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Valid_ServerRpcWithSender.cs");
+            await VerifyCS.VerifyAnalyzerAsync(code);
+        }
+
+        [Test]
+        public async Task StructFieldDoesNotReportError()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1301Tests/Valid_StructField.cs");
+            await VerifyCS.VerifyAnalyzerAsync(code);
         }
     }
 }

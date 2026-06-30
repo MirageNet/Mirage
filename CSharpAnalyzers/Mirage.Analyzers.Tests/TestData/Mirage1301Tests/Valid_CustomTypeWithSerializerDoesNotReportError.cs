@@ -1,9 +1,16 @@
 using Mirage;
 using Mirage.Serialization;
 
-public struct CustomType
+[NetworkMessage]
+public struct ValidMessage
 {
-    public int value;
+    public CustomLengthType customValue;
+}
+
+public struct CustomLengthType
+{
+    // type with invalid field but custom writers
+    public int[,] myArray;
 }
 
 public static class CustomSerialization
@@ -12,8 +19,3 @@ public static class CustomSerialization
     public static CustomType ReadCustomType(this NetworkReader reader) => default;
 }
 
-[NetworkMessage]
-public struct ValidMessage
-{
-    public CustomType customValue;
-}
