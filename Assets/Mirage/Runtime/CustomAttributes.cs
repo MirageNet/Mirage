@@ -308,4 +308,13 @@ namespace Mirage
             this.maxLength = maxLength;
         }
     }
+
+    /// <summary>
+    /// Mark a class/struct, field, property, or parameter as safe for the weaver.
+    /// This suppresses class serialization and allocation warnings.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Parameter)]
+    public class WeaverSafeClassAttribute : Attribute
+    {
+    }
 }
