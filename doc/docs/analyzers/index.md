@@ -11,7 +11,7 @@ Mirage uses Roslyn Analyzers to provide compile-time validation for network code
 | [MIRAGE1001](MIRAGE1001.md) | SyncVar Class Warning | Warning | Warns against using class types for `[SyncVar]` fields due to allocations and change-tracking limitations. |
 | [MIRAGE1002](MIRAGE1002.md) | Direct Mutation of SyncCollection Elements | Warning | Flags direct modification of elements within SyncCollections because the changes cannot be detected or synced. |
 | [MIRAGE1003](MIRAGE1003.md) | Reassignment of SyncObject Fields | Error | Restricts reassignment of fields implementing `ISyncObject` (like `SyncList`), requiring them to be marked `readonly`. |
-| [MIRAGE1004](MIRAGE1004.md) | Invalid SyncVar Hook Method | Error | Ensures `[SyncVar]` hook methods or events are correctly declared, matched by parameter type, and that hook events are non-static. |
+| [MIRAGE1004](MIRAGE1004.md) | Invalid SyncVar Hook Method | Error | Ensures `[SyncVar]` hook methods or events are correctly declared and matched by parameter type. |
 | [MIRAGE1005](MIRAGE1005.md) | Readonly SyncVar Field | Error | Restricts declaring fields marked with `[SyncVar]` as `readonly` to ensure they are mutable at runtime. |
 | [MIRAGE1101](MIRAGE1101.md) | Misplaced Network Attribute Error | Error | Prevents Mirage network attributes from being declared inside classes that do not inherit from `NetworkBehaviour`. |
 | [MIRAGE1102](MIRAGE1102.md) | Redundant Server/Client Attribute on RPC | Warning | Warns if an RPC method is decorated with both a routing attribute ([ServerRpc]/[ClientRpc]) and an active guard ([Server]/[Client]). |
