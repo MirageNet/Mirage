@@ -50,6 +50,49 @@ namespace Mirage.Analyzers.Tests
         }
 
         [Test]
+        public async Task WeaverIgnoreMethodsAreIgnored()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1303Tests/Valid_WeaverIgnoreMethods.cs");
+            await VerifyCS.VerifyAnalyzerAsync(code);
+        }
+
+        [Test]
+        public async Task ArrayMethodsAreValid()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1303Tests/Valid_ArraySerializationMethods.cs");
+            await VerifyCS.VerifyAnalyzerAsync(code);
+        }
+
+        [Test]
+        public async Task LengthRestrictedMethodsAreValid()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1303Tests/Valid_LengthRestrictedSerializationMethods.cs");
+            await VerifyCS.VerifyAnalyzerAsync(code);
+        }
+
+        [Test]
+        public async Task LengthRestrictedWriterOnlyReportsError()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1303Tests/Invalid_LengthRestrictedWriterOnly.cs");
+            var expected = VerifyCS.Diagnostic("MIRAGE1303")
+                .WithLocation(0)
+                .WithArguments("CustomLengthType", "Custom writer defined for 'CustomLengthType' but matching custom reader is missing.");
+
+            await VerifyCS.VerifyAnalyzerAsync(code, expected);
+        }
+
+        [Test]
+        public async Task LengthRestrictedReaderOnlyReportsError()
+        {
+            var code = VerifyCS.LoadTestData("Mirage1303Tests/Invalid_LengthRestrictedReaderOnly.cs");
+            var expected = VerifyCS.Diagnostic("MIRAGE1303")
+                .WithLocation(0)
+                .WithArguments("CustomLengthType", "Custom reader defined for 'CustomLengthType' but matching custom writer is missing.");
+
+            await VerifyCS.VerifyAnalyzerAsync(code, expected);
+        }
+
+        [Test]
         public async Task WriterOnlyReportsError()
         {
             var code = VerifyCS.LoadTestData("Mirage1303Tests/Invalid_WriterOnlyReportsError.cs");
