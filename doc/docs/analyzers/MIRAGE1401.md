@@ -4,7 +4,7 @@
 
 Reading, writing, or invoking any of the following network properties, fields, or methods inside Unity's lifecycle methods `Awake` or `Start`:
 
-*   **Helper Properties**: `IsServer`, `IsClient`, `IsHost`, `IsLocalPlayer`, `IsOwner`, `HasAuthority`
+*   **Helper Properties**: `IsServer`, `IsClient`, `IsHost`, `IsLocalPlayer`, `Owner`, `HasAuthority`, `IsLocalClient`, `IsServerOnly`, `IsClientOnly`
 *   **Network References**: `Server`, `Client`, `World`, `SyncVarSender`, `ServerObjectManager`, `ClientObjectManager`, `Visibility`
 *   **Remote Procedure Calls**: Any method decorated with `[ServerRpc]` or `[ClientRpc]`
 *   **Network Attributes**: Methods decorated with `[Server]`, `[Client]`, `[HasAuthority]`, `[LocalPlayer]`, or `[NetworkMethod]`
