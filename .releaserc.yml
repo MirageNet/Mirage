@@ -29,3 +29,4 @@ plugins:
         - 'Assets/Mirage/Weaver/Mirage.CecilExtensions/AssemblyInfo.cs'
         - 'Assets/Mirage/package.json'
         - 'Assets/Mirage/CHANGELOG.md'
+        - 'Assets/Mirage/Analyzers/Mirage.Analyzers.dll'

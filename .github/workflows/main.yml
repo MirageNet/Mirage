@@ -11,6 +11,7 @@ on:
       - '.releaserc.yml'
       - '.github/workflows/main.yml'
       - '.github/workflows/run-test.yml'
+      - 'CSharpAnalyzers/**'
 
 # available list of containers here:
 # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
@@ -87,9 +88,24 @@ jobs:
         run: unity-editor -nographics -logFile /dev/stdout -executeMethod Mirage.Tests.BuildIL2CPP.BuildTests.BuildWithIl2CPP -quit
         timeout-minutes: 20
 
+  AnalyzerTests:
+    name: Run Analyzer Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Run Tests
+        run: dotnet test CSharpAnalyzers/Mirage.Analyzers.slnx -c Release
+
   Publish:
     # only run once both tests and il2cpp have passed
-    needs: [Tests2022, Tests6000, Tests6000_3, BuildIL2CPP]
+    needs: [Tests2022, Tests6000, Tests6000_3, BuildIL2CPP, AnalyzerTests]
     # only run on main
     if: github.ref == 'refs/heads/main'
     name: Publish
@@ -97,6 +113,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Build Analyzer DLL
+        run: dotnet build CSharpAnalyzers/Mirage.Analyzers.slnx -c Release
 
       - uses: actions/setup-node@v6
         with:
