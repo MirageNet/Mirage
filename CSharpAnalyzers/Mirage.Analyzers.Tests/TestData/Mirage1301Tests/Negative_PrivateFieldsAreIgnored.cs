@@ -4,5 +4,5 @@ using System.Threading;
 [NetworkMessage]
 public struct MessageWithPrivateField
 {
-    private Thread executionThread;
+    private Thread {|#0:executionThread|};
 }

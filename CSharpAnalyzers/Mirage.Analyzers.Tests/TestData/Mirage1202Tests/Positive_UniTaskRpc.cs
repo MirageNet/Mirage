@@ -10,7 +10,7 @@ namespace Cysharp.Threading.Tasks
 public class MyBehaviour : NetworkBehaviour
 {
     [ServerRpc, RateLimit]
-    public UniTask CmdReturnsUniTask()
+    public UniTask {|#0:CmdReturnsUniTask|}()
     {
         return default;
     }
