@@ -464,8 +464,10 @@ namespace Mirage.Weaver
             var nopEnd = worker.Create(OpCodes.Nop);
 
             // **null check**
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldfld, eventField));
+            var isStatic = @event.AddMethod.IsStatic;
+            if (!isStatic)
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(worker.Create(isStatic ? OpCodes.Ldsfld : OpCodes.Ldfld, eventField));
             // dup so we dont need to load field twice
             worker.Append(worker.Create(OpCodes.Dup));
 
