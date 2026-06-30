@@ -24,6 +24,7 @@ namespace Mirage.Analyzers
         public INamedTypeSymbol? Vector3PackAttribute { get; }
         public INamedTypeSymbol? QuaternionPackAttribute { get; }
         public INamedTypeSymbol? RateLimitAttribute { get; }
+        public INamedTypeSymbol? WeaverIgnoreAttribute { get; }
 
         // Types
         public INamedTypeSymbol? NetworkBehaviour { get; }
@@ -74,6 +75,7 @@ namespace Mirage.Analyzers
             Vector3PackAttribute = compilation.GetTypeByMetadataName("Mirage.Serialization.Vector3PackAttribute");
             QuaternionPackAttribute = compilation.GetTypeByMetadataName("Mirage.Serialization.QuaternionPackAttribute");
             RateLimitAttribute = compilation.GetTypeByMetadataName("Mirage.RateLimitAttribute");
+            WeaverIgnoreAttribute = compilation.GetTypeByMetadataName("Mirage.Serialization.WeaverIgnoreAttribute");
 
             // Resolve types
             NetworkBehaviour = compilation.GetTypeByMetadataName("Mirage.NetworkBehaviour");
@@ -120,9 +122,20 @@ namespace Mirage.Analyzers
                     {
                         if (method.IsStatic && method.IsExtensionMethod)
                         {
-                            if (method.Parameters.Length == 2 && 
-                                NetworkWriter != null && 
-                                SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, NetworkWriter))
+                            if (HasAttribute(method, WeaverIgnoreAttribute))
+                                continue;
+
+                            var isWriter = method.Parameters.Length >= 2 &&
+                                           NetworkWriter != null && 
+                                           SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, NetworkWriter) &&
+                                           (method.Parameters.Length == 2 || (method.Parameters.Length == 3 && method.Parameters[2].Type.SpecialType == SpecialType.System_Int32));
+
+                            var isReader = method.Parameters.Length >= 1 &&
+                                           NetworkReader != null && 
+                                           SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, NetworkReader) &&
+                                           (method.Parameters.Length == 1 || (method.Parameters.Length == 2 && method.Parameters[1].Type.SpecialType == SpecialType.System_Int32));
+
+                            if (isWriter)
                             {
                                 var type = method.Parameters[1].Type;
                                 if (!CustomWriters.ContainsKey(type))
@@ -130,9 +143,7 @@ namespace Mirage.Analyzers
                                 
                                 CustomSerializableTypes.Add(type);
                             }
-                            else if (method.Parameters.Length == 1 && 
-                                     NetworkReader != null && 
-                                     SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, NetworkReader))
+                            else if (isReader)
                             {
                                 var type = method.ReturnType;
                                 if (!CustomReaders.ContainsKey(type))
