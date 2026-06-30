@@ -10,6 +10,6 @@ namespace Cysharp.Threading.Tasks
 
 public class MyBehaviour : NetworkBehaviour
 {
-    [ServerRpc]
+    [ServerRpc, RateLimit]
     public UniTask<Thread> {|#0:CmdGetSession|}() => default;
 }

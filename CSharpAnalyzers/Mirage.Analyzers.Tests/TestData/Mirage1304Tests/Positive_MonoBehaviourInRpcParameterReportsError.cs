@@ -5,7 +5,7 @@ public class PlainMonoBehaviour : MonoBehaviour {}
 
 public class PlayerCombat : NetworkBehaviour
 {
-    [ServerRpc]
+    [ServerRpc, RateLimit]
     public void CmdInteract(PlainMonoBehaviour {|#0:target|})
     {
     }

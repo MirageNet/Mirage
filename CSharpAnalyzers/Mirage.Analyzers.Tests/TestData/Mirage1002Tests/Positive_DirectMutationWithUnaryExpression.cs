@@ -1,6 +1,7 @@
 using Mirage;
 using Mirage.Collections;
 
+[WeaverSafeClass]
 public class MyClass
 {
     public int Value;

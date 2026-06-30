@@ -4,7 +4,7 @@ using Mirage.Collections;
 
 public class BasePlayer : NetworkBehaviour
 {
-    public SyncList<int> Scores = new SyncList<int>();
+    public readonly SyncList<int> Scores = new SyncList<int>();
 }
 
 public class HeroPlayer : BasePlayer

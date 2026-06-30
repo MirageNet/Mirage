@@ -25,14 +25,36 @@ namespace Mirage.Analyzers
                     return;
                 }
 
-                if (IsOrContainsUnsafeClass(fieldSymbol.Type, symbols, out var unsafeType))
+                if (isSyncVar)
                 {
-                    var diagnostic = Diagnostic.Create(
-                        MirageRules.SyncVarRule,
-                        fieldSymbol.Locations[0],
-                        fieldSymbol.Name,
-                        unsafeType.Name);
-                    context.ReportDiagnostic(diagnostic);
+                    if (IsOrContainsUnsafeClass(fieldSymbol.Type, symbols, out var unsafeType))
+                    {
+                        var diagnostic = Diagnostic.Create(
+                            MirageRules.SyncVarRule,
+                            fieldSymbol.Locations[0],
+                            fieldSymbol.Name,
+                            unsafeType.Name);
+                        context.ReportDiagnostic(diagnostic);
+                    }
+                }
+                else if (isSyncObject)
+                {
+                    if (fieldSymbol.Type is INamedTypeSymbol namedType && namedType.IsGenericType)
+                    {
+                        foreach (var arg in namedType.TypeArguments)
+                        {
+                            if (IsOrContainsUnsafeClass(arg, symbols, out var unsafeType))
+                            {
+                                var diagnostic = Diagnostic.Create(
+                                    MirageRules.SyncVarRule,
+                                    fieldSymbol.Locations[0],
+                                    fieldSymbol.Name,
+                                    unsafeType.Name);
+                                context.ReportDiagnostic(diagnostic);
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -47,6 +69,7 @@ namespace Mirage.Analyzers
             {
                 if (symbols.IsOrInherits(typeSymbol, symbols.NetworkIdentity) ||
                     symbols.IsOrInherits(typeSymbol, symbols.GameObject) ||
+                    symbols.IsOrInherits(typeSymbol, symbols.Transform) ||
                     symbols.IsOrInherits(typeSymbol, symbols.NetworkBehaviour))
                 {
                     return false;

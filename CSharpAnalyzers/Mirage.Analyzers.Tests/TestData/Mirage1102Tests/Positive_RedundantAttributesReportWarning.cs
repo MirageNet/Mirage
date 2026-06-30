@@ -4,7 +4,7 @@ using UnityEngine;
 public class PlayerCombat : NetworkBehaviour
 {
     [{|#0:Server|}]
-    [ServerRpc]
+    [ServerRpc, RateLimit]
     public void CmdFireWeapon(int weaponId)
     {
     }

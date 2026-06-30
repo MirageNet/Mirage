@@ -95,6 +95,17 @@ namespace Mirage.Analyzers
             return false;
         }
 
+        public static bool IsGenericUniTask(ITypeSymbol type, out ITypeSymbol? wrappedType)
+        {
+            wrappedType = null;
+            if (type is INamedTypeSymbol namedType && namedType.IsGenericType && namedType.Name == "UniTask" && namedType.ContainingNamespace?.ToDisplayString() == "Cysharp.Threading.Tasks")
+            {
+                wrappedType = namedType.TypeArguments[0];
+                return true;
+            }
+            return false;
+        }
+
         public static bool IsAutoProperty(IPropertySymbol propertySymbol)
         {
             var backingFieldName = $"<{propertySymbol.Name}>k__BackingField";
