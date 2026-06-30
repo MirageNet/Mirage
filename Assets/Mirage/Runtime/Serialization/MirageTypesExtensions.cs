@@ -44,6 +44,7 @@ namespace Mirage.Serialization
         /// Casts reader to <see cref="MirageNetworkReader"/>, throw if cast is invalid
         /// </summary>
         /// <param name=""></param>
+        [WeaverIgnore]
         public static MirageNetworkReader ToMirageReader(this NetworkReader reader)
         {
             if (reader is MirageNetworkReader mirageReader)
@@ -97,6 +98,7 @@ namespace Mirage.Serialization
             return identity.NetworkBehaviours[componentIndex];
         }
 
+        [WeaverIgnore]
         public static T ReadNetworkBehaviour<T>(this NetworkReader reader) where T : NetworkBehaviour
         {
             return reader.ReadNetworkBehaviour() as T;
