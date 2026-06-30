@@ -51,7 +51,9 @@ namespace Mirage.Analyzers
                         var name = symbol.Name;
                         if (name == "IsServer" || name == "IsClient" || name == "IsLocalPlayer" || name == "HasAuthority" ||
                             name == "Server" || name == "Client" || name == "World" ||
-                            name == "ServerObjectManager" || name == "ClientObjectManager")
+                            name == "ServerObjectManager" || name == "ClientObjectManager" ||
+                            name == "Owner" || name == "IsHost" || name == "IsLocalClient" ||
+                            name == "IsServerOnly" || name == "IsClientOnly")
                         {
                             isUnsafe = true;
                         }

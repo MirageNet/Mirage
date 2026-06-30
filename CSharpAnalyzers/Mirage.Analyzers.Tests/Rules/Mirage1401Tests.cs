@@ -49,8 +49,14 @@ namespace Mirage.Analyzers.Tests
             var expected11 = VerifyCS.Diagnostic("MIRAGE1401").WithLocation(11).WithArguments("MyHasAuthorityMethod", "Awake");
             var expected12 = VerifyCS.Diagnostic("MIRAGE1401").WithLocation(12).WithArguments("MyLocalPlayerMethod", "Awake");
             var expected13 = VerifyCS.Diagnostic("MIRAGE1401").WithLocation(13).WithArguments("MyNetworkFlagsMethod", "Awake");
+            var expected14 = VerifyCS.Diagnostic("MIRAGE1401").WithLocation(14).WithArguments("Owner", "Awake");
+            var expected15 = VerifyCS.Diagnostic("MIRAGE1401").WithLocation(15).WithArguments("IsHost", "Awake");
+            var expected16 = VerifyCS.Diagnostic("MIRAGE1401").WithLocation(16).WithArguments("IsLocalClient", "Awake");
+            var expected17 = VerifyCS.Diagnostic("MIRAGE1401").WithLocation(17).WithArguments("IsServerOnly", "Awake");
+            var expected18 = VerifyCS.Diagnostic("MIRAGE1401").WithLocation(18).WithArguments("IsClientOnly", "Awake");
+            var expected19 = VerifyCS.Diagnostic("MIRAGE1401").WithLocation(19).WithArguments("HasAuthority", "Awake");
 
-            await VerifyCS.VerifyAnalyzerAsync(code, expected0, expected1, expected2, expected3, expected4, expected5, expected6, expected7, expected8, expected9, expected10, expected11, expected12, expected13);
+            await VerifyCS.VerifyAnalyzerAsync(code, expected0, expected1, expected2, expected3, expected4, expected5, expected6, expected7, expected8, expected9, expected10, expected11, expected12, expected13, expected14, expected15, expected16, expected17, expected18, expected19);
         }
         [Test]
         public async Task Positive_AccessSyncVarPropertyInStart()
