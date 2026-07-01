@@ -72,11 +72,11 @@ jobs:
           unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
       
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Cache Library
         id: cache-library
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: Library
           key: Library-2022.3.62
@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - uses: actions/setup-node@v6
         with:

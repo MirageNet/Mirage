@@ -34,11 +34,11 @@ jobs:
           unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
 
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Cache Library
         id: cache-library
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: Library
           key: ${{ inputs.cache_key }}
