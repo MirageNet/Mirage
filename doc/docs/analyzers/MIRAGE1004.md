@@ -21,6 +21,11 @@ Specifically, the rules for SyncVar hooks are:
 ---
 
 ## How to Resolve
-Verify the spelling of the hook name, ensure all parameters match the SyncVar's type exactly, and explicitly define the `hookType` if overload resolution is ambiguous.
+Depending on the case, apply the following fix:
+
+- **Case 1 (Missing Hook):** Verify the spelling of the hook name and ensure the method exists within the class.
+- **Case 2 (Type Mismatch):** Ensure all parameters match the `SyncVar`'s type exactly (e.g., don't use `float` for a `double` SyncVar).
+- **Case 3 (Invalid Delegate):** Ensure hook events use `System.Action` delegates.
+- **Case 4 (Ambiguity):** Explicitly define the `hookType` in the `[SyncVar]` attribute if multiple overloads of the hook name exist.
 
 {{{ Path:'Snippets/Analyzers/Mirage1004.cs' Name:'mirage1004-resolved' }}}

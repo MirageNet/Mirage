@@ -20,9 +20,9 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-End: mirage1304-triggering
     }
 
-    namespace M1304.Resolved
+    namespace M1304.Recommended
     {
-        // CodeEmbed-Start: mirage1304-resolved
+        // CodeEmbed-Start: mirage1304-recommended
         public class NetworkedComponent : NetworkBehaviour
         {
             public int health;
@@ -34,6 +34,18 @@ namespace Mirage.Snippets.Analyzers
             // Correct: NetworkBehaviour is serializable by Mirage
             public NetworkedComponent target;
         }
-        // CodeEmbed-End: mirage1304-resolved
+        // CodeEmbed-End: mirage1304-recommended
     }
-}
+
+    namespace M1304.Alternative
+    {
+        // CodeEmbed-Start: mirage1304-alternative
+        [NetworkMessage]
+        public struct DamageMessage
+        {
+            // Correct: Pass a serializable identifier instead of the component object itself.
+            public uint targetId;
+        }
+        // CodeEmbed-End: mirage1304-alternative
+    }
+
