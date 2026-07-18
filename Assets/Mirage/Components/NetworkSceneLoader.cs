@@ -143,6 +143,7 @@ namespace Mirage.Components
             Debug.Assert(player.Identity == null, "Player already has a character spawned.");
 
             var character = Instantiate(PlayerPrefab);
+            // AddCharacter automatically calls SpawnVisibleObjects. If not using AddCharacter, call SpawnVisibleObjects directly instead.
             ServerObjectManager.AddCharacter(player, character.gameObject);
         }
 
