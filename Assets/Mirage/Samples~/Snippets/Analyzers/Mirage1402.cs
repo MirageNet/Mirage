@@ -17,7 +17,7 @@ namespace Mirage.Snippets.Analyzers
             [SyncVar]
             public int HeroId;
 
-            // Warning: Overriding OnSerialize without calling base.OnSerialize
+            // Warning: Missing base.OnSerialize call
             public override bool OnSerialize(NetworkWriter writer, bool initialState)
             {
                 writer.WritePackedInt32(HeroId);
@@ -41,7 +41,7 @@ namespace Mirage.Snippets.Analyzers
             [SyncVar]
             public int HeroId;
 
-            // Correct: Calls base.OnSerialize and combines dirty states
+            // Correct: Calls base.OnSerialize and combines results
             public override bool OnSerialize(NetworkWriter writer, bool initialState)
             {
                 bool baseDirty = base.OnSerialize(writer, initialState);

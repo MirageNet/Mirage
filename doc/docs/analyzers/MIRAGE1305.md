@@ -1,13 +1,12 @@
 # MIRAGE1305: Missing NetworkMessage Attribute
 
 ## The Problem
-A class or struct is used as a network message (passed as the type argument to one of the message-related API methods listed below), but it is missing the `[NetworkMessage]` attribute.
+A class or struct is used as a network message in one of the API methods below, but lacks the `[NetworkMessage]` attribute.
 
-Mirage's post-compilation Weaver generates serialization code and registers a unique message type ID (a 16-bit stable hash of the full type name) for every type marked `[NetworkMessage]`. When a type is used in a message-related call **without** that attribute, the Weaver may not produce the required serialization helpers, which results in runtime errors such as failing to serialize, failing to unpack, or "Unexpected message ID" warnings.
+Mirage's Weaver generates serialization code and registers message IDs for types marked with `[NetworkMessage]`. Using a type without this attribute can cause runtime errors, including serialization failures, unpacking issues, or "Unexpected message ID" warnings.
 
 ### Affected Methods
-
-The following generic methods all require their type argument to carry `[NetworkMessage]`:
+The following generic methods require their type argument to have `[NetworkMessage]`:
 
 | Method | Declared On |
 |---|---|
@@ -21,10 +20,8 @@ The following generic methods all require their type argument to carry `[Network
 | `GetId<T>()` | `MessagePacker` |
 
 ### Same-Assembly vs Cross-Assembly Behavior
-
-**Same assembly:** The Weaver scans every invocation of the methods above and can generate reader/writer code on the fly for the type argument even if `[NetworkMessage]` is absent. The type will still work at runtime, but the warning is raised because the intent is ambiguous and the behavior is fragile.
-
-**Cross-assembly (most critical case):** When a message type is defined in one assembly (e.g., a shared library or a separate asmdef) and *used* in another, the Weaver can only generate its serialization helpers in the **defining assembly**. That only happens when the type is tagged `[NetworkMessage]` in its own assembly. Without it, no reader/writer is generated in the defining assembly, so any assembly that references it will fail at runtime with a missing serializer error.
+* **Same assembly:** The Weaver can generate readers and writers on the fly during compilation even if `[NetworkMessage]` is missing. The code will work, but raises a warning to prevent fragile or ambiguous behavior.
+* **Cross-assembly:** When a message is defined in one assembly and used in another, the Weaver must generate the serialization code in the defining assembly. This requires `[NetworkMessage]` on the definition. Without it, referencing assemblies will fail at runtime with missing serializer errors.
 
 ---
 
@@ -34,7 +31,6 @@ The following generic methods all require their type argument to carry `[Network
 ---
 
 ## How to Resolve
-
-Decorate the target message class or struct with the `[NetworkMessage]` attribute. This instructs Mirage's Weaver to generate serialization code and register the type ID in the assembly where the type is defined, making it safe to use across assembly boundaries.
+Add the `[NetworkMessage]` attribute to the message class or struct. This ensures the Weaver generates the required serialization code in the defining assembly.
 
 {{{ Path:'Snippets/Analyzers/Mirage1305.cs' Name:'mirage1305-resolved' }}}

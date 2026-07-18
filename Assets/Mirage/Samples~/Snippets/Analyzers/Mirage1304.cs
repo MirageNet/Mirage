@@ -14,7 +14,7 @@ namespace Mirage.Snippets.Analyzers
         [NetworkMessage]
         public struct DamageMessage
         {
-            // Error: MonoBehaviour type 'LocalComponent' is not serializable by Mirage.
+            // Error: MonoBehaviour components are not network-serializable.
             public LocalComponent target;
         }
         // CodeEmbed-End: mirage1304-triggering
@@ -31,7 +31,7 @@ namespace Mirage.Snippets.Analyzers
         [NetworkMessage]
         public struct DamageMessage
         {
-            // Correct: NetworkBehaviour is serializable by Mirage
+            // Correct: NetworkBehaviour components are network-serializable.
             public NetworkedComponent target;
         }
         // CodeEmbed-End: mirage1304-recommended
@@ -43,9 +43,9 @@ namespace Mirage.Snippets.Analyzers
         [NetworkMessage]
         public struct DamageMessage
         {
-            // Correct: Pass a serializable identifier instead of the component object itself.
+            // Correct: Pass a serializable identifier instead.
             public uint targetId;
         }
         // CodeEmbed-End: mirage1304-alternative
     }
-
+}

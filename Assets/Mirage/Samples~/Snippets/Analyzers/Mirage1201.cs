@@ -9,7 +9,7 @@ namespace Mirage.Snippets.Analyzers
         [NetworkMessage]
         public struct UpdateUserMessage
         {
-            // Warning: Class types cause GC allocations during deserialization and lack change tracking.
+            // Warning: Class types cause garbage collection allocations during deserialization.
             public UserData data;
         }
 

@@ -8,14 +8,14 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1205-triggering
         public class Player : NetworkBehaviour
         {
-            // Error: [ClientRpc] must return void when target is Observers.
+            // Error: Observers target requires void return type
             [ClientRpc(target = RpcTarget.Observers)]
             public UniTask<int> RpcGetHealth()
             {
                 return UniTask.FromResult(100);
             }
 
-            // Error: ClientRpc method with target = Player requires first parameter to be INetworkPlayer
+            // Error: Player target requires INetworkPlayer as first parameter
             [ClientRpc(target = RpcTarget.Player)]
             public void RpcGiveItem(int itemId)
             {
@@ -29,14 +29,14 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1205-resolved
         public class Player : NetworkBehaviour
         {
-            // Correct: Targeted RPC returning value to the Owner
+            // Correct: Owner target allows returning values
             [ClientRpc(target = RpcTarget.Owner)]
             public UniTask<int> RpcGetHealth()
             {
                 return UniTask.FromResult(100);
             }
 
-            // Correct: First parameter is the target player connection
+            // Correct: First parameter specifies the target player
             [ClientRpc(target = RpcTarget.Player)]
             public void RpcGiveItem(INetworkPlayer targetPlayer, int itemId)
             {

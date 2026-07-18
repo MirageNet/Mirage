@@ -1,9 +1,9 @@
 # MIRAGE1204: Static RPC Methods
 
 ## The Problem
-An RPC method decorated with `[ServerRpc]` or `[ClientRpc]` is declared as `static`.
+An RPC method decorated with `[ServerRpc]` or `[ClientRpc]` is `static`.
 
-RPC methods must execute on a specific instance of a `NetworkBehaviour` on a specific `GameObject` so that Mirage knows which network identity the message is targeted at. Static methods lack an instance context (`this`), making it impossible to route the message to the correct network object.
+RPC methods must execute on a specific `NetworkBehaviour` instance so Mirage can route the message to the correct network identity. Static methods lack this instance context (`this`).
 
 ---
 
@@ -13,7 +13,6 @@ RPC methods must execute on a specific instance of a `NetworkBehaviour` on a spe
 ---
 
 ## How to Resolve
-
-Remove the `static` modifier from the RPC method declaration so it runs within the instance context of a spawned `NetworkBehaviour`.
+Remove the `static` modifier so the method executes within the instance context of the `NetworkBehaviour`.
 
 {{{ Path:'Snippets/Analyzers/Mirage1204.cs' Name:'mirage1204-resolved' }}}

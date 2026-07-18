@@ -1,11 +1,11 @@
 # MIRAGE1205: Invalid ClientRpc Target Configurations
 
 ## The Problem
-A `[ClientRpc]` target configuration is invalid for one of the following reasons:
-1. The target is set to `RpcTarget.Observers` but the method return type is not `void`.
-2. The target is set to `RpcTarget.Player` but the first parameter of the method is not an `INetworkPlayer` to specify the recipient.
+A `[ClientRpc]` target configuration is invalid if:
+- The target is `RpcTarget.Observers` but the method return type is not `void`.
+- The target is `RpcTarget.Player` but the first parameter is not an `INetworkPlayer`.
 
-Broadcast RPCs (where the target is `Observers`) must return `void` because multiple clients would respond, making return values or tasks invalid. Returning values requires a single, specific destination (e.g. `RpcTarget.Owner` or `RpcTarget.Player`). Furthermore, when targeting a specific `Player`, Mirage needs to know which connection to send the RPC to, so the method's first parameter must be the player connection (`INetworkPlayer`).
+Broadcast RPCs (`RpcTarget.Observers`) cannot return values because multiple clients cannot return a single response. Returning values is only supported for specific targets like `RpcTarget.Owner` or `RpcTarget.Player`. Additionally, `RpcTarget.Player` requires an `INetworkPlayer` parameter so Mirage knows which client to target.
 
 ---
 
@@ -15,8 +15,7 @@ Broadcast RPCs (where the target is `Observers`) must return `void` because mult
 ---
 
 ## How to Resolve
-
-1. If the RPC target is `RpcTarget.Observers`, change the return type to `void`. Alternatively, if the RPC returns values, change the target to `RpcTarget.Owner` or `RpcTarget.Player`.
-2. If the RPC targets `RpcTarget.Player`, ensure the first parameter is of type `INetworkPlayer`.
+- If the target is `RpcTarget.Observers`, change the return type to `void`, or use `RpcTarget.Owner` / `RpcTarget.Player` if returning values.
+- If the target is `RpcTarget.Player`, add `INetworkPlayer` as the first parameter.
 
 {{{ Path:'Snippets/Analyzers/Mirage1205.cs' Name:'mirage1205-resolved' }}}
