@@ -12,14 +12,14 @@ namespace Mirage.Snippets.Analyzers
 
             private void Start()
             {
-                // Warning: Accessing Network State (IsServer) in Awake/Start
+                // Warning: Accessing network state before object is spawned
                 if (IsServer)
                     Health = 100;
 
-                // Warning: Accessing Visibility before the object is spawned will throw an exception if no custom NetworkVisibility component is attached
+                // Warning: Visibility throws an exception before spawn if no custom NetworkVisibility is attached
                 var visibility = Identity.Visibility;
 
-                // Warning: Accessing Owner, IsHost, IsLocalClient, IsServerOnly, and IsClientOnly in Awake/Start is unsafe
+                // Warning: Helper properties are unsafe to access before spawn
                 var owner = Owner;
                 var isHost = IsHost;
                 var isLocalClient = IsLocalClient;
@@ -43,12 +43,12 @@ namespace Mirage.Snippets.Analyzers
                 Identity.OnStartServer.AddListener(OnStartServer);
             }
 
-            // Correct: Run server initialization when the network server has started
+            // Correct: Run server initialization when the network server is ready
             public void OnStartServer()
             {
                 Health = 100;
 
-                // Correct: Access Visibility once the object has been spawned
+                // Correct: Access Visibility after the object is spawned
                 var visibility = Identity.Visibility;
             }
         }

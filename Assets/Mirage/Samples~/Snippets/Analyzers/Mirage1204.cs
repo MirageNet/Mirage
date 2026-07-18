@@ -7,7 +7,7 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1204-triggering
         public class Player : NetworkBehaviour
         {
-            // Error: ServerRpc method 'CmdSpawnGlobal' must not be static
+            // Error: RPC methods cannot be static
             [ServerRpc]
             public static void CmdSpawnGlobal()
             {
@@ -21,7 +21,7 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1204-resolved
         public class Player : NetworkBehaviour
         {
-            // Correct: Instance method has access to the NetworkBehaviour state
+            // Correct: Instance method has access to instance state
             [ServerRpc]
             public void CmdSpawn()
             {

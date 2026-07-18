@@ -1,9 +1,9 @@
 # MIRAGE1303: Mismatched Custom Serialization Methods
 
 ## The Problem
-A custom serializer signature does not match the expected pattern, or a custom reader is missing for a custom writer (or vice versa).
+A custom serialization writer or reader is missing its matching counterpart, or their signatures do not match.
 
-When writing custom serialization for a type, Mirage requires both extension methods to be defined with matching signatures. Both standard and length-based (where an integer count/length is passed as the last argument) signatures are supported:
+Mirage requires both extension methods to be defined with matching signatures. Mirage supports standard and length-based signatures:
 
 ### Standard Signatures
 - **Writer:** `public static void WriteMyType(this NetworkWriter writer, MyType value)`
@@ -13,7 +13,7 @@ When writing custom serialization for a type, Mirage requires both extension met
 - **Writer:** `public static void WriteMyType(this NetworkWriter writer, MyType value, int length)`
 - **Reader:** `public static MyType ReadMyType(this NetworkReader reader, int length)`
 
-If only one of the methods is defined, or if the parameter/return types do not exactly match the type or its signature pair, Mirage cannot pair them up, causing serialization to fail at compile-time.
+If either method is missing or parameters do not align, serialization fails at compile time.
 
 ---
 
@@ -23,7 +23,6 @@ If only one of the methods is defined, or if the parameter/return types do not e
 ---
 
 ## How to Resolve
-
-Provide a matching reader or writer method with the correct signature. Ensure that the type being read and written is exactly the same.
+Define the missing reader or writer method, ensuring that target types and signature patterns match.
 
 {{{ Path:'Snippets/Analyzers/Mirage1303.cs' Name:'mirage1303-resolved' }}}

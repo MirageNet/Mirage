@@ -1,17 +1,15 @@
 # MIRAGE1401: Accessing Network State in Awake/Start
 
 ## The Problem
+Do not access network properties, references, or methods inside Unity's `Awake` or `Start`. At this stage, Mirage's network identity is not yet spawned or initialized, so these values are null or default. Calling RPCs or accessing these fields will cause `NullReferenceException`, default values, or race conditions.
 
-Reading, writing, or invoking any of the following network properties, fields, or methods inside Unity's lifecycle methods `Awake` or `Start`:
-
+Affected members include:
 *   **Helper Properties**: `IsServer`, `IsClient`, `IsHost`, `IsLocalPlayer`, `Owner`, `HasAuthority`, `IsLocalClient`, `IsServerOnly`, `IsClientOnly`
 *   **Network References**: `Server`, `Client`, `World`, `SyncVarSender`, `ServerObjectManager`, `ClientObjectManager`, `Visibility`
 *   **Remote Procedure Calls**: Any method decorated with `[ServerRpc]` or `[ClientRpc]`
 *   **Network Attributes**: Methods decorated with `[Server]`, `[Client]`, `[HasAuthority]`, `[LocalPlayer]`, or `[NetworkMethod]`
 
-Unity's `Awake` and `Start` methods are called during GameObject initialization before Mirage's network identity is spawned or initialized. At this point, properties and fields representing the network state or references are not set (they are null or default). Accessing them, invoking RPC methods, or calling attribute-guarded methods inside `Awake` or `Start` leads to incorrect behavior, `NullReferenceException` at runtime, default values, or race conditions.
-
-Specifically, accessing `Visibility` (via `Identity.Visibility` or `NetworkBehaviour.Identity.Visibility`) on a network identity that does not have a custom `NetworkVisibility` component attached will try to retrieve the `DefaultVisibility` from the `ServerObjectManager`. Since the `ServerObjectManager` is null before the identity is spawned, this will throw an `InvalidOperationException`.
+Additionally, accessing `Visibility` without a custom `NetworkVisibility` component requires `ServerObjectManager`, which is null before spawning and throws `InvalidOperationException`.
 
 ---
 
@@ -21,8 +19,7 @@ Specifically, accessing `Visibility` (via `Identity.Visibility` or `NetworkBehav
 ---
 
 ## How to Resolve
-
-Subscribe to lifecycle events on `Identity` (such as `Identity.OnStartServer`, `Identity.OnStartClient`, `Identity.OnStartLocalPlayer`, or `Identity.OnAuthorityChanged`) during `Awake()` to execute your network initialization code when the network state is fully ready.
+Subscribe to `Identity` lifecycle events (such as `Identity.OnStartServer`, `Identity.OnStartClient`, `Identity.OnStartLocalPlayer`, or `Identity.OnAuthorityChanged`) in `Awake` to run initialization code when the network state is ready.
 
 {{{ Path:'Snippets/Analyzers/Mirage1401.cs' Name:'mirage1401-resolved' }}}
 

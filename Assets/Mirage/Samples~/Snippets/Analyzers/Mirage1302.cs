@@ -10,14 +10,14 @@ namespace Mirage.Snippets.Analyzers
         {
             public string playerName;
             
-            // Warning: Private fields are not serialized by the Weaver
+            // Non-public fields are not serialized
             private int playerHash;
 
-            // Warning: Internal and protected fields are also ignored by the Weaver
+            // Internal/protected fields are not serialized
             internal int internalField;
             protected float protectedField;
 
-            // Warning: Properties (including public ones) are ignored by the Weaver
+            // Properties are not serialized
             public int PublicProperty { get; set; }
             private string PrivateProperty { get; set; }
         }

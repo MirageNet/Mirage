@@ -9,7 +9,7 @@ namespace Mirage.Snippets.Analyzers
         [NetworkMessage]
         public struct StartSessionMessage
         {
-            // Error: Field type 'Thread' is not serializable by Mirage.
+            // Error: Thread is not serializable
             public Thread executionThread;
         }
         // CodeEmbed-End: mirage1301-triggering
@@ -20,24 +20,23 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1301-resolved
         public class UserSession
         {
-            // Auto-serialized by the Weaver because it is a public field in a valid class
+            // Auto-serialized: public field in a valid class
             public int sessionId;
 
-            // Ignored by the Weaver during serialization to avoid errors on non-serializable utility types
+            // Ignored during serialization
             [NonSerialized] public System.Threading.Thread workerThread;
 
-
-            // Required constructor so the Weaver can instantiate this class during deserialization
+            // Required parameterless constructor for deserialization
             public UserSession() { }
         }
 
         [NetworkMessage]
         public struct StartSessionMessage
         {
-            // Correct: Pass a serializable identifier instead of the raw thread object
+            // Use a serializable identifier instead of the thread object
             public string threadName;
 
-            // Correct: Non-generic classes with parameterless constructors can be auto-serialized
+            // Auto-serialized: non-generic class with parameterless constructor
             public UserSession session;
         }
         // CodeEmbed-End: mirage1301-resolved

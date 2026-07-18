@@ -7,7 +7,7 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1005-triggering
         public class Player : NetworkBehaviour
         {
-            // Error: SyncVar 'health' cannot be marked readonly
+            // Error: SyncVar cannot be readonly
             [SyncVar]
             public readonly int health = 100;
         }
@@ -19,7 +19,7 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1005-resolved
         public class Player : NetworkBehaviour
         {
-            // Correct: SyncVar is mutable at runtime
+            // Correct: SyncVar is mutable
             [SyncVar]
             public int health = 100;
         }

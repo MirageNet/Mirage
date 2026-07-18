@@ -1,9 +1,9 @@
 # MIRAGE1203: Pass-by-Reference Modifiers in RPCs
 
 ## The Problem
-An RPC method contains parameters with `ref`, `out`, or `in` parameter modifiers.
+An RPC method contains parameters with `ref`, `out`, or `in` modifiers.
 
-RPCs (Remote Procedure Calls) serialize arguments and send them over the network. Pass-by-reference modifiers (`ref`, `out`, or `in`) pass values by reference under the hood (which triggers the Weaver's `IsByReference` check). Since RPC arguments must be serialized over a one-way network serialization boundary, pass-by-reference is not supported.
+Because RPC arguments must be serialized across the network, pass-by-reference modifiers are not supported.
 
 ---
 
@@ -15,15 +15,15 @@ RPCs (Remote Procedure Calls) serialize arguments and send them over the network
 ## How to Resolve
 
 ### Recommended Fix: Pass by value
-Pass parameters by value. This is the most direct and performant way to handle data transfer in RPCs.
+Pass parameters by value. This is the standard way to transfer data in RPCs.
 
 {{{ Path:'Snippets/Analyzers/Mirage1203.cs' Name:'mirage1203-recommended' }}}
 
 ---
 
 ### Alternative Solutions
-If you need to communicate updated state back to the caller, you can:
-1. **Use an asynchronous RPC** with a `UniTask<T>` return value.
-2. **Update a synchronized field** (such as a `[SyncVar]`) as shown in the example above.
+To return updated state to the caller:
+- Use an asynchronous RPC with a `UniTask<T>` return value.
+- Update a synchronized field like `[SyncVar]`.
 
 {{{ Path:'Snippets/Analyzers/Mirage1203.cs' Name:'mirage1203-alternative' }}}

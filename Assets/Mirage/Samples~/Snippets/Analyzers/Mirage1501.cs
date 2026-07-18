@@ -11,7 +11,7 @@ namespace Mirage.Snippets.Analyzers
         {
             public int id;
             public Vector3 position;
-            // Info Diagnostic: NetworkMessage 'PlayerUpdateMessage' has an estimated serialized size of 13 bytes.
+            // Diagnostic: 'PlayerUpdateMessage' estimated size: 13 bytes.
         }
         // CodeEmbed-End: mirage1501-example
     }

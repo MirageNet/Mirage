@@ -7,7 +7,7 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1203-triggering
         public class Player : NetworkBehaviour
         {
-            // Error: ServerRpc method 'CmdTakeDamage' cannot have ref/out/in parameters
+            // Error: RPC parameters cannot use ref, out, or in modifiers
             [ServerRpc]
             public void CmdTakeDamage(ref int health, in int damage)
             {
@@ -25,7 +25,7 @@ namespace Mirage.Snippets.Analyzers
             [SyncVar]
             public int Health;
 
-            // Correct: Pass by value and synchronize via SyncVar
+            // Correct: Pass by value and synchronize via [SyncVar]
             [ServerRpc]
             public void CmdTakeDamage(int damage)
             {
@@ -48,4 +48,4 @@ namespace Mirage.Snippets.Analyzers
         }
         // CodeEmbed-End: mirage1203-alternative
     }
-
+}

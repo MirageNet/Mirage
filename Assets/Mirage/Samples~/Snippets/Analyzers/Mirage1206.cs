@@ -7,7 +7,7 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1206-triggering
         public class Player : NetworkBehaviour
         {
-            // Error: RateLimit interval must be greater than zero, MaxTokens must be >= Refill, and Penalty must be >= 0
+            // Error: Invalid settings (Interval <= 0, MaxTokens < Refill, Penalty < 0)
             [ServerRpc]
             [RateLimit(Interval = -0.5f, Refill = 10, MaxTokens = 5, Penalty = -1)]
             public void CmdSpammyAction()
@@ -22,7 +22,7 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1206-resolved
         public class Player : NetworkBehaviour
         {
-            // Correct: Positive interval, MaxTokens >= Refill, and Penalty >= 0
+            // Correct: Valid settings (Interval > 0, MaxTokens >= Refill, Penalty >= 0)
             [ServerRpc]
             [RateLimit(Interval = 1.0f, Refill = 10, MaxTokens = 20, Penalty = 1)]
             public void CmdSpammyAction()
