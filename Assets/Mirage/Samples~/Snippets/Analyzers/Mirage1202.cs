@@ -17,11 +17,18 @@ namespace Mirage.Snippets.Analyzers
             {
             }
 
-            // Error: RPC methods must return void, UniTask, or UniTask<T>.
+            // Error: RPC methods must return void or UniTask<T>.
             [ServerRpc]
             public PlayerStats CmdGetStats()
             {
                 return new PlayerStats();
+            }
+
+            // Error: RPC methods must return void or UniTask<T> (non-generic UniTask is not supported).
+            [ServerRpc]
+            public UniTask CmdDoSomethingAsync()
+            {
+                return UniTask.CompletedTask;
             }
         }
         // CodeEmbed-End: mirage1202-triggering

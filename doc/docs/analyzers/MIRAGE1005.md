@@ -3,7 +3,7 @@
 ## The Problem
 A field marked with `[SyncVar]` is `readonly`.
 
-SyncVars must be synchronized from server to clients. The Weaver generates setters on these fields to track changes and trigger updates. Since `readonly` fields are immutable at runtime, the Weaver cannot wrap them and the server cannot update their values.
+SyncVars are synchronized between server and clients. Since `readonly` fields are immutable at runtime, Weaver cannot create setter methods to update the fields.
 
 ---
 
