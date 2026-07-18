@@ -71,6 +71,15 @@ namespace Mirage.Snippets.Analyzers
         {
             public string name;
         }
+
+        public class Player : NetworkBehaviour
+        {
+            [ServerRpc]
+            public void CmdUpdateUser([WeaverSafeClass] UserDataClassWithoutAttribute data)
+            {
+                // ...
+            }
+        }
         // CodeEmbed-End: mirage1201-alternative-suppress
     }
 
