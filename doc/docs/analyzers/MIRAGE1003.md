@@ -1,9 +1,9 @@
-# MIRAGE1003: Reassignment of SyncObject Fields
+# MIRAGE1003: SyncObject fields must be marked as readonly
 
 ## The Problem
-A field implementing `ISyncObject` (such as `SyncList`, `SyncDictionary`, `SyncHashSet`, etc.) is reassigned, or is not marked `readonly`.
+A field implementing `ISyncObject` (such as `SyncList`, `SyncDictionary`, `SyncHashSet`, etc.) is reassigned or is not marked as `readonly`.
 
-Fields implementing `ISyncObject` must be initialized once when the class is constructed and cannot be reassigned during the lifecycle of the object. Reassigning these fields breaks Mirage's post-processing code weaving and prevents proper dirty-tracking and delta serialization.
+These fields must be initialized once during construction and remain read-only throughout the lifecycle of the object. Reassignment breaks Mirage's post-processing code weaving, which prevents proper dirty-tracking and delta serialization.
 
 ---
 

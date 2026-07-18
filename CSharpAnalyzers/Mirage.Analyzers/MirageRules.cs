@@ -51,7 +51,7 @@ namespace Mirage.Analyzers
 
         public static readonly DiagnosticDescriptor ReassignmentRule = new DiagnosticDescriptor(
             ReassignmentDiagnosticId,
-            "Reassignment of ISyncObject fields",
+            "SyncObject fields must be marked as readonly",
             "ISyncObject field '{0}' must be marked readonly and cannot be reassigned",
             "Usage",
             DiagnosticSeverity.Error,
