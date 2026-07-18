@@ -10,7 +10,7 @@ Mirage uses Roslyn Analyzers to provide compile-time validation for network code
 | --- | --- | --- | --- |
 | [MIRAGE1001](MIRAGE1001.md) | SyncVar Class Warning | Warning | Warns against using class types for `[SyncVar]` fields due to allocations and change-tracking limitations. |
 | [MIRAGE1002](MIRAGE1002.md) | Direct Mutation of SyncCollection Elements | Warning | Flags direct modification of elements within SyncCollections because the changes cannot be detected or synced. |
-| [MIRAGE1003](MIRAGE1003.md) | Reassignment of SyncObject Fields | Error | Restricts reassignment of fields implementing `ISyncObject` (like `SyncList`), requiring them to be marked `readonly`. |
+| [MIRAGE1003](MIRAGE1003.md) | SyncObject fields must be marked as readonly | Error | Restricts reassignment of fields implementing `ISyncObject` (like `SyncList`), requiring them to be marked `readonly`. |
 | [MIRAGE1004](MIRAGE1004.md) | Invalid SyncVar Hook Method | Error | Ensures `[SyncVar]` hook methods or events are correctly declared and matched by parameter type. |
 | [MIRAGE1005](MIRAGE1005.md) | Readonly SyncVar Field | Error | Restricts declaring fields marked with `[SyncVar]` as `readonly` to ensure they are mutable at runtime. |
 | [MIRAGE1101](MIRAGE1101.md) | Misplaced Network Attribute Error | Error | Prevents Mirage network attributes from being declared inside classes that do not inherit from `NetworkBehaviour`. |
@@ -44,7 +44,7 @@ Using class types inside fields decorated with `[SyncVar]` triggers this warning
 #### [MIRAGE1002: Direct Mutation of SyncCollection Elements](MIRAGE1002.md)
 Modifying the properties of an element inside a `SyncList` or `SyncDictionary` directly (without setting it back) prevents Mirage from triggering change tracking. Because structs are value types, mutating them directly only changes a local copy. To resolve this, retrieve the element, modify it, and assign it back using the collection indexer.
 
-#### [MIRAGE1003: Reassignment of SyncObject Fields](MIRAGE1003.md)
+#### [MIRAGE1003: SyncObject fields must be marked as readonly](MIRAGE1003.md)
 Fields implementing `ISyncObject` (such as `SyncList` or `SyncHashSet`) must be declared as `readonly` and must not be reassigned after construction. Reassigning these fields breaks internal Weaver injection and delta synchronization. To reset the collection, use the collection's `.Clear()` method instead of creating a new instance.
 
 #### [MIRAGE1004: Invalid SyncVar Hook Method](MIRAGE1004.md)
