@@ -7,7 +7,7 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1102-triggering
         public class PlayerCombat : NetworkBehaviour
         {
-            // Redundant: [Server] is redundant on a [ServerRpc] method
+            // Redundant: [Server] is already implied by [ServerRpc]
             [Server]
             [ServerRpc]
             public void CmdFireWeapon(int weaponId)
@@ -15,7 +15,7 @@ namespace Mirage.Snippets.Analyzers
                 // Weapon fire logic
             }
 
-            // Redundant: [Client] is redundant on a [ClientRpc] method
+            // Redundant: [Client] is already implied by [ClientRpc]
             [Client]
             [ClientRpc]
             public void RpcPlayExplosion(UnityEngine.Vector3 position)

@@ -14,7 +14,7 @@ namespace Mirage.Snippets.Analyzers
 
             private void Update()
             {
-                // Warning: Checking .enabled checks Unity Component status, not if the server/client is active
+                // Warning: Checks Inspector component state instead of active network status
                 if (Server.enabled)
                 {
                     // Server logic...
@@ -45,7 +45,7 @@ namespace Mirage.Snippets.Analyzers
 
             private void Update()
             {
-                // Correct: Use .Active to check if the server/client is actively running
+                // Correct: Checks if the server/client is actively running
                 if (Server.Active)
                 {
                     // Server logic...
@@ -56,7 +56,7 @@ namespace Mirage.Snippets.Analyzers
                     // Client logic...
                 }
 
-                // Correct: Use .IsSpawned to check if the identity is active/spawned on the network
+                // Correct: Checks if the identity is active and spawned on the network
                 if (Identity.IsSpawned)
                 {
                     // Identity logic...

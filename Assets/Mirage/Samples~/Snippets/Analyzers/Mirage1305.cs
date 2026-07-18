@@ -7,7 +7,7 @@ namespace Mirage.Snippets.Analyzers
     namespace M1305.Triggering
     {
         // CodeEmbed-Start: mirage1305-triggering
-        // Error: Lacks [NetworkMessage] — used with all message-related API methods
+        // Error: Missing [NetworkMessage] but used in message APIs
         public struct PlayerScoreMessage
         {
             public int score;
@@ -43,8 +43,8 @@ namespace Mirage.Snippets.Analyzers
     namespace M1305.Resolved
     {
         // CodeEmbed-Start: mirage1305-resolved
-        // Correct: [NetworkMessage] lets the Weaver generate serialization code
-        // in this assembly, making the type safe to send and register everywhere.
+        // Correct: [NetworkMessage] forces Weaver to generate serialization code
+        // in this assembly, allowing safe cross-assembly use.
         [NetworkMessage]
         public struct PlayerScoreMessage
         {

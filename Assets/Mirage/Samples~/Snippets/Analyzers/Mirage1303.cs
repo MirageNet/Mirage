@@ -13,7 +13,7 @@ namespace Mirage.Snippets.Analyzers
 
         public static class CustomSerialization
         {
-            // Error: Custom writer defined but matching custom reader is missing
+            // Error: Missing matching custom reader
             public static void WriteCustomType(this NetworkWriter writer, CustomType value)
             {
                 writer.WritePackedInt32(value.value);
@@ -32,7 +32,7 @@ namespace Mirage.Snippets.Analyzers
 
         public static class CustomSerialization
         {
-            // Correct: Both writer and reader are defined with matching signatures
+            // Correct: Writer and reader signatures match
             public static void WriteCustomType(this NetworkWriter writer, CustomType value)
             {
                 writer.WritePackedInt32(value.value);
@@ -51,7 +51,7 @@ namespace Mirage.Snippets.Analyzers
 
         public static class LengthCustomSerialization
         {
-            // Correct: Length-based custom writer and reader signatures are also supported
+            // Correct: Length-based signatures match
             public static void WriteLengthCustomType(this NetworkWriter writer, LengthCustomType value, int length)
             {
                 writer.WriteBytes(value.data, 0, length);

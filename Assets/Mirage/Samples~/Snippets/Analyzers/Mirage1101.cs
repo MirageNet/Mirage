@@ -8,7 +8,7 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1101-triggering
         public class GameManager : MonoBehaviour
         {
-            // Errors: Attribute 'SyncVarAttribute' cannot be used on 'score'...
+            // Error: 'SyncVarAttribute' cannot be used outside NetworkBehaviour
             [SyncVar]
             public int score;
         }

@@ -11,7 +11,7 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1202-triggering
         public class Player : NetworkBehaviour
         {
-            // Error: RPC methods cannot define their own generic parameters.
+            // Error: RPC methods cannot declare generic parameters.
             [ServerRpc]
             public void CmdTakeDamage<T>(T damage)
             {
@@ -30,16 +30,16 @@ namespace Mirage.Snippets.Analyzers
     namespace M1202.Resolved
     {
         // CodeEmbed-Start: mirage1202-resolved
-        // Allowed: NetworkBehaviours can be generic classes.
+        // Allowed: Generic NetworkBehaviour class.
         public class Player<T> : NetworkBehaviour
         {
-            // Allowed: RPC methods can use generic parameters from the enclosing class.
+            // Allowed: Using generic parameters from the enclosing class.
             [ServerRpc]
             public void CmdProcessGenericArg(T data)
             {
             }
 
-            // Allowed: RPC methods can use closed generic types (e.g. DamageContainer<int>).
+            // Allowed: Using closed generic types.
             [ServerRpc]
             public void CmdTakeDamage(DamageContainer<int> damage)
             {
