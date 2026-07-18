@@ -3,7 +3,7 @@
 ## The Problem
 Methods decorated with `[ServerRpc]` or `[ClientRpc]` must follow these rules:
 * **No Generic Methods:** The RPC method itself cannot declare generic parameters (e.g., `void MyRpc<T>()`).
-* **Valid Return Type:** The method must return `void`, `UniTask`, or `UniTask<T>`.
+* **Valid Return Type:** The method must return `void`, or `UniTask<T>`.
 
 ### Generics Rules
 * **Allowed:** Generic NetworkBehaviour classes (e.g., `class MyBehaviour<T> : NetworkBehaviour`).
@@ -20,6 +20,6 @@ Methods decorated with `[ServerRpc]` or `[ClientRpc]` must follow these rules:
 
 ## How to Resolve
 * Remove generic parameters from the RPC method signature. Use class-level generic parameters or closed generic types instead.
-* Change the return type to `void`, `UniTask`, or `UniTask<T>`.
+* Change the return type to `void` or `UniTask<T>`.
 
 {{{ Path:'Snippets/Analyzers/Mirage1202.cs' Name:'mirage1202-resolved' }}}
