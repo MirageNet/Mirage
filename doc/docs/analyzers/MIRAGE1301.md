@@ -7,7 +7,7 @@ Mirage uses compile-time IL weaving to generate serialization code for NetworkMe
 
 Types that can be auto-weaved include simple structs or non-generic classes that have a public/internal parameterless constructor and contain only serializable fields.
 
-Note that internal fields are ignored by the Weaver during serialization, so they do not cause serialization errors even if their type is not serializable.
+Note that internal fields and those marked with `[NonSerialized]` are ignored by the Weaver during serialization, so they do not cause serialization errors even if their type is not serializable.
 
 ---
 

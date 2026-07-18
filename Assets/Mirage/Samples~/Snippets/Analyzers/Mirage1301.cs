@@ -24,7 +24,8 @@ namespace Mirage.Snippets.Analyzers
             public int sessionId;
 
             // Ignored by the Weaver during serialization to avoid errors on non-serializable utility types
-            internal System.Threading.Thread workerThread;
+            [NonSerialized] public System.Threading.Thread workerThread;
+
 
             // Required constructor so the Weaver can instantiate this class during deserialization
             public UserSession() { }

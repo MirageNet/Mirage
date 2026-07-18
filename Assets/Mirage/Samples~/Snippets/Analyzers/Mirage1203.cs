@@ -17,9 +17,9 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-End: mirage1203-triggering
     }
 
-    namespace M1203.Resolved
+    namespace M1203.Recommended
     {
-        // CodeEmbed-Start: mirage1203-resolved
+        // CodeEmbed-Start: mirage1203-recommended
         public class Player : NetworkBehaviour
         {
             [SyncVar]
@@ -32,6 +32,20 @@ namespace Mirage.Snippets.Analyzers
                 Health -= damage;
             }
         }
-        // CodeEmbed-End: mirage1203-resolved
+        // CodeEmbed-End: mirage1203-recommended
     }
-}
+
+    namespace M1203.Alternative
+    {
+        // CodeEmbed-Start: mirage1203-alternative
+        public class Player : NetworkBehaviour
+        {
+            [ServerRpc]
+            public async UniTask<int> CmdTakeDamage(int damage)
+            {
+                return 100; // Return new health
+            }
+        }
+        // CodeEmbed-End: mirage1203-alternative
+    }
+
