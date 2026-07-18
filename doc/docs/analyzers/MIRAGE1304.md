@@ -14,8 +14,16 @@ In Unity, a basic `MonoBehaviour` represents a local component attached to a Gam
 
 ## How to Resolve
 
-To resolve this error, ensure the component type inherits from `NetworkBehaviour` instead of `MonoBehaviour`. Mirage is able to serialize components that inherit from `NetworkBehaviour` by writing their parent `NetworkIdentity` and the component's index.
+### Recommended Fix: Inherit from NetworkBehaviour
+Ensure the component type inherits from `NetworkBehaviour` instead of `MonoBehaviour`. Mirage is able to serialize components that inherit from `NetworkBehaviour` by writing their parent `NetworkIdentity` and the component's index.
 
-Alternatively, if the component itself is purely local and cannot be networked, pass a serializable identifier (like a unique ID, parent `NetworkIdentity`, or string) instead of the component object itself.
+{{{ Path:'Snippets/Analyzers/Mirage1304.cs' Name:'mirage1304-recommended' }}}
 
-{{{ Path:'Snippets/Analyzers/Mirage1304.cs' Name:'mirage1304-resolved' }}}
+---
+
+### Alternative Solution: Use a serializable identifier
+If the component itself is purely local and cannot be networked, pass a serializable identifier (like a unique ID, parent `NetworkIdentity`, or string) instead of the component object itself.
+
+
+{{{ Path:'Snippets/Analyzers/Mirage1304.cs' Name:'mirage1304-alternative' }}}
+

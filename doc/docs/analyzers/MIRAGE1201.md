@@ -18,14 +18,19 @@ Class-based types are generally risky for network messaging because:
 
 ## How to Resolve
 
-### Option 1: Use a struct (Recommended)
+### Recommended Fix: Use a struct
 Structs (value types) avoid memory allocations and guarantee safe copy-by-value semantics.
-{{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-struct-option' }}}
+{{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-recommended' }}}
 
-### Option 2: Implement Custom Serialization and mark the class as safe
+---
+
+### Alternative Solutions
+If a struct is not viable for your use case (e.g., you require complex inheritance), you can:
+
+#### 1. Implement Custom Serialization
 If you want to use the class type and manage performance/reference safety yourself, write custom `Write` and `Read` extension methods for the class, and decorate the class with `[WeaverSafeClass]` to suppress the warning globally.
-{{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-class-option' }}}
+{{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-alternative-custom' }}}
 
-### Option 3: Suppress the warning on the member or parameter
+#### 2. Suppress the warning on the member or parameter
 If you want to disable the warning only on a specific field, property, or parameter, decorate it with `[WeaverSafeClass]`.
-{{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-suppress-option' }}}
+{{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-alternative-suppress' }}}
