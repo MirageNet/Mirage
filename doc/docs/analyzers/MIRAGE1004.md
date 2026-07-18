@@ -8,8 +8,8 @@ During assembly post-processing, Mirage's Weaver intercepts SyncVar field writes
 SyncVar hook requirements:
 1. **Existence:** The method or event must exist in the class.
 2. **Signature:** Parameters must match the SyncVar type exactly.
-   - Methods: 0, 1, or 2 parameters (e.g., `void Hook()`, `void Hook(T newValue)`, or `void Hook(T oldValue, T newValue)`).
-   - Events: Must use `System.Action` (generic or non-generic) with 0, 1, or 2 parameters.
+   - **Methods:** 0, 1, or 2 parameters (e.g., `void Hook()`, `void Hook(T newValue)`, or `void Hook(T oldValue, T newValue)`).
+   - **Events:** Must use `System.Action` (generic or non-generic) with 0, 1, or 2 parameters.
 3. **Ambiguity:** Under `SyncHookType.Automatic` mode, if multiple overloads (e.g., a method and an event, or methods with different parameter counts) exist with the same name, the Weaver cannot choose and throws an error. Explicitly define `hookType` or rename/remove the overloads.
 4. **Static:** Both static and instance methods/events are supported.
 
