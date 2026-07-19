@@ -187,11 +187,15 @@ namespace Mirage.Tests.Runtime.Syncing
             // Wait, CreateBehaviour components have IsServer set to true by default when spawned in ClientServerSetup.
             // Let's spawn the identity.
             serverObjectManager.Spawn(player.Identity);
-            
-            player.TestMethod(true);
+
+            player.TestMethod(null, true);
+            Assert.That(player.controlColor, Is.Null);
+            player.TestMethod(null, true);
             Assert.That(player.controlColor, Is.Null);
 
-            player.TestMethod(false);
+            player.TestMethod(player, false);
+            Assert.That(player.controlColor, Is.EqualTo(Color.blue));
+            player.TestMethod(player, true);
             Assert.That(player.controlColor, Is.EqualTo(Color.red));
         }
     }
@@ -200,19 +204,42 @@ namespace Mirage.Tests.Runtime.Syncing
     {
         [SyncVar]
         public Color? controlColor = null;
+        private Storage _storage = new Storage { color = Color.blue };
+        private Color? Other = Color.clear;
 
-        public void TestMethod(bool condition)
+        public struct Storage
+        {
+            public Color color;
+        }
+
+        private Color GetColor(MockPlayerWithNullable value)
+        {
+            return Color.red;
+        }
+
+        public void TestMethod(MockPlayerWithNullable value, bool condition2)
         {
             if (!IsServer)
                 return;
 
-            if (condition)
+            if (value == null)
             {
                 controlColor = null;
                 return;
             }
 
-            controlColor = Color.red;
+            if (condition2)
+            {
+                Debug.Assert(value.Other.HasValue, "Should have other value");
+                var teamColor = GetColor(value);
+                controlColor = teamColor;
+            }
+            else
+            {
+                // IMPORTANT the method needs this double line so it is the right length that the IL return breaks when inserting instructions
+                controlColor = value._storage.color;
+                controlColor = value._storage.color;
+            }
         }
     }
 }
