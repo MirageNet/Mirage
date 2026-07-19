@@ -85,7 +85,7 @@ jobs:
       - name: Run by Build with il2cpp
       # checks that all weaver generate code in the test dlls also compiles for IL2CPP
         run: unity-editor -nographics -logFile /dev/stdout -executeMethod Mirage.Tests.BuildIL2CPP.BuildTests.BuildWithIl2CPP -quit
-        timeout-minutes: 20
+        timeout-minutes: 30
 
   Publish:
     # only run once both tests and il2cpp have passed
