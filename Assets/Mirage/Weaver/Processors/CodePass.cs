@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using Mono.Collections.Generic;
 
 namespace Mirage.Weaver
@@ -64,8 +65,12 @@ namespace Mirage.Weaver
                 return;
             }
 
-            if (md.Body.CodeSize > 0 && selector(md))
+            if (md.Body.CodeSize > 0 && selector.Invoke(md))
             {
+                // Expand short branches (e.g. br.s) before edit
+                // if we dont do this, length of method could go over 127 bytes, causing short jump to corrupt the method
+                md.Body.SimplifyMacros();
+
                 var sequencePoints = md.DebugInformation.SequencePoints;
 
                 var sequencePointIndex = 0;
@@ -75,9 +80,12 @@ namespace Mirage.Weaver
                 {
                     SequencePoint sequencePoint;
                     (sequencePoint, sequencePointIndex) = GetSequencePoint(sequencePoints, sequencePointIndex, instr);
-                    instr = processor(md, instr, sequencePoint);
+                    instr = processor.Invoke(md, instr, sequencePoint);
                     instr = instr.Next;
                 }
+
+                // Shrink long branches back down (matches SimplifyMacros)
+                md.Body.OptimizeMacros();
             }
         }
 
