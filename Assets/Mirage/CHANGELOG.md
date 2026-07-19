@@ -1,3 +1,10 @@
+## [158.3.3](https://github.com/MirageNet/Mirage/compare/v158.3.2...v158.3.3) (2026-07-19)
+
+
+### Bug Fixes
+
+* fixing syncvar IL when set right before an if statement ([63b5463](https://github.com/MirageNet/Mirage/commit/63b5463e3e74597f9388a972c83ce419c0700045))
+
 ## [158.3.2](https://github.com/MirageNet/Mirage/compare/v158.3.1...v158.3.2) (2026-06-29)
 
 
