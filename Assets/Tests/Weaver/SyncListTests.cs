@@ -11,6 +11,12 @@ namespace Mirage.Tests.Weaver
         }
 
         [Test, BatchSafe(BatchType.Success)]
+        public void SyncListWithEarlyReturn()
+        {
+            IsSuccess();
+        }
+
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncListByteValid()
         {
             IsSuccess();

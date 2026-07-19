@@ -13,6 +13,34 @@ namespace Mirage.Tests.Runtime.Syncing
         public SyncList<int> MySyncList = new SyncList<int>();
     }
 
+    public class MockPlayerWithEarlyReturnList : MockPlayer
+    {
+        public SyncList<int> MySyncList = new SyncList<int>();
+
+        public MockPlayerWithEarlyReturnList()
+        {
+            if (UnityEngine.Application.isEditor)
+                return;
+        }
+    }
+
+    public class MockPlayerWithTryCatchList : MockPlayer
+    {
+        public SyncList<int> MySyncList = new SyncList<int>();
+
+        public MockPlayerWithTryCatchList()
+        {
+            try
+            {
+                UnityEngine.Debug.Log("Try");
+            }
+            catch (System.Exception)
+            {
+                UnityEngine.Debug.Log("Catch");
+            }
+        }
+    }
+
     // different Directions to test
 
     // server -> owner
@@ -658,6 +686,36 @@ namespace Mirage.Tests.Runtime.Syncing
             Assert.That(ServerComponent.MySyncList[1], Is.EqualTo(listValue2));
 
             Assert.That(ObserverComponent.MySyncList.Count, Is.Zero);
+        }
+    }
+
+    [TestFixture]
+    public class SyncListConstructorTests
+    {
+        [Test]
+        public void TestConstructorEarlyReturnWithSyncList()
+        {
+            var go = new GameObject();
+            var comp = go.AddComponent<MockPlayerWithEarlyReturnList>();
+            
+            var syncObjectsField = typeof(NetworkBehaviour).GetField("syncObjects", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var syncObjects = (System.Collections.IList)syncObjectsField.GetValue(comp);
+            Assert.That(syncObjects.Count, Is.GreaterThan(0), "SyncObject registration should not be skipped by early return");
+
+            UnityEngine.Object.DestroyImmediate(go);
+        }
+
+        [Test]
+        public void TestConstructorTryCatchWithSyncList()
+        {
+            var go = new GameObject();
+            var comp = go.AddComponent<MockPlayerWithTryCatchList>();
+            
+            var syncObjectsField = typeof(NetworkBehaviour).GetField("syncObjects", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var syncObjects = (System.Collections.IList)syncObjectsField.GetValue(comp);
+            Assert.That(syncObjects.Count, Is.GreaterThan(0), "SyncObject registration should not be skipped by try-catch blocks");
+
+            UnityEngine.Object.DestroyImmediate(go);
         }
     }
 }
