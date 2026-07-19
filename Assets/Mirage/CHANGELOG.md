@@ -1,3 +1,10 @@
+## [158.3.4](https://github.com/MirageNet/Mirage/compare/v158.3.3...v158.3.4) (2026-07-19)
+
+
+### Bug Fixes
+
+* fixing IL error from short jump  when inserting new instructions ([75dd2b5](https://github.com/MirageNet/Mirage/commit/75dd2b5f5fe2b16e066943ba308b754712654d28))
+
 ## [158.3.3](https://github.com/MirageNet/Mirage/compare/v158.3.2...v158.3.3) (2026-07-19)
 
 
