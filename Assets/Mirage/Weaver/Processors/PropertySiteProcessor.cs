@@ -141,16 +141,21 @@ namespace Mirage.Weaver
                     var worker = md.Body.GetILProcessor();
                     var tmpVariable = md.AddLocal(opField.FieldType);
 
-                    worker.InsertBefore(instr, worker.Create(OpCodes.Ldloca, tmpVariable));
-                    worker.InsertBefore(instr, worker.Create(OpCodes.Initobj, opField.FieldType));
-                    worker.InsertBefore(instr, worker.Create(OpCodes.Ldloc, tmpVariable));
-                    var newInstr = worker.Create(OpCodes.Call, replacement);
-                    worker.InsertBefore(instr, newInstr);
+                    // Avoid removing insturctions incase any br/etc that  branch/exception targets point to
+                    // instead Mutate instructions in-place, and insert new instructions after it 
+                    instr.OpCode = OpCodes.Ldloca;
+                    instr.Operand = tmpVariable;
 
-                    worker.Remove(instr);
-                    worker.Remove(nextInstr);
+                    nextInstr.OpCode = OpCodes.Initobj;
+                    nextInstr.Operand = opField.FieldType;
 
-                    return newInstr;
+                    var ldlocInstr = worker.Create(OpCodes.Ldloc, tmpVariable);
+                    worker.InsertAfter(nextInstr, ldlocInstr);
+
+                    var callInstr = worker.Create(OpCodes.Call, replacement);
+                    worker.InsertAfter(ldlocInstr, callInstr);
+
+                    return callInstr;
                 }
             }
 

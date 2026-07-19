@@ -178,5 +178,41 @@ namespace Mirage.Tests.Runtime.Syncing
 
             Assert.That(player.target, Is.EqualTo(other.GetComponent<NetworkIdentity>()));
         }
+
+        [Test]
+        public void TestNullableSyncVarWithBranch()
+        {
+            var player = CreateBehaviour<MockPlayerWithNullable>();
+            // Since IsServer needs to be true for our mock method to proceed, let's spawn or set IsServer if needed.
+            // Wait, CreateBehaviour components have IsServer set to true by default when spawned in ClientServerSetup.
+            // Let's spawn the identity.
+            serverObjectManager.Spawn(player.Identity);
+            
+            player.TestMethod(true);
+            Assert.That(player.controlColor, Is.Null);
+
+            player.TestMethod(false);
+            Assert.That(player.controlColor, Is.EqualTo(Color.red));
+        }
+    }
+
+    public class MockPlayerWithNullable : NetworkBehaviour
+    {
+        [SyncVar]
+        public Color? controlColor = null;
+
+        public void TestMethod(bool condition)
+        {
+            if (!IsServer)
+                return;
+
+            if (condition)
+            {
+                controlColor = null;
+                return;
+            }
+
+            controlColor = Color.red;
+        }
     }
 }

@@ -36,6 +36,12 @@ namespace Mirage.Tests.Weaver
         }
 
         [Test, BatchSafe(BatchType.Success)]
+        public void SyncVarNullable()
+        {
+            IsSuccess();
+        }
+
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncVarsGenericField()
         {
             IsSuccess();
