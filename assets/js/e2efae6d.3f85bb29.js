@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkmirage_docs=self.webpackChunkmirage_docs||[]).push([[2757],{33029:e=>{e.exports=JSON.parse('{"title":"General","slug":"/category/general","permalink":"/Mirage/docs/category/general","navigation":{"next":{"title":"Overview","permalink":"/Mirage/docs/general/overview"}}}')}}]);
