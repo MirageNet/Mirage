@@ -125,17 +125,24 @@ namespace Mirage.SocketLayer
             }
         }
 
-        public void Put(T buffer)
+        /// <summary>
+        /// Puts item back in pool, or leaves it for GC if pool is full.
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <returns>returns false if pool is full, in this case, any unmanaged objects should be cleared up</returns>
+        public bool Put(T buffer)
         {
             if (_next < _maxPoolSize - 1)
             {
                 // increment then put
                 _pool[++_next] = buffer;
+                return true;
             }
             else
             {
                 // buffer is left for GC, so decrement created
                 _created--;
+                return false;
             }
         }
 
