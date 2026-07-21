@@ -1,3 +1,11 @@
+## [158.3.5](https://github.com/MirageNet/Mirage/compare/v158.3.4...v158.3.5) (2026-07-21)
+
+
+### Bug Fixes
+
+* fixing release ([de8ff93](https://github.com/MirageNet/Mirage/commit/de8ff933c355c1a9fcce707c1764fc227888ec57))
+* Pool.Put now return false if pool is full ([79be850](https://github.com/MirageNet/Mirage/commit/79be850f913fa2adea30916b094aad14e27a5868))
+
 ## [158.3.4](https://github.com/MirageNet/Mirage/compare/v158.3.3...v158.3.4) (2026-07-19)
 
 
