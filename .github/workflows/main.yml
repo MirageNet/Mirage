@@ -51,15 +51,15 @@ jobs:
       unity_license: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
       access_token: ${{ secrets.GITHUB_TOKEN }}
     with:
-      unity_container: unityci/editor:ubuntu-6000.3.16f1-base-3.2.2
-      cache_key: Library-6000.3.16
+      unity_container: unityci/editor:ubuntu-6000.3.22f1-base-3.2.2
+      cache_key: Library-6000.3.22
       cache_key_restore: Library-6000
       test_results_name: Test results 6000.3
 
   BuildIL2CPP:
     name: BuildIL2CPP
     runs-on: ubuntu-latest
-    container: unityci/editor:ubuntu-2022.3.62f2-linux-il2cpp-3.2.2
+    container: unityci/editor:ubuntu-6000.3.22f1-linux-il2cpp-3.2.2
     
     steps:
       - name: Activate unity
@@ -79,8 +79,8 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: Library
-          key: Library-2022.3.62
-          restore-keys: Library-2022
+          key: Library-6000.3.22
+          restore-keys: Library-6000
 
       - name: Run by Build with il2cpp
       # checks that all weaver generate code in the test dlls also compiles for IL2CPP
