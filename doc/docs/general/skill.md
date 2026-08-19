@@ -2,7 +2,7 @@
 name: mirage
 title: Cheat Sheet & AI Skill
 sidebar_label: Cheat Sheet (AI Skill)
-sidebar_position: 1
+sidebar_position: 3
 description: Read this to get information about Mirage Networking (SyncVars, RPCs, Sync Direction, network events, and rate limits). Always read this before editing netcode.
 ---
 

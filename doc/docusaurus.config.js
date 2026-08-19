@@ -69,9 +69,20 @@ const config = {
           },
           {
             type: "doc",
+            docId: "general/skill",
+            position: "left",
+            label: "Cheat Sheet",
+          },
+          {
+            type: "doc",
             docId: "reference/Mirage/Mirage",
             position: "left",
             label: "API Reference",
+          },
+          {
+            href: `https://${orgName}.github.io/${repoName}/llms.txt`,
+            label: "llms.txt",
+            position: "right",
           },
           {
             className: "navbar-github-link",

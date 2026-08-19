@@ -106,3 +106,10 @@ Fix non-player prefabs such as enemies:
 ## Spawn positions for players
 -   Add a new game object and place it at the player's start location
 -   Add this GameObject to the `CharacterSpawner`'s `Positions` list.
+
+## AI Coding Assistants
+
+If you use AI coding assistants (such as Gemini CLI, Cursor, Claude Code, GitHub Copilot, or Codex) while developing with Mirage, you can provide your agent with our [Agent Skill & Cheat Sheet](skill.md) or point it directly to:
+- **Skill Cheat Sheet**: `https://miragenet.github.io/Mirage/skill.md`
+- **Documentation Index**: `https://miragenet.github.io/Mirage/llms.txt`
+
