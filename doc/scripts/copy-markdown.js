@@ -88,6 +88,8 @@ function generateLlmsTxt(docs) {
         '',
         '> High-performance, modular networking library for Unity.',
         '',
+        `- Quick Cheat Sheet / Skill: ${baseUrl}/skill.md`,
+        '',
         '## Documentation Index',
         '',
     ];
@@ -128,4 +130,10 @@ if (fs.existsSync(targetBuildDir) && collectedDocs.length > 0) {
 
     // Also write a markdown sitemap inside docs folder
     fs.writeFileSync(path.join(targetDocsDir, 'sitemap.md'), llmsContent, 'utf8');
+
+    // Copy skill.md to build root so https://miragenet.github.io/Mirage/skill.md is directly accessible
+    const skillPath = path.join(sourceDir, 'guides', 'skill.md');
+    if (fs.existsSync(skillPath)) {
+        fs.copyFileSync(skillPath, path.join(targetBuildDir, 'skill.md'));
+    }
 }
