@@ -10,6 +10,7 @@ namespace Mirage.Components
     /// For more complex use cases, it it best to create a copy of this script and modify it for your needs.
     /// </summary>
     [AddComponentMenu("Network/NetworkSceneLoader")]
+    [HelpURL("https://miragenet.github.io/Mirage/docs/components/network-scene-loader")]
     public class NetworkSceneLoader : MonoBehaviour
     {
         public NetworkServer Server;

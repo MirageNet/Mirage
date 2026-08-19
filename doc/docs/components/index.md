@@ -24,8 +24,8 @@ These core components are included in Mirage:
 -   [Network Match Checker](/docs/components/network-match-checker)
     The Network Match Checker component controls the visibility of networked objects based on match id.
 
--   [Network Scene Manager](/docs/components/network-scene-manager)
-    The Network Scene Manager component controls the Unity Scenes running over the network.
+-   [Network Scene Loader](/docs/components/network-scene-loader)
+    The Network Scene Loader component handles simple scene loading and character spawning across the network.
 
 ## Network Synchronization
 
