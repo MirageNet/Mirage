@@ -174,18 +174,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed4b54e25a3ee0940b4b750c66fa2c56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Client: {fileID: 249891958}
   Server: {fileID: 249891959}
-  SceneManager: {fileID: 0}
-  ClientObjectManager: {fileID: 249891961}
   ServerObjectManager: {fileID: 249891962}
   PlayerPrefab: {fileID: 1088833923132447018, guid: 22f1fa3a0aff72b46a371f667bb4fb30,
     type: 3}
-  AutoSpawn: 1
-  SetName: 1
-  startPositionIndex: 0
-  startPositions: []
-  playerSpawnMethod: 0
   Parent: {fileID: 379082679}
 --- !u!114 &249891956
 MonoBehaviour:
@@ -201,7 +193,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Server: {fileID: 249891959}
   Client: {fileID: 249891958}
-  NetworkSceneManager: {fileID: 0}
   ServerObjectManager: {fileID: 249891962}
   ClientObjectManager: {fileID: 249891961}
   ValidateReferences: 1
@@ -234,6 +225,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EnablePeerMetrics: 0
   MetricsSize: 10
+  PeerConfigProfile: 0
   SocketFactory: {fileID: 249891954}
   ObjectManager: {fileID: 249891961}
   DisconnectOnException: 1
@@ -271,9 +263,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EnablePeerMetrics: 0
   MetricsSize: 10
+  PeerConfigProfile: 0
   MaxConnections: 4
-  DisconnectOnException: 1
-  RethrowException: 1
   RunInBackground: 1
   Listening: 1
   SocketFactory: {fileID: 249891954}
@@ -304,6 +295,13 @@ MonoBehaviour:
     _event:
       m_PersistentCalls:
         m_Calls: []
+  DisconnectOnException: 1
+  RethrowException: 1
+  ErrorRateLimitEnabled: 1
+  ErrorRateLimitConfig:
+    Interval: 1
+    Refill: 50
+    MaxTokens: 200
   ManualUpdate: 0
 --- !u!114 &249891961
 MonoBehaviour:

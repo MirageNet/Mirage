@@ -63,7 +63,7 @@ namespace Mirage.Examples.Basic
         public void OnStartClient()
         {
             // Get spawner so we can set the parent under the canvas
-            var spawner = Client.GetComponent<CanvasCharacterSpawner>();
+            var spawner = Client.GetComponent<BasicPlayerSpawner>();
             transform.SetParent(spawner.Parent);
 
             var size = rectTransform.sizeDelta + padding;
