@@ -22,7 +22,7 @@ namespace Mirage.Components
         public NetworkIdentity PlayerPrefab;
 
         [Header("State")]
-        public string TargetScene;
+        [Scene] public string TargetScene;
         [Tooltip("Is server currently loading the scene"), ReadOnlyInspector]
         public bool ServerLoading;
 
