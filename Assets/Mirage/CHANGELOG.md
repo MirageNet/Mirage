@@ -1,3 +1,14 @@
+## [158.3.7](https://github.com/MirageNet/Mirage/compare/v158.3.6...v158.3.7) (2026-08-21)
+
+
+### Bug Fixes
+
+* **NetworkSceneLoader:** adding HelpBox to inspector ([8d80334](https://github.com/MirageNet/Mirage/commit/8d803349db74a90e7c1476ecf84826c1fe703af4))
+* **NetworkSceneLoader:** adding scene attribute to TargetScene ([8a32d62](https://github.com/MirageNet/Mirage/commit/8a32d628804d1e2a8b1efa1f661af980b349e877))
+* **NetworkSceneLoader:** fixing character not spawning on OnServerAuthenticated if scene is never set ([2f008ba](https://github.com/MirageNet/Mirage/commit/2f008ba59678e5ffa784466755c2223d2468e188))
+* **NetworkSceneLoader:** making ServerLoading readonly in inspector, and ensuring it starts false ([9a0b0db](https://github.com/MirageNet/Mirage/commit/9a0b0db714655787bdb4703f71e7c1954eb60302))
+* **NetworkSceneLoader:** setting mirage icon on NetworkSceneLoader ([4d32f60](https://github.com/MirageNet/Mirage/commit/4d32f605b60f7cb591283e66f0221215a03f04ea))
+
 ## [158.3.6](https://github.com/MirageNet/Mirage/compare/v158.3.5...v158.3.6) (2026-08-21)
 
 
