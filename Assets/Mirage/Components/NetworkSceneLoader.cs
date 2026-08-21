@@ -112,14 +112,23 @@ namespace Mirage.Components
         private void OnServerAuthenticated(INetworkPlayer player)
         {
             Debug.Assert(Server.Active);
-            // Host player is handled by the server loading logic
-            if (player.IsHost)
-                return;
 
-            if (!string.IsNullOrEmpty(TargetScene))
+            // if scene is set, then tell clients to load it
+            // else, spawn their character right away
+            var hasScene = !string.IsNullOrEmpty(TargetScene);
+            if (hasScene)
             {
-                player.SceneIsReady = false;
-                player.Send(new SceneMessage { ScenePath = TargetScene });
+                // Host player is handled by the server loading logic
+                if (!player.IsHost)
+                {
+                    player.SceneIsReady = false;
+                    player.Send(new SceneMessage { ScenePath = TargetScene });
+                }
+            }
+            else
+            {
+                player.SceneIsReady = true;
+                SpawnCharacterForPlayer(player);
             }
         }
 
