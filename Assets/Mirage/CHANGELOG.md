@@ -1,3 +1,10 @@
+## [158.3.6](https://github.com/MirageNet/Mirage/compare/v158.3.5...v158.3.6) (2026-08-21)
+
+
+### Bug Fixes
+
+* simplify BasicPlayerSpawner for Basic example ([03ae136](https://github.com/MirageNet/Mirage/commit/03ae136fa55bc3f0a7fb7ab7675ba146df6c0b25))
+
 ## [158.3.5](https://github.com/MirageNet/Mirage/compare/v158.3.4...v158.3.5) (2026-07-21)
 
 
