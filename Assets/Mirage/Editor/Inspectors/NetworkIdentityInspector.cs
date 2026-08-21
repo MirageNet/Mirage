@@ -82,7 +82,7 @@ namespace Mirage
                         // could be the case in the editor after existing play mode.
                         continue;
 
-                    EditorGUILayout.ObjectField("Visibility", behaviour, typeof(MonoBehaviour), false);
+                    EditorGUILayout.ObjectField($"[{behaviour.ComponentIndex}]", behaviour, typeof(MonoBehaviour), false);
                 }
                 EditorGUI.indentLevel--;
             }
