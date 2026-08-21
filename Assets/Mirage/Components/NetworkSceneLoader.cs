@@ -23,6 +23,7 @@ namespace Mirage.Components
 
         [Header("State")]
         public string TargetScene;
+        [Tooltip("Is server currently loading the scene"), ReadOnlyInspector]
         public bool ServerLoading;
 
 #if UNITY_EDITOR
@@ -50,6 +51,8 @@ namespace Mirage.Components
 
         private void Awake()
         {
+            // make sure Server loading starts false
+            ServerLoading = false;
             Server.Started.AddListener(OnServerStarted);
             Server.Authenticated.AddListener(OnServerAuthenticated);
             Client.Started.AddListener(OnClientStarted);
