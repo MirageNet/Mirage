@@ -139,8 +139,11 @@ namespace Mirage.Examples.MatchScenes
 
             // make it easier to tell players apart
             clone.transform.position = new Vector3(-2 + (4 * v), 0, 0);
-            clone.GetComponentInChildren<Renderer>().material.color = v == 0 ? Color.red : Color.green;
-            clone.GetComponent<MatchScenesPlayer>().color = v == 0 ? Color.red : Color.green;
+            var color = v == 0 ? Color.red : Color.green;
+            var renderer = clone.GetComponentInChildren<Renderer>();
+            renderer.material.color = color;
+            var matchPlayer = clone.GetComponent<MatchScenesPlayer>();
+            matchPlayer.color = color;
 
             var sceneChecker = (SceneVisibilityChecker)clone.Visibility;
             sceneChecker.MoveToScene(scene);
@@ -150,6 +153,14 @@ namespace Mirage.Examples.MatchScenes
         private void OnClientConnected(INetworkPlayer player)
         {
             Debug.Log("OnClientConnected");
+
+            // host shares the server's scenes, loading the match scene normally here would unload all the server's match scenes
+            if (Client.IsHost)
+            {
+                player.Send(new SceneLoaded());
+                return;
+            }
+
             UniTask.Void(async () =>
             {
                 await SceneManager.LoadSceneAsync(matchScene).ToUniTask();

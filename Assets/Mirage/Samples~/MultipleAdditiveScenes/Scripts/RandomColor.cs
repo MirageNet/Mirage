@@ -4,7 +4,12 @@ namespace Mirage.Examples.MultipleAdditiveScenes
 {
     public class RandomColor : NetworkBehaviour
     {
-        public void OnStartServer()
+        private void Awake()
+        {
+            Identity.OnStartServer.AddListener(OnStartServer);
+        }
+
+        private void OnStartServer()
         {
             color = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
         }

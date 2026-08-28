@@ -7,42 +7,53 @@ namespace Mirage.Examples.Chat
     {
         public string PlayerName { get; set; }
 
+        [RequiredField]
         public ChatWindow chatWindow;
 
+        [RequiredField]
         public Player playerPrefab;
 
         private void Awake()
         {
             Server.Started.AddListener(OnServerStarted);
-            Client.Connected.AddListener(OnClientAuthenticated);
+            Client.Authenticated.AddListener(OnClientAuthenticated);
+            Client.Disconnected.AddListener(OnClientDisconnected);
         }
 
+        [NetworkMessage]
         public struct CreateCharacterMessage
         {
             public string name;
         }
 
-        public void OnServerStarted()
+        private void OnServerStarted()
         {
             Server.MessageHandler.RegisterHandler<CreateCharacterMessage>(OnCreatePlayer);
         }
 
-        public void OnClientAuthenticated(INetworkPlayer player)
+        private void OnClientAuthenticated(INetworkPlayer player)
         {
-            // tell the server to create a player with this name
+            // Open the chat window on the client once authenticated
+            chatWindow.gameObject.SetActive(true);
+
+            // Request the server to create a player character with our chosen name
             player.Send(new CreateCharacterMessage { name = PlayerName });
+        }
+
+        private void OnClientDisconnected(ClientStoppedReason reason)
+        {
+            // Hide the chat window when client disconnects
+            chatWindow.gameObject.SetActive(false);
         }
 
         private void OnCreatePlayer(INetworkPlayer player, CreateCharacterMessage createCharacterMessage)
         {
-            // create a gameobject using the name supplied by client
-            var playergo = Instantiate(playerPrefab).gameObject;
-            playergo.GetComponent<Player>().playerName = createCharacterMessage.name;
+            // Create a gameobject using the name supplied by client
+            var character = Instantiate(playerPrefab);
+            character.playerName = createCharacterMessage.name;
 
-            // set it as the player
-            ServerObjectManager.AddCharacter(player, playergo);
-
-            chatWindow.gameObject.SetActive(true);
+            // Spawn the character and assign authority to the player connection
+            ServerObjectManager.AddCharacter(player, character.gameObject);
         }
     }
 }

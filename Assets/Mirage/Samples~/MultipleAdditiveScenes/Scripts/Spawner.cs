@@ -7,7 +7,12 @@ namespace Mirage.Examples.MultipleAdditiveScenes
     {
         public NetworkIdentity prizePrefab;
 
-        public void OnStartServer()
+        private void Awake()
+        {
+            Identity.OnStartServer.AddListener(OnStartServer);
+        }
+
+        private void OnStartServer()
         {
             for (var i = 0; i < 10; i++)
                 SpawnPrize();

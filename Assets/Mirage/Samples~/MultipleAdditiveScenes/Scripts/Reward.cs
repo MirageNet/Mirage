@@ -45,7 +45,8 @@ namespace Mirage.Examples.MultipleAdditiveScenes
                 if (logger.LogEnabled()) logger.LogFormat(LogType.Log, "Scored {0} points R:{1} G:{2} B:{3}", points, prizeColor.r, prizeColor.g, prizeColor.b);
 
                 // award the points via SyncVar on the PlayerController
-                player.GetComponent<PlayerScore>().score += points;
+                var playerScore = player.GetComponent<PlayerScore>();
+                playerScore.score += points;
 
                 // spawn a replacement
                 spawner.SpawnPrize();

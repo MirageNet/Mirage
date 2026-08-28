@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Mirage.Serialization;
 using Mirage.SocketLayer;
 
 namespace Mirage.Examples.Notify
@@ -66,24 +65,7 @@ namespace Mirage.Examples.Notify
             callbacks.valueCount = someValues.Count;
 
             // send message and callbacks
-            SendNotify(message, callbacks);
-        }
-
-
-        /// <summary>
-        /// This function Packs a message and sends it to the player's connection, This function may be added to NetworkPlayer in the future
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="callBacks"></param>
-        public void SendNotify(Changes message, INotifyCallBack callBacks)
-        {
-            using (var writer = NetworkWriterPool.GetWriter())
-            {
-                MessagePacker.Pack(message, writer);
-
-                var segment = writer.ToArraySegment();
-                player.Connection.SendNotify(segment, callBacks);
-            }
+            player.Send(message, callbacks);
         }
 
         // A message with changes
@@ -161,6 +143,12 @@ namespace Mirage.Examples.Notify
             var newValues = message.newValues;
             var newCount = message.valueCount;
 
+            // unreliable messages can arrive late or out of order, ignore ones we already have all the values for
+            if (newCount <= lastReceivedCount)
+                return;
+
+            // sender includes values from the last count it knows we received, which can be older than our count,
+            // so skip the values we already have
             var numberOfNewValues = newCount - lastReceivedCount;
             var offset = newValues.Count - numberOfNewValues;
 
@@ -169,6 +157,8 @@ namespace Mirage.Examples.Notify
             {
                 someValues.Add(newValues[i]);
             }
+
+            lastReceivedCount = newCount;
         }
     }
 }

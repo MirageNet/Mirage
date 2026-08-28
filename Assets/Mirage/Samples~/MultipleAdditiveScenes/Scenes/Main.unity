@@ -219,8 +219,6 @@ GameObject:
   - component: {fileID: 69965669}
   - component: {fileID: 69965672}
   - component: {fileID: 69965671}
-  - component: {fileID: 69965668}
-  - component: {fileID: 69965674}
   - component: {fileID: 69965667}
   - component: {fileID: 69965675}
   - component: {fileID: 69965673}
@@ -248,38 +246,6 @@ MonoBehaviour:
   - {fileID: 114402732107420660, guid: 1f4d376d8ca693049abd1744e4c79fad, type: 3}
   - {fileID: 114251241889735402, guid: 8cec47ed46e0eff45966a5173d3aa0d3, type: 3}
   NetworkPrefabs: {fileID: 0}
---- !u!114 &69965668
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 69965666}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7aaac73a16c040fd871cb977b5c557b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Client: {fileID: 69965671}
-  Server: {fileID: 69965672}
-  SceneManager: {fileID: 69965674}
-  ClientObjectManager: {fileID: 69965667}
-  ServerObjectManager: {fileID: 69965675}
-  PlayerPrefab: {fileID: 114402732107420660, guid: 1f4d376d8ca693049abd1744e4c79fad,
-    type: 3}
-  AutoSpawn: 1
-  SetName: 1
-  startPositionIndex: 0
-  startPositions:
-  - {fileID: 733367780}
-  - {fileID: 2127619492}
-  - {fileID: 1975674813}
-  - {fileID: 1760045337}
-  - {fileID: 204334130}
-  - {fileID: 263230755}
-  - {fileID: 290557150}
-  - {fileID: 990635330}
-  playerSpawnMethod: 0
 --- !u!114 &69965669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -294,12 +260,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Server: {fileID: 69965672}
   Client: {fileID: 69965671}
-  NetworkSceneManager: {fileID: 69965674}
   ServerObjectManager: {fileID: 69965675}
   ClientObjectManager: {fileID: 69965667}
   ValidateReferences: 1
   instances: 3
-  gameScene: Assets/Examples/MultipleAdditiveScenes/Scenes/Game.unity
+  gameScene: Game
+  PlayerPrefab: {fileID: 114402732107420660, guid: 1f4d376d8ca693049abd1744e4c79fad,
+    type: 3}
+  SpawnPoints:
+  - {fileID: 733367780}
+  - {fileID: 2127619492}
+  - {fileID: 1975674813}
+  - {fileID: 1760045337}
+  - {fileID: 204334130}
+  - {fileID: 263230755}
+  - {fileID: 290557150}
+  - {fileID: 990635330}
+  ServerLoading: 0
 --- !u!4 &69965670
 Transform:
   m_ObjectHideFlags: 0
@@ -413,39 +390,6 @@ MonoBehaviour:
   Port: 7777
   SocketLib: 0
   BufferSize: 262144
---- !u!114 &69965674
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 69965666}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30967dfd80dbb6c46a270a64ebecb951, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Client: {fileID: 69965671}
-  Server: {fileID: 69965672}
-  ServerObjectManager: {fileID: 69965675}
-  ClientObjectManager: {fileID: 69965667}
-  SendAdditiveScenesOnAuthenticate: 1
-  DontDestroy: 0
-  _onClientStartedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onClientFinishedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onServerStartedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onServerFinishedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onPlayerSceneReady:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &69965675
 MonoBehaviour:
   m_ObjectHideFlags: 0

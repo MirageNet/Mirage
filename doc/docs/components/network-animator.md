@@ -11,6 +11,10 @@ NetworkAnimator is not optimized and should not be used in production. It is rec
 
 :::
 
+:::warning Legacy Component
+`NetworkAnimator` is not part of the main package. To use it, import the **LegacyNetworkAnimator** sample from the Package Manager (see [Legacy Network Animator](/docs/examples/legacy-network-animator)).
+:::
+
 Note that if you create a Network Animator component on an empty game object, Mirage also creates a Network Identity component and an Animator component on that game object.
 
 ![The Network Animator component in the Inspector window](/img/components/NetworkAnimatorComponent.png)

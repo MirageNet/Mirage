@@ -15,17 +15,12 @@ namespace Mirage.Examples.SceneChange
             public bool Unload;
         }
 
+        [RequiredField(autoFind: true)]
         public NetworkSceneLoader SceneLoader;
+        [RequiredField]
         public Text AdditiveButtonText;
         private bool additiveLoaded;
         private Scene _additiveLoadedScene;
-
-#if UNITY_EDITOR
-        private void OnValidate()
-        {
-            if (SceneLoader == null) SceneLoader = GetComponent<NetworkSceneLoader>();
-        }
-#endif
 
         private void Start()
         {
@@ -39,28 +34,22 @@ namespace Mirage.Examples.SceneChange
 
         private void HandleAdditiveSceneMessage(AdditiveSceneMessage msg)
         {
+            // Skip in host mode since the server already loaded or unloaded the scene locally
+            if (SceneLoader.Client.IsHost)
+                return;
+
             if (msg.Unload)
-            {
                 SceneManager.UnloadSceneAsync(msg.ScenePath);
-            }
             else
-            {
                 SceneManager.LoadSceneAsync(msg.ScenePath, LoadSceneMode.Additive);
-            }
         }
-
-
 
         public void Update()
         {
             if (additiveLoaded)
-            {
                 AdditiveButtonText.text = "Additive Unload";
-            }
             else
-            {
                 AdditiveButtonText.text = "Additive Load";
-            }
         }
 
         public void Room1ButtonHandler()
@@ -77,7 +66,7 @@ namespace Mirage.Examples.SceneChange
 
         public void AdditiveButtonHandler()
         {
-            var players = SceneLoader.Server.AllPlayers;
+            var players = SceneLoader.Server.AuthenticatedPlayers;
 
             if (additiveLoaded)
             {

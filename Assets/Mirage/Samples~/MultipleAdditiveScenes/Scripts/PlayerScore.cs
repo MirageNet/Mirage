@@ -20,6 +20,11 @@ namespace Mirage.Examples.MultipleAdditiveScenes
 
         private void OnGUI()
         {
+            // a server-only instance has no local player to compare matches with,
+            // and on a client the local character might not be spawned yet
+            if (!IsClient || !Client.Player.HasCharacter)
+                return;
+
             if (!IsLocalPlayer && clientMatchIndex < 0)
                 clientMatchIndex = Client.Player.Identity.GetComponent<PlayerScore>().matchIndex;
 

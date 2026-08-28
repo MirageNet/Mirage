@@ -8,18 +8,18 @@ title: Spawn Player - Custom
 Full scripts for this page can be found in the SpawnCustomPlayer sample in the package manager or on [GitHub](https://github.com/MirageNet/Mirage/tree/main/Assets/Mirage/Samples%7E/SpawnCustomPlayer)
 :::
 
-Mirage comes with a CharacterSpawner which will automatically spawn a character object when a client connects.
+Mirage comes with a `NetworkSceneLoader` which will automatically spawn a character object when a client connects.
 
 Many games need character customization. You may want to pick the color of the hair, eyes, skin, height, race, etc.
 
-In this case, you will need to create your own CharacterSpawner.  Follow these steps:
+In this case, you will need to create your own character spawner.  Follow these steps:
 
 1) Create your player prefabs (as many as you need) and add them to the Spawnable Prefabs in your ClientObjectManager.
 2) Create a message that describes your player. For example:
 {{{ Path:'Snippets/GameObjects/CustomPlayerSpawning.cs' Name:'create-mmo-character-message' }}}
 3) Create Player Spawner class and add it to some GameObject in your scene
 {{{ Path:'Snippets/GameObjects/CustomPlayerSpawning.cs' Name:'custom-character-spawner-class' }}}
-4) Drag the NetworkClient and NetworkServer and Scene manager to the fields
+4) Drag the NetworkClient, NetworkServer, ClientObjectManager and ServerObjectManager to the fields
 
 5) Hook into events:
 

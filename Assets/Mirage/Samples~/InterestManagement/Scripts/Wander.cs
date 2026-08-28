@@ -4,19 +4,26 @@ using UnityEngine.AI;
 
 namespace Mirage.Examples.InterestManagement
 {
-    public class Wander : MonoBehaviour
+    /// <summary>
+    /// Moves the NPC to random points. Only runs on the server, the position is sent to clients by NetworkTransform
+    /// </summary>
+    public class Wander : NetworkBehaviour
     {
         public NavMeshAgent agent;
 
         public Bounds bounds;
 
-        // Start is called before the first frame update
-        public void StartMoving()
+        private void Awake()
+        {
+            Identity.OnStartServer.AddListener(StartMoving);
+        }
+
+        private void StartMoving()
         {
             StartCoroutine(Move());
         }
 
-        public IEnumerator Move()
+        private IEnumerator Move()
         {
             while (true)
             {

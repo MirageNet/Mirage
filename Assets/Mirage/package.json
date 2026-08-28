@@ -27,7 +27,7 @@
         {
             "displayName": "ChangeScene",
             "description": "Demo for normal or additive scene switching",
-            "path": "Samples~/ListServer"
+            "path": "Samples~/ChangeScene"
         },
         {
             "displayName": "InterestManagement",
@@ -53,6 +53,46 @@
             "displayName": "MatchScenes",
             "description": "Multiple matches on the same server by creating new scenes for each pair of players",
             "path": "Samples~/MatchScenes"
+        },
+        {
+            "displayName": "LegacyNetworkAnimator",
+            "description": "Old NetworkAnimator component, kept for projects that still depend on it",
+            "path": "Samples~/LegacyNetworkAnimator"
+        },
+        {
+            "displayName": "LegacySceneLoading",
+            "description": "Old NetworkSceneManager and CharacterSpawner, replaced by NetworkSceneLoader",
+            "path": "Samples~/LegacySceneLoading"
+        },
+        {
+            "displayName": "MultipleAdditiveScenes",
+            "description": "Multiple game instances on one server, each in its own additive physics scene",
+            "path": "Samples~/MultipleAdditiveScenes"
+        },
+        {
+            "displayName": "Notify",
+            "description": "Using Notify to send changes over unreliable and know when they are delivered or lost",
+            "path": "Samples~/Notify"
+        },
+        {
+            "displayName": "RigidbodyPhysics",
+            "description": "Syncing server-side rigidbody physics to clients",
+            "path": "Samples~/RigidbodyPhysics"
+        },
+        {
+            "displayName": "SendPrefab",
+            "description": "Letting clients ask the server to spawn one of an allowed list of prefabs",
+            "path": "Samples~/SendPrefab"
+        },
+        {
+            "displayName": "SpawnCustomPlayer",
+            "description": "Full scripts for the Custom Character Spawning guide",
+            "path": "Samples~/SpawnCustomPlayer"
+        },
+        {
+            "displayName": "SwitchTransport",
+            "description": "NetworkManager that can switch socket/transport at runtime",
+            "path": "Samples~/SwitchTransport"
         }
     ]
 }

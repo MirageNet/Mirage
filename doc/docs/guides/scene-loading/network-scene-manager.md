@@ -4,7 +4,7 @@ title: (Legacy) Network Scene Manager
 # Using Network Scene Manager
 
 :::warning Legacy Component
-`NetworkSceneManager` and `CharacterSpawner` are now considered legacy components and have been moved to the Examples folder. 
+`NetworkSceneManager` and `CharacterSpawner` are now considered legacy components and are no longer part of the main package. To use them, import the **LegacySceneLoading** sample from the Package Manager (see [Legacy Scene Loading](/docs/examples/legacy-scene-loading)).
 
 For modern projects, we recommend using the **[NetworkSceneLoader](/docs/guides/scene-loading/network-scene-loader)** component or the **[Manual Scene Loading](/docs/guides/scene-loading/manual-scene-loading)** guide.
 :::

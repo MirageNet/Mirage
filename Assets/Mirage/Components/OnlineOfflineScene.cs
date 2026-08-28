@@ -30,8 +30,11 @@ namespace Mirage.Components
         {
             void Check<T>(ref T field) where T : Component
             {
-                if (field == null) TryGetComponent(out field);
-                if (field == null) Debug.LogError($"{typeof(T).Name} is missing on {name}", this);
+                if (field == null)
+                    TryGetComponent(out field);
+
+                if (field == null)
+                    Debug.LogError($"{typeof(T).Name} is missing on {name}", this);
             }
 
             Check(ref Server);

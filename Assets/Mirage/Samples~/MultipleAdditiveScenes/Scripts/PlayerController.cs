@@ -20,12 +20,17 @@ namespace Mirage.Examples.MultipleAdditiveScenes
                 capsuleCollider = GetComponent<CapsuleCollider>();
         }
 
+        private void Awake()
+        {
+            Identity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
+        }
+
         private void Start()
         {
             capsuleCollider.enabled = IsServer;
         }
 
-        public void OnStartLocalPlayer()
+        private void OnStartLocalPlayer()
         {
             characterController.enabled = true;
 

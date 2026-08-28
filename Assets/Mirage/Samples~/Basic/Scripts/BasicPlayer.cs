@@ -16,7 +16,7 @@ namespace Mirage.Examples.Basic
         [SerializeField] private Vector2 offset = new Vector2(100, -170);
         [SerializeField] private Vector2 padding = new Vector2(10, 10);
 
-        // These are set in OnStartServer and used in OnStartClient
+        // These are set before the spawn message is sent (playerNo by BasicPlayerSpawner, playerColor in OnStartServer) and used in OnStartClient
 
         [SyncVar(initialOnly = true)] // playerNo is set on spawn so we can use initialOnly so it is only synced once
         public int playerNo;

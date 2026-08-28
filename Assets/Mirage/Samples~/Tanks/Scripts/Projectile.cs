@@ -45,10 +45,12 @@ namespace Mirage.Examples.Tanks
             if (co.tag.Equals("Player") && co.gameObject != source)
             {
                 //Apply damage
-                co.GetComponent<Tank>().health -= damage;
+                var target = co.GetComponent<Tank>();
+                target.health -= damage;
 
                 //update score on source
-                source.GetComponent<Tank>().score += damage;
+                var shooter = source.GetComponent<Tank>();
+                shooter.score += damage;
             }
 
             ServerObjectManager.Destroy(gameObject);

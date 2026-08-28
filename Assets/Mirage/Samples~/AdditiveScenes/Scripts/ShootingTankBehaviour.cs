@@ -14,6 +14,10 @@ namespace Mirage.Examples.Additive
         [Range(0, 1)]
         public float turnSpeed = 0.1f;
 
+        [Header("Firing Rate")]
+        public float fireInterval = 1.5f;
+        private float _nextFireTime;
+
         private void Update()
         {
             if (IsServer && Identity.observers.Count > 0)
@@ -45,9 +49,15 @@ namespace Mirage.Examples.Additive
             {
                 transform.LookAt(target.transform.position + Vector3.down);
                 rotation = transform.rotation;
-                
-                // Modern approach: trigger animation via ClientRpc
-                RpcFire();
+
+                // Throttle firing rate to avoid spamming RPCs every frame
+                if (Time.time >= _nextFireTime)
+                {
+                    _nextFireTime = Time.time + fireInterval;
+
+                    // Modern approach: trigger animation via ClientRpc
+                    RpcFire();
+                }
             }
         }
 

@@ -18,12 +18,6 @@ namespace Mirage.Examples.InterestManagement
 
         public TextMesh nameText;
 
-        [Server]
-        public void SetRandomName()
-        {
-            playerName = "PLAYER" + Random.Range(1, 99);
-        }
-
         private void Update()
         {
             if (Camera.main)

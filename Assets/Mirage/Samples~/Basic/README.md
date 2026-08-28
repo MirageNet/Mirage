@@ -1,16 +1,16 @@
 # Basic Example
 
-This is a bare bones example of a running game with Network Manager and UI prefab players:
+A bare bones example of players connecting and syncing data, with each player shown as a UI card.
 
-1.  Remove all scenes from Build Settings, then add the Example scene alone.
+See the [Basic example docs](https://miragenet.github.io/Mirage/docs/examples/basic) for how it works.
 
-2.  Open the Example scene and build the project.
+1.  Open the Example scene and build the project.
 
-3.  In the editor, click Play, and Server + Client or Server Only...it will be listening on port 7777.  
-    - If you clicked Host (Server + Client), the host player will appear as Player 00.
+2.  In the editor, click Play, and Host (Server + Client) or Server Only. It will be listening on port 7777.
+    - If you clicked Host (Server + Client), the host player will appear as BasicPlayer 01.
 
-4.  Run one or more instances (up to 16 total players) of the built application.
+3.  Run one or more instances (up to 4 total players) of the built application.
 
-5.  Click Client on each instance.
+4.  Click Client on each instance.
 
-6.  Now you will see all players in the editor and the clients, all with data being updated and synchronized.
+5.  Now you will see all players in the editor and the clients, all with data being updated and synchronized.

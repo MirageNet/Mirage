@@ -303,12 +303,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Server: {fileID: 385850961}
   Client: {fileID: 385850960}
-  NetworkSceneManager: {fileID: 0}
   ServerObjectManager: {fileID: 385850958}
   ClientObjectManager: {fileID: 385850957}
   ValidateReferences: 1
-  offlineScene: Assets/Examples/MatchScenes/MatchScenes_offline.unity
-  matchScene: Assets/Examples/MatchScenes/MatchScenes_match.unity
+  offlineScene: MatchScenes_offline
+  matchScene: MatchScenes_match
   _character: {fileID: 4845829010686006643, guid: 4edda9ae8a3982b4ebd030861886374e,
     type: 3}
 --- !u!4 &385850963

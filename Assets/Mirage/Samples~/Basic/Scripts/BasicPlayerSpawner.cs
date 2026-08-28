@@ -9,11 +9,15 @@ namespace Mirage.Examples.Basic
     public class BasicPlayerSpawner : MonoBehaviour
     {
         [Header("References")]
+        [RequiredField(autoFind: true)]
         public NetworkServer Server;
+        [RequiredField(autoFind: true)]
         public ServerObjectManager ServerObjectManager;
 
         [Header("Character Spawning")]
+        [RequiredField]
         public NetworkIdentity PlayerPrefab;
+        [RequiredField]
         public Transform Parent;
 
         // counter to give each player their own id

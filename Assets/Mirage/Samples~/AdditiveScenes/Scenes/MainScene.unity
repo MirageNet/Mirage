@@ -435,7 +435,7 @@ MonoBehaviour:
     To: 3
     Timing: 0
     Interval: 0.1
-  subScene: Assets/Examples/AdditiveScenes/Scenes/SubScene.unity
+  SubSceneLoader: {fileID: 1661834299}
 --- !u!1001 &160176455
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -515,10 +515,6 @@ PrefabInstance:
       propertyPath: m_LocalPlayerAuthority
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 160176461, guid: ab222ed73ada1ac4ba2f61e843d7627c, type: 3}
-      propertyPath: Animator
-      value: 
-      objectReference: {fileID: 816117415}
     m_RemovedComponents:
     - {fileID: 160176458, guid: ab222ed73ada1ac4ba2f61e843d7627c, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: ab222ed73ada1ac4ba2f61e843d7627c, type: 3}
@@ -892,11 +888,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 855244094988030908, guid: f6d08eb9a8e35d84fa30a7e3ae64181a,
         type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 855244094988030908, guid: f6d08eb9a8e35d84fa30a7e3ae64181a,
-        type: 3}
       propertyPath: forceHidden
       value: 0
       objectReference: {fileID: 0}
@@ -970,8 +961,7 @@ PrefabInstance:
       propertyPath: m_SceneId
       value: 529586728
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 855244094988030908, guid: f6d08eb9a8e35d84fa30a7e3ae64181a, type: 3}
+    m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f6d08eb9a8e35d84fa30a7e3ae64181a, type: 3}
 --- !u!4 &748207075 stripped
 Transform:
@@ -1074,12 +1064,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 794922164}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!95 &816117415 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 160176460, guid: ab222ed73ada1ac4ba2f61e843d7627c,
-    type: 3}
-  m_PrefabInstance: {fileID: 160176455}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &856402103
 GameObject:
   m_ObjectHideFlags: 0
@@ -1245,11 +1229,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6852530814182375317, guid: 12a4c14e672c00b4b840f937d824b890,
         type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6852530814182375317, guid: 12a4c14e672c00b4b840f937d824b890,
-        type: 3}
       propertyPath: forceHidden
       value: 0
       objectReference: {fileID: 0}
@@ -1263,8 +1242,7 @@ PrefabInstance:
       propertyPath: m_SceneId
       value: 568164022
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 6852530814182375317, guid: 12a4c14e672c00b4b840f937d824b890, type: 3}
+    m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 12a4c14e672c00b4b840f937d824b890, type: 3}
 --- !u!4 &901271863 stripped
 Transform:
@@ -1913,10 +1891,10 @@ GameObject:
   - component: {fileID: 1661834283}
   - component: {fileID: 1661834282}
   - component: {fileID: 1661834280}
-  - component: {fileID: 1661834284}
   - component: {fileID: 1661834281}
   - component: {fileID: 1661834286}
   - component: {fileID: 1661834285}
+  - component: {fileID: 1661834299}
   m_Layer: 0
   m_Name: Network
   m_TagString: Untagged
@@ -1924,6 +1902,23 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
   m_IsActive: 1
+--- !u!114 &1661834299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1661834277}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ad49c4d6dd8470da46ddcc6cc0e66bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Server: {fileID: 1661834283}
+  Client: {fileID: 1661834282}
+  ServerObjectManager: {fileID: 1661834286}
+  ClientObjectManager: {fileID: 1661834281}
+  SubScene: SubScene
 --- !u!114 &1661834278
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1938,7 +1933,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Server: {fileID: 1661834283}
   Client: {fileID: 1661834282}
-  NetworkSceneManager: {fileID: 1661834284}
   ServerObjectManager: {fileID: 1661834286}
   ClientObjectManager: {fileID: 1661834281}
   ValidateReferences: 1
@@ -1965,25 +1959,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 1661834277}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7aaac73a16c040fd871cb977b5c557b, type: 3}
+  m_Script: {fileID: 11500000, guid: 8c5671e54bd241b199ab102bcd1a4da0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Client: {fileID: 1661834282}
   Server: {fileID: 1661834283}
-  SceneManager: {fileID: 1661834284}
-  ClientObjectManager: {fileID: 1661834281}
   ServerObjectManager: {fileID: 1661834286}
   PlayerPrefab: {fileID: 8537344390966522168, guid: a5bdca0a2315d43499be7dcef473fbc7,
     type: 3}
-  AutoSpawn: 1
-  SetName: 1
-  startPositionIndex: 0
-  startPositions:
+  SpawnPoints:
   - {fileID: 178547538}
   - {fileID: 1816951100}
   - {fileID: 652875645}
   - {fileID: 691846570}
-  playerSpawnMethod: 1
 --- !u!114 &1661834281
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2087,39 +2074,6 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
   ManualUpdate: 0
---- !u!114 &1661834284
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1661834277}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30967dfd80dbb6c46a270a64ebecb951, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Client: {fileID: 1661834282}
-  Server: {fileID: 1661834283}
-  ServerObjectManager: {fileID: 1661834286}
-  ClientObjectManager: {fileID: 1661834281}
-  SendAdditiveScenesOnAuthenticate: 1
-  DontDestroy: 1
-  _onClientStartedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onClientFinishedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onServerStartedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onServerFinishedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onPlayerSceneReady:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &1661834285
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3756,16 +3710,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5697694911122891659, guid: e1971f4a8c7661546bc509b44bd91b80,
         type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5697694911122891659, guid: e1971f4a8c7661546bc509b44bd91b80,
-        type: 3}
       propertyPath: forceHidden
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 5697694911122891659, guid: e1971f4a8c7661546bc509b44bd91b80, type: 3}
+    m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e1971f4a8c7661546bc509b44bd91b80, type: 3}
 --- !u!114 &1398763119726924939
 MonoBehaviour:

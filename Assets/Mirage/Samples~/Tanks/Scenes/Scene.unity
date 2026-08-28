@@ -1489,7 +1489,6 @@ GameObject:
   - component: {fileID: 1282001523}
   - component: {fileID: 1282001521}
   - component: {fileID: 1282001525}
-  - component: {fileID: 1282001526}
   - component: {fileID: 1282001522}
   - component: {fileID: 1282001524}
   - component: {fileID: 1282001519}
@@ -1544,7 +1543,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Server: {fileID: 1282001523}
   Client: {fileID: 1282001525}
-  NetworkSceneManager: {fileID: 1282001526}
   ServerObjectManager: {fileID: 1282001524}
   ClientObjectManager: {fileID: 1282001522}
   ValidateReferences: 1
@@ -1557,25 +1555,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 1282001517}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7aaac73a16c040fd871cb977b5c557b, type: 3}
+  m_Script: {fileID: 11500000, guid: 8f321ccd817545078f97a982735e81c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Client: {fileID: 1282001525}
   Server: {fileID: 1282001523}
-  SceneManager: {fileID: 1282001526}
-  ClientObjectManager: {fileID: 1282001522}
   ServerObjectManager: {fileID: 1282001524}
   PlayerPrefab: {fileID: 114118589361100106, guid: 6f43bf5488a7443d19ab2a83c6b91f35,
     type: 3}
-  AutoSpawn: 1
-  SetName: 1
-  startPositionIndex: 0
-  startPositions:
+  SpawnPoints:
   - {fileID: 535739936}
   - {fileID: 1501912663}
   - {fileID: 251893065}
   - {fileID: 1458789073}
-  playerSpawnMethod: 0
 --- !u!114 &1282001522
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1688,39 +1679,6 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
   ManualUpdate: 0
---- !u!114 &1282001526
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1282001517}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30967dfd80dbb6c46a270a64ebecb951, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Client: {fileID: 1282001525}
-  Server: {fileID: 1282001523}
-  ServerObjectManager: {fileID: 1282001524}
-  ClientObjectManager: {fileID: 1282001522}
-  SendAdditiveScenesOnAuthenticate: 1
-  DontDestroy: 1
-  _onClientStartedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onClientFinishedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onServerStartedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onServerFinishedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onPlayerSceneReady:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1458789072
 GameObject:
   m_ObjectHideFlags: 0

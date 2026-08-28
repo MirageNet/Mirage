@@ -80,10 +80,10 @@ The actual flow of internal operations that takes place for spawning game object
 ### Character Game Objects
 
 Character game objects in Mirage represent the network identity associated with an active player connection. The flow for spawning character game objects is:
--   Prefab with `NetworkIdentity` is registered as the `PlayerPrefab` on `CharacterSpawner`.
+-   Prefab with `NetworkIdentity` is set as the `PlayerPrefab` on `NetworkSceneLoader` (or your custom spawner), and registered on the `ClientObjectManager`.
 -   The client connects and authenticates with the server.
--   Client sends an `AddCharacterMessage` to the server.
--   The server receives the message and calls `CharacterSpawner.OnServerAddPlayer` (or your custom spawn handler).
+-   If the server has a scene loaded, the client loads it and sends a `SceneReadyMessage` to the server.
+-   The server calls `NetworkSceneLoader.SpawnCharacterForPlayer` (or your custom spawn handler).
 -   A game object is instantiated from the Player Prefab on the server.
 -   `ServerObjectManager.AddCharacter` is called with the player and the new character instance on the server.
 -   The character instance is spawned - you do not have to call `ServerObjectManager.Spawn` for the character instance. The spawn message is sent to all clients like on a normal spawn.

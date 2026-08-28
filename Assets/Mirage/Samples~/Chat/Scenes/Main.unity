@@ -2998,7 +2998,6 @@ GameObject:
   - component: {fileID: 1783103025}
   - component: {fileID: 1783103028}
   - component: {fileID: 1783103027}
-  - component: {fileID: 1783103023}
   - component: {fileID: 1783103029}
   - component: {fileID: 1783103030}
   - component: {fileID: 1783103024}
@@ -3009,39 +3008,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1783103023
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1783103022}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30967dfd80dbb6c46a270a64ebecb951, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Client: {fileID: 1783103027}
-  Server: {fileID: 1783103028}
-  ServerObjectManager: {fileID: 1783103030}
-  ClientObjectManager: {fileID: 1783103029}
-  SendAdditiveScenesOnAuthenticate: 1
-  DontDestroy: 1
-  _onClientStartedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onClientFinishedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onServerStartedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onServerFinishedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onPlayerSceneReady:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &1783103024
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3072,7 +3038,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Server: {fileID: 1783103028}
   Client: {fileID: 1783103027}
-  NetworkSceneManager: {fileID: 1783103023}
   ServerObjectManager: {fileID: 1783103030}
   ClientObjectManager: {fileID: 1783103029}
   ValidateReferences: 1

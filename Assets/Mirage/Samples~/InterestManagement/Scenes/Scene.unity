@@ -482,6 +482,7 @@ MonoBehaviour:
     m_Center: {x: 0, y: 0.1, z: 0}
     m_Extent: {x: 4.5, y: 0, z: 4.5}
   prefab: {fileID: 6411109812051327673, guid: 943ce394f88b5436ca1beb0c643806d0, type: 3}
+  server: {fileID: 1282001523}
   serverObjectManager: {fileID: 1282001524}
 --- !u!1 &597109994
 GameObject:
@@ -884,19 +885,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 721760297}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1273045292}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: ReadyButtonHandler
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 1
+      m_Calls: []
 --- !u!114 &721760297
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1175,6 +1164,7 @@ MonoBehaviour:
     m_Center: {x: 0, y: 0.1, z: 0}
     m_Extent: {x: 4.5, y: 0, z: 4.5}
   prefab: {fileID: 6411109812051327673, guid: a9185e00d43994d3d937eaa684c53ff2, type: 3}
+  server: {fileID: 1282001523}
   serverObjectManager: {fileID: 1282001524}
 --- !u!1 &1117608592
 GameObject:
@@ -1346,7 +1336,6 @@ GameObject:
   - component: {fileID: 1273045295}
   - component: {fileID: 1273045294}
   - component: {fileID: 1273045293}
-  - component: {fileID: 1273045292}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -1354,32 +1343,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1273045292
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1273045291}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 21139f03d4abf3b4dbeb308fa6c880ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  MinimumPlayersForGame: 1
-  LocalPlayer: {fileID: 0}
-  StartPanel: {fileID: 944343260}
-  GameOverPanel: {fileID: 1966128034}
-  HealthTextLabel: {fileID: 721152070}
-  ScoreTextLabel: {fileID: 637114753}
-  HealthText: {fileID: 1278248530}
-  ScoreText: {fileID: 1162041875}
-  PlayerNameText: {fileID: 754665788}
-  WinnerNameText: {fileID: 597109996}
-  IsGameReady: 0
-  IsGameOver: 0
-  players: []
-  NetworkManager: {fileID: 1282001520}
 --- !u!114 &1273045293
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1557,7 +1520,6 @@ GameObject:
   - component: {fileID: 1282001523}
   - component: {fileID: 1282001521}
   - component: {fileID: 1282001525}
-  - component: {fileID: 1282001526}
   - component: {fileID: 1282001522}
   - component: {fileID: 1282001524}
   - component: {fileID: 1282001519}
@@ -1612,7 +1574,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Server: {fileID: 1282001523}
   Client: {fileID: 1282001525}
-  NetworkSceneManager: {fileID: 1282001526}
   ServerObjectManager: {fileID: 1282001524}
   ClientObjectManager: {fileID: 1282001522}
   ValidateReferences: 1
@@ -1625,25 +1586,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 1282001517}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7aaac73a16c040fd871cb977b5c557b, type: 3}
+  m_Script: {fileID: 11500000, guid: 3e32115bf7894bce9ed847781c043fc4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Client: {fileID: 1282001525}
   Server: {fileID: 1282001523}
-  SceneManager: {fileID: 1282001526}
-  ClientObjectManager: {fileID: 1282001522}
   ServerObjectManager: {fileID: 1282001524}
   PlayerPrefab: {fileID: 114118589361100106, guid: 80382f4d3904f4926bff940b8cb6311a,
     type: 3}
-  AutoSpawn: 1
-  SetName: 1
-  startPositionIndex: 0
-  startPositions:
+  SpawnPoints:
   - {fileID: 535739936}
   - {fileID: 1501912663}
   - {fileID: 251893065}
   - {fileID: 1458789073}
-  playerSpawnMethod: 0
 --- !u!114 &1282001522
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1757,39 +1711,6 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
   ManualUpdate: 0
---- !u!114 &1282001526
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1282001517}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30967dfd80dbb6c46a270a64ebecb951, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Client: {fileID: 1282001525}
-  Server: {fileID: 1282001523}
-  ServerObjectManager: {fileID: 1282001524}
-  ClientObjectManager: {fileID: 1282001522}
-  SendAdditiveScenesOnAuthenticate: 1
-  DontDestroy: 1
-  _onClientStartedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onClientFinishedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onServerStartedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onServerFinishedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onPlayerSceneReady:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1458789072
 GameObject:
   m_ObjectHideFlags: 0

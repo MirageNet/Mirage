@@ -1,116 +1,220 @@
-using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Mirage.Examples.MultipleAdditiveScenes
 {
+    /// <summary>
+    /// Loads multiple instances of the game scene on the server, and puts each player in one of them.
+    /// <para>
+    /// Scene loading is based on <see cref="Mirage.Components.NetworkSceneLoader"/>,
+    /// but loads scenes additively and the client only loads a single instance.
+    /// </para>
+    /// </summary>
     [AddComponentMenu("")]
     public class MultiSceneNetManager : NetworkManager
     {
         [Header("MultiScene Setup")]
         public int instances = 3;
 
-        // legacy NetworkSceneManager
-        [SerializeField] private NetworkSceneManager NetworkSceneManager;
-
         [Scene]
         public string gameScene;
-        private readonly List<Scene> subScenes = new List<Scene>();
 
-        /// <summary>
-        /// This is invoked when a server is started - including when a host is started.
-        /// <para>StartServer has multiple signatures, but they all cause this hook to be called.</para>
-        /// </summary>
-        public void Start()
+        [Header("Character Spawning")]
+        [RequiredField]
+        public NetworkIdentity PlayerPrefab;
+        [Tooltip("Players are spawned at each point in turn")]
+        public List<Transform> SpawnPoints = new List<Transform>();
+
+        [Tooltip("Is server currently loading the sub scenes"), ReadOnlyInspector]
+        public bool ServerLoading;
+
+        private readonly List<Scene> _subScenes = new List<Scene>();
+        // the one instance a (non-host) client loaded
+        private Scene _clientSubScene;
+        private int _nextPlayerId;
+        // incremented on start and stop, so a load from a previous session knows to stop
+        private int _serverSession;
+        private bool _serverUnloading;
+        private int _nextSpawnIndex;
+
+        private void Awake()
         {
-            Server.Started.AddListener(() => StartCoroutine(LoadSubScenes()));
-            Server.Authenticated.AddListener(OnServerAddPlayer);
-            Server.Stopped.AddListener(OnStopServer);
-            Client.Disconnected.AddListener(OnStopClient);
+            Server.Started.AddListener(OnServerStarted);
+            Server.Authenticated.AddListener(OnServerAuthenticated);
+            Server.Stopped.AddListener(OnServerStopped);
+            Client.Started.AddListener(OnClientStarted);
+            Client.Disconnected.AddListener(OnClientDisconnected);
         }
 
-        #region Server System Callbacks
+        #region Server
 
-        /// <summary>
-        /// Called on the server when a client adds a new player with ClientScene.AddPlayer.
-        /// <para>The default implementation for this function creates a new player object from the playerPrefab.</para>
-        /// </summary>
-        /// <param name="player">Connection from client.</param>
-        public void OnServerAddPlayer(INetworkPlayer player)
+        private void OnServerStarted()
         {
-            // This delay is really for the host player that loads too fast for the server to have subscene loaded
-            StartCoroutine(AddPlayerDelayed(player));
+            Server.MessageHandler.RegisterHandler<SceneReadyMessage>(HandleSceneReadyMessage);
+            _nextPlayerId = 0;
+            _nextSpawnIndex = 0;
+
+            ServerLoadSubScenes().Forget();
         }
 
-        private int playerId = 1;
-
-        private IEnumerator AddPlayerDelayed(INetworkPlayer player)
+        private async UniTaskVoid ServerLoadSubScenes()
         {
-            yield return new WaitForSeconds(.5f);
+            var session = ++_serverSession;
+            ServerLoading = true;
 
-            NetworkSceneManager.ServerLoadSceneAdditively(gameScene, Server.AllPlayers);
+            // if server was restarted quickly, wait for the old scenes to unload,
+            // otherwise SpawnSceneObjects could spawn objects in scenes that are about to be destroyed
+            await UniTask.WaitUntil(() => !_serverUnloading);
 
-            var playerScore = player.Identity.GetComponent<PlayerScore>();
-            playerScore.playerNumber = playerId;
-            playerScore.scoreIndex = playerId / subScenes.Count;
-            playerScore.matchIndex = playerId % subScenes.Count;
+            for (var index = 0; index < instances; index++)
+            {
+                if (session != _serverSession)
+                    return;
 
-            if (subScenes.Count > 0)
-                UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(player.Identity.gameObject, subScenes[playerId % subScenes.Count]);
+                // each instance gets its own physics scene so that matches don't collide with each other
+                // note: physics scenes do not auto simulate, see PhysicsSimulator
+                var parameters = new LoadSceneParameters(LoadSceneMode.Additive, LocalPhysicsMode.Physics3D);
+                await SceneManager.LoadSceneAsync(gameScene, parameters).ToUniTask();
+                var scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
 
-            playerId++;
+                // server was stopped while loading, OnServerStopped already unloaded the scenes before this one
+                if (session != _serverSession)
+                {
+                    SceneManager.UnloadSceneAsync(scene);
+                    return;
+                }
+
+                _subScenes.Add(scene);
+            }
+
+            ServerLoading = false;
+            ServerObjectManager.SpawnSceneObjects();
+
+            // spawn characters for players (eg host) that were ready before sub scenes finished loading
+            foreach (var player in Server.AuthenticatedPlayers)
+            {
+                if (player.SceneIsReady && !player.HasCharacter)
+                    SpawnCharacterForPlayer(player);
+            }
+        }
+
+        private void OnServerAuthenticated(INetworkPlayer player)
+        {
+            // host shares the server's scenes, so it is already ready
+            if (player.IsHost)
+            {
+                player.SceneIsReady = true;
+                if (!ServerLoading)
+                    SpawnCharacterForPlayer(player);
+                return;
+            }
+
+            // tell client to load its copy of the game scene, it will reply with SceneReadyMessage
+            player.SceneIsReady = false;
+            player.Send(new SceneMessage { ScenePath = gameScene });
+        }
+
+        private void HandleSceneReadyMessage(INetworkPlayer player, SceneReadyMessage message)
+        {
+            if (player.SceneIsReady)
+                return;
+
+            player.SceneIsReady = true;
+
+            // Only spawn if the server has finished its own loading
+            if (!ServerLoading)
+                SpawnCharacterForPlayer(player);
+        }
+
+        private void SpawnCharacterForPlayer(INetworkPlayer player)
+        {
+            Debug.Assert(player.Identity == null, "Player already has a character spawned.");
+
+            var spawnPoint = SpawnPoints[_nextSpawnIndex];
+            _nextSpawnIndex = (_nextSpawnIndex + 1) % SpawnPoints.Count;
+            var character = Instantiate(PlayerPrefab, spawnPoint.position, spawnPoint.rotation);
+
+            // increment first, so first player has id=1
+            _nextPlayerId++;
+            var matchIndex = _nextPlayerId % _subScenes.Count;
+
+            // Set SyncVars before AddCharacter so they are included in the spawn message
+            var playerScore = character.GetComponent<PlayerScore>();
+            playerScore.playerNumber = _nextPlayerId;
+            playerScore.scoreIndex = _nextPlayerId / _subScenes.Count;
+            playerScore.matchIndex = matchIndex;
+
+            // Move to sub scene before spawning, so NetworkSceneChecker only shows it to players in the same match
+            SceneManager.MoveGameObjectToScene(character.gameObject, _subScenes[matchIndex]);
+
+            ServerObjectManager.AddCharacter(player, character.gameObject);
+        }
+
+        private void OnServerStopped()
+        {
+            _serverSession++;
+            ServerLoading = false;
+            ServerUnloadSubScenes().Forget();
+        }
+
+        private async UniTaskVoid ServerUnloadSubScenes()
+        {
+            // copy and clear first, so the list is ready if server is started again while unloading
+            var subScenes = _subScenes.ToArray();
+            _subScenes.Clear();
+
+            _serverUnloading = true;
+            try
+            {
+                foreach (var scene in subScenes)
+                    await SceneManager.UnloadSceneAsync(scene).ToUniTask();
+            }
+            finally
+            {
+                _serverUnloading = false;
+            }
+
+            await Resources.UnloadUnusedAssets().ToUniTask();
         }
 
         #endregion
 
-        #region Start & Stop Callbacks
+        #region Client
 
-
-
-        private IEnumerator LoadSubScenes()
+        private void OnClientStarted()
         {
-            for (var index = 0; index < instances; index++)
-            {
-                yield return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(gameScene, new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive, localPhysicsMode = LocalPhysicsMode.Physics3D });
-                subScenes.Add(UnityEngine.SceneManagement.SceneManager.GetSceneAt(index + 1));
-            }
+            Client.MessageHandler.RegisterHandler<SceneMessage>(HandleSceneMessage);
         }
 
-        /// <summary>
-        /// This is called when a server is stopped - including when a host is stopped.
-        /// </summary>
-        public void OnStopServer()
+        private void HandleSceneMessage(INetworkPlayer player, SceneMessage message)
         {
-            // note: if in host mode you may not want to send SceneMessage to host player. In that case use the excludeLocalPlayer flag
-            var msg = new NetworkSceneManager.SceneMessage { MainActivateScene = gameScene, SceneOperation = SceneOperation.UnloadAdditive };
-            Server.SendToAll(msg, authenticatedOnly: true, excludeLocalPlayer: true);
-            StartCoroutine(UnloadSubScenes());
+            // Skip if we are host, as server handles loading
+            if (Client.IsHost)
+                return;
+
+            ClientLoadSubScene(player, message).Forget();
         }
 
-        public void OnStopClient(ClientStoppedReason reason)
+        private async UniTaskVoid ClientLoadSubScene(INetworkPlayer player, SceneMessage message)
         {
-            if (!Server.Active)
-                StartCoroutine(UnloadClientSubScenes());
+            // client only needs the instance its player is in, and doesn't run physics so it can use the default physics scene
+            await SceneManager.LoadSceneAsync(message.ScenePath, LoadSceneMode.Additive).ToUniTask();
+            _clientSubScene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+
+            ClientObjectManager.PrepareToSpawnSceneObjects();
+            player.Send(new SceneReadyMessage());
         }
 
-        private IEnumerator UnloadClientSubScenes()
+        private void OnClientDisconnected(ClientStoppedReason reason)
         {
-            for (var index = 0; index < UnityEngine.SceneManagement.SceneManager.sceneCount; index++)
-            {
-                if (UnityEngine.SceneManagement.SceneManager.GetSceneAt(index) != UnityEngine.SceneManagement.SceneManager.GetActiveScene())
-                    yield return UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(UnityEngine.SceneManagement.SceneManager.GetSceneAt(index));
-            }
-        }
+            // host never loads a client sub scene, its scenes are unloaded by OnServerStopped
+            if (!_clientSubScene.IsValid())
+                return;
 
-        private IEnumerator UnloadSubScenes()
-        {
-            for (var index = 0; index < subScenes.Count; index++)
-                yield return UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(subScenes[index]);
-
-            subScenes.Clear();
-
-            yield return Resources.UnloadUnusedAssets();
+            SceneManager.UnloadSceneAsync(_clientSubScene);
+            _clientSubScene = default;
         }
 
         #endregion

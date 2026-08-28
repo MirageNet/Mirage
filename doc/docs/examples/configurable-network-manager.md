@@ -1,12 +1,17 @@
+---
+sidebar_position: 23
+---
 
-# Configurable NetworkManager Example
+# Switch Transport (Configurable NetworkManager) Example
 
-This example demonstrates how to create a custom `NetworkManager` that allows for easy switching between different transport layers (e.g., UDP, Steam, or an offline mode) before the network is started. This is a common requirement for games that offer multiple ways to connect.
+The **SwitchTransport** sample is a script-only example, not a playable scene. It shows how to create a custom `NetworkManager` that can switch between different socket types (e.g., UDP, Steam, or an offline mode) before the network is started. This is a common requirement for games that offer multiple ways to connect.
 
 ## Setup
 
-1. Create a new GameObject and add the `ConfigurableNetworkManager` component to it.
-2. In the inspector, assign your `UdpTransport` and `SteamTransport` socket factory assets to the corresponding fields.
+1. Import the **SwitchTransport** sample.
+2. Add the `ConfigurableNetworkManager` component to your network GameObject (instead of `NetworkManager`), and set up `NetworkServer`, `NetworkClient` and the object managers the same as a normal `NetworkManager`.
+3. Add a `UdpSocketFactory` component, and assign it to the `udpTransport` field. If you use Steam, add a Steam socket factory (from a separate package) and assign it to `steamTransport`.
+4. Call `StartHost`, `StartClient` or `StartServer` from your own UI script, passing the `SocketType` you want. The methods take an enum, so they can't be assigned to a Button's OnClick in the inspector directly.
 
 ## Key Components
 

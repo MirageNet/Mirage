@@ -1,36 +1,60 @@
+---
+sidebar_position: 7
+---
+
 # Multiple Additive Scenes Example
 
-In Build Settings, remove all scenes and add both of the scenes from the Scenes folder in the following order:
+The Multiple Additive Scenes example runs several isolated game instances on a single server. Each instance is an additive copy of the `Game` scene with its own physics scene, and `NetworkSceneChecker` makes sure players only see objects in their own instance.
 
-- Main
-- Game
+<!-- TODO screenshot: game view with scores at the top, a few players and prizes in one instance -->
 
-Open the Main scene in the Editor and make sure the Game Scene field in the MultiScene Network Manager on the Network scene object contains the Game scene. This is already set up by default, but if the Main scene was opened and saved before putting the scenes in the Build Settings list, the Game Scene field may be cleared accidentally.
+## How It Works
 
-## MultiScene Network Manager
+### `MultiSceneNetManager`
+`MultiSceneNetManager` extends `NetworkManager` and handles scene loading and character spawning. Its scene loading is based on [`NetworkSceneLoader`](/docs/guides/scene-loading/network-scene-loader), changed to load scenes additively:
 
-The MultiScene Network Manager is derived from the base Network Manager and is responsible for additively loading the sub-scene instances and placing the players in their respective sub-scene instances and initializing player SyncVars. It has a Game Scene field where the Game sub-scene is assigned, and an Instances field to set how many instances are loaded on the server.
+- **Server Loading**: When the server starts, it loads `Instances` copies of the `Game` scene with `LocalPhysicsMode.Physics3D`, then calls `ServerObjectManager.SpawnSceneObjects()` to spawn the networked objects in them.
+- **Client Loading**: When a client is authenticated, the server sends it a `SceneMessage`. The client loads a single copy of the `Game` scene (without `localPhysicsMode`), calls `ClientObjectManager.PrepareToSpawnSceneObjects()`, and replies with `SceneReadyMessage`.
+- **Character Spawning**: Once the client is ready (and the server has finished loading), the server creates the character at the next spawn point, sets its `PlayerScore` SyncVars, moves it into one of the game instances, and then calls `ServerObjectManager.AddCharacter()`.
+- **Host**: The host shares the server's scenes, so it skips the client loading step and is ready right away.
 
-In this example, the sub-scene instances are additively loaded on the server with `localPhysicsMode = LocalPhysicsMode.Physics3D`. Physics sub-scenes do not auto-simulate, so each scene has a game object with a generic `PhysicsSimulator` script on it. This script does nothing on the client, only on the server.
+```csharp
+private void SpawnCharacterForPlayer(INetworkPlayer player)
+{
+    var spawnPoint = SpawnPoints[_nextSpawnIndex];
+    _nextSpawnIndex = (_nextSpawnIndex + 1) % SpawnPoints.Count;
+    var character = Instantiate(PlayerPrefab, spawnPoint.position, spawnPoint.rotation);
 
-Clients only ever have one instance of the sub-scene additively loaded (without `localPhysicsMode`), while the server has them all. All networked objects have a `NetworkSceneChecker` component which is what isolates them to their specific sub-scene.
+    // increment first, so first player has id=1
+    _nextPlayerId++;
+    var matchIndex = _nextPlayerId % _subScenes.Count;
 
-## Playing in the Instances
+    // Set SyncVars before AddCharacter so they are included in the spawn message
+    var playerScore = character.GetComponent<PlayerScore>();
+    playerScore.playerNumber = _nextPlayerId;
+    playerScore.scoreIndex = _nextPlayerId / _subScenes.Count;
+    playerScore.matchIndex = matchIndex;
 
-File -\> Build and Run
+    // Move to sub scene before spawning, so NetworkSceneChecker only shows it to players in the same match
+    SceneManager.MoveGameObjectToScene(character.gameObject, _subScenes[matchIndex]);
 
-Start at least 3 built instances: These will all be client players.
+    ServerObjectManager.AddCharacter(player, character.gameObject);
+}
+```
 
-Press Play in the Editor and click Host (Server + Client) in the HUD - This will be the host and the 1st player. You can also use Server Only if you prefer.
+### Physics and Isolation
+- Physics scenes do not auto-simulate, so each `Game` scene has a `PhysicsSimulator` that steps its physics scene on the server. It does nothing on the client.
+- All networked objects have a `NetworkSceneChecker`, which only shows them to players whose character is in the same scene.
 
-Click Client in the built instances.
+## Running the Example
 
--   WASDQE keys to move & turn your player capsule, Space to jump.
-
--   Colliding with the small colored spheres scores points based on their color.
-
--   Colliding with the larger tumblers sends them rolling around...they're server-side non-kinematic rigidbodies.
-
--   Only scores for the players in the same sub-scene are shown at the top of the game window.
-
-![MultiScene Network Manager](/img/examples/multiple-additive-scenes/MultiSceneNetworkManager.PNG)
+1. Import the **MultipleAdditiveScenes** sample.
+2. In **Build Settings**, add the scenes from the sample's `Scenes` folder in order:
+   - `Scenes/Main.unity`
+   - `Scenes/Game.unity`
+3. Open `Main.unity`, press **Play** and click **Host (Server + Client)** in the HUD. You can also use **Server Only**.
+4. Start at least 3 built instances and click **Client**.
+5. Use **WASDQE** to move and turn your player capsule, and **Space** to jump.
+   - Colliding with the small colored spheres scores points based on their color.
+   - Colliding with the larger tumblers sends them rolling around. They are server-side non-kinematic rigidbodies.
+   - Only scores for players in the same instance are shown at the top of the game window.

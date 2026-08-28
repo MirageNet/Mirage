@@ -16,9 +16,17 @@ namespace Mirage.Examples.MultipleAdditiveScenes
                 rigidbody3D = GetComponent<Rigidbody>();
         }
 
-        private void Start()
+        private void Awake()
         {
-            rigidbody3D.isKinematic = !IsServer;
+            // only the server simulates physics, clients just show the synced position.
+            // IsServer is not set until the scene object is spawned, so wait for OnStartServer instead of checking in Start
+            rigidbody3D.isKinematic = true;
+            Identity.OnStartServer.AddListener(OnStartServer);
+        }
+
+        private void OnStartServer()
+        {
+            rigidbody3D.isKinematic = false;
         }
 
         [Server(error = false)]

@@ -44,7 +44,8 @@ See [Using the NetworkManager](/docs/components/network-manager).
 ## Player Prefab
 - Create a new prefab in your project.
 - Add a NetworkIdentity component to the player prefab
-- Set the `playerPrefab` field on the `CharacterSpawner` component to the player prefab. You can find this component on the GameObject you created in the first setup.
+- Set the `PlayerPrefab` field on the `NetworkSceneLoader` component to the player prefab. You can find this component on the GameObject you created in the first setup.
+- Add the player prefab to the `Spawn Prefabs` list on the `ClientObjectManager`, so clients can spawn it.
 
 See [character objects](/docs/guides/game-objects/spawn-player) for more information.
 
@@ -104,8 +105,9 @@ Fix non-player prefabs such as enemies:
 -   Call `ServerObjectManager.Spawn()` for created game objects
 
 ## Spawn positions for players
+`NetworkSceneLoader` spawns characters at the player prefab's position. To use spawn points:
 -   Add a new game object and place it at the player's start location
--   Add this GameObject to the `CharacterSpawner`'s `Positions` list.
+-   Copy `NetworkSceneLoader` into your project and change `SpawnCharacterForPlayer` to pick one of your spawn points. The `PlayerSpawner` script in the Tanks sample shows how to do this.
 
 ## AI Coding Assistants
 

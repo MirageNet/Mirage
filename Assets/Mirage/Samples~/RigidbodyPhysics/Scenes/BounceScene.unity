@@ -233,7 +233,6 @@ GameObject:
   - component: {fileID: 492096641}
   - component: {fileID: 492096640}
   - component: {fileID: 492096639}
-  - component: {fileID: 492096634}
   - component: {fileID: 492096637}
   - component: {fileID: 492096642}
   - component: {fileID: 492096638}
@@ -244,39 +243,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &492096634
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 492096633}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30967dfd80dbb6c46a270a64ebecb951, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Client: {fileID: 492096641}
-  Server: {fileID: 492096640}
-  ServerObjectManager: {fileID: 492096642}
-  ClientObjectManager: {fileID: 492096637}
-  SendAdditiveScenesOnAuthenticate: 1
-  DontDestroy: 1
-  _onClientStartedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onClientFinishedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onServerStartedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onServerFinishedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onPlayerSceneReady:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &492096635
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -291,7 +257,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Server: {fileID: 492096640}
   Client: {fileID: 492096641}
-  NetworkSceneManager: {fileID: 492096634}
   ServerObjectManager: {fileID: 492096642}
   ClientObjectManager: {fileID: 492096637}
   ValidateReferences: 1
@@ -349,21 +314,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 492096633}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7aaac73a16c040fd871cb977b5c557b, type: 3}
+  m_Script: {fileID: 11500000, guid: d4f7f8640f4400e49ab26388b1c3665b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Client: {fileID: 492096641}
   Server: {fileID: 492096640}
-  SceneManager: {fileID: 492096634}
-  ClientObjectManager: {fileID: 492096637}
+  Client: {fileID: 492096641}
   ServerObjectManager: {fileID: 492096642}
+  ClientObjectManager: {fileID: 492096637}
   PlayerPrefab: {fileID: 1287874831399521600, guid: 4ab0a427bdc13244499c6e044ad7eb40,
     type: 3}
-  AutoSpawn: 1
-  SetName: 1
-  startPositionIndex: 0
-  startPositions: []
-  playerSpawnMethod: 0
+  TargetScene: 
+  ServerLoading: 0
 --- !u!114 &492096640
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -849,7 +810,6 @@ GameObject:
   - component: {fileID: 1200292995}
   - component: {fileID: 1200292994}
   - component: {fileID: 1200292993}
-  - component: {fileID: 1200292992}
   - component: {fileID: 1200292991}
   m_Layer: 0
   m_Name: Ball Red
@@ -876,28 +836,6 @@ MonoBehaviour:
     Timing: 0
     Interval: 0.1
   force: 500
---- !u!114 &1200292992
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1200292990}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 83392ae5c1b731446909f252fd494ae4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  target: {fileID: 1200292995}
-  clientAuthority: 0
-  syncVelocity: 1
-  clearVelocity: 0
-  velocitySensitivity: 0.1
-  syncAngularVelocity: 1
-  clearAngularVelocity: 0
-  angularVelocitySensitivity: 0.1
 --- !u!114 &1200292993
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1353,7 +1291,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: NetworkTranform
+  m_Text: NetworkTransform
 --- !u!222 &1619133805
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1618,9 +1556,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'NetworkTranform +
-
-    NetworkRigidbody'
+  m_Text: NetworkTransform
 --- !u!222 &2029351942
 CanvasRenderer:
   m_ObjectHideFlags: 0

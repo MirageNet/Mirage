@@ -75,7 +75,8 @@ namespace Mirage.Examples.Tanks
         private void CmdFire()
         {
             var projectile = Instantiate(projectilePrefab, projectileMount.position, transform.rotation);
-            projectile.GetComponent<Projectile>().source = gameObject;
+            var projectileComp = projectile.GetComponent<Projectile>();
+            projectileComp.source = gameObject;
             ServerObjectManager.Spawn(projectile);
             RpcOnFire();
         }

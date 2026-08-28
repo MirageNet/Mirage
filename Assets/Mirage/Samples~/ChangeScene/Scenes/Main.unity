@@ -214,7 +214,6 @@ GameObject:
   - component: {fileID: 450078215}
   - component: {fileID: 450078217}
   - component: {fileID: 450078216}
-  - component: {fileID: 450078219}
   - component: {fileID: 450078212}
   - component: {fileID: 450078220}
   - component: {fileID: 450078213}
@@ -235,30 +234,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 450078211}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30967dfd80dbb6c46a270a64ebecb951, type: 3}
+  m_Script: {fileID: 11500000, guid: d4f7f8640f4400e49ab26388b1c3665b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Client: {fileID: 450078216}
   Server: {fileID: 450078217}
+  Client: {fileID: 450078216}
   ServerObjectManager: {fileID: 450078213}
   ClientObjectManager: {fileID: 450078220}
-  SendAdditiveScenesOnAuthenticate: 1
-  DontDestroy: 1
-  _onClientStartedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onClientFinishedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onServerStartedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onServerFinishedSceneChange:
-    m_PersistentCalls:
-      m_Calls: []
-  _onPlayerSceneReady:
-    m_PersistentCalls:
-      m_Calls: []
+  PlayerPrefab: {fileID: 3878225662718291898, guid: 234985fef22d66a4ca2dba0e688f1743,
+    type: 3}
+  TargetScene: 
+  ServerLoading: 0
 --- !u!114 &450078213
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -302,7 +288,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Server: {fileID: 450078217}
   Client: {fileID: 450078216}
-  NetworkSceneManager: {fileID: 450078212}
   ServerObjectManager: {fileID: 450078213}
   ClientObjectManager: {fileID: 450078220}
   ValidateReferences: 1
@@ -403,31 +388,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &450078219
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 450078211}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7aaac73a16c040fd871cb977b5c557b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Client: {fileID: 450078216}
-  Server: {fileID: 450078217}
-  SceneManager: {fileID: 450078212}
-  ClientObjectManager: {fileID: 450078220}
-  ServerObjectManager: {fileID: 450078213}
-  PlayerPrefab: {fileID: 3878225662718291898, guid: 234985fef22d66a4ca2dba0e688f1743,
-    type: 3}
-  AutoSpawn: 1
-  SetName: 1
-  startPositionIndex: 0
-  startPositions:
-  - {fileID: 981637915}
-  playerSpawnMethod: 0
 --- !u!114 &450078220
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -786,7 +746,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43d53bca23122b54fb0ebaddebf2e987, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneManager: {fileID: 450078212}
+  SceneLoader: {fileID: 450078212}
   AdditiveButtonText: {fileID: 1173114603}
 --- !u!114 &1141063018
 MonoBehaviour:

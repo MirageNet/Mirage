@@ -14,7 +14,8 @@ namespace Mirage.Examples.MatchScenes
 
         private void OnStartClient()
         {
-            GetComponentInChildren<Renderer>().material.color = color;
+            var renderer = GetComponentInChildren<Renderer>();
+            renderer.material.color = color;
         }
     }
 }
