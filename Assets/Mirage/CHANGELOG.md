@@ -1,3 +1,10 @@
+## [158.3.8](https://github.com/MirageNet/Mirage/compare/v158.3.7...v158.3.8) (2026-09-16)
+
+
+### Bug Fixes
+
+* **license:** sync package license with root file ([a2f1756](https://github.com/MirageNet/Mirage/commit/a2f1756e4fe343cf68afacfb5ff0c278ca564bf6))
+
 ## [158.3.7](https://github.com/MirageNet/Mirage/compare/v158.3.6...v158.3.7) (2026-08-21)
 
 
