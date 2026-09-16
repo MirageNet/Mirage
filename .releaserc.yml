@@ -12,6 +12,8 @@ plugins:
         Assets/Mirage/Samples~/AssemblyInfo.cs
         Assets/Mirage/Samples~/RigidbodyPhysics/Scripts/AssemblyInfo.cs
         Assets/Mirage/Weaver/AssemblyInfo.cs"
+  - - '@semantic-release/exec'
+    - prepareCmd: "cp LICENSE Assets/Mirage/LICENSE"
   - - '@semantic-release/changelog'
     - changelogFile: 'Assets/Mirage/CHANGELOG.md'
   - - '@semantic-release/npm'
@@ -29,3 +31,4 @@ plugins:
         - 'Assets/Mirage/Weaver/Mirage.CecilExtensions/AssemblyInfo.cs'
         - 'Assets/Mirage/package.json'
         - 'Assets/Mirage/CHANGELOG.md'
+        - 'Assets/Mirage/LICENSE'
