@@ -358,7 +358,8 @@ namespace Mirage.Tests.Runtime.Serialization
 
             // Register RPC delegate that throws SerializationLimitException when called
             var remoteCall = new RemoteCall(
-                behaviour,
+                behaviour.GetType(),
+                behaviour.ComponentIndex,
                 0,
                 RpcInvokeType.ServerRpc,
                 (obj, reader, senderPlayer, replyId) => throw new SerializationLimitException("Simulated limit exceeded"),

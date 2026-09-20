@@ -47,7 +47,7 @@ namespace Mirage.RemoteCalls
             if (RemoteCalls[indexOffset + relativeIndex] != null)
                 throw new InvalidOperationException("2 Rpc has same index");
 
-            var call = new RemoteCall(behaviour, relativeIndex, invokerType, func, cmdRequireAuthority, name, rateLimit);
+            var call = new RemoteCall(behaviour.GetType(), behaviour.ComponentIndex, relativeIndex, invokerType, func, cmdRequireAuthority, name, rateLimit);
             RemoteCalls[indexOffset + relativeIndex] = call;
 
             if (logger.LogEnabled())
@@ -247,6 +247,14 @@ namespace Mirage.RemoteCalls
         /// </summary>
         public readonly Type DeclaringType;
         /// <summary>
+        /// Component index within NetworkIdentity.NetworkBehaviours
+        /// </summary>
+        public readonly int ComponentIndex;
+        /// <summary>
+        /// Relative index of this RPC within its declaring component
+        /// </summary>
+        public readonly int RelativeIndex;
+        /// <summary>
         /// Server rpc or client rpc
         /// </summary>
         public readonly RpcInvokeType InvokeType;
@@ -263,8 +271,6 @@ namespace Mirage.RemoteCalls
         /// </summary>
         public readonly string Name;
 
-        public readonly NetworkBehaviour Behaviour;
-
         /// <summary>
         /// Rate limit configuration for this RPC
         /// </summary>
@@ -276,7 +282,8 @@ namespace Mirage.RemoteCalls
         public readonly RpcId RpcId;
 
         public RemoteCall(
-            NetworkBehaviour behaviour,
+            Type declaringType,
+            int componentIndex,
             int indexInType,
             RpcInvokeType invokeType,
             RpcDelegate function,
@@ -284,19 +291,20 @@ namespace Mirage.RemoteCalls
             string name,
             RpcRateLimitConfig rateLimit)
         {
-            Behaviour = behaviour;
-            DeclaringType = behaviour.GetType();
+            DeclaringType = declaringType;
+            ComponentIndex = componentIndex;
+            RelativeIndex = indexInType;
             InvokeType = invokeType;
             Function = function;
             RequireAuthority = requireAuthority;
             Name = name;
-            RpcId = new RpcId(DeclaringType, indexInType);
+            RpcId = new RpcId(declaringType, indexInType);
             RateLimit = rateLimit;
         }
 
-        internal void Invoke(NetworkReader reader, INetworkPlayer senderPlayer = null, int replyId = 0)
+        internal void Invoke(NetworkBehaviour behaviour, NetworkReader reader, INetworkPlayer senderPlayer = null, int replyId = 0)
         {
-            Function(Behaviour, reader, senderPlayer, replyId);
+            Function(behaviour, reader, senderPlayer, replyId);
         }
 
         /// <summary>

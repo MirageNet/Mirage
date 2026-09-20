@@ -44,7 +44,7 @@ namespace Mirage.RemoteCalls
 
             var callInfo = collection.GetAbsolute(absoluteIndex);
             player = GetTarget(behaviour, player);
-            (var task, var id) = behaviour.ServerObjectManager._rpcHandler.CreateReplyTask<T>(callInfo, player);
+            (var task, var id) = behaviour.ServerObjectManager._rpcHandler.CreateReplyTask<T>(behaviour, callInfo, player);
             var message = new RpcWithReplyMessage
             {
                 NetId = behaviour.NetId,

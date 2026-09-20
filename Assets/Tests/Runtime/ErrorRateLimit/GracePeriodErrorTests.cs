@@ -43,7 +43,7 @@ namespace Mirage.Tests.Runtime.ErrorRateLimit
             for (var i = 0; i < remoteCalls.Length; i++)
             {
                 var remoteCall = remoteCalls[i];
-                if (remoteCall != null && remoteCall.Behaviour == component && remoteCall.Name.Contains(funcName))
+                if (remoteCall != null && remoteCall.ComponentIndex == component.ComponentIndex && remoteCall.Name.Contains(funcName))
                 {
                     functionIndex = i;
                     break;

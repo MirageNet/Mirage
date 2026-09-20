@@ -106,7 +106,7 @@ namespace Mirage.Tests.Runtime.RateLimit
                 Payload = new System.ArraySegment<byte>(new byte[0])
             };
 
-            (var task, var id) = clientObjectManager._rpcHandler.CreateReplyTask<T>(rpc, client.Player);
+            (var task, var id) = clientObjectManager._rpcHandler.CreateReplyTask<T>(behaviour, rpc, client.Player);
             message.ReplyId = id;
 
             client.Send(message, Channel.Reliable);

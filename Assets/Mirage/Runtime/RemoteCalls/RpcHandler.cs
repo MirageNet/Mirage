@@ -173,7 +173,8 @@ namespace Mirage.RemoteCalls
             {
                 try
                 {
-                    remoteCall.Invoke(reader, player, replyId);
+                    var behaviour = identity.NetworkBehaviours[remoteCall.ComponentIndex];
+                    remoteCall.Invoke(behaviour, reader, player, replyId);
                 }
                 catch (SerializationLimitException e)
                 {
@@ -227,7 +228,7 @@ namespace Mirage.RemoteCalls
         /// <typeparam name="T"></typeparam>
         /// <param name="expectedSender">The only player whose RpcReply is accepted for this id. Prevents reply spoofing by other authenticated players.</param>
         /// <returns>the task that will be completed when the result is in, and the id to use in the request</returns>
-        public (UniTask<T> task, int replyId) CreateReplyTask<T>(RemoteCall info, INetworkPlayer expectedSender)
+        public (UniTask<T> task, int replyId) CreateReplyTask<T>(NetworkBehaviour behaviour, RemoteCall info, INetworkPlayer expectedSender)
         {
             var newReplyId = _nextReplyId++;
             var completionSource = AutoResetUniTaskCompletionSource<T>.Create();
@@ -241,10 +242,10 @@ namespace Mirage.RemoteCalls
             {
                 var netId = 0u;
                 var name = "";
-                if (info.Behaviour != null)
+                if (behaviour != null)
                 {
-                    netId = info.Behaviour.NetId;
-                    name = info.Behaviour.name;
+                    netId = behaviour.NetId;
+                    name = behaviour.name;
                 }
                 var message = $"Exception thrown from return RPC. {info.Name} on netId={netId} {name}";
                 completionSource.TrySetException(new ReturnRpcException(message));
