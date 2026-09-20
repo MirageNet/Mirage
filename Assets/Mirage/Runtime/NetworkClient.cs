@@ -5,6 +5,7 @@ using Mirage.Events;
 using Mirage.Logging;
 using Mirage.Serialization;
 using Mirage.SocketLayer;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage
@@ -27,6 +28,11 @@ namespace Mirage
     public class NetworkClient : MonoBehaviour, IMessageSender
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkClient));
+
+        private static readonly ProfilerMarker startedInvokeMarker = new ProfilerMarker("Mirage.NetworkClient.Started.Invoke");
+        private static readonly ProfilerMarker connectedInvokeMarker = new ProfilerMarker("Mirage.NetworkClient.Connected.Invoke");
+        private static readonly ProfilerMarker authenticatedInvokeMarker = new ProfilerMarker("Mirage.NetworkClient.Authenticated.Invoke");
+        private static readonly ProfilerMarker disconnectedInvokeMarker = new ProfilerMarker("Mirage.NetworkClient.Disconnected.Invoke");
 
         public bool EnablePeerMetrics;
         [Tooltip("Sequence size of buffer in bits.\n10 => array size 1024 => ~17 seconds at 60hz")]
@@ -174,7 +180,8 @@ namespace Mirage
             // invoke started event after everything is set up, but before peer has connected
             if (ObjectManager != null)
                 ObjectManager.ClientStarted(this);
-            _started.Invoke();
+            using (startedInvokeMarker.Auto())
+                _started.Invoke();
         }
 
         private void ThrowIfActive()
@@ -196,14 +203,16 @@ namespace Mirage
                 World.Time.PingNow(this);
 
             _connectState = ConnectState.Connected;
-            _connected.Invoke(Player);
+            using (connectedInvokeMarker.Auto())
+                _connected.Invoke(Player);
         }
 
         private void Peer_OnConnectionFailed(IConnection conn, RejectReason reason)
         {
             if (logger.WarnEnabled()) logger.LogWarning($"Failed to connect to {conn.Handle} with reason {reason}");
             Player?.MarkAsDisconnected();
-            _disconnected?.Invoke(reason.ToClientStoppedReason());
+            using (disconnectedInvokeMarker.Auto())
+                _disconnected?.Invoke(reason.ToClientStoppedReason());
             Cleanup();
         }
 
@@ -211,14 +220,16 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log($"Disconnected from {conn.Handle} with reason {reason}");
             Player?.MarkAsDisconnected();
-            _disconnected?.Invoke(reason.ToClientStoppedReason());
+            using (disconnectedInvokeMarker.Auto())
+                _disconnected?.Invoke(reason.ToClientStoppedReason());
             Cleanup();
         }
 
         private void OnHostDisconnected()
         {
             Player?.MarkAsDisconnected();
-            _disconnected?.Invoke(ClientStoppedReason.HostModeStopped);
+            using (disconnectedInvokeMarker.Auto())
+                _disconnected?.Invoke(ClientStoppedReason.HostModeStopped);
         }
 
         internal void ConnectHost(NetworkServer server, IDataHandler serverDataHandler)
@@ -244,7 +255,8 @@ namespace Mirage
             // invoke started event after everything is set up, but before peer has connected
             if (ObjectManager != null)
                 ObjectManager.ClientStarted(this);
-            _started.Invoke();
+            using (startedInvokeMarker.Auto())
+                _started.Invoke();
 
             // we need add server connection to server's dictionary first
             // then invoke connected event on client (client has to connect first or it will miss message in NetworkScenemanager)
@@ -291,7 +303,8 @@ namespace Mirage
             }
 
             Player.SetAuthentication(new PlayerAuthentication(authenticator, null));
-            _authenticated.Invoke(Player);
+            using (authenticatedInvokeMarker.Auto())
+                _authenticated.Invoke(Player);
         }
 
 

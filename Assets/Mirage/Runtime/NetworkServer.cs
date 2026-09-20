@@ -7,6 +7,7 @@ using Mirage.Events;
 using Mirage.Logging;
 using Mirage.Serialization;
 using Mirage.SocketLayer;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -24,6 +25,16 @@ namespace Mirage
     public class NetworkServer : MonoBehaviour
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkServer));
+
+        private static readonly ProfilerMarker startedInvokeMarker = new ProfilerMarker("Mirage.NetworkServer.Started.Invoke");
+        private static readonly ProfilerMarker connectedInvokeMarker = new ProfilerMarker("Mirage.NetworkServer.Connected.Invoke");
+        private static readonly ProfilerMarker authenticatedInvokeMarker = new ProfilerMarker("Mirage.NetworkServer.Authenticated.Invoke");
+        private static readonly ProfilerMarker disconnectedInvokeMarker = new ProfilerMarker("Mirage.NetworkServer.Disconnected.Invoke");
+        private static readonly ProfilerMarker stoppedInvokeMarker = new ProfilerMarker("Mirage.NetworkServer.Stopped.Invoke");
+        private static readonly ProfilerMarker onStartHostInvokeMarker = new ProfilerMarker("Mirage.NetworkServer.OnStartHost.Invoke");
+        private static readonly ProfilerMarker onStopHostInvokeMarker = new ProfilerMarker("Mirage.NetworkServer.OnStopHost.Invoke");
+        private static readonly ProfilerMarker errorRateLimitCallbackMarker = new ProfilerMarker("Mirage.NetworkServer.Callback.ErrorRateLimit.Invoke");
+        private static readonly ProfilerMarker authFailCallbackMarker = new ProfilerMarker("Mirage.NetworkServer.Callback.AuthFailed.Invoke");
 
         public delegate void RateLimitCallback(INetworkPlayer player);
         public delegate void AuthFailCallback(INetworkPlayer player, AuthenticationResult result);
@@ -197,7 +208,8 @@ namespace Mirage
             {
                 if (logger.WarnEnabled())
                     logger.LogWarning($"ErrorRateLimit reached {player}. Invoking user callback");
-                _errorRateLimitReached.Invoke(player);
+                using (errorRateLimitCallbackMarker.Auto())
+                    _errorRateLimitReached.Invoke(player);
             }
             else
             {
@@ -248,7 +260,8 @@ namespace Mirage
 
             if (LocalClient != null)
             {
-                _onStopHost?.Invoke();
+                using (onStopHostInvokeMarker.Auto())
+                    _onStopHost?.Invoke();
                 LocalClient.Disconnect();
             }
 
@@ -258,7 +271,8 @@ namespace Mirage
             LocalClient = null;
             LocalPlayer = null;
 
-            _stopped?.Invoke();
+            using (stoppedInvokeMarker.Auto())
+                _stopped?.Invoke();
             Active = false;
 
             _started.Reset();
@@ -365,21 +379,24 @@ namespace Mirage
                 if (LocalClient == null)
                     ObjectManager.FirstServerSpawn();
             }
-            _started?.Invoke();
+            using (startedInvokeMarker.Auto())
+                _started?.Invoke();
 
             if (LocalClient != null)
             {
                 localClient.ConnectHost(this, dataHandler);
 
                 // onStartHost needs to be called after the client is active
-                _onStartHost?.Invoke();
+                using (onStartHostInvokeMarker.Auto())
+                    _onStartHost?.Invoke();
 
                 // spawn scene objects in starting scene AFTER host client has activated,
                 // otherwise IsClient will be false for objects in starting scene
                 if (ObjectManager != null)
                     ObjectManager.FirstServerSpawn();
 
-                Connected?.Invoke(LocalPlayer);
+                using (connectedInvokeMarker.Auto())
+                    Connected?.Invoke(LocalPlayer);
 
                 if (logger.LogEnabled()) logger.Log("NetworkServer StartHost");
                 Authenticate(LocalPlayer);
@@ -430,7 +447,8 @@ namespace Mirage
             _connections[player.Connection] = player;
 
             // let everyone know we just accepted a connection
-            Connected?.Invoke(player);
+            using (connectedInvokeMarker.Auto())
+                Connected?.Invoke(player);
 
             Authenticate(player);
         }
@@ -464,7 +482,8 @@ namespace Mirage
                 if (_authFailCallback != null)
                 {
                     if (logger.LogEnabled()) logger.Log($"Calling user auth failed callback");
-                    _authFailCallback.Invoke(player, result);
+                    using (authFailCallbackMarker.Auto())
+                        _authFailCallback.Invoke(player, result);
                 }
                 else
                 {
@@ -501,7 +520,8 @@ namespace Mirage
 
             // add connection
             _authenticatedPlayers.Add(player);
-            Authenticated?.Invoke(player);
+            using (authenticatedInvokeMarker.Auto())
+                Authenticated?.Invoke(player);
         }
 
         private void Peer_OnDisconnected(IConnection conn, DisconnectReason reason)
@@ -677,7 +697,8 @@ namespace Mirage
 
             RemoveConnection(player);
 
-            Disconnected?.Invoke(player);
+            using (disconnectedInvokeMarker.Auto())
+                Disconnected?.Invoke(player);
 
             player.DestroyOwnedObjects();
             player.Identity = null;

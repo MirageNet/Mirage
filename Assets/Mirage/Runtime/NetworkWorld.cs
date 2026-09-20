@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Mirage.Logging;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage
@@ -22,6 +23,10 @@ namespace Mirage
         public delegate void UnspawnHandler(uint netId, NetworkIdentity identity);
 
         private static readonly ILogger logger = LogFactory.GetLogger<NetworkWorld>();
+
+        private static readonly ProfilerMarker onSpawnInvokeMarker = new ProfilerMarker("Mirage.NetworkWorld.OnSpawn.Invoke");
+        private static readonly ProfilerMarker onUnspawnInvokeMarker = new ProfilerMarker("Mirage.NetworkWorld.OnUnspawn.Invoke");
+        private static readonly ProfilerMarker onAuthorityChangedInvokeMarker = new ProfilerMarker("Mirage.NetworkWorld.OnAuthorityChanged.Invoke");
 
         /// <summary>
         /// Raised when object is spawned
@@ -98,7 +103,8 @@ namespace Mirage
             // this can happen client side. we check for this case in TryGetValue above
             _spawnedObjects[netId] = identity;
             _needsSorting = true;
-            onSpawn?.Invoke(identity);
+            using (onSpawnInvokeMarker.Auto())
+                onSpawn?.Invoke(identity);
 
             // owner might be set before World is
             // so we need to invoke authChange now if the object has an owner
@@ -129,7 +135,8 @@ namespace Mirage
             {
                 _needsSorting = true;
                 if (logger.LogEnabled()) logger.Log($"Removing [netId={netId}, name={identity?.name}] from World");
-                onUnspawn?.Invoke(netId, identity);
+                using (onUnspawnInvokeMarker.Auto())
+                    onUnspawn?.Invoke(netId, identity);
             }
             else
             {
@@ -160,7 +167,8 @@ namespace Mirage
 
         internal void InvokeOnAuthorityChanged(NetworkIdentity identity, bool hasAuthority, INetworkPlayer owner)
         {
-            OnAuthorityChanged?.Invoke(identity, hasAuthority, owner);
+            using (onAuthorityChangedInvokeMarker.Auto())
+                OnAuthorityChanged?.Invoke(identity, hasAuthority, owner);
         }
 
         public NetworkWorld()

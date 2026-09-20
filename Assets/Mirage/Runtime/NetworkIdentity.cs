@@ -106,6 +106,13 @@ namespace Mirage
     {
         private static readonly ILogger logger = LogFactory.GetLogger<NetworkIdentity>();
 
+        private static readonly ProfilerMarker onStartServerInvokeMarker = new ProfilerMarker("Mirage.NetworkIdentity.OnStartServer.Invoke");
+        private static readonly ProfilerMarker onStartClientInvokeMarker = new ProfilerMarker("Mirage.NetworkIdentity.OnStartClient.Invoke");
+        private static readonly ProfilerMarker onStartLocalPlayerInvokeMarker = new ProfilerMarker("Mirage.NetworkIdentity.OnStartLocalPlayer.Invoke");
+        private static readonly ProfilerMarker onAuthorityChangedInvokeMarker = new ProfilerMarker("Mirage.NetworkIdentity.OnAuthorityChanged.Invoke");
+        private static readonly ProfilerMarker onOwnerChangedInvokeMarker = new ProfilerMarker("Mirage.NetworkIdentity.OnOwnerChanged.Invoke");
+        private static readonly ProfilerMarker onStopClientInvokeMarker = new ProfilerMarker("Mirage.NetworkIdentity.OnStopClient.Invoke");
+        private static readonly ProfilerMarker onStopServerInvokeMarker = new ProfilerMarker("Mirage.NetworkIdentity.OnStopServer.Invoke");
         private static readonly ProfilerMarker onSerializeDeltaMarker = new ProfilerMarker("Mirage.NetworkIdentity.OnSerializeDelta");
         private static readonly ProfilerMarker onSerializeInitialMarker = new ProfilerMarker("Mirage.NetworkIdentity.OnSerializeInitial");
         private static readonly ProfilerMarker onDeserializeAllMarker = new ProfilerMarker("Mirage.NetworkIdentity.OnDeserializeAll");
@@ -279,7 +286,8 @@ namespace Mirage
             foreach (var comp in NetworkBehaviours)
                 comp.UpdateSyncObjectShouldSync();
 
-            _onOwnerChanged.Invoke(_owner);
+            using (onOwnerChangedInvokeMarker.Auto())
+                _onOwnerChanged.Invoke(_owner);
 
             // only invoke again if new owner is not null
             if (_owner != null)
@@ -596,12 +604,14 @@ namespace Mirage
             foreach (var comp in NetworkBehaviours)
                 comp.UpdateSyncObjectShouldSync();
 
-            _onStartServer.Invoke();
+            using (onStartServerInvokeMarker.Auto())
+                _onStartServer.Invoke();
         }
 
         internal void StopServer()
         {
-            _onStopServer.Invoke();
+            using (onStopServerInvokeMarker.Auto())
+                _onStopServer.Invoke();
         }
 
         internal void StartClient()
@@ -615,7 +625,8 @@ namespace Mirage
                 comp.UpdateSyncObjectShouldSync();
 
             _clientStarted = true;
-            _onStartClient.Invoke();
+            using (onStartClientInvokeMarker.Auto())
+                _onStartClient.Invoke();
         }
 
         internal void StartLocalPlayer()
@@ -624,7 +635,8 @@ namespace Mirage
                 return;
             _localPlayerStarted = true;
 
-            _onStartLocalPlayer.Invoke();
+            using (onStartLocalPlayerInvokeMarker.Auto())
+                _onStartLocalPlayer.Invoke();
         }
 
         internal void NotifyAuthority()
@@ -642,7 +654,8 @@ namespace Mirage
 
         internal void CallStartAuthority()
         {
-            _onAuthorityChanged.Invoke(true);
+            using (onAuthorityChangedInvokeMarker.Auto())
+                _onAuthorityChanged.Invoke(true);
 
             // dont invoke in host mode, server will invoke it when owner is changed
             if (!IsServer)
@@ -651,7 +664,8 @@ namespace Mirage
 
         internal void CallStopAuthority()
         {
-            _onAuthorityChanged.Invoke(false);
+            using (onAuthorityChangedInvokeMarker.Auto())
+                _onAuthorityChanged.Invoke(false);
 
             // dont invoke in host mode, server will invoke it when owner is changed
             if (!IsServer)
@@ -668,7 +682,8 @@ namespace Mirage
 
         internal void StopClient()
         {
-            _onStopClient.Invoke();
+            using (onStopClientInvokeMarker.Auto())
+                _onStopClient.Invoke();
         }
 
         // random number that is unlikely to appear in a regular data stream
