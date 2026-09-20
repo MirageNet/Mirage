@@ -1,3 +1,11 @@
+## [158.3.9](https://github.com/MirageNet/Mirage/compare/v158.3.8...v158.3.9) (2026-09-20)
+
+
+### Performance Improvements
+
+* **rpc:** cache RemoteCallCollection per component type layout ([6697908](https://github.com/MirageNet/Mirage/commit/66979088420678fd4167cc88fe07fabd16033756))
+* **rpc:** eliminate closure allocations in request RPC registration ([0f5025a](https://github.com/MirageNet/Mirage/commit/0f5025af90fe8b2e19d8292061085ee57d17e892))
+
 ## [158.3.8](https://github.com/MirageNet/Mirage/compare/v158.3.7...v158.3.8) (2026-09-16)
 
 
