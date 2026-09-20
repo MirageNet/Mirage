@@ -1,3 +1,13 @@
+# [158.4.0](https://github.com/MirageNet/Mirage/compare/v158.3.9...v158.4.0) (2026-09-20)
+
+
+### Features
+
+* add profiler markers for event and callback invocations in NetworkServer, NetworkClient, NetworkIdentity, and NetworkWorld ([59a73e2](https://github.com/MirageNet/Mirage/commit/59a73e23bf3e78532a446955e7d177e116b2bba5))
+* add profiler markers to NetworkIdentity.RebuildObservers and NetworkVisibility.OnVisibilityChanged ([d17a164](https://github.com/MirageNet/Mirage/commit/d17a164ff5f31ab37ffc635a167f75754541b6ae))
+* add profiler markers to ServerObjectManager and ClientObjectManager ([47a443b](https://github.com/MirageNet/Mirage/commit/47a443b9328c641c190b0a110c05fde724b579a2))
+* add profiler markers to SyncVarSender, SyncVarReceiver, and NetworkIdentity serialization ([a9fd7e2](https://github.com/MirageNet/Mirage/commit/a9fd7e2e667029eb8607561f5a22d3613f258747))
+
 ## [158.3.9](https://github.com/MirageNet/Mirage/compare/v158.3.8...v158.3.9) (2026-09-20)
 
 
