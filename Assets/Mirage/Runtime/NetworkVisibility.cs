@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage
@@ -9,6 +10,8 @@ namespace Mirage
     [DisallowMultipleComponent]
     public abstract class NetworkVisibility : NetworkBehaviour, INetworkVisibility
     {
+        private static readonly ProfilerMarker onVisibilityChangedInvokeMarker = new ProfilerMarker("Mirage.NetworkVisibility.OnVisibilityChanged.Invoke");
+
         public delegate void VisibilityChanged(INetworkPlayer player, bool visible);
 
         /// <summary>
@@ -20,7 +23,8 @@ namespace Mirage
 
         internal void InvokeVisibilityChanged(INetworkPlayer player, bool visible)
         {
-            OnVisibilityChanged?.Invoke(player, visible);
+            using (onVisibilityChangedInvokeMarker.Auto())
+                OnVisibilityChanged?.Invoke(player, visible);
         }
 
         /// <summary>

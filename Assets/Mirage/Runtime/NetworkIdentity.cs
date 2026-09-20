@@ -116,6 +116,7 @@ namespace Mirage
         private static readonly ProfilerMarker onSerializeDeltaMarker = new ProfilerMarker("Mirage.NetworkIdentity.OnSerializeDelta");
         private static readonly ProfilerMarker onSerializeInitialMarker = new ProfilerMarker("Mirage.NetworkIdentity.OnSerializeInitial");
         private static readonly ProfilerMarker onDeserializeAllMarker = new ProfilerMarker("Mirage.NetworkIdentity.OnDeserializeAll");
+        private static readonly ProfilerMarker rebuildObserversMarker = new ProfilerMarker("Mirage.NetworkIdentity.RebuildObservers");
 
         public NetworkSpawnSettings SpawnSettings = NetworkSpawnSettings.Default;
 
@@ -1078,6 +1079,8 @@ namespace Mirage
         /// <param name="initialize">True if this is the first time.</param>
         public void RebuildObservers(bool initialize)
         {
+            using var _ = rebuildObserversMarker.Auto();
+
             // call OnRebuildObservers function
             GetNewObservers(newObservers, initialize);
 
