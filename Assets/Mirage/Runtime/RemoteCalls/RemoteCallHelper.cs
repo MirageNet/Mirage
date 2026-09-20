@@ -59,65 +59,7 @@ namespace Mirage.RemoteCalls
 
         public void RegisterRequest<T>(int relativeIndex, string name, bool cmdRequireAuthority, RpcInvokeType invokerType, NetworkBehaviour behaviour, RequestDelegate<T> func, RpcRateLimitConfig rateLimit)
         {
-            async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
-            {
-                /// invoke the serverRpc and send a reply message
-                bool success;
-                T result = default;
-                try
-                {
-                    result = await func(obj, reader, senderPlayer, replyId);
-                    success = true;
-                }
-                catch (System.IO.EndOfStreamException e)
-                {
-                    success = false;
-                    logger.LogError($"Return RPC threw EndOfStreamException: {e}");
-
-                    // cost=50 because NetworkReader throwing means serialization mismatch, hard to recover from, likely need to kick player if it happens often.
-                    senderPlayer.SetError(50, PlayerErrorFlags.DeserializationException);
-                }
-                catch (Exception e)
-                {
-                    success = false;
-                    logger.LogError($"Return RPC threw an Exception: {e}");
-
-                    // Common errors caused by developer mistake
-                    if (e is NullReferenceException || e is UnityEngine.MissingReferenceException || e is UnityEngine.UnassignedReferenceException)
-                        senderPlayer.SetError(1, PlayerErrorFlags.RpcNullException);
-                    else
-                        senderPlayer.SetError(2, PlayerErrorFlags.RpcException);
-                }
-
-
-                var serverRpcReply = new RpcReply
-                {
-                    ReplyId = replyId,
-                    Success = success,
-                };
-                if (success)
-                {
-                    // if success, write payload and send
-                    // else just send it without payload (since there is no result)
-                    using (var writer = NetworkWriterPool.GetWriter())
-                    {
-                        writer.Write(result);
-                        serverRpcReply.Payload = writer.ToArraySegment();
-                        senderPlayer.Send(serverRpcReply);
-                    }
-                }
-                else
-                {
-                    senderPlayer.Send(serverRpcReply);
-                }
-            }
-
-            void CmdWrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
-            {
-                Wrapper(obj, reader, senderPlayer, replyId).Forget();
-            }
-
-            Register(relativeIndex, name, cmdRequireAuthority, invokerType, behaviour, CmdWrapper, rateLimit);
+            Register(relativeIndex, name, cmdRequireAuthority, invokerType, behaviour, RequestRpcInvoker<T>.CreateWrapper(func), rateLimit);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -141,6 +83,7 @@ namespace Mirage.RemoteCalls
                 return null;
         }
     }
+
     /// <summary>
     /// Delegate for ServerRpc functions.
     /// </summary>
@@ -316,5 +259,69 @@ namespace Mirage.RemoteCalls
             return Name;
         }
     }
-}
 
+    internal static class RequestRpcInvoker<T>
+    {
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(RequestRpcInvoker<T>));
+
+        public static RpcDelegate CreateWrapper(RequestDelegate<T> func)
+        {
+            return (NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId) =>
+            {
+                Invoke(func, obj, reader, senderPlayer, replyId).Forget();
+            };
+        }
+
+        private static async UniTaskVoid Invoke(RequestDelegate<T> func, NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
+        {
+            // invoke the serverRpc and send a reply message
+            bool success;
+            T result = default;
+            try
+            {
+                result = await func(obj, reader, senderPlayer, replyId);
+                success = true;
+            }
+            catch (System.IO.EndOfStreamException e)
+            {
+                success = false;
+                logger.LogError($"Return RPC threw EndOfStreamException: {e}");
+
+                // cost=50 because NetworkReader throwing means serialization mismatch, hard to recover from, likely need to kick player if it happens often.
+                senderPlayer.SetError(50, PlayerErrorFlags.DeserializationException);
+            }
+            catch (Exception e)
+            {
+                success = false;
+                logger.LogError($"Return RPC threw an Exception: {e}");
+
+                // Common errors caused by developer mistake
+                if (e is NullReferenceException || e is UnityEngine.MissingReferenceException || e is UnityEngine.UnassignedReferenceException)
+                    senderPlayer.SetError(1, PlayerErrorFlags.RpcNullException);
+                else
+                    senderPlayer.SetError(2, PlayerErrorFlags.RpcException);
+            }
+
+            var serverRpcReply = new RpcReply
+            {
+                ReplyId = replyId,
+                Success = success,
+            };
+            if (success)
+            {
+                // if success, write payload and send
+                // else just send it without payload (since there is no result)
+                using (var writer = NetworkWriterPool.GetWriter())
+                {
+                    writer.Write(result);
+                    serverRpcReply.Payload = writer.ToArraySegment();
+                    senderPlayer.Send(serverRpcReply);
+                }
+            }
+            else
+            {
+                senderPlayer.Send(serverRpcReply);
+            }
+        }
+    }
+}
