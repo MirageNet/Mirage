@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage
@@ -16,6 +17,13 @@ namespace Mirage
     public class ClientObjectManager : MonoBehaviour
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientObjectManager));
+
+        private static readonly ProfilerMarker onSpawnMarker = new ProfilerMarker("Mirage.ClientObjectManager.OnSpawn");
+        private static readonly ProfilerMarker spawnPrefabMarker = new ProfilerMarker("Mirage.ClientObjectManager.SpawnPrefab");
+        private static readonly ProfilerMarker spawnSceneObjectMarker = new ProfilerMarker("Mirage.ClientObjectManager.SpawnSceneObject");
+        private static readonly ProfilerMarker applySpawnPayloadMarker = new ProfilerMarker("Mirage.ClientObjectManager.ApplySpawnPayload");
+        private static readonly ProfilerMarker unSpawnMarker = new ProfilerMarker("Mirage.ClientObjectManager.UnSpawn");
+        private static readonly ProfilerMarker prepareSceneObjectsMarker = new ProfilerMarker("Mirage.ClientObjectManager.PrepareSceneObjects");
 
         internal RpcHandler _rpcHandler;
         internal SyncVarReceiver _syncVarReceiver;
@@ -189,6 +197,8 @@ namespace Mirage
         /// </summary>
         public void PrepareToSpawnSceneObjects()
         {
+            using var _ = prepareSceneObjectsMarker.Auto();
+
             // clear up old scene,
             // we can just assume PrepareToSpawnSceneObjects is called after loading scene and call remove here
             Client.World?.RemoveDestroyedObjects();
@@ -482,6 +492,8 @@ namespace Mirage
 
         private void UnSpawn(NetworkIdentity identity)
         {
+            using var _ = unSpawnMarker.Auto();
+
             // have to store netid, so we can remove it from world, this is because NetworkReset will clear it
             var netId = identity.NetId;
 
@@ -553,6 +565,8 @@ namespace Mirage
 
         private void ApplySpawnPayload(NetworkIdentity identity, SpawnMessage msg)
         {
+            using var _ = applySpawnPayloadMarker.Auto();
+
             if (msg.PrefabHash.HasValue)
                 identity.PrefabHash = msg.PrefabHash.Value;
 
@@ -579,6 +593,8 @@ namespace Mirage
 
         internal void OnSpawn(SpawnMessage msg)
         {
+            using var _ = onSpawnMarker.Auto();
+
             // pendingSpawn.Count check to skip dictionary lookup if empty
             if (pendingSpawn.Count > 0 && pendingSpawn.TryGetValue(msg.NetId, out var pending)) // async spawning
             {
@@ -688,6 +704,8 @@ namespace Mirage
 
         private NetworkIdentity SpawnPrefab(SpawnMessage msg, SpawnHandler handler)
         {
+            using var _ = spawnPrefabMarker.Auto();
+
             var spawnHandler = handler.Handler;
             if (spawnHandler != null)
             {
@@ -714,6 +732,8 @@ namespace Mirage
 
         internal NetworkIdentity SpawnSceneObject(SpawnMessage msg)
         {
+            using var _ = spawnSceneObjectMarker.Auto();
+
             var sceneId = msg.SceneId.Value;
 
             if (spawnableObjects.TryGetValue(sceneId, out var foundSceneObject))

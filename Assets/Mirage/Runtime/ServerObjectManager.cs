@@ -4,6 +4,7 @@ using System.Linq;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
+using Unity.Profiling;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -23,6 +24,12 @@ namespace Mirage
     public class ServerObjectManager : MonoBehaviour
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(ServerObjectManager));
+
+        private static readonly ProfilerMarker spawnMarker = new ProfilerMarker("Mirage.ServerObjectManager.Spawn");
+        private static readonly ProfilerMarker sendSpawnMessageMarker = new ProfilerMarker("Mirage.ServerObjectManager.SendSpawnMessage");
+        private static readonly ProfilerMarker createSpawnPayloadMarker = new ProfilerMarker("Mirage.ServerObjectManager.CreateSpawnPayload");
+        private static readonly ProfilerMarker destroyObjectMarker = new ProfilerMarker("Mirage.ServerObjectManager.Destroy");
+        private static readonly ProfilerMarker spawnSceneObjectsMarker = new ProfilerMarker("Mirage.ServerObjectManager.SpawnSceneObjects");
 
         internal RpcHandler _rpcHandler;
         private SyncVarReceiver _syncVarReceiver;
@@ -412,6 +419,8 @@ namespace Mirage
         /// </summary>
         public void Spawn(NetworkIdentity identity)
         {
+            using var _ = spawnMarker.Auto();
+
             if (!_server || !_server.Active)
             {
                 throw new InvalidOperationException("NetworkServer is not active. Cannot spawn objects without an active server.");
@@ -444,6 +453,8 @@ namespace Mirage
 
         internal void SendSpawnMessage(NetworkIdentity identity, INetworkPlayer player)
         {
+            using var _ = sendSpawnMessageMarker.Auto();
+
             logger.Assert(player.IsAuthenticated || !(identity.Visibility is AlwaysVisible), // can't use `is not` in unity2020
                 "SendSpawnMessage should only be called if player is authenticated, or there is custom visibility");
             if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId}");
@@ -487,6 +498,8 @@ namespace Mirage
         }
         internal void SendSpawnMessageMany(NetworkIdentity identity, List<INetworkPlayer> players)
         {
+            using var _ = sendSpawnMessageMarker.Auto();
+
             if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId}");
 
             // one writer for owner, one for observers
@@ -577,6 +590,8 @@ namespace Mirage
 
         private static bool CreateSpawnMessagePayload(NetworkIdentity identity, PooledNetworkWriter ownerWriter, PooledNetworkWriter observersWriter)
         {
+            using var _ = createSpawnPayloadMarker.Auto();
+
             // Only call OnSerializeAllSafely if there are NetworkBehaviours
             if (identity.NetworkBehaviours.Length == 0)
             {
@@ -640,6 +655,8 @@ namespace Mirage
 
         private void DestroyObject(NetworkIdentity identity, bool destroyServerObject)
         {
+            using var _ = destroyObjectMarker.Auto();
+
             var netId = identity.NetId;
             if (netId == 0)
             {
@@ -703,6 +720,8 @@ namespace Mirage
         /// <exception cref="InvalidOperationException">Thrown when server is not active</exception>
         public void SpawnSceneObjects()
         {
+            using var _ = spawnSceneObjectsMarker.Auto();
+
             // only if server active
             if (!_server || !_server.Active)
                 throw new InvalidOperationException("Server was not active");
