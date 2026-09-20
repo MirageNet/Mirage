@@ -4,6 +4,7 @@ using Mirage.Events;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -104,6 +105,10 @@ namespace Mirage
     public sealed class NetworkIdentity : MonoBehaviour
     {
         private static readonly ILogger logger = LogFactory.GetLogger<NetworkIdentity>();
+
+        private static readonly ProfilerMarker onSerializeDeltaMarker = new ProfilerMarker("Mirage.NetworkIdentity.OnSerializeDelta");
+        private static readonly ProfilerMarker onSerializeInitialMarker = new ProfilerMarker("Mirage.NetworkIdentity.OnSerializeInitial");
+        private static readonly ProfilerMarker onDeserializeAllMarker = new ProfilerMarker("Mirage.NetworkIdentity.OnDeserializeAll");
 
         public NetworkSpawnSettings SpawnSettings = NetworkSpawnSettings.Default;
 
@@ -676,6 +681,7 @@ namespace Mirage
         /// <param name="observersWriter"></param>
         internal (int ownerWritten, int observersWritten) OnSerializeInitial(NetworkWriter ownerWriter, NetworkWriter observersWriter)
         {
+            using var _ = onSerializeInitialMarker.Auto();
             return OnSerialize(true, default, ownerWriter, observersWriter);
         }
 
@@ -687,6 +693,7 @@ namespace Mirage
         /// <param name="observersWriter"></param>
         internal (int ownerWritten, int observersWritten) OnSerializeDelta(double now, NetworkWriter ownerWriter, NetworkWriter observersWriter)
         {
+            using var _ = onSerializeDeltaMarker.Auto();
             return OnSerialize(false, now, ownerWriter, observersWriter);
         }
 
@@ -840,6 +847,8 @@ namespace Mirage
 
         internal void OnDeserializeAll(NetworkReader reader, bool initialState)
         {
+            using var _ = onDeserializeAllMarker.Auto();
+
             // set InitialState before deserializing so that syncvar hooks and other methods can check it
             InitialState = initialState;
 

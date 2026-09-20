@@ -1,5 +1,6 @@
 using Mirage.Logging;
 using Mirage.Serialization;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage
@@ -10,6 +11,8 @@ namespace Mirage
     public class SyncVarReceiver
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(SyncVarReceiver));
+
+        private static readonly ProfilerMarker onUpdateVarsMarker = new ProfilerMarker("Mirage.SyncVarReceiver.OnUpdateVars");
 
         private readonly IObjectLocator _objectLocator;
 
@@ -26,6 +29,8 @@ namespace Mirage
 
         internal void OnUpdateVarsMessage(INetworkPlayer sender, UpdateVarsMessage msg)
         {
+            using var _ = onUpdateVarsMarker.Auto();
+
             if (logger.LogEnabled()) logger.Log("SyncVarReceiver.OnUpdateVarsMessage " + msg.NetId);
 
             if (_objectLocator.TryGetIdentity(msg.NetId, out var localObject))

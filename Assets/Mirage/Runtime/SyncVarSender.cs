@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Mirage.Logging;
 using Mirage.Serialization;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage
@@ -12,6 +13,9 @@ namespace Mirage
     public class SyncVarSender
     {
         private static readonly ILogger logger = LogFactory.GetLogger<SyncVarSender>();
+
+        private static readonly ProfilerMarker updateMarker = new ProfilerMarker("Mirage.SyncVarSender.Update");
+        private static readonly ProfilerMarker sendUpdateVarsMarker = new ProfilerMarker("Mirage.SyncVarSender.SendUpdateVars");
 
         private readonly HashSet<NetworkIdentity> _dirtyObjects = new HashSet<NetworkIdentity>();
         private readonly List<NetworkIdentity> _dirtyObjectsTmp = new List<NetworkIdentity>();
@@ -27,6 +31,8 @@ namespace Mirage
         {
             if (_dirtyObjects.Count == 0)
                 return;
+
+            using var _ = updateMarker.Auto();
 
             if (logger.LogEnabled())
                 logger.Log($"SyncVar Sender Update, {_dirtyObjects.Count} dirty objects");
@@ -73,6 +79,8 @@ namespace Mirage
 
         internal static void SendUpdateVarsMessage(NetworkIdentity identity, double now)
         {
+            using var _ = sendUpdateVarsMarker.Auto();
+
             // one writer for owner, one for observers
             using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
             {
