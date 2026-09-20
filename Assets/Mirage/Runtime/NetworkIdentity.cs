@@ -1271,11 +1271,9 @@ namespace Mirage
         }
 
 
-        // todo update comment
         /// <summary>
-        /// Collection that holds information about all RPC in this networkbehaviour (including derived classes)
-        /// <para>Can be used to get RPC name from its index</para>
-        /// <para>NOTE: Weaver uses this collection to add rpcs, If adding your own rpc do at your own risk</para>
+        /// Collection that holds immutable RPC metadata and delegate invokers for all NetworkBehaviours on this identity.
+        /// <para>Shared across identities with matching NetworkBehaviour type compositions to eliminate spawn allocations.</para>
         /// </summary>
         [NonSerialized]
         private RemoteCallCollection _remoteCallCollection;
@@ -1284,13 +1282,8 @@ namespace Mirage
             get
             {
                 if (_remoteCallCollection == null)
-                {
-                    // we should be save to lazy init
-                    // we only need to register RPCs when we receive them
-                    // when sending the index is baked in by weaver
-                    _remoteCallCollection = new RemoteCallCollection();
-                    _remoteCallCollection.RegisterAll(NetworkBehaviours);
-                }
+                    _remoteCallCollection = RemoteCallCollectionCache.GetOrCreate(NetworkBehaviours);
+
                 return _remoteCallCollection;
             }
         }

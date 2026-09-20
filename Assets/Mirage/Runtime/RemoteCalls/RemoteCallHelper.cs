@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
 using Mirage.Logging;
@@ -10,17 +11,25 @@ namespace Mirage.RemoteCalls
 {
     public class RemoteCallCollection
     {
+        public static readonly RemoteCallCollection Empty = new RemoteCallCollection(Array.Empty<Type>(), Array.Empty<int>(), Array.Empty<RemoteCall>());
+
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(RemoteCallCollection));
 
-        /// <summary>
-        /// This is set by NetworkIdentity when we register each NetworkBehaviour so that they can pass their own idnex in
-        /// </summary>
-        public int[] IndexOffset;
-        public RemoteCall[] RemoteCalls;
+        private readonly Type[] _types;
 
-        public unsafe void RegisterAll(NetworkBehaviour[] behaviours)
+        /// <summary>
+        /// This is set by NetworkIdentity when we register each NetworkBehaviour so that they can pass their own index in
+        /// </summary>
+        public readonly int[] IndexOffset;
+        public readonly RemoteCall[] RemoteCalls;
+
+        public unsafe RemoteCallCollection(NetworkBehaviour[] behaviours)
         {
             var behaviourCount = behaviours.Length;
+            _types = new Type[behaviourCount];
+            for (var i = 0; i < behaviourCount; i++)
+                _types[i] = behaviours[i].GetType();
+
             var totalCount = 0;
             var counts = stackalloc int[behaviourCount];
             IndexOffset = new int[behaviourCount];
@@ -35,9 +44,31 @@ namespace Mirage.RemoteCalls
 
             RemoteCalls = new RemoteCall[totalCount];
             for (var i = 0; i < behaviourCount; i++)
-            {
                 behaviours[i].RegisterRpc(this);
+        }
+
+        private RemoteCallCollection(Type[] types, int[] indexOffset, RemoteCall[] remoteCalls)
+        {
+            _types = types;
+            IndexOffset = indexOffset;
+            RemoteCalls = remoteCalls;
+        }
+
+        /// <summary>
+        /// RPC signatures and offsets are static per component type composition.
+        /// Objects with the exact same component sequence can safely share a single collection layout.
+        /// </summary>
+        internal bool Matches(NetworkBehaviour[] behaviours)
+        {
+            if (_types.Length != behaviours.Length)
+                return false;
+
+            for (var i = 0; i < behaviours.Length; i++)
+            {
+                if (_types[i] != behaviours[i].GetType())
+                    return false;
             }
+            return true;
         }
 
         public void Register(int relativeIndex, string name, bool cmdRequireAuthority, RpcInvokeType invokerType, NetworkBehaviour behaviour, RpcDelegate func, RpcRateLimitConfig rateLimit)
@@ -322,6 +353,68 @@ namespace Mirage.RemoteCalls
             {
                 senderPlayer.Send(serverRpcReply);
             }
+        }
+    }
+
+    /// <summary>
+    /// Caches immutable RPC collection layouts to avoid re-allocating delegate wrappers and array buffers per spawned identity
+    /// </summary>
+    public static class RemoteCallCollectionCache
+    {
+        public static RemoteCallCollection Empty => RemoteCallCollection.Empty;
+
+        private static readonly Dictionary<int, List<RemoteCallCollection>> _cachedLayouts = new Dictionary<int, List<RemoteCallCollection>>();
+
+        private static int CalculateHash(NetworkBehaviour[] behaviours)
+        {
+            unchecked
+            {
+                var hash = 17;
+                for (var i = 0; i < behaviours.Length; i++)
+                    hash = (hash * 31) + behaviours[i].GetType().GetHashCode();
+
+                return hash;
+            }
+        }
+
+        public static RemoteCallCollection GetOrCreate(NetworkBehaviour[] behaviours)
+        {
+            if (behaviours == null)
+                throw new ArgumentNullException(nameof(behaviours));
+
+            if (behaviours.Length == 0)
+                return RemoteCallCollection.Empty;
+
+            var hash = CalculateHash(behaviours);
+            // List handles potential hash collisions between different component layouts
+            if (_cachedLayouts.TryGetValue(hash, out var list))
+            {
+                // in most case, first item will be a match,
+                // but need to check incase hash collisions
+                for (var i = 0; i < list.Count; i++)
+                {
+                    var layout = list[i];
+                    if (layout.Matches(behaviours))
+                        // found matching layout, so we can stop here and return
+                        return layout;
+                }
+            }
+            else
+            {
+                list = new List<RemoteCallCollection>(1);
+                _cachedLayouts[hash] = list;
+            }
+
+            // no matching layouts, create new out
+            var collection = new RemoteCallCollection(behaviours);
+            list.Add(collection);
+            return collection;
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        public static void Clear()
+        {
+            _cachedLayouts.Clear();
         }
     }
 }

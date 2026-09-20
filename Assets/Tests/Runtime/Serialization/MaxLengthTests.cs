@@ -59,7 +59,8 @@ namespace Mirage.Tests.Runtime.Serialization
 
     public class DummyBehaviour : NetworkBehaviour
     {
-        // Simple dummy behaviour for test network objects
+        [ServerRpc(requireAuthority = false)]
+        public void ThrowsLimit() => throw new SerializationLimitException("Simulated limit exceeded");
     }
 
     [TestFixture]
@@ -354,23 +355,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
             var go = new GameObject("DummyObj");
             var identity = go.AddComponent<NetworkIdentity>();
-            var behaviour = go.AddComponent<DummyBehaviour>();
-
-            // Register RPC delegate that throws SerializationLimitException when called
-            var remoteCall = new RemoteCall(
-                behaviour.GetType(),
-                behaviour.ComponentIndex,
-                0,
-                RpcInvokeType.ServerRpc,
-                (obj, reader, senderPlayer, replyId) => throw new SerializationLimitException("Simulated limit exceeded"),
-                false,
-                "TestRpc",
-                RpcRateLimitConfig.Disabled()
-            );
-
-            // Inject the custom RPC into the identity's collection
-            identity.RemoteCallCollection.RemoteCalls = new RemoteCall[] { remoteCall };
-            identity.RemoteCallCollection.IndexOffset = new int[] { 0 };
+            go.AddComponent<DummyBehaviour>();
 
             var objectLocator = Substitute.For<IObjectLocator>();
             objectLocator.TryGetIdentity(Arg.Any<uint>(), out Arg.Any<NetworkIdentity>())
