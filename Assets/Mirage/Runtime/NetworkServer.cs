@@ -35,6 +35,8 @@ namespace Mirage
         private static readonly ProfilerMarker onStopHostInvokeMarker = new ProfilerMarker("Mirage.NetworkServer.OnStopHost.Invoke");
         private static readonly ProfilerMarker errorRateLimitCallbackMarker = new ProfilerMarker("Mirage.NetworkServer.Callback.ErrorRateLimit.Invoke");
         private static readonly ProfilerMarker authFailCallbackMarker = new ProfilerMarker("Mirage.NetworkServer.Callback.AuthFailed.Invoke");
+        private static readonly ProfilerMarker updateReceiveMarker = new ProfilerMarker("Mirage.NetworkServer.UpdateReceive");
+        private static readonly ProfilerMarker updateSentMarker = new ProfilerMarker("Mirage.NetworkServer.UpdateSent");
 
         public delegate void RateLimitCallback(INetworkPlayer player);
         public delegate void AuthFailCallback(INetworkPlayer player, AuthenticationResult result);
@@ -427,6 +429,8 @@ namespace Mirage
 
         public void UpdateReceive()
         {
+            using var _ = updateReceiveMarker.Auto();
+
             if (ErrorRateLimitEnabled)
                 UpdatePlayerErrorLimits();
             _peer?.UpdateReceive();
@@ -434,6 +438,8 @@ namespace Mirage
 
         public void UpdateSent()
         {
+            using var _ = updateSentMarker.Auto();
+
             SyncVarSender?.Update();
             _peer?.UpdateSent();
         }

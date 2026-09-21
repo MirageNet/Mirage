@@ -33,6 +33,8 @@ namespace Mirage
         private static readonly ProfilerMarker connectedInvokeMarker = new ProfilerMarker("Mirage.NetworkClient.Connected.Invoke");
         private static readonly ProfilerMarker authenticatedInvokeMarker = new ProfilerMarker("Mirage.NetworkClient.Authenticated.Invoke");
         private static readonly ProfilerMarker disconnectedInvokeMarker = new ProfilerMarker("Mirage.NetworkClient.Disconnected.Invoke");
+        private static readonly ProfilerMarker updateReceiveMarker = new ProfilerMarker("Mirage.NetworkClient.UpdateReceive");
+        private static readonly ProfilerMarker updateSentMarker = new ProfilerMarker("Mirage.NetworkClient.UpdateSent");
 
         public bool EnablePeerMetrics;
         [Tooltip("Sequence size of buffer in bits.\n10 => array size 1024 => ~17 seconds at 60hz")]
@@ -388,9 +390,17 @@ namespace Mirage
             UpdateSent();
         }
 
-        public void UpdateReceive() => _peer?.UpdateReceive();
+        public void UpdateReceive()
+        {
+            using var _ = updateReceiveMarker.Auto();
+
+            _peer?.UpdateReceive();
+        }
+
         public void UpdateSent()
         {
+            using var _ = updateSentMarker.Auto();
+
             SyncVarSender?.Update();
             _peer?.UpdateSent();
         }
