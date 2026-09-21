@@ -5,6 +5,7 @@ using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using Mirage.SocketLayer;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage
@@ -33,6 +34,9 @@ namespace Mirage
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
         private static readonly ILogger errorLogger = LogFactory.GetLogger(typeof(PlayerErrorFlags));
         private static readonly ILogger rateLimitLogger = LogFactory.GetLogger(typeof(RateLimitAttribute));
+
+        private static readonly ProfilerMarker sendMarker = new ProfilerMarker("Mirage.NetworkPlayer.Send");
+        private static readonly ProfilerMarker sendNotifyMarker = new ProfilerMarker("Mirage.NetworkPlayer.SendNotify");
 
         private readonly HashSet<NetworkIdentity> _visList = new HashSet<NetworkIdentity>();
 
@@ -238,6 +242,8 @@ namespace Mirage
         /// <param name="channelId">The transport layer channel to send on.</param>
         public void Send<T>(T message, Channel channelId = Channel.Reliable)
         {
+            using var _ = sendMarker.Auto();
+
             if (_isDisconnected) { return; }
 
             using (var writer = NetworkWriterPool.GetWriter())
@@ -297,6 +303,8 @@ namespace Mirage
         /// <param name="channelId">The transport layer channel to send on.</param>
         public void Send<T>(T message, INotifyCallBack callBacks)
         {
+            using var _ = sendNotifyMarker.Auto();
+
             if (_isDisconnected) { return; }
 
             using (var writer = NetworkWriterPool.GetWriter())

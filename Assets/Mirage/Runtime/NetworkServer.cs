@@ -37,6 +37,7 @@ namespace Mirage
         private static readonly ProfilerMarker authFailCallbackMarker = new ProfilerMarker("Mirage.NetworkServer.Callback.AuthFailed.Invoke");
         private static readonly ProfilerMarker updateReceiveMarker = new ProfilerMarker("Mirage.NetworkServer.UpdateReceive");
         private static readonly ProfilerMarker updateSentMarker = new ProfilerMarker("Mirage.NetworkServer.UpdateSent");
+        private static readonly ProfilerMarker sendToManyMarker = new ProfilerMarker("Mirage.NetworkServer.SendToMany");
 
         public delegate void RateLimitCallback(INetworkPlayer player);
         public delegate void AuthFailCallback(INetworkPlayer player, AuthenticationResult result);
@@ -670,6 +671,8 @@ namespace Mirage
         /// </summary>
         public static void SendToMany<T>(IReadOnlyList<INetworkPlayer> players, T msg, Channel channelId = Channel.Reliable)
         {
+            using var _ = sendToManyMarker.Auto();
+
             // avoid serializing when list is empty
             if (players.Count == 0)
                 return;

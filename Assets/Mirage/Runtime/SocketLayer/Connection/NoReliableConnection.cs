@@ -1,4 +1,5 @@
 using System;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage.SocketLayer
@@ -8,6 +9,8 @@ namespace Mirage.SocketLayer
     /// </summary>
     internal sealed class NoReliableConnection : Connection
     {
+        private static readonly ProfilerMarker sendReliableMarker = new ProfilerMarker("Mirage.SocketLayer.NoReliableConnection.SendReliable");
+
         private const int HEADER_SIZE = 1 + Batch.MESSAGE_LENGTH_SIZE;
 
         private readonly Batch _nextBatchReliable;
@@ -49,6 +52,8 @@ namespace Mirage.SocketLayer
         /// <param name="message"></param>
         public override void SendReliable(byte[] message, int offset, int length)
         {
+            using var _ = sendReliableMarker.Auto();
+
             ThrowIfNotConnectedOrConnecting();
 
             if (length + HEADER_SIZE > _maxPacketSize)

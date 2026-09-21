@@ -10,6 +10,9 @@ namespace Mirage.SocketLayer
     internal sealed class ReliableConnection : Connection, IRawConnection, IDisposable
     {
         private static readonly ProfilerMarker handleFragmentedMarker = new ProfilerMarker("Mirage.SocketLayer.ReliableConnection.HandleFragmentedMessage");
+        private static readonly ProfilerMarker sendNotifyMarker = new ProfilerMarker("Mirage.SocketLayer.ReliableConnection.SendNotify");
+        private static readonly ProfilerMarker sendReliableMarker = new ProfilerMarker("Mirage.SocketLayer.ReliableConnection.SendReliable");
+        private static readonly ProfilerMarker sendUnreliableMarker = new ProfilerMarker("Mirage.SocketLayer.ReliableConnection.SendUnreliable");
 
         private readonly AckSystem _ackSystem;
         private readonly Batch _unreliableBatch;
@@ -50,6 +53,8 @@ namespace Mirage.SocketLayer
         /// </summary>
         public override INotifyToken SendNotify(byte[] packet, int offset, int length)
         {
+            using var _ = sendNotifyMarker.Auto();
+
             ThrowIfNotConnectedOrConnecting();
             var token = _ackSystem.SendNotify(packet, offset, length);
             _metrics?.OnSendMessageNotify(length);
@@ -61,6 +66,8 @@ namespace Mirage.SocketLayer
         /// </summary>
         public override void SendNotify(byte[] packet, int offset, int length, INotifyCallBack callBacks)
         {
+            using var _ = sendNotifyMarker.Auto();
+
             ThrowIfNotConnectedOrConnecting();
             _ackSystem.SendNotify(packet, offset, length, callBacks);
             _metrics?.OnSendMessageNotify(length);
@@ -72,6 +79,8 @@ namespace Mirage.SocketLayer
         /// <param name="message"></param>
         public override void SendReliable(byte[] message, int offset, int length)
         {
+            using var _ = sendReliableMarker.Auto();
+
             ThrowIfNotConnectedOrConnecting();
             _ackSystem.SendReliable(message, offset, length);
             _metrics?.OnSendMessageReliable(length);
@@ -79,6 +88,8 @@ namespace Mirage.SocketLayer
 
         public override void SendUnreliable(byte[] packet, int offset, int length)
         {
+            using var _ = sendUnreliableMarker.Auto();
+
             ThrowIfNotConnectedOrConnecting();
 
             const int batchHeader = 1 + Batch.MESSAGE_LENGTH_SIZE;
