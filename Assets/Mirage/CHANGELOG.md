@@ -1,3 +1,19 @@
+# [158.5.0](https://github.com/MirageNet/Mirage/compare/v158.4.0...v158.5.0) (2026-09-21)
+
+
+### Bug Fixes
+
+* fixing error using profile marker ([5278c5f](https://github.com/MirageNet/Mirage/commit/5278c5f005cbe4d6ded2cf5e322cacc0a583ba4f))
+
+
+### Features
+
+* add profiler markers for high-level and connection send methods ([f03532f](https://github.com/MirageNet/Mirage/commit/f03532fb82477d87f6c5486be4fe596372184b09)), closes [hi#level](https://github.com/hi/issues/level)
+* add profiler markers for ISocket calls in Peer (Tick, Receive, Send, SendUnconnected, Flush) ([eefec18](https://github.com/MirageNet/Mirage/commit/eefec18edf2f4b27a9a9433f37933968284883b2))
+* add profiler markers to MessageHandler, RpcHandler, and RemoteCalls ([ebf8b55](https://github.com/MirageNet/Mirage/commit/ebf8b5505fbe1d5722dcb5b993f4c537a25ae1e1))
+* add profiler markers to NetworkServer and NetworkClient UpdateReceive and UpdateSent ([19558d2](https://github.com/MirageNet/Mirage/commit/19558d2cd72788f6b9f692e6883c65aacccd46f7))
+* add profiler markers to SocketLayer (Peer, Connection, ReliableConnection, AckSystem) ([031bda4](https://github.com/MirageNet/Mirage/commit/031bda4726d63579d3368e7e2a9c3c3a32f41398))
+
 # [158.4.0](https://github.com/MirageNet/Mirage/compare/v158.3.9...v158.4.0) (2026-09-20)
 
 
