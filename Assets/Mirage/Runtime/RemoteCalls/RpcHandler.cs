@@ -4,12 +4,16 @@ using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using Mirage.Serialization;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage.RemoteCalls
 {
     internal class RpcHandler
     {
+        private static readonly ProfilerMarker handleRpcMarker = new ProfilerMarker("Mirage.RpcHandler.HandleRpc");
+        private static readonly ProfilerMarker onReplyMarker = new ProfilerMarker("Mirage.RpcHandler.OnReply");
+
         // 5 seconds should be more than enough time for client to receive message and stop sending RPC to previously owned and destroyed objects
         public const double DESTROY_GRACE_PERIOD = 5f;
 
@@ -74,6 +78,8 @@ namespace Mirage.RemoteCalls
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool HandleRpc(INetworkPlayer player, uint netId, int functionIndex, ArraySegment<byte> payload, int replyId)
         {
+            using var _ = handleRpcMarker.Auto();
+
             if (payload.Array == null)
             {
                 player.SetError(50, PlayerErrorFlags.DeserializationException);
@@ -257,6 +263,8 @@ namespace Mirage.RemoteCalls
 
         internal void OnReply(INetworkPlayer player, RpcReply reply)
         {
+            using var _ = onReplyMarker.Auto();
+
             // find the callback that was waiting for this and invoke it.
             // peek first so that a spoofed reply from a non-target player does
             // not consume the pending entry; the legitimate target must still

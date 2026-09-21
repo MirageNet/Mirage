@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using Mirage.Serialization;
 using Mirage.SocketLayer;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage.RemoteCalls
@@ -255,6 +256,8 @@ namespace Mirage.RemoteCalls
         /// </summary>
         public readonly RpcId RpcId;
 
+        public readonly ProfilerMarker InvokeMarker;
+
         public RemoteCall(
             Type declaringType,
             int componentIndex,
@@ -274,10 +277,12 @@ namespace Mirage.RemoteCalls
             Name = name;
             RpcId = new RpcId(declaringType, indexInType);
             RateLimit = rateLimit;
+            InvokeMarker = new ProfilerMarker($"Mirage.Rpc.{name}.Invoke");
         }
 
         internal void Invoke(NetworkBehaviour behaviour, NetworkReader reader, INetworkPlayer senderPlayer = null, int replyId = 0)
         {
+            using var _ = InvokeMarker.Auto();
             Function(behaviour, reader, senderPlayer, replyId);
         }
 

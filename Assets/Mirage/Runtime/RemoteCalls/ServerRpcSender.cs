@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Mirage.Serialization;
+using Unity.Profiling;
 
 namespace Mirage.RemoteCalls
 {
@@ -9,8 +10,13 @@ namespace Mirage.RemoteCalls
     /// </summary>
     public static class ServerRpcSender
     {
+        private static readonly ProfilerMarker sendMarker = new ProfilerMarker("Mirage.ServerRpcSender.Send");
+        private static readonly ProfilerMarker sendWithReturnMarker = new ProfilerMarker("Mirage.ServerRpcSender.SendWithReturn");
+
         public static void Send(NetworkBehaviour behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, bool requireAuthority)
         {
+            using var _ = sendMarker.Auto();
+
             var absoluteIndex = behaviour.Identity.RemoteCallCollection.GetIndexOffset(behaviour) + relativeIndex;
             Validate(behaviour, absoluteIndex, requireAuthority);
 
@@ -26,6 +32,8 @@ namespace Mirage.RemoteCalls
 
         public static UniTask<T> SendWithReturn<T>(NetworkBehaviour behaviour, int relativeIndex, NetworkWriter writer, bool requireAuthority)
         {
+            using var _ = sendWithReturnMarker.Auto();
+
             var collection = behaviour.Identity.RemoteCallCollection;
             var absoluteIndex = collection.GetIndexOffset(behaviour) + relativeIndex;
             Validate(behaviour, absoluteIndex, requireAuthority);

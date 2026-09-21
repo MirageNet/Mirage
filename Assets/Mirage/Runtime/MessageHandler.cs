@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Mirage.Logging;
 using Mirage.Serialization;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage
@@ -9,6 +10,7 @@ namespace Mirage
     public class MessageHandler : IMessageReceiver
     {
         private static readonly ILogger logger = LogFactory.GetLogger<MessageHandler>();
+        private static readonly ProfilerMarker handleMessageMarker = new ProfilerMarker("Mirage.MessageHandler.HandleMessage");
 
         private readonly bool _disconnectOnException;
         private readonly bool _rethrowException = false;
@@ -100,6 +102,7 @@ namespace Mirage
 
         public void HandleMessage(INetworkPlayer player, ArraySegment<byte> packet)
         {
+            using var _ = handleMessageMarker.Auto();
             using (var networkReader = NetworkReaderPool.GetReader(packet, _objectLocator))
             {
                 // protect against attackers trying to send invalid data packets
@@ -173,7 +176,10 @@ namespace Mirage
             if (_messageHandlers.TryGetValue(msgType, out var handler))
             {
                 if (CheckAuthentication(player, msgType, handler))
+                {
+                    using var _ = handler.Marker.Auto();
                     handler.Delegate.Invoke(player, reader);
+                }
             }
             else
             {
@@ -237,11 +243,13 @@ namespace Mirage
             public readonly NetworkMessageDelegate Delegate;
             public readonly bool AllowUnauthenticated;
             public readonly string UnauthenticatedError;
+            public readonly ProfilerMarker Marker;
 
             public Handler(NetworkMessageDelegate @delegate, bool allowUnauthenticated, Type type)
             {
                 Delegate = @delegate;
                 AllowUnauthenticated = allowUnauthenticated;
+                Marker = new ProfilerMarker($"Mirage.Message.{type.Name}.Invoke");
 
                 // cache the error message with the type, so we can log it on server with less allocations
                 if (!allowUnauthenticated)

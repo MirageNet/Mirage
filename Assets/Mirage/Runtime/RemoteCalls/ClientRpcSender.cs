@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using Mirage.Serialization;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage.RemoteCalls
@@ -11,9 +12,14 @@ namespace Mirage.RemoteCalls
     public static class ClientRpcSender
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientRpcSender));
+        private static readonly ProfilerMarker sendMarker = new ProfilerMarker("Mirage.ClientRpcSender.Send");
+        private static readonly ProfilerMarker sendTargetMarker = new ProfilerMarker("Mirage.ClientRpcSender.SendTarget");
+        private static readonly ProfilerMarker sendTargetWithReturnMarker = new ProfilerMarker("Mirage.ClientRpcSender.SendTargetWithReturn");
 
         public static void Send(NetworkBehaviour behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, bool excludeOwner)
         {
+            using var _ = sendMarker.Auto();
+
             var absoluteIndex = behaviour.Identity.RemoteCallCollection.GetIndexOffset(behaviour) + relativeIndex;
             Validate(behaviour, absoluteIndex);
 
@@ -27,6 +33,8 @@ namespace Mirage.RemoteCalls
 
         public static void SendTarget(NetworkBehaviour behaviour, int relativeIndex, NetworkWriter writer, Channel channelId, INetworkPlayer player)
         {
+            using var _ = sendTargetMarker.Auto();
+
             var absoluteIndex = behaviour.Identity.RemoteCallCollection.GetIndexOffset(behaviour) + relativeIndex;
             Validate(behaviour, absoluteIndex);
 
@@ -38,6 +46,8 @@ namespace Mirage.RemoteCalls
 
         public static UniTask<T> SendTargetWithReturn<T>(NetworkBehaviour behaviour, int relativeIndex, NetworkWriter writer, INetworkPlayer player)
         {
+            using var _ = sendTargetWithReturnMarker.Auto();
+
             var collection = behaviour.Identity.RemoteCallCollection;
             var absoluteIndex = collection.GetIndexOffset(behaviour) + relativeIndex;
             Validate(behaviour, absoluteIndex);
