@@ -41,7 +41,12 @@ namespace Mirage.SocketLayer
         private static readonly ProfilerMarker updateReceiveMarker = new ProfilerMarker("Mirage.SocketLayer.Peer.UpdateReceive");
         private static readonly ProfilerMarker updateSentMarker = new ProfilerMarker("Mirage.SocketLayer.Peer.UpdateSent");
         private static readonly ProfilerMarker onDataMarker = new ProfilerMarker("Mirage.SocketLayer.Peer.OnData");
-        private static readonly ProfilerMarker sendMarker = new ProfilerMarker("Mirage.SocketLayer.Peer.Send");
+
+        private static readonly ProfilerMarker socketTickMarker = new ProfilerMarker("Mirage.Socket.Tick");
+        private static readonly ProfilerMarker socketReceiveMarker = new ProfilerMarker("Mirage.Socket.Receive");
+        private static readonly ProfilerMarker socketSendMarker = new ProfilerMarker("Mirage.Socket.Send");
+        private static readonly ProfilerMarker socketSendUnconnectedMarker = new ProfilerMarker("Mirage.Socket.SendUnconnected");
+        private static readonly ProfilerMarker socketFlushMarker = new ProfilerMarker("Mirage.Socket.Flush");
 
         private readonly ILogger _logger;
         private readonly Metrics _metrics;
@@ -164,13 +169,13 @@ namespace Mirage.SocketLayer
 
         internal void Send(Connection connection, byte[] data, int length)
         {
-            using var _ = sendMarker.Auto();
-
             // connecting connections can send connect messages so is allowed
             // todo check connected before message are sent from high level
             _logger?.Assert(connection.State == ConnectionState.Connected || connection.State == ConnectionState.Connecting || connection.State == ConnectionState.Disconnected, connection.State);
 
-            _socket.Send(connection.Handle, data.AsSpan(0, length));
+            using (socketSendMarker.Auto())
+                _socket.Send(connection.Handle, data.AsSpan(0, length));
+
             _metrics?.OnSend(length);
             connection.SetSendTime();
 
@@ -193,7 +198,9 @@ namespace Mirage.SocketLayer
             {
                 var length = CreateCommandPacket(buffer, command, extra);
 
-                _socket.Send(handle, buffer.array.AsSpan(0, length));
+                using (socketSendUnconnectedMarker.Auto())
+                    _socket.Send(handle, buffer.array.AsSpan(0, length));
+
                 _metrics?.OnSendUnconnected(length);
                 if (_logger.Enabled(LogType.Log))
                 {
@@ -261,7 +268,10 @@ namespace Mirage.SocketLayer
             using var _ = updateSentMarker.Auto();
 
             UpdateConnections();
-            _socket.Flush();
+
+            using (socketFlushMarker.Auto())
+                _socket.Flush();
+
             _metrics?.OnTick(_connections.Count);
         }
 
@@ -278,7 +288,8 @@ namespace Mirage.SocketLayer
                 _isTicking = true;
                 try
                 {
-                    _socket.Tick();
+                    using (socketTickMarker.Auto())
+                        _socket.Tick();
                 }
                 finally
                 {
@@ -289,9 +300,18 @@ namespace Mirage.SocketLayer
                 using (var buffer = _bufferPool.Take())
                 {
                     // check active, because socket might have been closed by message handler
-                    while (_active && _socket.Poll())
+                    while (_active)
                     {
-                        var length = _socket.Receive(buffer.array, out var handle);
+                        int length;
+                        IConnectionHandle handle;
+                        using (socketReceiveMarker.Auto())
+                        {
+                            if (_socket.Poll())
+                                length = _socket.Receive(buffer.array, out handle);
+                            else
+                                // no new messages, break out of receive loop
+                                break;
+                        }
 
                         if (length < 0 && _logger.Enabled(LogType.Warning))
                         {
