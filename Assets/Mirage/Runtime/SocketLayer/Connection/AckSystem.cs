@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage.SocketLayer
 {
     public class AckSystem : IDisposable
     {
+        private static readonly ProfilerMarker receiveReliableMarker = new ProfilerMarker("Mirage.SocketLayer.AckSystem.ReceiveReliable");
+        private static readonly ProfilerMarker updateMarker = new ProfilerMarker("Mirage.SocketLayer.AckSystem.Update");
+
         private const int MASK_SIZE = sizeof(ulong) * 8;
 
         public const int SEQUENCE_HEADER = sizeof(byte) + sizeof(ushort) + sizeof(ushort) + sizeof(ulong);
@@ -226,6 +230,8 @@ namespace Mirage.SocketLayer
 
         public void Update()
         {
+            using var _ = updateMarker.Auto();
+
             _batch.Flush();
 
             // add resend here, before empty ack check
@@ -497,6 +503,8 @@ namespace Mirage.SocketLayer
         /// <returns>true if there are ordered message to read</returns>
         public void ReceiveReliable(ReadOnlySpan<byte> packet, bool isFragment)
         {
+            using var _ = receiveReliableMarker.Auto();
+
             // start at 1 to skip packet type
             var offset = 1;
 

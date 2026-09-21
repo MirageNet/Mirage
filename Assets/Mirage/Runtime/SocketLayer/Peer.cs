@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage.SocketLayer
@@ -37,6 +38,11 @@ namespace Mirage.SocketLayer
     /// </summary>
     public sealed class Peer : IPeer
     {
+        private static readonly ProfilerMarker updateReceiveMarker = new ProfilerMarker("Mirage.SocketLayer.Peer.UpdateReceive");
+        private static readonly ProfilerMarker updateSentMarker = new ProfilerMarker("Mirage.SocketLayer.Peer.UpdateSent");
+        private static readonly ProfilerMarker onDataMarker = new ProfilerMarker("Mirage.SocketLayer.Peer.OnData");
+        private static readonly ProfilerMarker sendMarker = new ProfilerMarker("Mirage.SocketLayer.Peer.Send");
+
         private readonly ILogger _logger;
         private readonly Metrics _metrics;
         private readonly ISocket _socket;
@@ -158,6 +164,8 @@ namespace Mirage.SocketLayer
 
         internal void Send(Connection connection, byte[] data, int length)
         {
+            using var _ = sendMarker.Auto();
+
             // connecting connections can send connect messages so is allowed
             // todo check connected before message are sent from high level
             _logger?.Assert(connection.State == ConnectionState.Connected || connection.State == ConnectionState.Connecting || connection.State == ConnectionState.Disconnected, connection.State);
@@ -250,6 +258,8 @@ namespace Mirage.SocketLayer
         /// </summary>
         public void UpdateSent()
         {
+            using var _ = updateSentMarker.Auto();
+
             UpdateConnections();
             _socket.Flush();
             _metrics?.OnTick(_connections.Count);
@@ -260,6 +270,8 @@ namespace Mirage.SocketLayer
         /// </summary>
         public void UpdateReceive()
         {
+            using var _ = updateReceiveMarker.Auto();
+
             try
             {
                 // tick loop (push)
@@ -405,6 +417,8 @@ namespace Mirage.SocketLayer
         }
         private void OnData(IConnectionHandle handle, Packet packet)
         {
+            using var _ = onDataMarker.Auto();
+
             if (handle.IsStateful)
             {
                 if (handle.SocketLayerConnection != null)

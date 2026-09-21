@@ -1,4 +1,5 @@
 using System;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage.SocketLayer
@@ -8,6 +9,8 @@ namespace Mirage.SocketLayer
     /// </summary>
     internal sealed class ReliableConnection : Connection, IRawConnection, IDisposable
     {
+        private static readonly ProfilerMarker handleFragmentedMarker = new ProfilerMarker("Mirage.SocketLayer.ReliableConnection.HandleFragmentedMessage");
+
         private readonly AckSystem _ackSystem;
         private readonly Batch _unreliableBatch;
         private readonly Pool<ByteBuffer> _bufferPool;
@@ -139,6 +142,8 @@ namespace Mirage.SocketLayer
 
         private void HandleFragmentedMessage(AckSystem.ReliableReceived received)
         {
+            using var _ = handleFragmentedMarker.Auto();
+
             // get index from first
             var firstArray = received.Buffer.array;
             // length +1 because zero indexed 

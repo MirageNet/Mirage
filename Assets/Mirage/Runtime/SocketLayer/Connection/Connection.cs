@@ -1,11 +1,14 @@
 using System;
 using Mirage.SocketLayer.ConnectionTrackers;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace Mirage.SocketLayer
 {
     internal abstract class Connection : IConnection, ISocketLayerConnection
     {
+        private static readonly ProfilerMarker handleReliableBatchedMarker = new ProfilerMarker("Mirage.SocketLayer.Connection.HandleReliableBatched");
+
         protected readonly ILogger _logger;
         protected readonly int _maxPacketSize;
         protected readonly Peer _peer;
@@ -240,6 +243,8 @@ namespace Mirage.SocketLayer
         }
         protected void HandleReliableBatched(byte[] array, int offset, int packetLength, PacketType packetType)
         {
+            using var _ = handleReliableBatchedMarker.Auto();
+
             while (offset < packetLength)
             {
                 // Check if connection is still valid before processing next message
