@@ -503,7 +503,7 @@ namespace Mirage.SocketLayer
         /// <returns>true if there are ordered message to read</returns>
         public void ReceiveReliable(ReadOnlySpan<byte> packet, bool isFragment)
         {
-            using var _ = receiveReliableMarker.Auto();
+            using var __ = receiveReliableMarker.Auto();
 
             // start at 1 to skip packet type
             var offset = 1;
