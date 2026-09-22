@@ -14,7 +14,7 @@ namespace Mirage.Snippets.Analyzers
         [NetworkMessage]
         public struct DamageMessage
         {
-            // Error: MonoBehaviour components are not network-serializable.
+            // No default serializer or custom serializer for LocalComponent.
             public LocalComponent target;
         }
         // CodeEmbed-End: mirage1304-triggering
@@ -31,7 +31,7 @@ namespace Mirage.Snippets.Analyzers
         [NetworkMessage]
         public struct DamageMessage
         {
-            // Correct: NetworkBehaviour components are network-serializable.
+            // Sends a reference to a spawned network object and its component.
             public NetworkedComponent target;
         }
         // CodeEmbed-End: mirage1304-recommended

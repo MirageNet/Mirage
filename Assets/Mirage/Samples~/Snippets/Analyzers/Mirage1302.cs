@@ -10,7 +10,7 @@ namespace Mirage.Snippets.Analyzers
         {
             public string playerName;
             
-            // Non-public fields are not serialized
+            // Private fields are not serialized
             private int playerHash;
 
             // Internal/protected fields are not serialized
