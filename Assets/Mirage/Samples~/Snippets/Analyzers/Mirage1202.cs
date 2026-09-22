@@ -3,14 +3,28 @@ using Cysharp.Threading.Tasks;
 
 namespace Mirage.Snippets.Analyzers
 {
-    public struct PlayerStats {}
-    public struct DamageContainer<T> { public T Value; }
-
     namespace M1202.Triggering
     {
         // CodeEmbed-Start: mirage1202-triggering
-        public class Player : NetworkBehaviour
+        using Mirage;
+        using Cysharp.Threading.Tasks;
+
+        public struct PlayerStats { public int Health; }
+
+        public abstract class Player : NetworkBehaviour
         {
+            // Error: Choose a single RPC direction.
+            [ServerRpc, ClientRpc]
+            public void RpcBothDirections() { }
+
+            // Error: Serialized parameters cannot be optional.
+            [ServerRpc]
+            public void CmdOptionalDamage(int damage = 1) { }
+
+            // Error: RPC methods cannot be abstract.
+            [ServerRpc]
+            public abstract void CmdReload();
+
             // Error: RPC methods cannot declare generic parameters.
             [ServerRpc]
             public void CmdTakeDamage<T>(T damage)
@@ -37,10 +51,20 @@ namespace Mirage.Snippets.Analyzers
     namespace M1202.Resolved
     {
         // CodeEmbed-Start: mirage1202-resolved
+        using Mirage;
+        using Cysharp.Threading.Tasks;
+
+        public struct PlayerStats { public int Health; }
+        public struct DamageContainer<T> { public T Value; }
+
         // Allowed: Generic NetworkBehaviour class.
         public class Player<T> : NetworkBehaviour
         {
-            // Allowed: Using generic parameters from the enclosing class.
+            // The optional sender is injected context, not a payload default.
+            [ServerRpc]
+            public void CmdDamage(int damage, INetworkPlayer sender = null) { }
+
+            // Allowed shape: Concrete T still needs registered serializers.
             [ServerRpc]
             public void CmdProcessGenericArg(T data)
             {
@@ -53,12 +77,20 @@ namespace Mirage.Snippets.Analyzers
             }
 
             [ServerRpc]
+            public virtual void CmdReload()
+            {
+            }
+
+            [ServerRpc]
             public async UniTask<PlayerStats> CmdGetStats()
             {
                 await UniTask.Yield();
-                return new PlayerStats();
+                return new PlayerStats { Health = 100 };
             }
         }
+
+        // Concrete component using an already supported payload type.
+        public class IntPlayer : Player<int> { }
         // CodeEmbed-End: mirage1202-resolved
     }
 }
