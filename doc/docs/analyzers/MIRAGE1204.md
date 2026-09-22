@@ -1,18 +1,15 @@
 # MIRAGE1204: Static RPC Methods
 
-## The Problem
-An RPC method decorated with `[ServerRpc]` or `[ClientRpc]` is `static`.
+## When this appears
 
-RPC methods must execute on a specific `NetworkBehaviour` instance so Mirage can route the message to the correct network identity. Static methods lack this instance context (`this`).
+A `[ServerRpc]` or `[ClientRpc]` method is `static`.
 
----
+RPCs need a specific `NetworkBehaviour` instance so the message can be routed to its network identity. A static method has no instance to identify the receiving object.
 
-## Example of Triggering Code
 {{{ Path:'Snippets/Analyzers/Mirage1204.cs' Name:'mirage1204-triggering' }}}
 
----
+## How to fix
 
-## How to Resolve
-Remove the `static` modifier so the method executes within the instance context of the `NetworkBehaviour`.
+Remove `static` from the RPC method:
 
 {{{ Path:'Snippets/Analyzers/Mirage1204.cs' Name:'mirage1204-resolved' }}}

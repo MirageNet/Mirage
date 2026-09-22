@@ -6,6 +6,9 @@ namespace Mirage.Snippets.Analyzers
     namespace M1205.Triggering
     {
         // CodeEmbed-Start: mirage1205-triggering
+        using Mirage;
+        using Cysharp.Threading.Tasks;
+
         public class Player : NetworkBehaviour
         {
             // Error: Observers target requires void return type
@@ -20,6 +23,12 @@ namespace Mirage.Snippets.Analyzers
             public void RpcGiveItem(int itemId)
             {
             }
+
+            // Error: An Owner-targeted RPC cannot exclude its owner.
+            [ClientRpc(target = RpcTarget.Owner, excludeOwner = true)]
+            public void RpcNotifyOwner()
+            {
+            }
         }
         // CodeEmbed-End: mirage1205-triggering
     }
@@ -27,6 +36,9 @@ namespace Mirage.Snippets.Analyzers
     namespace M1205.Resolved
     {
         // CodeEmbed-Start: mirage1205-resolved
+        using Mirage;
+        using Cysharp.Threading.Tasks;
+
         public class Player : NetworkBehaviour
         {
             // Correct: Owner target allows returning values
@@ -39,6 +51,11 @@ namespace Mirage.Snippets.Analyzers
             // Correct: First parameter specifies the target player
             [ClientRpc(target = RpcTarget.Player)]
             public void RpcGiveItem(INetworkPlayer targetPlayer, int itemId)
+            {
+            }
+
+            [ClientRpc(target = RpcTarget.Owner)]
+            public void RpcNotifyOwner()
             {
             }
         }
