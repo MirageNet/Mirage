@@ -490,9 +490,8 @@ namespace Mirage
                     SceneId = sceneId,
                     PrefabHash = prefabHash,
                     Payload = payload,
+                    SpawnValues = SpawnValuesHandler.CreateSpawnValues(identity)
                 };
-
-                msg.SpawnValues = CreateSpawnValues(identity);
 
                 player.Send(msg);
             }
@@ -517,8 +516,8 @@ namespace Mirage
                     SceneId = sceneId,
                     PrefabHash = prefabHash,
                     Payload = payload,
+                    SpawnValues = SpawnValuesHandler.CreateSpawnValues(identity)
                 };
-                msg.SpawnValues = CreateSpawnValues(identity);
 
                 // we have to send local/Owner values as their own message.
                 // but observers can be sent using SendToMany to avoid copying bytes multiple times
@@ -553,11 +552,6 @@ namespace Mirage
                     msg.Payload = observersWriter.ToArraySegment();
                 NetworkServer.SendToMany(observerPlayers, msg);
             }
-        }
-
-        private SpawnValues CreateSpawnValues(NetworkIdentity identity)
-        {
-            return SpawnValuesHandler.CreateSpawnValues(identity);
         }
 
         internal void SendRemoveAuthorityMessage(NetworkIdentity identity, INetworkPlayer previousOwner)
