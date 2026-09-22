@@ -1,29 +1,35 @@
 # MIRAGE1004: Invalid SyncVar Hook Method
 
-## The Problem
-A field marked with `[SyncVar]` specifies a hook name, but the hook cannot be resolved, is ambiguous, or does not match the required signature.
+## When this appears
 
-During assembly post-processing, Mirage's Weaver intercepts SyncVar field writes to call user-defined hook methods or events. If the hook cannot be resolved or does not match the expected signatures, it causes a compilation error.
+A `[SyncVar]` names a hook that is missing, invalid, or ambiguous.
 
-SyncVar hook requirements:
-1. **Existence:** The method or event must exist in the class.
-2. **Signature:** Parameters must match the SyncVar type exactly.
-   - **Methods:** 0, 1, or 2 parameters (e.g., `void Hook()`, `void Hook(T newValue)`, or `void Hook(T oldValue, T newValue)`).
-   - **Events:** Must use `System.Action` (generic or non-generic) with 0, 1, or 2 parameters.
-3. **Ambiguity:** Under `SyncHookType.Automatic` mode, if multiple overloads (e.g., a method and an event, or methods with different parameter counts) exist with the same name, the Weaver cannot choose and throws an error. Explicitly define `hookType` or rename/remove the overloads.
-4. **Static:** Both static and instance methods/events are supported.
+Hooks let your code react to a changed value, such as refreshing a health bar. Weaver must be able to find and call the hook to generate a working callback.
 
----
-
-## Example of Triggering Code
 {{{ Path:'Snippets/Analyzers/Mirage1004.cs' Name:'mirage1004-triggering' }}}
 
----
+## How to fix
 
-## How to Resolve
-- **Case 1 (Missing Hook):** Ensure the hook method name is spelled correctly and exists in the class.
-- **Case 2 (Type Mismatch):** Ensure hook parameters match the SyncVar's type exactly.
-- **Case 3 (Invalid Delegate):** Ensure hook events use `System.Action` delegates.
-- **Case 4 (Ambiguity):** Explicitly set `hookType` in the `[SyncVar]` attribute, or resolve the overloads.
+Declare the hook on the same type as the SyncVar and reference its name with `nameof`. Use a nongeneric `void` method or a field-like event.
+
+For a SyncVar of type `T`, supported signatures are:
+
+| Arguments | Method | Field-like event type |
+| --- | --- | --- |
+| None | `void Hook()` | `System.Action` |
+| New value | `void Hook(T newValue)` | `System.Action<T>` |
+| Old and new values | `void Hook(T oldValue, T newValue)` | `System.Action<T, T>` |
+
+Parameters must match `T` exactly and be passed by value. Implicit conversions and `ref`/`in`/`out` are unsupported.
+
+If overloads conflict, give the hook a unique name or set `hookType` to choose the method/event kind and argument count.
 
 {{{ Path:'Snippets/Analyzers/Mirage1004.cs' Name:'mirage1004-resolved' }}}
+
+## Other hook cases
+
+- Inherited-only hooks are not found. A virtual or abstract method declared beside a base SyncVar can dispatch to a derived override.
+- A generic behaviour's type parameter is allowed; the hook method cannot introduce its own. Static and instance hooks are supported, including private methods and static events.
+- Events need a backing field. Custom delegates, ordinary delegate fields, and explicit `add`/`remove` accessors are unsupported.
+- `SyncHookType.Automatic` requires one matching signature. Matching methods with different argument counts are ambiguous. Automatic lookup is not C# overload resolution; unrelated overloads can interfere.
+- An omitted or empty hook name means no hook. `invokeHookOnServer = true` or `invokeHookOnOwner = true` requires a valid hook.
