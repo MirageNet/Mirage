@@ -56,3 +56,25 @@ Below is an example where client pre-spawns objects while loading, and then netw
 Dynamic Handler avoid the need to add 1 spawn handler for each prefab hash. Instead you can just add a single dynamic handler that can then be used to find and return objects.
 
 {{{ Path:'Snippets/Spawning/DynamicSpawning.cs' Name:'dynamic-spawning' }}}
+
+## Custom Spawn Values & Floating Origin (`ISpawnValuesHandler`)
+
+By default, when an object is spawned, `ServerObjectManager` inspects the object's `NetworkSpawnSettings` to create a `SpawnValues` struct containing the object's `transform.localPosition`, `localRotation`, `localScale`, `name`, and active state.
+
+You can customize this behavior by implementing `ISpawnValuesHandler` and assigning it to `ServerObjectManager.SpawnValuesHandler` and `ClientObjectManager.SpawnValuesHandler`.
+
+### Floating Origin & Global Coordinates
+
+In large worlds or space games that use a **floating origin** (or sector system) to prevent floating-point precision jitter, objects in Unity space are positioned relative to a shifting local origin.
+
+Using `ISpawnValuesHandler`:
+- **Server-Side (`CreateSpawnValues`)**: Converts the local Unity position to global/world space coordinates before transmitting the `SpawnMessage` over the network.
+- **Client-Side (`GetPrefabPosition` / `ApplySpawnValues`)**: Receives the global coordinates and transforms them back into the client's current local floating origin space for prefab instantiation and applying spawn values.
+
+### Example
+
+{{{ Path:'Snippets/Spawning/SpawnValuesHandlerSnippets.cs' Name:'floating-origin-spawn-values-handler' }}}
+
+Attach and assign the handler in your setup script:
+
+{{{ Path:'Snippets/Spawning/SpawnValuesHandlerSnippets.cs' Name:'assign-spawn-values-handler' }}}
