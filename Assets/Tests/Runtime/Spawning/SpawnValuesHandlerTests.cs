@@ -181,4 +181,27 @@ namespace Mirage.Tests.Runtime.Spawning
             Assert.That(clientIdentity.transform.position, Is.EqualTo(new Vector3(25, 10, 5)));
         }
     }
+
+    [TestFixture]
+    public class SpawnValuesHandlerHostTests : Mirage.Tests.Runtime.Host.HostSetup
+    {
+        [Test]
+        public void HostModeSpawningPreservesServerObjectState()
+        {
+            var identity = CreateNetworkIdentity();
+            identity.PrefabHash = 12345;
+            identity.transform.position = new Vector3(42, 84, 126);
+            identity.transform.rotation = Quaternion.Euler(0, 45, 0);
+            identity.transform.localScale = new Vector3(2, 2, 2);
+
+            serverObjectManager.Spawn(identity);
+
+            Assert.That(identity.IsSpawned, Is.True);
+            Assert.That(identity.IsHost, Is.True);
+            Assert.That(identity.IsClient, Is.True);
+            Assert.That(identity.IsServer, Is.True);
+            Assert.That(identity.transform.position, Is.EqualTo(new Vector3(42, 84, 126)));
+            Assert.That(identity.transform.localScale, Is.EqualTo(new Vector3(2, 2, 2)));
+        }
+    }
 }
