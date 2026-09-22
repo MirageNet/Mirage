@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
@@ -54,7 +53,7 @@ namespace Mirage
         public int? PrefabHash;
 
         /// <summary>
-        /// Spawn values to set after spawning object, values based on <see cref="NetworkIdentity.TransformSpawnSettings"/>
+        /// Spawn values to set after spawning object, values based on <see cref="NetworkSpawnSettings"/>
         /// </summary>
         public SpawnValues SpawnValues;
 

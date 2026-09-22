@@ -38,6 +38,7 @@ namespace Mirage
         public NetworkServer Server => _server;
 
         public INetIdGenerator NetIdGenerator;
+        public ISpawnValuesHandler SpawnValuesHandler = DefaultSpawnValuesHandler.Instance;
         private uint _nextNetworkId = 1;
 
         private uint GetNextNetworkId() => NetIdGenerator?.GenerateNetId() ?? checked(_nextNetworkId++);
@@ -556,26 +557,7 @@ namespace Mirage
 
         private SpawnValues CreateSpawnValues(NetworkIdentity identity)
         {
-            var settings = identity.SpawnSettings;
-            SpawnValues values = default;
-
-            // values in msg are nullable, so by default they are null
-            // only set those values if the identity's settings say to send them
-            if (settings.SendPosition) values.Position = identity.transform.localPosition;
-            if (settings.SendRotation) values.Rotation = identity.transform.localRotation;
-            if (settings.SendScale) values.Scale = identity.transform.localScale;
-            if (settings.SendName) values.Name = identity.name;
-            switch (settings.SendActive)
-            {
-                case SyncActiveOption.SyncWithServer:
-                    values.SelfActive = identity.gameObject.activeSelf;
-                    break;
-                case SyncActiveOption.ForceEnable:
-                    values.SelfActive = true;
-                    break;
-            }
-
-            return values;
+            return SpawnValuesHandler.CreateSpawnValues(identity);
         }
 
         internal void SendRemoveAuthorityMessage(NetworkIdentity identity, INetworkPlayer previousOwner)
