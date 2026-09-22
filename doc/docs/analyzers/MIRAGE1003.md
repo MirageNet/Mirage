@@ -2,22 +2,22 @@
 
 ## When this appears
 
-A `NetworkBehaviour` instance field implementing `Mirage.Collections.ISyncObject`, such as `SyncList`, `SyncDictionary`, or `SyncHashSet`, lacks `readonly` or is replaced after construction.
+A SyncObject instance field in a `NetworkBehaviour` is missing `readonly` or is replaced after construction.
 
-The Weaver registers the field's object during construction. Replacing it leaves the original object registered; the replacement is not registered automatically.
-
-Requiring `readonly` protects that lifetime. It is an analyzer policy, not a modifier enforced by the Weaver.
-
-Ordinary `ISyncObject` use outside a `NetworkBehaviour` is outside this policy.
+Weaver registers the original object during construction. A replacement is not registered automatically, so its changes can stay local while the old object continues to synchronize.
 
 {{{ Path:'Snippets/Analyzers/Mirage1003.cs' Name:'mirage1003-triggering' }}}
 
 ## How to fix
 
 - Initialize a non-null instance in the field initializer or constructor, before registration.
-- Mark the field `readonly` and keep that instance for the behaviour's lifetime. Its contents remain mutable.
-- On the sending side configured by `SyncSettings`, change contents through the object's APIs. Built-in collections support `Clear()`; custom `ISyncObject` types need their own appropriate operation.
-
-SyncObjects synchronize themselves and must not also have `[SyncVar]`; the Weaver rejects that combination. Remove `[SyncVar]` and keep `readonly`, instead of applying the ordinary SyncVar fix from [MIRAGE1005](./MIRAGE1005.md).
+- Mark the field `readonly` and keep that instance for the behaviour's lifetime. You can still change its contents.
+- On the sending side configured by `SyncSettings`, change contents through the object's APIs. Use `Clear()` to empty a built-in collection; custom `ISyncObject` types need their own operation for changing or clearing contents.
 
 {{{ Path:'Snippets/Analyzers/Mirage1003.cs' Name:'mirage1003-resolved' }}}
+
+SyncObjects synchronize themselves and must not also have `[SyncVar]`; Weaver rejects that combination. Remove `[SyncVar]` and keep `readonly`, instead of applying the ordinary SyncVar fix from [MIRAGE1005](./MIRAGE1005.md).
+
+This rule covers instance fields implementing `Mirage.Collections.ISyncObject`, including `SyncList`, `SyncDictionary`, and `SyncHashSet`. Ordinary `ISyncObject` use outside a `NetworkBehaviour` is not covered.
+
+The analyzer requires `readonly` to prevent replacement. Weaver can register a field without it, but does not protect that field from later replacement.

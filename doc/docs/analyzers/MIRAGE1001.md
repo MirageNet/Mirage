@@ -2,15 +2,9 @@
 
 ## When this appears
 
-An ordinary class is used as a `[SyncVar]` payload. This warning concerns allocation and updates; many class payloads are serializable.
+An ordinary class is used as a `[SyncVar]` value.
 
-Exceptions: `string` uses dedicated serialization; `NetworkIdentity`, `GameObject`, and `NetworkBehaviour` references identify existing spawned objects. Other `UnityEngine.Object` or component types are not automatically exempt.
-
-- **Allocation:** Generated reads allocate non-null class payloads; custom readers may differ.
-- **Representation:** Generated serializers use eligible fields of the declared type and its bases, without automatically serializing properties or preserving derived runtime types.
-- **Updates:** Nested mutations bypass the setter. Default SyncVar assignments dirty only when `EqualityComparer<T>.Default` detects a difference. Reassigning the same mutated instance normally does nothing. Hooks depend on network side and options.
-
-With `initialOnly = true`, assignments change local storage without dirtying or invoking hooks. Only initial snapshots transmit the field; the allocation and representation rules still apply.
+Generated readers allocate a new object for each non-null value received, adding garbage during frequent updates. Changing a member also bypasses SyncVar change tracking, so other peers can keep the old value.
 
 {{{ Path:'Snippets/Analyzers/Mirage1001.cs' Name:'mirage1001-triggering' }}}
 
@@ -18,20 +12,29 @@ With `initialOnly = true`, assignments change local storage without dirtying or 
 
 ### Use a struct for small values
 
-On the sending side configured by `SyncSettings`, copy, modify, and assign the whole value back. In-place member writes still bypass the setter.
-
-Structs avoid the outer object allocation. Members can still allocate, copies share reference members, and equality must distinguish the synchronized changes.
+Use a struct for small values to avoid allocating the outer object. On the sending side configured by `SyncSettings`, copy the value, change the copy, and assign the whole value back.
 
 {{{ Path:'Snippets/Analyzers/Mirage1001.cs' Name:'mirage1001-recommended' }}}
 
+Changing a struct member in place still bypasses the setter. Struct members can allocate, and copies share reference members. Equality must distinguish the changes you want to synchronize.
+
 ### Keep a class
 
-Custom `Write`/`Read` extension methods control representation. This example replaces immutable values; its reader still allocates.
+You can keep a serializable class. Assign a replacement value when it changes; reassigning the same mutated instance normally compares equal and does not mark a new update.
 
-`[WeaverSafeClass]` on the payload type suppresses this warning for its uses. It changes neither serialization, equality, dirty tracking, nor hooks, and cannot make an unsupported type serializable.
+Custom `Write`/`Read` extension methods let you choose what is serialized. This example assigns new immutable values and supplies a custom serializer; its reader still allocates.
 
 {{{ Path:'Snippets/Analyzers/Mirage1001.cs' Name:'mirage1001-alternative-custom' }}}
 
-For one field, place `[WeaverSafeClass]` on that field instead.
+`[WeaverSafeClass]` on the class suppresses this warning wherever that class is used. To suppress it for one field, put the attribute on that field instead.
 
 {{{ Path:'Snippets/Analyzers/Mirage1001.cs' Name:'mirage1001-alternative-suppress' }}}
+
+The attribute changes neither serialization, equality, dirty tracking, nor hooks. It cannot make an unsupported type serializable.
+
+## Details and exceptions
+
+- Normal SyncVar assignments mark a change only when `EqualityComparer<T>.Default` finds a difference. Hook calls also depend on the network side and SyncVar options.
+- With `initialOnly = true`, assignments only change local storage, without marking an update or invoking hooks. Only initial snapshots transmit the field; allocation and serialization behavior are unchanged.
+- Generated serializers use eligible fields of the declared type and its base types. They do not automatically serialize properties or preserve derived runtime types. Custom readers can use different allocation behavior.
+- `string` uses dedicated serialization. `NetworkIdentity`, `GameObject`, and `NetworkBehaviour` references identify existing spawned objects. These types are exempt; other `UnityEngine.Object` or component types are not automatically exempt.
