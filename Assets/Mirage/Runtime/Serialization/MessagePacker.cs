@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Profiling;
 
 namespace Mirage.Serialization
 {
@@ -11,6 +12,9 @@ namespace Mirage.Serialization
     public static class MessageIdCache<T>
     {
         public static readonly int Id = MessagePacker.GetId(typeof(T));
+        public static readonly ProfilerMarker SendMarker = new ProfilerMarker($"Mirage.Message.{typeof(T).Name}.Send");
+        public static readonly ProfilerMarker SendNotifyMarker = new ProfilerMarker($"Mirage.Message.{typeof(T).Name}.SendNotify");
+        public static readonly ProfilerMarker SendToManyMarker = new ProfilerMarker($"Mirage.Message.{typeof(T).Name}.SendToMany");
     }
 
     // message packing all in one place, instead of constructing headers in all

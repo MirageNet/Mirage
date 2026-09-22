@@ -35,9 +35,6 @@ namespace Mirage
         private static readonly ILogger errorLogger = LogFactory.GetLogger(typeof(PlayerErrorFlags));
         private static readonly ILogger rateLimitLogger = LogFactory.GetLogger(typeof(RateLimitAttribute));
 
-        private static readonly ProfilerMarker sendMarker = new ProfilerMarker("Mirage.NetworkPlayer.Send");
-        private static readonly ProfilerMarker sendNotifyMarker = new ProfilerMarker("Mirage.NetworkPlayer.SendNotify");
-
         private readonly HashSet<NetworkIdentity> _visList = new HashSet<NetworkIdentity>();
 
         /// <summary>
@@ -242,7 +239,7 @@ namespace Mirage
         /// <param name="channelId">The transport layer channel to send on.</param>
         public void Send<T>(T message, Channel channelId = Channel.Reliable)
         {
-            using var _ = sendMarker.Auto();
+            using var _ = MessageIdCache<T>.SendMarker.Auto();
 
             if (_isDisconnected) { return; }
 
@@ -303,7 +300,7 @@ namespace Mirage
         /// <param name="channelId">The transport layer channel to send on.</param>
         public void Send<T>(T message, INotifyCallBack callBacks)
         {
-            using var _ = sendNotifyMarker.Auto();
+            using var _ = MessageIdCache<T>.SendNotifyMarker.Auto();
 
             if (_isDisconnected) { return; }
 
