@@ -1,31 +1,25 @@
 # MIRAGE1304: Non-Serializable MonoBehaviour Parameter
 
-## The Problem
-A transmitted RPC parameter or included network-message field refers to an ordinary `MonoBehaviour` type for which no usable serializer is available.
+## When this appears
 
-Default generation does not serialize arbitrary Unity component references. `NetworkBehaviour` subclasses use Mirage's network-reference serializer, and `NetworkIdentity` has a built-in serializer even though it is not a `NetworkBehaviour`. A custom serializer for another component type takes precedence over default-generation restrictions; manual serialization through `[WeaverWriteAsGeneric]` is also a distinct path.
+A transmitted RPC parameter or included message field refers to an ordinary `MonoBehaviour` without a usable serializer. Ignored message fields and ordinary properties are outside this rule.
 
-Only inspect values that are actually serialized. Ignored message fields and ordinary message properties do not require a serializer.
+Default generation does not serialize arbitrary component references. Supported alternatives include:
 
----
+- `NetworkBehaviour` subclasses, using Mirage's network-reference serializer.
+- `NetworkIdentity`, which has a built-in serializer despite not inheriting `NetworkBehaviour`.
+- A custom serializer, selected before default-generation restrictions, or manual serialization through `[WeaverWriteAsGeneric]` ([MIRAGE1301](./MIRAGE1301.md)).
 
-## Example of Triggering Code
 {{{ Path:'Snippets/Analyzers/Mirage1304.cs' Name:'mirage1304-triggering' }}}
 
----
+## How to fix
 
-## How to Resolve
+For a networked component, inherit from `NetworkBehaviour`. Mirage sends its network ID and component index; public field values are not included.
 
-### Recommended Fix: Inherit from NetworkBehaviour
-If this component belongs to a networked object, inherit from `NetworkBehaviour`. Mirage sends its network ID and component index, rather than the component's public field values. The instance must belong to a spawned `NetworkIdentity` that the receiver can resolve, with a matching component layout. Changing the base class alone does not create or spawn that identity.
+The component must belong to a spawned `NetworkIdentity` that the receiver can resolve, with a matching component layout. Changing the base class alone does not establish this.
 
 {{{ Path:'Snippets/Analyzers/Mirage1304.cs' Name:'mirage1304-recommended' }}}
 
----
-
-### Alternative Solution: Use a serializable identifier
-If the component cannot be networked, send a serializable identifier (such as an ID or string) instead of the component itself.
+Otherwise, send a serializable identifier and resolve the component on receipt. Both peers must agree on the mapping; a local Unity instance ID alone is insufficient. A custom reader/writer pair can encapsulate this mapping.
 
 {{{ Path:'Snippets/Analyzers/Mirage1304.cs' Name:'mirage1304-alternative' }}}
-
-A custom reader/writer pair can also encode an application-specific identifier and resolve the existing component on receipt. Both peers must agree on that mapping; a local Unity instance ID alone does not establish it.

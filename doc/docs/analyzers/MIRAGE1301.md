@@ -1,27 +1,24 @@
 # MIRAGE1301: Field Type Serialization Validation
 
-## The Problem
-A value that Mirage actually serializes has no usable reader or writer. This includes transmitted RPC parameters, `UniTask<T>` RPC results, and included network-message fields, including their nested and inherited fields.
+## When this appears
 
-Mirage discovers built-in and custom serializers before attempting to generate a missing serializer. A custom serializer can support a type that default generation rejects, such as an interface or abstract class. Field or parameter attributes can select a different serialization path, including a maximum-length serializer.
+A transmitted RPC parameter, `UniTask<T>` RPC result, or included message field lacks a usable reader or writer. This includes nested and inherited serialized fields.
 
-Default generation supports concrete structs and classes whose included fields can be serialized. Ordinary classes need a **public parameterless constructor** for the generated reader. Closed generic types have generation paths; an open generic definition is not a concrete message. `NetworkBehaviour` references and `ScriptableObject` subclasses use special serialization or construction paths.
+Serialization depends on the selected path:
 
-Use public instance fields for generated message data. Ordinary properties are not traversed. Static, private, internal and protected fields, and fields marked `[System.NonSerialized]` or `[WeaverIgnore]`, are skipped. An unsupported type on a skipped member does not trigger this rule. RPC `INetworkPlayer` routing/sender parameters are also not serialized payloads.
+- Built-in and custom serializers take precedence over generation. Custom serializers can support interfaces or abstract classes. Field and parameter attributes can select another path, including maximum-length serialization.
+- Generated concrete structs and classes require serializable included fields. Ordinary classes also need a **public parameterless constructor**. Closed generic types have generation paths; open generic definitions are not concrete messages.
+- `NetworkBehaviour` references and `ScriptableObject` subclasses use special serialization or construction paths.
+- `[WeaverWriteAsGeneric]` uses manually assigned `Writer<T>`/`Reader<T>` delegates. Default-generation restrictions do not invalidate this path, but the attribute does not guarantee runtime initialization.
 
-**Current Weaver caveat:** its field filter also traverses `protected internal` and `private protected` fields. This is not a supported visibility contract and may produce inaccessible generated field access. Do not assume these fields remain local or omit them from analysis solely because they are non-public. Use public fields for transmitted data, or an explicit ignore attribute for local state.
+Default generation skips ordinary properties and static, private, internal or protected fields, plus fields marked `[System.NonSerialized]` or `[WeaverIgnore]`. Unsupported types on skipped members do not trigger this rule. RPC `INetworkPlayer` routing/sender parameters are also excluded.
 
-Types marked `[WeaverWriteAsGeneric]` use manually assigned `Writer<T>` and `Reader<T>` delegates. Their presence cannot prove that those delegates will be initialized correctly at runtime; this rule must not reject the type merely because default generation is unavailable.
+**Weaver caveat:** `protected internal` and `private protected` fields are currently traversed and can cause inaccessible generated access. This is unsupported behavior: use public fields for transmitted data or explicit ignore attributes for local state.
 
----
-
-## Example of Triggering Code
 {{{ Path:'Snippets/Analyzers/Mirage1301.cs' Name:'mirage1301-triggering' }}}
 
----
+## How to fix
 
-## How to Resolve
-
-Replace the unsupported transmitted value with a supported type or identifier, exclude state that is intentionally local, or provide compatible custom reader and writer extension methods. For an ordinary class using generated serialization, supply a public parameterless constructor and make every included field serializable. Adding `[NetworkMessage]` alone does not make an unsupported field type serializable.
+Use a supported type or identifier, explicitly exclude local fields, or provide compatible custom reader/writer extensions. For generated classes, meet the field and constructor requirements above. Adding `[NetworkMessage]` alone does not make unsupported fields serializable.
 
 {{{ Path:'Snippets/Analyzers/Mirage1301.cs' Name:'mirage1301-resolved' }}}
