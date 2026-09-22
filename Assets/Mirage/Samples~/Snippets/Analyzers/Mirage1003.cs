@@ -8,12 +8,12 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1003-triggering
         public class Player : NetworkBehaviour
         {
-            // Error: ISyncObject field 'playerList' must be marked readonly and cannot be reassigned
+            // Analyzer error: protect the registered instance with readonly.
             public SyncList<int> playerList = new SyncList<int>();
 
             public void ResetList()
             {
-                playerList = new SyncList<int>();
+                playerList = new SyncList<int>(); // The original list remains registered.
             }
         }
         // CodeEmbed-End: mirage1003-triggering
@@ -24,12 +24,12 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1003-resolved
         public class Player : NetworkBehaviour
         {
-            // Correct: Marked as readonly
+            // The reference is fixed; the collection contents can still change.
             public readonly SyncList<int> playerList = new SyncList<int>();
 
             public void ResetList()
             {
-                // Correct: Clear the list instead of reassigning it
+                // Call on the sending side; preserve the registered instance.
                 playerList.Clear();
             }
         }
