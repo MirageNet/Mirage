@@ -1,9 +1,13 @@
 # MIRAGE1302: Unserialized Member Warning
 
 ## The Problem
-A non-public field or a property is declared inside a `[NetworkMessage]` struct or class.
+An instance field or property in a `[NetworkMessage]` type appears to hold message data but is omitted by default generated serialization.
 
-Mirage's Weaver only serializes public fields. Properties (even public ones) and non-public fields (private, internal, or protected) are ignored and will not be sent over the network.
+The supported generated layout uses eligible public instance fields, including inherited fields. Ordinary properties and fields declared private, internal or protected are omitted. Static members and fields explicitly marked `[System.NonSerialized]` or `[WeaverIgnore]` are intentional exclusions and should not produce this warning. Compiler-generated backing fields should not produce duplicate warnings.
+
+The current Weaver does not omit the combined `protected internal` and `private protected` accessibilities; see the [field-filter caveat in MIRAGE1301](./MIRAGE1301.md). This omission warning must not claim those fields are local-only.
+
+A custom serializer can explicitly serialize properties or otherwise choose its own layout. This rule should skip types using custom or manual serialization rather than infer what those serializers transmit from member visibility.
 
 ---
 
@@ -13,6 +17,6 @@ Mirage's Weaver only serializes public fields. Properties (even public ones) and
 ---
 
 ## How to Resolve
-Make fields public so the Weaver serializes them, or convert properties to public fields if they must be transmitted. Alternatively, ignore this warning if the member is meant to be local, or mark the field as static.
+Use public fields for data that should participate in generated serialization, or write a compatible custom reader/writer pair. For intentional local state, mark a field with an ignore attribute or suppress the warning on the declaration. Changing instance state to static changes its meaning and is not a general fix.
 
 {{{ Path:'Snippets/Analyzers/Mirage1302.cs' Name:'mirage1302-resolved' }}}

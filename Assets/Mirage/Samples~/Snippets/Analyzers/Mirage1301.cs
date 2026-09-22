@@ -24,9 +24,9 @@ namespace Mirage.Snippets.Analyzers
             public int sessionId;
 
             // Ignored during serialization
-            [NonSerialized] public System.Threading.Thread workerThread;
+            [System.NonSerialized] public System.Threading.Thread workerThread;
 
-            // Required parameterless constructor for deserialization
+            // Public parameterless constructor for generated deserialization
             public UserSession() { }
         }
 
@@ -36,7 +36,7 @@ namespace Mirage.Snippets.Analyzers
             // Use a serializable identifier instead of the thread object
             public string threadName;
 
-            // Auto-serialized: non-generic class with parameterless constructor
+            // Auto-serialized: concrete class with a public parameterless constructor
             public UserSession session;
         }
         // CodeEmbed-End: mirage1301-resolved

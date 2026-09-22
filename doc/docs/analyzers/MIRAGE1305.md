@@ -1,17 +1,17 @@
 # MIRAGE1305: Missing NetworkMessage Attribute
 
 ## The Problem
-A class or struct is used as a network message in one of the API methods below, but lacks the `[NetworkMessage]` attribute.
+A project-owned concrete class or struct is used as a message without an explicit `[NetworkMessage]` declaration. Requiring the marker is an **analyzer convention** that makes message discovery explicit; it is not a universal runtime requirement.
 
-Mirage's Weaver generates serialization code and registers message IDs for types marked with `[NetworkMessage]`. Using a type without this attribute can cause runtime errors, including serialization failures, unpacking issues, or "Unexpected message ID" warnings.
+The marker tells the Weaver to obtain readers and writers and register the message type when weaving its defining assembly. The type and all transmitted values must still be serializable.
 
 ### Affected Methods
-The following generic methods require their type argument to have `[NetworkMessage]`:
+This convention covers the following Mirage message APIs. Match their actual method symbols, including reduced extension methods, rather than unrelated methods with the same names.
 
 | Method | Declared On |
 |---|---|
-| `Send<T>()` | `INetworkPlayer`, `NetworkPlayer`, `NetworkClient` |
-| `RegisterHandler<T>()` | `IMessageReceiver`, `MessageHandler` |
+| `Send<T>()` | `IMessageSender` (inherited by `INetworkPlayer`), `NetworkPlayer`, `NetworkClient` |
+| `RegisterHandler<T>()` | `IMessageReceiver`, `MessageHandler`, `MessageReceiverExtensions` |
 | `UnregisterHandler<T>()` | `IMessageReceiver`, `MessageHandler` |
 | `SendToAll<T>()` | `NetworkServer` |
 | `SendToMany<T>()` | `NetworkServer` |
@@ -19,9 +19,15 @@ The following generic methods require their type argument to have `[NetworkMessa
 | `Unpack<T>()` | `MessagePacker` |
 | `GetId<T>()` | `MessagePacker` |
 
-### Same-Assembly vs Cross-Assembly Behavior
-* **Same assembly:** The Weaver can generate readers and writers on the fly during compilation even if `[NetworkMessage]` is missing. The code will work, but raises a warning to prevent fragile or ambiguous behavior.
-* **Cross-assembly:** When a message is defined in one assembly and used in another, the Weaver must generate the serialization code in the defining assembly. This requires `[NetworkMessage]` on the definition. Without it, referencing assemblies will fail at runtime with missing serializer errors.
+### What the Weaver Discovers
+
+Recognized direct generic calls with concrete type arguments can trigger serialization generation in the calling assembly, including for accessible types from another assembly. Therefore, an unmarked message can work in either case. Custom or manually initialized serializers can also supply the required serialization.
+
+Discovery is limited: open generic arguments are skipped, and arbitrary generic wrappers or reflection do not cause whole-program specialization. The convenience `MessageReceiverExtensions.RegisterHandler` overloads are not direct discovery triggers in the current Weaver. Explicit marking avoids relying on those call paths to discover a project-owned message.
+
+### IDs and Handlers
+
+`MessagePacker.GetId<T>()` computes an ID from the type name without checking this attribute. Weaver message registration records the type for diagnostics and collision detection. `RegisterHandler<T>()` separately installs a receiving handler. Adding the attribute does not install a handler or fix an unexpected-message warning caused by a missing handler. `GetId<T>()` and `UnregisterHandler<T>()` are included here as a convention, even though their runtime operations do not require serialization.
 
 ---
 
@@ -31,6 +37,8 @@ The following generic methods require their type argument to have `[NetworkMessa
 ---
 
 ## How to Resolve
-Add the `[NetworkMessage]` attribute to the message class or struct. This ensures the Weaver generates the required serialization code in the defining assembly.
+Add `[NetworkMessage]` to the editable concrete message declaration. Nested payload types used only as fields or RPC arguments do not need the marker.
+
+Do not offer an attribute code fix for framework types, declarations supplied only by referenced metadata, or an open generic definition: the Weaver rejects `[NetworkMessage]` on open generic types. Where the declaration cannot be marked, use a project-owned concrete message wrapper or an explicitly established serializer/discovery path and suppress this convention as appropriate.
 
 {{{ Path:'Snippets/Analyzers/Mirage1305.cs' Name:'mirage1305-resolved' }}}
