@@ -2,7 +2,9 @@
 
 ## When this appears
 
-A `[ServerRpc]` or `[ClientRpc]` violates these signature requirements:
+A `[ServerRpc]` or `[ClientRpc]` has an unsupported method signature.
+
+An unsupported signature stops the build because Weaver cannot generate the sending and receiving code for it. RPC methods must meet these requirements:
 
 | Requirement | Valid signature |
 | --- | --- |
@@ -20,10 +22,10 @@ Non-generic `UniTask`, `UniTaskVoid`, `Task`, `Task<T>`, coroutine returns, and 
 
 ## How to fix
 
-Apply the requirements above. Put convenience defaults on a separate non-RPC wrapper and pass payload arguments explicitly.
+Choose one RPC attribute and a supported return type. Give the method a body and remove method-level generic parameters. Put optional payload defaults on a separate non-RPC wrapper and pass those arguments explicitly.
 
-Generic `NetworkBehaviour` classes, concrete subclasses, enclosing type parameters in parameters or results, and closed generic payloads are supported shapes. Every concrete payload still needs registered readers and writers.
+A generic `NetworkBehaviour` class and its concrete subclasses can still use RPCs. Parameters and results may use the class's type parameters or closed generic types. Each concrete payload type still needs registered readers and writers.
 
-Missing registration for a class-level `T` can fail when the RPC runs. For custom concrete types, arrange generation, such as `[NetworkMessage]` on an eligible concrete type, or supply supported custom serializers. Built-in `int` already has serializers.
+Missing serializers for a class-level `T` can make the RPC fail at runtime. For custom types, generate serializers or provide [custom serializers](./MIRAGE1301.md). For example, `[NetworkMessage]` can generate them for an eligible concrete type. Built-in `int` already has serializers.
 
 {{{ Path:'Snippets/Analyzers/Mirage1202.cs' Name:'mirage1202-resolved' }}}

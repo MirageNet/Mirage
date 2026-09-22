@@ -11,7 +11,7 @@ namespace Mirage.Snippets.Analyzers
         [NetworkMessage]
         public struct UpdateUserMessage
         {
-            // Advisory: Generated deserialization allocates non-null UserData values.
+            // Warning: Reading a non-null UserData value creates a new object.
             public UserData data;
         }
 

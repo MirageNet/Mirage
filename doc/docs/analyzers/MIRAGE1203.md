@@ -2,7 +2,9 @@
 
 ## When this appears
 
-A `[ServerRpc]` or `[ClientRpc]` parameter uses `ref`, `out`, or readonly `in`. RPCs transfer serialized values and cannot share the caller's variable across the network. The Weaver does not treat `in` as an ordinary value parameter.
+A `[ServerRpc]` or `[ClientRpc]` parameter uses `ref`, `out`, or readonly `in`.
+
+RPCs transfer serialized values. They cannot share the caller's variable across the network or write a result back through its reference.
 
 {{{ Path:'Snippets/Analyzers/Mirage1203.cs' Name:'mirage1203-triggering' }}}
 

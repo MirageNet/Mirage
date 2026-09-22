@@ -2,7 +2,9 @@
 
 ## When this appears
 
-A method decorated with `[ServerRpc]` or `[ClientRpc]` is `static`. RPCs need a specific `NetworkBehaviour` instance so Mirage can route the message to its network identity.
+A `[ServerRpc]` or `[ClientRpc]` method is `static`.
+
+RPCs need a specific `NetworkBehaviour` instance so the message can be routed to its network identity. A static method has no instance to identify the receiving object.
 
 {{{ Path:'Snippets/Analyzers/Mirage1204.cs' Name:'mirage1204-triggering' }}}
 

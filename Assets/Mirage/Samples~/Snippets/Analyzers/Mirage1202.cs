@@ -60,11 +60,11 @@ namespace Mirage.Snippets.Analyzers
         // Allowed: Generic NetworkBehaviour class.
         public class Player<T> : NetworkBehaviour
         {
-            // The optional sender is injected context, not a payload default.
+            // RPC handling supplies the optional sender; it is not sent as payload.
             [ServerRpc]
             public void CmdDamage(int damage, INetworkPlayer sender = null) { }
 
-            // Allowed shape: Concrete T still needs registered serializers.
+            // The concrete type used for T still needs registered readers and writers.
             [ServerRpc]
             public void CmdProcessGenericArg(T data)
             {
@@ -89,7 +89,7 @@ namespace Mirage.Snippets.Analyzers
             }
         }
 
-        // Concrete component using an already supported payload type.
+        // int already has serializers.
         public class IntPlayer : Player<int> { }
         // CodeEmbed-End: mirage1202-resolved
     }

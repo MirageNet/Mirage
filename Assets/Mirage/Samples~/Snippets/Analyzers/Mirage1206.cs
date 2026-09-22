@@ -16,7 +16,7 @@ namespace Mirage.Snippets.Analyzers
             {
             }
 
-            // Analyzer policy: The interval must also be finite.
+            // NaN can stop the limiter from rejecting excess calls.
             [ServerRpc]
             [RateLimit(Interval = float.NaN)]
             public void CmdInvalidInterval()
