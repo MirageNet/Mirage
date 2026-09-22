@@ -1,10 +1,8 @@
 # Mirage Roslyn Analyzers
 
-Mirage analyzers highlight networking mistakes in your editor. Use each rule page to understand the diagnostic, its exceptions, and how to fix your code.
+Find a rule below to learn what causes it, why it matters, and how to fix it.
 
-These pages are the authoritative rule reference. The table lists default severities; rule availability depends on your analyzer version. [Message size estimation](MIRAGE1501.md) is proposed.
-
-Rules apply to Mirage's types, attributes, and members, including supported derived types. Some rules impose additional checks beyond the Weaver; their pages explain these requirements.
+These pages are the source of truth for rule behavior and default severity. Available rules depend on your analyzer version; [message size estimation](MIRAGE1501.md) is still proposed.
 
 ## Rules
 
