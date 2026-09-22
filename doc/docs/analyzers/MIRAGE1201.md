@@ -1,38 +1,36 @@
 # MIRAGE1201: NetworkMessage/RPC Class Warning
 
-## The Problem
-This advisory rule asks you to review a class used as a network payload. Classes can be valid Mirage payloads; this is not a Weaver serialization error.
+## When this appears
 
-The rule checks the declared type of an eligible serialized field in a `[NetworkMessage]` using generated serialization, an RPC payload parameter, or the result `T` of an RPC returning `UniTask<T>`. Ordinary properties and fields ignored by generated serialization are outside this scope. Inherited serialized fields are included.
+This advisory flags a class used directly as a payload type. Classes can serialize correctly; review their allocation and reference behavior.
 
-The policy excludes `string`, arrays, `List<T>`, `Dictionary<TKey, TValue>`, and Mirage's supported network references (`NetworkIdentity`, `NetworkBehaviour` and its subclasses, and networked `GameObject`). RPC sender/target `INetworkPlayer` parameters are connection context, not serialized payloads. This rule checks these declared payload types directly; it does not recursively inspect collection elements, nested payload members, or custom serializer bodies. Exemption from this warning does not prove that a type or its elements are serializable; see [MIRAGE1301](./MIRAGE1301.md).
+The rule checks the declared type of:
 
-Generated serialization normally constructs a new instance for each non-null class value and serializes the eligible fields of the declared type, including inherited fields. It does not preserve arbitrary object identity or automatically send fields added by a runtime subclass. Custom serializers can change this behavior.
+- Eligible fields, including inherited fields, in a `[NetworkMessage]` using generated serialization.
+- RPC payload parameters and the result `T` of `UniTask<T>`.
 
----
+Properties, ignored fields, and `INetworkPlayer` connection context are excluded. So are `string`, arrays, `List<T>`, `Dictionary<TKey, TValue>`, and supported `NetworkIdentity`, `NetworkBehaviour` (including subclasses), and networked `GameObject` references.
 
-## Example of Triggering Code
+It does not inspect collection elements, nested members, or custom serializer bodies. Exempt types still need [serialization support](./MIRAGE1301.md).
+
+Generated serialization allocates non-null class values and sends the declared type's eligible fields, including inherited fields. It does not preserve arbitrary object identity or automatically include runtime subclass fields. Custom serializers can change this.
+
 {{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-triggering' }}}
 
----
+## How to fix
 
-## How to Resolve
+A small struct can avoid the outer class allocation. Reference fields can still allocate, and copying the struct copies references rather than their objects. The string here can still allocate.
 
-### Recommended Fix: Use a struct
-A small struct can avoid the outer class allocation. Its reference fields can still allocate during deserialization, and copying the struct copies those references rather than cloning their objects. The string in this example can still allocate.
 {{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-recommended' }}}
 
----
+### Keep an intentional class payload
 
-### Alternative Solutions
-If the class representation is intentional, review its allocation and wire format before suppressing the warning.
+A custom writer/reader pair controls the format. This example preserves nulls but still allocates non-null instances. Polymorphism and shared reference identity require an explicit format.
 
-#### 1. Implement Custom Serialization
-Use a matching custom writer/reader pair when you need control over the wire format. The example preserves nulls and still allocates a class for a non-null value. It does not implement polymorphism or shared reference identity; those require an explicit format of your own.
-
-After reviewing that tradeoff, `[WeaverSafeClass]` on the payload type suppresses this advisory at its use sites. The attribute is an analyzer annotation: it does not generate serializers, validate custom code, or change runtime behavior. A custom serializer alone is not proof that allocation or reference semantics are safe.
 {{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-alternative-custom' }}}
 
-#### 2. Suppress the warning at a use site
-For an intentionally class-based payload, apply `[WeaverSafeClass]` to the serialized field or RPC parameter. For an RPC result, annotate the payload class or use a normal diagnostic suppression; this attribute cannot be applied to the method or return value. Marking a property does not make it part of generated serialization.
+After reviewing allocation and wire format, suppress this advisory with `[WeaverSafeClass]` on the payload class, serialized field, or RPC parameter. For RPC results, annotate the class or use normal diagnostic suppression; method and return-value annotations are unsupported.
+
+Custom serialization alone does not establish allocation or reference safety. The annotation does not generate or validate serializers, change runtime behavior, or make properties serializable.
+
 {{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-alternative-suppress' }}}

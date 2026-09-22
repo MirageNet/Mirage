@@ -1,29 +1,28 @@
 # MIRAGE1205: Invalid ClientRpc Target Configurations
 
-## The Problem
-A `[ClientRpc]` target configuration is invalid if:
-- The target is `RpcTarget.Observers` but the method return type is not `void`. Observers is also the default when `target` is omitted.
-- The target is `RpcTarget.Player` but the first parameter is not the target connection. Use `Mirage.INetworkPlayer` as its declared type.
-- The target is `RpcTarget.Owner` and `excludeOwner = true`.
+## When this appears
 
-Observers RPCs may have multiple recipients and cannot return a single response. Owner and Player RPCs may return `void` or `Cysharp.Threading.Tasks.UniTask<T>` with a serializable result; they do not allow arbitrary return types. See [MIRAGE1202](./MIRAGE1202.md).
+A `[ClientRpc]` does not meet its target's requirements:
 
-Owner selects the object's owner; Player selects the connection passed to the first parameter. The target client must have the corresponding spawned identity to execute the RPC. A missing owner causes a targeted send to fail. Pass an explicit non-null player for Player routing; the remote send path has an owner fallback for null, but the host local-call check uses the supplied value directly.
+| Target | Requirement |
+| --- | --- |
+| `RpcTarget.Observers` (default) | Return `void`; multiple recipients cannot provide one result. |
+| `RpcTarget.Player` | Declare `Mirage.INetworkPlayer` as the first parameter. |
+| `RpcTarget.Owner` | Do not set `excludeOwner = true`. |
 
-The first `INetworkPlayer` is not serialized. On the receiving client it is connection context for the server, not a copy of the caller's player object. Owner/Observers RPCs may also have this first connection-context parameter without changing their routing. Additional or later `INetworkPlayer` parameters are not supported on ClientRpcs. A ServerRpc's injected sender parameter has different rules and may appear in any position.
+Owner/Player RPCs may return `void` or `Cysharp.Threading.Tasks.UniTask<T>` with serializable `T`. Other return types remain [unsupported](./MIRAGE1202.md).
 
-Use the exact `INetworkPlayer` interface in these signatures. Although the Weaver's Player-target precheck accepts implementing types, other serialization and injection steps use an exact-type check; that precheck alone does not establish support for concrete implementations or derived interfaces.
-
----
-
-## Example of Triggering Code
 {{{ Path:'Snippets/Analyzers/Mirage1205.cs' Name:'mirage1205-triggering' }}}
 
----
+## How to fix
 
-## How to Resolve
-- If the target is `RpcTarget.Observers`, change the return type to `void`, or use `RpcTarget.Owner` / `RpcTarget.Player` with a valid `UniTask<T>` result.
-- If the target is `RpcTarget.Player`, add `INetworkPlayer` as the first parameter.
-- If the target is `RpcTarget.Owner`, remove `excludeOwner = true`. Use Observers with `excludeOwner = true` only when the intended recipients are the other observers.
+Use `void` for Observers, or choose Owner/Player for a result. Add the first `INetworkPlayer` parameter for Player routing. Remove `excludeOwner = true` for Owner; use Observers with that option when the intended recipients are the other observers.
 
 {{{ Path:'Snippets/Analyzers/Mirage1205.cs' Name:'mirage1205-resolved' }}}
+
+### Target and connection context
+
+- Owner selects the object's owner; Player selects the supplied connection. The client needs the corresponding spawned identity. Sending to a missing owner fails.
+- Pass a non-null Player target: remote sending can fall back to the owner for null; host local-call selection uses the supplied value.
+- Only the first ClientRpc parameter may be `INetworkPlayer` context, including Owner/Observers without changing routing. It is not serialized; the receiving body gets its connection to the server.
+- Use the exact interface, excluding concrete implementations and derived interfaces. ServerRpc sender context can appear anywhere; see [optional context rules](./MIRAGE1202.md).

@@ -1,29 +1,30 @@
 # MIRAGE1206: Invalid RateLimit Attribute Settings
 
-## The Problem
-The recognized Mirage `[RateLimit]` on a `[ServerRpc]` contains invalid settings. The Weaver rejects:
+## When this appears
 
-- `Interval <= 0`.
-- `Refill <= 0` or `MaxTokens <= 0`.
-- `Penalty < 0`.
+A recognized Mirage `[RateLimit]` on a `[ServerRpc]` violates these requirements:
 
-This analyzer contract additionally requires a **finite** interval: `float.NaN` and either infinity are invalid. This is deliberately stricter than the current Weaver's comparison checks. NaN can make the bucket stop rejecting calls, and positive infinity prevents replenishment.
+| Setting | Requirement | Default |
+| --- | --- | --- |
+| `Interval` | Finite and greater than zero | `1f` second |
+| `Refill` | Greater than zero | `50` tokens |
+| `MaxTokens` | Greater than zero | `200` tokens |
+| `Penalty` | Zero or greater | `1` |
 
-`MaxTokens` may be smaller than `Refill`. The bucket caps replenishment at `MaxTokens`, so this is a valid way to choose a smaller burst capacity. The settings are independent; their ordering is not an error.
+Finite intervals are an additional analyzer requirement beyond the Weaver's comparison checks: `NaN` and either infinity are invalid. NaN can stop rejection; positive infinity prevents replenishment.
 
-The defaults are `Interval = 1f` second, `Refill = 50`, `MaxTokens = 200`, and `Penalty = 1`. `Penalty = 0` is allowed and leaves RPC throttling enabled; it adds no error cost on an excess call. A penalty contributes to the player's separate error-rate-limit handling, rather than specifying a delay in seconds.
+`[RateLimit]` only configures ServerRpcs, not ClientRpcs or ordinary methods. Apply Mirage's exact attribute directly to each overriding RPC; same-named attributes, derived substitutes, and base-only attributes do not configure it.
 
-RateLimit is consumed only by ServerRpc processing. It does not throttle ordinary methods or ClientRpcs. An unrelated attribute named `RateLimit`, a derived substitute, or a RateLimit placed only on a base declaration is not the recognized attribute on an overriding RPC. This rule validates effective ServerRpc settings; it does not turn those other uses into working limiters.
-
----
-
-## Example of Triggering Code
 {{{ Path:'Snippets/Analyzers/Mirage1206.cs' Name:'mirage1206-triggering' }}}
 
----
+## How to fix
 
-## How to Resolve
+Choose valid settings for the RPC's workload. `MaxTokens` controls burst capacity; replenishment is capped there, so **`MaxTokens < Refill` is valid**.
 
-Choose a finite positive `Interval`, positive `Refill` and `MaxTokens`, and a non-negative `Penalty`. Set capacity for the permitted initial burst and refill for the intended workload; the defaults are not a security guarantee. See [MIRAGE1207](./MIRAGE1207.md) for scope, host behavior, and failure handling.
+`Penalty` adds error cost on an excess call, not a delay in seconds. `Penalty = 0` keeps RPC throttling enabled and adds no error cost.
+
+Disconnection depends on the server's separate error-rate-limit configuration and handler.
+
+Defaults do not guarantee protection. See [MIRAGE1207](./MIRAGE1207.md) for bucket scope, local-call behavior, and failure handling.
 
 {{{ Path:'Snippets/Analyzers/Mirage1206.cs' Name:'mirage1206-resolved' }}}
