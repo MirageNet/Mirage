@@ -2,21 +2,21 @@
 
 ## When this appears
 
-An override of `NetworkBehaviour.OnSerialize` or `OnDeserialize` omits its base call. This can skip SyncObjects, inherited custom data, and generated SyncVars—including those declared on the overriding class. Ordinary properties are not automatically synchronized.
+An override of `NetworkBehaviour.OnSerialize` or `OnDeserialize` is missing its base call.
 
-### Triggering example
+Skipping the base call can stop SyncVars, SyncObjects, and your base class's custom data from being sent or read. This includes SyncVars declared in the derived class.
 
 {{{ Path:'Snippets/Analyzers/Mirage1402.cs' Name:'mirage1402-triggering' }}}
 
 ## How to fix
 
 - Call the base method once on every serialization path.
-- Keep base calls and custom data in matching order on both sides. Pair each additional write with its corresponding read.
+- Keep base calls and custom data in matching order on both sides. Pair each added write with its read.
 - Do not write SyncVars again; the base call handles them.
-- Preserve the base return value when custom writes are conditional. Return `true` when custom data is always written.
+- Keep the base return value when custom writes are conditional. Return `true` when custom data is always written.
 
-Mark the behaviour dirty when custom data changes. Returning `true` does not schedule an update; dirty state and `SyncSettings` control synchronization.
-
-Suppress the warning only for a deliberate complete replacement with a verified matching reader and writer.
+Mark the behaviour dirty when custom data changes. Returning `true` does not schedule an update; dirty state and `SyncSettings` control when data is sent.
 
 {{{ Path:'Snippets/Analyzers/Mirage1402.cs' Name:'mirage1402-resolved' }}}
+
+If you replace the whole format yourself, suppress the warning only after checking both writer and reader. Ordinary properties are not automatically sent.
