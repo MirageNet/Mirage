@@ -16,7 +16,7 @@ namespace Mirage.Snippets.Analyzers
                 if (IsServer)
                     Health = 100;
 
-                // Warning: Visibility throws an exception before spawn if no custom NetworkVisibility is attached
+                // Warning: Default Visibility requires an initialized server object manager
                 var visibility = Identity.Visibility;
 
                 // Warning: These values may not represent the eventual spawned state

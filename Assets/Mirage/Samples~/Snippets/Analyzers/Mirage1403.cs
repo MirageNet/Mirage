@@ -56,7 +56,7 @@ namespace Mirage.Snippets.Analyzers
                     // Client logic...
                 }
 
-                // Correct: Checks if the identity is active and spawned on the network
+                // Correct: Checks whether the identity has a network ID
                 if (Identity.IsSpawned)
                 {
                     // Identity logic...
