@@ -1,5 +1,4 @@
 using System.Collections;
-using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -24,7 +23,7 @@ namespace Mirage.Tests.Runtime.Spawning
 
             public (Vector3 pos, Quaternion rot) GetPrefabPosition(NetworkIdentity prefab, SpawnValues values)
             {
-                var pos = (values.Position.HasValue ? values.Position.Value - ClientOffset : prefab.transform.position);
+                var pos = values.Position.HasValue ? values.Position.Value - ClientOffset : prefab.transform.position;
                 var rot = values.Rotation ?? prefab.transform.rotation;
                 return (pos, rot);
             }
@@ -67,12 +66,12 @@ namespace Mirage.Tests.Runtime.Spawning
 
                 var (pos1, rot1) = DefaultSpawnValuesHandler.Instance.GetPrefabPosition(identity, withValues);
                 Assert.That(pos1, Is.EqualTo(new Vector3(10, 20, 30)));
-                Assert.That(rot1, Is.EqualTo(Quaternion.Euler(0, 180, 0)));
+                Assert.That(Quaternion.Angle(rot1, Quaternion.Euler(0, 180, 0)), Is.LessThan(0.1f));
 
                 var emptyValues = new SpawnValues();
                 var (pos2, rot2) = DefaultSpawnValuesHandler.Instance.GetPrefabPosition(identity, emptyValues);
                 Assert.That(pos2, Is.EqualTo(new Vector3(5, 5, 5)));
-                Assert.That(rot2, Is.EqualTo(Quaternion.Euler(0, 90, 0)));
+                Assert.That(Quaternion.Angle(rot2, Quaternion.Euler(0, 90, 0)), Is.LessThan(0.1f));
             }
             finally
             {
@@ -180,6 +179,137 @@ namespace Mirage.Tests.Runtime.Spawning
             var clientIdentity = _remoteClients[0].Get(clone);
             Assert.That(clientIdentity.transform.position, Is.EqualTo(new Vector3(25, 10, 5)));
         }
+
+        private class FullOverrideSpawnValuesHandler : ISpawnValuesHandler
+        {
+            public SpawnValues ValuesToCreate;
+            public SpawnValues ValuesToApply;
+            public bool UseCustomApply;
+
+            public SpawnValues CreateSpawnValues(NetworkIdentity identity)
+            {
+                return ValuesToCreate;
+            }
+
+            public (Vector3 pos, Quaternion rot) GetPrefabPosition(NetworkIdentity prefab, SpawnValues values)
+            {
+                var effectiveValues = UseCustomApply ? ValuesToApply : values;
+                var pos = effectiveValues.Position ?? prefab.transform.position;
+                var rot = effectiveValues.Rotation ?? prefab.transform.rotation;
+                return (pos, rot);
+            }
+
+            public void ApplySpawnValues(NetworkIdentity identity, SpawnValues values)
+            {
+                var effectiveValues = UseCustomApply ? ValuesToApply : values;
+                DefaultSpawnValuesHandler.Instance.ApplySpawnValues(identity, effectiveValues);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator CustomServerHandlerFullyOverridesAllValues()
+        {
+            var expectedValues = new SpawnValues
+            {
+                Position = new Vector3(123, 456, 789),
+                Rotation = Quaternion.Euler(30, 60, 90),
+                Scale = new Vector3(3.5f, 4.5f, 5.5f),
+                Name = "FullyOverriddenEntity",
+                SelfActive = true
+            };
+
+            serverObjectManager.SpawnValuesHandler = new FullOverrideSpawnValuesHandler
+            {
+                ValuesToCreate = expectedValues
+            };
+
+            var clone = InstantiateForTest(_characterPrefab);
+            clone.transform.position = Vector3.zero;
+            clone.transform.rotation = Quaternion.identity;
+            clone.transform.localScale = Vector3.one;
+            clone.name = "OriginalServerName";
+            clone.gameObject.SetActive(false);
+
+            serverObjectManager.Spawn(clone);
+
+            yield return null;
+            yield return null;
+
+            var clientIdentity = _remoteClients[0].Get(clone);
+            Assert.That(clientIdentity.transform.position, Is.EqualTo(new Vector3(123, 456, 789)));
+            // 0.3f tolerance accounts for Mirage's 9-bit Quaternion smallest-three network compression
+            Assert.That(Quaternion.Angle(clientIdentity.transform.rotation, Quaternion.Euler(30, 60, 90)), Is.LessThan(0.3f));
+            Assert.That(clientIdentity.transform.localScale, Is.EqualTo(new Vector3(3.5f, 4.5f, 5.5f)));
+            Assert.That(clientIdentity.name, Is.EqualTo("FullyOverriddenEntity"));
+            Assert.That(clientIdentity.gameObject.activeSelf, Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator CustomServerHandlerFullyOverridesActiveFalse()
+        {
+            var expectedValues = new SpawnValues
+            {
+                Position = new Vector3(10, 20, 30),
+                Rotation = Quaternion.Euler(0, 45, 0),
+                Scale = new Vector3(2, 2, 2),
+                Name = "InactiveOverriddenEntity",
+                SelfActive = false
+            };
+
+            serverObjectManager.SpawnValuesHandler = new FullOverrideSpawnValuesHandler
+            {
+                ValuesToCreate = expectedValues
+            };
+
+            var clone = InstantiateForTest(_characterPrefab);
+            clone.gameObject.SetActive(true);
+
+            serverObjectManager.Spawn(clone);
+
+            yield return null;
+            yield return null;
+
+            var clientIdentity = _remoteClients[0].Get(clone);
+            Assert.That(clientIdentity.gameObject.activeSelf, Is.False);
+            Assert.That(clientIdentity.name, Is.EqualTo("InactiveOverriddenEntity"));
+            Assert.That(clientIdentity.transform.position, Is.EqualTo(new Vector3(10, 20, 30)));
+            Assert.That(clientIdentity.transform.localScale, Is.EqualTo(new Vector3(2, 2, 2)));
+        }
+
+        [UnityTest]
+        public IEnumerator CustomClientHandlerFullyOverridesAllValues()
+        {
+            var clientOverrideValues = new SpawnValues
+            {
+                Position = new Vector3(777, 888, 999),
+                Rotation = Quaternion.Euler(15, 30, 45),
+                Scale = new Vector3(0.5f, 0.5f, 0.5f),
+                Name = "ClientOverriddenName",
+                SelfActive = true
+            };
+
+            clientObjectManager.SpawnValuesHandler = new FullOverrideSpawnValuesHandler
+            {
+                UseCustomApply = true,
+                ValuesToApply = clientOverrideValues
+            };
+
+            var clone = InstantiateForTest(_characterPrefab);
+            clone.transform.position = new Vector3(1, 2, 3);
+            clone.name = "ServerDefaultName";
+
+            serverObjectManager.Spawn(clone);
+
+            yield return null;
+            yield return null;
+
+            var clientIdentity = _remoteClients[0].Get(clone);
+            Assert.That(clientIdentity.transform.position, Is.EqualTo(new Vector3(777, 888, 999)));
+            Assert.That(Quaternion.Angle(clientIdentity.transform.rotation, Quaternion.Euler(15, 30, 45)), Is.LessThan(0.5f));
+            Assert.That(clientIdentity.transform.localScale, Is.EqualTo(new Vector3(0.5f, 0.5f, 0.5f)));
+            Assert.That(clientIdentity.name, Is.EqualTo("ClientOverriddenName"));
+            Assert.That(clientIdentity.gameObject.activeSelf, Is.True);
+        }
     }
 
     [TestFixture]
@@ -201,6 +331,7 @@ namespace Mirage.Tests.Runtime.Spawning
             Assert.That(identity.IsClient, Is.True);
             Assert.That(identity.IsServer, Is.True);
             Assert.That(identity.transform.position, Is.EqualTo(new Vector3(42, 84, 126)));
+            Assert.That(Quaternion.Angle(identity.transform.rotation, Quaternion.Euler(0, 45, 0)), Is.LessThan(0.1f));
             Assert.That(identity.transform.localScale, Is.EqualTo(new Vector3(2, 2, 2)));
         }
     }
