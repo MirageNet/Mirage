@@ -1,19 +1,22 @@
 # MIRAGE1102: Redundant Attribute on RPC
 
-## The Problem
-An RPC method has both a routing attribute (`[ServerRpc]` or `[ClientRpc]`) and a corresponding guard attribute (`[Server]` or `[Client]`). 
+## When this appears
 
-- `[Server]` is redundant on `[ServerRpc]` because the RPC body executes on the server.
-- `[Client]` is redundant on `[ClientRpc]` because the RPC body executes on a receiving client, including an eligible host client.
+An RPC has a corresponding guard that its receiving body does not need:
 
-This is an analyzer recommendation, not a combination rejected by the Weaver. Guards are injected before RPC body extraction, so the corresponding guard stays with the receiving body. It does not prevent a client from sending a ServerRpc or a server from sending a ClientRpc, and it does not select recipients.
+| RPC | Redundant guard | Body executes on |
+| --- | --- | --- |
+| `[ServerRpc]` | `[Server]` | The server |
+| `[ClientRpc]` | `[Client]` | A receiving client, including an eligible host client |
 
-Only these corresponding pairs are covered. An opposite-side guard, `[HasAuthority]`, `[LocalPlayer]`, or `[NetworkMethod]` can change which receiving bodies execute and must not be removed as an equivalent fix.
+This is an analyzer recommendation; the Weaver accepts these combinations. Guards remain with the receiving body. They neither prevent sending from the opposite side nor select recipients.
 
-## Example of Triggering Code
 {{{ Path:'Snippets/Analyzers/Mirage1102.cs' Name:'mirage1102-triggering' }}}
 
-## How to Resolve
-Remove the corresponding redundant guard attribute. RPC routing, target selection, and authority checks remain controlled by the RPC configuration.
+## How to fix
+
+Remove the corresponding guard. RPC configuration still controls routing, targets, and authority checks.
+
+Only the two pairs above are covered. Opposite-side guards, `[HasAuthority]`, `[LocalPlayer]`, and `[NetworkMethod]` can change receiving execution and must not be removed as an equivalent fix.
 
 {{{ Path:'Snippets/Analyzers/Mirage1102.cs' Name:'mirage1102-resolved' }}}

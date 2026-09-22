@@ -1,23 +1,19 @@
 # MIRAGE1005: Readonly SyncVar Field
 
-## The Problem
-A field marked with `[SyncVar]` is `readonly`.
+## When this appears
 
-This analyzer policy requires writable storage for received synchronized state. C# `readonly` restricts field assignment to initialization, while Mirage's generated deserializer must assign the field after construction. The policy also applies to `initialOnly` SyncVars, whose initial state is received after construction.
+A `[SyncVar]` field is `readonly`. Received state must be assigned after construction, including initial state for `initialOnly` SyncVars.
 
-The current Weaver does not explicitly reject the readonly flag before emitting field writes. A missing Weaver error is therefore not evidence that readonly SyncVars are supported. For a reference-type field, `readonly` also does not make the referenced object's contents immutable.
+This writable-storage requirement is an analyzer policy. The Weaver does not explicitly reject `readonly` before emitting writes; successful weaving does not establish support.
 
----
+For reference types, `readonly` restricts field assignment, not changes to the referenced object's contents.
 
-## Example of Triggering Code
 {{{ Path:'Snippets/Analyzers/Mirage1005.cs' Name:'mirage1005-triggering' }}}
 
----
+## How to fix
 
-## How to Resolve
+Remove `readonly` from an ordinary SyncVar field.
 
-Remove the `readonly` modifier from the field.
-
-If the field implements `ISyncObject`, it should not be a SyncVar at all. Remove `[SyncVar]` instead and retain the stable `readonly` SyncObject reference described in [MIRAGE1003](./MIRAGE1003.md). That fixes the unsupported combination without introducing a reassignment risk.
+If the field implements `ISyncObject`, remove `[SyncVar]` instead and keep the stable `readonly` reference. SyncObjects synchronize themselves; see [MIRAGE1003](./MIRAGE1003.md).
 
 {{{ Path:'Snippets/Analyzers/Mirage1005.cs' Name:'mirage1005-resolved' }}}

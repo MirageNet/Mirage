@@ -1,44 +1,37 @@
 # MIRAGE1001: SyncVar Class Warning
 
-## The Problem
-An ordinary class payload is used as the value of a `[SyncVar]` field. Mirage can serialize many such classes; this warning is an analyzer policy about their allocation and update semantics, not a ban on reference types.
+## When this appears
 
-With generated serialization and change tracking:
+An ordinary class is used as a `[SyncVar]` payload. This warning concerns allocation and updates; many class payloads are serializable.
 
-1. **Allocations:** Reading a non-null ordinary class payload creates a new instance. Custom readers can use a different allocation strategy.
-2. **Representation:** Generated serializers use eligible fields of the declared type and its base types. They do not automatically serialize properties or preserve the concrete derived type of a polymorphic value.
-3. **Nested mutations:** Changing a member or a nested collection does not assign the SyncVar itself, so it bypasses the generated setter. Assignments are compared with `EqualityComparer<T>.Default`; a value that compares equal does not set a dirty bit. Assigning the same mutated instance back is therefore normally insufficient. Hook execution also depends on the SyncVar's hook options and the network side.
+Exceptions: `string` uses dedicated serialization; `NetworkIdentity`, `GameObject`, and `NetworkBehaviour` references identify existing spawned objects. Other `UnityEngine.Object` or component types are not automatically exempt.
 
-Supported values such as `string`, `NetworkIdentity`, `GameObject`, and `NetworkBehaviour` references are exceptions to this class-payload warning. Strings have dedicated serialization; network object references identify existing spawned objects rather than copying their fields. This is not a general exemption for every `UnityEngine.Object` or component type.
+- **Allocation:** Generated reads allocate non-null class payloads; custom readers may differ.
+- **Representation:** Generated serializers use eligible fields of the declared type and its bases, without automatically serializing properties or preserving derived runtime types.
+- **Updates:** Nested mutations bypass the setter. Default SyncVar assignments dirty only when `EqualityComparer<T>.Default` detects a difference. Reassigning the same mutated instance normally does nothing. Hooks depend on network side and options.
 
-For `[SyncVar(initialOnly = true)]`, assignments update the local field but do not mark it dirty or invoke hooks. Only initial snapshots transmit it; copy–modify–assign does not enable later incremental updates. The class allocation and representation considerations still apply.
+With `initialOnly = true`, assignments change local storage without dirtying or invoking hooks. Only initial snapshots transmit the field; the allocation and representation rules still apply.
 
----
-
-## Example of Triggering Code
 {{{ Path:'Snippets/Analyzers/Mirage1001.cs' Name:'mirage1001-triggering' }}}
 
----
+## How to fix
 
-## How to Resolve
+### Use a struct for small values
 
-### Recommended Fix: Use a struct
-Use a struct for a small data value, then copy it, modify the copy, and assign the complete value back to the SyncVar on its configured sending side. Changing `data.health` in place still bypasses the SyncVar setter.
+On the sending side configured by `SyncSettings`, copy, modify, and assign the whole value back. In-place member writes still bypass the setter.
 
-Structs avoid allocating the outer payload object, but their members can still allocate. Copies are shallow: mutable reference members remain shared, and equality must distinguish the synchronized values you intend to send.
+Structs avoid the outer object allocation. Members can still allocate, copies share reference members, and equality must distinguish the synchronized changes.
+
 {{{ Path:'Snippets/Analyzers/Mirage1001.cs' Name:'mirage1001-recommended' }}}
 
----
+### Keep a class
 
-### Alternative Solutions
-If a class is appropriate for your data model, choose its serialization and replacement behavior deliberately.
+Custom `Write`/`Read` extension methods control representation. This example replaces immutable values; its reader still allocates.
 
-#### 1. Implement Custom Serialization
-Custom `Write` and `Read` extension methods control the wire representation. The following example uses immutable class values and replaces the SyncVar when updating it. Its reader still allocates a new instance; custom serialization does not itself add nested mutation tracking or eliminate allocations.
+`[WeaverSafeClass]` on the payload type suppresses this warning for its uses. It changes neither serialization, equality, dirty tracking, nor hooks, and cannot make an unsupported type serializable.
 
-`[WeaverSafeClass]` on the payload type acknowledges this policy warning for uses of that type. The marker does not change serialization, equality, dirty tracking, or hooks.
 {{{ Path:'Snippets/Analyzers/Mirage1001.cs' Name:'mirage1001-alternative-custom' }}}
 
-#### 2. Suppress the warning on the field
-To acknowledge the warning only for a particular field, decorate that field with `[WeaverSafeClass]`. This suppresses the warning; it does not fix nested mutations or make an unsupported type serializable.
+For one field, place `[WeaverSafeClass]` on that field instead.
+
 {{{ Path:'Snippets/Analyzers/Mirage1001.cs' Name:'mirage1001-alternative-suppress' }}}

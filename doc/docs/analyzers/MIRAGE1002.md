@@ -1,39 +1,36 @@
 # MIRAGE1002: Direct Mutation of SyncCollection Elements
 
-## The Problem
-A member of a value stored in a `SyncList` or `SyncDictionary` is changed without recording an update through the collection's API.
+## When this appears
 
-The collection records operations such as additions and indexer assignments; it does not observe arbitrary nested mutations.
+A `SyncList` or `SyncDictionary` element is mutated without notifying the collection. Initial snapshots or queued operations may include the mutation, but do not provide nested change tracking.
 
-- **Classes:** `mySyncList[i].health = 10` changes the object but bypasses the collection's setter and does not queue a new update.
-- **Structs:** Assigning a field directly through these non-ref indexers, such as `mySyncList[i].health = 10`, is rejected by C# (CS1612). Modifying a local struct copy without assigning it back changes only that copy. Reference members inside a struct can still be mutated through shared references.
+- **Classes:** `list[i].health = 10` changes the object without queuing an update.
+- **Structs:** That direct field assignment is rejected by C# (CS1612). Changing a local copy requires write-back; reference members can still mutate shared state.
 
-An initial snapshot or an already queued operation can happen to include later class mutations. That does not make nested mutation reliable change tracking.
-
----
-
-## Example of Triggering Code
 {{{ Path:'Snippets/Analyzers/Mirage1002.cs' Name:'mirage1002-triggering' }}}
 
----
+## How to fix
 
-## How to Resolve
+Make changes on the sending side configured by `SyncSettings`.
 
-Make changes on the sending side configured by `SyncSettings`. Use the operation appropriate to the collection and its value type.
+### Struct values
 
-### Solution 1: For Structs (Value Types)
-Retrieve the element, modify it, and assign it back using the indexer. A `SyncList` queues the assignment only if its configured equality comparer considers the old and new values different. Ensure equality reflects the changed data; a shallow copy containing shared mutable references may still compare equal. A `SyncDictionary` records an assignment to an existing key without this value-equality check.
+Copy the element, modify it, and assign it back through the indexer. `SyncList` queues only values its configured comparer considers different; shared references or equality that ignores changed fields can defeat notification.
+
+`SyncDictionary` records existing-key assignments without comparing values.
 
 {{{ Path:'Snippets/Analyzers/Mirage1002.cs' Name:'mirage1002-resolved' }}}
 
-### Solution 2: For Classes in a SyncList
-After mutating an object, call `SetItemDirtyAt(index)` to queue that element. `SetItemDirty(item)` locates an item using the list's equality comparer; use an index when the intended position matters. Assigning the same mutated class instance back through the list indexer normally compares equal and queues nothing.
+### Class values in a SyncList
 
-Manual dirty notification invokes the local `OnSet` callback with the current item for both old and new values; it does not preserve a snapshot of the old object.
+After mutation, call `SetItemDirtyAt(index)`. Reassigning the same mutated instance normally compares equal and queues nothing.
+
+`SetItemDirty(item)` locates a match using the list's comparer; use an index when position matters. Both dirty methods invoke local `OnSet` with the current item as both old and new values, without an old-state snapshot.
 
 {{{ Path:'Snippets/Analyzers/Mirage1002.cs' Name:'mirage1002-resolved-class' }}}
 
-### Solution 3: For Classes in a SyncDictionary
-Retrieve the value, mutate it, and assign it back to its key. The dictionary records this assignment even when it is the same reference. `SetItemDirty` and `SetItemDirtyAt` are `SyncList` APIs, not `SyncDictionary` APIs.
+### Class values in a SyncDictionary
+
+Retrieve, mutate, and assign the value back to its key. This queues an update even for the same reference. `SetItemDirty` and `SetItemDirtyAt` belong to `SyncList`, not `SyncDictionary`.
 
 {{{ Path:'Snippets/Analyzers/Mirage1002.cs' Name:'mirage1002-resolved-dictionary' }}}
