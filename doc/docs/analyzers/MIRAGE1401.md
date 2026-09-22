@@ -1,25 +1,38 @@
 # MIRAGE1401: Accessing Network State in Awake/Start
 
-## The Problem
-Do not access network properties, references, or methods inside Unity's `Awake` or `Start`. At this stage, Mirage's network identity is not yet spawned or initialized, so these values are null or default. Calling RPCs or accessing these fields will cause `NullReferenceException`, default values, or race conditions.
+## When this appears
 
-Affected members include:
-*   **Helper Properties**: `IsServer`, `IsClient`, `IsHost`, `IsLocalPlayer`, `Owner`, `HasAuthority`, `IsLocalClient`, `IsServerOnly`, `IsClientOnly`
-*   **Network References**: `Server`, `Client`, `World`, `SyncVarSender`, `ServerObjectManager`, `ClientObjectManager`, `Visibility`
-*   **Remote Procedure Calls**: Any method decorated with `[ServerRpc]` or `[ClientRpc]`
-*   **Network Attributes**: Methods decorated with `[Server]`, `[Client]`, `[HasAuthority]`, `[LocalPlayer]`, or `[NetworkMethod]`
+A network property or method is used directly in `Awake` or `Start`.
 
-Additionally, accessing `Visibility` without a custom `NetworkVisibility` component requires `ServerObjectManager`, which is null before spawning and throws `InvalidOperationException`.
+These methods can run before the object is spawned. An `IsServer` check may skip initialization, network references can still be null, and RPC calls can fail.
 
----
-
-## Example of Triggering Code
 {{{ Path:'Snippets/Analyzers/Mirage1401.cs' Name:'mirage1401-triggering' }}}
 
----
+## How to fix
 
-## How to Resolve
-Subscribe to `Identity` lifecycle events (such as `Identity.OnStartServer`, `Identity.OnStartClient`, `Identity.OnStartLocalPlayer`, or `Identity.OnAuthorityChanged`) in `Awake` to run initialization code when the network state is ready.
+Subscribe in `Awake` to the `Identity` event for the state you need. These events also invoke listeners added after the event has fired.
+
+| You need | Use |
+| --- | --- |
+| Server state | `OnStartServer` |
+| Client state | `OnStartClient` |
+| Local player state | `OnStartLocalPlayer` |
+| Authority | `OnAuthorityChanged`; check its Boolean argument |
 
 {{{ Path:'Snippets/Analyzers/Mirage1401.cs' Name:'mirage1401-resolved' }}}
 
+## Checked members
+
+| Use | Members |
+| --- | --- |
+| State | `IsServer`, `IsClient`, `IsHost`, `IsLocalPlayer`, `Owner`, `HasAuthority`, `IsLocalClient`, `IsServerOnly`, `IsClientOnly` |
+| References | `Server`, `Client`, `World`, `SyncVarSender`, `ServerObjectManager`, `ClientObjectManager`, `Identity.Visibility` |
+| Calls | `[ServerRpc]`, `[ClientRpc]`, `[Server]`, `[Client]`, `[HasAuthority]`, `[LocalPlayer]`, and `[NetworkMethod]` requiring active network state |
+
+## Notes
+
+- Getting `Identity` and subscribing to events are allowed. This warning does not treat event-handler code as part of the `Awake` or `Start` body.
+- A `[NetworkMethod]` call allowing `NetworkFlags.NotActive` is exempt for that guard. Other direct network-state uses still count. Keep NotActive-only initialization outside spawned-state callbacks.
+- Suppress the warning for deliberate state checks when you control initialization order.
+- `OnStartServer` runs before the object is added to `World`.
+- Without a custom `NetworkVisibility` component, `Identity.Visibility` needs an initialized server object manager. Spawning on a client alone is not enough.
