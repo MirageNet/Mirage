@@ -12,14 +12,14 @@ namespace Mirage.Snippets.Analyzers
 
             private void Start()
             {
-                // Warning: Accessing network state before object is spawned
+                // Warning: Start can run before spawning, skipping this initialization
                 if (IsServer)
                     Health = 100;
 
                 // Warning: Visibility throws an exception before spawn if no custom NetworkVisibility is attached
                 var visibility = Identity.Visibility;
 
-                // Warning: Helper properties are unsafe to access before spawn
+                // Warning: These values may not represent the eventual spawned state
                 var owner = Owner;
                 var isHost = IsHost;
                 var isLocalClient = IsLocalClient;
