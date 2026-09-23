@@ -30,16 +30,16 @@ namespace Mirage
             SpawnValues values = default;
 
             // values in msg are nullable, so only set those enabled by the identity's settings
-            if (settings.SendPosition) 
+            if (settings.SendPosition)
                 values.Position = identity.transform.localPosition;
 
-            if (settings.SendRotation) 
+            if (settings.SendRotation)
                 values.Rotation = identity.transform.localRotation;
 
-            if (settings.SendScale) 
+            if (settings.SendScale)
                 values.Scale = identity.transform.localScale;
 
-            if (settings.SendName) 
+            if (settings.SendName)
                 values.Name = identity.name;
 
             switch (settings.SendActive)
@@ -65,19 +65,19 @@ namespace Mirage
         public void ApplySpawnValues(NetworkIdentity identity, SpawnValues values)
         {
             var transform = identity.transform;
-            if (values.Position.HasValue) 
+            if (values.Position.HasValue)
                 transform.localPosition = values.Position.Value;
 
-            if (values.Rotation.HasValue) 
+            if (values.Rotation.HasValue)
                 transform.localRotation = values.Rotation.Value;
 
-            if (values.Scale.HasValue) 
+            if (values.Scale.HasValue)
                 transform.localScale = values.Scale.Value;
 
-            if (!string.IsNullOrEmpty(values.Name)) 
+            if (!string.IsNullOrEmpty(values.Name))
                 identity.gameObject.name = values.Name;
 
-            if (values.SelfActive.HasValue) 
+            if (values.SelfActive.HasValue)
                 identity.gameObject.SetActive(values.SelfActive.Value);
         }
     }
