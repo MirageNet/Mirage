@@ -44,7 +44,7 @@ The server does not need to register anything, as it knows what game object is b
 
 When writing your own network manager, it’s important to make the client ready to receive state updates before calling the spawn command on the server, otherwise, they won’t be sent. If you’re using Mirage’s built-in Network Manager component, this happens automatically.
 
-For more advanced uses, such as object pools or dynamically created Assets, you can use the `ClientObjectManager.RegisterSpawnHandler` method, which allows callback functions to be registered for client-side spawning. See the documentation on [Custom Spawn Functions](/docs/guides/game-objects/spawn-object-custom) for an example of this.
+For more advanced uses, such as object pools, dynamically created Assets, or custom spawn coordinate encoding (e.g. floating origin), you can use custom spawn handlers and `ISpawnValuesHandler`. See the documentation on [Custom Spawn Functions](/docs/guides/game-objects/spawn-object-custom) for examples.
 
 If the game object has a network state like synchronized variables, then that state is synchronized with the spawn message. In the following example, this script is attached to the tree Prefab:
 

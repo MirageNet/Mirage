@@ -38,6 +38,7 @@ namespace Mirage
         public NetworkServer Server => _server;
 
         public INetIdGenerator NetIdGenerator;
+        public ISpawnValuesHandler SpawnValuesHandler = DefaultSpawnValuesHandler.Instance;
         private uint _nextNetworkId = 1;
 
         private uint GetNextNetworkId() => NetIdGenerator?.GenerateNetId() ?? checked(_nextNetworkId++);
@@ -489,9 +490,8 @@ namespace Mirage
                     SceneId = sceneId,
                     PrefabHash = prefabHash,
                     Payload = payload,
+                    SpawnValues = SpawnValuesHandler.CreateSpawnValues(identity)
                 };
-
-                msg.SpawnValues = CreateSpawnValues(identity);
 
                 player.Send(msg);
             }
@@ -516,8 +516,8 @@ namespace Mirage
                     SceneId = sceneId,
                     PrefabHash = prefabHash,
                     Payload = payload,
+                    SpawnValues = SpawnValuesHandler.CreateSpawnValues(identity)
                 };
-                msg.SpawnValues = CreateSpawnValues(identity);
 
                 // we have to send local/Owner values as their own message.
                 // but observers can be sent using SendToMany to avoid copying bytes multiple times
@@ -552,30 +552,6 @@ namespace Mirage
                     msg.Payload = observersWriter.ToArraySegment();
                 NetworkServer.SendToMany(observerPlayers, msg);
             }
-        }
-
-        private SpawnValues CreateSpawnValues(NetworkIdentity identity)
-        {
-            var settings = identity.SpawnSettings;
-            SpawnValues values = default;
-
-            // values in msg are nullable, so by default they are null
-            // only set those values if the identity's settings say to send them
-            if (settings.SendPosition) values.Position = identity.transform.localPosition;
-            if (settings.SendRotation) values.Rotation = identity.transform.localRotation;
-            if (settings.SendScale) values.Scale = identity.transform.localScale;
-            if (settings.SendName) values.Name = identity.name;
-            switch (settings.SendActive)
-            {
-                case SyncActiveOption.SyncWithServer:
-                    values.SelfActive = identity.gameObject.activeSelf;
-                    break;
-                case SyncActiveOption.ForceEnable:
-                    values.SelfActive = true;
-                    break;
-            }
-
-            return values;
         }
 
         internal void SendRemoveAuthorityMessage(NetworkIdentity identity, INetworkPlayer previousOwner)

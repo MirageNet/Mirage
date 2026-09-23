@@ -1007,13 +1007,6 @@ namespace Mirage
 
         internal void SetClientValues(ClientObjectManager clientObjectManager, SpawnMessage msg)
         {
-            var spawnValues = msg.SpawnValues;
-            if (spawnValues.Position.HasValue) transform.localPosition = spawnValues.Position.Value;
-            if (spawnValues.Rotation.HasValue) transform.localRotation = spawnValues.Rotation.Value;
-            if (spawnValues.Scale.HasValue) transform.localScale = spawnValues.Scale.Value;
-            if (!string.IsNullOrEmpty(spawnValues.Name)) gameObject.name = spawnValues.Name;
-            if (spawnValues.SelfActive.HasValue) gameObject.SetActive(spawnValues.SelfActive.Value);
-
             NetId = msg.NetId;
             HasAuthority = msg.IsOwner;
             ClientObjectManager = clientObjectManager;

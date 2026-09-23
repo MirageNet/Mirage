@@ -51,6 +51,8 @@ namespace Mirage
         /// </summary>
         public Func<NetworkIdentity, bool> SceneObjectFilter { get; set; }
 
+        public ISpawnValuesHandler SpawnValuesHandler = DefaultSpawnValuesHandler.Instance;
+
         /// <summary>
         /// This is a dictionary of the prefabs and delegates that are registered on the client with RegisterPrefab().
         /// <para>The key to the dictionary is the prefab asset Id.</para>
@@ -571,6 +573,7 @@ namespace Mirage
                 identity.PrefabHash = msg.PrefabHash.Value;
 
             identity.SetClientValues(this, msg);
+            SpawnValuesHandler.ApplySpawnValues(identity, msg.SpawnValues);
 
             if (msg.IsLocalPlayer)
                 InternalAddCharacter(identity);
@@ -725,8 +728,7 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log($"[ClientObjectManager] Instantiate Prefab for netid:{msg.NetId}, hash:{msg.PrefabHash.Value:X}, prefab:{prefab.name}");
 
             // we need to set position and rotation here incase that their values are used from awake/onenable
-            var pos = msg.SpawnValues.Position ?? prefab.transform.position;
-            var rot = msg.SpawnValues.Rotation ?? prefab.transform.rotation;
+            var (pos, rot) = SpawnValuesHandler.GetPrefabPosition(prefab, msg.SpawnValues);
             return Instantiate(prefab, pos, rot);
         }
 
