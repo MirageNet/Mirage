@@ -1,3 +1,13 @@
+# [159.0.0](https://github.com/MirageNet/Mirage/compare/v158.5.1...v159.0.0) (2026-09-23)
+
+
+* feat!: add ISpawnValuesHandler to customize spawn values on server and client ([#1227](https://github.com/MirageNet/Mirage/issues/1227)) ([9d82984](https://github.com/MirageNet/Mirage/commit/9d82984732aa4f6984df3433e12cacf84510f7d8))
+
+
+### BREAKING CHANGES
+
+* Spawn values are now applied to the spawned object via ISpawnValuesHandler.ApplySpawnValues during ApplySpawnPayload instead of inside NetworkIdentity.SetClientValues.
+
 ## [158.5.1](https://github.com/MirageNet/Mirage/compare/v158.5.0...v158.5.1) (2026-09-22)
 
 
