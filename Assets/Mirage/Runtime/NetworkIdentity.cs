@@ -408,13 +408,13 @@ namespace Mirage
             {
                 if (value == 0)
                 {
-                    throw new ArgumentException($"Cannot set PrefabHash to 0 on '{name}'. Old PrefabHash '{_prefabHash:X}'.");
+                    throw new ArgumentException($"Cannot set PrefabHash to 0 on '{name}'. Old PrefabHash '{_prefabHash}'.");
                 }
 
                 var old = _prefabHash;
                 _prefabHash = value;
 
-                if (logger.LogEnabled()) logger.Log($"Setting PrefabHash on '{name}' to '{value:X}', Old PrefabHash:{old:X}");
+                if (logger.LogEnabled()) logger.Log($"Setting PrefabHash on '{name}' to '{value}', Old PrefabHash:{old}");
             }
         }
 
@@ -598,7 +598,7 @@ namespace Mirage
 
         internal void StartServer()
         {
-            if (logger.LogEnabled()) logger.Log($"OnStartServer invoked on '{this}' (NetId: {NetId}, SceneId: {SceneId:X})");
+            if (logger.LogEnabled()) logger.Log($"OnStartServer invoked on '{this}' (NetId: {NetId}, SceneId: {SceneId})");
 
             // update sync direction before invoking start callback
             // need to do this because IsServer might now be set when it previosuly wasn't
@@ -842,7 +842,7 @@ namespace Mirage
             writer.WriteByte((byte)i);
 
             comp.OnSerialize(writer, initialState);
-            if (logger.LogEnabled()) logger.Log($"OnSerializeSafely written for '{comp.name}', Component '{comp.GetType()}', SceneId {SceneId:X}");
+            if (logger.LogEnabled()) logger.Log($"OnSerializeSafely written for '{comp.name}', Component '{comp.GetType()}', SceneId {SceneId}");
 
             // serialize a barrier to be checked by the deserializer
             writer.WriteByte(BARRIER);
@@ -926,7 +926,7 @@ namespace Mirage
         {
             if (index >= components.Length)
             {
-                throw new DeserializeFailedException($"Deserialization failure component index out of range on networked object '{name}' (NetId {NetId}, SceneId {SceneId:X})." +
+                throw new DeserializeFailedException($"Deserialization failure component index out of range on networked object '{name}' (NetId {NetId}, SceneId {SceneId})." +
                     $" Possible Reasons:\n" +
                     $"  * Component added at runtime causing behaviour array to be mismatched\n" +
                     $"  * out dated version of prefab on either server or client, Try rebuilding both.\n\n");
@@ -940,7 +940,7 @@ namespace Mirage
             var notToServer = (comp.SyncSettings.To & SyncTo.Server) == 0;
             if (notToServer && IsServer)
             {
-                throw new DeserializeFailedException($"Invalid sync settings on '{comp.GetType()}' on networked object '{name}' (NetId {NetId}, SceneId {SceneId:X})." +
+                throw new DeserializeFailedException($"Invalid sync settings on '{comp.GetType()}' on networked object '{name}' (NetId {NetId}, SceneId {SceneId})." +
                    $" Possible Reason: SyncSettings was changed to SyncTo.Server at runtime, but not udpated on server.\n" +
                    $"Ensure SyncSettings is same on both Server and Client, this may rebuilding both.");
             }
@@ -949,7 +949,7 @@ namespace Mirage
         {
             if (barrierData != BARRIER)
             {
-                throw new DeserializeFailedException($"Deserialization failure for component '{comp.GetType()}' on networked object '{name}' (NetId {NetId}, SceneId {SceneId:X})." +
+                throw new DeserializeFailedException($"Deserialization failure for component '{comp.GetType()}' on networked object '{name}' (NetId {NetId}, SceneId {SceneId})." +
                     $" Possible Reasons:\n" +
                     $"  * Do {comp.GetType()}'s OnSerialize and OnDeserialize calls write the same amount of data?\n" +
                     $"  * Did something fail in {comp.GetType()}'s OnSerialize/OnDeserialize code?\n" +

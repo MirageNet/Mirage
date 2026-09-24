@@ -260,7 +260,7 @@ namespace Mirage
             var infos = new List<NetworkIdentityInfo>
             {
                 GetAssetId(identity),
-                GetString("Scene ID", identity.SceneId.ToString("X"))
+                GetString("Scene ID", identity.SceneId.ToString())
             };
 
             if (Application.isPlaying)
@@ -302,7 +302,7 @@ namespace Mirage
             var prefabHash = identity.PrefabHash;
 
             var value = prefabHash != 0
-                ? prefabHash.ToString("X")
+                ? prefabHash.ToString()
                 : "<object has no prefab>";
 
             return GetString("Asset ID", value);

@@ -262,7 +262,7 @@ namespace Mirage
 
             if (_handlers.TryGetValue(prefabHash, out var registeredHandle))
             {
-                if (logger.LogEnabled()) logger.Log($"Found Registered Handle for {prefabHash:X}");
+                if (logger.LogEnabled()) logger.Log($"Found Registered Handle for {prefabHash}");
                 return registeredHandle;
             }
 
@@ -271,7 +271,7 @@ namespace Mirage
                 var handler = dynamicHandler.Invoke(prefabHash);
                 if (handler != null)
                 {
-                    if (logger.LogEnabled()) logger.Log($"Found Dynamic Handle for {prefabHash:X}");
+                    if (logger.LogEnabled()) logger.Log($"Found Dynamic Handle for {prefabHash}");
                     return handler;
                 }
             }
@@ -317,7 +317,7 @@ namespace Mirage
             var prefabHash = identity.PrefabHash;
             ThrowIfExists(prefabHash, identity);
 
-            if (logger.LogEnabled()) logger.Log($"Registering prefab '{identity.name}' as asset:{prefabHash:X}");
+            if (logger.LogEnabled()) logger.Log($"Registering prefab '{identity.name}' as asset:{prefabHash}");
             _handlers[prefabHash] = new SpawnHandler(identity);
         }
 
@@ -336,15 +336,15 @@ namespace Mirage
             var prefabHash = identity.PrefabHash;
             if (!_handlers.ContainsKey(prefabHash))
             {
-                throw new InvalidOperationException($"No prefab with hash {prefabHash:X}. Prefab must be registered before adding unspawn handler");
+                throw new InvalidOperationException($"No prefab with hash {prefabHash}. Prefab must be registered before adding unspawn handler");
             }
 
             if (_handlers[prefabHash].Prefab == null)
             {
-                throw new InvalidOperationException($"Existing handler for {prefabHash:X} was not a prefab. Prefab must be registered before adding unspawn handler");
+                throw new InvalidOperationException($"Existing handler for {prefabHash} was not a prefab. Prefab must be registered before adding unspawn handler");
             }
 
-            if (logger.LogEnabled()) logger.Log($"Registering custom prefab '{identity.name}' as asset:{prefabHash:X} {unspawnHandler.Method.Name}");
+            if (logger.LogEnabled()) logger.Log($"Registering custom prefab '{identity.name}' as asset:{prefabHash} {unspawnHandler.Method.Name}");
 
             _handlers[prefabHash].AddUnspawnHandler(unspawnHandler);
         }
@@ -427,7 +427,7 @@ namespace Mirage
             {
                 var spawnName = spawnHandler?.Method.Name ?? "<NULL>";
                 var unspawnName = unspawnHandler?.Method.Name ?? "<NULL>";
-                logger.Log($"RegisterSpawnHandler PrefabHash:'{prefabHash:X}' Spawn:{spawnName} UnSpawn:{unspawnName}");
+                logger.Log($"RegisterSpawnHandler PrefabHash:'{prefabHash}' Spawn:{spawnName} UnSpawn:{unspawnName}");
             }
         }
 
@@ -470,7 +470,7 @@ namespace Mirage
         }
         private static void ThrowMissingHandler(int prefabHash)
         {
-            throw new SpawnObjectException($"No prefab for {prefabHash:X}. did you forget to add it to the ClientObjectManager?");
+            throw new SpawnObjectException($"No prefab for {prefabHash}. did you forget to add it to the ClientObjectManager?");
         }
         private void ThrowIfExists(int prefabHash, NetworkIdentity newPrefab = null)
         {
@@ -485,7 +485,7 @@ namespace Mirage
                     ? "Prefab"
                     : "Handlers";
 
-                throw new InvalidOperationException($"{typeString} with hash {prefabHash:X} already registered. " +
+                throw new InvalidOperationException($"{typeString} with hash {prefabHash} already registered. " +
                     $"Unregister before adding new or prefabshandlers. Too add Unspawn handler to prefab use RegisterUnspawnHandler instead");
             }
         }
@@ -680,7 +680,7 @@ namespace Mirage
                         {
                             var identity = await spawnHandler.Invoke(msg);
                             if (identity == null)
-                                throw new SpawnObjectException($"Async Spawn handler for prefabHash={msg.PrefabHash:X} returned null");
+                                throw new SpawnObjectException($"Async Spawn handler for prefabHash={msg.PrefabHash} returned null");
                             AfterSpawn(msg, false, identity);
 
                             // IMPORTANT: remove from pendingSpawn first, so that methods will be invoked instead of adding to pending a 2nd time
@@ -716,7 +716,7 @@ namespace Mirage
 
                 var obj = spawnHandler.Invoke(msg);
                 if (obj == null)
-                    throw new SpawnObjectException($"Spawn handler for prefabHash={msg.PrefabHash:X} returned null");
+                    throw new SpawnObjectException($"Spawn handler for prefabHash={msg.PrefabHash} returned null");
                 return obj;
             }
 
@@ -725,7 +725,7 @@ namespace Mirage
 
             var prefab = handler.Prefab;
 
-            if (logger.LogEnabled()) logger.Log($"[ClientObjectManager] Instantiate Prefab for netid:{msg.NetId}, hash:{msg.PrefabHash.Value:X}, prefab:{prefab.name}");
+            if (logger.LogEnabled()) logger.Log($"[ClientObjectManager] Instantiate Prefab for netid:{msg.NetId}, hash:{msg.PrefabHash.Value}, prefab:{prefab.name}");
 
             // we need to set position and rotation here incase that their values are used from awake/onenable
             var (pos, rot) = SpawnValuesHandler.GetPrefabPosition(prefab, msg.SpawnValues);
@@ -743,14 +743,14 @@ namespace Mirage
                 spawnableObjects.Remove(sceneId);
 
                 if (foundSceneObject == null)
-                    throw new SpawnObjectException($"Scene object is null, sceneId={msg.SceneId:X}, NetId={msg.NetId}");
+                    throw new SpawnObjectException($"Scene object is null, sceneId={msg.SceneId}, NetId={msg.NetId}");
 
-                if (logger.LogEnabled()) logger.Log($"[ClientObjectManager] Found scene object for netid:{msg.NetId}, sceneId:{msg.SceneId.Value:X}, obj:{foundSceneObject}");
+                if (logger.LogEnabled()) logger.Log($"[ClientObjectManager] Found scene object for netid:{msg.NetId}, sceneId:{msg.SceneId.Value}, obj:{foundSceneObject}");
                 return foundSceneObject;
             }
 
             // failed to spawn
-            var errorMsg = $"Could not find scene object with sceneId={msg.SceneId:X}, NetId={msg.NetId}. Enable full logs in project settings to see current list of SpawnableObjects in the scene";
+            var errorMsg = $"Could not find scene object with sceneId={msg.SceneId}, NetId={msg.NetId}. Enable full logs in project settings to see current list of SpawnableObjects in the scene";
             // dump the whole spawnable objects dict for easier debugging
             if (logger.LogEnabled())
             {
@@ -758,7 +758,7 @@ namespace Mirage
                 builder.AppendLine($"{errorMsg} SpawnableObjects.Count={spawnableObjects.Count}");
 
                 foreach (var kvp in spawnableObjects)
-                    builder.AppendLine($"Spawnable: SceneId={kvp.Key:X} name={kvp.Value.name}");
+                    builder.AppendLine($"Spawnable: SceneId={kvp.Key} name={kvp.Value.name}");
 
                 logger.Log(builder.ToString());
             }

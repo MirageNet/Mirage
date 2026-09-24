@@ -125,7 +125,7 @@ namespace Mirage.Tests.Runtime.ClientServer
                 clientObjectManager.RegisterSpawnHandler(identity.PrefabHash, (msg) => null, (obj) => { });
             });
 
-            Assert.That(exception, Has.Message.EqualTo($"Prefab with hash {identity.PrefabHash:X} already registered. " +
+            Assert.That(exception, Has.Message.EqualTo($"Prefab with hash {identity.PrefabHash} already registered. " +
                     $"Unregister before adding new or prefabshandlers. Too add Unspawn handler to prefab use RegisterUnspawnHandler instead"));
         }
 
@@ -142,7 +142,7 @@ namespace Mirage.Tests.Runtime.ClientServer
                 clientObjectManager.RegisterPrefab(identity);
             });
 
-            Assert.That(exception, Has.Message.EqualTo($"Handlers with hash {identity.PrefabHash:X} already registered. " +
+            Assert.That(exception, Has.Message.EqualTo($"Handlers with hash {identity.PrefabHash} already registered. " +
                     $"Unregister before adding new or prefabshandlers. Too add Unspawn handler to prefab use RegisterUnspawnHandler instead"));
         }
 
@@ -266,7 +266,7 @@ namespace Mirage.Tests.Runtime.ClientServer
                 var handler = clientObjectManager.GetSpawnHandler(prefabHash);
             });
 
-            Assert.That(exception, Has.Message.EqualTo($"No prefab for {prefabHash:X}. did you forget to add it to the ClientObjectManager?"));
+            Assert.That(exception, Has.Message.EqualTo($"No prefab for {prefabHash}. did you forget to add it to the ClientObjectManager?"));
         }
 
         [UnityTest]
@@ -415,7 +415,7 @@ namespace Mirage.Tests.Runtime.ClientServer
                 clientObjectManager.RegisterSpawnHandler(identity.PrefabHash, asyncHandler, (obj) => { });
             });
 
-            Assert.That(exception, Has.Message.EqualTo($"Handlers with hash {identity.PrefabHash:X} already registered. " +
+            Assert.That(exception, Has.Message.EqualTo($"Handlers with hash {identity.PrefabHash} already registered. " +
                     $"Unregister before adding new or prefabshandlers. Too add Unspawn handler to prefab use RegisterUnspawnHandler instead"));
 
         }
@@ -471,7 +471,7 @@ namespace Mirage.Tests.Runtime.ClientServer
                 var handler = clientObjectManager.GetSpawnHandler(noHandlerHash);
 
             });
-            var expected = new SpawnObjectException($"No prefab for {noHandlerHash:X}. did you forget to add it to the ClientObjectManager?");
+            var expected = new SpawnObjectException($"No prefab for {noHandlerHash}. did you forget to add it to the ClientObjectManager?");
             Assert.That(actual, Has.Message.EqualTo(expected.Message));
         }
 

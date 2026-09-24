@@ -198,7 +198,7 @@ namespace Mirage
             // IMPORTANT: do this in AddCharacter & ReplaceCharacter!
             SpawnVisibleObjects(player, identity);
 
-            if (logger.LogEnabled()) logger.Log($"Replacing playerGameObject object netId: {identity.NetId} asset ID {identity.PrefabHash:X}");
+            if (logger.LogEnabled()) logger.Log($"Replacing playerGameObject object netId: {identity.NetId} asset ID {identity.PrefabHash}");
 
             Respawn(identity);
 
@@ -256,7 +256,7 @@ namespace Mirage
             // spawn any new visible scene objects
             SpawnVisibleObjects(player, identity);
 
-            if (logger.LogEnabled()) logger.Log($"Adding new playerGameObject object netId: {identity.NetId} asset ID {identity.PrefabHash:X}");
+            if (logger.LogEnabled()) logger.Log($"Adding new playerGameObject object netId: {identity.NetId} asset ID {identity.PrefabHash}");
 
             Respawn(identity);
         }
@@ -396,7 +396,7 @@ namespace Mirage
 
             if (identity.IsSceneObject)
             {
-                if (logger.LogEnabled()) logger.Log($"Clearing SceneId on {identity} because setting prefabHash when spawning. Old sceneId={identity.SceneId:X} New PrefabHash:{prefabHash:X}");
+                if (logger.LogEnabled()) logger.Log($"Clearing SceneId on {identity} because setting prefabHash when spawning. Old sceneId={identity.SceneId} New PrefabHash:{prefabHash}");
                 identity.ClearSceneId();
             }
 
@@ -447,7 +447,7 @@ namespace Mirage
                 _server.World.AddIdentity(identity.NetId, identity);
             }
 
-            if (logger.LogEnabled()) logger.Log($"SpawnObject NetId:{identity.NetId} PrefabHash:{identity.PrefabHash:X}");
+            if (logger.LogEnabled()) logger.Log($"SpawnObject NetId:{identity.NetId} PrefabHash:{identity.PrefabHash}");
 
             identity.RebuildObservers(true);
         }
@@ -458,7 +458,7 @@ namespace Mirage
 
             logger.Assert(player.IsAuthenticated || !(identity.Visibility is AlwaysVisible), // can't use `is not` in unity2020
                 "SendSpawnMessage should only be called if player is authenticated, or there is custom visibility");
-            if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId}");
+            if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId} netId={identity.NetId}");
 
             // one writer for owner, one for observers
             using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
@@ -500,7 +500,7 @@ namespace Mirage
         {
             using var _ = sendSpawnMessageMarker.Auto();
 
-            if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId}");
+            if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId} netId={identity.NetId}");
 
             // one writer for owner, one for observers
             using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
@@ -556,7 +556,7 @@ namespace Mirage
 
         internal void SendRemoveAuthorityMessage(NetworkIdentity identity, INetworkPlayer previousOwner)
         {
-            if (logger.LogEnabled()) logger.Log($"Server SendRemoveAuthorityMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId}");
+            if (logger.LogEnabled()) logger.Log($"Server SendRemoveAuthorityMessage: name={identity.name} sceneId={identity.SceneId} netId={identity.NetId}");
 
             previousOwner.Send(new RemoveAuthorityMessage
             {
@@ -719,7 +719,7 @@ namespace Mirage
             spawnList.Sort(NetworkIdentityComparer.instance);
             foreach (var identity in spawnList)
             {
-                if (logger.LogEnabled()) logger.Log($"SpawnObjects sceneId:{identity.SceneId:X} name:{identity.gameObject.name}");
+                if (logger.LogEnabled()) logger.Log($"SpawnObjects sceneId:{identity.SceneId} name:{identity.gameObject.name}");
                 Spawn(identity);
             }
             spawnList.Clear();
@@ -813,7 +813,7 @@ namespace Mirage
                 if (skip != null && skip.Contains(identity))
                     continue;
 
-                if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} sceneId={identity.SceneId:X}");
+                if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} sceneId={identity.SceneId}");
 
                 var visible = identity.OnCheckObserver(player);
                 if (visible)

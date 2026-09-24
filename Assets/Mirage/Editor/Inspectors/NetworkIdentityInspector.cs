@@ -17,10 +17,10 @@ namespace Mirage
             using (new EditorGUI.DisabledGroupScope(true))
             {
                 EditorGUILayout.LabelField("Scene Id", target.SceneId != 0
-                    ? target.SceneId.ToString("X")
+                    ? target.SceneId.ToString()
                     : "<not part of a scene>");
                 EditorGUILayout.LabelField("Prefab Hash", target.PrefabHash != 0
-                    ? target.PrefabHash.ToString("X")
+                    ? target.PrefabHash.ToString()
                     : "<no prefab>");
             }
 

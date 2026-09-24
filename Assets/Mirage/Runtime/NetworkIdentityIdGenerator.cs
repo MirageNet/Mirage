@@ -42,7 +42,7 @@ namespace Mirage
             wrapper.SceneHash = pathHash;
 
             // log it. this is incredibly useful to debug sceneId issues.
-            if (logger.LogEnabled()) logger.Log($"{identity.name} in scene={identity.gameObject.scene.name} scene index hash({pathHash:X}) scene id: {wrapper.SceneId:X}");
+            if (logger.LogEnabled()) logger.Log($"{identity.name} in scene={identity.gameObject.scene.name} scene index hash({pathHash}) scene id: {wrapper.SceneId}");
         }
 
         private static int GetSceneHash(NetworkIdentity identity)
