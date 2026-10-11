@@ -26,6 +26,13 @@ namespace Mirage
 
         public static Wrapper Take() => Pool.Take();
 
+        public static Wrapper Take(out T item)
+        {
+            var wrapper = Pool.Take();
+            item = wrapper.Item;
+            return wrapper;
+        }
+
         public class Wrapper : IDisposable
         {
             private readonly Pool<Wrapper> _pool;
