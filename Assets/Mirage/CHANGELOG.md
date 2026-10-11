@@ -1,3 +1,10 @@
+# [159.1.0](https://github.com/MirageNet/Mirage/compare/v159.0.0...v159.1.0) (2026-10-11)
+
+
+### Features
+
+* adding Take(out T item) option for AutoPool ([e2158e8](https://github.com/MirageNet/Mirage/commit/e2158e8daaccaa086009689bac744aaa94ab5af3))
+
 # [159.0.0](https://github.com/MirageNet/Mirage/compare/v158.5.1...v159.0.0) (2026-09-23)
 
 
