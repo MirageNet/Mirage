@@ -8,6 +8,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using Mirage.SocketLayer;
 using UnityEngine;
 
@@ -61,8 +62,23 @@ namespace Mirage.Sockets.Udp
         {
             if (NanoSocket.Supported)
             {
-                InitUDP.Init();
-                _udpNeedRelease = true;
+                try
+                {
+                    InitUDP.Init();
+                    _udpNeedRelease = true;
+                }
+                // native library missing (eg no build for this CPU architecture, like Linux ARM64),
+                // or present but built for a different architecture
+                catch (Exception e) when (e is DllNotFoundException || e is BadImageFormatException || e is EntryPointNotFoundException)
+                {
+                    var message = $"NanoSocket native library isn't available on this architecture ({RuntimeInformation.ProcessArchitecture}); falling back to Managed Sockets.\n{e}";
+                    if (SocketLib == SocketLib.Native)
+                        Debug.LogError(message);
+                    else
+                        Debug.LogWarning(message);
+
+                    SocketLib = SocketLib.Managed;
+                }
             }
             else
             {
