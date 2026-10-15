@@ -1,3 +1,11 @@
+## [159.1.1](https://github.com/MirageNet/Mirage/compare/v159.1.0...v159.1.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* **nanosocket:** only report Supported on x64 processes ([2196689](https://github.com/MirageNet/Mirage/commit/219668965d6c6c40984a1407352ca5df3ac6f1f2))
+* **udpsocketfactory:** NanoSockets throwing DllNotFoundException on init ([ff3e153](https://github.com/MirageNet/Mirage/commit/ff3e1539e8bd7eebee275b003d43040716c11f7c))
+
 # [159.1.0](https://github.com/MirageNet/Mirage/compare/v159.0.0...v159.1.0) (2026-10-11)
 
 
