@@ -1,6 +1,7 @@
 // windows, linux or standalone c#, unless EXCLUDE_NANOSOCKETS is defined
 #if !EXCLUDE_NANOSOCKETS && (UNITY_EDITOR_WIN || UNITY_EDITOR_LINUX || UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || NETCOREAPP || NET_5_0_OR_GREATER)
 using System;
+using System.Runtime.InteropServices;
 using Mirage.SocketLayer;
 using NanoSockets;
 
@@ -8,7 +9,8 @@ namespace Mirage.Sockets.Udp
 {
     public sealed class NanoSocket : ISocket, IDisposable
     {
-        public static bool Supported => true;
+        // native plugins are only built for x86_64, #if above handles the platform check
+        public static bool Supported => RuntimeInformation.ProcessArchitecture == Architecture.X64;
 
         private Socket socket;
         private NanoConnectionHandle receiveEndPoint;
