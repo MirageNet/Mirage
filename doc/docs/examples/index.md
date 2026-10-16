@@ -18,6 +18,8 @@ Scenes you can open, press Play, and connect to with a host and clients.
 
 - [Basic](/docs/examples/basic)  
   The simplest setup: players connect, get a player number, and show live data synced from the server with SyncVars.
+- [Coin Grab Arena](/docs/examples/coin-grab-arena)  
+  A complete top-down arena game with round states, synced countdown timer via `NetworkTime`, server-authoritative coin pickups, and a live scoreboard.
 - [Pong](/docs/examples/pong)  
   2-player Pong with server-side ball physics, left/right paddle spawning, and client-authority paddles.
 - [ChangeScene](/docs/examples/change-scene)  
