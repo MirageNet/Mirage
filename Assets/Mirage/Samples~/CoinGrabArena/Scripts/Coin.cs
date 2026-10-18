@@ -17,18 +17,24 @@ namespace Mirage.Examples.CoinGrabArena
         [RequiredField]
         public Renderer CoinRenderer;
         [RequiredField]
+        public MeshFilter CoinMeshFilter;
+        [RequiredField]
         public SphereCollider TriggerCollider;
         [RequiredField]
         public ParticleSystem PickupEffectPrefab;
 
         [Header("Visuals")]
         [RequiredField]
+        public Mesh NormalMesh;
+        [RequiredField]
+        public Mesh GoldMesh;
+        [RequiredField]
         public Material NormalMaterial;
         [RequiredField]
         public Material GoldMaterial;
         public Color NormalColor = new Color(1f, 0.85f, 0.1f);
         public Color GoldColor = new Color(1f, 0.45f, 0f);
-        public float NormalScale = 0.7f;
+        public float NormalScale = 1f;
         public float GoldScale = 1.15f;
         public float SpinSpeed = 120f;
 
@@ -46,6 +52,8 @@ namespace Mirage.Examples.CoinGrabArena
 
         private CoinSpawner _spawner;
         private CoinGrabGameManager _gameManager;
+        private Material[] _normalMaterials;
+        private Material[] _goldMaterials;
 
         // Guards against two players overlapping the same coin in the same physics step before Destroy completes
         private bool _collected;
@@ -58,8 +66,20 @@ namespace Mirage.Examples.CoinGrabArena
 
         private void Awake()
         {
+            _normalMaterials = CreateMaterialArray(NormalMesh, NormalMaterial);
+            _goldMaterials = CreateMaterialArray(GoldMesh, GoldMaterial);
+
             Identity.OnStartServer.AddListener(OnStartServer);
             Identity.OnStartClient.AddListener(OnStartClient);
+        }
+
+        private static Material[] CreateMaterialArray(Mesh mesh, Material material)
+        {
+            int count = mesh != null ? Mathf.Max(1, mesh.subMeshCount) : 1;
+            var materials = new Material[count];
+            for (int i = 0; i < count; i++)
+                materials[i] = material;
+            return materials;
         }
 
         /// <summary>
@@ -83,8 +103,9 @@ namespace Mirage.Examples.CoinGrabArena
 
         private void OnStartClient()
         {
-            // Assign sharedMaterial rather than material.color so destroyed coins do not leak cloned Materials
-            CoinRenderer.sharedMaterial = IsGold ? GoldMaterial : NormalMaterial;
+            // Swap sharedMesh and sharedMaterials so Gold Coins show the 3D star mesh across all submeshes
+            CoinMeshFilter.sharedMesh = IsGold ? GoldMesh : NormalMesh;
+            CoinRenderer.sharedMaterials = IsGold ? _goldMaterials : _normalMaterials;
             transform.localScale = Vector3.one * (IsGold ? GoldScale : NormalScale);
         }
 

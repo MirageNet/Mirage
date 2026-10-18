@@ -19,6 +19,7 @@ namespace Mirage.Examples.CoinGrabArena
     public class CoinGrabPlayer : NetworkBehaviour
     {
         private static readonly int ColorShaderId = Shader.PropertyToID("_Color");
+        private static readonly int BaseColorShaderId = Shader.PropertyToID("_BaseColor");
 
         [Header("Components")]
         [RequiredField]
@@ -209,6 +210,7 @@ namespace Mirage.Examples.CoinGrabArena
             // Use a MaterialPropertyBlock instead of BodyRenderer.material so we do not instantiate and leak materials
             BodyRenderer.GetPropertyBlock(_propertyBlock);
             _propertyBlock.SetColor(ColorShaderId, Color);
+            _propertyBlock.SetColor(BaseColorShaderId, Color);
             BodyRenderer.SetPropertyBlock(_propertyBlock);
         }
     }
