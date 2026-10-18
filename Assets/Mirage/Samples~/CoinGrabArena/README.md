@@ -28,3 +28,27 @@ No Build Settings changes are needed because the sample runs in a single scene (
 - **`CoinSpawner`**: Server-only component that spawns up to `MaxCoins` at random obstacle-free positions (`Physics.CheckSphere`) on an interval during the `Playing` state and clears all coins when the round ends or the server stops.
 - **`CoinGrabGameManager`**: Scene `NetworkBehaviour` that runs the server-authoritative round state machine (`Waiting` -> `Countdown` -> `Playing` -> `Results`) and syncs `RoundEndTime` using `NetworkTime.Time` so clients compute the countdown locally without per-frame network traffic.
 - **`CoinGrabHud`**: Pure UI `MonoBehaviour` that listens to `NetworkWorld` spawn events and player/game-manager state events to render the round state, countdown timer, and sorted scoreboard without per-frame allocations.
+
+## Prefab Organization
+
+Prefabs in `Prefabs/` are grouped so you can easily inspect or copy individual pieces into your own project:
+
+- **`Prefabs/` (Core Gameplay Prefabs)**
+  - `CoinGrabPlayer.prefab`: Networked player character (`NetworkIdentity`, `NetworkTransform`, `CharacterController`, server-only `CapsuleCollider`, `CoinGrabPlayer`) with child `Visuals` (`Body` and `Eyes`) and floating `NamePlate` separated from the physics root so you can easily swap in your own 3D model.
+  - `Coin.prefab`: Networked collectible (`NetworkIdentity`, kinematic `Rigidbody`, server-only trigger `SphereCollider`, `Coin`) with a child `Visual` mesh.
+  - `PickupEffect.prefab`: Local non-networked 3D star `ParticleSystem` spawned by `Coin.RpcPlayPickupEffect`.
+- **`Prefabs/UI/` (Reusable UI Canvases)**
+  - `NetworkManagerHud.prefab`: Self-contained connection Canvas (`Host`, `Client` + IP input, `Server Only`, and `Stop` buttons) wired to `NetworkManagerHud`.
+  - `CoinGrabHud.prefab`: Game HUD Canvas (`TopBanner` with state/timer/name bar, `ScoreboardPanel`, and `ResultsPanel`) wired to `CoinGrabHud`.
+- **`Prefabs/Environment/` (Arena Props)**
+  - `WallBlock.prefab`, `ObstacleCube.prefab`, `ObstacleStump.prefab` (placed on the obstacle layer so coins do not spawn inside them), plus decorative `Tree.prefab` and `Rock.prefab`.
+
+## Rebuilding Assets in the Editor
+
+`CoinGrabArenaBuilder` (`Scripts/CoinGrabArenaBuilder.cs`) provides Editor menu commands under **Tools > Mirage Samples > Coin Grab Arena** to create or rebuild the sample assets at any time:
+
+- **Create All (Materials, Prefabs & Scene)**
+- **Create Materials**
+- **Create Prefabs**
+- **Create Scene**
+
