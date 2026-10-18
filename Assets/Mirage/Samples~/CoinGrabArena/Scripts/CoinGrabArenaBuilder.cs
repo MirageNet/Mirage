@@ -420,9 +420,11 @@ namespace Mirage.Examples.CoinGrabArena.EditorScripts
             rb.isKinematic = true;
             rb.useGravity = false;
 
-            // Visual hierarchy separated from root physics/network components so users can swap meshes easily
+            // Visual hierarchy separated from root physics/network components so users can swap meshes easily.
+            // Rotated 180 degrees on Y because Blender's -Y forward maps to -Z after axis conversion.
             var visuals = new GameObject("Visuals");
             visuals.transform.SetParent(root.transform, false);
+            visuals.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
 
             var bodyObj = new GameObject("Body");
             bodyObj.transform.SetParent(visuals.transform, false);
@@ -472,10 +474,10 @@ namespace Mirage.Examples.CoinGrabArena.EditorScripts
 
             // Top-left card for Host / Client / Server Only connection controls
             var card = CreatePanel("ConnectionPanel", canvasRoot.transform, new Color(0.11f, 0.13f, 0.18f, 0.92f));
-            SetTopLeftRect(card.GetComponent<RectTransform>(), new Vector2(16f, -16f), new Vector2(280f, 210f));
+            SetTopLeftRect(card.GetComponent<RectTransform>(), new Vector2(12f, -12f), new Vector2(220f, 188f));
 
-            var statusText = CreateText("StatusLabel", card.transform, font, "Mirage Coin Grab Arena", 15, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.95f, 0.82f, 0.32f));
-            SetTopLeftRect(statusText.GetComponent<RectTransform>(), new Vector2(12f, -10f), new Vector2(256f, 24f));
+            var statusText = CreateText("StatusLabel", card.transform, font, "Mirage Coin Grab Arena", 14, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.95f, 0.82f, 0.32f));
+            SetTopLeftRect(statusText.GetComponent<RectTransform>(), new Vector2(10f, -8f), new Vector2(200f, 22f));
 
             // Offline container (Host, Client + Address, Server Only)
             var offlineGo = new GameObject("OfflinePanel", typeof(RectTransform));
@@ -483,19 +485,19 @@ namespace Mirage.Examples.CoinGrabArena.EditorScripts
             SetStretchRect(offlineGo.GetComponent<RectTransform>(), Vector2.zero, Vector2.zero);
 
             Button hostButton = CreateButton("HostButton", offlineGo.transform, font, "Host (Server + Client)", new Color(0.22f, 0.58f, 0.34f, 1f));
-            SetTopLeftRect(hostButton.GetComponent<RectTransform>(), new Vector2(14f, -42f), new Vector2(252f, 36f));
+            SetTopLeftRect(hostButton.GetComponent<RectTransform>(), new Vector2(10f, -36f), new Vector2(200f, 32f));
 
             Button clientButton = CreateButton("ClientButton", offlineGo.transform, font, "Client", new Color(0.24f, 0.48f, 0.78f, 1f));
-            SetTopLeftRect(clientButton.GetComponent<RectTransform>(), new Vector2(14f, -86f), new Vector2(96f, 36f));
+            SetTopLeftRect(clientButton.GetComponent<RectTransform>(), new Vector2(10f, -74f), new Vector2(76f, 32f));
 
-            InputField addressInput = CreateInputField("AddressInput", offlineGo.transform, font, "localhost", "Enter Host IP...");
-            SetTopLeftRect(addressInput.GetComponent<RectTransform>(), new Vector2(118f, -86f), new Vector2(148f, 36f));
+            InputField addressInput = CreateInputField("AddressInput", offlineGo.transform, font, "localhost", "Host IP...");
+            SetTopLeftRect(addressInput.GetComponent<RectTransform>(), new Vector2(92f, -74f), new Vector2(118f, 32f));
 
             Button serverButton = CreateButton("ServerOnlyButton", offlineGo.transform, font, "Server Only", new Color(0.32f, 0.35f, 0.42f, 1f));
-            SetTopLeftRect(serverButton.GetComponent<RectTransform>(), new Vector2(14f, -130f), new Vector2(252f, 34f));
+            SetTopLeftRect(serverButton.GetComponent<RectTransform>(), new Vector2(10f, -112f), new Vector2(200f, 30f));
 
-            var controlsHint = CreateText("ControlsHint", offlineGo.transform, font, "Move: WASD or Arrow Keys", 13, FontStyle.Normal, TextAnchor.MiddleCenter, new Color(0.78f, 0.82f, 0.88f));
-            SetTopLeftRect(controlsHint.GetComponent<RectTransform>(), new Vector2(14f, -172f), new Vector2(252f, 24f));
+            var controlsHint = CreateText("ControlsHint", offlineGo.transform, font, "Move: WASD | Dash: Space", 12, FontStyle.Normal, TextAnchor.MiddleCenter, new Color(0.78f, 0.82f, 0.88f));
+            SetTopLeftRect(controlsHint.GetComponent<RectTransform>(), new Vector2(10f, -150f), new Vector2(200f, 28f));
 
             // Online container (Stop button shown while connected/hosting)
             var onlineGo = new GameObject("OnlinePanel", typeof(RectTransform));
@@ -503,7 +505,7 @@ namespace Mirage.Examples.CoinGrabArena.EditorScripts
             SetStretchRect(onlineGo.GetComponent<RectTransform>(), Vector2.zero, Vector2.zero);
 
             Button stopButton = CreateButton("StopButton", onlineGo.transform, font, "Stop / Disconnect", new Color(0.78f, 0.26f, 0.26f, 1f));
-            SetTopLeftRect(stopButton.GetComponent<RectTransform>(), new Vector2(14f, -46f), new Vector2(252f, 38f));
+            SetTopLeftRect(stopButton.GetComponent<RectTransform>(), new Vector2(10f, -40f), new Vector2(200f, 34f));
 
             onlineGo.SetActive(false);
 
@@ -540,21 +542,21 @@ namespace Mirage.Examples.CoinGrabArena.EditorScripts
             topBarRect.anchorMin = new Vector2(0.5f, 1f);
             topBarRect.anchorMax = new Vector2(0.5f, 1f);
             topBarRect.pivot = new Vector2(0.5f, 1f);
-            topBarRect.anchoredPosition = new Vector2(0f, -16f);
-            topBarRect.sizeDelta = new Vector2(460f, 132f);
+            topBarRect.anchoredPosition = new Vector2(0f, -12f);
+            topBarRect.sizeDelta = new Vector2(340f, 114f);
 
-            Text stateText = CreateText("StateText", topBar.transform, font, "Waiting for players (0/2)", 20, FontStyle.Bold, TextAnchor.MiddleCenter, Color.white);
-            SetTopLeftRect(stateText.GetComponent<RectTransform>(), new Vector2(16f, -10f), new Vector2(428f, 28f));
+            Text stateText = CreateText("StateText", topBar.transform, font, "Waiting for players (0/2)", 16, FontStyle.Bold, TextAnchor.MiddleCenter, Color.white);
+            SetTopLeftRect(stateText.GetComponent<RectTransform>(), new Vector2(12f, -8f), new Vector2(316f, 24f));
 
-            Text timerText = CreateText("TimerText", topBar.transform, font, "Time: 120s", 24, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(1f, 0.84f, 0.25f));
-            SetTopLeftRect(timerText.GetComponent<RectTransform>(), new Vector2(16f, -40f), new Vector2(428f, 34f));
+            Text timerText = CreateText("TimerText", topBar.transform, font, "Time: 120s", 20, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(1f, 0.84f, 0.25f));
+            SetTopLeftRect(timerText.GetComponent<RectTransform>(), new Vector2(12f, -34f), new Vector2(316f, 28f));
 
-            InputField nameInput = CreateInputField("NameInputField", topBar.transform, font, "", "Player Name (max 20)...");
+            InputField nameInput = CreateInputField("NameInputField", topBar.transform, font, "", "Player Name...");
             nameInput.characterLimit = 20;
-            SetTopLeftRect(nameInput.GetComponent<RectTransform>(), new Vector2(54f, -84f), new Vector2(236f, 34f));
+            SetTopLeftRect(nameInput.GetComponent<RectTransform>(), new Vector2(16f, -70f), new Vector2(204f, 32f));
 
             Button setNameButton = CreateButton("SetNameButton", topBar.transform, font, "Set Name", new Color(0.24f, 0.52f, 0.78f, 1f));
-            SetTopLeftRect(setNameButton.GetComponent<RectTransform>(), new Vector2(298f, -84f), new Vector2(108f, 34f));
+            SetTopLeftRect(setNameButton.GetComponent<RectTransform>(), new Vector2(228f, -70f), new Vector2(96f, 32f));
 
             // Top-right scoreboard panel (CoinGrabHud.RebuildScoreboard writes "<b>SCOREBOARD</b>" + player rows)
             var scoreboardPanel = CreatePanel("ScoreboardPanel", hudRoot.transform, new Color(0.11f, 0.13f, 0.18f, 0.90f));
@@ -562,13 +564,13 @@ namespace Mirage.Examples.CoinGrabArena.EditorScripts
             scoreboardRect.anchorMin = new Vector2(1f, 1f);
             scoreboardRect.anchorMax = new Vector2(1f, 1f);
             scoreboardRect.pivot = new Vector2(1f, 1f);
-            scoreboardRect.anchoredPosition = new Vector2(-16f, -16f);
-            scoreboardRect.sizeDelta = new Vector2(290f, 240f);
+            scoreboardRect.anchoredPosition = new Vector2(-12f, -12f);
+            scoreboardRect.sizeDelta = new Vector2(210f, 200f);
 
-            Text scoreboardText = CreateText("ScoreboardText", scoreboardPanel.transform, font, "<b>SCOREBOARD</b>\nPlayer 1 (You): 0", 16, FontStyle.Normal, TextAnchor.UpperLeft, Color.white);
+            Text scoreboardText = CreateText("ScoreboardText", scoreboardPanel.transform, font, "<b>SCOREBOARD</b>\nPlayer 1 (You): 0", 14, FontStyle.Normal, TextAnchor.UpperLeft, Color.white);
             scoreboardText.supportRichText = true;
-            scoreboardText.lineSpacing = 1.2f;
-            SetTopLeftRect(scoreboardText.GetComponent<RectTransform>(), new Vector2(18f, -14f), new Vector2(254f, 212f));
+            scoreboardText.lineSpacing = 1.15f;
+            SetTopLeftRect(scoreboardText.GetComponent<RectTransform>(), new Vector2(14f, -12f), new Vector2(182f, 176f));
 
             // Center-screen results overlay panel shown at the end of a round
             var resultsPanel = CreatePanel("ResultsPanel", hudRoot.transform, new Color(0.08f, 0.10f, 0.14f, 0.95f));
@@ -577,13 +579,13 @@ namespace Mirage.Examples.CoinGrabArena.EditorScripts
             resultsRect.anchorMax = new Vector2(0.5f, 0.5f);
             resultsRect.pivot = new Vector2(0.5f, 0.5f);
             resultsRect.anchoredPosition = Vector2.zero;
-            resultsRect.sizeDelta = new Vector2(520f, 160f);
+            resultsRect.sizeDelta = new Vector2(400f, 130f);
 
-            Text resultsHeader = CreateText("ResultsHeader", resultsPanel.transform, font, "ROUND COMPLETE", 20, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.95f, 0.82f, 0.32f));
-            SetTopLeftRect(resultsHeader.GetComponent<RectTransform>(), new Vector2(20f, -18f), new Vector2(480f, 30f));
+            Text resultsHeader = CreateText("ResultsHeader", resultsPanel.transform, font, "ROUND COMPLETE", 18, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.95f, 0.82f, 0.32f));
+            SetTopLeftRect(resultsHeader.GetComponent<RectTransform>(), new Vector2(16f, -14f), new Vector2(368f, 26f));
 
-            Text winnerText = CreateText("WinnerText", resultsPanel.transform, font, "Player 1 wins!", 28, FontStyle.Bold, TextAnchor.MiddleCenter, Color.white);
-            SetTopLeftRect(winnerText.GetComponent<RectTransform>(), new Vector2(20f, -58f), new Vector2(480f, 80f));
+            Text winnerText = CreateText("WinnerText", resultsPanel.transform, font, "Player 1 wins!", 22, FontStyle.Bold, TextAnchor.MiddleCenter, Color.white);
+            SetTopLeftRect(winnerText.GetComponent<RectTransform>(), new Vector2(16f, -46f), new Vector2(368f, 68f));
 
             resultsPanel.SetActive(false);
 
@@ -990,10 +992,10 @@ namespace Mirage.Examples.CoinGrabArena.EditorScripts
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = sortingOrder;
 
+            // Fixed pixel size keeps UI crisp and readable when testing multiple small windowed instances side-by-side
             var scaler = canvasGo.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920f, 1080f);
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
+            scaler.scaleFactor = 1f;
 
             canvasGo.AddComponent<GraphicRaycaster>();
             return canvasGo;

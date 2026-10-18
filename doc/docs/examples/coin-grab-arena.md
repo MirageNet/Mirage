@@ -39,7 +39,7 @@ private void SpawnCharacterForPlayer(INetworkPlayer player)
 ```
 
 ### `CoinGrabPlayer`
-Each player prefab has a `CoinGrabPlayer` component that syncs its display name, capsule color, and score:
+Each player prefab has a `CoinGrabPlayer` component that syncs its display name, capsule color, score, and active speed-boost expiration timestamp:
 
 ```csharp
 [SyncVar(hook = nameof(OnNameChanged)), MaxLength(20)]
@@ -50,9 +50,14 @@ public Color32 Color;
 
 [SyncVar(hook = nameof(OnScoreChanged))]
 public int Score;
+
+// Synced using NetworkTime.Time so the owning client knows locally when the gold coin speed boost expires
+[SyncVar]
+public double SpeedBoostEndTime;
 ```
 
-- **Owner-Authoritative Movement**: Only the owning client enables its `CharacterController` (`OnStartLocalPlayer`) and reads `Input.GetAxis` in `Update`. Position changes are synced to the server and other clients via `NetworkTransform` with `ClientAuthority = true`. This keeps movement responsive for the local player while the server retains authority over coin pickups and scoring.
+- **Owner-Authoritative Movement & Dash**: Only the owning client enables its `CharacterController` (`OnStartLocalPlayer`), reads `Input.GetAxis` in `Update`, and triggers a short directional dash on **Spacebar** (`DashCooldown = 2.0f`). Position changes are synced to the server and other clients via `NetworkTransform` with `ClientAuthority = true`. This keeps movement responsive for the local player while the server retains authority over coin pickups and scoring.
+- **Gold Coin Speed Boost**: When a player collects a gold coin on the server, the server sets `SpeedBoostEndTime = NetworkTime.Time + SpeedBoostDuration` (4 seconds). While `NetworkTime.Time < SpeedBoostEndTime`, the owning client multiplies its movement speed by `1.5x` (+50%).
 - **Server-Only Collider**: A separate non-trigger `CapsuleCollider` (`ServerCollider`) on the player is enabled only on the server (`OnStartServer`) along with a kinematic `Rigidbody` so `OnTriggerEnter` events on the coin's trigger collider only fire on the server.
 - **Round Reset Teleport**: Because the owning client has transform authority, the server resets positions at the start of a round by updating its own transform and calling `[ClientRpc] RpcTeleport` so the owner and observers snap immediately to their spawn points.
 - **Validated Name Change**: Players can change their display name via a `[ServerRpc]` protected by `[RateLimit]` and `[MaxLength(20)]`. If a client sends an empty string or control characters, the server rejects it and flags the player with `Owner.SetError`:
@@ -85,7 +90,7 @@ public void CmdSetPlayerName([MaxLength(20)] string requestedName)
 ```
 
 ### `Coin`
-Coins are spawned by the server with two `[SyncVar(initialOnly = true)]` fields—`Value` and `IsGold`—set before `ServerObjectManager.Spawn` so clients know immediately whether to display a normal coin (1 point) or a larger gold coin (5 points).
+Coins are spawned by the server with two `[SyncVar(initialOnly = true)]` fields—`Value` and `IsGold`—set before `ServerObjectManager.Spawn` so clients know immediately whether to display a normal coin (1 point) or a larger gold coin (5 points + 4s 50% speed boost).
 
 Pickup logic runs only on the server (`[Server(error = false)]` on `OnTriggerEnter`):
 
@@ -120,6 +125,8 @@ private void OnTriggerEnter(Collider other)
     _collected = true;
 
     player.Score += Value;
+    if (IsGold)
+        player.ApplySpeedBoost();
 
     // Notify all clients to play the pickup burst before destroying the networked coin object
     RpcPlayPickupEffect(transform.position, IsGold);
@@ -163,4 +170,4 @@ public float GetRemainingTime()
 2. Press **Play** in the Editor and click **Host (Server + Client)** in the HUD.
    - To test a full round by yourself in Host mode, set **Min Players** to `1` on the `GameManager` object in the Inspector.
 3. Start one or more built instances and click **Client**.
-4. Use **WASD** or the **Arrow Keys** to move around and collect coins.
+4. Use **WASD** or the **Arrow Keys** to move around, press **Space** to dash, and collect coins.

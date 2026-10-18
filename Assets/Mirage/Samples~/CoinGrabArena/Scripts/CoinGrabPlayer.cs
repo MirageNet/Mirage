@@ -33,7 +33,12 @@ namespace Mirage.Examples.CoinGrabArena
         public TextMesh NameLabel;
 
         [Header("Movement")]
-        public float MoveSpeed = 8f;
+        public float MoveSpeed = 9.6f;
+        public float DashSpeedMultiplier = 2.4f;
+        public float DashDuration = 0.18f;
+        public float DashCooldown = 2.0f;
+        public float SpeedBoostMultiplier = 1.5f;
+        public float SpeedBoostDuration = 2.0f;
 
         [Header("Synced State")]
         [SyncVar(hook = nameof(OnNameChanged)), MaxLength(20)]
@@ -45,6 +50,10 @@ namespace Mirage.Examples.CoinGrabArena
         [SyncVar(hook = nameof(OnScoreChanged))]
         public int Score;
 
+        // Synced using NetworkTime.Time so the owning client knows locally when the gold coin speed boost expires
+        [SyncVar]
+        public double SpeedBoostEndTime;
+
         /// <summary>
         /// Fired on the client whenever name, color, score, or local-player status changes so the HUD
         /// only rebuilds the scoreboard when data actually changes instead of every frame.
@@ -53,6 +62,12 @@ namespace Mirage.Examples.CoinGrabArena
 
         private Transform _mainCameraTransform;
         private MaterialPropertyBlock _propertyBlock;
+        private float _dashEndTime;
+        private float _nextDashTime;
+        private Vector3 _dashDirection;
+
+        public bool HasSpeedBoost => (IsServer || IsClient) && NetworkTime.Time < SpeedBoostEndTime;
+        public float DashCooldownRemaining => Mathf.Max(0f, _nextDashTime - Time.time);
 
         private void OnValidate()
         {
@@ -108,11 +123,36 @@ namespace Mirage.Examples.CoinGrabArena
             var vertical = Input.GetAxis("Vertical");
 
             // Clamp magnitude so diagonal movement is not faster than cardinal movement
-            var direction = Vector3.ClampMagnitude(new Vector3(horizontal, 0f, vertical), 1f);
-            CharacterController.SimpleMove(direction * MoveSpeed);
+            var inputDirection = Vector3.ClampMagnitude(new Vector3(horizontal, 0f, vertical), 1f);
 
-            if (direction.sqrMagnitude > 0.001f)
-                transform.rotation = Quaternion.LookRotation(direction, Vector3.up);
+            if (Input.GetKeyDown(KeyCode.Space) && Time.time >= _nextDashTime)
+            {
+                _nextDashTime = Time.time + DashCooldown;
+                _dashEndTime = Time.time + DashDuration;
+                _dashDirection = inputDirection.sqrMagnitude > 0.001f
+                    ? inputDirection.normalized
+                    : transform.forward;
+            }
+
+            var currentSpeed = MoveSpeed;
+            if (HasSpeedBoost)
+                currentSpeed *= SpeedBoostMultiplier;
+
+            Vector3 moveDirection;
+            if (Time.time < _dashEndTime)
+            {
+                moveDirection = _dashDirection;
+                currentSpeed *= DashSpeedMultiplier;
+            }
+            else
+            {
+                moveDirection = inputDirection;
+            }
+
+            CharacterController.SimpleMove(moveDirection * currentSpeed);
+
+            if (moveDirection.sqrMagnitude > 0.001f)
+                transform.rotation = Quaternion.LookRotation(moveDirection, Vector3.up);
         }
 
         private void LateUpdate()
@@ -123,12 +163,22 @@ namespace Mirage.Examples.CoinGrabArena
         }
 
         /// <summary>
+        /// Grants or refreshes the temporary speed boost on the server when the player collects a gold coin.
+        /// </summary>
+        [Server]
+        public void ApplySpeedBoost()
+        {
+            SpeedBoostEndTime = NetworkTime.Time + SpeedBoostDuration;
+        }
+
+        /// <summary>
         /// Called on the server at the start of Countdown to reset score and snap the player back to a spawn point.
         /// </summary>
         [Server]
         public void ServerResetForRound(Vector3 position, Quaternion rotation)
         {
             Score = 0;
+            SpeedBoostEndTime = 0;
             ApplyPositionAndRotation(position, rotation);
             RpcTeleport(position, rotation);
         }
@@ -138,6 +188,7 @@ namespace Mirage.Examples.CoinGrabArena
         {
             // Because NetworkTransform uses ClientAuthority, the server must tell the owning client
             // (and observers) to snap their transform to the spawn point
+            _dashEndTime = 0f;
             ApplyPositionAndRotation(position, rotation);
         }
 

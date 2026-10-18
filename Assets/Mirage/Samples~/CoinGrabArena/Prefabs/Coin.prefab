@@ -224,6 +224,6 @@ MonoBehaviour:
   NormalScale: 1
   GoldScale: 1.15
   SpinSpeed: 120
-  MaxPickupDistance: 2.5
+  MaxPickupDistance: 4
   Value: 1
   IsGold: 0

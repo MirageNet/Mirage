@@ -40,7 +40,7 @@ namespace Mirage.Examples.CoinGrabArena
 
         [Header("Anti-Cheat")]
         [Tooltip("Maximum distance allowed on the server between player and coin to accept a pickup.")]
-        public float MaxPickupDistance = 2.5f;
+        public float MaxPickupDistance = 4f;
 
         [Header("Synced State")]
         // Value is set before Spawn and never changes, so initialOnly avoids any future dirty checks
@@ -139,6 +139,8 @@ namespace Mirage.Examples.CoinGrabArena
             _collected = true;
 
             player.Score += Value;
+            if (IsGold)
+                player.ApplySpeedBoost();
 
             // Notify all clients to play the pickup burst before destroying the networked coin object
             RpcPlayPickupEffect(transform.position, IsGold);

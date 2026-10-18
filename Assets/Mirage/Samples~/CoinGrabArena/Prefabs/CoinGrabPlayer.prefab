@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2075583652848112088}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -91,7 +91,7 @@ MonoBehaviour:
     SendName: 0
     SendActive: 2
   _sceneId: 0
-  _prefabHash: 0
+  _prefabHash: 197467582
   ServerObjectManager: {fileID: 0}
   ClientObjectManager: {fileID: 0}
   _hasSpawned: 0
@@ -213,12 +213,18 @@ MonoBehaviour:
   ServerCollider: {fileID: 724970255424584448}
   BodyRenderer: {fileID: 14383560520322705}
   NameLabel: {fileID: 3147232973519953700}
-  MoveSpeed: 8
+  MoveSpeed: 9.6
+  DashSpeedMultiplier: 2.4
+  DashDuration: 0.18
+  DashCooldown: 2
+  SpeedBoostMultiplier: 1.5
+  SpeedBoostDuration: 2
   PlayerName: 
   Color:
     serializedVersion: 2
     rgba: 0
   Score: 0
+  SpeedBoostEndTime: 0
 --- !u!1 &4057325690006186746
 GameObject:
   m_ObjectHideFlags: 0

@@ -16,8 +16,8 @@ No Build Settings changes are needed because the sample runs in a single scene (
 3. Build and run one or more client instances (2-8 players) and click **Client** on each.
 4. Once enough players have joined, a 3-second countdown starts and coins begin spawning around the arena:
    - **Normal Coins** (yellow) are worth **1 point**.
-   - **Gold Coins** (orange, larger, 10% spawn chance) are worth **5 points**.
-5. Use **WASD** or the **Arrow Keys** to move around and collect coins. You can also enter a custom name in the top bar and click **Set Name**.
+   - **Gold Coins** (orange with raised star, larger, 10% spawn chance) are worth **5 points** and grant a **50% speed boost for 4 seconds**.
+5. Use **WASD** or the **Arrow Keys** to move around, and press **Space** to dash (2s cooldown). You can also enter a custom name in the top bar and click **Set Name**.
 6. The round ends when a player reaches the target score (default `30`) or the round timer (`120s`) runs out. The winner and scoreboard are shown for 5 seconds before the next round starts automatically.
 
 ## How It Works
