@@ -548,8 +548,11 @@ namespace Mirage.Examples.CoinGrabArena.EditorScripts
             Text stateText = CreateText("StateText", topBar.transform, font, "Waiting for players (0/2)", 16, FontStyle.Bold, TextAnchor.MiddleCenter, Color.white);
             SetTopLeftRect(stateText.GetComponent<RectTransform>(), new Vector2(12f, -8f), new Vector2(316f, 24f));
 
-            Text timerText = CreateText("TimerText", topBar.transform, font, "Time: 120s", 20, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(1f, 0.84f, 0.25f));
+            Text timerText = CreateText("TimerText", topBar.transform, font, "", 20, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(1f, 0.84f, 0.25f));
             SetTopLeftRect(timerText.GetComponent<RectTransform>(), new Vector2(12f, -34f), new Vector2(316f, 28f));
+
+            Button startAloneButton = CreateButton("StartAloneButton", topBar.transform, font, "Start Alone", new Color(0.22f, 0.58f, 0.34f, 1f));
+            SetTopLeftRect(startAloneButton.GetComponent<RectTransform>(), new Vector2(95f, -35f), new Vector2(150f, 28f));
 
             InputField nameInput = CreateInputField("NameInputField", topBar.transform, font, "", "Player Name...");
             nameInput.characterLimit = 20;
@@ -592,6 +595,7 @@ namespace Mirage.Examples.CoinGrabArena.EditorScripts
             coinGrabHud.HudRoot = hudRoot;
             coinGrabHud.StateText = stateText;
             coinGrabHud.TimerText = timerText;
+            coinGrabHud.StartAloneButton = startAloneButton;
             coinGrabHud.ScoreboardText = scoreboardText;
             coinGrabHud.ResultsPanel = resultsPanel;
             coinGrabHud.WinnerText = winnerText;

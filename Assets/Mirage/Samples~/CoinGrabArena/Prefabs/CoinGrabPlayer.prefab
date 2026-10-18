@@ -91,7 +91,7 @@ MonoBehaviour:
     SendName: 0
     SendActive: 2
   _sceneId: 0
-  _prefabHash: 197467582
+  _prefabHash: 0
   ServerObjectManager: {fileID: 0}
   ClientObjectManager: {fileID: 0}
   _hasSpawned: 0

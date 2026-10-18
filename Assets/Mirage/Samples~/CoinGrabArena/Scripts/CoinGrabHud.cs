@@ -30,6 +30,8 @@ namespace Mirage.Examples.CoinGrabArena
         [RequiredField]
         public Text TimerText;
         [RequiredField]
+        public Button StartAloneButton;
+        [RequiredField]
         public Text ScoreboardText;
         [RequiredField]
         public GameObject ResultsPanel;
@@ -61,6 +63,7 @@ namespace Mirage.Examples.CoinGrabArena
 
             GameManager.OnGameStateChanged += OnGameStateChanged;
             SetNameButton.onClick.AddListener(OnSetNameClicked);
+            StartAloneButton.onClick.AddListener(OnStartAloneClicked);
 
             HudRoot.SetActive(false);
             ResultsPanel.SetActive(false);
@@ -198,6 +201,7 @@ namespace Mirage.Examples.CoinGrabArena
             _lastDisplayedSeconds = -1;
             _lastWaitingPlayerCount = -1;
 
+            StartAloneButton.gameObject.SetActive(GameManager.State == RoundState.Waiting);
             ResultsPanel.SetActive(GameManager.State == RoundState.Results);
             if (GameManager.State == RoundState.Results)
                 WinnerText.text = GameManager.WinnerText;
@@ -315,6 +319,11 @@ namespace Mirage.Examples.CoinGrabArena
 
             if (Client.Player.Identity.TryGetComponent<CoinGrabPlayer>(out var localPlayer))
                 localPlayer.CmdSetPlayerName(requestedName);
+        }
+
+        private void OnStartAloneClicked()
+        {
+            GameManager.RequestStartAlone();
         }
     }
 }

@@ -54,9 +54,12 @@ namespace Mirage.Examples.CoinGrabArena
 
         private readonly List<CoinGrabPlayer> _serverPlayers = new List<CoinGrabPlayer>();
         private readonly StringBuilder _winnerBuilder = new StringBuilder(256);
+        private int _initialMinPlayers;
 
         private void Awake()
         {
+            _initialMinPlayers = MinPlayers;
+
             Identity.OnStartServer.AddListener(OnStartServer);
             Identity.OnStopServer.AddListener(OnStopServer);
             Identity.OnStartClient.AddListener(OnStartClient);
@@ -64,6 +67,7 @@ namespace Mirage.Examples.CoinGrabArena
 
         private void OnStartServer()
         {
+            MinPlayers = _initialMinPlayers;
             _serverPlayers.Clear();
 
             // Track players joining and leaving via NetworkWorld events instead of polling FindObjectsOfType
@@ -135,6 +139,34 @@ namespace Mirage.Examples.CoinGrabArena
         {
             if (State == RoundState.Playing && player.Score >= TargetScore)
                 EndRound();
+        }
+
+        /// <summary>
+        /// Allows a single player to skip the waiting state and start a solo round without editing MinPlayers in the Inspector.
+        /// </summary>
+        public void RequestStartAlone()
+        {
+            if (IsServer)
+                ServerStartAlone();
+            else if (IsClient)
+                CmdStartAlone();
+        }
+
+        [ServerRpc(requireAuthority = false)]
+        [RateLimit(Interval = 2f, Refill = 1, MaxTokens = 2, Penalty = 5)]
+        private void CmdStartAlone()
+        {
+            ServerStartAlone();
+        }
+
+        [Server]
+        private void ServerStartAlone()
+        {
+            if (State != RoundState.Waiting || _serverPlayers.Count == 0)
+                return;
+
+            MinPlayers = 1;
+            EnterCountdownState();
         }
 
         /// <summary>
