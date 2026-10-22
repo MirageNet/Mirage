@@ -69,8 +69,10 @@ namespace Mirage
         public bool Listening = true;
 
         [Tooltip("Creates Socket for Peer to use")]
+        [RequiredField(autoFind: true)]
         public SocketFactory SocketFactory;
 
+        [RequiredField(autoFind: true)]
         public ServerObjectManager ObjectManager;
 
         private Peer _peer;

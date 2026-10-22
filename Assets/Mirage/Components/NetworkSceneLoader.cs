@@ -13,12 +13,17 @@ namespace Mirage.Components
     [HelpURL("https://miragenet.github.io/Mirage/docs/components/network-scene-loader")]
     public class NetworkSceneLoader : MonoBehaviour
     {
+        [RequiredField(autoFind: true)]
         public NetworkServer Server;
+        [RequiredField(autoFind: true)]
         public NetworkClient Client;
+        [RequiredField(autoFind: true)]
         public ServerObjectManager ServerObjectManager;
+        [RequiredField(autoFind: true)]
         public ClientObjectManager ClientObjectManager;
 
         [Header("Character Spawning")]
+        [RequiredField]
         public NetworkIdentity PlayerPrefab;
 
         [Header("State")]

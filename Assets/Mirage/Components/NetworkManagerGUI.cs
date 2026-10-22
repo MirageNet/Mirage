@@ -16,6 +16,7 @@ namespace Mirage
         public bool AutoConfigureNetworkManager = true;
 
         [Tooltip("The value in this property field (if set) will not be overwritten if Auto Configuration is enabled.")]
+        [RequiredField(autoFind: true)]
         public NetworkManager NetworkManager;
 
         [Header("Cosmetics")]

@@ -5,13 +5,16 @@ namespace Mirage
 {
     public class NetworkManagerHud : MonoBehaviour
     {
+        [RequiredField(autoFind: true)]
         public NetworkManager NetworkManager;
         public string NetworkAddress = "localhost";
         public bool DontDestroy = true;
 
         [Header("Prefab Canvas Elements")]
         public InputField NetworkAddressInput;
+        [RequiredField]
         public GameObject OfflineGO;
+        [RequiredField]
         public GameObject OnlineGO;
         public Text StatusLabel;
 

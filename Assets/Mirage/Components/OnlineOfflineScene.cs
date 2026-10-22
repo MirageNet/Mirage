@@ -11,8 +11,10 @@ namespace Mirage.Components
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(OnlineOfflineScene));
 
         [FormerlySerializedAs("server")]
+        [RequiredField(autoFind: true)]
         public NetworkServer Server;
 
+        [RequiredField(autoFind: true)]
         public NetworkSceneLoader SceneLoader;
 
         [Scene]

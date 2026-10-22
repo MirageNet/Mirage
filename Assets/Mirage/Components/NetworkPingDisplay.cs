@@ -11,7 +11,9 @@ namespace Mirage
     [HelpURL("https://miragenet.github.io/Mirage/docs/components/network-ping-display")]
     public class NetworkPingDisplay : MonoBehaviour
     {
+        [RequiredField(autoFind: true)]
         public NetworkClient Client;
+        [RequiredField]
         public Text NetworkPingLabelText;
 
         internal void Update()

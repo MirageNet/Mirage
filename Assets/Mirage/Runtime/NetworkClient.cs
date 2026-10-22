@@ -51,8 +51,10 @@ namespace Mirage
         public PeerConfigProfile PeerConfigProfile = PeerConfigProfile.RawUdp;
 
         [Tooltip("Creates Socket for Peer to use")]
+        [RequiredField(autoFind: true)]
         public SocketFactory SocketFactory;
 
+        [RequiredField(autoFind: true)]
         public ClientObjectManager ObjectManager;
 
         public bool DisconnectOnException = true;

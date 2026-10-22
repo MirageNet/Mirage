@@ -6,6 +6,7 @@ namespace Mirage.DisplayMetrics
     {
         public NetworkServer server;
         public NetworkClient client;
+        [RequiredField(autoFind: true)]
         public DisplayMetricsAverageGui displayMetrics;
 
         private void Start()

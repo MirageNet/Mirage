@@ -14,6 +14,7 @@ namespace Mirage.Authenticators.SessionId
 
         public NetworkServer Server;
         public NetworkClient Client;
+        [RequiredField(autoFind: true)]
         public SessionIdAuthenticator Authenticator;
         public bool AutoRefreshSession = true;
         private bool _sentRefresh = false;

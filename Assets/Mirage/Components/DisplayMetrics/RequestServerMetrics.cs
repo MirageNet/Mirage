@@ -8,6 +8,7 @@ namespace Mirage.DisplayMetrics
 {
     public class RequestServerMetrics : MonoBehaviour
     {
+        [RequiredField(autoFind: true)]
         public NetworkServer server;
         public NetworkClient client;
         public DisplayMetricsAverageGui displayMetrics;

@@ -9,6 +9,7 @@ namespace Mirage.Components
         private static readonly ILogger logger = LogFactory.GetLogger<LobbyReady>();
         private static readonly List<INetworkPlayer> sendCache = new List<INetworkPlayer>();
 
+        [RequiredField(autoFind: true)]
         public NetworkServer Server;
         public Dictionary<NetworkIdentity, ReadyCheck> Players = new Dictionary<NetworkIdentity, ReadyCheck>();
 

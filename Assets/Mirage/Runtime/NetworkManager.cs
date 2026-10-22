@@ -17,9 +17,13 @@ namespace Mirage
     [DisallowMultipleComponent]
     public class NetworkManager : MonoBehaviour
     {
+        [RequiredField(autoFind: true)]
         public NetworkServer Server;
+        [RequiredField(autoFind: true)]
         public NetworkClient Client;
+        [RequiredField(autoFind: true)]
         public ServerObjectManager ServerObjectManager;
+        [RequiredField(autoFind: true)]
         public ClientObjectManager ClientObjectManager;
 
         [Tooltip("Will setup reference automatically")]

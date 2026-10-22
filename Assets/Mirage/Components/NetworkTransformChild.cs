@@ -11,6 +11,7 @@ namespace Mirage
     public class NetworkTransformChild : NetworkTransformBase
     {
         [Header("Target")]
+        [RequiredField]
         public Transform Target;
 
         protected override Transform TargetComponent => Target;

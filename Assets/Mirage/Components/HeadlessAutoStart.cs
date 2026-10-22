@@ -7,6 +7,7 @@ namespace Mirage
     public class HeadlessAutoStart : MonoBehaviour
     {
         [FormerlySerializedAs("server")]
+        [RequiredField(autoFind: true)]
         public NetworkServer Server;
 
         /// <summary>
