@@ -280,6 +280,44 @@ namespace Mirage
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class ReadOnlyInspectorAttribute : PropertyAttribute { }
 
+    public enum RequiredType
+    {
+        Error,
+        Warning,
+    }
+
+    /// <summary>
+    /// Checks if a field is assigned in the inspector and displays a warning or error help box if unassigned.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field)]
+    public sealed class RequiredFieldAttribute : PropertyAttribute
+    {
+        public RequiredType Type { get; set; } = RequiredType.Error;
+        public string Message { get; set; }
+        public bool AutoFind { get; set; }
+
+        public RequiredFieldAttribute() { }
+
+        public RequiredFieldAttribute(bool autoFind)
+        {
+            AutoFind = autoFind;
+        }
+
+        public RequiredFieldAttribute(RequiredType type, string message = null, bool autoFind = false)
+        {
+            Type = type;
+            Message = message;
+            AutoFind = autoFind;
+        }
+
+        public RequiredFieldAttribute(string message, RequiredType type = RequiredType.Error, bool autoFind = false)
+        {
+            Message = message;
+            Type = type;
+            AutoFind = autoFind;
+        }
+    }
+
     /// <summary>
     /// Forces the user to provide a prefab that has a NetworkIdentity component and is registered.
     /// Also provides a fix button to fix the prefab if it hasn't been networked.
