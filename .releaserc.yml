@@ -14,6 +14,9 @@ plugins:
         Assets/Mirage/Weaver/AssemblyInfo.cs"
   - - '@semantic-release/exec'
     - prepareCmd: "cp LICENSE Assets/Mirage/LICENSE"
+  # keep package.json samples in sync with Samples~ folders, so new samples can be imported from the package manager
+  - - '@semantic-release/exec'
+    - prepareCmd: "python3 .github/scripts/update_samples.py"
   - - '@semantic-release/changelog'
     - changelogFile: 'Assets/Mirage/CHANGELOG.md'
   - - '@semantic-release/npm'
