@@ -26,6 +26,9 @@ namespace Mirage.Components
         [RequiredField]
         public NetworkIdentity PlayerPrefab;
 
+        [Tooltip("Keeps this GameObject alive when scene changes. Should be true if the network components are on this GameObject, otherwise they will be destroyed when server changes scene")]
+        public bool DontDestroy = true;
+
         [Header("State")]
         [Scene] public string TargetScene;
         [Tooltip("Is server currently loading the scene"), ReadOnlyInspector]
@@ -56,6 +59,9 @@ namespace Mirage.Components
 
         private void Awake()
         {
+            if (DontDestroy)
+                DontDestroyOnLoad(gameObject);
+
             // make sure Server loading starts false
             ServerLoading = false;
             Server.Started.AddListener(OnServerStarted);

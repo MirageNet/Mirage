@@ -18,6 +18,7 @@ Add the `NetworkSceneLoader` component to the same GameObject as your `NetworkSe
 | **ServerObjectManager** | Reference to the `ServerObjectManager` component |
 | **ClientObjectManager** | Reference to the `ClientObjectManager` component |
 | **PlayerPrefab** | The `NetworkIdentity` prefab to spawn as the player's character |
+| **DontDestroy** | Calls `DontDestroyOnLoad` on this GameObject so the network components survive scene changes. Default `true` |
 
 :::note
 These references will be auto-found via `OnValidate` if they are on the same GameObject.
