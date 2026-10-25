@@ -1,3 +1,10 @@
+## [159.1.2](https://github.com/MirageNet/Mirage/compare/v159.1.1...v159.1.2) (2026-10-25)
+
+
+### Bug Fixes
+
+* SendToAll ignoring channelId when authenticatedOnly is true ([8c69551](https://github.com/MirageNet/Mirage/commit/8c69551d498ae8fcd29edd0aaf6766999d20c694))
+
 ## [159.1.1](https://github.com/MirageNet/Mirage/compare/v159.1.0...v159.1.1) (2026-10-15)
 
 
