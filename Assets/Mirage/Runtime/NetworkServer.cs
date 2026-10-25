@@ -587,7 +587,7 @@ namespace Mirage
         {
             if (authenticatedOnly)
             {
-                SendToMany(_authenticatedPlayers, msg, excludeLocalPlayer);
+                SendToMany(_authenticatedPlayers, msg, excludeLocalPlayer, channelId);
             }
             else
             {
