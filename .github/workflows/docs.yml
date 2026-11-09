@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     # available list of containers here:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
-    container: unityci/editor:ubuntu-6000.3.22f1-base-3.2.2
+    container: unityci/editor:ubuntu-6000.3.28f1-base-3.2.2
 
     steps:
       - name: Activate unity
