@@ -49,7 +49,7 @@ namespace Mirage
         /// <para>Used by <see cref="PrepareToSpawnSceneObjects"/> when finding scene objects.</para>
         /// <para>If the filter is null, all valid scene objects will be included.</para>
         /// </summary>
-        public Func<NetworkIdentity, bool> SceneObjectFilter { get; set; }
+        public NetworkIdentityFilter SceneObjectFilter { get; set; }
 
         public ISpawnValuesHandler SpawnValuesHandler = DefaultSpawnValuesHandler.Instance;
 
@@ -196,8 +196,24 @@ namespace Mirage
 
         /// <summary>
         /// Call this after loading/unloading a scene in the client after connection to register the spawnable objects
+        /// <para>
+        /// This version of PrepareToSpawnSceneObjects uses the <see cref="SceneObjectFilter"/> field to filter which objects are spawned, by default this filter is null.
+        /// You can call <see cref="PrepareToSpawnSceneObjects(NetworkIdentityFilter)"/> with a custom filter if you want to decide what objects get spawned for a single PrepareToSpawnSceneObjects call.
+        /// </para>
         /// </summary>
         public void PrepareToSpawnSceneObjects()
+        {
+            PrepareToSpawnSceneObjects(SceneObjectFilter);
+        }
+
+        /// <summary>
+        /// Call this after loading/unloading a scene in the client after connection to register the spawnable objects
+        /// <para>
+        /// This version of PrepareToSpawnSceneObjects ignores the globals <see cref="SceneObjectFilter"/> filter (can be null) and only uses the custom filter argument instead.
+        /// If you need SceneObjectFilter as well your filter method should call it and return the value.
+        /// </para>
+        /// </summary>
+        public void PrepareToSpawnSceneObjects(NetworkIdentityFilter filter)
         {
             using var _ = prepareSceneObjectsMarker.Auto();
 
@@ -211,7 +227,7 @@ namespace Mirage
             {
                 if (!ConsiderForSpawning(identity))
                     continue;
-                if (SceneObjectFilter != null && !SceneObjectFilter.Invoke(identity))
+                if (filter != null && !filter.Invoke(identity))
                     continue;
 
                 spawnableObjects.Add(identity.SceneId, identity);

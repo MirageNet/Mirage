@@ -10,6 +10,8 @@ using Object = UnityEngine.Object;
 
 namespace Mirage
 {
+    public delegate bool NetworkIdentityFilter(NetworkIdentity identity);
+
     /// <summary>
     /// The ServerObjectManager.
     /// </summary>
@@ -50,7 +52,7 @@ namespace Mirage
         /// <para>Used by <see cref="SpawnSceneObjects"/> when finding scene objects.</para>
         /// <para>If the filter is null, all valid scene objects will be included.</para>
         /// </summary>
-        public Func<NetworkIdentity, bool> SceneObjectFilter { get; set; }
+        public NetworkIdentityFilter SceneObjectFilter { get; set; }
 
         internal void ServerStarted(NetworkServer server)
         {
@@ -687,14 +689,45 @@ namespace Mirage
         }
 
         /// <summary>
-        /// This causes NetworkIdentity objects in a scene to be spawned on a server.
+        /// This causes NetworkIdentity objects in active scenes to be spawned on a server. 
         /// <para>
-        ///     Calling SpawnObjects() causes all scene objects to be spawned.
-        ///     It is like calling Spawn() for each of them.
+        /// This will calls <see cref="Spawn"/> on each NetworkIdentity. Objects that are already spawned will have <see cref="NetworkIdentity.RebuildObservers"/> called causing Spawn message to be sent to players who do not yet have the object.
+        /// </para>
+        /// <para>
+        /// Spawning is sorted by netid if object are already spawned, and then by sceneId if objects are not yet spawned.
+        /// Because sceneId starts with a hash of the scene path, if you have multiple active scenes then NetworkIdentity in the same scene will spawn together.
+        /// </para>
+        /// <para>
+        /// This version of SpawnSceneObjects uses the <see cref="SceneObjectFilter"/> field to filter which objects are spawned, by default this filter is null.
+        /// You can call <see cref="SpawnSceneObjects(NetworkIdentityFilter)"/> with a custom filter if you want to decide what objects get spawned for a single SpawnSceneObjects call.
         /// </para>
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown when server is not active</exception>
         public void SpawnSceneObjects()
+        {
+            SpawnSceneObjects(SceneObjectFilter);
+        }
+
+        /// <summary>
+        /// This causes NetworkIdentity objects in active scenes to be spawned on a server. 
+        /// <para>
+        /// This will calls <see cref="Spawn"/> on each NetworkIdentity. Objects that are already spawned will have <see cref="NetworkIdentity.RebuildObservers"/> called causing Spawn message to be sent to players who do not yet have the object.
+        /// </para>
+        /// <para>
+        /// Spawning is sorted by netid if object are already spawned, and then by sceneId if objects are not yet spawned.
+        /// Because sceneId starts with a hash of the scene path, if you have multiple active scenes then NetworkIdentity in the same scene will spawn together.
+        /// </para>
+        /// <para>
+        /// This version of SpawnSceneObjects ignores the globals <see cref="SceneObjectFilter"/> filter (can be null) and only uses the custom filter argument instead.
+        /// If you need SceneObjectFilter as well your filter method should call it and return the value.
+        /// <br>
+        /// An example use for a custom filter might be to spawn all objects from Scene A before Scene B.
+        /// To do this you would call SpawnSceneObjects with a filter for just sceneA, then call it a 2nd time with a filter for just sceneB.
+        /// For this type of use case you would not need a matching filter for <see cref="ClientObjectManager.PrepareToSpawnSceneObjects"/> as all objects will still be spawned
+        /// </para>
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown when server is not active</exception>
+        public void SpawnSceneObjects(NetworkIdentityFilter filter)
         {
             using var _ = spawnSceneObjectsMarker.Auto();
 
@@ -710,7 +743,7 @@ namespace Mirage
             {
                 if (!ValidateSceneObject(identity))
                     continue;
-                if (SceneObjectFilter != null && !SceneObjectFilter.Invoke(identity))
+                if (filter != null && !filter.Invoke(identity))
                     continue;
                 spawnList.Add(identity);
             }
@@ -726,20 +759,22 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
+        /// Checks all objects spawned on the server to see if they should be visible to <paramref name="player"/> and sends a <see cref="SpawnMessage"/> if they should be.
         /// <para>
-        /// If there is a scene helper (e.g. <see cref="Mirage.Components.NetworkSceneHelper"/>) then this will be called after the client finishes loading the scene and sends <see cref="SceneReadyMessage"/>
+        /// <see cref="AddCharacter(INetworkPlayer, NetworkIdentity)"/> calls this method, so you only need to call it your self if you have custom scene loading that does not call AddCharacter after scene load.
         /// </para>
         /// </summary>
         /// <param name="player">The player to spawn objects for</param>
-        // note: can't use optional param here because we need just NetworkPlayer version for event
         public void SpawnVisibleObjects(INetworkPlayer player)
         {
             SpawnVisibleObjects(player, false, (HashSet<NetworkIdentity>)null);
         }
 
         /// <summary>
-        /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
+        /// Checks all objects spawned on the server to see if they should be visible to <paramref name="player"/> and sends a <see cref="SpawnMessage"/> if they should be.
+        /// <para>
+        /// <see cref="AddCharacter(INetworkPlayer, NetworkIdentity)"/> calls this method, so you only need to call it your self if you have custom scene loading that does not call AddCharacter after scene load.
+        /// </para>
         /// </summary>
         /// <param name="player">The player to spawn objects for</param>
         /// <param name="ignoreHasCharacter">If true will spawn visible objects even if player does not have a spawned character yet</param>
@@ -749,21 +784,27 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
+        /// Checks all objects spawned on the server to see if they should be visible to <paramref name="player"/> and sends a <see cref="SpawnMessage"/> if they should be.
+        /// <para>
+        /// <see cref="AddCharacter(INetworkPlayer, NetworkIdentity)"/> calls this method, so you only need to call it your self if you have custom scene loading that does not call AddCharacter after scene load.
+        /// </para>
         /// </summary>
         /// <param name="player">The player to spawn objects for</param>
-        /// <param name="ignoreHasCharacter">If true will spawn visible objects even if player does not have a spawned character yet</param>
+        /// <param name="skip">Can be used to skip 1 object, like if you need to spawn all other objects and then that 1 object after all the rest are spawned.</param>
         public void SpawnVisibleObjects(INetworkPlayer player, NetworkIdentity skip)
         {
             SpawnVisibleObjects(player, false, skip);
         }
 
         /// <summary>
-        /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
+        /// Checks all objects spawned on the server to see if they should be visible to <paramref name="player"/> and sends a <see cref="SpawnMessage"/> if they should be.
+        /// <para>
+        /// <see cref="AddCharacter(INetworkPlayer, NetworkIdentity)"/> calls this method, so you only need to call it your self if you have custom scene loading that does not call AddCharacter after scene load.
+        /// </para>
         /// </summary>
         /// <param name="player">The player to spawn objects for</param>
         /// <param name="ignoreHasCharacter">If true will spawn visible objects even if player does not have a spawned character yet</param>
-        /// <param name="skip">NetworkIdentity to skip when spawning. Can be null</param>
+        /// <param name="skip">Can be used to skip 1 object, like if you need to spawn all other objects and then that 1 object after all the rest are spawned.</param>
         public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter, NetworkIdentity skip)
         {
             using var skipWrapper = AutoPool<HashSet<NetworkIdentity>>.Take();
@@ -775,11 +816,14 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
+        /// Checks all objects spawned on the server to see if they should be visible to <paramref name="player"/> and sends a <see cref="SpawnMessage"/> if they should be.
+        /// <para>
+        /// <see cref="AddCharacter(INetworkPlayer, NetworkIdentity)"/> calls this method, so you only need to call it your self if you have custom scene loading that does not call AddCharacter after scene load.
+        /// </para>
         /// </summary>
         /// <param name="player">The player to spawn objects for</param>
         /// <param name="ignoreHasCharacter">If true will spawn visible objects even if player does not have a spawned character yet</param>
-        /// <param name="skip">NetworkIdentity to skip when spawning. Can be null</param>
+        /// <param name="skip">Optional argument. Can be used to skip many objects, like if you need to spawn all other objects and then the set of other object after all the rest are spawned.</param>
         public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter, HashSet<NetworkIdentity> skip)
         {
             // remove all, so that it will send spawn message for objects destroyed in scene change

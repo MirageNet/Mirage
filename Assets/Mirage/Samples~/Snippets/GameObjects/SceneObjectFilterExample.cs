@@ -1,6 +1,6 @@
-using Mirage;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static Mirage.ServerObjectManager;
 
 namespace Mirage.Snippets.GameObjects
 {
@@ -12,15 +12,15 @@ namespace Mirage.Snippets.GameObjects
         public Scene myScene;
 
         // Set the scene to use for filtering
-        public void SetScene(Scene scene) 
+        public void SetScene(Scene scene)
         {
             myScene = scene;
         }
 
-        void Awake()
+        private void Awake()
         {
             // Set the filter before spawning scene objects
-            System.Func<NetworkIdentity, bool> filter = (NetworkIdentity identity) =>
+            NetworkIdentityFilter filter = (NetworkIdentity identity) =>
             {
                 return identity.gameObject.scene == myScene;
             };
