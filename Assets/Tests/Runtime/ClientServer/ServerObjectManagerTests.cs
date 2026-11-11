@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Mirage.Serialization;
@@ -169,6 +170,117 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             Assert.That(spawned.NetId, Is.EqualTo(spawnedNetId));
             Assert.That(unspawned.NetId, Is.GreaterThan(spawnedNetId));
+        }
+
+        [Test]
+        public void SpawnSceneObjectsSendsSpawnedObjectsBeforeUnspawned()
+        {
+            var spawned = CreateBehaviour<SerializeEventBehaviour>();
+            // higher sceneId than unspawned, so that sceneId order alone would put it last
+            spawned.Identity.SetSceneId(20);
+            serverObjectManager.Spawn(spawned.Identity);
+
+            var unspawned = CreateBehaviour<SerializeEventBehaviour>();
+            unspawned.Identity.SetSceneId(10);
+
+            // OnSerialize with initialState is called when the spawn message is created, so it gives the send order
+            var sendOrder = new List<NetworkIdentity>();
+            spawned.OnSerializeCalled += (initial) =>
+            {
+                if (initial)
+                    sendOrder.Add(spawned.Identity);
+            };
+            unspawned.OnSerializeCalled += (initial) =>
+            {
+                if (initial)
+                    sendOrder.Add(unspawned.Identity);
+            };
+
+            serverObjectManager.SpawnSceneObjects();
+
+            Assert.That(sendOrder.Distinct().ToArray(), Is.EqualTo(new[] { spawned.Identity, unspawned.Identity }));
+        }
+
+        [Test]
+        public void SpawnSceneObjectsUsesSceneObjectFilterProperty()
+        {
+            var included = InstantiateForTest(_characterPrefabGo).GetComponent<NetworkIdentity>();
+            included.SetSceneId(10);
+            var excluded = InstantiateForTest(_characterPrefabGo).GetComponent<NetworkIdentity>();
+            excluded.SetSceneId(20);
+
+            serverObjectManager.SceneObjectFilter = (identity) => identity == included;
+            serverObjectManager.SpawnSceneObjects();
+
+            Assert.That(included.IsSpawned, Is.True);
+            Assert.That(excluded.IsSpawned, Is.False);
+        }
+
+        [Test]
+        public void SpawnSceneObjectsWithFilterOnlySpawnsMatchingObjects()
+        {
+            var included = InstantiateForTest(_characterPrefabGo).GetComponent<NetworkIdentity>();
+            included.SetSceneId(10);
+            var excluded = InstantiateForTest(_characterPrefabGo).GetComponent<NetworkIdentity>();
+            excluded.SetSceneId(20);
+
+            serverObjectManager.SpawnSceneObjects((identity) => identity == included);
+
+            Assert.That(included.IsSpawned, Is.True);
+            Assert.That(excluded.IsSpawned, Is.False);
+        }
+
+        [Test]
+        public void SpawnSceneObjectsWithFilterIgnoresSceneObjectFilterProperty()
+        {
+            var sceneObject = InstantiateForTest(_characterPrefabGo).GetComponent<NetworkIdentity>();
+            sceneObject.SetSceneId(10);
+
+            // property would exclude everything, so object can only spawn if it is ignored
+            serverObjectManager.SceneObjectFilter = (identity) => false;
+            serverObjectManager.SpawnSceneObjects((identity) => identity == sceneObject);
+
+            Assert.That(sceneObject.IsSpawned, Is.True);
+        }
+
+        [Test]
+        public void SpawnSceneObjectsWithNullFilterSpawnsAllSceneObjects()
+        {
+            var sceneObject = InstantiateForTest(_characterPrefabGo).GetComponent<NetworkIdentity>();
+            sceneObject.SetSceneId(10);
+
+            // property would exclude everything, so object can only spawn if it is ignored
+            serverObjectManager.SceneObjectFilter = (identity) => false;
+            serverObjectManager.SpawnSceneObjects(null);
+
+            Assert.That(sceneObject.IsSpawned, Is.True);
+        }
+
+        [Test]
+        public void SpawnSceneObjectsCalledPerFilterSpawnsGroupsInCallOrder()
+        {
+            // sceneA has higher sceneIds, so a single unfiltered call would spawn sceneB first
+            var sceneA = new[]
+            {
+                InstantiateForTest(_characterPrefabGo).GetComponent<NetworkIdentity>(),
+                InstantiateForTest(_characterPrefabGo).GetComponent<NetworkIdentity>(),
+            };
+            sceneA[0].SetSceneId(30);
+            sceneA[1].SetSceneId(40);
+            var sceneB = new[]
+            {
+                InstantiateForTest(_characterPrefabGo).GetComponent<NetworkIdentity>(),
+                InstantiateForTest(_characterPrefabGo).GetComponent<NetworkIdentity>(),
+            };
+            sceneB[0].SetSceneId(10);
+            sceneB[1].SetSceneId(20);
+
+            serverObjectManager.SpawnSceneObjects((identity) => sceneA.Contains(identity));
+            serverObjectManager.SpawnSceneObjects((identity) => sceneB.Contains(identity));
+
+            var maxA = sceneA.Max(x => x.NetId);
+            var minB = sceneB.Min(x => x.NetId);
+            Assert.That(minB, Is.GreaterThan(maxA));
         }
 
         [Test]

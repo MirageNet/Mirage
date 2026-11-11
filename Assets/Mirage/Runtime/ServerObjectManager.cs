@@ -689,12 +689,12 @@ namespace Mirage
         }
 
         /// <summary>
-        /// This causes NetworkIdentity objects in active scenes to be spawned on a server. 
+        /// This causes NetworkIdentity objects in active scenes to be spawned on a server.
         /// <para>
-        /// This will calls <see cref="Spawn"/> on each NetworkIdentity. Objects that are already spawned will have <see cref="NetworkIdentity.RebuildObservers"/> called causing Spawn message to be sent to players who do not yet have the object.
+        /// This will call <see cref="Spawn"/> on each NetworkIdentity. Objects that are already spawned will have <see cref="NetworkIdentity.RebuildObservers"/> called with initialize true, causing a Spawn message to be sent again to every ready player, including players that already have the object.
         /// </para>
         /// <para>
-        /// Spawning is sorted by netid if object are already spawned, and then by sceneId if objects are not yet spawned.
+        /// Objects that are already spawned are processed first, sorted by netid. Objects that are not yet spawned come after them, sorted by sceneId.
         /// Because sceneId starts with a hash of the scene path, if you have multiple active scenes then NetworkIdentity in the same scene will spawn together.
         /// </para>
         /// <para>
@@ -709,18 +709,18 @@ namespace Mirage
         }
 
         /// <summary>
-        /// This causes NetworkIdentity objects in active scenes to be spawned on a server. 
+        /// This causes NetworkIdentity objects in active scenes to be spawned on a server.
         /// <para>
-        /// This will calls <see cref="Spawn"/> on each NetworkIdentity. Objects that are already spawned will have <see cref="NetworkIdentity.RebuildObservers"/> called causing Spawn message to be sent to players who do not yet have the object.
+        /// This will call <see cref="Spawn"/> on each NetworkIdentity. Objects that are already spawned will have <see cref="NetworkIdentity.RebuildObservers"/> called with initialize true, causing a Spawn message to be sent again to every ready player, including players that already have the object.
         /// </para>
         /// <para>
-        /// Spawning is sorted by netid if object are already spawned, and then by sceneId if objects are not yet spawned.
+        /// Objects that are already spawned are processed first, sorted by netid. Objects that are not yet spawned come after them, sorted by sceneId.
         /// Because sceneId starts with a hash of the scene path, if you have multiple active scenes then NetworkIdentity in the same scene will spawn together.
         /// </para>
         /// <para>
-        /// This version of SpawnSceneObjects ignores the globals <see cref="SceneObjectFilter"/> filter (can be null) and only uses the custom filter argument instead.
+        /// This version of SpawnSceneObjects ignores the global <see cref="SceneObjectFilter"/> filter (can be null) and only uses the custom filter argument instead.
         /// If you need SceneObjectFilter as well your filter method should call it and return the value.
-        /// <br>
+        /// <br/>
         /// An example use for a custom filter might be to spawn all objects from Scene A before Scene B.
         /// To do this you would call SpawnSceneObjects with a filter for just sceneA, then call it a 2nd time with a filter for just sceneB.
         /// For this type of use case you would not need a matching filter for <see cref="ClientObjectManager.PrepareToSpawnSceneObjects"/> as all objects will still be spawned
@@ -872,12 +872,24 @@ namespace Mirage
             public static readonly NetworkIdentityComparer instance = new NetworkIdentityComparer();
             public int Compare(NetworkIdentity x, NetworkIdentity y)
             {
-                // unspawned objects all have NetId 0, and FindObjectsOfTypeAll order is not stable,
-                // so sort by SceneId to assign the same NetIds every load
-                if (x.NetId == 0 && y.NetId == 0)
-                    return x.SceneId.CompareTo(y.SceneId);
+                var xSpawned = x.NetId != 0;
+                var ySpawned = y.NetId != 0;
 
-                return x.NetId.CompareTo(y.NetId);
+                // sort spawned object first, low NetId to high NetId
+                // then sort unspawned objects by SceneId so that order is stable between runs of the game
+                // this makes it easier to track down bugs in spawn order
+                // unspawned objects all have NetId 0, and FindObjectsOfTypeAll order is not stable,
+                // so without SceneId the same NetIds would not be assigned every load
+
+                // note: sort is ascending, so -1 means put earlier in sort
+                if (xSpawned && ySpawned)
+                    return x.NetId.CompareTo(y.NetId);
+                else if (xSpawned && !ySpawned)
+                    return -1;
+                else if (!xSpawned && ySpawned)
+                    return 1;
+                else // both unspawned
+                    return x.SceneId.CompareTo(y.SceneId);
             }
         }
     }

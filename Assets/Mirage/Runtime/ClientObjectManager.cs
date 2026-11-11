@@ -209,7 +209,7 @@ namespace Mirage
         /// <summary>
         /// Call this after loading/unloading a scene in the client after connection to register the spawnable objects
         /// <para>
-        /// This version of PrepareToSpawnSceneObjects ignores the globals <see cref="SceneObjectFilter"/> filter (can be null) and only uses the custom filter argument instead.
+        /// This version of PrepareToSpawnSceneObjects ignores the global <see cref="SceneObjectFilter"/> filter (can be null) and only uses the custom filter argument instead.
         /// If you need SceneObjectFilter as well your filter method should call it and return the value.
         /// </para>
         /// </summary>
