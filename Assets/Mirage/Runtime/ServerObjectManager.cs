@@ -828,6 +828,11 @@ namespace Mirage
             public static readonly NetworkIdentityComparer instance = new NetworkIdentityComparer();
             public int Compare(NetworkIdentity x, NetworkIdentity y)
             {
+                // unspawned objects all have NetId 0, and FindObjectsOfTypeAll order is not stable,
+                // so sort by SceneId to assign the same NetIds every load
+                if (x.NetId == 0 && y.NetId == 0)
+                    return x.SceneId.CompareTo(y.SceneId);
+
                 return x.NetId.CompareTo(y.NetId);
             }
         }

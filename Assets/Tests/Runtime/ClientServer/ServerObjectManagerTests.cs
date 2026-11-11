@@ -134,6 +134,44 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [Test]
+        public void SpawnSceneObjectsInSceneIdOrder()
+        {
+            // created out of order so the test can't pass from FindObjectsOfTypeAll returning creation order (or reverse)
+            // hash is set so that test fails if only the lower 32 bits are compared
+            var ids = new[] { (id: 30, hash: 1), (id: 10, hash: 2), (id: 50, hash: 1), (id: 20, hash: 2), (id: 40, hash: 1) };
+            var sceneObjects = new NetworkIdentity[ids.Length];
+            for (var i = 0; i < ids.Length; i++)
+            {
+                var sceneObject = InstantiateForTest(_characterPrefabGo).GetComponent<NetworkIdentity>();
+                sceneObject.SetSceneId(ids[i].id, ids[i].hash);
+                sceneObjects[i] = sceneObject;
+            }
+
+            serverObjectManager.SpawnSceneObjects();
+
+            var sorted = sceneObjects.OrderBy(x => x.SceneId).ToArray();
+            for (var i = 1; i < sorted.Length; i++)
+                Assert.That(sorted[i].NetId, Is.GreaterThan(sorted[i - 1].NetId));
+        }
+
+        [Test]
+        public void SpawnSceneObjectsKeepsNetIdOfSpawnedObject()
+        {
+            var spawned = InstantiateForTest(_characterPrefabGo).GetComponent<NetworkIdentity>();
+            spawned.SetSceneId(20);
+            serverObjectManager.Spawn(spawned);
+            var spawnedNetId = spawned.NetId;
+
+            var unspawned = InstantiateForTest(_characterPrefabGo).GetComponent<NetworkIdentity>();
+            unspawned.SetSceneId(10);
+
+            serverObjectManager.SpawnSceneObjects();
+
+            Assert.That(spawned.NetId, Is.EqualTo(spawnedNetId));
+            Assert.That(unspawned.NetId, Is.GreaterThan(spawnedNetId));
+        }
+
+        [Test]
         public void SpawnEvent()
         {
             var mockHandler = Substitute.For<Action<NetworkIdentity>>();
