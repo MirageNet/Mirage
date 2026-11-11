@@ -1,3 +1,10 @@
+# [159.2.0](https://github.com/MirageNet/Mirage/compare/v159.1.3...v159.2.0) (2026-11-11)
+
+
+### Features
+
+* adding NetworkIdentityFilter overrides for SpawnSceneObjects and PrepareToSpawnSceneObjects ([c9f9159](https://github.com/MirageNet/Mirage/commit/c9f915941ec5de37c6fcce3d25105b152d537288))
+
 ## [159.1.3](https://github.com/MirageNet/Mirage/compare/v159.1.2...v159.1.3) (2026-11-11)
 
 
