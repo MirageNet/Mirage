@@ -1,3 +1,10 @@
+## [159.1.3](https://github.com/MirageNet/Mirage/compare/v159.1.2...v159.1.3) (2026-11-11)
+
+
+### Bug Fixes
+
+* SpawnSceneObjects now spawns scene objects in SceneId order so NetIds are the same each load ([2a50287](https://github.com/MirageNet/Mirage/commit/2a50287723e777712d124659dbc4cbd3bb1313f2))
+
 ## [159.1.2](https://github.com/MirageNet/Mirage/compare/v159.1.1...v159.1.2) (2026-10-25)
 
 
