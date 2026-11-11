@@ -1,3 +1,10 @@
+## [159.2.1](https://github.com/MirageNet/Mirage/compare/v159.2.0...v159.2.1) (2026-11-11)
+
+
+### Bug Fixes
+
+* fixing spawn order so that spawned objects are sent to clients first before new unspawned ones ([8fd5038](https://github.com/MirageNet/Mirage/commit/8fd5038d7ec9505fbefb9ba61d1aeaf5c9b414b3))
+
 # [159.2.0](https://github.com/MirageNet/Mirage/compare/v159.1.3...v159.2.0) (2026-11-11)
 
 
