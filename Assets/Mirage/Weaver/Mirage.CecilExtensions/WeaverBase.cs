@@ -34,6 +34,8 @@ namespace Mirage.CodeGen
         public readonly WeaverDiagnosticsTimer timer;
 
         private AssemblyDefinition _assemblyDefinition;
+        /// <summary>Names of assemblies the weaved assembly is allowed to reference, see <see cref="CheckAssemblyReferences"/></summary>
+        private HashSet<string> _allowedReferences;
 
         public WeaverBase(IWeaverLogger logger = null)
         {
@@ -56,6 +58,7 @@ namespace Mirage.CodeGen
                 {
                     _assemblyDefinition = ReadAssembly(compiledAssembly);
                 }
+                _allowedReferences = GetAllowedReferences(compiledAssembly, _assemblyDefinition);
 
                 var result = Process(_assemblyDefinition, compiledAssembly);
                 var ilResult = CreateResults(result);
@@ -100,6 +103,9 @@ namespace Mirage.CodeGen
 
         private ILPostProcessResult Success()
         {
+            if (!CheckAssemblyReferences())
+                return Failed();
+
             // write assembly to file on success
             var pe = new MemoryStream();
             var pdb = new MemoryStream();
@@ -118,6 +124,43 @@ namespace Mirage.CodeGen
         private ILPostProcessResult Failed()
         {
             return new ILPostProcessResult(null, logger.GetDiagnostics());
+        }
+
+        /// <summary>
+        /// Weaver can add references that the compiler didn't need (eg UnityEditor for InitializeOnLoadMethod),
+        /// but only to assemblies this one was compiled against, or that it already referenced
+        /// </summary>
+        private static HashSet<string> GetAllowedReferences(ICompiledAssembly compiledAssembly, AssemblyDefinition assemblyDefinition)
+        {
+            var allowed = new HashSet<string>();
+            foreach (var reference in assemblyDefinition.MainModule.AssemblyReferences)
+                allowed.Add(reference.Name);
+
+            foreach (var path in compiledAssembly.References)
+                allowed.Add(Path.GetFileNameWithoutExtension(path));
+
+            return allowed;
+        }
+
+        /// <summary>
+        /// Errors if weaving added a reference outside of <see cref="_allowedReferences"/>.
+        /// <para>
+        /// A bad import (eg the weaver's own System.Private.CoreLib, or this assembly referencing itself) still writes fine and
+        /// works until the editor restarts, then unity refuses to load the assembly. Failing here points at the weaver instead
+        /// </para>
+        /// </summary>
+        private bool CheckAssemblyReferences()
+        {
+            var valid = true;
+            foreach (var reference in _assemblyDefinition.MainModule.AssemblyReferences)
+            {
+                if (_allowedReferences.Contains(reference.Name))
+                    continue;
+
+                logger.Error($"Weaver added reference to '{reference.FullName}' which {_assemblyDefinition.Name.Name} was not compiled against. Unity will not load the assembly after an editor restart, this is a bug in the weaver");
+                valid = false;
+            }
+            return valid;
         }
 
         private void InsertDebugIfErrors(List<DiagnosticMessage> diag, ICompiledAssembly compiledAssembly)
