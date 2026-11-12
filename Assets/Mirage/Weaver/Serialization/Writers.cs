@@ -262,12 +262,12 @@ namespace Mirage.Weaver
                     worker.Append(worker.Create(OpCodes.Ldnull));
                     worker.Append(worker.Create(OpCodes.Ldftn, writerMethod));
                     var actionGenericInstance = actionRef.MakeGenericInstanceType(networkWriterRef, dataType);
-                    var actionRefInstance = actionConstructorRef.MakeHostInstanceGeneric(actionGenericInstance);
+                    var actionRefInstance = actionConstructorRef.MakeHostInstanceGeneric(module, actionGenericInstance);
                     worker.Append(worker.Create(OpCodes.Newobj, actionRefInstance));
 
                     // save it in Writer<T>.write
                     var genericInstance = genericWriterClassRef.MakeGenericInstanceType(dataType);
-                    var specializedField = fieldRef.MakeHostInstanceGeneric(genericInstance);
+                    var specializedField = fieldRef.MakeHostInstanceGeneric(module, genericInstance);
                     worker.Append(worker.Create(OpCodes.Call, specializedField));
                 }
             }
@@ -288,12 +288,12 @@ namespace Mirage.Weaver
                     worker.Append(worker.Create(OpCodes.Ldnull));
                     worker.Append(worker.Create(OpCodes.Ldftn, writerMethod));
                     var actionGenericInstance = action3Ref.MakeGenericInstanceType(networkWriterRef, dataType, intRef);
-                    var actionRefInstance = action3ConstructorRef.MakeHostInstanceGeneric(actionGenericInstance);
+                    var actionRefInstance = action3ConstructorRef.MakeHostInstanceGeneric(module, actionGenericInstance);
                     worker.Append(worker.Create(OpCodes.Newobj, actionRefInstance));
 
                     // save it in Writer<T>.WriteWithLength
                     var genericInstance = genericWriterClassRef.MakeGenericInstanceType(dataType);
-                    var specializedField = fieldWithLengthRef.MakeHostInstanceGeneric(genericInstance);
+                    var specializedField = fieldWithLengthRef.MakeHostInstanceGeneric(module, genericInstance);
                     worker.Append(worker.Create(OpCodes.Call, specializedField));
                 }
             }

@@ -46,7 +46,7 @@ namespace Mirage.Weaver.NetworkBehaviours
 
         protected virtual void WriteBaseCall()
         {
-            var baseMethod = _typeDefinition.BaseType.GetMethodInBaseType(MethodName);
+            var baseMethod = _typeDefinition.BaseType.GetMethodInBaseType(_module, MethodName);
             if (baseMethod == null)
                 return;
 
