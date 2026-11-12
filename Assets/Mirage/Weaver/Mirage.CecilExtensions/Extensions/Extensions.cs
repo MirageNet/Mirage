@@ -195,24 +195,33 @@ namespace Mirage.CodeGen
         /// <para> Note that calling ArraySegment`T.get_Count directly gives an invalid IL error </para>
         /// </summary>
         /// <param name="self"></param>
+        /// <param name="module">
+        /// Module that will use the reference. Must not be <c>self.Module</c> when self is from another assembly,
+        /// otherwise type args from <paramref name="module"/> are scoped to an assembly reference and it ends up referencing itself
+        /// </param>
         /// <param name="instanceType"></param>
         /// <returns></returns>
-        public static MethodReference MakeHostInstanceGeneric(this MethodReference self, GenericInstanceType instanceType)
+        public static MethodReference MakeHostInstanceGeneric(this MethodReference self, ModuleDefinition module, GenericInstanceType instanceType)
         {
-            var reference = new MethodReference(self.Name, self.ReturnType, instanceType)
+            // import self first so its return and parameter types belong to module.
+            // Importing the new reference instead is skipped by cecil when instanceType is already in module,
+            // which leaves those types in self's module and fails when the assembly is written
+            var imported = module.ImportReference(self);
+
+            var reference = new MethodReference(imported.Name, imported.ReturnType, module.ImportReference(instanceType))
             {
-                CallingConvention = self.CallingConvention,
-                HasThis = self.HasThis,
-                ExplicitThis = self.ExplicitThis
+                CallingConvention = imported.CallingConvention,
+                HasThis = imported.HasThis,
+                ExplicitThis = imported.ExplicitThis
             };
 
-            foreach (var parameter in self.Parameters)
+            foreach (var parameter in imported.Parameters)
                 reference.Parameters.Add(new ParameterDefinition(parameter.ParameterType));
 
-            foreach (var generic_parameter in self.GenericParameters)
+            foreach (var generic_parameter in imported.GenericParameters)
                 reference.GenericParameters.Add(new GenericParameter(generic_parameter.Name, reference));
 
-            return self.Module.ImportReference(reference);
+            return reference;
         }
 
         public static MethodReference MakeHostInstanceSelfGeneric(this MethodReference self)
@@ -226,7 +235,8 @@ namespace Mirage.CodeGen
             else
             {
                 var genericType = (GenericInstanceType)type.MakeSelfGeneric();
-                return self.MakeHostInstanceGeneric(genericType);
+                // self generic uses only the type's own generic params, so self.Module is the module that uses it
+                return self.MakeHostInstanceGeneric(self.Module, genericType);
             }
         }
 

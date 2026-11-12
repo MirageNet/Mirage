@@ -425,7 +425,7 @@ namespace Mirage.Weaver
                 {
                     // we need to get the Type<T>.HookMethod so convert it to a generic<T>.
                     var genericType = (GenericInstanceType)hookMethod.DeclaringType.ConvertToGenericIfNeeded();
-                    hookMethodReference = hookMethod.MakeHostInstanceGeneric(genericType);
+                    hookMethodReference = hookMethod.MakeHostInstanceGeneric(module, genericType);
                 }
 
                 worker.Append(worker.Create(OpCall, module.ImportReference(hookMethodReference)));
@@ -458,7 +458,7 @@ namespace Mirage.Weaver
             // get Invoke method and make it correct type
             var invoke = module.ImportReference(actionType.GetMethod("Invoke"));
             if (@event.EventType.IsGenericInstance)
-                invoke = invoke.MakeHostInstanceGeneric((GenericInstanceType)@event.EventType);
+                invoke = invoke.MakeHostInstanceGeneric(module, (GenericInstanceType)@event.EventType);
 
             var nopEvent = worker.Create(OpCodes.Nop);
             var nopEnd = worker.Create(OpCodes.Nop);

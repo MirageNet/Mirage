@@ -131,7 +131,7 @@ namespace Mirage.Weaver
 
                 var constructorRef = func.Module.ImportReference(constructor);
 
-                return constructorRef.MakeHostInstanceGeneric(delegateInstance);
+                return constructorRef.MakeHostInstanceGeneric(func.Module, delegateInstance);
             }
             else
             {

@@ -49,7 +49,7 @@ namespace Mirage.Weaver
                 }
 
                 // this instruction sets the value of a field. cache the field reference.
-                ProcessInstructionSetterField(instr, resolved);
+                ProcessInstructionSetterField(md.Module, instr, resolved);
             }
 
             if (instr.OpCode == OpCodes.Ldfld && instr.Operand is FieldReference opFieldld)
@@ -61,7 +61,7 @@ namespace Mirage.Weaver
                 }
 
                 // this instruction gets the value of a field. cache the field reference.
-                ProcessInstructionGetterField(instr, resolved);
+                ProcessInstructionGetterField(md.Module, instr, resolved);
             }
 
             if (instr.OpCode == OpCodes.Ldflda && instr.Operand is FieldReference opFieldlda)
@@ -81,7 +81,7 @@ namespace Mirage.Weaver
         }
 
         // replaces syncvar write access with the NetworkXYZ.get property calls
-        private void ProcessInstructionSetterField(Instruction i, FieldReference opField)
+        private void ProcessInstructionSetterField(ModuleDefinition module, Instruction i, FieldReference opField)
         {
             // does it set a field that we replaced?
             if (Setters.TryGetValue(opField, out var replacement))
@@ -91,7 +91,7 @@ namespace Mirage.Weaver
                     var newField = i.Operand as FieldReference;
                     var genericType = (GenericInstanceType)newField.DeclaringType;
                     i.OpCode = OpCodes.Callvirt;
-                    i.Operand = replacement.MakeHostInstanceGeneric(genericType);
+                    i.Operand = replacement.MakeHostInstanceGeneric(module, genericType);
                 }
                 else
                 {
@@ -103,7 +103,7 @@ namespace Mirage.Weaver
         }
 
         // replaces syncvar read access with the NetworkXYZ.get property calls
-        private void ProcessInstructionGetterField(Instruction i, FieldReference opField)
+        private void ProcessInstructionGetterField(ModuleDefinition module, Instruction i, FieldReference opField)
         {
             // does it set a field that we replaced?
             if (Getters.TryGetValue(opField, out var replacement))
@@ -113,7 +113,7 @@ namespace Mirage.Weaver
                     var newField = i.Operand as FieldReference;
                     var genericType = (GenericInstanceType)newField.DeclaringType;
                     i.OpCode = OpCodes.Callvirt;
-                    i.Operand = replacement.MakeHostInstanceGeneric(genericType);
+                    i.Operand = replacement.MakeHostInstanceGeneric(module, genericType);
                 }
                 else
                 {

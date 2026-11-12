@@ -33,11 +33,12 @@ namespace Mirage.CodeGen
         /// </para>
         /// </summary>
         /// <param name="typeReference">Unresolved type reference, dont resolve if generic</param>
+        /// <param name="module">Module that will call the method, generic instances are imported into it</param>
         /// <param name="methodName"></param>
         /// <returns></returns>
-        public static MethodReference GetMethodInBaseType(this TypeReference typeReference, string methodName)
+        public static MethodReference GetMethodInBaseType(this TypeReference typeReference, ModuleDefinition module, string methodName)
         {
-            return GetMethodInBaseType(typeReference, (md) => md.Name == methodName);
+            return GetMethodInBaseType(typeReference, module, (md) => md.Name == methodName);
         }
 
         /// <summary>
@@ -47,9 +48,10 @@ namespace Mirage.CodeGen
         /// </para>
         /// </summary>
         /// <param name="typeReference">Unresolved type reference, dont resolve if generic</param>
+        /// <param name="module">Module that will call the method, generic instances are imported into it</param>
         /// <param name="methodName"></param>
         /// <returns></returns>
-        public static MethodReference GetMethodInBaseType(this TypeReference typeReference, Predicate<MethodDefinition> match)
+        public static MethodReference GetMethodInBaseType(this TypeReference typeReference, ModuleDefinition module, Predicate<MethodDefinition> match)
         {
             var typedef = typeReference.Resolve();
             var typeRef = typeReference;
@@ -63,7 +65,8 @@ namespace Mirage.CodeGen
                         if (typeRef.IsGenericInstance)
                         {
                             var generic = (GenericInstanceType)typeRef;
-                            method = method.MakeHostInstanceGeneric(generic);
+                            // md can be from a base type in another assembly, so import into the calling module, not md.Module
+                            method = method.MakeHostInstanceGeneric(module, generic);
                         }
 
                         return method;
@@ -79,7 +82,7 @@ namespace Mirage.CodeGen
 
                     if (parent.IsGenericInstance)
                     {
-                        parent = MatchGenericParameters((GenericInstanceType)parent, typeRef);
+                        parent = MatchGenericParameters((GenericInstanceType)parent, module, typeRef);
                     }
                     typeRef = parent;
                     typedef = parent?.Resolve();
@@ -94,7 +97,8 @@ namespace Mirage.CodeGen
             return null;
         }
 
-        public static TypeReference GetBaseType(this TypeReference typeReference, Predicate<TypeReference> match)
+        /// <param name="module">Module that will use the type, generic args are imported into it</param>
+        public static TypeReference GetBaseType(this TypeReference typeReference, ModuleDefinition module, Predicate<TypeReference> match)
         {
             var typedef = typeReference.Resolve();
             var typeRef = typeReference;
@@ -114,7 +118,7 @@ namespace Mirage.CodeGen
 
                     if (parent.IsGenericInstance)
                     {
-                        parent = MatchGenericParameters((GenericInstanceType)parent, typeRef);
+                        parent = MatchGenericParameters((GenericInstanceType)parent, module, typeRef);
                     }
                     typeRef = parent;
                     typedef = parent?.Resolve();
@@ -135,9 +139,13 @@ namespace Mirage.CodeGen
         /// eg makes `Base{T}` in <c>Child{int} : Base{int}</c> have `int` instead of `T`
         /// </summary>
         /// <param name="parentReference"></param>
+        /// <param name="module">
+        /// Module that will use the type. Not parentReference.Module, that can be another assembly when walking up base types,
+        /// and importing child args into it scopes them to an assembly reference so module ends up referencing itself
+        /// </param>
         /// <param name="childReference"></param>
         /// <returns></returns>
-        public static GenericInstanceType MatchGenericParameters(this GenericInstanceType parentReference, TypeReference childReference)
+        public static GenericInstanceType MatchGenericParameters(this GenericInstanceType parentReference, ModuleDefinition module, TypeReference childReference)
         {
             if (!parentReference.IsGenericInstance)
                 throw new InvalidOperationException("Can't make non generic type into generic");
@@ -163,7 +171,7 @@ namespace Mirage.CodeGen
                 var arg = FindMatchingGenericArgument(childReference, name);
 
                 // import just to be safe
-                var imported = parentReference.Module.ImportReference(arg);
+                var imported = module.ImportReference(arg);
                 // set arg on generic, parent ref will be Base<int> instead of just Base<T>
                 generic.GenericArguments[i] = imported;
             }

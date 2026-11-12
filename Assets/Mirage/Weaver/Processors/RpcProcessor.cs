@@ -431,7 +431,7 @@ namespace Mirage.Weaver
                 var targetName = UserCodeMethodName(calledMethod);
                 // check this type and base types for methods
                 // if the calledMethod is an rpc, then it will have a UserCode_ method generated for it
-                var userCodeReplacement = type.GetMethodInBaseType(targetName);
+                var userCodeReplacement = type.GetMethodInBaseType(generatedMethod.Module, targetName);
 
                 if (userCodeReplacement == null)
                 {
