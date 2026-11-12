@@ -1,4 +1,7 @@
 using System;
+using System.IO;
+using System.IO.Compression;
+using System.Text;
 using Mirage.Serialization;
 using Mirage.Serialization.BrotliCompression;
 using NSubstitute;
@@ -258,6 +261,225 @@ namespace Mirage.Tests.Runtime.Serialization
             reader.Dispose();
 
             Assert.That(reader.StringStore, Is.Null, "StringStore should be cleared when putting the reader back in the pool");
+        }
+
+        private static StringStoreLengthsMessage CreateLengthsMessage(params uint[] lengths)
+        {
+            var writer = new NetworkWriter(1300);
+            foreach (var length in lengths)
+                writer.WritePackedUInt32(length);
+
+            return new StringStoreLengthsMessage
+            {
+                stringCount = (ushort)lengths.Length,
+                payload = writer.ToArraySegment(),
+            };
+        }
+
+        private static StringStoreStringsMessage CreateStringsMessage(byte[] raw)
+        {
+            // extra space because brotli output can be larger than input for tiny payloads
+            var buffer = new byte[raw.Length + 100];
+            var compressed = BrotliEncoder.TryCompress(raw, buffer, out var bytesWritten);
+            Assert.That(compressed, Is.True);
+
+            return new StringStoreStringsMessage
+            {
+                payload = new ArraySegment<byte>(buffer, 0, bytesWritten),
+            };
+        }
+
+        /// <summary>Captures what the real encoder sends, so tests use a real compressed payload</summary>
+        private static (StringStoreLengthsMessage lengths, StringStoreStringsMessage strings) EncodeStore(StringStore store)
+        {
+            var encoder = StringStoreBrotliEncoder.Encode(store);
+
+            var player = Substitute.For<INetworkPlayer>();
+            ArraySegment<byte> lengthsSegment = default;
+            ArraySegment<byte> stringsSegment = default;
+            player.When(p => p.Send(Arg.Any<ArraySegment<byte>>(), Arg.Any<Channel>()))
+                  .Do(info =>
+                  {
+                      var seg = info.Arg<ArraySegment<byte>>();
+                      // lengths are sent first, then strings
+                      if (lengthsSegment == default)
+                          lengthsSegment = seg;
+                      else
+                          stringsSegment = seg;
+                  });
+
+            encoder.Send(player);
+
+            var lengthsReader = new NetworkReader();
+            lengthsReader.Reset(lengthsSegment);
+            lengthsReader.ReadUInt16(); // skip id
+            var lengthsMsg = lengthsReader.ReadStringStoreLengthsMessage();
+
+            var stringsReader = new NetworkReader();
+            stringsReader.Reset(stringsSegment);
+            stringsReader.ReadUInt16(); // skip id
+            var stringsMsg = stringsReader.ReadStringStoreStringsMessage();
+
+            return (lengthsMsg, stringsMsg);
+        }
+
+        private static StringStore CreateLargeStore()
+        {
+            var store = new StringStore();
+            for (var i = 0; i < 100; i++)
+                store.GetKey($"String_{i}");
+            return store;
+        }
+
+        private static void AssertLengthsHandlerNotSwapped(IMessageReceiver receiver)
+        {
+            receiver.DidNotReceive().UnregisterHandler<StringStoreLengthsMessage>();
+            receiver.DidNotReceive().RegisterHandler(Arg.Any<MessageDelegateWithPlayer<StringStoreStringsMessage>>(), Arg.Any<bool>());
+        }
+
+        [Test]
+        public void BrotliDecoderRejectsLengthAboveDefaultMax()
+        {
+            var receiver = Substitute.For<IMessageReceiver>();
+            var decoder = new StringStoreBrotliDecoder(receiver);
+
+            var message = CreateLengthsMessage((uint)StringStoreBrotliDecoder.DefaultMaxUncompressedBytes + 1);
+
+            Assert.Throws<SerializationLimitException>(() => decoder.HandleStringStoreLengthsMessage(message));
+            AssertLengthsHandlerNotSwapped(receiver);
+        }
+
+        [Test]
+        public void BrotliDecoderRejectsLengthNearIntMax()
+        {
+            var receiver = Substitute.For<IMessageReceiver>();
+            var decoder = new StringStoreBrotliDecoder(receiver);
+
+            var message = CreateLengthsMessage(int.MaxValue);
+
+            Assert.Throws<SerializationLimitException>(() => decoder.HandleStringStoreLengthsMessage(message));
+            AssertLengthsHandlerNotSwapped(receiver);
+        }
+
+        [TestCase(uint.MaxValue)]
+        [TestCase(0x80000000u)]
+        public void BrotliDecoderRejectsNegativeLength(uint length)
+        {
+            var receiver = Substitute.For<IMessageReceiver>();
+            var decoder = new StringStoreBrotliDecoder(receiver);
+
+            var message = CreateLengthsMessage(length);
+
+            Assert.Throws<SerializationLimitException>(() => decoder.HandleStringStoreLengthsMessage(message));
+            AssertLengthsHandlerNotSwapped(receiver);
+        }
+
+        [Test]
+        public void BrotliDecoderRejectsTotalThatOverflowsInt()
+        {
+            var receiver = Substitute.For<IMessageReceiver>();
+            // max of int.MaxValue so each length passes alone, and only the sum is over the limit
+            var decoder = new StringStoreBrotliDecoder(receiver, maxUncompressedBytes: int.MaxValue);
+
+            var message = CreateLengthsMessage(int.MaxValue, int.MaxValue);
+
+            Assert.Throws<SerializationLimitException>(() => decoder.HandleStringStoreLengthsMessage(message));
+            AssertLengthsHandlerNotSwapped(receiver);
+        }
+
+        [Test]
+        public void BrotliDecoderRejectsTotalJustAboveCustomMax()
+        {
+            var receiver = Substitute.For<IMessageReceiver>();
+            var decoder = new StringStoreBrotliDecoder(receiver, maxUncompressedBytes: 100);
+
+            var lengths = new uint[101];
+            for (var i = 0; i < lengths.Length; i++)
+                lengths[i] = 1;
+            var message = CreateLengthsMessage(lengths);
+
+            Assert.Throws<SerializationLimitException>(() => decoder.HandleStringStoreLengthsMessage(message));
+            AssertLengthsHandlerNotSwapped(receiver);
+        }
+
+        [Test]
+        public void BrotliDecoderAcceptsTotalEqualToCustomMax()
+        {
+            var receiver = Substitute.For<IMessageReceiver>();
+            var decoder = new StringStoreBrotliDecoder(receiver, maxUncompressedBytes: 100);
+
+            var lengths = new uint[100];
+            for (var i = 0; i < lengths.Length; i++)
+                lengths[i] = 1;
+            var message = CreateLengthsMessage(lengths);
+
+            Assert.DoesNotThrow(() => decoder.HandleStringStoreLengthsMessage(message));
+            receiver.Received().UnregisterHandler<StringStoreLengthsMessage>();
+            receiver.Received().RegisterHandler(Arg.Any<MessageDelegateWithPlayer<StringStoreStringsMessage>>(), Arg.Any<bool>());
+        }
+
+        [Test]
+        public void BrotliDecoderRejectsValidStoreAboveCustomMax()
+        {
+            var store = CreateLargeStore();
+            var (lengthsMsg, _) = EncodeStore(store);
+
+            var receiver = Substitute.For<IMessageReceiver>();
+            var decoder = new StringStoreBrotliDecoder(receiver, maxUncompressedBytes: 100);
+
+            Assert.Throws<SerializationLimitException>(() => decoder.HandleStringStoreLengthsMessage(lengthsMsg));
+            AssertLengthsHandlerNotSwapped(receiver);
+        }
+
+        [Test]
+        public void BrotliDecoderDecodesValidStoreWithDefaultMax()
+        {
+            var store = CreateLargeStore();
+            var (lengthsMsg, stringsMsg) = EncodeStore(store);
+
+            var receiver = Substitute.For<IMessageReceiver>();
+            var decoder = new StringStoreBrotliDecoder(receiver);
+
+            decoder.HandleStringStoreLengthsMessage(lengthsMsg);
+            decoder.HandleStringStoreStringsMessage(stringsMsg);
+
+            Assert.That(decoder.StringStore, Is.Not.Null);
+            Assert.That(decoder.StringStore.Strings, Is.EqualTo(store.Strings));
+        }
+
+        [Test]
+        public void BrotliDecoderRejectsPayloadSmallerThanDeclared()
+        {
+            var receiver = Substitute.For<IMessageReceiver>();
+            var decoder = new StringStoreBrotliDecoder(receiver);
+            var receivedEventCalled = false;
+            decoder.OnReceived += () => receivedEventCalled = true;
+
+            var raw = Encoding.UTF8.GetBytes("hello");
+            decoder.HandleStringStoreLengthsMessage(CreateLengthsMessage(5, 5));
+            var stringsMsg = CreateStringsMessage(raw);
+
+            Assert.Throws<InvalidDataException>(() => decoder.HandleStringStoreStringsMessage(stringsMsg));
+            Assert.That(decoder.StringStore, Is.Null);
+            Assert.That(receivedEventCalled, Is.False);
+        }
+
+        [Test]
+        public void BrotliDecoderRejectsPayloadLargerThanDeclared()
+        {
+            var receiver = Substitute.For<IMessageReceiver>();
+            var decoder = new StringStoreBrotliDecoder(receiver);
+            var receivedEventCalled = false;
+            decoder.OnReceived += () => receivedEventCalled = true;
+
+            var raw = Encoding.UTF8.GetBytes("hello world");
+            decoder.HandleStringStoreLengthsMessage(CreateLengthsMessage(5));
+            var stringsMsg = CreateStringsMessage(raw);
+
+            // Catch rather than Throws, because the decoder throws the base Exception type for this case
+            Assert.Catch<Exception>(() => decoder.HandleStringStoreStringsMessage(stringsMsg));
+            Assert.That(decoder.StringStore, Is.Null);
+            Assert.That(receivedEventCalled, Is.False);
         }
     }
 }

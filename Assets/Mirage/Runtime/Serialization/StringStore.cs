@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -249,39 +250,74 @@ namespace Mirage.Serialization.BrotliCompression
     /// </summary>
     public class StringStoreBrotliDecoder
     {
+        /// <summary>
+        /// Default max total size of all strings (in UTF-8 bytes) after decompression.
+        /// <para>
+        /// The sizes come from the remote peer, so without a limit a tiny message could make us allocate gigabytes.
+        /// Peak memory is higher than this limit, because the bytes are also copied into managed UTF-16 strings (up to about 2x more for ASCII).
+        /// </para>
+        /// </summary>
+        public const int DefaultMaxUncompressedBytes = 64 * 1024 * 1024;
+
         private int[] _lengthsMessage;
+        private int _uncompressedByteCount;
         private readonly IMessageReceiver _receiver;
+        private readonly int _maxUncompressedBytes;
 
         public StringStore StringStore { get; private set; }
         public event Action OnReceived;
 
-        public StringStoreBrotliDecoder(IMessageReceiver receiver)
+        /// <param name="maxUncompressedBytes">Max total size of all strings (in UTF-8 bytes) after decompression, see <see cref="DefaultMaxUncompressedBytes"/> for why the limit exists</param>
+        public StringStoreBrotliDecoder(IMessageReceiver receiver, int maxUncompressedBytes = DefaultMaxUncompressedBytes)
         {
             _receiver = receiver;
+            _maxUncompressedBytes = maxUncompressedBytes;
             receiver.RegisterHandler<StringStoreLengthsMessage>(HandleStringStoreLengthsMessage);
         }
 
         public void HandleStringStoreLengthsMessage(StringStoreLengthsMessage message)
         {
-            _lengthsMessage = message.GetLengths();
+            var lengths = message.GetLengths();
+            // validate before swapping handlers, so a rejected message leaves the decoder state untouched
+            var uncompressedByteCount = ValidateLengths(lengths, _maxUncompressedBytes);
+
+            _lengthsMessage = lengths;
+            _uncompressedByteCount = uncompressedByteCount;
 
             _receiver.UnregisterHandler<StringStoreLengthsMessage>();
             _receiver.RegisterHandler<StringStoreStringsMessage>(HandleStringStoreStringsMessage);
         }
 
+        /// <returns>Total byte count of all strings</returns>
+        private static int ValidateLengths(int[] lengths, int maxUncompressedBytes)
+        {
+            // long so that hostile lengths can't overflow and wrap back under the limit
+            long total = 0;
+            for (var i = 0; i < lengths.Length; i++)
+            {
+                var length = lengths[i];
+                // negative means the sender wrote a packed uint above int.MaxValue
+                if (length < 0)
+                    throw new SerializationLimitException($"StringStore length {(uint)length} at index {i} exceeds maximum limit of {maxUncompressedBytes}");
+
+                total += length;
+            }
+
+            if (total > maxUncompressedBytes)
+                throw new SerializationLimitException($"StringStore total length {total} exceeds maximum limit of {maxUncompressedBytes}");
+
+            return (int)total;
+        }
+
         public void HandleStringStoreStringsMessage(StringStoreStringsMessage message)
         {
-            StringStore = DecompressStringStore(_lengthsMessage, message);
+            StringStore = DecompressStringStore(_lengthsMessage, _uncompressedByteCount, message);
             _receiver.UnregisterHandler<StringStoreStringsMessage>();
             OnReceived?.Invoke();
         }
 
-        private static unsafe StringStore DecompressStringStore(int[] stringByteLength, StringStoreStringsMessage message)
+        private static unsafe StringStore DecompressStringStore(int[] stringByteLength, int uncompressedByteCount, StringStoreStringsMessage message)
         {
-            var uncompressedByteCount = 0;
-            for (var i = 0; i < stringByteLength.Length; i++)
-                uncompressedByteCount += stringByteLength[i];
-
             var rawPtr = Marshal.AllocHGlobal(uncompressedByteCount);
             try
             {
@@ -293,7 +329,9 @@ namespace Mirage.Serialization.BrotliCompression
                 {
                     throw new Exception("Brotli decompression failed.");
                 }
-                Debug.Assert(totalBytesWritten == uncompressedByteCount, "BrotliDecoder wrote a different number of bytes than server sent");
+                // fewer bytes than declared would leave uninitialised native memory to be read into strings
+                if (totalBytesWritten != uncompressedByteCount)
+                    throw new InvalidDataException($"BrotliDecoder wrote {totalBytesWritten} bytes, but lengths message declared {uncompressedByteCount} bytes");
 
                 var stringStore = new StringStore();
                 stringStore.Strings = new List<string>(stringByteLength.Length);
