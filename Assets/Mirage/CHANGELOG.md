@@ -1,3 +1,17 @@
+# [159.3.0](https://github.com/MirageNet/Mirage/compare/v159.2.2...v159.3.0) (2026-11-12)
+
+
+### Bug Fixes
+
+* **weaver:** importing base type references into the weaved module instead of the base type's module ([d5f3e77](https://github.com/MirageNet/Mirage/commit/d5f3e7796aa1d1705d22f52be359300ac5da997e))
+* **weaver:** importing SyncVar property methods when the field is declared in another assembly ([360387e](https://github.com/MirageNet/Mirage/commit/360387e017394ca8b347b83b090cfefb23522544))
+* **weaver:** using post processor reflection importer for referenced assemblies ([25a551b](https://github.com/MirageNet/Mirage/commit/25a551bdc2f5a161601013d5d167a4cdf924d8bc))
+
+
+### Features
+
+* **weaver:** failing weave if it adds a reference the assembly was not compiled against ([88b6206](https://github.com/MirageNet/Mirage/commit/88b62060588d241f848e69ad451816728fae5558))
+
 ## [159.2.2](https://github.com/MirageNet/Mirage/compare/v159.2.1...v159.2.2) (2026-11-12)
 
 
