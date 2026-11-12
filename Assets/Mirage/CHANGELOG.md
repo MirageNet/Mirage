@@ -1,3 +1,10 @@
+## [159.2.2](https://github.com/MirageNet/Mirage/compare/v159.2.1...v159.2.2) (2026-11-12)
+
+
+### Bug Fixes
+
+* adding a default max size of 64mb to StringStoreBrotliDecoder to avoid malicious server causing 2gb allocations ([7efb62a](https://github.com/MirageNet/Mirage/commit/7efb62a71cc0ab27094b8c6b481d9a612bd17a80))
+
 ## [159.2.1](https://github.com/MirageNet/Mirage/compare/v159.2.0...v159.2.1) (2026-11-11)
 
 
