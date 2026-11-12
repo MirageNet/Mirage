@@ -97,7 +97,8 @@ namespace Mirage.Weaver
                 {
                     //replace with property
                     i.OpCode = OpCodes.Call;
-                    i.Operand = replacement;
+                    // replacement is from another module when the syncvar is on a base type in another assembly
+                    i.Operand = module.ImportReference(replacement);
                 }
             }
         }
@@ -119,7 +120,8 @@ namespace Mirage.Weaver
                 {
                     //replace with property
                     i.OpCode = OpCodes.Call;
-                    i.Operand = replacement;
+                    // replacement is from another module when the syncvar is on a base type in another assembly
+                    i.Operand = module.ImportReference(replacement);
                 }
             }
         }
@@ -139,20 +141,22 @@ namespace Mirage.Weaver
                     //     var tmp = new MyStruct();
                     //     this.set_Networkxxxx(tmp);
                     var worker = md.Body.GetILProcessor();
-                    var tmpVariable = md.AddLocal(opField.FieldType);
+                    // opField and replacement are from another module when the syncvar is on a base type in another assembly
+                    var fieldType = md.Module.ImportReference(opField.FieldType);
+                    var tmpVariable = md.AddLocal(fieldType);
 
                     // Avoid removing insturctions incase any br/etc that  branch/exception targets point to
-                    // instead Mutate instructions in-place, and insert new instructions after it 
+                    // instead Mutate instructions in-place, and insert new instructions after it
                     instr.OpCode = OpCodes.Ldloca;
                     instr.Operand = tmpVariable;
 
                     nextInstr.OpCode = OpCodes.Initobj;
-                    nextInstr.Operand = opField.FieldType;
+                    nextInstr.Operand = fieldType;
 
                     var ldlocInstr = worker.Create(OpCodes.Ldloc, tmpVariable);
                     worker.InsertAfter(nextInstr, ldlocInstr);
 
-                    var callInstr = worker.Create(OpCodes.Call, replacement);
+                    var callInstr = worker.Create(OpCodes.Call, md.Module.ImportReference(replacement));
                     worker.InsertAfter(ldlocInstr, callInstr);
 
                     return callInstr;
