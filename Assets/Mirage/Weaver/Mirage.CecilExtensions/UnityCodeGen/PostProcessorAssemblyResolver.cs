@@ -69,6 +69,10 @@ namespace Mirage.CodeGen
                 parameters = new ReaderParameters(ReadingMode.Deferred);
 
             parameters.AssemblyResolver = this;
+            // Weaver also weaves base types from referenced assemblies in memory, because the references are not post processed yet.
+            // Without this they use cecil's default importer, so typeof imports there are scoped to the weaver's
+            // System.Private.CoreLib and that reference leaks into the weaved assembly when it calls those base methods
+            parameters.ReflectionImporterProvider = new PostProcessorReflectionImporterProvider();
 
             var ms = MemoryStreamFor(fileName);
 
