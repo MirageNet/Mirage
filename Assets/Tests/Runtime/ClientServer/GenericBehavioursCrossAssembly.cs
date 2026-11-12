@@ -64,6 +64,36 @@ namespace Mirage.Tests.Runtime.ClientServer.GenericBehaviours.CrossAssembly
         }
     }
 
+    public class CrossAssemblyNonGenericDerived : CrossAssemblyBase
+    {
+        [SyncVar] public int derivedValue;
+    }
+
+    /// <summary>
+    /// Sets SyncVar fields declared in another assembly. The Weaver swaps those field accesses for the base's generated
+    /// property methods, which must be imported into this assembly or writing it fails.
+    /// Only checks the server side, syncing a SyncVar field set from another assembly is not supported yet
+    /// </summary>
+    public class CrossAssemblySyncVarFieldTest : ClientServerSetup<CrossAssemblyNonGenericDerived>
+    {
+        [Test]
+        public void CanSetAndGetBaseSyncVar()
+        {
+            serverComponent.baseValue = 10;
+
+            Assert.That(serverComponent.baseValue, Is.EqualTo(10));
+        }
+
+        [Test]
+        public void CanSetBaseStructSyncVarToDefault()
+        {
+            serverComponent.baseVector = Vector3.one;
+            serverComponent.baseVector = default;
+
+            Assert.That(serverComponent.baseVector, Is.EqualTo(Vector3.zero));
+        }
+    }
+
     // goes through CrossAssemblyGenericMiddle<T>, so the Weaver has to match CrossAssemblyArg to the base's T
     public class CrossAssemblyDerivedThroughMiddle : CrossAssemblyGenericMiddle<CrossAssemblyArg>
     {
