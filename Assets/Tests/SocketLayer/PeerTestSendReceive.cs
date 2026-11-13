@@ -320,13 +320,17 @@ namespace Mirage.SocketLayer.Tests.PeerTests
 
             serverConnections[0].SendReliable(message);
             var handler = clients[0].dataHandler;
+            // copy inside callback, the shared fragment buffer is cleared after ReceiveMessage returns
+            byte[] received = null;
+            handler.When(x => x.ReceiveMessage(clientConnections[0], Arg.Any<ArraySegment<byte>>())).Do(x => received = x.ArgAt<ArraySegment<byte>>(1).ToArray());
 
             // change in sent
             Assert.That(server.socket.Sent.Count - sentCount, Is.EqualTo(expectedFragments));
 
             UpdateAll();
 
-            handler.Received(1).ReceiveMessage(clientConnections[0], Arg.Is<ArraySegment<byte>>(x => x.SequenceEqual(message)));
+            handler.Received(1).ReceiveMessage(clientConnections[0], Arg.Any<ArraySegment<byte>>());
+            Assert.That(received, Is.EqualTo(message));
         }
 
         [Test]
