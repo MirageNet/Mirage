@@ -247,7 +247,12 @@ namespace Mirage.SocketLayer
             finally
             {
                 if (usedShared)
+                {
+                    // clear the part of the shared buffer this message could have written,
+                    // otherwise a later message (from any connection) with a short fragment could deliver these stale bytes
+                    Array.Clear(message, 0, requiredSize);
                     _peer._fragmentBufferInUse = false;
+                }
             }
 
             // **Local cleanup function**
