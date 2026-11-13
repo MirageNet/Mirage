@@ -157,6 +157,9 @@ namespace Mirage.Serialization
 
         public void Reset()
         {
+            // clear used part of buffer, otherwise stale bits from previous user
+            // would be sent in padding and in the unused bits of the last partial byte
+            Array.Clear(_managedBuffer, 0, ByteLength);
             _bitPosition = 0;
         }
 
