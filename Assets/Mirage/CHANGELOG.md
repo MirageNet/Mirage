@@ -1,3 +1,11 @@
+## [159.4.1](https://github.com/MirageNet/Mirage/compare/v159.4.0...v159.4.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* **Serialization:** clear NetworkWriter buffer on Reset ([f16895a](https://github.com/MirageNet/Mirage/commit/f16895a35d57bcf621e519142064f7009cc72eb5))
+* **SocketLayer:** clear shared fragment buffer after use ([b349f22](https://github.com/MirageNet/Mirage/commit/b349f220634d90363b8ae0005244be982dbb94e6))
+
 # [159.4.0](https://github.com/MirageNet/Mirage/compare/v159.3.0...v159.4.0) (2026-11-13)
 
 
