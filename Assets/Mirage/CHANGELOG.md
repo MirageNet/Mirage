@@ -1,3 +1,15 @@
+# [159.5.0](https://github.com/MirageNet/Mirage/compare/v159.4.1...v159.5.0) (2026-11-13)
+
+
+### Bug Fixes
+
+* **Weaver:** use long ZigZag encode for long based enums ([905baa3](https://github.com/MirageNet/Mirage/commit/905baa30f1485f09aee981bd5c12eade9731cbcf))
+
+
+### Features
+
+* **Weaver:** allow BitCount, BitCountFromRange and ZigZagEncode on enum types ([5cdaed5](https://github.com/MirageNet/Mirage/commit/5cdaed56515d0b15287171aa02b7aeef9eb46e43))
+
 ## [159.4.1](https://github.com/MirageNet/Mirage/compare/v159.4.0...v159.4.1) (2026-11-13)
 
 
