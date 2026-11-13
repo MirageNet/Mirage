@@ -163,6 +163,16 @@ namespace Mirage
         public AuthorityTime AuthorityRemovedTime;
 
         /// <summary>
+        /// True if authority was removed from <paramref name="player"/> within <see cref="RpcHandler.DESTROY_GRACE_PERIOD"/>.
+        /// <para>Use in ServerRpc with requireAuthority=false to ignore RPCs sent before the client knew about the authority change. Only valid on server</para>
+        /// </summary>
+        public bool InAuthorityRemovedGracePeriod(INetworkPlayer player)
+        {
+            return AuthorityRemovedTime.Owner == player
+                && AuthorityRemovedTime.Time + RpcHandler.DESTROY_GRACE_PERIOD > Time.unscaledTimeAsDouble;
+        }
+
+        /// <summary>
         /// The set of network connections (players) that can see this object.
         /// </summary>
         public readonly HashSet<INetworkPlayer> observers = new HashSet<INetworkPlayer>();

@@ -142,11 +142,7 @@ namespace Mirage.RemoteCalls
                 {
                     // If authority was removed recently, then we can ignore the rpc without error
                     // we need to check the time on the identity
-                    var removed = identity.AuthorityRemovedTime;
-                    var inGracePeriod = removed.Owner == player
-                        && removed.Time + DESTROY_GRACE_PERIOD > Time.unscaledTimeAsDouble;
-
-                    if (inGracePeriod)
+                    if (identity.InAuthorityRemovedGracePeriod(player))
                     {
                         if (logger.WarnEnabled())
                             logger.LogWarning($"ServerRpc for object without authority {identity} but within grace period. Method: {remoteCall.Name}, Sent by: {player}, Current owner: {identity.Owner?.ToString() ?? "None"}.");
