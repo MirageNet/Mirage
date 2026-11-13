@@ -1,0 +1,136 @@
+---
+id: AddLateEventUnity-3
+title: AddLateEventUnity<T0, T1, TEvent>
+---
+
+# Class AddLateEventUnity&lt;T0, T1, TEvent&gt;
+
+
+Version of  with 2 arguments
+Create a non-generic class inheriting from this to use in inspector. Same rules as 
+
+
+
+<div class="inheritance">
+
+##### Inheritance
+
+<div class="level" style={{"--data-index": 0}}>
+System.Object
+</div>
+<div class="level" style={{"--data-index": 1}}>
+Mirage.Events.AddLateEventBase
+</div>
+<div class="level" style={{"--data-index": 2}}>
+Mirage.Events.AddLateEvent&lt;T0, T1&gt;
+</div>
+</div>
+
+##### Inherited Members
+
+<details>
+<summary>Show</summary>
+
+Mirage.Events.AddLateEvent&lt;T0, T1&gt;._arg0
+
+
+Mirage.Events.AddLateEvent&lt;T0, T1&gt;._arg1
+
+
+Mirage.Events.AddLateEvent&lt;T0, T1&gt;.AddListener(System.Action&lt;T0, T1&gt;)
+
+
+Mirage.Events.AddLateEvent&lt;T0, T1&gt;.RemoveListener(System.Action&lt;T0, T1&gt;)
+
+
+Mirage.Events.AddLateEvent&lt;T0, T1&gt;.Invoke(T0, T1)
+
+
+Mirage.Events.AddLateEvent&lt;T0, T1&gt;.OnDestroyCleanup()
+
+
+Mirage.Events.AddLateEventBase.HasInvoked
+
+
+Mirage.Events.AddLateEventBase.MarkInvoked()
+
+
+Mirage.Events.AddLateEventBase.Reset()
+
+</details>
+
+##### Syntax
+
+```cs
+[Serializable]
+public abstract class AddLateEventUnity<T0, T1, TEvent> : AddLateEvent<T0, T1>, IAddLateEventUnity<T0, T1>, IAddLateEvent<T0, T1> where TEvent : UnityEvent<T0, T1>, new()
+```
+
+##### Type Parameters
+| Name | Description |
+| ---- | ---- |
+| T0 |  |
+| T1 |  |
+| TEvent |  |
+
+### Methods
+#### AddListener(UnityAction&lt;T0, T1&gt;)
+
+
+
+##### Declaration
+
+```cs
+public void AddListener(UnityAction<T0, T1> handler)
+```
+##### Parameters
+| Type | Name | Description |
+| ---- | ---- | ---- |
+| UnityAction&lt;T0, T1&gt; | handler |  |
+
+
+#### RemoveListener(UnityAction&lt;T0, T1&gt;)
+
+
+
+##### Declaration
+
+```cs
+public void RemoveListener(UnityAction<T0, T1> handler)
+```
+##### Parameters
+| Type | Name | Description |
+| ---- | ---- | ---- |
+| UnityAction&lt;T0, T1&gt; | handler |  |
+
+
+#### Invoke(T0, T1)
+
+
+
+##### Declaration
+
+```cs
+public override void Invoke(T0 arg0, T1 arg1)
+```
+##### Parameters
+| Type | Name | Description |
+| ---- | ---- | ---- |
+| T0 | arg0 |  |
+| T1 | arg1 |  |
+
+
+#### RemoveAllListeners()
+
+
+Remove all non-persisent (ie created from script) listeners from the event.
+
+
+
+##### Declaration
+
+```cs
+public void RemoveAllListeners()
+```
+
+
