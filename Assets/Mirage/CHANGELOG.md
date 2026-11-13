@@ -1,3 +1,10 @@
+# [159.4.0](https://github.com/MirageNet/Mirage/compare/v159.3.0...v159.4.0) (2026-11-13)
+
+
+### Features
+
+* adding InAuthorityRemovedGracePeriod helper method ([5b1bbcb](https://github.com/MirageNet/Mirage/commit/5b1bbcbdef0cbd077fa252feb23d67a08b75a1d2))
+
 # [159.3.0](https://github.com/MirageNet/Mirage/compare/v159.2.2...v159.3.0) (2026-11-12)
 
 
