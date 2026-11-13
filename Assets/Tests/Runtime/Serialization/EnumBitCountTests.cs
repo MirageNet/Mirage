@@ -22,6 +22,15 @@ namespace Mirage.Tests.Runtime.Serialization
             Max = 7,
         }
 
+        // values need more than 32 bits, so long encode/decode must be used
+        [BitCount(40), ZigZagEncode]
+        public enum MyLongZigZagEnum : long
+        {
+            Min = -(1L << 38),
+            Zero = 0,
+            Max = (1L << 38) - 1,
+        }
+
         [BitCountFromRange(-2, 2)]
         public enum MyRangeEnum
         {
@@ -78,6 +87,20 @@ namespace Mirage.Tests.Runtime.Serialization
 
             var result = reader.Read<MyZigZagEnum>();
             AssertReaderBits(4);
+            Assert.That(result, Is.EqualTo(value));
+        }
+
+        [Test]
+        [TestCase(MyLongZigZagEnum.Min)]
+        [TestCase(MyLongZigZagEnum.Zero)]
+        [TestCase(MyLongZigZagEnum.Max)]
+        public void LongZigZagEnumIsBitPacked(MyLongZigZagEnum value)
+        {
+            writer.Write(value);
+            AssertWriterBits(40);
+
+            var result = reader.Read<MyLongZigZagEnum>();
+            AssertReaderBits(40);
             Assert.That(result, Is.EqualTo(value));
         }
 

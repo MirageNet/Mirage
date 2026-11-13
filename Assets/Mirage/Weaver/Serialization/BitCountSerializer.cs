@@ -2,6 +2,7 @@ using Mirage.CodeGen;
 using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 
 namespace Mirage.Weaver.Serialization
 {
@@ -95,7 +96,7 @@ namespace Mirage.Weaver.Serialization
 
         private void WriteZigZag(ModuleDefinition module, ILProcessor worker, TypeReference fieldType)
         {
-            var useLong = fieldType.Is<long>();
+            var useLong = IsLongType(fieldType);
             var encode = useLong
                 ? module.ImportReference((long v) => ZigZag.Encode(v))
                 : module.ImportReference((int v) => ZigZag.Encode(v));
@@ -138,12 +139,22 @@ namespace Mirage.Weaver.Serialization
 
         private void ReadZigZag(ModuleDefinition module, ILProcessor worker, TypeReference fieldType)
         {
-            var useLong = fieldType.Is<long>();
+            var useLong = IsLongType(fieldType);
             var encode = useLong
                 ? module.ImportReference((ulong v) => ZigZag.Decode(v))
                 : module.ImportReference((uint v) => ZigZag.Decode(v));
 
             worker.Append(worker.Create(OpCodes.Call, encode));
+        }
+
+        private static bool IsLongType(TypeReference type)
+        {
+            // enum value is its underlying type on the stack, so long based enums need the long encode/decode
+            var typeDef = type.Resolve();
+            if (typeDef.IsEnum)
+                return typeDef.GetEnumUnderlyingType().Is<long>();
+
+            return type.Is<long>();
         }
 
         private void ReadAddMinValue(ILProcessor worker)
