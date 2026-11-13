@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq.Expressions;
 using Mirage.CodeGen;
 using Mirage.Serialization;
+using Mirage.Weaver.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -27,6 +28,7 @@ namespace Mirage.Weaver
         protected readonly Dictionary<TypeDefinition, MethodReference> genericWithLengthLookup = new Dictionary<TypeDefinition, MethodReference>(new TypeReferenceComparer());
         private readonly IWeaverLogger logger;
         protected readonly ModuleDefinition module;
+        protected readonly EnumBitPackLookup enumBitPackLookup;
 
         /// <summary>Count used to see if we generated any new ones, meaning the dll is changed and needs writing</summary>
         public int Count => functionLookup.Count;
@@ -38,10 +40,11 @@ namespace Mirage.Weaver
         protected abstract string FunctionTypeLog { get; }
         protected abstract string FunctionTypeWithLengthLog { get; }
 
-        protected SerializeFunctionBase(ModuleDefinition module, IWeaverLogger logger)
+        protected SerializeFunctionBase(ModuleDefinition module, IWeaverLogger logger, EnumBitPackLookup enumBitPackLookup)
         {
             this.logger = logger;
             this.module = module;
+            this.enumBitPackLookup = enumBitPackLookup;
         }
 
         public void Register(TypeReference dataType, MethodReference methodReference) => RegisterInternal(dataType, methodReference, false);

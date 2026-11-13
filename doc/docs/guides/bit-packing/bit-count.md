@@ -2,7 +2,7 @@
 
 The bit count of Integer based fields can be set using the [BitCountAttribute](/docs/reference/Mirage.Serialization/BitCountAttribute).
 
-This will truncate the bits so that only the small bits are sent. There is no range checking for values using BitCount, so the value that is too big or negative will not be unpacked correctly
+This will truncate the bits so that only the small bits are sent. There is no runtime range checking for values using BitCount, so the value that is too big or negative will not be unpacked correctly. Enum values are checked when weaving, see [Enum Types](#enum-types).
 
 This means that `BitCount` should not be used with values that can be negative because this data will be lost. If you do need to send negative values then use [ZigZagEncode](/docs/guides/bit-packing/zig-zag-encode) or [BitCountFromRange](/docs/guides/bit-packing/bit-count-from-range)
 
@@ -47,6 +47,35 @@ Weapon index in a list of 6 weapons
 `BitCount = 3` so max value of Health is 7
 
 `WeaponIndex = 5` will serialize to `101`
+
+
+### Enum Types
+
+`BitCount` can also be placed on an enum type. The bit count is then used everywhere that enum is sent:
+- SyncVars
+- RPC parameters
+- Fields in messages and structs
+- Collections and nullables, eg `List<T>`, `T[]` and `T?`
+
+A `BitCount` on a field or parameter will override the one on the enum.
+
+{{{ Path:'Snippets/BitPacking/BitCountSnippets.cs' Name:'bit-count-enum-example' }}}
+
+[ZigZagEncode](/docs/guides/bit-packing/zig-zag-encode) and [BitCountFromRange](/docs/guides/bit-packing/bit-count-from-range) can also be placed on an enum type.
+
+#### Weave time checks
+
+When an enum is packed using `BitCount`, either from the enum type or from a field, Weaver checks every value defined in the enum. Weaver will give an error if:
+- A value does not fit in the bit count
+- A value is negative and `ZigZagEncode` is not used
+
+This means that adding a new value to an enum that no longer fits will fail to compile, instead of being silently truncated.
+
+:::note
+Only defined values are checked. A value created by casting, eg `(WeaponType)10`, will still be truncated.
+
+If you write your own write function for the enum, it will be used instead and the attribute on the enum is ignored.
+:::
 
 
 ### Generated Code

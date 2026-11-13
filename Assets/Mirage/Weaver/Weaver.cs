@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Mirage.CodeGen;
+using Mirage.Weaver.Serialization;
 using Mono.Cecil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
 using UnityEngine;
@@ -41,10 +42,16 @@ namespace Mirage.Weaver
             try
             {
                 var module = assembly.MainModule;
-                readers = new Readers(module, logger);
-                writers = new Writers(module, logger);
+                var enumBitPackLookup = new EnumBitPackLookup(logger);
+                readers = new Readers(module, logger, enumBitPackLookup);
+                writers = new Writers(module, logger, enumBitPackLookup);
                 propertySiteProcessor = new PropertySiteProcessor();
                 var rwProcessor = new ReaderWriterProcessor(module, readers, writers, logger);
+
+                using (timer.Sample("EnumBitPackLookup"))
+                {
+                    enumBitPackLookup.CheckAllEnums(module);
+                }
 
                 var modified = false;
                 using (timer.Sample("ReaderWriterProcessor"))

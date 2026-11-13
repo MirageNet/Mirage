@@ -23,6 +23,35 @@ namespace Mirage.Snippets.BitPacking.BitCountExample2
     // CodeEmbed-End: bit-count-example-2
 }
 
+namespace Mirage.Snippets.BitPacking.BitCountEnumExample
+{
+    // CodeEmbed-Start: bit-count-enum-example
+    [BitCount(2)]
+    public enum WeaponType
+    {
+        Pistol = 0,
+        Rifle = 1,
+        Shotgun = 2,
+        Rocket = 3,
+    }
+
+    public class MyNetworkBehaviour : NetworkBehaviour
+    {
+        // sent using 2 bits, from the attribute on WeaponType
+        [SyncVar]
+        public WeaponType PrimaryWeapon;
+
+        // attribute on field overrides the one on WeaponType
+        [SyncVar, BitCount(4)]
+        public WeaponType SecondaryWeapon;
+
+        // each element in the list is sent using 2 bits
+        [ClientRpc]
+        public void RpcSetLoadout(System.Collections.Generic.List<WeaponType> weapons) { }
+    }
+    // CodeEmbed-End: bit-count-enum-example
+}
+
 namespace Mirage.Snippets.BitPacking.BitCountGenerated
 {
     public class GeneratedExample : NetworkBehaviour

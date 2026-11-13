@@ -41,9 +41,10 @@ namespace Mirage.Serialization
     /// <para>
     /// NOTE: bits are truncated when using this, so signed values will lose their sign. Use <see cref="ZigZagEncodeAttribute"/> as well if value might be negative
     /// </para>
+    /// <para>Can be used on an enum type, so all fields and parameters using that enum are packed. Attribute on field or parameter will override the enum's attribute</para>
     /// <para>Also See: <see href="https://miragenet.github.io/Mirage/docs/guides/bit-packing/bit-countl">Bit Packing Documentation</see></para>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Enum)]
     public class BitCountAttribute : Attribute
     {
         /// <param name="bitCount">Value should be between 1 and 64</param>
@@ -52,9 +53,10 @@ namespace Mirage.Serialization
 
     /// <summary>
     /// Calculates bitcount from then given min/max values and then packs using <see cref="BitCountAttribute"/>
+    /// <para>Can be used on an enum type, so all fields and parameters using that enum are packed. Attribute on field or parameter will override the enum's attribute</para>
     /// <para>Also See: <see href="https://miragenet.github.io/Mirage/docs/guides/bit-packing/bit-count-from-range">Bit Packing Documentation</see></para>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Enum)]
     public class BitCountFromRangeAttribute : Attribute
     {
         /// <param name="min">minimum possible int value</param>
@@ -65,8 +67,9 @@ namespace Mirage.Serialization
     /// <summary>
     /// Used along size <see cref="BitCountAttribute"/> to encodes a integer value using <see cref="ZigZag"/> so that both positive and negative values can be sent
     /// <para>Also See: <see href="https://miragenet.github.io/Mirage/docs/guides/bit-packing/bit-count-from-rangel">Bit Packing Documentation</see></para>
+    /// <para>Can be used on an enum type along side <see cref="BitCountAttribute"/></para>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Enum)]
     public class ZigZagEncodeAttribute : Attribute
     {
         public ZigZagEncodeAttribute() { }

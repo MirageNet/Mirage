@@ -56,6 +56,8 @@ A Direction enum to say which way a model is facing
 
 `direction = 1` will serialize to `10`
 
+`BitCountFromRange` can also be placed on the enum type itself, so that every field and parameter using the enum is packed. Weaver will give an error if a defined enum value is outside of the range. See [Bit Count Enum Types](/docs/guides/bit-packing/bit-count#enum-types).
+
 
 ### Generated Code
 

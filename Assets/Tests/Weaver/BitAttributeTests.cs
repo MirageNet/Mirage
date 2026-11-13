@@ -57,6 +57,39 @@ namespace Mirage.Tests.Weaver
         }
 
         [Test, BatchSafe(BatchType.Success)]
+        public void EnumBitCount()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void EnumBitCountInvalid()
+        {
+            HasErrorCount(7);
+
+            HasError("Enum value FieldTooSmall.B (2) does not fit in 1 bits",
+                "BitAttributeTests.EnumBitCountInvalid.FieldTooSmall BitAttributeTests.EnumBitCountInvalid.MyBehaviour::value1");
+
+            HasError("Enum value TooLarge.B (4) does not fit in 2 bits",
+                "BitAttributeTests.EnumBitCountInvalid.TooLarge");
+
+            HasError("Enum value Negative.A (-1) is negative, use [ZigZagEncode] or [BitCountFromRange] to send negative values",
+                "BitAttributeTests.EnumBitCountInvalid.Negative");
+
+            HasError("Enum value ZigZagTooLarge.B (8) does not fit in 4 bits",
+                "BitAttributeTests.EnumBitCountInvalid.ZigZagTooLarge");
+
+            HasError("Enum value BelowRange.A (-2) is below min value (-1)",
+                "BitAttributeTests.EnumBitCountInvalid.BelowRange");
+
+            HasError("BitCount can not be above target type size, bitCount:9, max size:8, type:TooManyBits",
+                "BitAttributeTests.EnumBitCountInvalid.TooManyBits");
+
+            HasError("[ZigZagEncode] can only be used with [BitCount]",
+                "BitAttributeTests.EnumBitCountInvalid.ZigZagOnly");
+        }
+
+        [Test, BatchSafe(BatchType.Success)]
         public void ZigZag()
         {
             IsSuccess();

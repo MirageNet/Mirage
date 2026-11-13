@@ -12,7 +12,7 @@ namespace Mirage.Weaver
 {
     public class Writers : SerializeFunctionBase
     {
-        public Writers(ModuleDefinition module, IWeaverLogger logger) : base(module, logger) { }
+        public Writers(ModuleDefinition module, IWeaverLogger logger, EnumBitPackLookup enumBitPackLookup) : base(module, logger, enumBitPackLookup) { }
 
         protected override string FunctionTypeLog => "write function";
         protected override string FunctionTypeWithLengthLog => "write function with length";
@@ -51,6 +51,15 @@ namespace Mirage.Weaver
             var writerMethod = GenerateWriterFunc(typeReference);
 
             var worker = writerMethod.worker;
+
+            // packing in the enum function means collections and Writer<T> also use it, not just fields with attributes
+            var bitPackSerializer = enumBitPackLookup.GetSerializer(typeReference);
+            if (bitPackSerializer != null)
+            {
+                bitPackSerializer.AppendWriteArgument(module, worker, writerMethod.writerParameter, writerMethod.typeParameter);
+                worker.Append(worker.Create(OpCodes.Ret));
+                return writerMethod.definition;
+            }
 
             var underlyingWriter = TryGetFunction(typeReference.Resolve().GetEnumUnderlyingType(), null);
 

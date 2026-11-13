@@ -14,6 +14,10 @@ namespace Mirage.Weaver.Serialization
         private readonly bool useZigZag;
         private readonly int? minValue;
 
+        internal int BitCount => bitCount;
+        internal bool UseZigZag => useZigZag;
+        internal int? MinValue => minValue;
+
         public BitCountSerializer(int bitCount, OpCode? typeConverter, bool useZigZag = false)
         {
             this.bitCount = bitCount;
@@ -41,37 +45,43 @@ namespace Mirage.Weaver.Serialization
 
         public override void AppendWriteField(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldReference fieldReference)
         {
-            var writeWithBitCount = module.ImportReference(typeof(NetworkWriter).GetMethod(nameof(NetworkWriter.Write)));
-
             worker.Append(LoadParamOrArg0(worker, writerParameter));
             worker.Append(LoadParamOrArg0(worker, typeParameter));
             worker.Append(worker.Create(OpCodes.Ldfld, fieldReference));
 
-            if (useZigZag)
-            {
-                WriteZigZag(module, worker, fieldReference.FieldType);
-            }
-            if (minValue.HasValue)
-            {
-                WriteSubtractMinValue(worker);
-            }
-
-            worker.Append(worker.Create(OpCodes.Conv_U8));
-            worker.Append(worker.Create(OpCodes.Ldc_I4, bitCount));
-            worker.Append(worker.Create(OpCodes.Call, writeWithBitCount));
+            AppendWriteValue(module, worker, fieldReference.FieldType);
         }
 
 
         public override void AppendWriteParameter(ModuleDefinition module, ILProcessor worker, VariableDefinition writer, ParameterDefinition valueParameter)
         {
-            var writeWithBitCount = module.ImportReference(typeof(NetworkWriter).GetMethod(nameof(NetworkWriter.Write)));
-
             worker.Append(worker.Create(OpCodes.Ldloc, writer));
             worker.Append(worker.Create(OpCodes.Ldarg, valueParameter));
 
+            AppendWriteValue(module, worker, valueParameter.ParameterType);
+        }
+
+        /// <summary>
+        /// Writes a value where both writer and value are arguments of the method, used by generated enum write functions
+        /// </summary>
+        internal void AppendWriteArgument(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition valueParameter)
+        {
+            worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
+            worker.Append(worker.Create(OpCodes.Ldarg, valueParameter));
+
+            AppendWriteValue(module, worker, valueParameter.ParameterType);
+        }
+
+        /// <summary>
+        /// Packs and writes the value, expects writer and value to already be on the stack
+        /// </summary>
+        private void AppendWriteValue(ModuleDefinition module, ILProcessor worker, TypeReference valueType)
+        {
+            var writeWithBitCount = module.ImportReference(typeof(NetworkWriter).GetMethod(nameof(NetworkWriter.Write)));
+
             if (useZigZag)
             {
-                WriteZigZag(module, worker, valueParameter.ParameterType);
+                WriteZigZag(module, worker, valueType);
             }
             if (minValue.HasValue)
             {

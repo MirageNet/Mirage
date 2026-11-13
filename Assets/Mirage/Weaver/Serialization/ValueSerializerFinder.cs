@@ -109,6 +109,14 @@ namespace Mirage.Weaver.Serialization
 
             ZigZagFinder.CheckZigZag(attributeProvider, fieldType, ref valueSerializer);
 
+            // check after ZigZag because it changes which values fit
+            if (valueSerializer is BitCountSerializer bitCountSerializer)
+            {
+                var fieldTypeDef = fieldType.Resolve();
+                if (fieldTypeDef.IsEnum)
+                    EnumBitPackFinder.ThrowIfValuesDontFit(fieldTypeDef, bitCountSerializer);
+            }
+
             if (attributeProvider.HasCustomAttribute<FloatPackAttribute>())
                 valueSerializer = new FloatPackFinder().GetSerializer(module, holder, attributeProvider, fieldType, fieldName);
 

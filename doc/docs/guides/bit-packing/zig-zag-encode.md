@@ -6,6 +6,8 @@ This will cause negative values to be encoded as positive so that the sign bit i
 
 This works best with [VarIntBlocks](/docs/guides/bit-packing/var-int-blocks) but also works with [BitCount](/docs/guides/bit-packing/bit-count).
 
+This attribute can also be placed on an enum type along side `BitCount`, see [Bit Count Enum Types](/docs/guides/bit-packing/bit-count#enum-types).
+
 This attribute can not be used on the same field as [BitCountFromRange](/docs/guides/bit-packing/bit-count-from-range), this is because `BitCountFromRange` already ensures negative values are packed correctly.
 
 :::note

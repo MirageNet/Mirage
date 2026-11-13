@@ -13,7 +13,7 @@ namespace Mirage.Weaver
 {
     public class Readers : SerializeFunctionBase
     {
-        public Readers(ModuleDefinition module, IWeaverLogger logger) : base(module, logger) { }
+        public Readers(ModuleDefinition module, IWeaverLogger logger, EnumBitPackLookup enumBitPackLookup) : base(module, logger, enumBitPackLookup) { }
 
         protected override string FunctionTypeLog => "read function";
         protected override string FunctionTypeWithLengthLog => "read function with length";
@@ -51,6 +51,15 @@ namespace Mirage.Weaver
             var readMethod = GenerateReaderFunction(typeReference);
 
             var worker = readMethod.worker;
+
+            // must match the packing used in Writers.GenerateEnumFunction
+            var bitPackSerializer = enumBitPackLookup.GetSerializer(typeReference);
+            if (bitPackSerializer != null)
+            {
+                bitPackSerializer.AppendRead(module, worker, readMethod.readParameter, typeReference);
+                worker.Append(worker.Create(OpCodes.Ret));
+                return readMethod.definition;
+            }
 
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
