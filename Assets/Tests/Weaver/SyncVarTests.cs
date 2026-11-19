@@ -79,11 +79,10 @@ namespace Mirage.Tests.Weaver
                 "UnityEngine.TextMesh SyncVarTests.SyncVarsUnityComponent.SyncVarsUnityComponent::invalidVar");
         }
 
-        [Test]
-        public void SyncVarsCantBeArray()
+        [Test, BatchSafe(BatchType.Success)]
+        public void SyncVarArray()
         {
-            HasError("thisShouldntWork has invalid type. Use SyncLists instead of arrays",
-                "System.Int32[] SyncVarTests.SyncVarsCantBeArray.SyncVarsCantBeArray::thisShouldntWork");
+            IsSuccess();
         }
 
         [Test]

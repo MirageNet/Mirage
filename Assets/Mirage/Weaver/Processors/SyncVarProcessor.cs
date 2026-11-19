@@ -85,12 +85,6 @@ namespace Mirage.Weaver
                 throw new SyncVarException($"{field.Name} cannot be static", field);
             }
 
-            if (field.FieldType.IsArray)
-            {
-                // todo should arrays really be blocked?
-                throw new SyncVarException($"{field.Name} has invalid type. Use SyncLists instead of arrays", field);
-            }
-
             if (SyncObjectProcessor.ImplementsSyncObject(field.FieldType))
             {
                 throw new SyncVarException($"{field.Name} has [SyncVar] attribute. ISyncObject should not be marked with SyncVar", field);
