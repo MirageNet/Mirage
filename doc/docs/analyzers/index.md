@@ -13,6 +13,7 @@ Mirage uses Roslyn Analyzers to provide compile-time validation for network code
 | [MIRAGE1003](MIRAGE1003.md) | SyncObject fields must be marked as readonly | Error | Restricts reassignment of fields implementing `ISyncObject` (like `SyncList`), requiring them to be marked `readonly`. |
 | [MIRAGE1004](MIRAGE1004.md) | Invalid SyncVar Hook Method | Error | Ensures `[SyncVar]` hook methods or events are correctly declared and matched by parameter type. |
 | [MIRAGE1005](MIRAGE1005.md) | Readonly SyncVar Field | Error | Restricts declaring fields marked with `[SyncVar]` as `readonly` to ensure they are mutable at runtime. |
+| [MIRAGE1006](MIRAGE1006.md) | Prefer SyncList instead of array for SyncVar | Warning | Warns against array `[SyncVar]` fields because element changes are not synced, unless `initialOnly = true` is used. |
 | [MIRAGE1101](MIRAGE1101.md) | Misplaced Network Attribute Error | Error | Prevents Mirage network attributes from being declared inside classes that do not inherit from `NetworkBehaviour`. |
 | [MIRAGE1102](MIRAGE1102.md) | Redundant Server/Client Attribute on RPC | Warning | Warns if an RPC method is decorated with both a routing attribute ([ServerRpc]/[ClientRpc]) and an active guard ([Server]/[Client]). |
 | [MIRAGE1201](MIRAGE1201.md) | NetworkMessage/RPC Class Warning | Warning | Warns about class types used inside network messages or RPC parameters because they cause GC allocations. |
@@ -52,6 +53,9 @@ Specifying a hook name in a `[SyncVar]` attribute that cannot be resolved, has m
 
 #### [MIRAGE1005: Readonly SyncVar Field](MIRAGE1005.md)
 A field decorated with `[SyncVar]` cannot be marked as `readonly`. Because SyncVars are synchronized dynamically at runtime from the server, declaring them as `readonly` prevents mutability and breaks Weaver-injected property setter wrappers. Remove the `readonly` modifier to allow runtime modification.
+
+#### [MIRAGE1006: Prefer SyncList instead of array for SyncVar](MIRAGE1006.md)
+Using an array type (such as `byte[]`) for a `[SyncVar]` field triggers this warning. Changing an element does not call the SyncVar setter, so the change is not synced, and reassigning the array resends the whole array. Use a `readonly SyncList<T>` instead, which only sends changes. The warning is not shown when `initialOnly = true` is set, because the array is only sent once on spawn, so it is likely an intentional design choice.
 
 ---
 
