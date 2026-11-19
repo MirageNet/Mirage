@@ -1,3 +1,10 @@
+## [159.5.1](https://github.com/MirageNet/Mirage/compare/v159.5.0...v159.5.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* **Weaver:** allow arrays as SyncVars ([73f8bfa](https://github.com/MirageNet/Mirage/commit/73f8bfa2f34110d99766921edba59a297cbfe954))
+
 # [159.5.0](https://github.com/MirageNet/Mirage/compare/v159.4.1...v159.5.0) (2026-11-13)
 
 
