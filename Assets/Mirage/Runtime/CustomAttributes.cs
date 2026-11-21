@@ -144,6 +144,11 @@ namespace Mirage
         public bool excludeOwner;
         /// <summary>stops method being called on host/server</summary>
         public bool excludeHost;
+        /// <summary>
+        /// Also calls method on server, including in server only mode. Server always calls it once, even if host player is not an observer.
+        /// <para>Only valid with <see cref="RpcTarget.Observers"/>, and can not be used with <see cref="excludeHost"/> or <see cref="excludeOwner"/></para>
+        /// </summary>
+        public bool includeServer;
     }
 
     /// <summary>

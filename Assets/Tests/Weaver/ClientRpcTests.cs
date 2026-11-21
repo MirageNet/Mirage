@@ -68,6 +68,36 @@ namespace Mirage.Tests.Weaver
         }
 
         [Test, BatchSafe(BatchType.Success)]
+        public void ClientRpcIncludeServer()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void ClientRpcIncludeServerCantUseOwner()
+        {
+            HasError("ClientRpc with includeServer can only be used with RpcTarget.Observers", "System.Void ClientRpcTests.ClientRpcIncludeServerCantUseOwner.ClientRpcIncludeServerCantUseOwner::ClientRpcMethod()");
+        }
+
+        [Test]
+        public void ClientRpcIncludeServerCantUsePlayer()
+        {
+            HasError("ClientRpc with includeServer can only be used with RpcTarget.Observers", "System.Void ClientRpcTests.ClientRpcIncludeServerCantUsePlayer.ClientRpcIncludeServerCantUsePlayer::ClientRpcMethod(Mirage.INetworkPlayer)");
+        }
+
+        [Test]
+        public void ClientRpcIncludeServerCantExcludeHost()
+        {
+            HasError("ClientRpc with includeServer cannot have excludeHost set as true", "System.Void ClientRpcTests.ClientRpcIncludeServerCantExcludeHost.ClientRpcIncludeServerCantExcludeHost::ClientRpcMethod()");
+        }
+
+        [Test]
+        public void ClientRpcIncludeServerCantExcludeOwner()
+        {
+            HasError("ClientRpc with includeServer cannot have excludeOwner set as true", "System.Void ClientRpcTests.ClientRpcIncludeServerCantExcludeOwner.ClientRpcIncludeServerCantExcludeOwner::ClientRpcMethod()");
+        }
+
+        [Test, BatchSafe(BatchType.Success)]
         public void CallToRpcBase()
         {
             IsSuccess();

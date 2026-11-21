@@ -110,14 +110,19 @@ namespace Mirage.RemoteCalls
         /// <param name="behaviour"></param>
         /// <param name="target"></param>
         /// <param name="player">player used for RpcTarget.Player</param>
+        /// <param name="includeServer">if true, invoke on server even if not host</param>
         /// <returns></returns>
-        public static bool ShouldInvokeLocally(NetworkBehaviour behaviour, RpcTarget target, INetworkPlayer player, bool excludeOwner)
+        public static bool ShouldInvokeLocally(NetworkBehaviour behaviour, RpcTarget target, INetworkPlayer player, bool excludeOwner, bool includeServer)
         {
             // not server? error
             if (!behaviour.IsServer)
             {
                 throw new InvalidOperationException("Client RPC can only be called when server is active");
             }
+
+            // ignore host checks so that server only and host both invoke it exactly once
+            if (includeServer)
+                return true;
 
             // not host? never invoke locally
             if (!behaviour.IsClient)

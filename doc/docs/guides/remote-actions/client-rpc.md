@@ -40,6 +40,19 @@ Mirage will use the `NetworkPlayer target` to know where to send it, but it will
 
 You may want to exclude the owner client when calling a ClientRpc. This is done with the `excludeOwner` option: `[ClientRpc(excludeOwner = true)]`.
 
+## Exclude host
+
+In host mode, ClientRpcs are invoked on the host's local client. To stop this, use the `excludeHost` option: `[ClientRpc(excludeHost = true)]`.
+
+## Include server
+
+By default, the server only invokes a ClientRpc locally in host mode, for the host's local client. Use the `includeServer` option to also invoke it on a server-only instance: `[ClientRpc(includeServer = true)]`.
+
+With `includeServer`, the server always invokes the method exactly once, in both server-only and host mode. In host mode, it runs even if the host's player is not an observer of the object. If the method plays visuals or audio, you may want to check `IsClient` or observer status inside the method.
+
+The method is invoked on the server before the message is sent to clients.
+
+`includeServer` can only be used with `RpcTarget.Observers`, and can not be combined with `excludeHost` or `excludeOwner`.
 
 ## Channel
 

@@ -81,6 +81,7 @@ namespace Mirage.Weaver
             var channel = clientRpcAttr.GetField(nameof(ClientRpcAttribute.channel), 0);
             var excludeOwner = clientRpcAttr.GetField(nameof(ClientRpcAttribute.excludeOwner), false);
             var excludeHost = clientRpcAttr.GetField(nameof(ClientRpcAttribute.excludeHost), false);
+            var includeServer = clientRpcAttr.GetField(nameof(ClientRpcAttribute.includeServer), false);
 
             var rpc = SubstituteMethod(md);
 
@@ -91,7 +92,7 @@ namespace Mirage.Weaver
             //    call the body
             // }
             if (!excludeHost)
-                CallBody(worker, rpc, target, excludeOwner);
+                CallBody(worker, rpc, target, excludeOwner, includeServer);
 
             // NetworkWriter writer = NetworkWriterPool.GetWriter()
             var writer = md.AddLocal<PooledNetworkWriter>();
@@ -156,7 +157,7 @@ namespace Mirage.Weaver
 
 
 
-        private void InvokeLocally(ILProcessor worker, RpcTarget target, bool excludeOwner, Action body)
+        private void InvokeLocally(ILProcessor worker, RpcTarget target, bool excludeOwner, bool includeServer, Action body)
         {
             // if (IsLocalClient) {
             var endif = worker.Create(OpCodes.Nop);
@@ -173,8 +174,9 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Ldnull));
 
             worker.Append(worker.Create(excludeOwner.OpCode_Ldc()));
+            worker.Append(worker.Create(includeServer.OpCode_Ldc()));
             // call function
-            worker.Append(worker.Create(OpCodes.Call, () => ClientRpcSender.ShouldInvokeLocally(default, default, default, default)));
+            worker.Append(worker.Create(OpCodes.Call, () => ClientRpcSender.ShouldInvokeLocally(default, default, default, default, default)));
             worker.Append(worker.Create(OpCodes.Brfalse, endif));
 
             body();
@@ -184,9 +186,9 @@ namespace Mirage.Weaver
 
         }
 
-        private void CallBody(ILProcessor worker, MethodDefinition rpc, RpcTarget target, bool excludeOwner)
+        private void CallBody(ILProcessor worker, MethodDefinition rpc, RpcTarget target, bool excludeOwner, bool includeServer)
         {
-            InvokeLocally(worker, target, excludeOwner, () =>
+            InvokeLocally(worker, target, excludeOwner, includeServer, () =>
             {
                 InvokeBody(worker, rpc);
                 // if target is owner or player we can return after invoking locally
@@ -268,6 +270,22 @@ namespace Mirage.Weaver
             if (target == RpcTarget.Owner && excludeOwner)
             {
                 throw new RpcException("ClientRpc with RpcTarget.Owner cannot have excludeOwner set as true", md);
+            }
+
+            var includeServer = clientRpcAttr.GetField(nameof(ClientRpcAttribute.includeServer), false);
+            if (includeServer)
+            {
+                // Owner/Player rpcs return early after local invoke, so server only would invoke but never send
+                if (target != RpcTarget.Observers)
+                    throw new RpcException("ClientRpc with includeServer can only be used with RpcTarget.Observers", md);
+
+                var excludeHost = clientRpcAttr.GetField(nameof(ClientRpcAttribute.excludeHost), false);
+                if (excludeHost)
+                    throw new RpcException("ClientRpc with includeServer cannot have excludeHost set as true", md);
+
+                // blocked because host as owner is ambiguous: body might be needed for server logic, or might double up owner's prediction
+                if (excludeOwner)
+                    throw new RpcException("ClientRpc with includeServer cannot have excludeOwner set as true", md);
             }
         }
     }

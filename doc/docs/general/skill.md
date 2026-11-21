@@ -77,6 +77,7 @@ Options:
 - `target`: `RpcTarget` enum
 - `excludeOwner`: Excludes owner client from execution.
 - `excludeHost`: Stops execution on host/server.
+- `includeServer`: Also executes on server, including server-only (always once on server). Observers only, can't combine with `excludeHost`/`excludeOwner`.
 Can have return value using `UniTask<MyValue>` (if target is Owner or Player)
 
 ### Metadata Attributes
