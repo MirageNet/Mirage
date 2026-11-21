@@ -5,6 +5,8 @@ namespace Mirage.Snippets.Analyzers
     namespace M1203.Triggering
     {
         // CodeEmbed-Start: mirage1203-triggering
+        using Mirage;
+
         public class Player : NetworkBehaviour
         {
             // Error: RPC parameters cannot use ref, out, or in modifiers
@@ -20,6 +22,8 @@ namespace Mirage.Snippets.Analyzers
     namespace M1203.Recommended
     {
         // CodeEmbed-Start: mirage1203-recommended
+        using Mirage;
+
         public class Player : NetworkBehaviour
         {
             [SyncVar]
@@ -38,12 +42,18 @@ namespace Mirage.Snippets.Analyzers
     namespace M1203.Alternative
     {
         // CodeEmbed-Start: mirage1203-alternative
+        using Mirage;
+        using Cysharp.Threading.Tasks;
+
         public class Player : NetworkBehaviour
         {
+            private int health = 100;
+
             [ServerRpc]
-            public async UniTask<int> CmdTakeDamage(int damage)
+            public UniTask<int> CmdTakeDamage(int damage)
             {
-                return 100; // Return new health
+                health -= damage; // Validate gameplay inputs before applying them.
+                return UniTask.FromResult(health);
             }
         }
         // CodeEmbed-End: mirage1203-alternative

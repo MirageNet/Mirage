@@ -6,10 +6,12 @@ namespace Mirage.Snippets.Analyzers
     namespace M1201.Triggering
     {
         // CodeEmbed-Start: mirage1201-triggering
+        using Mirage;
+
         [NetworkMessage]
         public struct UpdateUserMessage
         {
-            // Warning: Class types cause garbage collection allocations during deserialization.
+            // Warning: Reading a non-null UserData value creates a new object.
             public UserData data;
         }
 
@@ -23,6 +25,8 @@ namespace Mirage.Snippets.Analyzers
     namespace M1201.Recommended
     {
         // CodeEmbed-Start: mirage1201-recommended
+        using Mirage;
+
         [NetworkMessage]
         public struct UpdateUserMessage
         {
@@ -38,8 +42,11 @@ namespace Mirage.Snippets.Analyzers
     namespace M1201.AlternativeCustom
     {
         // CodeEmbed-Start: mirage1201-alternative-custom
+        using Mirage;
+        using Mirage.Serialization;
+
         [WeaverSafeClass]
-        public class UserDataClass
+        public sealed class UserDataClass
         {
             public string name;
         }
@@ -47,12 +54,18 @@ namespace Mirage.Snippets.Analyzers
         {
             public static void WriteUserData(this NetworkWriter writer, UserDataClass data)
             {
+                writer.WriteBoolean(data != null);
+                if (data == null)
+                    return;
+
                 writer.WriteString(data.name);
             }
             public static UserDataClass ReadUserData(this NetworkReader reader)
             {
-                return new UserDataClass { name = reader.ReadString() };
+                if (!reader.ReadBoolean())
+                    return null;
 
+                return new UserDataClass { name = reader.ReadString() };
             }
         }
         // CodeEmbed-End: mirage1201-alternative-custom
@@ -61,6 +74,8 @@ namespace Mirage.Snippets.Analyzers
     namespace M1201.AlternativeSuppress
     {
         // CodeEmbed-Start: mirage1201-alternative-suppress
+        using Mirage;
+
         [NetworkMessage]
         public struct UpdateUserMessageWithSuppressed
         {

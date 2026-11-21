@@ -1,36 +1,42 @@
 # MIRAGE1201: NetworkMessage/RPC Class Warning
 
-## The Problem
-A field or property inside a `[NetworkMessage]`, or a parameter/return type in a `[ServerRpc]` or `[ClientRpc]` method is declared using a class type instead of a value type/struct.
+## When this appears
 
-Class-based types are generally risky for network serialization because:
-1. **Allocations:** Mirage must allocate a new object instance upon deserialization, which causes garbage collection (GC) spikes and performance overhead.
-2. **Polymorphism Limitations:** Mirage's standard serialization only serializes fields of the declared type, not the concrete derived subclass type.
+A `[NetworkMessage]` field, RPC parameter, or RPC result uses a class type.
 
-*Note: Standard collections like `List<T>` or `Dictionary<K, V>` are natively supported and ignored.*
+Generated serialization creates a new object for each non-null class value. Frequent messages can increase garbage collection work. It also does not preserve shared object identity or fields found only on a runtime subclass.
 
----
-
-## Example of Triggering Code
 {{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-triggering' }}}
 
----
+## How to fix
 
-## How to Resolve
+Use a small struct to avoid allocating the outer class object. Reference fields can still allocate, and copying the struct copies references rather than their objects. The string in this example can still allocate.
 
-### Recommended Fix: Use a struct
-Structs (value types) avoid memory allocation, support standard change tracking, and guarantee safe value-copy semantics.
 {{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-recommended' }}}
 
----
+### Keep an intentional class payload
 
-### Alternative Solutions
-If a struct is not viable for your use case (e.g., you require complex inheritance), you can:
+Classes can serialize correctly. Generated serialization sends the declared type's serializable fields, including inherited fields. A custom writer/reader pair can change the format, but you must explicitly handle subclass data or shared references if you need them.
 
-#### 1. Implement Custom Serialization
-If you want to use the class type and manage performance/reference safety yourself, write custom `Write` and `Read` extension methods for the class, and decorate the class with `[WeaverSafeClass]` to suppress the warning globally.
+This custom serializer preserves nulls but still allocates non-null instances:
+
 {{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-alternative-custom' }}}
 
-#### 2. Suppress the warning on the field
-If you want to disable the warning only on a specific field, property, or parameter, decorate it with `[WeaverSafeClass]`.
+After reviewing allocation and the data sent, suppress this warning with `[WeaverSafeClass]` on the payload class, serialized field, or RPC parameter.
+
+For RPC results, annotate the class or use normal diagnostic suppression. The attribute cannot be placed on a method or return value.
+
+Custom serialization alone does not establish allocation or reference safety. The annotation does not generate or validate serializers, change runtime behavior, or make properties serializable.
+
 {{{ Path:'Snippets/Analyzers/Mirage1201.cs' Name:'mirage1201-alternative-suppress' }}}
+
+### Which types are checked
+
+The rule checks the declared type of:
+
+- Serialized fields, including inherited fields, in a `[NetworkMessage]` using generated serialization.
+- RPC payload parameters and the result `T` of `UniTask<T>`.
+
+Properties, ignored fields, and `INetworkPlayer` connection parameters are excluded. So are `string`, arrays, `List<T>`, `Dictionary<TKey, TValue>`, and supported `NetworkIdentity`, `NetworkBehaviour` (including subclasses), and networked `GameObject` references.
+
+The rule does not inspect collection elements, nested members, or custom serializer bodies. Excluded types still need [serialization support](./MIRAGE1301.md).
