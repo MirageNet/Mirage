@@ -1,3 +1,15 @@
+# [159.6.0](https://github.com/MirageNet/Mirage/compare/v159.5.1...v159.6.0) (2026-11-21)
+
+
+### Bug Fixes
+
+* **Weaver:** use helper for local ClientRpc INetworkPlayer arg so it is null on server only ([397fe23](https://github.com/MirageNet/Mirage/commit/397fe23850ee29f5980f0c0c9bf3fd5b87f87357))
+
+
+### Features
+
+* adding includeServer to ClientRpc to invoke method on server-only as well as clients ([bbad4f8](https://github.com/MirageNet/Mirage/commit/bbad4f8dea68f54849a3920a6bae2f75ce95bcd2))
+
 ## [159.5.1](https://github.com/MirageNet/Mirage/compare/v159.5.0...v159.5.1) (2026-11-19)
 
 
