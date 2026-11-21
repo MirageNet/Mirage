@@ -166,6 +166,20 @@ namespace Mirage.RemoteCalls
             var local = behaviour.Server.LocalPlayer;
             return local == target;
         }
+
+        /// <summary>
+        /// Gets the INetworkPlayer arg to pass in when ClientRpc is invoked locally
+        /// <para>Weaver uses this instead of Client.Player so that it is safe to call on server only</para>
+        /// </summary>
+        /// <param name="behaviour"></param>
+        /// <returns>Player for connection to the server, or null when there is no local client</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static INetworkPlayer GetLocalInvokePlayer(NetworkBehaviour behaviour)
+        {
+            // server only has no local client, so there is no player to pass in
+            // ?. is a reference check (not unity's == operator), which is all we need and is cheap for every local invoke
+            return behaviour.Client?.Player;
+        }
     }
 }
 
