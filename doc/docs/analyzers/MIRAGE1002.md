@@ -1,32 +1,41 @@
 # MIRAGE1002: Direct Mutation of SyncCollection Elements
 
-## The Problem
-A member or element within a `SyncList` or `SyncDictionary` is mutated directly without assigning it back to the collection or calling a change notification method.
+## When this appears
 
-Direct modifications like `mySyncList[i].health = 10;` will not synchronize to clients due to how C# handles collections and types:
-- For Structs (Value Types): You are only modifying a temporary local copy, not the item inside the collection.
-- For Classes (Reference Types): While the object itself is mutated, this action bypasses the collection's indexer setter.
+A member of a `SyncList` or `SyncDictionary` element is changed without notifying the collection.
 
-Because the collection cannot detect these nested field changes, it never sets the dirty flag, preventing the update from syncing.
+The collection records changes made through its own methods and indexer. It does not track fields inside an element, so other peers can keep the old value.
 
----
-
-## Example of Triggering Code
 {{{ Path:'Snippets/Analyzers/Mirage1002.cs' Name:'mirage1002-triggering' }}}
 
----
+## How to fix
 
-## How to Resolve
+Make changes on the sending side configured by `SyncSettings`.
 
-Depending on whether your collection stores structs (value types) or classes (reference types), resolve this in one of two ways:
+### Struct values
 
-### Solution 1: For Structs (Value Types)
-Retrieve the element, modify it, and assign it back to the collection using the indexer. This triggers the collection's indexer setter.
+Copy the element, change the copy, and assign it back through the indexer.
 
 {{{ Path:'Snippets/Analyzers/Mirage1002.cs' Name:'mirage1002-resolved' }}}
 
-### Solution 2: For Classes (Reference Types)
-Directly mutate the fields of the object inside the collection, and then manually mark the item as dirty using `SetItemDirty` or `SetItemDirtyAt` so that the change is serialized and synchronized.
+`SyncList` indexer assignments queue an update only when its comparer finds a difference. Equality that ignores the changed field, or a copied struct that still shares reference members, can hide a change.
+
+`SyncDictionary` records existing-key assignments without comparing values.
+
+### Class values in a SyncList
+
+After mutation, call `SetItemDirtyAt(index)`. Reassigning the same mutated instance normally compares equal and queues nothing.
 
 {{{ Path:'Snippets/Analyzers/Mirage1002.cs' Name:'mirage1002-resolved-class' }}}
 
+### Class values in a SyncDictionary
+
+Retrieve, mutate, and assign the value back to its key. This queues an update even for the same reference. `SetItemDirty` and `SetItemDirtyAt` belong to `SyncList`, not `SyncDictionary`.
+
+{{{ Path:'Snippets/Analyzers/Mirage1002.cs' Name:'mirage1002-resolved-dictionary' }}}
+
+## Details and exceptions
+
+- For a struct element, C# rejects a direct field assignment such as `list[i].health = 10` with CS1612. Changing a local copy requires writing it back; reference members can still mutate shared state.
+- `SetItemDirty(item)` finds a match using the list's comparer. Use `SetItemDirtyAt(index)` when position matters. Both invoke local `OnSet` with the current item as both old and new values, without a snapshot of its previous state.
+- An initial snapshot or an already queued operation may include a nested change. That does not mean the collection tracks nested changes or will send later ones.

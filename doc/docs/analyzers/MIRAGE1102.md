@@ -1,17 +1,24 @@
 # MIRAGE1102: Redundant Attribute on RPC
 
-## The Problem
-An RPC method has both a routing attribute (`[ServerRpc]` or `[ClientRpc]`) and a corresponding guard attribute (`[Server]` or `[Client]`). 
+## When this appears
 
-- `[Server]` is redundant on `[ServerRpc]` since ServerRpcs only run on the server.
-- `[Client]` is redundant on `[ClientRpc]` since ClientRpcs only run on clients.
+A `[ServerRpc]` method also has `[Server]`, or a `[ClientRpc]` method also has `[Client]`.
 
-Combining them causes redundant guard code generation during weaving and clutters the codebase.
+The RPC already ensures its body runs on the server or a receiving client. The extra guard adds a duplicate check and can be mistaken for a restriction on who may send the RPC.
 
-## Example of Triggering Code
+| RPC | Redundant guard | Body executes on |
+| --- | --- | --- |
+| `[ServerRpc]` | `[Server]` | The server |
+| `[ClientRpc]` | `[Client]` | A receiving client, including an eligible host client |
+
 {{{ Path:'Snippets/Analyzers/Mirage1102.cs' Name:'mirage1102-triggering' }}}
 
-## How to Resolve
-Remove the redundant guard attribute (`[Server]` or `[Client]`).
+## How to fix
+
+Remove the corresponding guard. RPC configuration still controls routing, targets, and authority checks.
 
 {{{ Path:'Snippets/Analyzers/Mirage1102.cs' Name:'mirage1102-resolved' }}}
+
+This rule covers only the two pairs above. Opposite-side guards, `[HasAuthority]`, `[LocalPlayer]`, and `[NetworkMethod]` can change whether the receiving body runs; keep them unless you intend that change.
+
+Guards stay with the receiving body. They neither prevent sending from the opposite side nor select recipients. Weaver accepts these combinations; the analyzer recommends removing the redundant guard.

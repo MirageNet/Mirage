@@ -17,7 +17,7 @@ namespace Mirage.Snippets.Analyzers
 
             public void DamagePlayer(int index, int damage)
             {
-                // Warning: Direct mutation of elements inside playerList is not supported because changes cannot be tracked.
+                // Warning: This nested mutation does not queue a collection update.
                 playerList[index].health -= damage;
             }
         }
@@ -38,7 +38,7 @@ namespace Mirage.Snippets.Analyzers
 
             public void DamagePlayer(int index, int damage)
             {
-                // Correct: Modifying the element and setting it back, triggering the index setter
+                // Call on the sending side. The changed struct compares different.
                 var data = playerList[index];
                 data.health -= damage;
                 playerList[index] = data;
@@ -61,12 +61,34 @@ namespace Mirage.Snippets.Analyzers
 
             public void DamagePlayer(int index, int damage)
             {
-                // Correct: Mutating the class object directly, then calling SetItemDirtyAt to sync changes
+                // Call on the sending side, then explicitly queue this element.
                 playerList[index].health -= damage;
                 playerList.SetItemDirtyAt(index);
             }
         }
         // CodeEmbed-End: mirage1002-resolved-class
     }
-}
 
+    namespace M1002.ResolvedDictionary
+    {
+        // CodeEmbed-Start: mirage1002-resolved-dictionary
+        public class PlayerData
+        {
+            public int health;
+        }
+
+        public class Player : NetworkBehaviour
+        {
+            public readonly SyncDictionary<int, PlayerData> players = new SyncDictionary<int, PlayerData>();
+
+            public void DamagePlayer(int playerId, int damage)
+            {
+                // Call on the sending side. Dictionary assignment queues an update.
+                var data = players[playerId];
+                data.health -= damage;
+                players[playerId] = data;
+            }
+        }
+        // CodeEmbed-End: mirage1002-resolved-dictionary
+    }
+}

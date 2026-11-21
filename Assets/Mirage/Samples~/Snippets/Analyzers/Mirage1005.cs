@@ -7,7 +7,7 @@ namespace Mirage.Snippets.Analyzers
         // CodeEmbed-Start: mirage1005-triggering
         public class Player : NetworkBehaviour
         {
-            // Error: SyncVar cannot be readonly
+            // Analyzer error: received SyncVar state needs writable storage.
             [SyncVar]
             public readonly int health = 100;
         }
