@@ -1,18 +1,24 @@
 # MIRAGE1403: Enabled property check on NetworkServer/Client/NetworkIdentity
 
-## The Problem
-Accessing or modifying `.enabled` on `NetworkServer`, `NetworkClient`, or `NetworkIdentity` only checks whether the underlying `MonoBehaviour` component is enabled in the Inspector. This does not indicate if the server or client is actively running, or if the network identity has been spawned.
+## When this appears
 
-Using `.enabled` leads to incorrect logic because the component can remain enabled even when the networking systems are inactive.
+Code reads or writes `.enabled` on a `NetworkServer`, `NetworkClient`, or `NetworkIdentity`.
 
----
+`enabled` controls the Unity component, not the connection or spawn state. An enabled component can still have no running server, connected client, or spawned identity.
 
-## Example of Triggering Code
 {{{ Path:'Snippets/Analyzers/Mirage1403.cs' Name:'mirage1403-triggering' }}}
 
----
+## How to fix
 
-## How to Resolve
-Use `.Active` on `NetworkServer` or `NetworkClient` to check their status, and `.IsSpawned` on `NetworkIdentity` to check if it is active on the network.
+| Check | Property |
+| --- | --- |
+| Server is running | `NetworkServer.Active` |
+| Client is connecting or connected | `NetworkClient.Active` |
+| Client is connected | `NetworkClient.IsConnected` |
+| Identity has a network ID | `NetworkIdentity.IsSpawned` |
+
+These properties are read-only. Use server/client start and stop methods, or object-manager spawn/despawn methods, to change network state.
 
 {{{ Path:'Snippets/Analyzers/Mirage1403.cs' Name:'mirage1403-resolved' }}}
+
+If you mean to check or change the Unity component's enabled state, you can suppress this warning. It does not apply to unrelated properties named `enabled`.

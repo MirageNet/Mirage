@@ -14,7 +14,6 @@ namespace Mirage.Snippets.Analyzers
 
         public class HeroPlayer : BasePlayer
         {
-            [SyncVar]
             public int HeroId;
 
             // Warning: Missing base.OnSerialize call
@@ -22,6 +21,12 @@ namespace Mirage.Snippets.Analyzers
             {
                 writer.WritePackedInt32(HeroId);
                 return true;
+            }
+
+            // Warning: Missing base.OnDeserialize call
+            public override void OnDeserialize(NetworkReader reader, bool initialState)
+            {
+                HeroId = reader.ReadPackedInt32();
             }
         }
         // CodeEmbed-End: mirage1402-triggering
@@ -38,15 +43,26 @@ namespace Mirage.Snippets.Analyzers
 
         public class HeroPlayer : BasePlayer
         {
-            [SyncVar]
             public int HeroId;
 
-            // Correct: Calls base.OnSerialize and combines results
+            public void SetHeroId(int value)
+            {
+                HeroId = value;
+                SetDirtyBit(ulong.MaxValue);
+            }
+
+            // Correct: Preserve generated state, then append custom data
             public override bool OnSerialize(NetworkWriter writer, bool initialState)
             {
-                bool baseDirty = base.OnSerialize(writer, initialState);
+                base.OnSerialize(writer, initialState);
                 writer.WritePackedInt32(HeroId);
-                return baseDirty || true;
+                return true; // This example always writes custom data
+            }
+
+            public override void OnDeserialize(NetworkReader reader, bool initialState)
+            {
+                base.OnDeserialize(reader, initialState);
+                HeroId = reader.ReadPackedInt32();
             }
         }
         // CodeEmbed-End: mirage1402-resolved
