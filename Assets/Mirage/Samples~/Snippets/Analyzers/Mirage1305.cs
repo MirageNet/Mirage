@@ -7,7 +7,7 @@ namespace Mirage.Snippets.Analyzers
     namespace M1305.Triggering
     {
         // CodeEmbed-Start: mirage1305-triggering
-        // Error: Missing [NetworkMessage] but used in message APIs
+        // MIRAGE1305 convention: explicitly mark this message declaration.
         public struct PlayerScoreMessage
         {
             public int score;
@@ -22,8 +22,8 @@ namespace Mirage.Snippets.Analyzers
                 player.Send(new PlayerScoreMessage { score = 10 });
                 Server.SendToAll(new PlayerScoreMessage(), authenticatedOnly: false, excludeLocalPlayer: false);
                 Server.SendToMany(new List<INetworkPlayer>(), new PlayerScoreMessage(), excludeLocalPlayer: false);
-                MessagePacker.Pack(new PlayerScoreMessage(), null);
-                MessagePacker.Unpack<PlayerScoreMessage>(null, null);
+                var bytes = MessagePacker.Pack(new PlayerScoreMessage());
+                MessagePacker.Unpack<PlayerScoreMessage>(bytes, null);
                 MessagePacker.GetId<PlayerScoreMessage>();
             }
 
@@ -43,8 +43,7 @@ namespace Mirage.Snippets.Analyzers
     namespace M1305.Resolved
     {
         // CodeEmbed-Start: mirage1305-resolved
-        // Correct: [NetworkMessage] forces Weaver to generate serialization code
-        // in this assembly, allowing safe cross-assembly use.
+        // Explicitly requests serialization discovery in this assembly.
         [NetworkMessage]
         public struct PlayerScoreMessage
         {
@@ -59,8 +58,8 @@ namespace Mirage.Snippets.Analyzers
                 player.Send(new PlayerScoreMessage { score = 10 });
                 Server.SendToAll(new PlayerScoreMessage(), authenticatedOnly: false, excludeLocalPlayer: false);
                 Server.SendToMany(new List<INetworkPlayer>(), new PlayerScoreMessage(), excludeLocalPlayer: false);
-                MessagePacker.Pack(new PlayerScoreMessage(), null);
-                MessagePacker.Unpack<PlayerScoreMessage>(null, null);
+                var bytes = MessagePacker.Pack(new PlayerScoreMessage());
+                MessagePacker.Unpack<PlayerScoreMessage>(bytes, null);
                 MessagePacker.GetId<PlayerScoreMessage>();
             }
 

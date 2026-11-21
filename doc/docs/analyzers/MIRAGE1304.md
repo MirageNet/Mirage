@@ -1,28 +1,29 @@
 # MIRAGE1304: Non-Serializable MonoBehaviour Parameter
 
-## The Problem
-An RPC parameter or `[NetworkMessage]` field is a `MonoBehaviour` type that does not inherit from `NetworkBehaviour`.
+## When this appears
 
-Because basic `MonoBehaviour` components lack network identities, Mirage cannot identify them across the network. The Weaver cannot generate serialization code for these component references, causing a compile error.
+A serialized RPC parameter or message field refers to a `MonoBehaviour` that has no usable serializer.
 
----
+An ordinary component reference only identifies an object in the local Unity process. Generated serialization cannot tell the receiver which component to use, so Weaver cannot generate a serializer for it.
 
-## Example of Triggering Code
 {{{ Path:'Snippets/Analyzers/Mirage1304.cs' Name:'mirage1304-triggering' }}}
 
----
+## How to fix
 
-## How to Resolve
+For a networked component, inherit from `NetworkBehaviour`. Mirage sends its network ID and component index; public field values are not included.
 
-### Recommended Fix: Inherit from NetworkBehaviour
-Change the component to inherit from `NetworkBehaviour` instead of `MonoBehaviour`. Mirage can serialize `NetworkBehaviour` components by sending their `NetworkIdentity` and component index.
+The component must belong to a spawned `NetworkIdentity` that the receiver can find, with the same network component layout. Changing the base class alone does not set this up.
 
 {{{ Path:'Snippets/Analyzers/Mirage1304.cs' Name:'mirage1304-recommended' }}}
 
----
-
-### Alternative Solution: Use a serializable identifier
-If the component cannot be networked, send a serializable identifier (such as an ID or string) instead of the component itself.
+Otherwise, send a serializable identifier and look up the component when the message arrives. Both peers must agree on the mapping; a local Unity instance ID alone is not enough. A custom reader/writer pair can perform this lookup.
 
 {{{ Path:'Snippets/Analyzers/Mirage1304.cs' Name:'mirage1304-alternative' }}}
 
+## Exceptions
+
+`NetworkIdentity` has a built-in serializer, even though it does not inherit `NetworkBehaviour`.
+
+A custom serializer is used before Weaver checks whether it can generate one. Manual serialization through `[WeaverWriteAsGeneric]` is also possible; see [MIRAGE1301](./MIRAGE1301.md).
+
+Ignored message fields and ordinary properties are not serialized by default and do not trigger this rule.

@@ -1,36 +1,37 @@
 # MIRAGE1305: Missing NetworkMessage Attribute
 
-## The Problem
-A class or struct is used as a network message in one of the API methods below, but lacks the `[NetworkMessage]` attribute.
+## When this appears
 
-Mirage's Weaver generates serialization code and registers message IDs for types marked with `[NetworkMessage]`. Using a type without this attribute can cause runtime errors, including serialization failures, unpacking issues, or "Unexpected message ID" warnings.
+A concrete message class or struct in your project is missing `[NetworkMessage]` when used with one of the message APIs listed below.
 
-### Affected Methods
-The following generic methods require their type argument to have `[NetworkMessage]`:
+Without the attribute, a message used through a generic wrapper or reflection may have no serializers at runtime. The attribute tells Weaver to prepare its serializers when building the message's assembly.
 
-| Method | Declared On |
-|---|---|
-| `Send<T>()` | `INetworkPlayer`, `NetworkPlayer`, `NetworkClient` |
-| `RegisterHandler<T>()` | `IMessageReceiver`, `MessageHandler` |
-| `UnregisterHandler<T>()` | `IMessageReceiver`, `MessageHandler` |
-| `SendToAll<T>()` | `NetworkServer` |
-| `SendToMany<T>()` | `NetworkServer` |
-| `Pack<T>()` | `MessagePacker` |
-| `Unpack<T>()` | `MessagePacker` |
-| `GetId<T>()` | `MessagePacker` |
-
-### Same-Assembly vs Cross-Assembly Behavior
-* **Same assembly:** The Weaver can generate readers and writers on the fly during compilation even if `[NetworkMessage]` is missing. The code will work, but raises a warning to prevent fragile or ambiguous behavior.
-* **Cross-assembly:** When a message is defined in one assembly and used in another, the Weaver must generate the serialization code in the defining assembly. This requires `[NetworkMessage]` on the definition. Without it, referencing assemblies will fail at runtime with missing serializer errors.
-
----
-
-## Example of Triggering Code
 {{{ Path:'Snippets/Analyzers/Mirage1305.cs' Name:'mirage1305-triggering' }}}
 
----
+## How to fix
 
-## How to Resolve
-Add the `[NetworkMessage]` attribute to the message class or struct. This ensures the Weaver generates the required serialization code in the defining assembly.
+Add `[NetworkMessage]` to the message class or struct. The type and all fields you send must still be serializable. Types used only as fields or RPC arguments do not need the attribute.
 
 {{{ Path:'Snippets/Analyzers/Mirage1305.cs' Name:'mirage1305-resolved' }}}
+
+## Message APIs
+
+| Method | Declared on |
+|---|---|
+| `Send<T>()` | `IMessageSender` (inherited by `INetworkPlayer`), `NetworkPlayer`, `NetworkClient` |
+| `RegisterHandler<T>()` | `IMessageReceiver`, `MessageHandler`, `MessageReceiverExtensions` |
+| `UnregisterHandler<T>()` | `IMessageReceiver`, `MessageHandler` |
+| `SendToAll<T>()`, `SendToMany<T>()` | `NetworkServer` |
+| `Pack<T>()`, `Unpack<T>()`, `GetId<T>()` | `MessagePacker` |
+
+Extension calls to these APIs count; unrelated methods with the same names do not. `GetId<T>()` and `UnregisterHandler<T>()` are also checked, although they do not need serializers themselves.
+
+## Discovery details
+
+`[NetworkMessage]` also registers the type for diagnostic messages and checks for message ID collisions. It does not install a receiving handler: use `RegisterHandler<T>()` separately. `GetId<T>()` computes an ID from the type name without checking the attribute.
+
+Weaver can generate serializers for concrete types used in direct generic calls to the APIs above, except `MessageReceiverExtensions.RegisterHandler`. It generates them in the calling assembly, including for accessible types from other assemblies.
+
+Custom or manually initialized serializers can also support messages without the attribute. Weaver skips open generic arguments; arbitrary generic wrappers and reflection do not cause it to generate serializers for each concrete type.
+
+You cannot add the attribute to framework types or types from assemblies you cannot edit, and Weaver rejects it on open generic definitions. Use a concrete wrapper in your project, or ensure serializers are available before suppressing this rule.
