@@ -31,6 +31,7 @@ Mirage uses Roslyn Analyzers to provide compile-time validation for network code
 | [MIRAGE1401](MIRAGE1401.md) | Accessing Network State in Awake/Start | Warning | Warns against accessing network states like `IsServer` during early Unity lifecycle phases. |
 | [MIRAGE1402](MIRAGE1402.md) | Missing base Call in OnSerialize/OnDeserialize | Warning | Ensures overriding `OnSerialize` or `OnDeserialize` in derived classes calls the base implementation. |
 | [MIRAGE1403](MIRAGE1403.md) | Enabled property check on NetworkServer/Client/NetworkIdentity | Warning | Warns if checking/setting .enabled on NetworkServer, NetworkClient, or NetworkIdentity. |
+| [MIRAGE1404](MIRAGE1404.md) | AutoPool collection is not cleared on return | Warning | Warns when taking a collection like `HashSet` from `AutoPool<T>` directly, because it is not cleared when returned to the pool. |
 | [MIRAGE1501](MIRAGE1501.md) | Network Message Serialized Size Estimation | Info | Estimates the serialized size of all `[NetworkMessage]` types to help analyze bandwidth usage. |
 
 ---
@@ -123,6 +124,9 @@ Derived classes overriding custom `OnSerialize` or `OnDeserialize` methods must 
 
 #### [MIRAGE1403: Enabled property check on NetworkServer/Client/NetworkIdentity](MIRAGE1403.md)
 Warns if a developer tries to check whether `NetworkServer`, `NetworkClient`, or `NetworkIdentity` is active by accessing its `.enabled` property. Since they inherit from `MonoBehaviour`, `.enabled` is just Unity's component active flag, which is not synchronized with the active network state. Use the `.Active` property for server/client, or `.IsSpawned` for NetworkIdentity.
+
+#### [MIRAGE1404: AutoPool collection is not cleared on return](MIRAGE1404.md)
+`AutoPool<T>` only clears collections that implement `IList` or `IDictionary` (such as `List<T>` and `Dictionary<TKey, TValue>`) when they are returned to the pool. Taking other collections like `HashSet<T>`, `Queue<T>` or `Stack<T>` directly from `AutoPool<T>` can return a collection that still contains old items. Use the matching helper, such as `AutoPool.TakeHashSet<T>`, which clears the collection when it is returned, or set `AutoPool<T>.ClearAction` for collections without a helper.
 
 ---
 
