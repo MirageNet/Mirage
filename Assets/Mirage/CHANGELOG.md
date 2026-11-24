@@ -1,3 +1,10 @@
+# [159.7.0](https://github.com/MirageNet/Mirage/compare/v159.6.0...v159.7.0) (2026-11-24)
+
+
+### Features
+
+* AutoPool clears Dictionary, HashSet, Queue and Stack ([a88b3ea](https://github.com/MirageNet/Mirage/commit/a88b3ea2e5d6b5e15345b376889b6f71948b7263))
+
 # [159.6.0](https://github.com/MirageNet/Mirage/compare/v159.5.1...v159.6.0) (2026-11-21)
 
 
