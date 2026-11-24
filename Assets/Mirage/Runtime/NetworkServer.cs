@@ -600,7 +600,7 @@ namespace Mirage
         {
             if (excludeLocalPlayer)
             {
-                using (var list = AutoPool<List<INetworkPlayer>>.Take())
+                using (AutoPool.TakeList<INetworkPlayer>(out var list))
                 {
                     ListHelper.AddToList(list, players, LocalPlayer);
                     NetworkServer.SendToMany(list, msg, channelId);
@@ -622,7 +622,7 @@ namespace Mirage
         /// <param name="channelId"></param>
         public void SendToMany<T>(IEnumerable<INetworkPlayer> players, T msg, bool excludeLocalPlayer, Channel channelId = Channel.Reliable)
         {
-            using (var list = AutoPool<List<INetworkPlayer>>.Take())
+            using (AutoPool.TakeList<INetworkPlayer>(out var list))
             {
                 ListHelper.AddToList(list, players, excludeLocalPlayer ? LocalPlayer : null);
                 NetworkServer.SendToMany(list, msg, channelId);
@@ -634,7 +634,7 @@ namespace Mirage
         public void SendToMany<T, TEnumerator>(TEnumerator playerEnumerator, T msg, bool excludeLocalPlayer, Channel channelId = Channel.Reliable)
             where TEnumerator : struct, IEnumerator<INetworkPlayer>
         {
-            using (var list = AutoPool<List<INetworkPlayer>>.Take())
+            using (AutoPool.TakeList<INetworkPlayer>(out var list))
             {
                 ListHelper.AddToList(list, playerEnumerator, excludeLocalPlayer ? LocalPlayer : null);
                 NetworkServer.SendToMany(list, msg, channelId);
@@ -647,7 +647,7 @@ namespace Mirage
             if (observers.Count == 0)
                 return;
 
-            using (var list = AutoPool<List<INetworkPlayer>>.Take())
+            using (AutoPool.TakeList<INetworkPlayer>(out var list))
             {
                 var enumerator = observers.GetEnumerator();
                 ListHelper.AddToList(list, enumerator, excludeLocalPlayer ? LocalPlayer : null, excludeOwner ? identity.Owner : null);

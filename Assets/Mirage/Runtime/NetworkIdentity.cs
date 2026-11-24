@@ -1131,8 +1131,7 @@ namespace Mirage
         // add all newObservers that aren't in .observers yet
         private bool AddNewObservers(bool initialize)
         {
-            using var addedWrapper = AutoPool<List<INetworkPlayer>>.Take();
-            var added = addedWrapper.Item;
+            using var _ = AutoPool.TakeList<INetworkPlayer>(out var added);
             Debug.Assert(added.Count == 0);
 
             foreach (var player in newObservers)

@@ -300,8 +300,7 @@ namespace Mirage
         internal void ShowToPlayerMany(NetworkIdentity identity, List<INetworkPlayer> players)
         {
             // make new list so that we can filter out SceneIsReady
-            using var addedWrapper = AutoPool<List<INetworkPlayer>>.Take();
-            var sendTo = addedWrapper.Item;
+            using var _ = AutoPool.TakeList<INetworkPlayer>(out var sendTo);
             Debug.Assert(sendTo.Count == 0);
 
             foreach (var player in players)
@@ -523,8 +522,7 @@ namespace Mirage
 
                 // we have to send local/Owner values as their own message.
                 // but observers can be sent using SendToMany to avoid copying bytes multiple times
-                using var observersList = AutoPool<List<INetworkPlayer>>.Take();
-                var observerPlayers = observersList.Item;
+                using var __ = AutoPool.TakeList<INetworkPlayer>(out var observerPlayers);
                 Debug.Assert(observerPlayers.Count == 0);
 
                 foreach (var player in players)
@@ -735,9 +733,7 @@ namespace Mirage
             if (!_server || !_server.Active)
                 throw new InvalidOperationException("Server was not active");
 
-            using var spawnListWrapper = AutoPool<List<NetworkIdentity>>.Take();
-            var spawnList = spawnListWrapper.Item;
-            spawnList.Clear();
+            using var __ = AutoPool.TakeList<NetworkIdentity>(out var spawnList);
 
             foreach (var identity in Resources.FindObjectsOfTypeAll<NetworkIdentity>())
             {
@@ -755,7 +751,6 @@ namespace Mirage
                 if (logger.LogEnabled()) logger.Log($"SpawnObjects sceneId:{identity.SceneId} name:{identity.gameObject.name}");
                 Spawn(identity);
             }
-            spawnList.Clear();
         }
 
         /// <summary>
@@ -807,12 +802,9 @@ namespace Mirage
         /// <param name="skip">Can be used to skip 1 object, like if you need to spawn all other objects and then that 1 object after all the rest are spawned.</param>
         public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter, NetworkIdentity skip)
         {
-            using var skipWrapper = AutoPool<HashSet<NetworkIdentity>>.Take();
-            var skipSet = skipWrapper.Item;
-            skipSet.Clear();
+            using var _ = AutoPool.TakeHashSet<NetworkIdentity>(out var skipSet);
             skipSet.Add(skip);
             SpawnVisibleObjects(player, ignoreHasCharacter, skipSet);
-            skipSet.Clear();
         }
 
         /// <summary>
